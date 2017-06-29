@@ -2,9 +2,9 @@
 [![Total Downloads](https://poser.pugx.org/thecodingmachine/graphql-controllers/downloads)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
 [![Latest Unstable Version](https://poser.pugx.org/thecodingmachine/graphql-controllers/v/unstable)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
 [![License](https://poser.pugx.org/thecodingmachine/graphql-controllers/license)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/graphql-controllers/badges/quality-score.png?b=1.x)](https://scrutinizer-ci.com/g/thecodingmachine/graphql-controllers/?branch=1.x)
-[![Build Status](https://travis-ci.org/thecodingmachine/graphql-controllers.svg?branch=1.x)](https://travis-ci.org/thecodingmachine/graphql-controllers)
-[![Coverage Status](https://coveralls.io/repos/thecodingmachine/graphql-controllers/badge.svg?branch=1.x&service=github)](https://coveralls.io/github/thecodingmachine/graphql-controllers?branch=1.x)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/graphql-controllers/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/thecodingmachine/graphql-controllers/?branch=master)
+[![Build Status](https://travis-ci.org/thecodingmachine/graphql-controllers.svg?branch=master)](https://travis-ci.org/thecodingmachine/graphql-controllers)
+[![Coverage Status](https://coveralls.io/repos/thecodingmachine/graphql-controllers/badge.svg?branch=master&service=github)](https://coveralls.io/github/thecodingmachine/graphql-controllers?branch=master)
 
 
 GraphQL controllers
