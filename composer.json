@@ -13,7 +13,8 @@
         "youshido/graphql": "^1.4",
         "psr/container": "^1.0",
         "doctrine/annotations": "^1.2",
-        "roave/better-reflection": "dev-master"
+        "roave/better-reflection": "dev-master",
+        "http-interop/http-middleware": "^0.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.1",
