@@ -1,0 +1,39 @@
+{
+    "name": "thecodingmachine/graphql-controllers",
+    "description": "Write your GraphQL queries in simple to write controllers (using youshido/graphql).",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Négrier",
+            "email": "d.negrier@thecodingmachine.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "youshido/graphql": "^1.4",
+        "psr/container": "^1.0",
+        "doctrine/annotations": "^1.2",
+        "roave/better-reflection": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.1",
+        "satooshi/php-coveralls": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "TheCodingMachine\\GraphQL\\Controllers\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TheCodingMachine\\GraphQL\\Controllers\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

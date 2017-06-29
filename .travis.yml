@@ -1,0 +1,16 @@
+language: php
+php:
+- 7.1
+cache:
+  directories:
+    - $HOME/.composer/cache
+env:
+  matrix:
+  - PREFER_LOWEST="--prefer-lowest"
+  - PREFER_LOWEST=""
+before_script:
+- composer update --prefer-dist $PREFER_LOWEST
+script:
+- "./vendor/bin/phpunit"
+after_script:
+- if [ -z "$PREFER_LOWEST" ]; then ./vendor/bin/coveralls -v; fi
