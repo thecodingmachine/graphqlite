@@ -2,7 +2,7 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\GraphQL;
-use Mouf\GraphQL\Schema;
+use Youshido\GraphQL\Schema\AbstractSchema;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Youshido\GraphQL\Execution\Processor;
@@ -33,18 +33,14 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
      * @var Processor
      */
     private $schema;
-    /**
-     * @var null
-     */
-    private $rootUrl;
 
     /**
      * GraphQLMiddleware constructor.
      *
-     * @param Schema    $schema
+     * @param AbstractSchema    $schema
      * @param string    $graphqlUri
      */
-    public function __construct(Schema $schema, $graphqlUri = '/graphql', $rootUrl = null)
+    public function __construct(AbstractSchema $schema, $graphqlUri = '/graphql', $rootUrl = null)
     {
         $this->schema = $schema;
         $this->graphqlUri = rtrim($rootUrl, '/').'/'. ltrim($graphqlUri, '/');
@@ -74,7 +70,7 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
         list($query, $variables) = $this->getPayload($request);
 
 
-        $processor = new Processor($this->schema->toGraphQLSchema());
+        $processor = new Processor($this->schema);
         $processor->processPayload($query, $variables);
         $res = $processor->getResponseData();
         return new JsonResponse($res);

@@ -21,8 +21,8 @@ class Schema extends AbstractSchema
 
     public function __construct(QueryProviderInterface $queryProvider, array $config = [])
     {
-        parent::__construct($config);
         $this->queryProvider = $queryProvider;
+        parent::__construct($config);
     }
 
     public function build(SchemaConfig $config)
