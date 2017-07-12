@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
 
+use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 
 class TestController
@@ -25,5 +26,15 @@ class TestController
             $str .= $test->getTest();
         }
         return new TestObject($string.$int.$str);
+    }
+
+    /**
+     * @Mutation()
+     * @param TestObject $testObject
+     * @return TestObject
+     */
+    public function mutation(TestObject $testObject): TestObject
+    {
+        return $testObject;
     }
 }

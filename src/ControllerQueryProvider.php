@@ -12,6 +12,7 @@ use Roave\BetterReflection\Reflection\ReflectionClass;
 use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use Youshido\GraphQL\Field\Field;
 use Youshido\GraphQL\Type\ListType\ListType;
@@ -59,6 +60,22 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     public function getQueries(): array
     {
+        return $this->getFieldsByAnnotations(Query::class);
+    }
+
+    /**
+     * @return Field[]
+     */
+    public function getMutations(): array
+    {
+        return $this->getFieldsByAnnotations(Mutation::class);
+    }
+
+    /**
+     * @return Field[]
+     */
+    private function getFieldsByAnnotations(string $annotationName): array
+    {
         $refClass = ReflectionClass::createFromInstance($this->controller);
 
         $queryList = [];
@@ -66,7 +83,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         foreach ($refClass->getMethods() as $refMethod) {
             $standardPhpMethod = new \ReflectionMethod(get_class($this->controller), $refMethod->getName());
             // First, let's check the "Query" annotation
-            $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, Query::class);
+            $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, $annotationName);
             if ($queryAnnotation !== null) {
                 $methodName = $refMethod->getName();
 

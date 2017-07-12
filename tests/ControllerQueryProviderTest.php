@@ -16,35 +16,72 @@ use Youshido\GraphQL\Type\TypeInterface;
 
 class ControllerQueryProviderTest extends TestCase
 {
+
+    private $testObjectType;
+    private $typeMapper;
+    private $hydrator;
+
+    private function getTestObjectType()
+    {
+        if ($this->testObjectType === null) {
+            $this->testObjectType = new ObjectType([
+                'name'    => 'TestObject',
+                'fields'  => [
+                    'test'   => new StringType(),
+                ],
+            ]);
+        }
+        return $this->testObjectType;
+    }
+
+    private function getTypeMapper()
+    {
+        if ($this->typeMapper === null) {
+            $this->typeMapper = new class($this->getTestObjectType()) implements TypeMapperInterface {
+                /**
+                 * @var ObjectType
+                 */
+                private $testObjectType;
+
+                public function __construct(ObjectType $testObjectType)
+                {
+
+                    $this->testObjectType = $testObjectType;
+                }
+
+                public function mapClassToType(string $className): TypeInterface
+                {
+                    if ($className === TestObject::class) {
+                        return $this->testObjectType;
+                    } else {
+                        throw new \RuntimeException('Unexpected type');
+                    }
+                }
+            };
+        }
+        return $this->typeMapper;
+    }
+
+    private function getHydrator()
+    {
+        if ($this->hydrator === null) {
+            $this->hydrator = new class implements HydratorInterface
+            {
+                public function hydrate(array $data, TypeInterface $type)
+                {
+                    return new TestObject($data['test']);
+                }
+            };
+        }
+        return $this->hydrator;
+    }
+
     public function testQueryProvider()
     {
         $controller = new TestController();
         $reader = new AnnotationReader();
 
-        $typeMapper = new class implements TypeMapperInterface {
-            public function mapClassToType(string $className): TypeInterface
-            {
-                if ($className === TestObject::class) {
-                    return new ObjectType([
-                        'name'    => 'TestObject',
-                        'fields'  => [
-                            'test'   => new StringType(),
-                        ],
-                    ]);
-                } else {
-                    throw new \RuntimeException('Unexpected type');
-                }
-            }
-        };
-
-        $hydrator = new class implements HydratorInterface {
-            public function hydrate(array $data, TypeInterface $type)
-            {
-                return new TestObject($data['test']);
-            }
-        };
-
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $typeMapper, $hydrator);
+        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator());
 
         $queries = $queryProvider->getQueries();
 
@@ -62,12 +99,7 @@ class ControllerQueryProviderTest extends TestCase
         $this->assertInstanceOf(ObjectType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf());
         $this->assertSame('TestObject', $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf()->getName());
 
-        $mockResolveInfo = $this->getMockBuilder(ResolveInfo::class)
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes()
-            ->getMock();
+        $mockResolveInfo = $this->createMock(ResolveInfo::class);
 
         $result = $usersQuery->resolve('foo', ['int'=>42, 'string'=>'foo', 'list'=>[
             ['test'=>42],
@@ -76,5 +108,27 @@ class ControllerQueryProviderTest extends TestCase
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertSame('foo424212', $result->getTest());
+    }
+
+    public function testMutations()
+    {
+        $controller = new TestController();
+        $reader = new AnnotationReader();
+
+        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator());
+
+        $mutations = $queryProvider->getMutations();
+
+        $this->assertCount(1, $mutations);
+        $mutation = $mutations[0];
+        $this->assertSame('mutation', $mutation->getName());
+
+        $mockResolveInfo = $this->createMock(ResolveInfo::class);
+
+        $result = $mutation->resolve('foo', ['testObject'=>['test'=>42]], $mockResolveInfo);
+
+        $this->assertInstanceOf(TestObject::class, $result);
+        $this->assertEquals('42', $result->getTest());
+
     }
 }
