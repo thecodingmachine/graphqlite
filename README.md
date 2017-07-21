@@ -18,11 +18,12 @@ This library allows you to write your GraphQL queries in simple to write control
 
 ```php
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 
 class UserController
 {
     /**
-     * @Query()
+     * @Query
      * @return User[]
      */
     public function users(int $limit, int $offset): array
@@ -30,8 +31,40 @@ class UserController
         // Some code that returns an array of "users".
         // This completely replaces the "resolve" method.
     }
+
+    /**
+     * @Mutation
+     * @return User
+     */
+    public function saveUser(UserInput $user): User
+    {
+        // Some code that saves a user.
+        // This completely replaces the "resolve" method.
+    }
 }
 ```
+
+There is an additional support for authentication and authorization:
+
+```php
+use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
+
+class UserController
+{
+    /**
+     * @Query
+     * @Logged
+     * @Right("CAN_VIEW_USER_LIST")
+     * @return User[]
+     */
+    public function users(int $limit, int $offset): array
+    {
+        //
+    }
+}
+```
+
 
 
 Troubleshooting

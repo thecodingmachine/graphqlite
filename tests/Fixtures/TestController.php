@@ -3,14 +3,15 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
-
+use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 
 class TestController
 {
     /**
-     * @Query()
+     * @Query
      * @param int $int
      * @param null|string $string
      * @param TestObject[] $list
@@ -29,12 +30,30 @@ class TestController
     }
 
     /**
-     * @Mutation()
+     * @Mutation
      * @param TestObject $testObject
      * @return TestObject
      */
     public function mutation(TestObject $testObject): TestObject
     {
         return $testObject;
+    }
+
+    /**
+     * @Query
+     * @Logged
+     */
+    public function testLogged(): TestObject
+    {
+        return new TestObject('foo');
+    }
+
+    /**
+     * @Query
+     * @Right(name="CAN_FOO")
+     */
+    public function testRight(): TestObject
+    {
+        return new TestObject('foo');
     }
 }

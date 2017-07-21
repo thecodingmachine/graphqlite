@@ -46,7 +46,7 @@ class QueryField extends AbstractField
                 $type = $this->stripNonNullType($type);
                 if ($type instanceof ListType) {
                     $subtype = $this->stripNonNullType($type->getItemType());
-                    $val = array_map(function($item) use ($subtype) {
+                    $val = array_map(function ($item) use ($subtype) {
                         if ($subtype->getKind() === TypeMap::KIND_OBJECT) {
                             return $this->hydrator->hydrate($item, $subtype);
                         };

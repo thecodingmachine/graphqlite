@@ -6,6 +6,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use Youshido\GraphQL\Execution\ResolveInfo;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
@@ -16,7 +18,6 @@ use Youshido\GraphQL\Type\TypeInterface;
 
 class ControllerQueryProviderTest extends TestCase
 {
-
     private $testObjectType;
     private $typeMapper;
     private $hydrator;
@@ -45,7 +46,6 @@ class ControllerQueryProviderTest extends TestCase
 
                 public function __construct(ObjectType $testObjectType)
                 {
-
                     $this->testObjectType = $testObjectType;
                 }
 
@@ -65,8 +65,7 @@ class ControllerQueryProviderTest extends TestCase
     private function getHydrator()
     {
         if ($this->hydrator === null) {
-            $this->hydrator = new class implements HydratorInterface
-            {
+            $this->hydrator = new class implements HydratorInterface {
                 public function hydrate(array $data, TypeInterface $type)
                 {
                     return new TestObject($data['test']);
@@ -81,7 +80,7 @@ class ControllerQueryProviderTest extends TestCase
         $controller = new TestController();
         $reader = new AnnotationReader();
 
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator());
+        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
 
         $queries = $queryProvider->getQueries();
 
@@ -115,7 +114,7 @@ class ControllerQueryProviderTest extends TestCase
         $controller = new TestController();
         $reader = new AnnotationReader();
 
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator());
+        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
 
         $mutations = $queryProvider->getMutations();
 
@@ -129,6 +128,5 @@ class ControllerQueryProviderTest extends TestCase
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
-
     }
 }
