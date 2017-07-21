@@ -14,4 +14,9 @@ interface QueryProviderInterface
      * @return Field[]
      */
     public function getQueries(): array;
+
+    /**
+     * @return Field[]
+     */
+    public function getMutations(): array;
 }

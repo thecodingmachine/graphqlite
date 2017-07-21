@@ -75,4 +75,20 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         return $queryList;
     }
+
+    /**
+     * @return Field[]
+     */
+    public function getMutations(): array
+    {
+        $mutationList = [];
+
+        foreach ($this->controllers as $controllerName) {
+            $controller = $this->container->get($controllerName);
+            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator);
+            $mutationList = array_merge($mutationList, $queryProvider->getMutations());
+        }
+
+        return $mutationList;
+    }
 }
