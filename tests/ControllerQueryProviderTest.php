@@ -16,64 +16,8 @@ use Youshido\GraphQL\Type\Scalar\IntType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
 
-class ControllerQueryProviderTest extends TestCase
+class ControllerQueryProviderTest extends AbstractQueryProviderTest
 {
-    private $testObjectType;
-    private $typeMapper;
-    private $hydrator;
-
-    private function getTestObjectType()
-    {
-        if ($this->testObjectType === null) {
-            $this->testObjectType = new ObjectType([
-                'name'    => 'TestObject',
-                'fields'  => [
-                    'test'   => new StringType(),
-                ],
-            ]);
-        }
-        return $this->testObjectType;
-    }
-
-    private function getTypeMapper()
-    {
-        if ($this->typeMapper === null) {
-            $this->typeMapper = new class($this->getTestObjectType()) implements TypeMapperInterface {
-                /**
-                 * @var ObjectType
-                 */
-                private $testObjectType;
-
-                public function __construct(ObjectType $testObjectType)
-                {
-                    $this->testObjectType = $testObjectType;
-                }
-
-                public function mapClassToType(string $className): TypeInterface
-                {
-                    if ($className === TestObject::class) {
-                        return $this->testObjectType;
-                    } else {
-                        throw new \RuntimeException('Unexpected type');
-                    }
-                }
-            };
-        }
-        return $this->typeMapper;
-    }
-
-    private function getHydrator()
-    {
-        if ($this->hydrator === null) {
-            $this->hydrator = new class implements HydratorInterface {
-                public function hydrate(array $data, TypeInterface $type)
-                {
-                    return new TestObject($data['test']);
-                }
-            };
-        }
-        return $this->hydrator;
-    }
 
     public function testQueryProvider()
     {
