@@ -27,5 +27,6 @@ class Schema extends AbstractSchema
     public function build(SchemaConfig $config)
     {
         $config->getQuery()->addFields($this->queryProvider->getQueries());
+        $config->getMutation()->addFields($this->queryProvider->getMutations());
     }
 }
