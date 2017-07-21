@@ -14,6 +14,8 @@ use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
@@ -47,17 +49,27 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
      * @var ContainerInterface
      */
     private $container;
+    /**
+     * @var AuthenticationServiceInterface
+     */
+    private $authenticationService;
+    /**
+     * @var AuthorizationServiceInterface
+     */
+    private $authorizationService;
 
     /**
      * @param string[] $controllers A list of controllers name in the container.
      */
-    public function __construct(array $controllers, ContainerInterface $container, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator)
+    public function __construct(array $controllers, ContainerInterface $container, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService)
     {
         $this->controllers = $controllers;
         $this->container = $container;
         $this->annotationReader = $annotationReader;
         $this->typeMapper = $typeMapper;
         $this->hydrator = $hydrator;
+        $this->authenticationService = $authenticationService;
+        $this->authorizationService = $authorizationService;
     }
 
     /**
@@ -69,7 +81,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator);
+            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService);
             $queryList = array_merge($queryList, $queryProvider->getQueries());
         }
 

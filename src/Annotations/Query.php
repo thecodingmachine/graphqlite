@@ -8,5 +8,4 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  */
 class Query
 {
-
 }

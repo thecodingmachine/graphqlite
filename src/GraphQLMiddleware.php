@@ -61,7 +61,7 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
             return $delegate->process($request);
         }
 
-        if (!in_array($request->getMethod(), $this->allowed_methods, true)){
+        if (!in_array($request->getMethod(), $this->allowed_methods, true)) {
             return new JsonResponse([
                 "Method not allowed. Allowed methods are " . implode(", ", $this->allowed_methods)
             ], 405);
@@ -96,12 +96,12 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
             return false;
         }
 
-        $request_headers = array_map(function($header){
+        $request_headers = array_map(function ($header) {
             return trim($header);
         }, explode(",", $request->getHeaderLine("content-type")));
 
         foreach ($this->graphql_headers as $allowed_header) {
-            if (in_array($allowed_header, $request_headers)){
+            if (in_array($allowed_header, $request_headers)) {
                 return true;
             }
         }
@@ -134,7 +134,6 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
         $variables = is_string($variables) ? json_decode($variables, true) ?: [] : [];
 
         return [$query, $variables];
-
     }
 
     private function fromPost(ServerRequestInterface $request)
@@ -167,6 +166,5 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
             }
         }
         return [$query, $variables];
-
     }
 }

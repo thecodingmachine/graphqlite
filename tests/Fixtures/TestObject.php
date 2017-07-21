@@ -3,7 +3,6 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
-
 class TestObject
 {
     /**
@@ -13,7 +12,6 @@ class TestObject
 
     public function __construct(string $test)
     {
-
         $this->test = $test;
     }
 
@@ -24,6 +22,4 @@ class TestObject
     {
         return $this->test;
     }
-
-
 }

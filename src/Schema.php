@@ -3,7 +3,6 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-
 use Youshido\GraphQL\Config\Schema\SchemaConfig;
 use Youshido\GraphQL\Schema\AbstractSchema;
 

@@ -2,6 +2,7 @@
 
 
 namespace TheCodingMachine\GraphQL\Controllers;
+
 use Youshido\GraphQL\Type\TypeInterface;
 
 /**

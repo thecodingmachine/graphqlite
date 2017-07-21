@@ -12,8 +12,12 @@ use Roave\BetterReflection\Reflection\ReflectionClass;
 use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
@@ -43,16 +47,26 @@ class ControllerQueryProvider implements QueryProviderInterface
      * @var HydratorInterface
      */
     private $hydrator;
+    /**
+     * @var AuthenticationServiceInterface
+     */
+    private $authenticationService;
+    /**
+     * @var AuthorizationServiceInterface
+     */
+    private $authorizationService;
 
     /**
      * @param object $controller
      */
-    public function __construct($controller, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator)
+    public function __construct($controller, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService)
     {
         $this->controller = $controller;
         $this->annotationReader = $annotationReader;
         $this->typeMapper = $typeMapper;
         $this->hydrator = $hydrator;
+        $this->authenticationService = $authenticationService;
+        $this->authorizationService = $authorizationService;
     }
 
     /**
@@ -84,7 +98,12 @@ class ControllerQueryProvider implements QueryProviderInterface
             $standardPhpMethod = new \ReflectionMethod(get_class($this->controller), $refMethod->getName());
             // First, let's check the "Query" annotation
             $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, $annotationName);
+
             if ($queryAnnotation !== null) {
+                if (!$this->isAuthorized($standardPhpMethod)) {
+                    continue;
+                }
+
                 $methodName = $refMethod->getName();
 
                 $args = $this->mapParameters($refMethod, $standardPhpMethod);
@@ -96,6 +115,30 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         return $queryList;
+    }
+
+    /**
+     * Checks the @Logged and @Right annotations.
+     *
+     * @param \ReflectionMethod $reflectionMethod
+     * @return bool
+     */
+    private function isAuthorized(\ReflectionMethod $reflectionMethod) : bool
+    {
+        $loggedAnnotation = $this->annotationReader->getMethodAnnotation($reflectionMethod, Logged::class);
+
+        if ($loggedAnnotation !== null && !$this->authenticationService->isLogged()) {
+            return false;
+        }
+
+        $rightAnnotation = $this->annotationReader->getMethodAnnotation($reflectionMethod, Right::class);
+        /** @var $rightAnnotation Right */
+
+        if ($rightAnnotation !== null && !$this->authorizationService->isAllowed($rightAnnotation->getName())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -183,7 +226,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private function typesWithoutNullable(array $docBlockTypeHints): array
     {
-        return array_filter($docBlockTypeHints, function($item) {
+        return array_filter($docBlockTypeHints, function ($item) {
             return !$item instanceof Null_;
         });
     }
