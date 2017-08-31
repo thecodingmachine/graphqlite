@@ -5,6 +5,8 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Mixed;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
@@ -21,6 +23,9 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
+use Youshido\GraphQL\Type\Scalar\BooleanType;
+use Youshido\GraphQL\Type\Scalar\DateTimeType;
+use Youshido\GraphQL\Type\Scalar\FloatType;
 use Youshido\GraphQL\Type\Scalar\IntType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
@@ -219,7 +224,18 @@ class ControllerQueryProvider implements QueryProviderInterface
             return new IntType();
         } elseif ($type instanceof String_) {
             return new StringType();
+        } elseif ($type instanceof Boolean) {
+            return new BooleanType();
+        } elseif ($type instanceof Float_) {
+            return new FloatType();
         } elseif ($type instanceof Object_) {
+            $fqcn = (string) $type->getFqsen();
+            if ($fqcn === '\\DateTimeImmutable' || $fqcn === '\\DateTimeInterface') {
+                return new DateTimeType();
+            } elseif ($fqcn === '\\DateTime') {
+                throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+            }
+
             return $this->typeMapper->mapClassToType(ltrim($type->getFqsen(), '\\'));
         } elseif ($type instanceof Array_) {
             return new ListType(new NonNullType($this->toGraphQlType($type->getValueType())));

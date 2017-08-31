@@ -44,6 +44,16 @@ class UserController
 }
 ```
 
+Your methods can type-hint against:
+
+- int
+- string
+- bool
+- float
+- DateTimeImmutable or DateTimeInterface
+- an array
+- any object (if you provide an hydrator for the object type)
+
 There is an additional support for authentication and authorization:
 
 ```php
@@ -65,7 +75,28 @@ class UserController
 }
 ```
 
+Type-hinting against arrays
+---------------------------
 
+You can type-hint against arrays as long as you document the PHP-Doc correctly:
+
+```php
+/**
+ * @Query
+ * @return User[] <=== we specify that the array is an array of User objects.
+ */
+public function users(int $limit, int $offset): array
+{
+    // Some code that returns an array of "users".
+    // This completely replaces the "resolve" method.
+}
+```
+
+Type-hinting against objects
+----------------------------
+
+When you specify an object type-hint, graphql-controllers will delegate the object creation to an hydrator.
+You must pass this hydrator in parameter when building the `ControllerQueryProvider`.
 
 Troubleshooting
 ---------------
