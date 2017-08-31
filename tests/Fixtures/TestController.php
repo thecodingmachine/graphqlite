@@ -15,9 +15,13 @@ class TestController
      * @param int $int
      * @param null|string $string
      * @param TestObject[] $list
+     * @param bool|null $boolean
+     * @param float|null $float
+     * @param \DateTimeImmutable|null $dateTimeImmutable
+     * @param \DateTime|null $dateTime
      * @return TestObject
      */
-    public function test(int $int, ?string $string, array $list): TestObject
+    public function test(int $int, ?string $string, array $list, ?bool $boolean, ?float $float, ?\DateTimeImmutable $dateTimeImmutable, ?\DateTimeInterface $dateTime): TestObject
     {
         $str = '';
         foreach ($list as $test) {
@@ -26,7 +30,7 @@ class TestController
             }
             $str .= $test->getTest();
         }
-        return new TestObject($string.$int.$str);
+        return new TestObject($string.$int.$str.($boolean?'true':'false').$float.$dateTimeImmutable->format('YmdHis').$dateTime->format('YmdHis'));
     }
 
     /**

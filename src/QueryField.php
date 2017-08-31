@@ -10,6 +10,7 @@ use Youshido\GraphQL\Type\AbstractType;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
 use Youshido\GraphQL\Type\Object\AbstractObjectType;
+use Youshido\GraphQL\Type\Scalar\DateTimeType;
 use Youshido\GraphQL\Type\TypeInterface;
 use Youshido\GraphQL\Type\TypeMap;
 
@@ -47,11 +48,15 @@ class QueryField extends AbstractField
                 if ($type instanceof ListType) {
                     $subtype = $this->stripNonNullType($type->getItemType());
                     $val = array_map(function ($item) use ($subtype) {
-                        if ($subtype->getKind() === TypeMap::KIND_OBJECT) {
+                        if ($subtype instanceof DateTimeType) {
+                            return new \DateTimeImmutable($item);
+                        } elseif ($subtype->getKind() === TypeMap::KIND_OBJECT) {
                             return $this->hydrator->hydrate($item, $subtype);
                         };
                         return $item;
                     }, $val);
+                } elseif ($type instanceof DateTimeType) {
+                    $val = new \DateTimeImmutable($val);
                 } elseif ($type->getKind() === TypeMap::KIND_OBJECT) {
                     $val = $this->hydrator->hydrate($val, $type);
                 }

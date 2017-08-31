@@ -12,6 +12,9 @@ use Youshido\GraphQL\Execution\ResolveInfo;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
 use Youshido\GraphQL\Type\Object\ObjectType;
+use Youshido\GraphQL\Type\Scalar\BooleanType;
+use Youshido\GraphQL\Type\Scalar\DateTimeType;
+use Youshido\GraphQL\Type\Scalar\FloatType;
 use Youshido\GraphQL\Type\Scalar\IntType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
@@ -32,7 +35,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->getName());
 
-        $this->assertCount(3, $usersQuery->getArguments());
+        $this->assertCount(7, $usersQuery->getArguments());
         $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('int')->getType());
         $this->assertInstanceOf(IntType::class, $usersQuery->getArgument('int')->getType()->getTypeOf());
         $this->assertInstanceOf(StringType::class, $usersQuery->getArgument('string')->getType());
@@ -40,17 +43,26 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ListType::class, $usersQuery->getArgument('list')->getType()->getTypeOf());
         $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType());
         $this->assertInstanceOf(ObjectType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf());
+        $this->assertInstanceOf(BooleanType::class, $usersQuery->getArgument('boolean')->getType());
+        $this->assertInstanceOf(FloatType::class, $usersQuery->getArgument('float')->getType());
+        $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTimeImmutable')->getType());
+        $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTime')->getType());
         $this->assertSame('TestObject', $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf()->getName());
 
         $mockResolveInfo = $this->createMock(ResolveInfo::class);
 
         $result = $usersQuery->resolve('foo', ['int'=>42, 'string'=>'foo', 'list'=>[
-            ['test'=>42],
-            ['test'=>12],
-        ]], $mockResolveInfo);
+                ['test'=>42],
+                ['test'=>12],
+            ],
+            'boolean'=>true,
+            'float'=>4.2,
+            'dateTimeImmutable'=>'2017-01-01 01:01:01',
+            'dateTime'=>'2017-01-01 01:01:01'
+        ], $mockResolveInfo);
 
         $this->assertInstanceOf(TestObject::class, $result);
-        $this->assertSame('foo424212', $result->getTest());
+        $this->assertSame('foo424212true4.22017010101010120170101010101', $result->getTest());
     }
 
     public function testMutations()
