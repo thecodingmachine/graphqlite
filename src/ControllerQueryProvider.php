@@ -94,6 +94,8 @@ class ControllerQueryProvider implements QueryProviderInterface
 
         $queryList = [];
 
+        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+
         foreach ($refClass->getMethods() as $refMethod) {
             $standardPhpMethod = new \ReflectionMethod(get_class($this->controller), $refMethod->getName());
             // First, let's check the "Query" annotation
@@ -108,7 +110,9 @@ class ControllerQueryProvider implements QueryProviderInterface
 
                 $args = $this->mapParameters($refMethod, $standardPhpMethod);
 
-                $type = $this->mapType($refMethod->getReturnType()->getTypeObject(), $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull());
+                $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
+
+                $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull());
 
                 $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator);
             }
@@ -151,10 +155,16 @@ class ControllerQueryProvider implements QueryProviderInterface
     private function mapParameters(ReflectionMethod $refMethod, \ReflectionMethod $standardRefMethod)
     {
         $args = [];
+
+        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+
         foreach ($standardRefMethod->getParameters() as $standardParameter) {
             $allowsNull = $standardParameter->allowsNull();
             $parameter = $refMethod->getParameter($standardParameter->getName());
-            $args[$parameter->getName()] = $this->mapType($parameter->getTypeHint(), $parameter->getDocBlockTypes(), $allowsNull);
+
+            $phpdocType = $typeResolver->resolve((string) $parameter->getType());
+
+            $args[$parameter->getName()] = $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull);
         }
 
         return $args;
