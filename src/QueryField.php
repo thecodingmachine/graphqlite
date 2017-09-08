@@ -50,14 +50,14 @@ class QueryField extends AbstractField
                     $val = array_map(function ($item) use ($subtype) {
                         if ($subtype instanceof DateTimeType) {
                             return new \DateTimeImmutable($item);
-                        } elseif ($subtype->getKind() === TypeMap::KIND_OBJECT) {
+                        } elseif ($subtype->getKind() === TypeMap::KIND_INPUT_OBJECT) {
                             return $this->hydrator->hydrate($item, $subtype);
                         };
                         return $item;
                     }, $val);
                 } elseif ($type instanceof DateTimeType) {
                     $val = new \DateTimeImmutable($val);
-                } elseif ($type->getKind() === TypeMap::KIND_OBJECT) {
+                } elseif ($type->getKind() === TypeMap::KIND_INPUT_OBJECT) {
                     $val = $this->hydrator->hydrate($val, $type);
                 }
 

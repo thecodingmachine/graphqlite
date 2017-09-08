@@ -117,7 +117,7 @@ class ControllerQueryProvider implements QueryProviderInterface
 
                 $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
-                $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull());
+                $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
 
                 $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator);
             }
@@ -169,7 +169,7 @@ class ControllerQueryProvider implements QueryProviderInterface
 
             $phpdocType = $typeResolver->resolve((string) $parameter->getType());
 
-            $args[$parameter->getName()] = $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull);
+            $args[$parameter->getName()] = $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull, true);
         }
 
         return $args;
@@ -180,7 +180,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      * @param Type[] $docBlockTypes
      * @return TypeInterface
      */
-    private function mapType(Type $type, array $docBlockTypes, bool $isNullable): TypeInterface
+    private function mapType(Type $type, array $docBlockTypes, bool $isNullable, bool $mapToInputType): TypeInterface
     {
         $graphQlType = null;
 
@@ -194,14 +194,14 @@ class ControllerQueryProvider implements QueryProviderInterface
                 // TODO: improve error message
                 throw new GraphQLException("Don't know how to handle type ".((string) $type));
             } elseif (count($filteredDocBlockTypes) === 1) {
-                $graphQlType = $this->toGraphQlType($filteredDocBlockTypes[0]);
+                $graphQlType = $this->toGraphQlType($filteredDocBlockTypes[0], $mapToInputType);
             } else {
                 throw new GraphQLException('Union types are not supported (yet)');
                 //$graphQlTypes = array_map([$this, 'toGraphQlType'], $filteredDocBlockTypes);
                 //$$graphQlType = new UnionType($graphQlTypes);
             }
         } else {
-            $graphQlType = $this->toGraphQlType($type);
+            $graphQlType = $this->toGraphQlType($type, $mapToInputType);
         }
 
         if (!$isNullable) {
@@ -216,9 +216,10 @@ class ControllerQueryProvider implements QueryProviderInterface
      * Does not deal with nullable.
      *
      * @param Type $type
+     * @param bool $mapToInputType
      * @return TypeInterface
      */
-    private function toGraphQlType(Type $type): TypeInterface
+    private function toGraphQlType(Type $type, bool $mapToInputType): TypeInterface
     {
         if ($type instanceof Integer) {
             return new IntType();
@@ -236,9 +237,14 @@ class ControllerQueryProvider implements QueryProviderInterface
                 throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
             }
 
-            return $this->typeMapper->mapClassToType(ltrim($type->getFqsen(), '\\'));
+            $className = ltrim($type->getFqsen(), '\\');
+            if ($mapToInputType) {
+                return $this->typeMapper->mapClassToInputType($className);
+            } else {
+                return $this->typeMapper->mapClassToType($className);
+            }
         } elseif ($type instanceof Array_) {
-            return new ListType(new NonNullType($this->toGraphQlType($type->getValueType())));
+            return new ListType(new NonNullType($this->toGraphQlType($type->getValueType(), $mapToInputType)));
         } else {
             throw new GraphQLException("Don't know how to handle type ".((string) $type));
         }

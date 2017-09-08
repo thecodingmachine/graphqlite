@@ -9,6 +9,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use Youshido\GraphQL\Execution\ResolveInfo;
+use Youshido\GraphQL\Type\InputObject\InputObjectType;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
 use Youshido\GraphQL\Type\Object\ObjectType;
@@ -21,7 +22,6 @@ use Youshido\GraphQL\Type\TypeInterface;
 
 class ControllerQueryProviderTest extends AbstractQueryProviderTest
 {
-
     public function testQueryProvider()
     {
         $controller = new TestController();
@@ -42,7 +42,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('list')->getType());
         $this->assertInstanceOf(ListType::class, $usersQuery->getArgument('list')->getType()->getTypeOf());
         $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType());
-        $this->assertInstanceOf(ObjectType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf());
+        $this->assertInstanceOf(InputObjectType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf());
         $this->assertInstanceOf(BooleanType::class, $usersQuery->getArgument('boolean')->getType());
         $this->assertInstanceOf(FloatType::class, $usersQuery->getArgument('float')->getType());
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTimeImmutable')->getType());

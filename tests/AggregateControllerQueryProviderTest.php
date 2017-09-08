@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-
 use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
