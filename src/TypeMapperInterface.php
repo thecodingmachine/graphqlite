@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use Youshido\GraphQL\Type\InputTypeInterface;
 use Youshido\GraphQL\Type\TypeInterface;
 
 /**
@@ -17,4 +18,12 @@ interface TypeMapperInterface
      * @return TypeInterface
      */
     public function mapClassToType(string $className): TypeInterface;
+
+    /**
+     * Maps a PHP fully qualified class name to a GraphQL input type.
+     *
+     * @param string $className
+     * @return InputTypeInterface
+     */
+    public function mapClassToInputType(string $className): InputTypeInterface;
 }
