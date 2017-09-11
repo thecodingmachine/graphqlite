@@ -72,6 +72,10 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
 
         $processor = new Processor($this->schema);
         $processor->processPayload($query, $variables);
+        // Hack while waiting validation of PR: https://github.com/Youshido/GraphQL/pull/178
+        if (method_exists($processor->getExecutionContext(), 'setCatchExceptions')) {
+            $processor->getExecutionContext()->setCatchExceptions(false);
+        }
         $res = $processor->getResponseData();
         return new JsonResponse($res);
 
