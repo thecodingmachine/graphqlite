@@ -19,6 +19,7 @@ use Youshido\GraphQL\Type\Scalar\FloatType;
 use Youshido\GraphQL\Type\Scalar\IntType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 
 class ControllerQueryProviderTest extends AbstractQueryProviderTest
 {
@@ -35,7 +36,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->getName());
 
-        $this->assertCount(7, $usersQuery->getArguments());
+        $this->assertCount(8, $usersQuery->getArguments());
         $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('int')->getType());
         $this->assertInstanceOf(IntType::class, $usersQuery->getArgument('int')->getType()->getTypeOf());
         $this->assertInstanceOf(StringType::class, $usersQuery->getArgument('string')->getType());
@@ -62,7 +63,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         ], $mockResolveInfo);
 
         $this->assertInstanceOf(TestObject::class, $result);
-        $this->assertSame('foo424212true4.22017010101010120170101010101', $result->getTest());
+        $this->assertSame('foo424212true4.22017010101010120170101010101default', $result->getTest());
     }
 
     public function testMutations()
@@ -84,5 +85,25 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
+    }
+
+    public function testErrors()
+    {
+        $controller = new class {
+            /**
+             * @Query
+             * @return string
+             */
+            public function test($noTypeHint): string
+            {
+                return 'foo';
+            }
+        };
+        $reader = new AnnotationReader();
+
+        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+
+        $this->expectException(MissingTypeHintException::class);
+        $queryProvider->getQueries();
     }
 }

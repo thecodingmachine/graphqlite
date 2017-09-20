@@ -156,6 +156,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      * @param ReflectionMethod $refMethod
      * @param \ReflectionMethod $standardRefMethod
      * @return array
+     * @throws MissingTypeHintException
      */
     private function mapParameters(ReflectionMethod $refMethod, \ReflectionMethod $standardRefMethod)
     {
@@ -167,9 +168,24 @@ class ControllerQueryProvider implements QueryProviderInterface
             $allowsNull = $standardParameter->allowsNull();
             $parameter = $refMethod->getParameter($standardParameter->getName());
 
-            $phpdocType = $typeResolver->resolve((string) $parameter->getType());
+            $type = (string) $parameter->getType();
+            if ($type === '') {
+                throw MissingTypeHintException::missingTypeHint($parameter);
+            }
+            $phpdocType = $typeResolver->resolve($type);
 
-            $args[$parameter->getName()] = $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull, true);
+            $arr = [
+                'type' => $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull, true),
+            ];
+
+            if ($standardParameter->allowsNull()) {
+                $arr['default'] = null;
+            }
+            if ($standardParameter->isDefaultValueAvailable()) {
+                $arr['default'] = $standardParameter->getDefaultValue();
+            }
+
+            $args[$parameter->getName()] = $arr;
         }
 
         return $args;
