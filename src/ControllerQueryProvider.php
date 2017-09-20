@@ -7,7 +7,7 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Float_;
-use phpDocumentor\Reflection\Types\Mixed;
+use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Roave\BetterReflection\Reflection\ReflectionClass;
@@ -200,7 +200,7 @@ class ControllerQueryProvider implements QueryProviderInterface
     {
         $graphQlType = null;
 
-        if ($type instanceof Array_ || $type instanceof Mixed) {
+        if ($type instanceof Array_ || $type instanceof Mixed_) {
             if (!$isNullable) {
                 // Let's check a "null" value in the docblock
                 $isNullable = $this->isNullable($docBlockTypes);
