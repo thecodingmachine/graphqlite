@@ -52,18 +52,25 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $mockResolveInfo = $this->createMock(ResolveInfo::class);
 
-        $result = $usersQuery->resolve('foo', ['int'=>42, 'string'=>'foo', 'list'=>[
-                ['test'=>42],
-                ['test'=>12],
-            ],
+        $context = ['int'=>42, 'string'=>'foo', 'list'=>[
+            ['test'=>42],
+            ['test'=>12],
+        ],
             'boolean'=>true,
             'float'=>4.2,
             'dateTimeImmutable'=>'2017-01-01 01:01:01',
             'dateTime'=>'2017-01-01 01:01:01'
-        ], $mockResolveInfo);
+        ];
+
+        $result = $usersQuery->resolve('foo', $context, $mockResolveInfo);
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertSame('foo424212true4.22017010101010120170101010101default', $result->getTest());
+
+        unset($context['string']); // Testing null default value
+        $result = $usersQuery->resolve('foo', $context, $mockResolveInfo);
+
+        $this->assertSame('424212true4.22017010101010120170101010101default', $result->getTest());
     }
 
     public function testMutations()
