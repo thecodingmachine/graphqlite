@@ -13,15 +13,16 @@ class TestController
     /**
      * @Query
      * @param int $int
-     * @param null|string $string
      * @param TestObject[] $list
      * @param bool|null $boolean
      * @param float|null $float
      * @param \DateTimeImmutable|null $dateTimeImmutable
-     * @param \DateTime|null $dateTime
+     * @param \DateTime|\DateTimeInterface|null $dateTime
+     * @param string $withDefault
+     * @param null|string $string
      * @return TestObject
      */
-    public function test(int $int, ?string $string, array $list, ?bool $boolean, ?float $float, ?\DateTimeImmutable $dateTimeImmutable, ?\DateTimeInterface $dateTime, string $withDefault = 'default'): TestObject
+    public function test(int $int, array $list, ?bool $boolean, ?float $float, ?\DateTimeImmutable $dateTimeImmutable, ?\DateTimeInterface $dateTime, string $withDefault = 'default', ?string $string = null): TestObject
     {
         $str = '';
         foreach ($list as $test) {

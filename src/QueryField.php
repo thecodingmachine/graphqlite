@@ -61,7 +61,7 @@ class QueryField extends AbstractField
                     } elseif ($type->getKind() === TypeMap::KIND_INPUT_OBJECT) {
                         $val = $this->hydrator->hydrate($val, $type);
                     }
-                } elseif (isset($arr['default'])) {
+                } elseif (array_key_exists('default', $arr)) {
                     $val = $arr['default'];
                 } else {
                     throw new GraphQLException("Expected argument '$name' was not provided.");
