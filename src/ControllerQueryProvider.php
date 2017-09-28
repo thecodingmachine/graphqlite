@@ -117,8 +117,11 @@ class ControllerQueryProvider implements QueryProviderInterface
 
                 $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
-                $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
-
+                try {
+                    $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
+                } catch (TypeMappingException $e) {
+                    throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
+                }
                 $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator);
             }
         }
@@ -174,9 +177,13 @@ class ControllerQueryProvider implements QueryProviderInterface
             }
             $phpdocType = $typeResolver->resolve($type);
 
-            $arr = [
-                'type' => $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull, true),
-            ];
+            try {
+                $arr = [
+                    'type' => $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull, true),
+                ];
+            } catch (TypeMappingException $e) {
+                throw TypeMappingException::wrapWithParamInfo($e, $parameter);
+            }
 
             if ($standardParameter->allowsNull()) {
                 $arr['default'] = null;
@@ -207,8 +214,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             }
             $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockTypes);
             if (empty($filteredDocBlockTypes)) {
-                // TODO: improve error message
-                throw new GraphQLException("Don't know how to handle type ".((string) $type));
+                throw TypeMappingException::createFromType($type);
             } elseif (count($filteredDocBlockTypes) === 1) {
                 $graphQlType = $this->toGraphQlType($filteredDocBlockTypes[0], $mapToInputType);
             } else {
