@@ -268,7 +268,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         } elseif ($type instanceof Array_) {
             return new ListType(new NonNullType($this->toGraphQlType($type->getValueType(), $mapToInputType)));
         } else {
-            throw new GraphQLException("Don't know how to handle type ".((string) $type));
+            throw TypeMappingException::createFromType($type);
         }
     }
 
