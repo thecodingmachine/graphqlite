@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
@@ -107,6 +108,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, $annotationName);
 
             if ($queryAnnotation !== null) {
+                $docBlock = new CommentParser($refMethod->getDocComment());
                 if (!$this->isAuthorized($standardPhpMethod)) {
                     continue;
                 }
@@ -122,7 +124,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 } catch (TypeMappingException $e) {
                     throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
                 }
-                $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator);
+                $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment());
             }
         }
 
