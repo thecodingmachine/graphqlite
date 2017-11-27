@@ -29,7 +29,7 @@ class QueryField extends AbstractField
      * @param callable $resolve
      * @param array $additionalConfig
      */
-    public function __construct(string $name, TypeInterface $type, array $arguments, callable $resolve, HydratorInterface $hydrator, array $additionalConfig = [])
+    public function __construct(string $name, TypeInterface $type, array $arguments, callable $resolve, HydratorInterface $hydrator, ?string $comment, array $additionalConfig = [])
     {
         $this->hydrator = $hydrator;
         $config = [
@@ -37,6 +37,9 @@ class QueryField extends AbstractField
             'type' => $type,
             'args' => array_map(function(array $item) { return $item['type']; }, $arguments)
         ];
+        if ($comment) {
+            $config['description'] = $comment;
+        }
 
         $config['resolve'] = function ($source, array $args, ResolveInfo $info) use ($resolve, $arguments) {
             $toPassArgs = [];
