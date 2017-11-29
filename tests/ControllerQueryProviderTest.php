@@ -6,6 +6,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use Youshido\GraphQL\Execution\ResolveInfo;
@@ -32,7 +33,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(1, $queries);
+        $this->assertCount(2, $queries);
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->getName());
 
@@ -52,14 +53,14 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $mockResolveInfo = $this->createMock(ResolveInfo::class);
 
-        $context = ['int'=>42, 'string'=>'foo', 'list'=>[
-            ['test'=>42],
-            ['test'=>12],
+        $context = ['int' => 42, 'string' => 'foo', 'list' => [
+            ['test' => 42],
+            ['test' => 12],
         ],
-            'boolean'=>true,
-            'float'=>4.2,
-            'dateTimeImmutable'=>'2017-01-01 01:01:01',
-            'dateTime'=>'2017-01-01 01:01:01'
+            'boolean' => true,
+            'float' => 4.2,
+            'dateTimeImmutable' => '2017-01-01 01:01:01',
+            'dateTime' => '2017-01-01 01:01:01'
         ];
 
         $result = $usersQuery->resolve('foo', $context, $mockResolveInfo);
@@ -88,7 +89,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $mockResolveInfo = $this->createMock(ResolveInfo::class);
 
-        $result = $mutation->resolve('foo', ['testObject'=>['test'=>42]], $mockResolveInfo);
+        $result = $mutation->resolve('foo', ['testObject' => ['test' => 42]], $mockResolveInfo);
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
@@ -96,7 +97,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testErrors()
     {
-        $controller = new class {
+        $controller = new class
+        {
             /**
              * @Query
              * @return string
@@ -112,5 +114,20 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->expectException(MissingTypeHintException::class);
         $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithFixedReturnType()
+    {
+        $controller = new TestController();
+        $reader = new AnnotationReader();
+
+        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+
+        $queries = $queryProvider->getQueries();
+
+        $this->assertCount(2, $queries);
+        $fixedQuery = $queries[1];
+
+        $this->assertInstanceOf(TestType::class, $fixedQuery->getType());
     }
 }

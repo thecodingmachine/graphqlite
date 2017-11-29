@@ -5,7 +5,10 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
 
 /**
  * @Annotation
+ * @Attributes({
+ *   @Attribute("returnType", type = "string"),
+ * })
  */
-class Query
+class Query extends AbstractRequest
 {
 }
