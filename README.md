@@ -10,8 +10,6 @@
 GraphQL controllers
 ===================
 
-**Work in progress, no stable release yet**
-
 A utility library on top of `Youshido/graphql` library.
 
 This library allows you to write your GraphQL queries in simple to write controllers:
@@ -92,11 +90,42 @@ public function users(int $limit, int $offset): array
 }
 ```
 
-Type-hinting against objects
-----------------------------
+Type-hinting against objects (automatic)
+----------------------------------------
 
 When you specify an object type-hint, graphql-controllers will delegate the object creation to an hydrator.
 You must pass this hydrator in parameter when building the `ControllerQueryProvider`.
+
+Type-hinting against objects (manually)
+---------------------------------------
+
+As an alternative, you can also manually specify the GraphqlType of your return type manually.
+
+```php
+/**
+ * @Query(returnType=UserListType::class)
+ */
+public function users(int $limit, int $offset)
+{
+    // Whatever the return type of the method, it will be managed as a GraphQL UserListType
+    // UserListType must implement Youshido's TypeInterface
+}
+```
+
+You can also specify the name of an entry in the container that resolves to the GraphQL type to be used.
+
+```php
+/**
+ * @Query(returnType="userListType")
+ */
+public function users(int $limit, int $offset)
+{
+    // The return type is fetched from the container. Expected name is "userListType"
+}
+```
+
+Note: for container discovery to work, you must pass the container when constructing the `ControllerQueryProvider` object.
+
 
 Troubleshooting
 ---------------

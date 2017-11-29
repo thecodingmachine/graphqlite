@@ -61,4 +61,12 @@ class TestController
     {
         return new TestObject('foo');
     }
+
+    /**
+     * @Query(returnType=TestType::class)
+     */
+    public function testFixReturnType(): TestObject
+    {
+        return new TestObject('foo');
+    }
 }

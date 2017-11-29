@@ -44,7 +44,7 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
         $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $container, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
 
         $queries = $aggregateQueryProvider->getQueries();
-        $this->assertCount(1, $queries);
+        $this->assertCount(2, $queries);
 
         $mutations = $aggregateQueryProvider->getMutations();
         $this->assertCount(1, $mutations);

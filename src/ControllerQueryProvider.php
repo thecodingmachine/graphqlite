@@ -10,15 +10,19 @@ use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
+use Psr\Container\ContainerInterface;
 use Roave\BetterReflection\Reflection\ReflectionClass;
 use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
+use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
+use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
+use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
@@ -30,7 +34,6 @@ use Youshido\GraphQL\Type\Scalar\FloatType;
 use Youshido\GraphQL\Type\Scalar\IntType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
-use Youshido\GraphQL\Type\Union\UnionType;
 
 /**
  * A query provider that looks for queries in a "controller"
@@ -61,11 +64,15 @@ class ControllerQueryProvider implements QueryProviderInterface
      * @var AuthorizationServiceInterface
      */
     private $authorizationService;
+    /**
+     * @var ContainerInterface
+     */
+    private $registry;
 
     /**
      * @param object $controller
      */
-    public function __construct($controller, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService)
+    public function __construct($controller, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService, ?ContainerInterface $container = null)
     {
         $this->controller = $controller;
         $this->annotationReader = $annotationReader;
@@ -73,6 +80,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         $this->hydrator = $hydrator;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
+        $this->registry = new Registry($container ?: new EmptyContainer());
     }
 
     /**
@@ -106,6 +114,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             $standardPhpMethod = new \ReflectionMethod(get_class($this->controller), $refMethod->getName());
             // First, let's check the "Query" annotation
             $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, $annotationName);
+            /* @var $queryAnnotation AbstractRequest */
 
             if ($queryAnnotation !== null) {
                 $docBlock = new CommentParser($refMethod->getDocComment());
@@ -119,11 +128,16 @@ class ControllerQueryProvider implements QueryProviderInterface
 
                 $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
-                try {
-                    $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
-                } catch (TypeMappingException $e) {
-                    throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
+                if ($queryAnnotation->getReturnType()) {
+                    $type = $this->registry->get($queryAnnotation->getReturnType());
+                } else {
+                    try {
+                        $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
+                    } catch (TypeMappingException $e) {
+                        throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
+                    }
                 }
+
                 $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment());
             }
         }
