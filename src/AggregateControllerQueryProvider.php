@@ -81,7 +81,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService);
+            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService, $this->container);
             $queryList = array_merge($queryList, $queryProvider->getQueries());
         }
 
@@ -97,7 +97,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService);
+            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService, $this->container);
             $mutationList = array_merge($mutationList, $queryProvider->getMutations());
         }
 
