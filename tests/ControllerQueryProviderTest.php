@@ -49,6 +49,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(FloatType::class, $usersQuery->getArgument('float')->getType());
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTimeImmutable')->getType());
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTime')->getType());
+        $this->assertInstanceOf(StringType::class, $usersQuery->getArgument('withDefault')->getType());
         $this->assertSame('TestObject', $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf()->getName());
 
         $mockResolveInfo = $this->createMock(ResolveInfo::class);

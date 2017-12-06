@@ -195,7 +195,7 @@ class ControllerQueryProvider implements QueryProviderInterface
 
             try {
                 $arr = [
-                    'type' => $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull, true),
+                    'type' => $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull || $parameter->isDefaultValueAvailable(), true),
                 ];
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
