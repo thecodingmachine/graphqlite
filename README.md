@@ -126,6 +126,39 @@ public function users(int $limit, int $offset)
 
 Note: for container discovery to work, you must pass the container when constructing the `ControllerQueryProvider` object.
 
+Usage
+-----
+
+```bash
+$ composer require thecodingmachine/graphql-controllers
+```
+
+The package contains a http-interop compatible middleware: `TheCodingMachine\GraphQL\Controllers\GraphQLMiddleware`.
+Put this middleware in your middleware pipe.
+
+The middleware expects a GraphQL schema to be created. This package comes with a GraphQL schema compatible with Youshido
+schemas that will automatically be filled from the GraphQL controllers you will write.
+
+Controllers will be fetched from the container (it must be PSR-11 compliant).
+
+Pseudo-code to initialize the middleware looks like this:
+
+```php
+$queryProvider = new AggregateControllerQueryProvider([
+        "myController1", // These are the name of entries in the container to fetch the GraphQL controllers
+        "myController2"
+    ],
+    $container, // The container containing the controllers (PSR-11 compliant),
+    $annotationReader, // A Doctrine annotation reader
+    $typeMapper, // Object used to map PHP classes to GraphQL types. 
+    $hydrator, // Object used to create Objects from sent data (mostly for mutation)
+    $authenticationService, // Object to manage authentication (the @Logged annotation)
+    AuthorizationServiceInterface $authorizationService // Object to manage authorization (the @Right annotation)
+    )
+);
+```  
+
+
 
 Troubleshooting
 ---------------
