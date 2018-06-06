@@ -8,6 +8,7 @@ use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Mixed_;
+use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Container\ContainerInterface;
@@ -85,7 +86,7 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return Field[]
+     * @return QueryField[]
      */
     public function getQueries(): array
     {
@@ -93,7 +94,7 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return Field[]
+     * @return QueryField[]
      */
     public function getMutations(): array
     {
@@ -101,7 +102,7 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return Field[]
+     * @return QueryField[]
      */
     public function getFields(): array
     {
@@ -111,7 +112,7 @@ class ControllerQueryProvider implements QueryProviderInterface
     /**
      * @param string $annotationName
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field, false for @Query and @Mutation
-     * @return Field[]
+     * @return QueryField[]
      * @throws \ReflectionException
      */
     private function getFieldsByAnnotations(string $annotationName, bool $injectSource): array

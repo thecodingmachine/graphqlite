@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
+use Youshido\GraphQL\Config\Object\ObjectTypeConfig;
 use Youshido\GraphQL\Type\Object\AbstractObjectType;
 
 abstract class AbstractAnnotatedObjectType extends AbstractObjectType

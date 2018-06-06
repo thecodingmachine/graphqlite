@@ -28,7 +28,7 @@ class QueryField extends AbstractField
      * QueryField constructor.
      * @param string $name
      * @param TypeInterface $type
-     * @param TypeInterface[] $arguments Indexed by argument name.
+     * @param array[] $arguments Indexed by argument name, value: ['type'=>TypeInterface, 'default'=>val].
      * @param callable $resolve
      * @param HydratorInterface $hydrator
      * @param null|string $comment
