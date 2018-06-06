@@ -14,6 +14,9 @@ use Youshido\GraphQL\Type\Scalar\DateTimeType;
 use Youshido\GraphQL\Type\TypeInterface;
 use Youshido\GraphQL\Type\TypeMap;
 
+/**
+ * A GraphQL field that maps to a PHP method automatically.
+ */
 class QueryField extends AbstractField
 {
     /**
@@ -27,9 +30,12 @@ class QueryField extends AbstractField
      * @param TypeInterface $type
      * @param TypeInterface[] $arguments Indexed by argument name.
      * @param callable $resolve
+     * @param HydratorInterface $hydrator
+     * @param null|string $comment
+     * @param bool $injectSource Whether to inject the source object (for Fields), or null for Query and Mutations
      * @param array $additionalConfig
      */
-    public function __construct(string $name, TypeInterface $type, array $arguments, callable $resolve, HydratorInterface $hydrator, ?string $comment, array $additionalConfig = [])
+    public function __construct(string $name, TypeInterface $type, array $arguments, callable $resolve, HydratorInterface $hydrator, ?string $comment, bool $injectSource, array $additionalConfig = [])
     {
         $this->hydrator = $hydrator;
         $config = [
@@ -41,8 +47,11 @@ class QueryField extends AbstractField
             $config['description'] = $comment;
         }
 
-        $config['resolve'] = function ($source, array $args, ResolveInfo $info) use ($resolve, $arguments) {
+        $config['resolve'] = function ($source, array $args, ResolveInfo $info) use ($resolve, $arguments, $injectSource) {
             $toPassArgs = [];
+            if ($injectSource) {
+                $toPassArgs[] = $source;
+            }
             foreach ($arguments as $name => $arr) {
                 $type = $arr['type'];
                 if (isset($args[$name])) {

@@ -150,7 +150,7 @@ $queryProvider = new AggregateControllerQueryProvider([
     ],
     $container, // The container containing the controllers (PSR-11 compliant),
     $annotationReader, // A Doctrine annotation reader
-    $typeMapper, // Object used to map PHP classes to GraphQL types. 
+    $typeMapper, // Object used to map PHP classes to GraphQL types.
     $hydrator, // Object used to create Objects from sent data (mostly for mutation)
     $authenticationService, // Object to manage authentication (the @Logged annotation)
     AuthorizationServiceInterface $authorizationService // Object to manage authorization (the @Right annotation)

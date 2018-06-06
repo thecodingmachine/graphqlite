@@ -3,8 +3,14 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
+use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use Youshido\GraphQL\Type\InputObject\InputObjectType;
 use Youshido\GraphQL\Type\InputTypeInterface;
 use Youshido\GraphQL\Type\Object\ObjectType;
@@ -17,6 +23,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $inputTestObjectType;
     private $typeMapper;
     private $hydrator;
+    private $registry;
 
     protected function getTestObjectType()
     {
@@ -96,5 +103,24 @@ abstract class AbstractQueryProviderTest extends TestCase
             };
         }
         return $this->hydrator;
+    }
+
+    protected function getRegistry()
+    {
+        if ($this->registry === null) {
+            $this->registry = $this->buildRegistry(new EmptyContainer());
+        }
+        return $this->registry;
+    }
+
+    protected function buildRegistry(ContainerInterface $container)
+    {
+        $reader = new AnnotationReader();
+        return new Registry($container,
+                new VoidAuthorizationService(),
+                new VoidAuthenticationService(),
+                $reader,
+                $this->getTypeMapper(),
+                $this->getHydrator());
     }
 }

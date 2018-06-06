@@ -3,44 +3,16 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use phpDocumentor\Reflection\Type;
-use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Mixed;
-use phpDocumentor\Reflection\Types\Object_;
-use phpDocumentor\Reflection\Types\String_;
 use Psr\Container\ContainerInterface;
-use Roave\BetterReflection\Reflection\ReflectionClass;
-use Roave\BetterReflection\Reflection\ReflectionMethod;
-use Doctrine\Common\Annotations\Reader;
-use phpDocumentor\Reflection\Types\Integer;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use Youshido\GraphQL\Field\Field;
-use Youshido\GraphQL\Type\ListType\ListType;
-use Youshido\GraphQL\Type\NonNullType;
-use Youshido\GraphQL\Type\Scalar\IntType;
-use Youshido\GraphQL\Type\Scalar\StringType;
-use Youshido\GraphQL\Type\TypeInterface;
-use Youshido\GraphQL\Type\Union\UnionType;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
  */
 class AggregateControllerQueryProvider implements QueryProviderInterface
 {
-    /**
-     * @var Reader
-     */
-    private $annotationReader;
-    /**
-     * @var TypeMapperInterface
-     */
-    private $typeMapper;
-    /**
-     * @var HydratorInterface
-     */
-    private $hydrator;
     /**
      * @var array|\string[]
      */
@@ -50,26 +22,20 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
      */
     private $container;
     /**
-     * @var AuthenticationServiceInterface
+     * @var RegistryInterface
      */
-    private $authenticationService;
-    /**
-     * @var AuthorizationServiceInterface
-     */
-    private $authorizationService;
+    private $registry;
 
     /**
      * @param string[] $controllers A list of controllers name in the container.
+     * @param RegistryInterface $registry
+     * @param ContainerInterface|null $container The container we will fetch controllers from. If not specified, container from the registry is used instead.
      */
-    public function __construct(array $controllers, ContainerInterface $container, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService)
+    public function __construct(array $controllers, RegistryInterface $registry, ContainerInterface $container = null)
     {
         $this->controllers = $controllers;
-        $this->container = $container;
-        $this->annotationReader = $annotationReader;
-        $this->typeMapper = $typeMapper;
-        $this->hydrator = $hydrator;
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService = $authorizationService;
+        $this->registry = $registry;
+        $this->container = $container ?: $registry;
     }
 
     /**
@@ -81,7 +47,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService, $this->container);
+            $queryProvider = new ControllerQueryProvider($controller, $this->registry);
             $queryList = array_merge($queryList, $queryProvider->getQueries());
         }
 
@@ -97,7 +63,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->annotationReader, $this->typeMapper, $this->hydrator, $this->authenticationService, $this->authorizationService, $this->container);
+            $queryProvider = new ControllerQueryProvider($controller, $this->registry);
             $mutationList = array_merge($mutationList, $queryProvider->getMutations());
         }
 
