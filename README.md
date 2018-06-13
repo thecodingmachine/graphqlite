@@ -144,21 +144,77 @@ Controllers will be fetched from the container (it must be PSR-11 compliant).
 Pseudo-code to initialize the middleware looks like this:
 
 ```php
+$registry = new Registry(
+  $container, // The container containing the controllers (PSR-11 compliant),
+  $authorizationService // Object to manage authorization (the @Right annotation)  
+  $authenticationService, // Object to manage authentication (the @Logged annotation)
+  $annotationReader, // A Doctrine annotation reader
+  $typeMapper, // Object used to map PHP classes to GraphQL types.
+  $hydrator, // Object used to create Objects from sent data (mostly for mutation)
+);
+
 $queryProvider = new AggregateControllerQueryProvider([
         "myController1", // These are the name of entries in the container to fetch the GraphQL controllers
         "myController2"
     ],
-    $container, // The container containing the controllers (PSR-11 compliant),
-    $annotationReader, // A Doctrine annotation reader
-    $typeMapper, // Object used to map PHP classes to GraphQL types. 
-    $hydrator, // Object used to create Objects from sent data (mostly for mutation)
-    $authenticationService, // Object to manage authentication (the @Logged annotation)
-    AuthorizationServiceInterface $authorizationService // Object to manage authorization (the @Right annotation)
-    )
-);
-```  
+    $registry
+  );
+```
 
+Using @Field annotation in object types
+=======================================
 
+When you use youshido/graphql, you will typically extend the `AbstractObjectType` class to declare your GraphQL types.
+
+Typical code looks like this:
+
+```php
+class PostType extends AbstractObjectType
+{
+
+    public function build($config)
+    {
+        // you can define fields in a single addFields call instead of chaining multiple addField()
+        $config->addFields([
+            'title'      => [
+                'type' => new StringType(),
+                'args'              => [
+                    'truncate' => new BooleanType()
+                ],
+                'resolve'           => function (Post $source, $args) {
+                    return (!empty($args['truncate'])) ? explode(' ', $source->getTitle())[0] . '...' : $source->getTitle();
+                }
+            ]
+        ]);
+    }
+}
+```
+
+You can replace the whole `build` method with methods with the @Field annotation:
+
+```php
+class PostType extends AbstractAnnotatedObjectType
+{
+    /**
+     * @Field()
+     */
+    public function customField(Post $source, bool $truncate = false): string
+    {
+        return (!empty($args['truncate'])) ? explode(' ', $source->getTitle())[0] . '...' : $source->getTitle();
+    }
+}
+```
+
+You simply have to:
+
+- extend the `AbstractAnnotatedObjectType` class
+- add the @Field annotation
+- when constructing the object, you must pass the $registry object as the first argument:
+  ```php
+  $postType = new PostType($registry);
+  ```
+
+Please note that the first argument of the method is the object we are calling the field on. The remaining arguments are converted to GraphQL arguments of the field.
 
 Troubleshooting
 ---------------

@@ -3,21 +3,28 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
+use TheCodingMachine\GraphQL\Controllers\AbstractAnnotatedObjectType;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use Youshido\GraphQL\Config\Object\ObjectTypeConfig;
 use Youshido\GraphQL\Type\Object\AbstractObjectType;
 
-class TestType extends AbstractObjectType
+class TestType extends AbstractAnnotatedObjectType
 {
-    public function __construct(Registry $registry)
+    public function __construct(RegistryInterface $registry)
     {
-        parent::__construct([]);
+        parent::__construct($registry);
     }
 
     /**
-     * @param ObjectTypeConfig $config
+     * @Field()
+     * @param TestObject $test
+     * @param string $param
+     * @return string
      */
-    public function build($config)
+    public function customField(TestObject $test, string $param = 'foo'): string
     {
+        return $test->getTest().$param;
     }
 }

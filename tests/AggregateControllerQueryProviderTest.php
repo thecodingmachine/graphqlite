@@ -16,7 +16,6 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
     public function testAggregate()
     {
         $controller = new TestController();
-        $reader = new AnnotationReader();
 
         $container = new class([ 'controller' => $controller ]) implements ContainerInterface {
 
@@ -41,7 +40,7 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $container, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+        $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $this->getRegistry(), $container);
 
         $queries = $aggregateQueryProvider->getQueries();
         $this->assertCount(2, $queries);

@@ -8,6 +8,7 @@ use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Mixed_;
+use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Container\ContainerInterface;
@@ -23,6 +24,7 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
@@ -65,44 +67,55 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private $authorizationService;
     /**
-     * @var ContainerInterface
+     * @var RegistryInterface
      */
     private $registry;
 
     /**
      * @param object $controller
      */
-    public function __construct($controller, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService, ?ContainerInterface $container = null)
+    public function __construct($controller, RegistryInterface $registry)
     {
         $this->controller = $controller;
-        $this->annotationReader = $annotationReader;
-        $this->typeMapper = $typeMapper;
-        $this->hydrator = $hydrator;
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService = $authorizationService;
-        $this->registry = new Registry($container ?: new EmptyContainer());
+        $this->annotationReader = $registry->getAnnotationReader();
+        $this->typeMapper = $registry->getTypeMapper();
+        $this->hydrator = $registry->getHydrator();
+        $this->authenticationService = $registry->getAuthenticationService();
+        $this->authorizationService = $registry->getAuthorizationService();
+        $this->registry = $registry;
     }
 
     /**
-     * @return Field[]
+     * @return QueryField[]
      */
     public function getQueries(): array
     {
-        return $this->getFieldsByAnnotations(Query::class);
+        return $this->getFieldsByAnnotations(Query::class, false);
     }
 
     /**
-     * @return Field[]
+     * @return QueryField[]
      */
     public function getMutations(): array
     {
-        return $this->getFieldsByAnnotations(Mutation::class);
+        return $this->getFieldsByAnnotations(Mutation::class, false);
     }
 
     /**
-     * @return Field[]
+     * @return QueryField[]
      */
-    private function getFieldsByAnnotations(string $annotationName): array
+    public function getFields(): array
+    {
+        return $this->getFieldsByAnnotations(Annotations\Field::class, true);
+    }
+
+    /**
+     * @param string $annotationName
+     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field, false for @Query and @Mutation
+     * @return QueryField[]
+     * @throws \ReflectionException
+     */
+    private function getFieldsByAnnotations(string $annotationName, bool $injectSource): array
     {
         $refClass = ReflectionClass::createFromInstance($this->controller);
 
@@ -112,7 +125,7 @@ class ControllerQueryProvider implements QueryProviderInterface
 
         foreach ($refClass->getMethods() as $refMethod) {
             $standardPhpMethod = new \ReflectionMethod(get_class($this->controller), $refMethod->getName());
-            // First, let's check the "Query" annotation
+            // First, let's check the "Query" or "Mutation" or "Field" annotation
             $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, $annotationName);
             /* @var $queryAnnotation AbstractRequest */
 
@@ -138,7 +151,15 @@ class ControllerQueryProvider implements QueryProviderInterface
                     }
                 }
 
-                $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment());
+                //$sourceType = null;
+                if ($injectSource === true) {
+                    /*$sourceArr = */\array_shift($args);
+                    // Security check: if the first parameter of the correct type?
+                    //$sourceType = $sourceArr['type'];
+                    /* @var $sourceType TypeInterface */
+                    // TODO
+                }
+                $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment(), $injectSource);
             }
         }
 
@@ -174,10 +195,10 @@ class ControllerQueryProvider implements QueryProviderInterface
      *
      * @param ReflectionMethod $refMethod
      * @param \ReflectionMethod $standardRefMethod
-     * @return array
+     * @return array[] An array of ['type'=>TypeInterface, 'default'=>val]
      * @throws MissingTypeHintException
      */
-    private function mapParameters(ReflectionMethod $refMethod, \ReflectionMethod $standardRefMethod)
+    private function mapParameters(ReflectionMethod $refMethod, \ReflectionMethod $standardRefMethod): array
     {
         $args = [];
 

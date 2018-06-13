@@ -27,9 +27,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     public function testQueryProvider()
     {
         $controller = new TestController();
-        $reader = new AnnotationReader();
 
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
 
         $queries = $queryProvider->getQueries();
 
@@ -78,9 +77,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     public function testMutations()
     {
         $controller = new TestController();
-        $reader = new AnnotationReader();
 
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
 
         $mutations = $queryProvider->getMutations();
 
@@ -109,9 +107,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
                 return 'foo';
             }
         };
-        $reader = new AnnotationReader();
 
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
 
         $this->expectException(MissingTypeHintException::class);
         $queryProvider->getQueries();
@@ -120,9 +117,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     public function testQueryProviderWithFixedReturnType()
     {
         $controller = new TestController();
-        $reader = new AnnotationReader();
 
-        $queryProvider = new ControllerQueryProvider($controller, $reader, $this->getTypeMapper(), $this->getHydrator(), new VoidAuthenticationService(), new VoidAuthorizationService());
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
 
         $queries = $queryProvider->getQueries();
 

@@ -3,17 +3,21 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Registry;
 
+use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\TypeMapperInterface;
 use Youshido\GraphQL\Type\Object\AbstractObjectType;
 
 /**
  * The role of the registry is to provide access to all GraphQL types.
  * If the type is not found, it can be queried from the container, or if not in the container, it can be created from the Registry itself.
  */
-class Registry implements ContainerInterface
+class Registry implements RegistryInterface
 {
 
     /**
@@ -29,15 +33,34 @@ class Registry implements ContainerInterface
      * @var null|AuthorizationServiceInterface
      */
     private $authorizationService;
+    /**
+     * @var AuthenticationServiceInterface
+     */
+    private $authenticationService;
+    /**
+     * @var Reader
+     */
+    private $annotationReader;
+    /**
+     * @var TypeMapperInterface
+     */
+    private $typeMapper;
+    /**
+     * @var HydratorInterface
+     */
+    private $hydrator;
 
     /**
      * @param ContainerInterface $container The proxied container.
-     * @param AuthorizationServiceInterface|null $authorizationService
      */
-    public function __construct(ContainerInterface $container, AuthorizationServiceInterface $authorizationService = null)
+    public function __construct(ContainerInterface $container, AuthorizationServiceInterface $authorizationService, AuthenticationServiceInterface $authenticationService, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator)
     {
         $this->container = $container;
         $this->authorizationService = $authorizationService;
+        $this->authenticationService = $authenticationService;
+        $this->annotationReader = $annotationReader;
+        $this->typeMapper = $typeMapper;
+        $this->hydrator = $hydrator;
     }
 
     /**
@@ -97,10 +120,42 @@ class Registry implements ContainerInterface
     /**
      * Returns the authorization service.
      *
-     * @return AuthorizationServiceInterface|null
+     * @return AuthorizationServiceInterface
      */
-    public function getAuthorizationService(): ?AuthorizationServiceInterface
+    public function getAuthorizationService(): AuthorizationServiceInterface
     {
         return $this->authorizationService;
+    }
+
+    /**
+     * @return AuthenticationServiceInterface
+     */
+    public function getAuthenticationService(): AuthenticationServiceInterface
+    {
+        return $this->authenticationService;
+    }
+
+    /**
+     * @return Reader
+     */
+    public function getAnnotationReader(): Reader
+    {
+        return $this->annotationReader;
+    }
+
+    /**
+     * @return TypeMapperInterface
+     */
+    public function getTypeMapper(): TypeMapperInterface
+    {
+        return $this->typeMapper;
+    }
+
+    /**
+     * @return HydratorInterface
+     */
+    public function getHydrator(): HydratorInterface
+    {
+        return $this->hydrator;
     }
 }
