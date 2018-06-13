@@ -12,11 +12,17 @@ abstract class AbstractRequest
     private $returnType;
 
     /**
+     * @var string|null
+     */
+    private $name;
+
+    /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
     {
         $this->returnType = $attributes['returnType'] ?? null;
+        $this->name = $attributes['name'] ?? null;
     }
 
     /**
@@ -28,5 +34,16 @@ abstract class AbstractRequest
     public function getReturnType(): ?string
     {
         return $this->returnType;
+    }
+
+    /**
+     * Returns the name of the GraphQL query/mutation/field.
+     * If not specified, the name of the method should be used instead.
+     *
+     * @return null|string
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }

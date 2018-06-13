@@ -69,4 +69,12 @@ class TestController
     {
         return new TestObject('foo');
     }
+
+    /**
+     * @Query(name="nameFromAnnotation")
+     */
+    public function testNameFromAnnotation(): TestObject
+    {
+        return new TestObject('foo');
+    }
 }
