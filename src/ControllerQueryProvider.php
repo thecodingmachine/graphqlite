@@ -136,6 +136,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 }
 
                 $methodName = $refMethod->getName();
+                $name = $queryAnnotation->getName() ?: $methodName;
 
                 $args = $this->mapParameters($refMethod, $standardPhpMethod);
 
@@ -159,7 +160,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                     /* @var $sourceType TypeInterface */
                     // TODO
                 }
-                $queryList[] = new QueryField($methodName, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment(), $injectSource);
+                $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment(), $injectSource);
             }
         }
 

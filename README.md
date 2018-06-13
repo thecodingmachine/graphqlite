@@ -126,6 +126,25 @@ public function users(int $limit, int $offset)
 
 Note: for container discovery to work, you must pass the container when constructing the `ControllerQueryProvider` object.
 
+Overriding the query name
+-------------------------
+
+By default, the name of the query is the name of the method.
+You can override the name of the query by passing the "name" attribute to the @Query annotation:
+
+```php
+/**
+ * @Query(name="my_query_name")
+ */
+public function someMethodName()
+{
+    // The GraphQL query name will be "my_query_name",  not "someMethodName"
+}
+```
+
+You can of course do the same thing with the "@Mutation" annotation.
+
+
 Usage
 -----
 
@@ -215,6 +234,21 @@ You simply have to:
   ```
 
 Please note that the first argument of the method is the object we are calling the field on. The remaining arguments are converted to GraphQL arguments of the field.
+
+Just like the @Query and @Mutation annotations, the @Field annotation can be passed an optional "name" and "returnType" attribute:
+
+```php
+class PostType extends AbstractAnnotatedObjectType
+{
+    /**
+     * @Field(name="customField", returnType="myCustomField")
+     */
+    public function getCustomField(Post $source, bool $truncate = false): CustomField
+    {
+        // ...
+    }
+}
+```
 
 Troubleshooting
 ---------------

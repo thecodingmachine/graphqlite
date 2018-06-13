@@ -32,7 +32,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(2, $queries);
+        $this->assertCount(3, $queries);
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->getName());
 
@@ -122,9 +122,22 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(2, $queries);
+        $this->assertCount(3, $queries);
         $fixedQuery = $queries[1];
 
         $this->assertInstanceOf(TestType::class, $fixedQuery->getType());
+    }
+
+    public function testNameFromAnnotation()
+    {
+        $controller = new TestController();
+
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+
+        $queries = $queryProvider->getQueries();
+
+        $query = $queries[2];
+
+        $this->assertSame('nameFromAnnotation', $query->getName());
     }
 }
