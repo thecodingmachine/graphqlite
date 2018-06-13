@@ -133,7 +133,7 @@ Usage
 $ composer require thecodingmachine/graphql-controllers
 ```
 
-The package contains a http-interop compatible middleware: `TheCodingMachine\GraphQL\Controllers\GraphQLMiddleware`.
+The package contains a PSR-15 compatible middleware: `TheCodingMachine\GraphQL\Controllers\GraphQLMiddleware`.
 Put this middleware in your middleware pipe.
 
 The middleware expects a GraphQL schema to be created. This package comes with a GraphQL schema compatible with Youshido
