@@ -1,14 +1,18 @@
 <?php
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use GraphQL\GraphQL;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Youshido\GraphQL\Schema\AbstractSchema;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Youshido\GraphQL\Execution\Processor;
 use Zend\Diactoros\Response\JsonResponse;
 
-class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInterface
+/**
+ * A PSR-15 middleware to handle GraphQL requests.
+ */
+class GraphQLMiddleware implements MiddlewareInterface
 {
     /**
      * @var string The graphql uri path to match against
@@ -46,19 +50,10 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
         $this->graphqlUri = rtrim($rootUrl, '/').'/'. ltrim($graphqlUri, '/');
     }
 
-    /**
-     * Process an incoming server request and return a response, optionally delegating
-     * to the next middleware component to create the response.
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Interop\Http\ServerMiddleware\DelegateInterface $delegate
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function process(\Psr\Http\Message\ServerRequestInterface $request, \Interop\Http\ServerMiddleware\DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (!$this->isGraphQLRequest($request)) {
-            return $delegate->process($request);
+            return $handler->handle($request);
         }
 
         if (!in_array($request->getMethod(), $this->allowed_methods, true)) {
@@ -78,10 +73,6 @@ class GraphQLMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInte
         }
         $res = $processor->getResponseData();
         return new JsonResponse($res);
-
-        /*$res = GraphQL::execute($this->schema->toGraphQLSchema(), $query, null, null, $variables, null);
-
-        return new JsonResponse($res);*/
     }
 
     private function isGraphQLRequest(ServerRequestInterface $request)
