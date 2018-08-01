@@ -35,7 +35,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
      *
-     * @param array<string,InputTypeInterface> $types
+     * @param array<string,InputTypeInterface> $inputTypes
      */
     public function setInputTypes(array $inputTypes)
     {
