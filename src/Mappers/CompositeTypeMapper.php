@@ -14,6 +14,9 @@ class CompositeTypeMapper implements TypeMapperInterface
      */
     private $typeMappers;
 
+    /**
+     * @param TypeMapperInterface[] $typeMappers
+     */
     public function __construct(array $typeMappers)
     {
 
