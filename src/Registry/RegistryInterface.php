@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\TypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 
 
 /**
