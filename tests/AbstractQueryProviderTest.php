@@ -7,6 +7,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
@@ -86,6 +87,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                     } else {
                         throw new \RuntimeException('Unexpected type');
                     }
+                }
+
+                public function canMapClassToType(string $className): bool
+                {
+                    return $className === TestObject::class;
+                }
+
+                /**
+                 * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
+                 *
+                 * @param string $className
+                 * @return bool
+                 */
+                public function canMapClassToInputType(string $className): bool
+                {
+                    return $className === TestObject::class;
                 }
             };
         }
