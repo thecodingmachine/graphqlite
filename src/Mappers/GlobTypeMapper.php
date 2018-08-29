@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
@@ -78,7 +79,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     private function buildMap(): array
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl);
+        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true));
         $classes = $explorer->getClasses();
         $map = [];
         foreach ($classes as $className) {
@@ -90,6 +91,9 @@ final class GlobTypeMapper implements TypeMapperInterface
             $type = $this->annotationReader->getClassAnnotation($refClass, Type::class);
             if ($type === null) {
                 continue;
+            }
+            if (isset($map[$type->getClass()])) {
+                throw DuplicateMappingException::create($type->getClass(), $map[$type->getClass()], $className);
             }
             $map[$type->getClass()] = $className;
         }
@@ -104,7 +108,8 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToType(string $className): bool
     {
-        return isset($this->getMap()[$className]);
+        $map = $this->getMap();
+        return isset($map[$className]);
     }
 
     /**
@@ -116,7 +121,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function mapClassToType(string $className): TypeInterface
     {
-        $map = $this->getMap()[$className];
+        $map = $this->getMap();
         if (!isset($map[$className])) {
             throw CannotMapTypeException::createForType($className);
         }
