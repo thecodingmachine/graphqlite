@@ -23,7 +23,7 @@
         "phpunit/phpunit": "^6.1",
         "satooshi/php-coveralls": "^1.0",
         "symfony/cache": "^4.1.4",
-        "mouf/picotainer": "^1"
+        "mouf/picotainer": "^1.1"
     },
     "autoload": {
         "psr-4": {
