@@ -9,10 +9,15 @@ class TestObject
      * @var string
      */
     private $test;
+    /**
+     * @var bool
+     */
+    private $testBool;
 
-    public function __construct(string $test)
+    public function __construct(string $test, bool $testBool = false)
     {
         $this->test = $test;
+        $this->testBool = $testBool;
     }
 
     /**
@@ -21,5 +26,13 @@ class TestObject
     public function getTest(): string
     {
         return $this->test;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTestBool(): bool
+    {
+        return $this->testBool;
     }
 }

@@ -4,12 +4,19 @@
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
 use TheCodingMachine\GraphQL\Controllers\AbstractAnnotatedObjectType;
+use TheCodingMachine\GraphQL\Controllers\Annotations\ExposedField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use Youshido\GraphQL\Config\Object\ObjectTypeConfig;
 use Youshido\GraphQL\Type\Object\AbstractObjectType;
 
+/**
+ * @Type(class=TestObject::class)
+ * @ExposedField(name="test")
+ * @ExposedField(name="testBool")
+ */
 class TestType extends AbstractAnnotatedObjectType
 {
     public function __construct(RegistryInterface $registry)

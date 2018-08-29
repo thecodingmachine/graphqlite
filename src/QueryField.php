@@ -29,13 +29,14 @@ class QueryField extends AbstractField
      * @param string $name
      * @param TypeInterface $type
      * @param array[] $arguments Indexed by argument name, value: ['type'=>TypeInterface, 'default'=>val].
-     * @param callable $resolve
+     * @param callable|null $resolve The method to execute
+     * @param string|null $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
      * @param HydratorInterface $hydrator
      * @param null|string $comment
      * @param bool $injectSource Whether to inject the source object (for Fields), or null for Query and Mutations
      * @param array $additionalConfig
      */
-    public function __construct(string $name, TypeInterface $type, array $arguments, callable $resolve, HydratorInterface $hydrator, ?string $comment, bool $injectSource, array $additionalConfig = [])
+    public function __construct(string $name, TypeInterface $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, HydratorInterface $hydrator, ?string $comment, bool $injectSource, array $additionalConfig = [])
     {
         $this->hydrator = $hydrator;
         $config = [
@@ -47,7 +48,7 @@ class QueryField extends AbstractField
             $config['description'] = $comment;
         }
 
-        $config['resolve'] = function ($source, array $args, ResolveInfo $info) use ($resolve, $arguments, $injectSource) {
+        $config['resolve'] = function ($source, array $args, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments, $injectSource) {
             $toPassArgs = [];
             if ($injectSource) {
                 $toPassArgs[] = $source;
@@ -82,7 +83,14 @@ class QueryField extends AbstractField
                 $toPassArgs[] = $val;
             }
 
-            return $resolve(...$toPassArgs);
+            if ($resolve !== null) {
+                return $resolve(...$toPassArgs);
+            }
+            if ($targetMethodOnSource !== null) {
+                $method = [$source, $targetMethodOnSource];
+                return $method(...$toPassArgs);
+            }
+            throw new \InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
         };
 
         $config += $additionalConfig;

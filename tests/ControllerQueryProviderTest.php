@@ -7,6 +7,8 @@ use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use Youshido\GraphQL\Execution\ResolveInfo;
@@ -139,5 +141,36 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $query = $queries[2];
 
         $this->assertSame('nameFromAnnotation', $query->getName());
+    }
+
+    public function testExposedField()
+    {
+        $controller = new TestType($this->getRegistry());
+
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+
+        $fields = $queryProvider->getFields();
+
+        $this->assertCount(3, $fields);
+
+        $this->assertSame('customField', $fields[0]->getName());
+        $this->assertSame('test', $fields[1]->getName());
+    }
+
+    public function testMissingTypeAnnotation()
+    {
+        $queryProvider = new ControllerQueryProvider(new TestTypeMissingAnnotation(), $this->getRegistry());
+
+        $this->expectException(MissingAnnotationException::class);
+        $queryProvider->getFields();
+    }
+
+    public function testExposedFieldDoesNotExists()
+    {
+        $queryProvider = new ControllerQueryProvider(new TestTypeMissingField(), $this->getRegistry());
+
+        $this->expectException(FieldNotFoundException::class);
+        $this->expectExceptionMessage("There is an issue with a @ExposedField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
+        $queryProvider->getFields();
     }
 }
