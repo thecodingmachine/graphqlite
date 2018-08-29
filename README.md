@@ -250,6 +250,57 @@ class PostType extends AbstractAnnotatedObjectType
 }
 ```
 
+The @SourceField annotation
+----------------------------
+
+If your object has a lot of getters, you might end up in your type class mapping a lot of redundant code:
+
+```php
+class PostType extends AbstractAnnotatedObjectType
+{
+    /**
+     * @Field(name="name")
+     */
+    public function getName(Post $source): string
+    {
+        return $source->getName();
+    }
+}
+```
+
+GraphQL-controllers provides a shortcut for this:
+
+```php
+/**
+ * @Type(class=Post::class)
+ * @SourceField(name="name")
+ */
+class PostType extends AbstractAnnotatedObjectType
+{
+}
+```
+
+By putting the `@SourceField` in the class docblock, you let GraphQL-controllers now that the type should expose the
+`getName` method of the underlying `Post` object.
+
+For the `@SourceField` annotation to work, you need to add a `@Type` annotation that will let the GraphQL-controllers
+library now the underlying type.
+
+You can also check for logged users or users with a specific right using the `logged` and `right` properties of the annotation:
+
+```php
+/**
+ * @Type(class=Post::class)
+ * @SourceField(name="name")
+ * @SourceField(name="status", logged=true, right=@Right(name="CAN_ACCESS_STATUS"))
+ */
+class PostType extends AbstractAnnotatedObjectType
+{
+}
+```
+
+
+
 Troubleshooting
 ---------------
 

@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
 
 /**
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"ANNOTATION", "METHOD"})
  * @Attributes({
  *   @Attribute("name", type = "string"),
  * })

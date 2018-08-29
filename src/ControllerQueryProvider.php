@@ -17,6 +17,7 @@ use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
@@ -106,7 +107,10 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     public function getFields(): array
     {
-        return $this->getFieldsByAnnotations(Annotations\Field::class, true);
+        $fieldAnnotations = $this->getFieldsByAnnotations(Annotations\Field::class, true);
+        $sourceFields = $this->getSourceFields();
+
+        return array_merge($fieldAnnotations, $sourceFields);
     }
 
     /**
@@ -130,10 +134,10 @@ class ControllerQueryProvider implements QueryProviderInterface
             /* @var $queryAnnotation AbstractRequest */
 
             if ($queryAnnotation !== null) {
-                $docBlock = new CommentParser($refMethod->getDocComment());
                 if (!$this->isAuthorized($standardPhpMethod)) {
                     continue;
                 }
+                $docBlock = new CommentParser($refMethod->getDocComment());
 
                 $methodName = $refMethod->getName();
                 $name = $queryAnnotation->getName() ?: $methodName;
@@ -160,11 +164,96 @@ class ControllerQueryProvider implements QueryProviderInterface
                     /* @var $sourceType TypeInterface */
                     // TODO
                 }
-                $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], $this->hydrator, $docBlock->getComment(), $injectSource);
+                $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], null, $this->hydrator, $docBlock->getComment(), $injectSource);
             }
         }
 
         return $queryList;
+    }
+
+    /**
+     * @return QueryField[]
+     */
+    private function getSourceFields(): array
+    {
+        $refClass = new \ReflectionClass($this->controller);
+
+        /** @var SourceField[] $sourceFields */
+        $sourceFields = $this->annotationReader->getClassAnnotations($refClass);
+        $sourceFields = \array_filter($sourceFields, function($annotation): bool {
+            return $annotation instanceof SourceField;
+        });
+
+        if (empty($sourceFields)) {
+            return [];
+        }
+
+        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type $typeField */
+        $typeField = $this->annotationReader->getClassAnnotation($refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+
+        if ($typeField === null) {
+            throw MissingAnnotationException::missingTypeException();
+        }
+
+        $objectClass = $typeField->getClass();
+        $objectRefClass = ReflectionClass::createFromName($objectClass);
+
+        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+
+        foreach ($sourceFields as $sourceField) {
+            // Ignore the field if we must be logged.
+            if ($sourceField->isLogged() && !$this->authenticationService->isLogged()) {
+                continue;
+            }
+
+            $right = $sourceField->getRight();
+            if ($right !== null && !$this->authorizationService->isAllowed($right->getName())) {
+                continue;
+            }
+
+            try {
+                $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
+            } catch (FieldNotFoundException $e) {
+                throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
+            }
+
+            $docBlock = new CommentParser($refMethod->getDocComment());
+
+            $methodName = $refMethod->getName();
+
+            $standardPhpMethod = new \ReflectionMethod($objectRefClass->getName(), $refMethod->getName());
+            $args = $this->mapParameters($refMethod, $standardPhpMethod);
+
+            $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
+
+            if ($sourceField->getReturnType()) {
+                $type = $this->registry->get($sourceField->getReturnType());
+            } else {
+                try {
+                    $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
+                } catch (TypeMappingException $e) {
+                    throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
+                }
+            }
+
+            $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlock->getComment(), false);
+
+        }
+        return $queryList;
+    }
+
+    private function getMethodFromPropertyName(ReflectionClass $reflectionClass, string $propertyName): ReflectionMethod
+    {
+        $upperCasePropertyName = \ucfirst($propertyName);
+        if ($reflectionClass->hasMethod('get'.$upperCasePropertyName)) {
+            $methodName = 'get'.$upperCasePropertyName;
+        } elseif ($reflectionClass->hasMethod('is'.$upperCasePropertyName)) {
+            $methodName = 'is'.$upperCasePropertyName;
+        } else {
+            throw FieldNotFoundException::missingField($reflectionClass->getName(), $propertyName);
+        }
+
+        return $reflectionClass->getMethod($methodName);
     }
 
     /**
