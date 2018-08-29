@@ -3,10 +3,10 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\ExposedField;
+use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 
 /**
- * @ExposedField(name="test")
+ * @SourceField(name="test")
  */
 class TestTypeMissingAnnotation
 {

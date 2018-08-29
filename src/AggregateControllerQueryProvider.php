@@ -7,6 +7,7 @@ use phpDocumentor\Reflection\Types\Mixed;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use Youshido\GraphQL\Field\Field;
+use Youshido\GraphQL\Field\FieldInterface;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
@@ -39,7 +40,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return Field[]
+     * @return FieldInterface[]
      */
     public function getQueries(): array
     {
@@ -55,7 +56,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return Field[]
+     * @return FieldInterface[]
      */
     public function getMutations(): array
     {

@@ -250,7 +250,7 @@ class PostType extends AbstractAnnotatedObjectType
 }
 ```
 
-The @ExposedField annotation
+The @SourceField annotation
 ----------------------------
 
 If your object has a lot of getters, you might end up in your type class mapping a lot of redundant code:
@@ -273,17 +273,17 @@ GraphQL-controllers provides a shortcut for this:
 ```php
 /**
  * @Type(class=Post::class)
- * @ExposedField(name="name")
+ * @SourceField(name="name")
  */
 class PostType extends AbstractAnnotatedObjectType
 {
 }
 ```
 
-By putting the `@ExposedField` in the class docblock, you let GraphQL-controllers now that the type should expose the
+By putting the `@SourceField` in the class docblock, you let GraphQL-controllers now that the type should expose the
 `getName` method of the underlying `Post` object.
 
-For the `@ExposedField` annotation to work, you need to add a `@Type` annotation that will let the GraphQL-controllers
+For the `@SourceField` annotation to work, you need to add a `@Type` annotation that will let the GraphQL-controllers
 library now the underlying type.
 
 Troubleshooting

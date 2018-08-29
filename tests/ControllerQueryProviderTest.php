@@ -143,7 +143,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertSame('nameFromAnnotation', $query->getName());
     }
 
-    public function testExposedField()
+    public function testSourceField()
     {
         $controller = new TestType($this->getRegistry());
 
@@ -165,12 +165,12 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $queryProvider->getFields();
     }
 
-    public function testExposedFieldDoesNotExists()
+    public function testSourceFieldDoesNotExists()
     {
         $queryProvider = new ControllerQueryProvider(new TestTypeMissingField(), $this->getRegistry());
 
         $this->expectException(FieldNotFoundException::class);
-        $this->expectExceptionMessage("There is an issue with a @ExposedField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
+        $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
         $queryProvider->getFields();
     }
 }

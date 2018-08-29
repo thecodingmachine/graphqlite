@@ -4,7 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Annotations;
 
 /**
- * ExposedFields are fields that are directly exposed from the base object into GraphQL.
+ * SourceFields are fields that are directly source from the base object into GraphQL.
  *
  * @Annotation
  * @Target({"CLASS"})
@@ -15,7 +15,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  *   @Attribute("returnType", type = "string"),
  * })
  */
-class ExposedField
+class SourceField
 {
     /**
      * @var Right|null
@@ -49,7 +49,7 @@ class ExposedField
     }
 
     /**
-     * Returns the GraphQL right to be applied to this exposed field.
+     * Returns the GraphQL right to be applied to this source field.
      *
      * @return Right|null
      */

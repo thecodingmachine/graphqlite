@@ -18,7 +18,7 @@ use TheCodingMachine\GraphQL\Controllers\MissingAnnotationException;
 class Type
 {
     /**
-     * @var string|null
+     * @var string
      */
     private $className;
 

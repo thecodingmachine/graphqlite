@@ -14,7 +14,7 @@ class FieldNotFoundException extends \RuntimeException
 
     public static function wrapWithCallerInfo(self $e, string $className): self
     {
-        throw new self(sprintf('There is an issue with a @ExposedField annotation in class "%s": %s',
+        throw new self(sprintf('There is an issue with a @SourceField annotation in class "%s": %s',
             $className, $e->getMessage()), 0, $e);
     }
 }

@@ -3,7 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use Youshido\GraphQL\Field\Field;
+use Youshido\GraphQL\Field\FieldInterface;
 
 /**
  * Returns a list of queries to be put in the GraphQL schema
@@ -11,12 +11,12 @@ use Youshido\GraphQL\Field\Field;
 interface QueryProviderInterface
 {
     /**
-     * @return Field[]
+     * @return FieldInterface[]
      */
     public function getQueries(): array;
 
     /**
-     * @return Field[]
+     * @return FieldInterface[]
      */
     public function getMutations(): array;
 }
