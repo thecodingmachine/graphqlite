@@ -286,6 +286,21 @@ By putting the `@SourceField` in the class docblock, you let GraphQL-controllers
 For the `@SourceField` annotation to work, you need to add a `@Type` annotation that will let the GraphQL-controllers
 library now the underlying type.
 
+You can also check for logged users or users with a specific right using the `logged` and `right` properties of the annotation:
+
+```php
+/**
+ * @Type(class=Post::class)
+ * @SourceField(name="name")
+ * @SourceField(name="status", logged=true, right=@Right(name="CAN_ACCESS_STATUS"))
+ */
+class PostType extends AbstractAnnotatedObjectType
+{
+}
+```
+
+
+
 Troubleshooting
 ---------------
 

@@ -9,6 +9,10 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
+use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
+use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use Youshido\GraphQL\Execution\ResolveInfo;
@@ -151,10 +155,54 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $fields = $queryProvider->getFields();
 
-        $this->assertCount(3, $fields);
+        $this->assertCount(2, $fields);
 
         $this->assertSame('customField', $fields[0]->getName());
         $this->assertSame('test', $fields[1]->getName());
+    }
+
+    public function testLoggedInSourceField()
+    {
+        $registry = new Registry(new EmptyContainer(),
+            new VoidAuthorizationService(),
+            new class implements AuthenticationServiceInterface {
+                public function isLogged(): bool
+                {
+                    return true;
+                }
+            },
+            new AnnotationReader(),
+            $this->getTypeMapper(),
+            $this->getHydrator());
+
+        $queryProvider = new ControllerQueryProvider(new TestType($this->getRegistry()), $registry);
+        $fields = $queryProvider->getFields();
+        $this->assertCount(3, $fields);
+
+        $this->assertSame('testBool', $fields[2]->getName());
+
+    }
+
+    public function testRightInSourceField()
+    {
+        $registry = new Registry(new EmptyContainer(),
+            new class implements AuthorizationServiceInterface {
+                public function isAllowed(string $right): bool
+                {
+                    return true;
+                }
+            },
+            new VoidAuthenticationService(),
+            new AnnotationReader(),
+            $this->getTypeMapper(),
+            $this->getHydrator());
+
+        $queryProvider = new ControllerQueryProvider(new TestType($this->getRegistry()), $registry);
+        $fields = $queryProvider->getFields();
+        $this->assertCount(3, $fields);
+
+        $this->assertSame('testRight', $fields[2]->getName());
+
     }
 
     public function testMissingTypeAnnotation()

@@ -11,7 +11,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("logged", type = "bool"),
- *   @Attribute("right", type = Right::class),
+ *   @Attribute("right", type = "TheCodingMachine\GraphQL\Controllers\Annotations\Right"),
  *   @Attribute("returnType", type = "string"),
  * })
  */

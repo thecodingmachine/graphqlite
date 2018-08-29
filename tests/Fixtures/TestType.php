@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
 use TheCodingMachine\GraphQL\Controllers\AbstractAnnotatedObjectType;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
@@ -15,7 +16,8 @@ use Youshido\GraphQL\Type\Object\AbstractObjectType;
 /**
  * @Type(class=TestObject::class)
  * @SourceField(name="test")
- * @SourceField(name="testBool")
+ * @SourceField(name="testBool", logged=true)
+ * @SourceField(name="testRight", right=@Right(name="FOOBAR"))
  */
 class TestType extends AbstractAnnotatedObjectType
 {

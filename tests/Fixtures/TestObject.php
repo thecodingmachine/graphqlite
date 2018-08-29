@@ -35,4 +35,9 @@ class TestObject
     {
         return $this->testBool;
     }
+
+    public function getTestRight(): string
+    {
+        return "foo";
+    }
 }
