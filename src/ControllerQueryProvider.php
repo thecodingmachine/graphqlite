@@ -128,13 +128,14 @@ class ControllerQueryProvider implements QueryProviderInterface
         $refClass = new \ReflectionClass($this->controller);
         $docBlockFactory = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
         $contextFactory = new ContextFactory();
-        $context = $contextFactory->createFromReflector($refClass);
 
         //$refClass = ReflectionClass::createFromInstance($this->controller);
 
         $queryList = [];
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+
+        $oldDeclaringClass = null;
 
         foreach ($refClass->getMethods() as $refMethod) {
             // First, let's check the "Query" or "Mutation" or "Field" annotation
@@ -147,6 +148,14 @@ class ControllerQueryProvider implements QueryProviderInterface
                 }
 
                 $docComment = $refMethod->getDocComment() ?: '/** */';
+
+                // context is changing based on the class the method is declared in.
+                // we assume methods will be returned packed by classes so we do this little cache
+                if ($oldDeclaringClass !== $refMethod->getDeclaringClass()->getName()) {
+                    $context = $contextFactory->createFromReflector($refMethod);
+                    $oldDeclaringClass = $refMethod->getDeclaringClass()->getName();
+                }
+
                 $docBlockObj = $docBlockFactory->create($docComment, $context);
 
                 // TODO: change CommentParser to use $docBlockObj methods instead.
@@ -208,7 +217,6 @@ class ControllerQueryProvider implements QueryProviderInterface
         $refClass = new \ReflectionClass($this->controller);
         $docBlockFactory = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
         $contextFactory = new ContextFactory();
-        $context = $contextFactory->createFromReflector($refClass);
 
         /** @var SourceField[] $sourceFields */
         $sourceFields = $this->annotationReader->getClassAnnotations($refClass);
@@ -232,6 +240,8 @@ class ControllerQueryProvider implements QueryProviderInterface
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
+        $oldDeclaringClass = null;
+
         foreach ($sourceFields as $sourceField) {
             // Ignore the field if we must be logged.
             if ($sourceField->isLogged() && !$this->authenticationService->isLogged()) {
@@ -252,6 +262,14 @@ class ControllerQueryProvider implements QueryProviderInterface
             $docBlock = new CommentParser($refMethod->getDocComment());
 
             $methodName = $refMethod->getName();
+
+
+            // context is changing based on the class the method is declared in.
+            // we assume methods will be returned packed by classes so we do this little cache
+            if ($oldDeclaringClass !== $refMethod->getDeclaringClass()->getName()) {
+                $context = $contextFactory->createFromReflector($refMethod);
+                $oldDeclaringClass = $refMethod->getDeclaringClass()->getName();
+            }
 
             $docComment = $refMethod->getDocComment() ?: '/** */';
             $docBlockObj = $docBlockFactory->create($docComment, $context);
