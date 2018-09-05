@@ -1,7 +1,7 @@
 <?php
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use \ReflectionParameter;
 
 class MissingTypeHintException extends GraphQLException
 {

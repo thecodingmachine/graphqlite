@@ -3,17 +3,21 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Container\ContainerInterface;
-use Roave\BetterReflection\Reflection\ReflectionClass;
-use Roave\BetterReflection\Reflection\ReflectionMethod;
+use \ReflectionClass;
+use \ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
@@ -121,36 +125,47 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private function getFieldsByAnnotations(string $annotationName, bool $injectSource): array
     {
-        $refClass = ReflectionClass::createFromInstance($this->controller);
+        $refClass = new \ReflectionClass($this->controller);
+        $docBlockFactory = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
+        $contextFactory = new ContextFactory();
+        $context = $contextFactory->createFromReflector($refClass);
+
+        //$refClass = ReflectionClass::createFromInstance($this->controller);
 
         $queryList = [];
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
         foreach ($refClass->getMethods() as $refMethod) {
-            $standardPhpMethod = new \ReflectionMethod(get_class($this->controller), $refMethod->getName());
             // First, let's check the "Query" or "Mutation" or "Field" annotation
-            $queryAnnotation = $this->annotationReader->getMethodAnnotation($standardPhpMethod, $annotationName);
+            $queryAnnotation = $this->annotationReader->getMethodAnnotation($refMethod, $annotationName);
             /* @var $queryAnnotation AbstractRequest */
 
             if ($queryAnnotation !== null) {
-                if (!$this->isAuthorized($standardPhpMethod)) {
+                if (!$this->isAuthorized($refMethod)) {
                     continue;
                 }
+
+                $docComment = $refMethod->getDocComment() ?: '/** */';
+                $docBlockObj = $docBlockFactory->create($docComment, $context);
+
+                // TODO: change CommentParser to use $docBlockObj methods instead.
                 $docBlock = new CommentParser($refMethod->getDocComment());
 
                 $methodName = $refMethod->getName();
                 $name = $queryAnnotation->getName() ?: $methodName;
 
-                $args = $this->mapParameters($refMethod, $standardPhpMethod);
+                $args = $this->mapParameters($refMethod, $docBlockObj);
 
                 $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
                 if ($queryAnnotation->getReturnType()) {
                     $type = $this->registry->get($queryAnnotation->getReturnType());
                 } else {
+                    $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
+
                     try {
-                        $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
+                        $type = $this->mapType($phpdocType, $docBlockReturnType, $refMethod->getReturnType()->allowsNull(), false);
                     } catch (TypeMappingException $e) {
                         throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
                     }
@@ -171,12 +186,29 @@ class ControllerQueryProvider implements QueryProviderInterface
         return $queryList;
     }
 
+    private function getDocBlocReturnType(DocBlock $docBlock, \ReflectionMethod $refMethod): ?Type
+    {
+        /** @var Return_[] $returnTypeTags */
+        $returnTypeTags = $docBlock->getTagsByName('return');
+        if (count($returnTypeTags) > 1) {
+            throw InvalidDocBlockException::tooManyReturnTags($refMethod);
+        }
+        $docBlockReturnType = null;
+        if (isset($returnTypeTags[0])) {
+            $docBlockReturnType = $returnTypeTags[0]->getType();
+        }
+        return $docBlockReturnType;
+    }
+
     /**
      * @return QueryField[]
      */
     private function getSourceFields(): array
     {
         $refClass = new \ReflectionClass($this->controller);
+        $docBlockFactory = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
+        $contextFactory = new ContextFactory();
+        $context = $contextFactory->createFromReflector($refClass);
 
         /** @var SourceField[] $sourceFields */
         $sourceFields = $this->annotationReader->getClassAnnotations($refClass);
@@ -196,7 +228,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         $objectClass = $typeField->getClass();
-        $objectRefClass = ReflectionClass::createFromName($objectClass);
+        $objectRefClass = new \ReflectionClass($objectClass);
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
@@ -221,16 +253,20 @@ class ControllerQueryProvider implements QueryProviderInterface
 
             $methodName = $refMethod->getName();
 
-            $standardPhpMethod = new \ReflectionMethod($objectRefClass->getName(), $refMethod->getName());
-            $args = $this->mapParameters($refMethod, $standardPhpMethod);
+            $docComment = $refMethod->getDocComment() ?: '/** */';
+            $docBlockObj = $docBlockFactory->create($docComment, $context);
+
+            $args = $this->mapParameters($refMethod, $docBlockObj);
 
             $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
             if ($sourceField->getReturnType()) {
                 $type = $this->registry->get($sourceField->getReturnType());
             } else {
+                $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
+
                 try {
-                    $type = $this->mapType($phpdocType, $refMethod->getDocBlockReturnTypes(), $standardPhpMethod->getReturnType()->allowsNull(), false);
+                    $type = $this->mapType($phpdocType, $docBlockReturnType, $refMethod->getReturnType()->allowsNull(), false);
                 } catch (TypeMappingException $e) {
                     throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
                 }
@@ -242,7 +278,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         return $queryList;
     }
 
-    private function getMethodFromPropertyName(ReflectionClass $reflectionClass, string $propertyName): ReflectionMethod
+    private function getMethodFromPropertyName(\ReflectionClass $reflectionClass, string $propertyName): \ReflectionMethod
     {
         $upperCasePropertyName = \ucfirst($propertyName);
         if ($reflectionClass->hasMethod('get'.$upperCasePropertyName)) {
@@ -283,40 +319,49 @@ class ControllerQueryProvider implements QueryProviderInterface
     /**
      * Note: there is a bug in $refMethod->allowsNull that forces us to use $standardRefMethod->allowsNull instead.
      *
-     * @param ReflectionMethod $refMethod
-     * @param \ReflectionMethod $standardRefMethod
+     * @param \ReflectionMethod $refMethod
      * @return array[] An array of ['type'=>TypeInterface, 'default'=>val]
      * @throws MissingTypeHintException
      */
-    private function mapParameters(ReflectionMethod $refMethod, \ReflectionMethod $standardRefMethod): array
+    private function mapParameters(\ReflectionMethod $refMethod, DocBlock $docBlock): array
     {
         $args = [];
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
-        foreach ($standardRefMethod->getParameters() as $standardParameter) {
-            $allowsNull = $standardParameter->allowsNull();
-            $parameter = $refMethod->getParameter($standardParameter->getName());
+        foreach ($refMethod->getParameters() as $parameter) {
+            $parameterType = $parameter->getType();
+            $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
 
-            $type = (string) $parameter->getType();
+            $type = (string) $parameterType;
             if ($type === '') {
                 throw MissingTypeHintException::missingTypeHint($parameter);
             }
             $phpdocType = $typeResolver->resolve($type);
 
+            /** @var DocBlock\Tags\Param[] $paramTags */
+            $paramTags = $docBlock->getTagsByName('param');
+            $docBlockType = null;
+            foreach ($paramTags as $paramTag) {
+                if ($paramTag->getVariableName() === $parameter->getName()) {
+                    $docBlockType = $paramTag->getType();
+                    break;
+                }
+            }
+
             try {
                 $arr = [
-                    'type' => $this->mapType($phpdocType, $parameter->getDocBlockTypes(), $allowsNull || $parameter->isDefaultValueAvailable(), true),
+                    'type' => $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true),
                 ];
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
             }
 
-            if ($standardParameter->allowsNull()) {
+            if ($parameter->allowsNull()) {
                 $arr['default'] = null;
             }
-            if ($standardParameter->isDefaultValueAvailable()) {
-                $arr['default'] = $standardParameter->getDefaultValue();
+            if ($parameter->isDefaultValueAvailable()) {
+                $arr['default'] = $parameter->getDefaultValue();
             }
 
             $args[$parameter->getName()] = $arr;
@@ -327,19 +372,22 @@ class ControllerQueryProvider implements QueryProviderInterface
 
     /**
      * @param Type $type
-     * @param Type[] $docBlockTypes
+     * @param Type|null $docBlockType
      * @return TypeInterface
      */
-    private function mapType(Type $type, array $docBlockTypes, bool $isNullable, bool $mapToInputType): TypeInterface
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): TypeInterface
     {
         $graphQlType = null;
 
         if ($type instanceof Array_ || $type instanceof Mixed_) {
+            if ($docBlockType === null) {
+                throw TypeMappingException::createFromType($type);
+            }
             if (!$isNullable) {
                 // Let's check a "null" value in the docblock
-                $isNullable = $this->isNullable($docBlockTypes);
+                $isNullable = $this->isNullable($docBlockType);
             }
-            $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockTypes);
+            $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockType);
             if (empty($filteredDocBlockTypes)) {
                 throw TypeMappingException::createFromType($type);
             } elseif (count($filteredDocBlockTypes) === 1) {
@@ -400,29 +448,40 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * Removes "null" from the list of types.
+     * Removes "null" from the type (if it is compound). Return an array of types (not a Compound type).
      *
-     * @param Type[] $docBlockTypeHints
+     * @param Type $docBlockTypeHint
      * @return array
      */
-    private function typesWithoutNullable(array $docBlockTypeHints): array
+    private function typesWithoutNullable(Type $docBlockTypeHint): array
     {
+        if ($docBlockTypeHint instanceof Compound) {
+            $docBlockTypeHints = \iterator_to_array($docBlockTypeHint);
+        } else {
+            $docBlockTypeHints = [$docBlockTypeHint];
+        }
         return array_filter($docBlockTypeHints, function ($item) {
             return !$item instanceof Null_;
         });
     }
 
     /**
-     * @param Type[] $docBlockTypeHints
+     * @param Type $docBlockTypeHint
      * @return bool
      */
-    private function isNullable(array $docBlockTypeHints): bool
+    private function isNullable(Type $docBlockTypeHint): bool
     {
-        foreach ($docBlockTypeHints as $docBlockTypeHint) {
-            if ($docBlockTypeHint instanceof Null_) {
-                return true;
+        if ($docBlockTypeHint instanceof Null_) {
+            return true;
+        }
+        if ($docBlockTypeHint instanceof Compound) {
+            foreach ($docBlockTypeHint as $type) {
+                if ($type instanceof Null_) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 }

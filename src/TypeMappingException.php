@@ -7,9 +7,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Mixed_;
-use Roave\BetterReflection\Reflection\ReflectionFunction;
-use Roave\BetterReflection\Reflection\ReflectionMethod;
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use \ReflectionMethod;
 
 class TypeMappingException extends GraphQLException
 {
@@ -22,7 +20,7 @@ class TypeMappingException extends GraphQLException
         return $e;
     }
 
-    public static function wrapWithParamInfo(TypeMappingException $previous, ReflectionParameter $parameter): TypeMappingException
+    public static function wrapWithParamInfo(TypeMappingException $previous, \ReflectionParameter $parameter): TypeMappingException
     {
         if ($previous->type instanceof Array_) {
             $message = sprintf('Parameter $%s in %s::%s is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $%s.',
