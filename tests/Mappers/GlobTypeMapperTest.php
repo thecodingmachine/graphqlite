@@ -24,6 +24,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
         $this->assertInstanceOf(FooType::class, $mapper->mapClassToType(TestObject::class));
+
+        $this->expectException(CannotMapTypeException::class);
+        $mapper->mapClassToType(\stdClass::class);
     }
 
     public function testGlobTypeMapperException()
@@ -38,5 +41,21 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
+    }
+
+    public function testGlobTypeMapperInputType()
+    {
+        $container = new Picotainer([
+            FooType::class => function() {
+                return new FooType($this->getRegistry());
+            }
+        ]);
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $container, new AnnotationReader(), new NullCache());
+
+        $this->assertFalse($mapper->canMapClassToInputType(TestObject::class));
+
+        $this->expectException(CannotMapTypeException::class);
+        $mapper->mapClassToInputType(TestType::class);
     }
 }
