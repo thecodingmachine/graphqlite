@@ -191,8 +191,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         /** @var Return_[] $returnTypeTags */
         $returnTypeTags = $docBlock->getTagsByName('return');
         if (count($returnTypeTags) > 1) {
-            // TODO: clean exception
-            throw new \Exception('Method '.$refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName().' has several @return annotations.');
+            throw InvalidDocBlockException::tooManyReturnTags($refMethod);
         }
         $docBlockReturnType = null;
         if (isset($returnTypeTags[0])) {
