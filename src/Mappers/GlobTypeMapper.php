@@ -65,7 +65,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     private function getMap(): array
     {
         if ($this->map === null) {
-            $key = 'globTypeMapper_'.$this->namespace;
+            $key = 'globTypeMapper_'.str_replace('\\', '_', $this->namespace);
             $this->map = $this->cache->get($key);
             if ($this->map === null) {
                 $this->map = $this->buildMap();
