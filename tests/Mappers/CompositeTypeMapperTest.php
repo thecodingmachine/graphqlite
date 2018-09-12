@@ -62,7 +62,8 @@ class CompositeTypeMapperTest extends TestCase
             }
         };
 
-        $this->composite = new CompositeTypeMapper([$typeMapper1]);
+        $this->composite = new CompositeTypeMapper();
+        $this->composite->setTypeMappers([$typeMapper1]);
     }
 
 
