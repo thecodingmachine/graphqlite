@@ -2,7 +2,8 @@
 
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
-use Doctrine\Common\Annotations\AnnotationReader;
+
+use Doctrine\Common\Annotations\Reader;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -24,7 +25,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     private $namespace;
     /**
-     * @var AnnotationReader
+     * @var Reader
      */
     private $annotationReader;
     /**
@@ -47,7 +48,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, ContainerInterface $container, Reader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
     {
         $this->namespace = $namespace;
         $this->container = $container;
