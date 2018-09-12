@@ -17,9 +17,11 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * @param TypeMapperInterface[] $typeMappers
      */
-    public function __construct(array $typeMappers)
+    public function setTypeMappers(array $typeMappers): void
     {
-
+        // TODO: move the setter in the constructor in v3
+        // We can do this if we get rid of the Registry god object which is easier if we don't have to inject it in the
+        // AbsractAnnotatedObjectType class (this class will disappear in v3)
         $this->typeMappers = $typeMappers;
     }
 
