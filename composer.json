@@ -38,7 +38,7 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=3 --no-progress -vvv"
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=4 --no-progress -vvv"
     },
     "extra": {
         "branch-alias": {
