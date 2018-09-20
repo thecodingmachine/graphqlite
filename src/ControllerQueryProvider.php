@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
@@ -33,6 +34,7 @@ use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use Youshido\GraphQL\Field\Field;
+use Youshido\GraphQL\Type\InputTypeInterface;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
 use Youshido\GraphQL\Type\Scalar\BooleanType;
@@ -136,11 +138,12 @@ class ControllerQueryProvider implements QueryProviderInterface
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
         $oldDeclaringClass = null;
+        $context = null;
 
         foreach ($refClass->getMethods() as $refMethod) {
             // First, let's check the "Query" or "Mutation" or "Field" annotation
+            /** @var AbstractRequest $queryAnnotation */
             $queryAnnotation = $this->annotationReader->getMethodAnnotation($refMethod, $annotationName);
-            /* @var $queryAnnotation AbstractRequest */
 
             if ($queryAnnotation !== null) {
                 if (!$this->isAuthorized($refMethod)) {
@@ -228,7 +231,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             return [];
         }
 
-        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type $typeField */
+        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
         $typeField = $this->annotationReader->getClassAnnotation($refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
 
         if ($typeField === null) {
@@ -241,6 +244,8 @@ class ControllerQueryProvider implements QueryProviderInterface
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
         $oldDeclaringClass = null;
+        $context = null;
+        $queryList = [];
 
         foreach ($sourceFields as $sourceField) {
             // Ignore the field if we must be logged.
@@ -324,8 +329,8 @@ class ControllerQueryProvider implements QueryProviderInterface
             return false;
         }
 
+        /** @var Right $rightAnnotation */
         $rightAnnotation = $this->annotationReader->getMethodAnnotation($reflectionMethod, Right::class);
-        /** @var $rightAnnotation Right */
 
         if ($rightAnnotation !== null && !$this->authorizationService->isAllowed($rightAnnotation->getName())) {
             return false;
@@ -391,9 +396,9 @@ class ControllerQueryProvider implements QueryProviderInterface
     /**
      * @param Type $type
      * @param Type|null $docBlockType
-     * @return TypeInterface
+     * @return InputTypeInterface
      */
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): TypeInterface
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): InputTypeInterface
     {
         $graphQlType = null;
 
@@ -432,9 +437,9 @@ class ControllerQueryProvider implements QueryProviderInterface
      *
      * @param Type $type
      * @param bool $mapToInputType
-     * @return TypeInterface
+     * @return InputTypeInterface
      */
-    private function toGraphQlType(Type $type, bool $mapToInputType): TypeInterface
+    private function toGraphQlType(Type $type, bool $mapToInputType): InputTypeInterface
     {
         if ($type instanceof Integer) {
             return new IntType();

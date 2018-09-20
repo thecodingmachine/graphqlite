@@ -88,7 +88,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 continue;
             }
             $refClass = new \ReflectionClass($className);
-            /** @var Type $type */
+            /** @var Type|null $type */
             $type = $this->annotationReader->getClassAnnotation($refClass, Type::class);
             if ($type === null) {
                 continue;
