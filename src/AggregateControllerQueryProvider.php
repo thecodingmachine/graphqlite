@@ -15,7 +15,7 @@ use Youshido\GraphQL\Field\FieldInterface;
 class AggregateControllerQueryProvider implements QueryProviderInterface
 {
     /**
-     * @var array|\string[]
+     * @var array|string[]
      */
     private $controllers;
     /**

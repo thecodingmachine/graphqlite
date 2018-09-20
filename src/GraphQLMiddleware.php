@@ -34,7 +34,7 @@ class GraphQLMiddleware implements MiddlewareInterface
     ];
 
     /**
-     * @var Processor
+     * @var AbstractSchema
      */
     private $schema;
 

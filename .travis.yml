@@ -12,5 +12,6 @@ before_script:
 - composer update --prefer-dist $PREFER_LOWEST
 script:
 - "./vendor/bin/phpunit"
+- composer phpstan
 after_script:
 - if [ -z "$PREFER_LOWEST" ]; then ./vendor/bin/coveralls -v; fi
