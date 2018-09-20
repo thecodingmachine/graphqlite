@@ -9,6 +9,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 use Youshido\GraphQL\Type\InputTypeInterface;
 use Youshido\GraphQL\Type\TypeInterface;
 
@@ -44,17 +45,22 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var ContainerInterface
      */
     private $container;
+    /**
+     * @var TypeGenerator
+     */
+    private $typeGenerator;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, ContainerInterface $container, Reader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, Reader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
     {
         $this->namespace = $namespace;
         $this->container = $container;
         $this->annotationReader = $annotationReader;
         $this->cache = $cache;
         $this->cacheTtl = $cacheTtl;
+        $this->typeGenerator = $typeGenerator;
     }
 
     /**
@@ -126,7 +132,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         if (!isset($map[$className])) {
             throw CannotMapTypeException::createForType($className);
         }
-        return $this->container->get($map[$className]);
+        return $this->typeGenerator->mapAnnotatedObject($this->container->get($map[$className]));
     }
 
     /**
