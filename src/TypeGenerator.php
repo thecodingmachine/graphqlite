@@ -27,9 +27,9 @@ class TypeGenerator
 
     /**
      * @param object $annotatedObject An object with a @Type annotation.
-     * @return ObjectType
+     * @return TypeInterface
      */
-    public function mapAnnotatedObject($annotatedObject): ObjectType
+    public function mapAnnotatedObject($annotatedObject): TypeInterface
     {
         // Objects that are already a GraphQL type need no attention.
         if ($annotatedObject instanceof TypeInterface) {
