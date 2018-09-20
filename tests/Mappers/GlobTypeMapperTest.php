@@ -9,6 +9,8 @@ use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
+use Youshido\GraphQL\Type\Object\ObjectType;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -20,10 +22,12 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
             }
         ]);
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $container, new AnnotationReader(), new NullCache());
+        $typeGenerator = new TypeGenerator($this->getRegistry());
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new AnnotationReader(), new NullCache());
 
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
-        $this->assertInstanceOf(FooType::class, $mapper->mapClassToType(TestObject::class));
+        $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class));
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToType(\stdClass::class);
@@ -37,7 +41,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
             }
         ]);
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures', $container, new AnnotationReader(), new NullCache());
+        $typeGenerator = new TypeGenerator($this->getRegistry());
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures', $typeGenerator, $container, new AnnotationReader(), new NullCache());
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
@@ -51,7 +57,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
             }
         ]);
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $container, new AnnotationReader(), new NullCache());
+        $typeGenerator = new TypeGenerator($this->getRegistry());
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new AnnotationReader(), new NullCache());
 
         $this->assertFalse($mapper->canMapClassToInputType(TestObject::class));
 

@@ -14,12 +14,12 @@ use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use Youshido\GraphQL\Config\Object\ObjectTypeConfig;
 use Youshido\GraphQL\Type\Object\AbstractObjectType;
 
-abstract class AbstractFooType extends AbstractAnnotatedObjectType
+abstract class AbstractFooType /*extends AbstractAnnotatedObjectType*/
 {
-    public function __construct(RegistryInterface $registry)
+    /*public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry);
-    }
+    }*/
 
     /**
      * @Field()

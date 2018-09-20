@@ -235,7 +235,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         $typeField = $this->annotationReader->getClassAnnotation($refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
 
         if ($typeField === null) {
-            throw MissingAnnotationException::missingTypeException();
+            throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
         }
 
         $objectClass = $typeField->getClass();
