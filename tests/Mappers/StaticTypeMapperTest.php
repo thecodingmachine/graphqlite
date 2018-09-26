@@ -8,7 +8,6 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
-use Youshido\GraphQL\Type\Scalar\StringType;
 
 class StaticTypeMapperTest extends TestCase
 {

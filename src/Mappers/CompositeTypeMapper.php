@@ -6,8 +6,6 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
-use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\TypeInterface;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {

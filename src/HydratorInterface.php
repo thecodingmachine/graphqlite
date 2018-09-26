@@ -4,7 +4,6 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\InputType;
-use Youshido\GraphQL\Type\TypeInterface;
 
 /**
  * Hydrates an object given an array and a GraphQL type.

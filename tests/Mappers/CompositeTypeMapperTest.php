@@ -6,15 +6,10 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\TypeMappingException;
 use GraphQL\Type\Definition\InputObjectType;
-use Youshido\GraphQL\Type\InputTypeInterface;
 use GraphQL\Type\Definition\ObjectType;
-use Youshido\GraphQL\Type\Scalar\StringType;
-use Youshido\GraphQL\Type\TypeInterface;
 
 class CompositeTypeMapperTest extends TestCase
 {

@@ -7,11 +7,10 @@ use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
-use GraphQL\Type\Definition\Type as GraphQLType;
 
 /**
- * This class is in charge of creating Youshido GraphQL types from annotated objects that do not extend the
- * Youshido base class.
+ * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
+ * Webonix ObjectType class.
  */
 class TypeGenerator
 {
