@@ -3,30 +3,42 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use Youshido\GraphQL\Config\Schema\SchemaConfig;
-use Youshido\GraphQL\Schema\AbstractSchema;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\SchemaConfig;
+use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
  *
- * Note: does not support mutators yet.
+ * TODO: turn this into a SchemaFactory (cleaner than extending a class)
  */
-class Schema extends AbstractSchema
+class Schema extends \GraphQL\Type\Schema
 {
-    /**
-     * @var QueryProviderInterface
-     */
-    private $queryProvider;
-
-    public function __construct(QueryProviderInterface $queryProvider, array $config = [])
+    public function __construct(QueryProviderInterface $queryProvider, Registry $registry, SchemaConfig $config = null)
     {
-        $this->queryProvider = $queryProvider;
+        if ($config === null) {
+            $config = SchemaConfig::create();
+        }
+
+        $query = new ObjectType([
+            'name' => 'Query',
+            'fields' => function() use ($queryProvider) {
+                return $queryProvider->getQueries();
+            }
+        ]);
+        $mutation = new ObjectType([
+            'name' => 'Mutation',
+            'fields' => function() use ($queryProvider) {
+                return $queryProvider->getMutations();
+            }
+        ]);
+
+        $config->setQuery($query);
+        $config->setMutation($mutation);
+        $config->setTypeLoader(function(string $name) use ($registry) {
+            return $registry->get($name);
+        });
+
         parent::__construct($config);
-    }
-
-    public function build(SchemaConfig $config)
-    {
-        $config->getQuery()->addFields($this->queryProvider->getQueries());
-        $config->getMutation()->addFields($this->queryProvider->getMutations());
     }
 }

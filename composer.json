@@ -1,6 +1,6 @@
 {
     "name": "thecodingmachine/graphql-controllers",
-    "description": "Write your GraphQL queries in simple to write controllers (using youshido/graphql).",
+    "description": "Write your GraphQL queries in simple to write controllers (using webonix/graphql-php).",
     "license": "MIT",
     "authors": [
         {
@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.1",
-        "youshido/graphql": "^1.4",
+        "webonyx/graphql-php": "^0.12.6",
         "psr/container": "^1.0",
         "doctrine/annotations": "^1.2",
         "psr/http-server-middleware": "^1",
@@ -42,7 +42,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0.x-dev"
+            "dev-master": "3.0.x-dev"
         }
     },
     "minimum-stability": "dev",

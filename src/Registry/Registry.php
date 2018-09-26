@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Registry;
 
+use function class_exists;
 use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -11,7 +12,8 @@ use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
-use Youshido\GraphQL\Type\Object\AbstractObjectType;
+use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
 /**
  * The role of the registry is to provide access to all GraphQL types.
@@ -26,7 +28,7 @@ class Registry implements RegistryInterface
     private $container;
 
     /**
-     * @var AbstractObjectType[]
+     * @var ObjectType[]
      */
     private $values = [];
     /**
@@ -82,12 +84,38 @@ class Registry implements RegistryInterface
             return $this->container->get($id);
         }
 
-        if (is_a($id, AbstractObjectType::class, true)) {
+        // The registry will try to instantiate the type if the class exists and has an annotation.
+
+
+        /*if (is_a($id, ObjectType::class, true)) {
             $this->values[$id] = new $id($this);
+            return $this->values[$id];
+        }*/
+        if ($this->isGraphqlType($id)) {
+            $refTypeClass = new \ReflectionClass($id);
+            if ($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0) {
+                throw NotFoundException::notFoundInContainer($id);
+            }
+            // FIXME: TypeGenerator is hard coded here
+            $typeGenerator = new TypeGenerator($this);
+            $this->values[$id] = $typeGenerator->mapAnnotatedObject(new $id());
             return $this->values[$id];
         }
 
+
         throw NotFoundException::notFound($id);
+    }
+
+    private function isGraphqlType(string $className) : bool
+    {
+        if (!class_exists($className))  {
+            return false;
+        }
+        $refTypeClass = new \ReflectionClass($className);
+
+        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
+        $typeField = $this->getAnnotationReader()->getClassAnnotation($refTypeClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        return $typeField !== null;
     }
 
     /**
@@ -110,11 +138,10 @@ class Registry implements RegistryInterface
             return true;
         }
 
-        if (is_a($id, AbstractObjectType::class, true)) {
+        /*if (is_a($id, ObjectType::class, true)) {
             return true;
-        }
-
-        return false;
+        }*/
+        return $this->isGraphqlType($id);
     }
 
     /**

@@ -8,10 +8,6 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
-use Youshido\GraphQL\Config\Object\ObjectTypeConfig;
-use Youshido\GraphQL\Type\Object\AbstractObjectType;
 
 /**
  * @Type(class=TestObject::class)
@@ -19,13 +15,8 @@ use Youshido\GraphQL\Type\Object\AbstractObjectType;
  * @SourceField(name="testBool", logged=true)
  * @SourceField(name="testRight", right=@Right(name="FOOBAR"))
  */
-class TestType extends AbstractAnnotatedObjectType
+class TestType
 {
-    public function __construct(RegistryInterface $registry)
-    {
-        parent::__construct($registry);
-    }
-
     /**
      * @Field()
      * @param TestObject $test

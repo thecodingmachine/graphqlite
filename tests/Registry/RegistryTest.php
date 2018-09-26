@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Registry;
 
+use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
@@ -41,7 +42,8 @@ class RegistryTest extends AbstractQueryProviderTest
 
         $this->assertTrue($registry->has(TestType::class));
         $type = $registry->get(TestType::class);
-        $this->assertInstanceOf(TestType::class, $type);
+        $this->assertInstanceOf(ObjectType::class, $type);
+        $this->assertSame('Test', $type->name);
         $this->assertSame($type, $registry->get(TestType::class));
         $this->assertTrue($registry->has(TestType::class));
     }

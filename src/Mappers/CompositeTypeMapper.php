@@ -4,8 +4,8 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 
-use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\TypeInterface;
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\OutputType;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {
@@ -45,10 +45,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
-     * @return TypeInterface
+     * @return OutputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): TypeInterface
+    public function mapClassToType(string $className): OutputType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
@@ -78,10 +78,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputTypeInterface
+     * @return InputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToInputType(string $className): InputTypeInterface
+    public function mapClassToInputType(string $className): InputType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToInputType($className)) {

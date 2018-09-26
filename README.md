@@ -10,7 +10,9 @@
 GraphQL controllers
 ===================
 
-A utility library on top of `Youshido/graphql` library.
+A utility library on top of `webonyx/graphql-php` library.
+
+Note: v1 and v2 of this library was built on top of `youshido/graphql`.
 
 This library allows you to write your GraphQL queries in simple to write controllers:
 
@@ -108,7 +110,7 @@ As an alternative, you can also manually specify the GraphqlType of your return 
 public function users(int $limit, int $offset)
 {
     // Whatever the return type of the method, it will be managed as a GraphQL UserListType
-    // UserListType must implement Youshido's TypeInterface
+    // UserListType must extend Webonix's Type
 }
 ```
 
@@ -155,7 +157,7 @@ $ composer require thecodingmachine/graphql-controllers
 The package contains a PSR-15 compatible middleware: `TheCodingMachine\GraphQL\Controllers\GraphQLMiddleware`.
 Put this middleware in your middleware pipe.
 
-The middleware expects a GraphQL schema to be created. This package comes with a GraphQL schema compatible with Youshido
+The middleware expects a GraphQL schema to be created. This package comes with a GraphQL schema compatible with Webonix
 schemas that will automatically be filled from the GraphQL controllers you will write.
 
 Controllers will be fetched from the container (it must be PSR-11 compliant).
@@ -184,7 +186,7 @@ $queryProvider = new AggregateControllerQueryProvider([
 Defining object types
 =====================
 
-When you use youshido/graphql, you will typically extend the `AbstractObjectType` class to declare your GraphQL types.
+When you use webonyx/graphql-php, you will typically extend the `AbstractObjectType` class to declare your GraphQL types.
 
 Typical code looks like this:
 
@@ -234,7 +236,7 @@ TODO: continue
 Using @Field annotation in object types
 =======================================
 
-When you use youshido/graphql, you will typically extend the `AbstractObjectType` class to declare your GraphQL types.
+When you use webonyx/graphql-php, you will typically extend the `AbstractObjectType` class to declare your GraphQL types.
 
 Typical code looks like this:
 
@@ -357,7 +359,7 @@ Troubleshooting
 
 ### Error: Maximum function nesting level of '100' reached
 
-Youshido's GraphQL library tends to use a very deep stack. This error does not necessarily mean your code is going into an infinite loop.
+Webonix's GraphQL library tends to use a very deep stack. This error does not necessarily mean your code is going into an infinite loop.
 Simply try to increase the maximum allowed nesting level in your XDebug conf:
 
 ```

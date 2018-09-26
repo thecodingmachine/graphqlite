@@ -2,12 +2,12 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
+use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use Youshido\GraphQL\Type\InputObject\InputObjectType;
-use Youshido\GraphQL\Type\Object\ObjectType;
-use Youshido\GraphQL\Type\Scalar\StringType;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ObjectType;
 
 class StaticTypeMapperTest extends TestCase
 {
@@ -23,7 +23,7 @@ class StaticTypeMapperTest extends TestCase
             TestObject::class => new ObjectType([
                 'name'    => 'TestObject',
                 'fields'  => [
-                    'test'   => new StringType(),
+                    'test'   => Type::string(),
                 ],
             ])
         ]);
@@ -31,7 +31,7 @@ class StaticTypeMapperTest extends TestCase
             TestObject::class => new InputObjectType([
                 'name'    => 'TestObject',
                 'fields'  => [
-                    'test'   => new StringType(),
+                    'test'   => Type::string(),
                 ],
             ])
         ]);

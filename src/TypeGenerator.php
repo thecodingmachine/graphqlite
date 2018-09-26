@@ -3,15 +3,14 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
-use Youshido\GraphQL\Type\Object\ObjectType;
-use Youshido\GraphQL\Type\TypeInterface;
 
 /**
- * This class is in charge of creating Youshido GraphQL types from annotated objects that do not extend the
- * Youshido base class.
+ * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
+ * Webonix ObjectType class.
  */
 class TypeGenerator
 {
@@ -27,15 +26,10 @@ class TypeGenerator
 
     /**
      * @param object $annotatedObject An object with a @Type annotation.
-     * @return TypeInterface
+     * @return ObjectType
      */
-    public function mapAnnotatedObject($annotatedObject): TypeInterface
+    public function mapAnnotatedObject($annotatedObject): ObjectType
     {
-        // Objects that are already a GraphQL type need no attention.
-        if ($annotatedObject instanceof TypeInterface) {
-            return $annotatedObject;
-        }
-
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
         /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
@@ -45,14 +39,12 @@ class TypeGenerator
             throw MissingAnnotationException::missingTypeException();
         }
 
-
-
-        $fieldProvider = new ControllerQueryProvider($annotatedObject, $this->registry);
-        $fields = $fieldProvider->getFields();
-
         $type = new ObjectType([
             'name' => $this->getName($refTypeClass, $typeField),
-            'fields' => $fields,
+            'fields' => function() use ($annotatedObject) {
+                $fieldProvider = new ControllerQueryProvider($annotatedObject, $this->registry);
+                return $fieldProvider->getFields();
+            },
         ]);
 
         return $type;
