@@ -180,6 +180,57 @@ $queryProvider = new AggregateControllerQueryProvider([
   );
 ```
 
+
+Defining object types
+=====================
+
+When you use youshido/graphql, you will typically extend the `AbstractObjectType` class to declare your GraphQL types.
+
+Typical code looks like this:
+
+```php
+class PostType extends AbstractObjectType
+{
+
+    public function build($config)
+    {
+        // you can define fields in a single addFields call instead of chaining multiple addField()
+        $config->addFields([
+            'title'      => [
+                'type' => new StringType(),
+                'args'              => [
+                    'truncate' => new BooleanType()
+                ],
+                'resolve'           => function (Post $source, $args) {
+                    return (!empty($args['truncate'])) ? explode(' ', $source->getTitle())[0] . '...' : $source->getTitle();
+                }
+            ]
+        ]);
+    }
+}
+```
+
+In graphql-controllers, you can instead define a simple class with annotations:
+
+```php
+/**
+ * @Type(class=Post::class)
+ */
+class PostType extends AbstractAnnotatedObjectType
+{
+    /**
+     * @Field()
+     */
+    public function customField(Post $source, bool $truncate = false): string
+    {
+        return (!empty($args['truncate'])) ? explode(' ', $source->getTitle())[0] . '...' : $source->getTitle();
+    }
+}
+```
+
+TODO: continue
+
+
 Using @Field annotation in object types
 =======================================
 
