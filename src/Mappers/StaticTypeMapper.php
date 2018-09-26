@@ -2,8 +2,8 @@
 
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
-use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\TypeInterface;
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\OutputType;
 
 /**
  * A simple implementation of the TypeMapperInterface that expects mapping to be passed in a setter.
@@ -13,14 +13,14 @@ use Youshido\GraphQL\Type\TypeInterface;
 final class StaticTypeMapper implements TypeMapperInterface
 {
     /**
-     * @var array<string,TypeInterface>
+     * @var array<string,OutputType>
      */
     private $types;
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
      *
-     * @param array<string,TypeInterface> $types
+     * @param array<string,OutputType> $types
      */
     public function setTypes(array $types)
     {
@@ -28,14 +28,14 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @var array<string,InputTypeInterface>
+     * @var array<string,InputType>
      */
     private $inputTypes;
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
      *
-     * @param array<string,InputTypeInterface> $inputTypes
+     * @param array<string,InputType> $inputTypes
      */
     public function setInputTypes(array $inputTypes)
     {
@@ -57,10 +57,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
-     * @return TypeInterface
+     * @return OutputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): TypeInterface
+    public function mapClassToType(string $className): OutputType
     {
         if (isset($this->types[$className])) {
             return $this->types[$className];
@@ -83,10 +83,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputTypeInterface
+     * @return InputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToInputType(string $className): InputTypeInterface
+    public function mapClassToInputType(string $className): InputType
     {
         if (isset($this->inputTypes[$className])) {
             return $this->inputTypes[$className];

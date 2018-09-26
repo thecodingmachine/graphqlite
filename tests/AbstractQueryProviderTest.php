@@ -4,6 +4,11 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
@@ -12,9 +17,7 @@ use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
-use Youshido\GraphQL\Type\InputObject\InputObjectType;
 use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\Object\ObjectType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
 
@@ -32,7 +35,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->testObjectType = new ObjectType([
                 'name'    => 'TestObject',
                 'fields'  => [
-                    'test'   => new StringType(),
+                    'test'   => Type::string(),
                 ],
             ]);
         }
@@ -45,7 +48,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->inputTestObjectType = new InputObjectType([
                 'name'    => 'TestObject',
                 'fields'  => [
-                    'test'   => new StringType(),
+                    'test'   => Type::string(),
                 ],
             ]);
         }
@@ -71,7 +74,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     $this->inputTestObjectType = $inputTestObjectType;
                 }
 
-                public function mapClassToType(string $className): TypeInterface
+                public function mapClassToType(string $className): OutputType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -80,7 +83,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     }
                 }
 
-                public function mapClassToInputType(string $className): InputTypeInterface
+                public function mapClassToInputType(string $className): InputType
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
@@ -113,7 +116,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->hydrator === null) {
             $this->hydrator = new class implements HydratorInterface {
-                public function hydrate(array $data, TypeInterface $type)
+                public function hydrate(array $data, InputType $type)
                 {
                     return new TestObject($data['test']);
                 }

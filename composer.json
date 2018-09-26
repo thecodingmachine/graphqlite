@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.1",
-        "youshido/graphql": "^1.4",
+        "webonyx/graphql-php": "^0.12.6",
         "psr/container": "^1.0",
         "doctrine/annotations": "^1.2",
         "psr/http-server-middleware": "^1",

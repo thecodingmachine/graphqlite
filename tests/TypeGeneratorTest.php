@@ -3,25 +3,17 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TypeFoo;
-use Youshido\GraphQL\Type\Object\ObjectType;
+use GraphQL\Type\Definition\ObjectType;
 
 class TypeGeneratorTest extends AbstractQueryProviderTest
 {
-    public function testIdentityWhenMappingAlreadyAType()
-    {
-        $typeGenerator = new TypeGenerator($this->getRegistry());
-
-        $type = new ObjectType(['name'=>'foo']);
-        $this->assertSame($type, $typeGenerator->mapAnnotatedObject($type));
-    }
-
     public function testNameAndFields()
     {
         $typeGenerator = new TypeGenerator($this->getRegistry());
 
         $type = $typeGenerator->mapAnnotatedObject(new TypeFoo());
 
-        $this->assertSame('TestObject', $type->getName());
+        $this->assertSame('TestObject', $type->name);
         $this->assertCount(1, $type->getFields());
     }
 

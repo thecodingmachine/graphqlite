@@ -3,6 +3,8 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\Type;
@@ -15,9 +17,6 @@ use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
-use Psr\Container\ContainerInterface;
-use \ReflectionClass;
-use \ReflectionMethod;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
@@ -28,21 +27,11 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
-use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use Youshido\GraphQL\Field\Field;
-use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\ListType\ListType;
-use Youshido\GraphQL\Type\NonNullType;
-use Youshido\GraphQL\Type\Scalar\BooleanType;
-use Youshido\GraphQL\Type\Scalar\DateTimeType;
-use Youshido\GraphQL\Type\Scalar\FloatType;
-use Youshido\GraphQL\Type\Scalar\IntType;
-use Youshido\GraphQL\Type\Scalar\StringType;
-use Youshido\GraphQL\Type\TypeInterface;
+use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 
 /**
  * A query provider that looks for queries in a "controller"
@@ -343,7 +332,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      * Note: there is a bug in $refMethod->allowsNull that forces us to use $standardRefMethod->allowsNull instead.
      *
      * @param \ReflectionMethod $refMethod
-     * @return array[] An array of ['type'=>TypeInterface, 'default'=>val]
+     * @return array[] An array of ['type'=>Type, 'default'=>val]
      * @throws MissingTypeHintException
      */
     private function mapParameters(\ReflectionMethod $refMethod, DocBlock $docBlock): array
@@ -396,9 +385,9 @@ class ControllerQueryProvider implements QueryProviderInterface
     /**
      * @param Type $type
      * @param Type|null $docBlockType
-     * @return InputTypeInterface
+     * @return GraphQLType
      */
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): InputTypeInterface
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): GraphQLType
     {
         $graphQlType = null;
 
@@ -425,7 +414,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         if (!$isNullable) {
-            $graphQlType = new NonNullType($graphQlType);
+            $graphQlType = GraphQLType::nonNull($graphQlType);
         }
 
         return $graphQlType;
@@ -437,22 +426,22 @@ class ControllerQueryProvider implements QueryProviderInterface
      *
      * @param Type $type
      * @param bool $mapToInputType
-     * @return InputTypeInterface
+     * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
      */
-    private function toGraphQlType(Type $type, bool $mapToInputType): InputTypeInterface
+    private function toGraphQlType(Type $type, bool $mapToInputType): GraphQLType
     {
         if ($type instanceof Integer) {
-            return new IntType();
+            return GraphQLType::int();
         } elseif ($type instanceof String_) {
-            return new StringType();
+            return GraphQLType::string();
         } elseif ($type instanceof Boolean) {
-            return new BooleanType();
+            return GraphQLType::boolean();
         } elseif ($type instanceof Float_) {
-            return new FloatType();
+            return GraphQLType::float();
         } elseif ($type instanceof Object_) {
             $fqcn = (string) $type->getFqsen();
             if ($fqcn === '\\DateTimeImmutable' || $fqcn === '\\DateTimeInterface') {
-                return new DateTimeType();
+                return DateTimeType::getInstance();
             } elseif ($fqcn === '\\DateTime') {
                 throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
             }
@@ -464,7 +453,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 return $this->typeMapper->mapClassToType($className);
             }
         } elseif ($type instanceof Array_) {
-            return new ListType(new NonNullType($this->toGraphQlType($type->getValueType(), $mapToInputType)));
+            return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQlType($type->getValueType(), $mapToInputType)));
         } else {
             throw TypeMappingException::createFromType($type);
         }

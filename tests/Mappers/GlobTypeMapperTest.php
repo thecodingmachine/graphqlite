@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
-use Youshido\GraphQL\Type\Object\ObjectType;
+use GraphQL\Type\Definition\ObjectType;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {

@@ -3,6 +3,14 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use GraphQL\Type\Definition\BooleanType;
+use GraphQL\Type\Definition\FloatType;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\IntType;
+use GraphQL\Type\Definition\ListOfType;
+use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\StringType;
+use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
@@ -15,7 +23,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
-use Youshido\GraphQL\Execution\ResolveInfo;
+/*use Youshido\GraphQL\Execution\ResolveInfo;
 use Youshido\GraphQL\Type\InputObject\InputObjectType;
 use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\NonNullType;
@@ -25,8 +33,9 @@ use Youshido\GraphQL\Type\Scalar\DateTimeType;
 use Youshido\GraphQL\Type\Scalar\FloatType;
 use Youshido\GraphQL\Type\Scalar\IntType;
 use Youshido\GraphQL\Type\Scalar\StringType;
-use Youshido\GraphQL\Type\TypeInterface;
+use Youshido\GraphQL\Type\TypeInterface;*/
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 
 class ControllerQueryProviderTest extends AbstractQueryProviderTest
 {
@@ -40,24 +49,23 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->assertCount(3, $queries);
         $usersQuery = $queries[0];
-        $this->assertSame('test', $usersQuery->getName());
+        $this->assertSame('test', $usersQuery->name);
 
-        $this->assertCount(8, $usersQuery->getArguments());
-        $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('int')->getType());
-        $this->assertInstanceOf(IntType::class, $usersQuery->getArgument('int')->getType()->getTypeOf());
-        $this->assertInstanceOf(StringType::class, $usersQuery->getArgument('string')->getType());
-        $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('list')->getType());
-        $this->assertInstanceOf(ListType::class, $usersQuery->getArgument('list')->getType()->getTypeOf());
-        $this->assertInstanceOf(NonNullType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType());
-        $this->assertInstanceOf(InputObjectType::class, $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf());
-        $this->assertInstanceOf(BooleanType::class, $usersQuery->getArgument('boolean')->getType());
-        $this->assertInstanceOf(FloatType::class, $usersQuery->getArgument('float')->getType());
-        $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTimeImmutable')->getType());
-        $this->assertInstanceOf(DateTimeType::class, $usersQuery->getArgument('dateTime')->getType());
-        $this->assertInstanceOf(StringType::class, $usersQuery->getArgument('withDefault')->getType());
-        $this->assertSame('TestObject', $usersQuery->getArgument('list')->getType()->getTypeOf()->getItemType()->getTypeOf()->getName());
-
-        $mockResolveInfo = $this->createMock(ResolveInfo::class);
+        $this->assertCount(8, $usersQuery->args);
+        $this->assertSame('int', $usersQuery->args[0]->name);
+        $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType());
+        $this->assertInstanceOf(StringType::class, $usersQuery->args[7]->getType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->args[1]->getType());
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->args[1]->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(InputObjectType::class, $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(BooleanType::class, $usersQuery->args[2]->getType());
+        $this->assertInstanceOf(FloatType::class, $usersQuery->args[3]->getType());
+        $this->assertInstanceOf(DateTimeType::class, $usersQuery->args[4]->getType());
+        $this->assertInstanceOf(DateTimeType::class, $usersQuery->args[5]->getType());
+        $this->assertInstanceOf(StringType::class, $usersQuery->args[6]->getType());
+        $this->assertSame('TestObject', $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
 
         $context = ['int' => 42, 'string' => 'foo', 'list' => [
             ['test' => 42],
@@ -69,13 +77,14 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
             'dateTime' => '2017-01-01 01:01:01'
         ];
 
-        $result = $usersQuery->resolve('foo', $context, $mockResolveInfo);
+        $resolve = $usersQuery->resolveFn;
+        $result = $resolve('foo', $context);
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertSame('foo424212true4.22017010101010120170101010101default', $result->getTest());
 
         unset($context['string']); // Testing null default value
-        $result = $usersQuery->resolve('foo', $context, $mockResolveInfo);
+        $result = $resolve('foo', $context);
 
         $this->assertSame('424212true4.22017010101010120170101010101default', $result->getTest());
     }
@@ -90,11 +99,10 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->assertCount(1, $mutations);
         $mutation = $mutations[0];
-        $this->assertSame('mutation', $mutation->getName());
+        $this->assertSame('mutation', $mutation->name);
 
-        $mockResolveInfo = $this->createMock(ResolveInfo::class);
-
-        $result = $mutation->resolve('foo', ['testObject' => ['test' => 42]], $mockResolveInfo);
+        $resolve = $mutation->resolveFn;
+        $result = $resolve('foo', ['testObject' => ['test' => 42]]);
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
@@ -131,7 +139,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertCount(3, $queries);
         $fixedQuery = $queries[1];
 
-        $this->assertInstanceOf(TestType::class, $fixedQuery->getType());
+        $this->assertInstanceOf(ObjectType::class, $fixedQuery->getType());
+        $this->assertSame('Test', $fixedQuery->getType()->name);
     }
 
     public function testNameFromAnnotation()
@@ -144,7 +153,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $query = $queries[2];
 
-        $this->assertSame('nameFromAnnotation', $query->getName());
+        $this->assertSame('nameFromAnnotation', $query->name);
     }
 
     public function testSourceField()
@@ -157,8 +166,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->assertCount(2, $fields);
 
-        $this->assertSame('customField', $fields[0]->getName());
-        $this->assertSame('test', $fields[1]->getName());
+        $this->assertSame('customField', $fields[0]->name);
+        $this->assertSame('test', $fields[1]->name);
     }
 
     public function testLoggedInSourceField()
@@ -179,7 +188,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
-        $this->assertSame('testBool', $fields[2]->getName());
+        $this->assertSame('testBool', $fields[2]->name);
 
     }
 
@@ -201,7 +210,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
-        $this->assertSame('testRight', $fields[2]->getName());
+        $this->assertSame('testRight', $fields[2]->name);
 
     }
 

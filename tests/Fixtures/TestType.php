@@ -19,13 +19,8 @@ use Youshido\GraphQL\Type\Object\AbstractObjectType;
  * @SourceField(name="testBool", logged=true)
  * @SourceField(name="testRight", right=@Right(name="FOOBAR"))
  */
-class TestType extends AbstractAnnotatedObjectType
+class TestType
 {
-    public function __construct(RegistryInterface $registry)
-    {
-        parent::__construct($registry);
-    }
-
     /**
      * @Field()
      * @param TestObject $test

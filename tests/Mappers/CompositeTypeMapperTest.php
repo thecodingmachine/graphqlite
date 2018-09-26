@@ -2,14 +2,17 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\TypeMappingException;
-use Youshido\GraphQL\Type\InputObject\InputObjectType;
+use GraphQL\Type\Definition\InputObjectType;
 use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\Object\ObjectType;
+use GraphQL\Type\Definition\ObjectType;
 use Youshido\GraphQL\Type\Scalar\StringType;
 use Youshido\GraphQL\Type\TypeInterface;
 
@@ -23,13 +26,13 @@ class CompositeTypeMapperTest extends TestCase
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className): TypeInterface
+            public function mapClassToType(string $className): OutputType
             {
                 if ($className === TestObject::class) {
                     return new ObjectType([
                         'name'    => 'TestObject',
                         'fields'  => [
-                            'test'   => new StringType(),
+                            'test'   => Type::string(),
                         ],
                     ]);
                 } else {
@@ -37,13 +40,13 @@ class CompositeTypeMapperTest extends TestCase
                 }
             }
 
-            public function mapClassToInputType(string $className): InputTypeInterface
+            public function mapClassToInputType(string $className): InputType
             {
                 if ($className === TestObject::class) {
                     return new InputObjectType([
                         'name'    => 'TestObject',
                         'fields'  => [
-                            'test'   => new StringType(),
+                            'test'   => Type::string(),
                         ],
                     ]);
                 } else {

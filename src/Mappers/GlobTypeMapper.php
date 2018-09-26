@@ -4,14 +4,14 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use Doctrine\Common\Annotations\Reader;
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
-use Youshido\GraphQL\Type\InputTypeInterface;
-use Youshido\GraphQL\Type\TypeInterface;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -123,10 +123,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
-     * @return TypeInterface
+     * @return OutputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): TypeInterface
+    public function mapClassToType(string $className): OutputType
     {
         $map = $this->getMap();
         if (!isset($map[$className])) {
@@ -150,10 +150,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputTypeInterface
+     * @return InputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToInputType(string $className): InputTypeInterface
+    public function mapClassToInputType(string $className): InputType
     {
         throw CannotMapTypeException::createForInputType($className);
     }

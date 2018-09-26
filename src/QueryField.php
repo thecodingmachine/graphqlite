@@ -3,21 +3,18 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
-use Youshido\GraphQL\Execution\ResolveInfo;
-use Youshido\GraphQL\Field\AbstractField;
-use Youshido\GraphQL\Type\AbstractType;
-use Youshido\GraphQL\Type\ListType\ListType;
-use Youshido\GraphQL\Type\NonNullType;
-use Youshido\GraphQL\Type\Object\AbstractObjectType;
-use Youshido\GraphQL\Type\Scalar\DateTimeType;
-use Youshido\GraphQL\Type\TypeInterface;
-use Youshido\GraphQL\Type\TypeMap;
+use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ListOfType;
+use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
  */
-class QueryField extends AbstractField
+class QueryField extends FieldDefinition
 {
     /**
      * @var HydratorInterface
@@ -27,8 +24,8 @@ class QueryField extends AbstractField
     /**
      * QueryField constructor.
      * @param string $name
-     * @param TypeInterface $type
-     * @param array[] $arguments Indexed by argument name, value: ['type'=>TypeInterface, 'default'=>val].
+     * @param OutputType&Type $type
+     * @param array[] $arguments Indexed by argument name, value: ['type'=>InputType, 'default'=>val].
      * @param callable|null $resolve The method to execute
      * @param string|null $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
      * @param HydratorInterface $hydrator
@@ -36,8 +33,9 @@ class QueryField extends AbstractField
      * @param bool $injectSource Whether to inject the source object (for Fields), or null for Query and Mutations
      * @param array $additionalConfig
      */
-    public function __construct(string $name, TypeInterface $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, HydratorInterface $hydrator, ?string $comment, bool $injectSource, array $additionalConfig = [])
+    public function __construct(string $name, OutputType $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, HydratorInterface $hydrator, ?string $comment, bool $injectSource, array $additionalConfig = [])
     {
+        // FIXME: remove hydrator since not used!!!!
         $this->hydrator = $hydrator;
         $config = [
             'name' => $name,
@@ -48,7 +46,7 @@ class QueryField extends AbstractField
             $config['description'] = $comment;
         }
 
-        $config['resolve'] = function ($source, array $args, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments, $injectSource) {
+        $config['resolve'] = function ($source, array $args) use ($resolve, $targetMethodOnSource, $arguments, $injectSource) {
             $toPassArgs = [];
             if ($injectSource) {
                 $toPassArgs[] = $source;
@@ -59,19 +57,19 @@ class QueryField extends AbstractField
                     $val = $args[$name];
 
                     $type = $this->stripNonNullType($type);
-                    if ($type instanceof ListType) {
-                        $subtype = $this->stripNonNullType($type->getItemType());
+                    if ($type instanceof ListOfType) {
+                        $subtype = $this->stripNonNullType($type->getWrappedType());
                         $val = array_map(function ($item) use ($subtype) {
                             if ($subtype instanceof DateTimeType) {
                                 return new \DateTimeImmutable($item);
-                            } elseif ($subtype->getKind() === TypeMap::KIND_INPUT_OBJECT) {
+                            } elseif ($subtype instanceof InputObjectType) {
                                 return $this->hydrator->hydrate($item, $subtype);
                             };
                             return $item;
                         }, $val);
                     } elseif ($type instanceof DateTimeType) {
                         $val = new \DateTimeImmutable($val);
-                    } elseif ($type->getKind() === TypeMap::KIND_INPUT_OBJECT) {
+                    } elseif ($type instanceof InputObjectType) {
                         $val = $this->hydrator->hydrate($val, $type);
                     }
                 } elseif (array_key_exists('default', $arr)) {
@@ -97,18 +95,10 @@ class QueryField extends AbstractField
         parent::__construct($config);
     }
 
-    /**
-     * @return AbstractObjectType|AbstractType
-     */
-    public function getType()
+    private function stripNonNullType(Type $type): Type
     {
-        return $this->config->getType();
-    }
-
-    private function stripNonNullType(TypeInterface $type): TypeInterface
-    {
-        if ($type instanceof NonNullType) {
-            return $this->stripNonNullType($type->getTypeOf());
+        if ($type instanceof NonNull) {
+            return $this->stripNonNullType($type->getWrappedType());
         }
         return $type;
     }

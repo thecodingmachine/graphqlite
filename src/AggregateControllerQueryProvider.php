@@ -3,11 +3,9 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use phpDocumentor\Reflection\Types\Mixed;
+use GraphQL\Type\Definition\OutputType;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
-use Youshido\GraphQL\Field\Field;
-use Youshido\GraphQL\Field\FieldInterface;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
@@ -40,7 +38,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return FieldInterface[]
+     * @return QueryField[]
      */
     public function getQueries(): array
     {
@@ -56,7 +54,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return FieldInterface[]
+     * @return QueryField[]
      */
     public function getMutations(): array
     {
