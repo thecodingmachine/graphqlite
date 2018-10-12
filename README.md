@@ -352,6 +352,34 @@ class PostType extends AbstractAnnotatedObjectType
 }
 ```
 
+In some very particular cases, you might not know exactly the list of @SourceField annotations at development time.
+If you need to decide the list of @SourceField at runtime, you can implement the `FromSourceFieldsInterface`:
+
+```php
+/**
+ * @Type(class=Post::class)
+ */
+class PostType implements FromSourceFieldsInterface
+{
+    /**
+     * Dynamically returns the array of source fields to be fetched from the original object.
+     *
+     * @return SourceFieldInterface[]
+     */
+    public function getSourceFields(): array
+    {
+        // You can want to enable fields conditionnaly based on feature flags...
+        if (ENABLE_STATUS_GLOBALLY) {
+            return [
+                new SourceField(['name'=>'status', 'logged'=>true]),
+            ];        
+        } else {
+            return [];
+        }
+    }
+}
+```
+
 
 
 Troubleshooting

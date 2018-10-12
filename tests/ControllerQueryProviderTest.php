@@ -16,6 +16,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
@@ -194,7 +195,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $this->getHydrator());
 
-        $queryProvider = new ControllerQueryProvider(new TestType($this->getRegistry()), $registry);
+        $queryProvider = new ControllerQueryProvider(new TestType(), $registry);
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
@@ -218,4 +219,27 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
         $queryProvider->getFields();
     }
+
+    public function testFromSourceFieldsInterface()
+    {
+        $registry = new Registry(new EmptyContainer(),
+            new class implements AuthorizationServiceInterface {
+                public function isAllowed(string $right): bool
+                {
+                    return true;
+                }
+            },
+            new VoidAuthenticationService(),
+            new AnnotationReader(),
+            $this->getTypeMapper(),
+            $this->getHydrator());
+
+        $queryProvider = new ControllerQueryProvider(new TestTypeWithSourceFieldInterface(), $registry);
+        $fields = $queryProvider->getFields();
+        $this->assertCount(1, $fields);
+
+        $this->assertSame('test', $fields[0]->name);
+
+    }
+
 }

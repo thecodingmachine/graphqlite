@@ -15,7 +15,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  *   @Attribute("returnType", type = "string"),
  * })
  */
-class SourceField
+class SourceField implements SourceFieldInterface
 {
     /**
      * @var Right|null
