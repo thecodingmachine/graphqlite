@@ -212,7 +212,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         $contextFactory = new ContextFactory();
 
         /** @var SourceField[] $sourceFields */
-        $sourceFields = $this->annotationReader->getClassAnnotations($refClass);
+        $sourceFields = AnnotationUtils::getClassAnnotations($this->annotationReader, $refClass);
         $sourceFields = \array_filter($sourceFields, function($annotation): bool {
             return $annotation instanceof SourceField;
         });
@@ -226,7 +226,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-        $typeField = $this->annotationReader->getClassAnnotation($refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        $typeField = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
