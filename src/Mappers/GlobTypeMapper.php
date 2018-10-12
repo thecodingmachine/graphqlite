@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
 /**
@@ -94,8 +95,11 @@ final class GlobTypeMapper implements TypeMapperInterface
                 continue;
             }
             $refClass = new \ReflectionClass($className);
+            if (!$refClass->isInstantiable()) {
+                continue;
+            }
             /** @var Type|null $type */
-            $type = $this->annotationReader->getClassAnnotation($refClass, Type::class);
+            $type = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, Type::class);
             if ($type === null) {
                 continue;
             }
