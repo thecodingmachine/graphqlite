@@ -12,7 +12,7 @@ class AnnotationUtils
     /**
      * Returns a class annotation. Finds in the parents if not found in the main class.
      *
-     * @return object
+     * @return object|null
      */
     public static function getClassAnnotation(Reader $reader, ReflectionClass $refClass, string $annotationClass)
     {
