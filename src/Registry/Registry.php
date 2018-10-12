@@ -8,6 +8,7 @@ use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
@@ -114,7 +115,7 @@ class Registry implements RegistryInterface
         $refTypeClass = new \ReflectionClass($className);
 
         /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-        $typeField = $this->getAnnotationReader()->getClassAnnotation($refTypeClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        $typeField = AnnotationUtils::getClassAnnotation($this->getAnnotationReader(), $refTypeClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
         return $typeField !== null;
     }
 
