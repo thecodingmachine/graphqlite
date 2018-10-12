@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use function array_merge;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\DocBlock;
@@ -215,6 +216,10 @@ class ControllerQueryProvider implements QueryProviderInterface
         $sourceFields = \array_filter($sourceFields, function($annotation): bool {
             return $annotation instanceof SourceField;
         });
+
+        if ($this->controller instanceof FromSourceFieldsInterface) {
+            $sourceFields = array_merge($sourceFields, $this->controller->getSourceFields());
+        }
 
         if (empty($sourceFields)) {
             return [];
