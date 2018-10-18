@@ -86,12 +86,6 @@ class Registry implements RegistryInterface
         }
 
         // The registry will try to instantiate the type if the class exists and has an annotation.
-
-
-        /*if (is_a($id, ObjectType::class, true)) {
-            $this->values[$id] = new $id($this);
-            return $this->values[$id];
-        }*/
         if ($this->isGraphqlType($id)) {
             $refTypeClass = new \ReflectionClass($id);
             if ($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0) {

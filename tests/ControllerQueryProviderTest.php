@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Type\Definition\BooleanType;
 use GraphQL\Type\Definition\FloatType;
+use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
@@ -14,6 +15,7 @@ use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
@@ -218,6 +220,17 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->expectException(FieldNotFoundException::class);
         $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
         $queryProvider->getFields();
+    }
+
+    public function testSourceFieldIsId()
+    {
+        $queryProvider = new ControllerQueryProvider(new TestTypeId(), $this->getRegistry());
+        $fields = $queryProvider->getFields();
+        $this->assertCount(1, $fields);
+
+        $this->assertSame('test', $fields[0]->name);
+        $this->assertInstanceOf(NonNull::class, $fields[0]->getType());
+        $this->assertInstanceOf(IDType::class, $fields[0]->getType()->getWrappedType());
     }
 
     public function testFromSourceFieldsInterface()
