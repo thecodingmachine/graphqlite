@@ -13,6 +13,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  *   @Attribute("logged", type = "bool"),
  *   @Attribute("right", type = "TheCodingMachine\GraphQL\Controllers\Annotations\Right"),
  *   @Attribute("returnType", type = "string"),
+ *   @Attribute("isId", type = "bool"),
  * })
  */
 class SourceField implements SourceFieldInterface
@@ -38,6 +39,11 @@ class SourceField implements SourceFieldInterface
     private $returnType;
 
     /**
+     * @var bool
+     */
+    private $id;
+
+    /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
@@ -46,6 +52,7 @@ class SourceField implements SourceFieldInterface
         $this->logged = $attributes['logged'] ?? false;
         $this->right = $attributes['right'] ?? null;
         $this->returnType = $attributes['returnType'] ?? null;
+        $this->id = $attributes['isId'] ?? false;
     }
 
     /**
@@ -86,5 +93,15 @@ class SourceField implements SourceFieldInterface
     public function getReturnType(): ?string
     {
         return $this->returnType;
+    }
+
+    /**
+     * If the GraphQL type is "ID", isID will return true.
+     *
+     * @return bool
+     */
+    public function isId(): bool
+    {
+        return $this->id;
     }
 }

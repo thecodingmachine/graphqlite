@@ -283,7 +283,12 @@ class ControllerQueryProvider implements QueryProviderInterface
 
             $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
-            if ($sourceField->getReturnType()) {
+            if ($sourceField->isId()) {
+                $type = GraphQLType::id();
+                if (!$refMethod->getReturnType()->allowsNull()) {
+                    $type = GraphQLType::nonNull($type);
+                }
+            } elseif ($sourceField->getReturnType()) {
                 $type = $this->registry->get($sourceField->getReturnType());
             } else {
                 $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
