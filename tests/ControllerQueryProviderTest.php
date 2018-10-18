@@ -36,7 +36,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(3, $queries);
+        $this->assertCount(5, $queries);
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->name);
 
@@ -125,7 +125,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(3, $queries);
+        $this->assertCount(5, $queries);
         $fixedQuery = $queries[1];
 
         $this->assertInstanceOf(ObjectType::class, $fixedQuery->getType());
@@ -242,4 +242,39 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     }
 
+    public function testQueryProviderWithIterableClass()
+    {
+        $controller = new TestController();
+
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+
+        $queries = $queryProvider->getQueries();
+
+        $this->assertCount(5, $queries);
+        $iterableQuery = $queries[3];
+
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(ObjectType::class, $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
+        $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
+    }
+
+    public function testQueryProviderWithIterable()
+    {
+        $controller = new TestController();
+
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+
+        $queries = $queryProvider->getQueries();
+
+        $this->assertCount(5, $queries);
+        $iterableQuery = $queries[4];
+
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(ObjectType::class, $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
+        $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
+    }
 }

@@ -43,7 +43,7 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
         $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $this->getRegistry(), $container);
 
         $queries = $aggregateQueryProvider->getQueries();
-        $this->assertCount(3, $queries);
+        $this->assertCount(5, $queries);
 
         $mutations = $aggregateQueryProvider->getMutations();
         $this->assertCount(1, $mutations);
