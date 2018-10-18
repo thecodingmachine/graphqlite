@@ -6,6 +6,9 @@ namespace TheCodingMachine\GraphQL\Controllers;
 use function array_merge;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\UnionType;
+use Iterator;
+use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\Type;
@@ -14,18 +17,21 @@ use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Float_;
+use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
+use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
@@ -396,32 +402,82 @@ class ControllerQueryProvider implements QueryProviderInterface
     {
         $graphQlType = null;
 
-        if ($type instanceof Array_ || $type instanceof Mixed_) {
-            if ($docBlockType === null) {
-                throw TypeMappingException::createFromType($type);
-            }
-            if (!$isNullable) {
-                // Let's check a "null" value in the docblock
-                $isNullable = $this->isNullable($docBlockType);
-            }
-            $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockType);
-            if (empty($filteredDocBlockTypes)) {
-                throw TypeMappingException::createFromType($type);
-            } elseif (count($filteredDocBlockTypes) === 1) {
-                $graphQlType = $this->toGraphQlType($filteredDocBlockTypes[0], $mapToInputType);
-            } else {
-                throw new GraphQLException('Union types are not supported (yet)');
-                //$graphQlTypes = array_map([$this, 'toGraphQlType'], $filteredDocBlockTypes);
-                //$$graphQlType = new UnionType($graphQlTypes);
-            }
+        if ($type instanceof Array_ || $type instanceof Iterable_ || $type instanceof Mixed_) {
+            $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType);
         } else {
-            $graphQlType = $this->toGraphQlType($type, $mapToInputType);
+            try {
+                $graphQlType = $this->toGraphQlType($type, $mapToInputType);
+                if (!$isNullable) {
+                    $graphQlType = GraphQLType::nonNull($graphQlType);
+                }
+            } catch (TypeMappingException | CannotMapTypeException $e) {
+                // Is the type iterable? If yes, let's analyze the docblock
+                // TODO: it would be bettrr not to go through an exception for this.
+                if ($type instanceof Object_) {
+                    $fqcn = (string) $type->getFqsen();
+                    $refClass = new ReflectionClass($fqcn);
+                    // Note : $refClass->isIterable() is only accessible in PHP 7.2
+                    if ($refClass->implementsInterface(Iterator::class) || $refClass->implementsInterface(IteratorAggregate::class)) {
+                        $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType);
+                    } else {
+                        throw $e;
+                    }
+                } else {
+                    throw $e;
+                }
+            }
         }
+
+
+        return $graphQlType;
+    }
+
+    private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): GraphQLType
+    {
+        if ($docBlockType === null) {
+            throw TypeMappingException::createFromType($type);
+        }
+        if (!$isNullable) {
+            // Let's check a "null" value in the docblock
+            $isNullable = $this->isNullable($docBlockType);
+        }
+
+        $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockType);
+        if (empty($filteredDocBlockTypes)) {
+            throw TypeMappingException::createFromType($type);
+        }
+
+        $unionTypes = [];
+        foreach ($filteredDocBlockTypes as $singleDocBlockType) {
+            try {
+                $unionTypes[] = $this->toGraphQlType($singleDocBlockType, $mapToInputType);
+            } catch (TypeMappingException | CannotMapTypeException $e) {
+                // We have several types. It is ok not to be able to match one.
+            }
+        }
+
+        if (empty($unionTypes)) {
+            throw TypeMappingException::createFromType($docBlockType);
+        }
+
+        if (count($unionTypes) === 1) {
+            $graphQlType = $unionTypes[0];
+        } else {
+            //$graphQlType = new UnionType()
+            throw new GraphQLException('Union types are not supported (yet)');
+        }
+
+        /* elseif (count($filteredDocBlockTypes) === 1) {
+            $graphQlType = $this->toGraphQlType($filteredDocBlockTypes[0], $mapToInputType);
+        } else {
+            throw new GraphQLException('Union types are not supported (yet)');
+            //$graphQlTypes = array_map([$this, 'toGraphQlType'], $filteredDocBlockTypes);
+            //$$graphQlType = new UnionType($graphQlTypes);
+        }*/
 
         if (!$isNullable) {
             $graphQlType = GraphQLType::nonNull($graphQlType);
         }
-
         return $graphQlType;
     }
 

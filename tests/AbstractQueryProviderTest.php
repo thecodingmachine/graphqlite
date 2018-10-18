@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
@@ -76,7 +77,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
                     } else {
-                        throw new \RuntimeException('Unexpected type');
+                        throw CannotMapTypeException::createForType($className);
                     }
                 }
 
@@ -85,7 +86,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
                     } else {
-                        throw new \RuntimeException('Unexpected type');
+                        throw CannotMapTypeException::createForInputType($className);
                     }
                 }
 

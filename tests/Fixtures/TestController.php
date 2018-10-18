@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
 
+use ArrayObject;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
@@ -76,5 +77,23 @@ class TestController
     public function testNameFromAnnotation(): TestObject
     {
         return new TestObject('foo');
+    }
+
+    /**
+     * @Query(name="arrayObject")
+     * @return ArrayObject|TestObject[]
+     */
+    public function testArrayObject(): ArrayObject
+    {
+        return new ArrayObject([]);
+    }
+
+    /**
+     * @Query(name="arrayObject")
+     * @return iterable|TestObject[]
+     */
+    public function testIterable(): iterable
+    {
+        return array();
     }
 }
