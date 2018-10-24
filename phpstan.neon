@@ -1,7 +1,5 @@
 parameters:
     ignoreErrors:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
-        # See https://github.com/phpstan/phpstan/pull/1439
-        - "#Strict comparison using === between ReflectionType and null will always evaluate to false#"
 #includes:
 #    - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
