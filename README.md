@@ -182,6 +182,15 @@ $queryProvider = new AggregateControllerQueryProvider([
   );
 ```
 
+Alternatively, you can use auto-discovery of the controllers if you put them in a common namespace:
+
+```php
+$queryProvider = new GlobControllerQueryProvider('App\\GraphQL\\Controllers', $this->getRegistry(), $container, $cache, $cacheTtl);
+```
+
+The application will look into the 'App\\GraphQL\\Controllers' namespace for GraphQL controllers. It assumes that the 
+container contains an entry whose name is the fully qualified class name of the container.
+Note: $cache is a PSR-16 compatible cache.
 
 Defining object types
 =====================
