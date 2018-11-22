@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\UnionType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
@@ -39,7 +40,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(5, $queries);
+        $this->assertCount(6, $queries);
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->name);
 
@@ -128,7 +129,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(5, $queries);
+        $this->assertCount(6, $queries);
         $fixedQuery = $queries[1];
 
         $this->assertInstanceOf(ObjectType::class, $fixedQuery->getType());
@@ -264,7 +265,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(5, $queries);
+        $this->assertCount(6, $queries);
         $iterableQuery = $queries[3];
 
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
@@ -282,7 +283,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries();
 
-        $this->assertCount(5, $queries);
+        $this->assertCount(6, $queries);
         $iterableQuery = $queries[4];
 
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
@@ -297,5 +298,24 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $queryProvider = new ControllerQueryProvider(new TestControllerNoReturnType(), $this->getRegistry());
         $this->expectException(TypeMappingException::class);
         $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithUnion()
+    {
+        $controller = new TestController();
+
+        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+
+        $queries = $queryProvider->getQueries();
+
+        $this->assertCount(6, $queries);
+        $unionQuery = $queries[5];
+
+        $this->assertInstanceOf(NonNull::class, $unionQuery->getType());
+        $this->assertInstanceOf(UnionType::class, $unionQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(ObjectType::class, $unionQuery->getType()->getWrappedType()->getTypes()[0]);
+        $this->assertSame('TestObject', $unionQuery->getType()->getWrappedType()->getTypes()[0]->name);
+        $this->assertInstanceOf(ObjectType::class, $unionQuery->getType()->getWrappedType()->getTypes()[1]);
+        $this->assertSame('TestObject2', $unionQuery->getType()->getWrappedType()->getTypes()[1]->name);
     }
 }

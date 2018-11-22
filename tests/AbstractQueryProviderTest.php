@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
@@ -22,6 +23,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 abstract class AbstractQueryProviderTest extends TestCase
 {
     private $testObjectType;
+    private $testObjectType2;
     private $inputTestObjectType;
     private $typeMapper;
     private $hydrator;
@@ -40,6 +42,19 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->testObjectType;
     }
 
+    protected function getTestObjectType2()
+    {
+        if ($this->testObjectType2 === null) {
+            $this->testObjectType2 = new ObjectType([
+                'name'    => 'TestObject2',
+                'fields'  => [
+                    'test'   => Type::string(),
+                ],
+            ]);
+        }
+        return $this->testObjectType2;
+    }
+
     protected function getInputTestObjectType()
     {
         if ($this->inputTestObjectType === null) {
@@ -56,19 +71,24 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getTypeMapper()
     {
         if ($this->typeMapper === null) {
-            $this->typeMapper = new class($this->getTestObjectType(), $this->getInputTestObjectType()) implements TypeMapperInterface {
+            $this->typeMapper = new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()) implements TypeMapperInterface {
                 /**
                  * @var ObjectType
                  */
                 private $testObjectType;
                 /**
+                 * @var ObjectType
+                 */
+                private $testObjectType2;
+                /**
                  * @var InputObjectType
                  */
                 private $inputTestObjectType;
 
-                public function __construct(ObjectType $testObjectType, InputObjectType $inputTestObjectType)
+                public function __construct(ObjectType $testObjectType, ObjectType $testObjectType2, InputObjectType $inputTestObjectType)
                 {
                     $this->testObjectType = $testObjectType;
+                    $this->testObjectType2 = $testObjectType2;
                     $this->inputTestObjectType = $inputTestObjectType;
                 }
 
@@ -76,6 +96,8 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
+                    } elseif ($className === TestObject2::class) {
+                        return $this->testObjectType2;
                     } else {
                         throw CannotMapTypeException::createForType($className);
                     }

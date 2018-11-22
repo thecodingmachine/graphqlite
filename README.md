@@ -128,6 +128,22 @@ public function users(int $limit, int $offset)
 
 Note: for container discovery to work, you must pass the container when constructing the `ControllerQueryProvider` object.
 
+Type-hinting union types
+------------------------
+
+You can create a GraphQL union type "on the fly", using the pipe (|) operator in the PHPDoc:
+
+```php
+/**
+ * @Query
+ * @return Company|Contact <== can return a company OR a contact
+ */
+public function companyOrContact(int $id)
+{
+    // Some code that returns a company or a contact.
+}
+```
+
 Overriding the query name
 -------------------------
 
