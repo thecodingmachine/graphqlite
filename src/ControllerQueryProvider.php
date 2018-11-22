@@ -4,9 +4,12 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use function array_merge;
+use function get_class;
+use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\UnionType;
+use function is_object;
 use Iterator;
 use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
@@ -179,7 +182,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                     $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
 
                     try {
-                        $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : true, false);
+                        $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
                     } catch (TypeMappingException $e) {
                         throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
                     }
@@ -474,8 +477,24 @@ class ControllerQueryProvider implements QueryProviderInterface
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
         } else {
-            //$graphQlType = new UnionType()
-            throw new GraphQLException('Union types are not supported (yet)');
+            $name = 'Union';
+            foreach ($unionTypes as $type) {
+                $name .= $type->name;
+            }
+            $graphQlType = new UnionType([
+                'name' => $name,
+                'types' => $unionTypes,
+                'resolveType' => function($value) {
+                    // TODO: find closest class implementing type...
+                    if (!is_object($value)) {
+                        throw new \InvalidArgumentException('Expected object for resolveType. Got: "'.gettype($value).'"');
+                    }
+
+                    $className = get_class($value);
+                    // TODO: check that if the class does not match, a parent class can match.
+                    return $this->registry->getTypeMapper()->mapClassToType($className);
+                }
+            ]);
         }
 
         /* elseif (count($filteredDocBlockTypes) === 1) {

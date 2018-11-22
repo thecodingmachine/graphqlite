@@ -96,4 +96,13 @@ class TestController
     {
         return array();
     }
+
+    /**
+     * @Query(name="union")
+     * @return TestObject|TestObject2
+     */
+    public function testUnion()
+    {
+        return new TestObject2('foo');
+    }
 }
