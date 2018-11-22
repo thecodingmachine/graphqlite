@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
@@ -289,5 +290,12 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
         $this->assertInstanceOf(ObjectType::class, $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
         $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
+    }
+
+    public function testNoReturnTypeError()
+    {
+        $queryProvider = new ControllerQueryProvider(new TestControllerNoReturnType(), $this->getRegistry());
+        $this->expectException(TypeMappingException::class);
+        $queryProvider->getQueries();
     }
 }

@@ -165,15 +165,21 @@ class ControllerQueryProvider implements QueryProviderInterface
 
                 $args = $this->mapParameters($refMethod, $docBlockObj);
 
-                $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
-
                 if ($queryAnnotation->getReturnType()) {
                     $type = $this->registry->get($queryAnnotation->getReturnType());
                 } else {
+                    $phpdocType = null;
+                    $returnType = $refMethod->getReturnType();
+                    if ($returnType !== null) {
+                        $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
+                    } else {
+                        $phpdocType = new Mixed_();
+                    }
+
                     $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
 
                     try {
-                        $type = $this->mapType($phpdocType, $docBlockReturnType, $refMethod->getReturnType()->allowsNull(), false);
+                        $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : true, false);
                     } catch (TypeMappingException $e) {
                         throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
                     }
@@ -417,7 +423,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 }
             } catch (TypeMappingException | CannotMapTypeException $e) {
                 // Is the type iterable? If yes, let's analyze the docblock
-                // TODO: it would be bettrr not to go through an exception for this.
+                // TODO: it would be better not to go through an exception for this.
                 if ($type instanceof Object_) {
                     $fqcn = (string) $type->getFqsen();
                     $refClass = new ReflectionClass($fqcn);
