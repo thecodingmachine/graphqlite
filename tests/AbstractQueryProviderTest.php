@@ -14,6 +14,7 @@ use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
@@ -71,7 +72,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getTypeMapper()
     {
         if ($this->typeMapper === null) {
-            $this->typeMapper = new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()) implements TypeMapperInterface {
+            $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()) implements TypeMapperInterface {
                 /**
                  * @var ObjectType
                  */
@@ -114,7 +115,7 @@ abstract class AbstractQueryProviderTest extends TestCase
 
                 public function canMapClassToType(string $className): bool
                 {
-                    return $className === TestObject::class;
+                    return $className === TestObject::class || $className === TestObject2::class;
                 }
 
                 /**
@@ -125,9 +126,9 @@ abstract class AbstractQueryProviderTest extends TestCase
                  */
                 public function canMapClassToInputType(string $className): bool
                 {
-                    return $className === TestObject::class;
+                    return $className === TestObject::class || $className === TestObject2::class;
                 }
-            };
+            });
         }
         return $this->typeMapper;
     }
