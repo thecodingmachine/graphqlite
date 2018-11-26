@@ -12,7 +12,7 @@ use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
@@ -45,7 +45,7 @@ class Registry implements RegistryInterface
      */
     private $annotationReader;
     /**
-     * @var TypeMapperInterface
+     * @var RecursiveTypeMapperInterface
      */
     private $typeMapper;
     /**
@@ -56,7 +56,7 @@ class Registry implements RegistryInterface
     /**
      * @param ContainerInterface $container The proxied container.
      */
-    public function __construct(ContainerInterface $container, AuthorizationServiceInterface $authorizationService, AuthenticationServiceInterface $authenticationService, Reader $annotationReader, TypeMapperInterface $typeMapper, HydratorInterface $hydrator)
+    public function __construct(ContainerInterface $container, AuthorizationServiceInterface $authorizationService, AuthenticationServiceInterface $authenticationService, Reader $annotationReader, RecursiveTypeMapperInterface $typeMapper, HydratorInterface $hydrator)
     {
         $this->container = $container;
         $this->authorizationService = $authorizationService;
@@ -166,9 +166,9 @@ class Registry implements RegistryInterface
     }
 
     /**
-     * @return TypeMapperInterface
+     * @return RecursiveTypeMapperInterface
      */
-    public function getTypeMapper(): TypeMapperInterface
+    public function getTypeMapper(): RecursiveTypeMapperInterface
     {
         return $this->typeMapper;
     }

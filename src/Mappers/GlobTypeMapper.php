@@ -83,7 +83,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @return array<string,string>
+     * @return array<string,string> Maps the class name of a target object to the class name of the GraphQL Type class.
      */
     private function buildMap(): array
     {

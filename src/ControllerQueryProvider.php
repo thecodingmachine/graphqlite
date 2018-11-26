@@ -8,7 +8,7 @@ use function get_class;
 use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
-use GraphQL\Type\Definition\UnionType;
+use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use function is_object;
 use Iterator;
 use IteratorAggregate;
@@ -35,7 +35,7 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
@@ -57,7 +57,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private $annotationReader;
     /**
-     * @var TypeMapperInterface
+     * @var RecursiveTypeMapperInterface
      */
     private $typeMapper;
     /**
@@ -477,24 +477,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
         } else {
-            $name = 'Union';
-            foreach ($unionTypes as $type) {
-                $name .= $type->name;
-            }
-            $graphQlType = new UnionType([
-                'name' => $name,
-                'types' => $unionTypes,
-                'resolveType' => function($value) {
-                    // TODO: find closest class implementing type...
-                    if (!is_object($value)) {
-                        throw new \InvalidArgumentException('Expected object for resolveType. Got: "'.gettype($value).'"');
-                    }
-
-                    $className = get_class($value);
-                    // TODO: check that if the class does not match, a parent class can match.
-                    return $this->registry->getTypeMapper()->mapClassToType($className);
-                }
-            ]);
+            $graphQlType = new UnionType($unionTypes, $this->registry->getTypeMapper());
         }
 
         /* elseif (count($filteredDocBlockTypes) === 1) {

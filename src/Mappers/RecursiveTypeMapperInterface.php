@@ -8,14 +8,16 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 
 /**
- * Maps a PHP class to a GraphQL type
+ * Maps a PHP class to a GraphQL type.
+ *
+ * Unlike the TypeMapperInterface, if a given class does not map a type, parent classes are explored.
  */
-interface TypeMapperInterface
+interface RecursiveTypeMapperInterface
 {
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param string $className The exact class name to look for (this function does not look into parent classes).
+     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
      * @return bool
      */
     public function canMapClassToType(string $className): bool;
@@ -23,11 +25,12 @@ interface TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string $className The exact class name to look for (this function does not look into parent classes).
+     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
      * @return OutputType&Type
      * @throws CannotMapTypeException
      */
     public function mapClassToType(string $className): OutputType;
+
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
