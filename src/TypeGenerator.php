@@ -45,15 +45,8 @@ class TypeGenerator
                 $fieldProvider = new ControllerQueryProvider($annotatedObject, $this->registry);
                 return $fieldProvider->getFields();
             },
-            'interfaces' => function() {
-                // TODO: we need to ask: WHAT INTERFACES do we implement????
-                // We need to be able to ask, given a type: what parent do we have???
-                // TODO: from Type => go to class => recursively go to parent class => search for Type
-
-                // Simple idea: every type has an interface attached.
-
-
-                return [];
+            'interfaces' => function() use ($refTypeClass) {
+                return $this->registry->getTypeMapper()->findInterfaces($refTypeClass->getName());
             }
         ]);
 
