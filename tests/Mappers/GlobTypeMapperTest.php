@@ -19,7 +19,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     {
         $container = new Picotainer([
             FooType::class => function() {
-                return new FooType($this->getRegistry());
+                return new FooType();
             }
         ]);
 
@@ -39,7 +39,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     {
         $container = new Picotainer([
             TestType::class => function() {
-                return new TestType($this->getRegistry());
+                return new TestType();
             }
         ]);
 
@@ -55,7 +55,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     {
         $container = new Picotainer([
             TestType::class => function() {
-                return new TestType($this->getRegistry());
+                return new TestType();
             }
         ]);
 
@@ -72,7 +72,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     {
         $container = new Picotainer([
             FooType::class => function() {
-                return new FooType($this->getRegistry());
+                return new FooType();
             }
         ]);
 
