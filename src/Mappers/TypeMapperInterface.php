@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 
@@ -28,6 +29,13 @@ interface TypeMapperInterface
      * @throws CannotMapTypeException
      */
     public function mapClassToType(string $className): OutputType;
+
+    /**
+     * Returns the list of classes that have matching input GraphQL types.
+     *
+     * @return string[]
+     */
+    public function getSupportedClasses(): array;
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.

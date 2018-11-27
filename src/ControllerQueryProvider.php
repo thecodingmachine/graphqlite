@@ -8,6 +8,7 @@ use function get_class;
 use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use function is_object;
 use Iterator;
@@ -241,7 +242,11 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-        $typeField = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        try {
+            $typeField = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        } catch (ClassNotFoundException $e) {
+            throw ClassNotFoundException::wrapException($e, $refClass->getName());
+        }
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
@@ -524,7 +529,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             if ($mapToInputType) {
                 return $this->typeMapper->mapClassToInputType($className);
             } else {
-                return $this->typeMapper->mapClassToType($className);
+                return $this->typeMapper->mapClassToInterfaceOrType($className);
             }
         } elseif ($type instanceof Array_) {
             return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQlType($type->getValueType(), $mapToInputType)));

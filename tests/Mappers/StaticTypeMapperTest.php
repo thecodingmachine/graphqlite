@@ -45,6 +45,7 @@ class StaticTypeMapperTest extends TestCase
         $this->assertFalse($this->typeMapper->canMapClassToInputType(\Exception::class));
         $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class));
         $this->assertInstanceOf(InputObjectType::class, $this->typeMapper->mapClassToInputType(TestObject::class));
+        $this->assertSame([TestObject::class], $this->typeMapper->getSupportedClasses());
     }
 
     public function testException1(): void

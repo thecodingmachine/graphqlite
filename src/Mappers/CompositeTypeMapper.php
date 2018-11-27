@@ -4,6 +4,9 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 
+use function array_map;
+use function array_merge;
+use function array_unique;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 
@@ -15,13 +18,20 @@ class CompositeTypeMapper implements TypeMapperInterface
     private $typeMappers;
 
     /**
+     * The cache of supported classes.
+     *
+     * @var string[]
+     */
+    private $supportedClasses;
+
+    /**
      * @param TypeMapperInterface[] $typeMappers
      */
     public function setTypeMappers(array $typeMappers): void
     {
         // TODO: move the setter in the constructor in v3
         // We can do this if we get rid of the Registry god object which is easier if we don't have to inject it in the
-        // AbsractAnnotatedObjectType class (this class will disappear in v3)
+        // AbstractAnnotatedObjectType class (this class will disappear in v3)
         $this->typeMappers = $typeMappers;
     }
 
@@ -56,6 +66,20 @@ class CompositeTypeMapper implements TypeMapperInterface
             }
         }
         throw CannotMapTypeException::createForType($className);
+    }
+
+    /**
+     * Returns the list of classes that have matching input GraphQL types.
+     *
+     * @return string[]
+     */
+    public function getSupportedClasses(): array
+    {
+        if ($this->supportedClasses === null) {
+            $supportedClassesArrays = array_map(function(TypeMapperInterface $typeMapper) { return $typeMapper->getSupportedClasses(); }, $this->typeMappers);
+            $this->supportedClasses = array_unique(array_merge(...$supportedClassesArrays));
+        }
+        return $this->supportedClasses;
     }
 
     /**

@@ -5,13 +5,13 @@ namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types;
 
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassA;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassB;
 
 /**
- * @Type(class=ClassA::class)
- * @SourceField(name="foo")
+ * @Type(class=ClassB::class)
+ * @SourceField(name="bar")
  */
-class ClassAType
+class ClassBType
 {
 
 }

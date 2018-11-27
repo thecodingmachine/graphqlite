@@ -128,6 +128,16 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     return $className === TestObject::class || $className === TestObject2::class;
                 }
+
+                /**
+                 * Returns the list of classes that have matching input GraphQL types.
+                 *
+                 * @return string[]
+                 */
+                public function getSupportedClasses(): array
+                {
+                    return [TestObject::class, TestObject2::class];
+                }
             });
         }
         return $this->typeMapper;
@@ -154,7 +164,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->registry;
     }
 
-    protected function buildRegistry(ContainerInterface $container)
+    protected function buildRegistry(ContainerInterface $container): Registry
     {
         $reader = new AnnotationReader();
         return new Registry($container,

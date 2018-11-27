@@ -3,6 +3,8 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Annotations;
 
+use function class_exists;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\MissingAnnotationException;
 
 /**
@@ -31,6 +33,9 @@ class Type
             throw new MissingAnnotationException('In annotation @Type, missing compulsory parameter "class".');
         }
         $this->className = $attributes['class'];
+        if (!class_exists($this->className)) {
+            throw ClassNotFoundException::couldNotFindClass($this->className);
+        }
     }
 
     /**

@@ -58,6 +58,16 @@ class CompositeTypeMapperTest extends TestCase
             {
                 return $className === TestObject::class;
             }
+
+            /**
+             * Returns the list of classes that have matching input GraphQL types.
+             *
+             * @return string[]
+             */
+            public function getSupportedClasses(): array
+            {
+                return [TestObject::class];
+            }
         };
 
         $this->composite = new CompositeTypeMapper();
@@ -73,6 +83,7 @@ class CompositeTypeMapperTest extends TestCase
         $this->assertFalse($this->composite->canMapClassToInputType(\Exception::class));
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class));
         $this->assertInstanceOf(InputObjectType::class, $this->composite->mapClassToInputType(TestObject::class));
+        $this->assertSame([TestObject::class], $this->composite->getSupportedClasses());
     }
 
     public function testException1(): void
