@@ -114,6 +114,28 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     }
 
     /**
+     * Finds the list of interfaces returned by $className.
+     *
+     * @param string $className
+     * @return InterfaceType[]
+     */
+    public function findInterfaces(string $className): array
+    {
+        $interfaces = [];
+        while ($className = $this->findClosestMatchingParent($className)) {
+            $type = $this->mapClassToInterfaceOrType($className);
+            if ($type instanceof InterfaceType) {
+                $interfaces[] = $type;
+            }
+            $className = get_parent_class($className);
+            if ($className === false) {
+                break;
+            }
+        }
+        return $interfaces;
+    }
+
+    /**
      * @return array<string,MappedClass>
      */
     private function getClassTree(): array

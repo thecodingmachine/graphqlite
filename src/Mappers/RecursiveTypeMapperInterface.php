@@ -42,6 +42,14 @@ interface RecursiveTypeMapperInterface
     public function mapClassToInterfaceOrType(string $className): OutputType;
 
     /**
+     * Finds the list of interfaces returned by $className.
+     *
+     * @param string $className
+     * @return InterfaceType[]
+     */
+    public function findInterfaces(string $className): array;
+
+    /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
      *
      * @param string $className

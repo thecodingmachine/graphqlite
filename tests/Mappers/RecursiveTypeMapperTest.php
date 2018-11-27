@@ -86,6 +86,10 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $type);
         $this->assertSame('ClassB', $type->name);
 
+        $interfaces = $recursiveMapper->findInterfaces(ClassC::class);
+        $this->assertCount(1, $interfaces);
+        $this->assertSame('ClassAInterface', $interfaces[0]->name);
+
         $this->expectException(CannotMapTypeException::class);
         $recursiveMapper->mapClassToInterfaceOrType('Not exists');
     }
