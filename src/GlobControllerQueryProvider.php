@@ -3,20 +3,11 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use Doctrine\Common\Annotations\Reader;
-use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use TheCodingMachine\GraphQL\Controllers\AggregateControllerQueryProvider;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
-use TheCodingMachine\GraphQL\Controllers\QueryField;
-use TheCodingMachine\GraphQL\Controllers\QueryProviderInterface;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
-use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).

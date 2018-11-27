@@ -4,7 +4,6 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use function array_keys;
-use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
@@ -12,9 +11,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
 /**
