@@ -9,46 +9,46 @@ class MappedClass
     /**
      * @var string
      */
-    private $className;
+    //private $className;
 
     /**
      * @var MappedClass|null
      */
-    private $parent;
+    //private $parent;
 
     /**
      * @var MappedClass[]
      */
     private $children = [];
 
-    public function __construct(string $className)
+    /*public function __construct(string $className)
     {
         $this->className = $className;
-    }
+    }*/
 
     /**
      * @return string
      */
-    public function getClassName(): string
+    /*public function getClassName(): string
     {
         return $this->className;
-    }
+    }*/
 
     /**
      * @return MappedClass|null
      */
-    public function getParent(): ?MappedClass
+    /*public function getParent(): ?MappedClass
     {
         return $this->parent;
-    }
+    }*/
 
     /**
      * @param MappedClass|null $parent
      */
-    public function setParent(?MappedClass $parent): void
+    /*public function setParent(?MappedClass $parent): void
     {
         $this->parent = $parent;
-    }
+    }*/
 
     /**
      * @return MappedClass[]

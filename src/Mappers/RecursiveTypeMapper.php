@@ -135,13 +135,13 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     private function getMappedClass(string $className, array $supportedClasses): MappedClass
     {
         if (!isset($this->mappedClasses[$className])) {
-            $mappedClass = new MappedClass($className);
+            $mappedClass = new MappedClass(/*$className*/);
             $this->mappedClasses[$className] = $mappedClass;
             $parentClassName = $className;
             while ($parentClassName = get_parent_class($parentClassName)) {
                 if (isset($supportedClasses[$parentClassName])) {
                     $parentMappedClass = $this->getMappedClass($parentClassName, $supportedClasses);
-                    $mappedClass->setParent($parentMappedClass);
+                    //$mappedClass->setParent($parentMappedClass);
                     $parentMappedClass->addChild($mappedClass);
                     break;
                 }
