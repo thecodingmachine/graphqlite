@@ -33,13 +33,7 @@ class TypeGenerator
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
-        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-        try {
-            $typeField = AnnotationUtils::getClassAnnotation($this->registry->getAnnotationReader(), $refTypeClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
-        } catch (ClassNotFoundException $e) {
-            throw ClassNotFoundException::wrapException($e, $refTypeClass->getName());
-        }
-
+        $typeField = $this->registry->getAnnotationReader()->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeException();

@@ -11,6 +11,7 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
@@ -29,7 +30,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     private $namespace;
     /**
-     * @var Reader
+     * @var AnnotationReader
      */
     private $annotationReader;
     /**
@@ -56,7 +57,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, Reader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
     {
         $this->namespace = $namespace;
         $this->container = $container;
@@ -100,12 +101,8 @@ final class GlobTypeMapper implements TypeMapperInterface
             if (!$refClass->isInstantiable()) {
                 continue;
             }
-            try {
-                /** @var Type|null $type */
-                $type = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, Type::class);
-            } catch (ClassNotFoundException $e) {
-                throw ClassNotFoundException::wrapException($e, $className);
-            }
+
+            $type = $this->annotationReader->getTypeAnnotation($refClass);
 
             if ($type === null) {
                 continue;

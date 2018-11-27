@@ -26,7 +26,6 @@ use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
-use Doctrine\Common\Annotations\Reader;
 use phpDocumentor\Reflection\Types\Integer;
 use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
@@ -54,7 +53,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private $controller;
     /**
-     * @var Reader
+     * @var AnnotationReader
      */
     private $annotationReader;
     /**
@@ -142,8 +141,7 @@ class ControllerQueryProvider implements QueryProviderInterface
 
         foreach ($refClass->getMethods() as $refMethod) {
             // First, let's check the "Query" or "Mutation" or "Field" annotation
-            /** @var AbstractRequest $queryAnnotation */
-            $queryAnnotation = $this->annotationReader->getMethodAnnotation($refMethod, $annotationName);
+            $queryAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, $annotationName);
 
             if ($queryAnnotation !== null) {
                 if (!$this->isAuthorized($refMethod)) {
@@ -228,10 +226,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         $contextFactory = new ContextFactory();
 
         /** @var SourceField[] $sourceFields */
-        $sourceFields = AnnotationUtils::getClassAnnotations($this->annotationReader, $refClass);
-        $sourceFields = \array_filter($sourceFields, function($annotation): bool {
-            return $annotation instanceof SourceField;
-        });
+        $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         if ($this->controller instanceof FromSourceFieldsInterface) {
             $sourceFields = array_merge($sourceFields, $this->controller->getSourceFields());
@@ -241,12 +236,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             return [];
         }
 
-        try {
-            /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-            $typeField = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
-        } catch (ClassNotFoundException $e) {
-            throw ClassNotFoundException::wrapException($e, $refClass->getName());
-        }
+        $typeField = $this->annotationReader->getTypeAnnotation($refClass);
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
@@ -342,14 +332,14 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private function isAuthorized(\ReflectionMethod $reflectionMethod) : bool
     {
-        $loggedAnnotation = $this->annotationReader->getMethodAnnotation($reflectionMethod, Logged::class);
+        $loggedAnnotation = $this->annotationReader->getLoggedAnnotation($reflectionMethod);
 
         if ($loggedAnnotation !== null && !$this->authenticationService->isLogged()) {
             return false;
         }
 
-        /** @var Right $rightAnnotation */
-        $rightAnnotation = $this->annotationReader->getMethodAnnotation($reflectionMethod, Right::class);
+
+        $rightAnnotation = $this->annotationReader->getRightAnnotation($reflectionMethod);
 
         if ($rightAnnotation !== null && !$this->authorizationService->isAllowed($rightAnnotation->getName())) {
             return false;

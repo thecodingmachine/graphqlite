@@ -25,7 +25,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = new TypeGenerator($this->getRegistry());
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new AnnotationReader(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
 
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class));
@@ -45,7 +45,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = new TypeGenerator($this->getRegistry());
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateTypes', $typeGenerator, $container, new AnnotationReader(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateTypes', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
@@ -61,7 +61,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = new TypeGenerator($this->getRegistry());
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\BadClassType', $typeGenerator, $container, new AnnotationReader(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\BadClassType', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
 
         $this->expectException(ClassNotFoundException::class);
         $this->expectExceptionMessage("Could not autoload class 'Foobar' defined in @Type annotation of class 'TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\BadClassType\\TestType'");
@@ -78,7 +78,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = new TypeGenerator($this->getRegistry());
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new AnnotationReader(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
 
         $this->assertFalse($mapper->canMapClassToInputType(TestObject::class));
 

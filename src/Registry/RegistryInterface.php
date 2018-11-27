@@ -2,8 +2,8 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Registry;
 
-use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerInterface;
+use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
@@ -29,9 +29,9 @@ interface RegistryInterface extends ContainerInterface
     public function getAuthenticationService(): AuthenticationServiceInterface;
 
     /**
-     * @return Reader
+     * @return AnnotationReader
      */
-    public function getAnnotationReader(): Reader;
+    public function getAnnotationReader(): AnnotationReader;
 
     /**
      * @return RecursiveTypeMapperInterface
