@@ -34,7 +34,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * An array of interfaces OR object types if no interface matching.
      *
-     * @var array<string,OutputType>
+     * @var array<string,OutputType&Type>
      */
     private $interfaces = [];
 
@@ -90,7 +90,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
-     * @return OutputType
+     * @return OutputType&Type
      * @throws CannotMapTypeException
      */
     public function mapClassToInterfaceOrType(string $className): OutputType
@@ -106,7 +106,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             if (!empty($supportedClasses[$closestClassName]->getChildren())) {
                 // Cast as an interface
                 $this->interfaces[$closestClassName] = new InterfaceFromObjectType($objectType, $this);
-                return $this->interfaces[$closestClassName];
             } else {
                 $this->interfaces[$closestClassName] = $objectType;
             }

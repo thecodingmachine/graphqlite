@@ -241,8 +241,8 @@ class ControllerQueryProvider implements QueryProviderInterface
             return [];
         }
 
-        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
         try {
+            /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
             $typeField = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapException($e, $refClass->getName());

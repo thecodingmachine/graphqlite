@@ -100,8 +100,8 @@ final class GlobTypeMapper implements TypeMapperInterface
             if (!$refClass->isInstantiable()) {
                 continue;
             }
-            /** @var Type|null $type */
             try {
+                /** @var Type|null $type */
                 $type = AnnotationUtils::getClassAnnotation($this->annotationReader, $refClass, Type::class);
             } catch (ClassNotFoundException $e) {
                 throw ClassNotFoundException::wrapException($e, $className);

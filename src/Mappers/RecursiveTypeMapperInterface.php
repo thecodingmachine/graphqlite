@@ -36,7 +36,7 @@ interface RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
-     * @return OutputType
+     * @return OutputType&Type
      * @throws CannotMapTypeException
      */
     public function mapClassToInterfaceOrType(string $className): OutputType;
