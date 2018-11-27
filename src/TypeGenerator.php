@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 
@@ -32,8 +33,7 @@ class TypeGenerator
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
-        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-        $typeField = AnnotationUtils::getClassAnnotation($this->registry->getAnnotationReader(), $refTypeClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        $typeField = $this->registry->getAnnotationReader()->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeException();

@@ -2,14 +2,22 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
-use PHPUnit\Framework\TestCase;
+use Mouf\Picotainer\Picotainer;
+use Symfony\Component\Cache\Simple\NullCache;
+use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassA;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassB;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassC;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types\ClassAType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types\ClassBType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
-class RecursiveTypeMapperTest extends TestCase
+class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 {
 
     public function testMapClassToType()
@@ -51,5 +59,34 @@ class RecursiveTypeMapperTest extends TestCase
 
         $this->expectException(CannotMapTypeException::class);
         $recursiveTypeMapper->mapClassToInputType(ClassC::class);
+    }
+
+    public function testMapClassToInterfaceOrType()
+    {
+        $container = new Picotainer([
+            ClassAType::class => function() {
+                return new ClassAType();
+            },
+            ClassBType::class => function() {
+                return new ClassBType();
+            }
+        ]);
+
+        $typeGenerator = new TypeGenerator($this->getRegistry());
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
+
+        $recursiveMapper = new RecursiveTypeMapper($mapper);
+
+        $type = $recursiveMapper->mapClassToInterfaceOrType(ClassA::class);
+        $this->assertInstanceOf(InterfaceType::class, $type);
+        $this->assertSame('ClassAInterface', $type->name);
+
+        $type = $recursiveMapper->mapClassToInterfaceOrType(ClassC::class);
+        $this->assertInstanceOf(ObjectType::class, $type);
+        $this->assertSame('ClassB', $type->name);
+
+        $this->expectException(CannotMapTypeException::class);
+        $recursiveMapper->mapClassToInterfaceOrType('Not exists');
     }
 }

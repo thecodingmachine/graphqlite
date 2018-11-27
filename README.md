@@ -406,6 +406,75 @@ class PostType implements FromSourceFieldsInterface
 ```
 
 
+Inheritance
+-----------
+
+Your PHP model extend each others. GraphQL-controllers will do its best to represent this hierarchy of objects in GraphQL using interfaces.
+
+Let's say you have 2 classes: `Contact` and `User` (which extends `Contact`)
+
+```php
+class Contact
+{
+    // ...
+}
+
+class User extends Contact
+{
+    // ...
+}
+```
+
+Let's say you create 2 types for those 2 classes:
+
+```php
+/**
+ * @Type(class=Contact::class)
+ */
+class ContactType
+{
+    // ...
+}
+
+/**
+ * @Type(class=User::class)
+ */
+class UserType
+{
+    // ...
+}
+```
+
+Now, let's assume you have a query that returns a contact:
+
+```
+class ContactController
+{
+    /**
+     * @Query()
+     */
+    public function getContact(): Contact
+    {
+        // ...
+    }
+}
+```
+
+When writing a GraphQL query, you can query using fragments:
+
+```graphql
+getContact {
+    name
+    ... User {
+       email
+    }
+}
+``` 
+
+Behind the scene, GraphQL-controllers will detect that the `Contact` class is extended by the `User` class. Because the
+class is extended, a GraphQL `ContactInterface` interface is created dynamically. You don't have to do anything.
+The GraphQL `User` type will automatically implement this `ContactInterface`. The interface contains all the fields
+available in the `Contact` type.
 
 Troubleshooting
 ---------------

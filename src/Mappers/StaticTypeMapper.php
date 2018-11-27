@@ -2,6 +2,7 @@
 
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+use function array_keys;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 
@@ -66,6 +67,16 @@ final class StaticTypeMapper implements TypeMapperInterface
             return $this->types[$className];
         }
         throw CannotMapTypeException::createForType($className);
+    }
+
+    /**
+     * Returns the list of classes that have matching input GraphQL types.
+     *
+     * @return string[]
+     */
+    public function getSupportedClasses(): array
+    {
+        return array_keys($this->types);
     }
 
     /**

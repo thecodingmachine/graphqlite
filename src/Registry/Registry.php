@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use TheCodingMachine\GraphQL\Controllers\AnnotationUtils;
+use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
@@ -41,7 +41,7 @@ class Registry implements RegistryInterface
      */
     private $authenticationService;
     /**
-     * @var Reader
+     * @var AnnotationReader
      */
     private $annotationReader;
     /**
@@ -61,7 +61,7 @@ class Registry implements RegistryInterface
         $this->container = $container;
         $this->authorizationService = $authorizationService;
         $this->authenticationService = $authenticationService;
-        $this->annotationReader = $annotationReader;
+        $this->annotationReader = new AnnotationReader($annotationReader);
         $this->typeMapper = $typeMapper;
         $this->hydrator = $hydrator;
     }
@@ -108,8 +108,8 @@ class Registry implements RegistryInterface
         }
         $refTypeClass = new \ReflectionClass($className);
 
-        /** @var \TheCodingMachine\GraphQL\Controllers\Annotations\Type|null $typeField */
-        $typeField = AnnotationUtils::getClassAnnotation($this->getAnnotationReader(), $refTypeClass, \TheCodingMachine\GraphQL\Controllers\Annotations\Type::class);
+        $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
+
         return $typeField !== null;
     }
 
@@ -158,9 +158,9 @@ class Registry implements RegistryInterface
     }
 
     /**
-     * @return Reader
+     * @return AnnotationReader
      */
-    public function getAnnotationReader(): Reader
+    public function getAnnotationReader(): AnnotationReader
     {
         return $this->annotationReader;
     }
