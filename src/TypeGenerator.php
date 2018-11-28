@@ -20,7 +20,18 @@ class TypeGenerator
      */
     private $registry;
 
-    public function __construct(RegistryInterface $registry)
+    public function __construct(RegistryInterface $registry = null)
+    {
+        $this->registry = $registry;
+    }
+
+    /**
+     * We need a setter to break the constructors loop:
+     *  RecursiveTypeMapper => GlobTypeMapper => TypeGenerator => RecursiveTypeMapper
+     *
+     * @param RegistryInterface $registry
+     */
+    public function setRegistry(RegistryInterface $registry): void
     {
         $this->registry = $registry;
     }
@@ -45,8 +56,8 @@ class TypeGenerator
                 $fieldProvider = new ControllerQueryProvider($annotatedObject, $this->registry);
                 return $fieldProvider->getFields();
             },
-            'interfaces' => function() use ($refTypeClass) {
-                return $this->registry->getTypeMapper()->findInterfaces($refTypeClass->getName());
+            'interfaces' => function() use ($typeField) {
+                return $this->registry->getTypeMapper()->findInterfaces($typeField->getClass());
             }
         ]);
 

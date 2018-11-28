@@ -35,9 +35,13 @@ class Schema extends \GraphQL\Type\Schema
 
         $config->setQuery($query);
         $config->setMutation($mutation);
-        $config->setTypeLoader(function(string $name) use ($registry) {
+        // TODO: WRITE A TYPE LOADER
+        /*$config->setTypeLoader(function(string $name) use ($registry) {
+            // FIXME: TYPELOADER IS COMPLETELY FALSE.
+            // We need to find a type FROM a GraphQL type name
+            // Therefore, we need to modify the TypeMapperInterface.
             return $registry->get($name);
-        });
+        });*/
 
         parent::__construct($config);
     }

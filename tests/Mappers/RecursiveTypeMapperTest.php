@@ -61,7 +61,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $recursiveTypeMapper->mapClassToInputType(ClassC::class);
     }
 
-    public function testMapClassToInterfaceOrType()
+    protected function getTypeMapper()
     {
         $container = new Picotainer([
             ClassAType::class => function() {
@@ -76,11 +76,20 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
 
-        $recursiveMapper = new RecursiveTypeMapper($mapper);
+        return new RecursiveTypeMapper($mapper);
+    }
+
+    public function testMapClassToInterfaceOrType()
+    {
+        $recursiveMapper = $this->getTypeMapper();
 
         $type = $recursiveMapper->mapClassToInterfaceOrType(ClassA::class);
         $this->assertInstanceOf(InterfaceType::class, $type);
         $this->assertSame('ClassAInterface', $type->name);
+
+        $classAObjectType = $recursiveMapper->mapClassToType(ClassA::class);
+        $this->assertInstanceOf(ObjectType::class, $classAObjectType);
+        $this->assertCount(1, $classAObjectType->getInterfaces());
 
         $type = $recursiveMapper->mapClassToInterfaceOrType(ClassC::class);
         $this->assertInstanceOf(ObjectType::class, $type);
@@ -89,6 +98,10 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $interfaces = $recursiveMapper->findInterfaces(ClassC::class);
         $this->assertCount(1, $interfaces);
         $this->assertSame('ClassAInterface', $interfaces[0]->name);
+
+        $classBObjectType = $recursiveMapper->mapClassToType(ClassC::class);
+        $this->assertInstanceOf(ObjectType::class, $classBObjectType);
+        $this->assertCount(1, $classBObjectType->getInterfaces());
 
         $this->expectException(CannotMapTypeException::class);
         $recursiveMapper->mapClassToInterfaceOrType('Not exists');
