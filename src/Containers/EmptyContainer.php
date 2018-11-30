@@ -1,12 +1,12 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Registry;
+namespace TheCodingMachine\GraphQL\Controllers\Containers;
 
 use Psr\Container\ContainerInterface;
 
 /**
- * An always empty container (to use as a stub for the Registry).
+ * An always empty container (to use as a stub for the BasicAutoWiringContainer).
  */
 class EmptyContainer implements ContainerInterface
 {

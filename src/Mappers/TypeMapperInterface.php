@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQL\Controllers\Mappers\Interfaces\InterfacesResolverInterface;
 
 /**
  * Maps a PHP class to a GraphQL type
@@ -25,10 +26,11 @@ interface TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return OutputType&Type
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): OutputType;
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType;
 
     /**
      * Returns the list of classes that have matching input GraphQL types.

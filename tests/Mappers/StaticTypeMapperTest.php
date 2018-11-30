@@ -4,12 +4,13 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 
-class StaticTypeMapperTest extends TestCase
+class StaticTypeMapperTest extends AbstractQueryProviderTest
 {
     /**
      * @var StaticTypeMapper
@@ -43,7 +44,7 @@ class StaticTypeMapperTest extends TestCase
         $this->assertFalse($this->typeMapper->canMapClassToType(\Exception::class));
         $this->assertTrue($this->typeMapper->canMapClassToInputType(TestObject::class));
         $this->assertFalse($this->typeMapper->canMapClassToInputType(\Exception::class));
-        $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class));
+        $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
         $this->assertInstanceOf(InputObjectType::class, $this->typeMapper->mapClassToInputType(TestObject::class));
         $this->assertSame([TestObject::class], $this->typeMapper->getSupportedClasses());
     }
@@ -51,7 +52,7 @@ class StaticTypeMapperTest extends TestCase
     public function testException1(): void
     {
         $this->expectException(CannotMapTypeException::class);
-        $this->typeMapper->mapClassToType(\Exception::class);
+        $this->typeMapper->mapClassToType(\Exception::class, $this->getTypeMapper());
     }
 
     public function testException2(): void

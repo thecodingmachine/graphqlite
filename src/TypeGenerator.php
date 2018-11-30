@@ -5,9 +5,8 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
@@ -16,35 +15,32 @@ use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 class TypeGenerator
 {
     /**
-     * @var RegistryInterface
+     * @var AnnotationReader
      */
-    private $registry;
-
-    public function __construct(RegistryInterface $registry = null)
-    {
-        $this->registry = $registry;
-    }
-
+    private $annotationReader;
     /**
-     * We need a setter to break the constructors loop:
-     *  RecursiveTypeMapper => GlobTypeMapper => TypeGenerator => RecursiveTypeMapper
-     *
-     * @param RegistryInterface $registry
+     * @var ControllerQueryProviderFactory
      */
-    public function setRegistry(RegistryInterface $registry): void
+    private $controllerQueryProviderFactory;
+
+    public function __construct(AnnotationReader $annotationReader,
+                                ControllerQueryProviderFactory $controllerQueryProviderFactory)
     {
-        $this->registry = $registry;
+        $this->annotationReader = $annotationReader;
+        $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
     }
 
     /**
      * @param object $annotatedObject An object with a @Type annotation.
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return ObjectType
+     * @throws \ReflectionException
      */
-    public function mapAnnotatedObject($annotatedObject): ObjectType
+    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
-        $typeField = $this->registry->getAnnotationReader()->getTypeAnnotation($refTypeClass);
+        $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeException();
@@ -52,12 +48,12 @@ class TypeGenerator
 
         $type = new ObjectType([
             'name' => $this->getName($refTypeClass, $typeField),
-            'fields' => function() use ($annotatedObject) {
-                $fieldProvider = new ControllerQueryProvider($annotatedObject, $this->registry);
+            'fields' => function() use ($annotatedObject, $recursiveTypeMapper) {
+                $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($annotatedObject, $recursiveTypeMapper);
                 return $fieldProvider->getFields();
             },
-            'interfaces' => function() use ($typeField) {
-                return $this->registry->getTypeMapper()->findInterfaces($typeField->getClass());
+            'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
+                return $recursiveTypeMapper->findInterfaces($typeField->getClass());
             }
         ]);
 

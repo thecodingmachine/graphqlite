@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 use function array_keys;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use TheCodingMachine\GraphQL\Controllers\Mappers\Interfaces\InterfacesResolverInterface;
 
 /**
  * A simple implementation of the TypeMapperInterface that expects mapping to be passed in a setter.
@@ -58,10 +59,11 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return OutputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): OutputType
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
     {
         if (isset($this->types[$className])) {
             return $this->types[$className];

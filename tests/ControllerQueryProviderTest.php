@@ -21,8 +21,8 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
-use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
+use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
@@ -36,7 +36,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $queries = $queryProvider->getQueries();
 
@@ -86,7 +86,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $mutations = $queryProvider->getMutations();
 
@@ -115,7 +115,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $this->expectException(MissingTypeHintException::class);
         $queryProvider->getQueries();
@@ -125,22 +125,21 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $queries = $queryProvider->getQueries();
 
         $this->assertCount(6, $queries);
         $fixedQuery = $queries[1];
 
-        $this->assertInstanceOf(ObjectType::class, $fixedQuery->getType());
-        $this->assertSame('Test', $fixedQuery->getType()->name);
+        $this->assertInstanceOf(StringType::class, $fixedQuery->getType());
     }
 
     public function testNameFromAnnotation()
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $queries = $queryProvider->getQueries();
 
@@ -153,7 +152,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestType($this->getRegistry());
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $fields = $queryProvider->getFields();
 
@@ -165,19 +164,21 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testLoggedInSourceField()
     {
-        $registry = new Registry(new EmptyContainer(),
-            new VoidAuthorizationService(),
+        $queryProvider = new ControllerQueryProvider(
+            new TestType(),
+            $this->getAnnotationReader(),
+            $this->getTypeMapper(),
+            $this->getHydrator(),
             new class implements AuthenticationServiceInterface {
                 public function isLogged(): bool
                 {
                     return true;
                 }
             },
-            new AnnotationReader(),
-            $this->getTypeMapper(),
-            $this->getHydrator());
+            new VoidAuthorizationService(),
+            new EmptyContainer()
+        );
 
-        $queryProvider = new ControllerQueryProvider(new TestType($this->getRegistry()), $registry);
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
@@ -187,19 +188,20 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testRightInSourceField()
     {
-        $registry = new Registry(new EmptyContainer(),
+        $queryProvider = new ControllerQueryProvider(
+            new TestType(),
+            $this->getAnnotationReader(),
+            $this->getTypeMapper(),
+            $this->getHydrator(),
+            new VoidAuthenticationService(),
             new class implements AuthorizationServiceInterface {
                 public function isAllowed(string $right): bool
                 {
                     return true;
                 }
-            },
-            new VoidAuthenticationService(),
-            new AnnotationReader(),
-            $this->getTypeMapper(),
-            $this->getHydrator());
+            },new EmptyContainer()
+        );
 
-        $queryProvider = new ControllerQueryProvider(new TestType(), $registry);
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
@@ -209,7 +211,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testMissingTypeAnnotation()
     {
-        $queryProvider = new ControllerQueryProvider(new TestTypeMissingAnnotation(), $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider(new TestTypeMissingAnnotation());
 
         $this->expectException(MissingAnnotationException::class);
         $queryProvider->getFields();
@@ -217,7 +219,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testSourceFieldDoesNotExists()
     {
-        $queryProvider = new ControllerQueryProvider(new TestTypeMissingField(), $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider(new TestTypeMissingField());
 
         $this->expectException(FieldNotFoundException::class);
         $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
@@ -226,7 +228,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testSourceFieldIsId()
     {
-        $queryProvider = new ControllerQueryProvider(new TestTypeId(), $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider(new TestTypeId());
         $fields = $queryProvider->getFields();
         $this->assertCount(1, $fields);
 
@@ -237,19 +239,15 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testFromSourceFieldsInterface()
     {
-        $registry = new Registry(new EmptyContainer(),
-            new class implements AuthorizationServiceInterface {
-                public function isAllowed(string $right): bool
-                {
-                    return true;
-                }
-            },
-            new VoidAuthenticationService(),
-            new AnnotationReader(),
+        $queryProvider = new ControllerQueryProvider(
+            new TestTypeWithSourceFieldInterface(),
+            $this->getAnnotationReader(),
             $this->getTypeMapper(),
-            $this->getHydrator());
-
-        $queryProvider = new ControllerQueryProvider(new TestTypeWithSourceFieldInterface(), $registry);
+            $this->getHydrator(),
+            new VoidAuthenticationService(),
+            new VoidAuthorizationService(),
+            new EmptyContainer()
+        );
         $fields = $queryProvider->getFields();
         $this->assertCount(1, $fields);
 
@@ -261,7 +259,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $queries = $queryProvider->getQueries();
 
@@ -279,7 +277,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $queries = $queryProvider->getQueries();
 
@@ -295,7 +293,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testNoReturnTypeError()
     {
-        $queryProvider = new ControllerQueryProvider(new TestControllerNoReturnType(), $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider(new TestControllerNoReturnType());
         $this->expectException(TypeMappingException::class);
         $queryProvider->getQueries();
     }
@@ -304,7 +302,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = new ControllerQueryProvider($controller, $this->getRegistry());
+        $queryProvider = $this->buildControllerQueryProvider($controller);
 
         $queries = $queryProvider->getQueries();
 

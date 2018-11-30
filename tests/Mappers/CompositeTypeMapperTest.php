@@ -6,12 +6,13 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\TypeMappingException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 
-class CompositeTypeMapperTest extends TestCase
+class CompositeTypeMapperTest extends AbstractQueryProviderTest
 {
     /**
      * @var CompositeTypeMapper
@@ -21,7 +22,7 @@ class CompositeTypeMapperTest extends TestCase
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className): OutputType
+            public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
             {
                 if ($className === TestObject::class) {
                     return new ObjectType([
@@ -70,8 +71,7 @@ class CompositeTypeMapperTest extends TestCase
             }
         };
 
-        $this->composite = new CompositeTypeMapper();
-        $this->composite->setTypeMappers([$typeMapper1]);
+        $this->composite = new CompositeTypeMapper([$typeMapper1]);
     }
 
 
@@ -81,7 +81,7 @@ class CompositeTypeMapperTest extends TestCase
         $this->assertFalse($this->composite->canMapClassToType(\Exception::class));
         $this->assertTrue($this->composite->canMapClassToInputType(TestObject::class));
         $this->assertFalse($this->composite->canMapClassToInputType(\Exception::class));
-        $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class));
+        $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class, $this->getTypeMapper()));
         $this->assertInstanceOf(InputObjectType::class, $this->composite->mapClassToInputType(TestObject::class));
         $this->assertSame([TestObject::class], $this->composite->getSupportedClasses());
     }
@@ -89,7 +89,7 @@ class CompositeTypeMapperTest extends TestCase
     public function testException1(): void
     {
         $this->expectException(CannotMapTypeException::class);
-        $this->composite->mapClassToType(\Exception::class);
+        $this->composite->mapClassToType(\Exception::class, $this->getTypeMapper());
     }
 
     public function testException2(): void

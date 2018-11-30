@@ -23,8 +23,8 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\QueryProviderInterface;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
+use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Schema;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
@@ -43,37 +43,14 @@ class EndToEndTest /*extends TestCase*/
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
-                return new Schema($container->get(QueryProviderInterface::class), $container->get(RegistryInterface::class));
+                return new Schema($container->get(QueryProviderInterface::class), $container->get(BasicAutoWiringContainer::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(RegistryInterface::class),
-                    $container->get('autowiringContainer'), new NullCache());
+                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(BasicAutoWiringContainer::class),
+                    $container->get(BasicAutoWiringContainer::class), new NullCache());
             },
-            RegistryInterface::class => function(ContainerInterface $container) {
-                return new Registry($container->get('autowiringContainer'),
-                    $container->get(AuthorizationServiceInterface::class),
-                    $container->get(AuthenticationServiceInterface::class),
-                    new DoctrineAnnotationReader(),
-                    $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(HydratorInterface::class)
-                    );
-            },
-            'autowiringContainer' => function(ContainerInterface $container) {
-                return new class implements ContainerInterface {
-                    public function get($id)
-                    {
-                        if (!$this->has($id)) {
-                            throw new class('Class not found') extends Exception implements NotFoundExceptionInterface {
-                            };
-                        }
-                        return new $id();
-                    }
-
-                    public function has($id)
-                    {
-                        return class_exists($id);
-                    }
-                };
+            BasicAutoWiringContainer::class => function(ContainerInterface $container) {
+                return new BasicAutoWiringContainer(new EmptyContainer());
             },
             AuthorizationServiceInterface::class => function(ContainerInterface $container) {
                 return new VoidAuthorizationService();
@@ -87,7 +64,7 @@ class EndToEndTest /*extends TestCase*/
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
-                    $container->get('autowiringContainer'),
+                    $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     new NullCache()
                     );
@@ -108,8 +85,6 @@ class EndToEndTest /*extends TestCase*/
                 };
             }
         ]);
-        // Fixing the loop
-        $this->mainContainer->get(TypeGenerator::class)->setRegistry($this->mainContainer->get(RegistryInterface::class));
     }
 
     public function testEndToEnd()

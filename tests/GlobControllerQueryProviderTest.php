@@ -34,7 +34,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers', $this->getRegistry(), $container, new NullCache());
+        $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), $container, new NullCache());
 
         $queries = $globControllerQueryProvider->getQueries();
         $this->assertCount(6, $queries);

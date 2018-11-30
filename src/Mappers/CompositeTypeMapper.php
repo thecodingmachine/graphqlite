@@ -27,11 +27,8 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * @param TypeMapperInterface[] $typeMappers
      */
-    public function setTypeMappers(array $typeMappers): void
+    public function __construct(array $typeMappers)
     {
-        // TODO: move the setter in the constructor in v3
-        // We can do this if we get rid of the Registry god object which is easier if we don't have to inject it in the
-        // AbstractAnnotatedObjectType class (this class will disappear in v3)
         $this->typeMappers = $typeMappers;
     }
 
@@ -55,14 +52,15 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return OutputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): OutputType
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
-                return $typeMapper->mapClassToType($className);
+                return $typeMapper->mapClassToType($className, $recursiveTypeMapper);
             }
         }
         throw CannotMapTypeException::createForType($className);

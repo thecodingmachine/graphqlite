@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\SchemaConfig;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -14,7 +14,7 @@ use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, Registry $registry, SchemaConfig $config = null)
+    public function __construct(QueryProviderInterface $queryProvider, SchemaConfig $config = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();

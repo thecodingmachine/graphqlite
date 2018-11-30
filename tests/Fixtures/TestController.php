@@ -64,7 +64,7 @@ class TestController
     }
 
     /**
-     * @Query(returnType=TestType::class)
+     * @Query(returnType="customOutput")
      */
     public function testFixReturnType(): TestObject
     {

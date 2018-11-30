@@ -128,16 +128,17 @@ final class GlobTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return OutputType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): OutputType
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
     {
         $map = $this->getMap();
         if (!isset($map[$className])) {
             throw CannotMapTypeException::createForType($className);
         }
-        return $this->typeGenerator->mapAnnotatedObject($this->container->get($map[$className]));
+        return $this->typeGenerator->mapAnnotatedObject($this->container->get($map[$className]), $recursiveTypeMapper);
     }
 
     /**
