@@ -9,9 +9,9 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
 {
     public function testNameAndFields()
     {
-        $typeGenerator = new TypeGenerator($this->getRegistry());
+        $typeGenerator = $this->getTypeGenerator();
 
-        $type = $typeGenerator->mapAnnotatedObject(new TypeFoo());
+        $type = $typeGenerator->mapAnnotatedObject(new TypeFoo(), $this->getTypeMapper());
 
         $this->assertSame('TestObject', $type->name);
         $this->assertCount(1, $type->getFields());
@@ -19,9 +19,9 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
 
     public function testMapAnnotatedObjectException()
     {
-        $typeGenerator = new TypeGenerator($this->getRegistry());
+        $typeGenerator = $this->getTypeGenerator();
 
         $this->expectException(MissingAnnotationException::class);
-        $typeGenerator->mapAnnotatedObject(new \stdClass());
+        $typeGenerator->mapAnnotatedObject(new \stdClass(), $this->getTypeMapper());
     }
 }

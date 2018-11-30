@@ -7,7 +7,7 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -42,27 +42,32 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private $aggregateControllerQueryProvider;
     /**
-     * @var RegistryInterface
+     * @var ControllerQueryProviderFactory
      */
-    private $registry;
+    private $controllerQueryProviderFactory;
+    /**
+     * @var RecursiveTypeMapperInterface
+     */
+    private $recursiveTypeMapper;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
-     * @param ContainerInterface|null $container The container we will fetch controllers from. If not specified, container from the registry is used instead.
+     * @param ContainerInterface $container The container we will fetch controllers from.
      */
-    public function __construct(string $namespace, RegistryInterface $registry, ?ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, ControllerQueryProviderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null)
     {
         $this->namespace = $namespace;
-        $this->registry = $registry;
-        $this->container = $container ?: $registry;
+        $this->container = $container;
         $this->cache = $cache;
         $this->cacheTtl = $cacheTtl;
+        $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
+        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
     {
         if ($this->aggregateControllerQueryProvider === null) {
-            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->registry, $this->container);
+            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->controllerQueryProviderFactory, $this->recursiveTypeMapper, $this->container);
         }
         return $this->aggregateControllerQueryProvider;
     }

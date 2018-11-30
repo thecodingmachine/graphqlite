@@ -3,21 +3,25 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
+use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Registry\EmptyContainer;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
+use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 
@@ -29,6 +33,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeMapper;
     private $hydrator;
     private $registry;
+    private $typeGenerator;
+    private $controllerQueryProviderFactory;
+    private $annotationReader;
 
     protected function getTestObjectType()
     {
@@ -93,7 +100,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     $this->inputTestObjectType = $inputTestObjectType;
                 }
 
-                public function mapClassToType(string $className): OutputType
+                public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -159,19 +166,58 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getRegistry()
     {
         if ($this->registry === null) {
-            $this->registry = $this->buildRegistry(new EmptyContainer());
+            $this->registry = $this->buildAutoWiringContainer(new Picotainer([
+                'customOutput' => function() {
+                    return new StringType();
+                }
+            ]));
         }
         return $this->registry;
     }
 
-    protected function buildRegistry(ContainerInterface $container): Registry
+    protected function buildAutoWiringContainer(ContainerInterface $container): BasicAutoWiringContainer
     {
-        $reader = new AnnotationReader();
-        return new Registry($container,
-                new VoidAuthorizationService(),
+        return new BasicAutoWiringContainer($container);
+    }
+
+    protected function getAnnotationReader(): AnnotationReader
+    {
+        if ($this->annotationReader === null) {
+            $this->annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+        }
+        return $this->annotationReader;
+    }
+
+    protected function buildControllerQueryProvider($controller)
+    {
+        return new ControllerQueryProvider(
+            $controller,
+            $this->getAnnotationReader(),
+            $this->getTypeMapper(),
+            $this->getHydrator(),
+            new VoidAuthenticationService(),
+            new VoidAuthorizationService(),
+            $this->getRegistry()
+        );
+    }
+
+    protected function getTypeGenerator(): TypeGenerator
+    {
+        if ($this->typeGenerator === null) {
+            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory());
+        }
+        return $this->typeGenerator;
+    }
+
+    protected function getControllerQueryProviderFactory(): ControllerQueryProviderFactory
+    {
+        if ($this->controllerQueryProviderFactory === null) {
+            $this->controllerQueryProviderFactory = new ControllerQueryProviderFactory($this->getAnnotationReader(),
+                $this->getHydrator(),
                 new VoidAuthenticationService(),
-                $reader,
-                $this->getTypeMapper(),
-                $this->getHydrator());
+                new VoidAuthorizationService(),
+                $this->getRegistry());
+        }
+        return $this->controllerQueryProviderFactory;
     }
 }

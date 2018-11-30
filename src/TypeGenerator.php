@@ -3,11 +3,11 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use function get_parent_class;
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
@@ -16,41 +16,69 @@ use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 class TypeGenerator
 {
     /**
-     * @var RegistryInterface
+     * @var AnnotationReader
      */
-    private $registry;
+    private $annotationReader;
+    /**
+     * @var ControllerQueryProviderFactory
+     */
+    private $controllerQueryProviderFactory;
+    /**
+     * @var array<string, ObjectType>
+     */
+    private $cache = [];
 
-    public function __construct(RegistryInterface $registry)
+    public function __construct(AnnotationReader $annotationReader,
+                                ControllerQueryProviderFactory $controllerQueryProviderFactory)
     {
-        $this->registry = $registry;
+        $this->annotationReader = $annotationReader;
+        $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
     }
 
     /**
      * @param object $annotatedObject An object with a @Type annotation.
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return ObjectType
+     * @throws \ReflectionException
      */
-    public function mapAnnotatedObject($annotatedObject): ObjectType
+    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
-        $typeField = $this->registry->getAnnotationReader()->getTypeAnnotation($refTypeClass);
+        $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
             throw MissingAnnotationException::missingTypeException();
         }
 
-        $type = new ObjectType([
-            'name' => $this->getName($refTypeClass, $typeField),
-            'fields' => function() use ($annotatedObject) {
-                $fieldProvider = new ControllerQueryProvider($annotatedObject, $this->registry);
-                return $fieldProvider->getFields();
-            },
-            'interfaces' => function() use ($refTypeClass) {
-                return $this->registry->getTypeMapper()->findInterfaces($refTypeClass->getName());
-            }
-        ]);
+        $typeName = $this->getName($refTypeClass, $typeField);
 
-        return $type;
+        if (!isset($this->cache[$typeName])) {
+            $this->cache[$typeName] = new ObjectType([
+                'name' => $typeName,
+                'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $typeField) {
+                    $parentClass = get_parent_class($typeField->getClass());
+                    $parentType = null;
+                    if ($parentClass !== false) {
+                        if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
+                            $parentType = $recursiveTypeMapper->mapClassToType($parentClass);
+                        }
+                    }
+
+                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($annotatedObject, $recursiveTypeMapper);
+                    $fields = $fieldProvider->getFields();
+                    if ($parentType !== null) {
+                        $fields = $parentType->getFields() + $fields;
+                    }
+                    return $fields;
+                },
+                'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
+                    return $recursiveTypeMapper->findInterfaces($typeField->getClass());
+                }
+            ]);
+        }
+
+        return $this->cache[$typeName];
     }
 
     private function getName(ReflectionClass $refTypeClass, Type $type): string

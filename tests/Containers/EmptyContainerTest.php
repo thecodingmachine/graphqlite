@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Registry;
+namespace TheCodingMachine\GraphQL\Controllers\Containers;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\NotFoundExceptionInterface;

@@ -8,6 +8,7 @@ use function array_map;
 use function array_merge;
 use function array_unique;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 
 class CompositeTypeMapper implements TypeMapperInterface
@@ -27,11 +28,8 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * @param TypeMapperInterface[] $typeMappers
      */
-    public function setTypeMappers(array $typeMappers): void
+    public function __construct(array $typeMappers)
     {
-        // TODO: move the setter in the constructor in v3
-        // We can do this if we get rid of the Registry god object which is easier if we don't have to inject it in the
-        // AbstractAnnotatedObjectType class (this class will disappear in v3)
         $this->typeMappers = $typeMappers;
     }
 
@@ -55,14 +53,15 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
-     * @return OutputType
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return ObjectType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className): OutputType
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
-                return $typeMapper->mapClassToType($className);
+                return $typeMapper->mapClassToType($className, $recursiveTypeMapper);
             }
         }
         throw CannotMapTypeException::createForType($className);

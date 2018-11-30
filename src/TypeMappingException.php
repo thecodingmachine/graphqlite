@@ -13,7 +13,7 @@ class TypeMappingException extends GraphQLException
 {
     private $type;
 
-    public static function createFromType(Type $type)
+    public static function createFromType(Type $type): self
     {
         $e = new self("Don't know how to handle type ".(string) $type);
         $e->type = $type;

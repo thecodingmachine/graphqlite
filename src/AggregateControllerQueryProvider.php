@@ -3,9 +3,8 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use GraphQL\Type\Definition\OutputType;
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
@@ -19,22 +18,27 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     /**
      * @var ContainerInterface
      */
-    private $container;
+    private $controllersContainer;
     /**
-     * @var RegistryInterface
+     * @var ControllerQueryProviderFactory
      */
-    private $registry;
+    private $queryProviderFactory;
+    /**
+     * @var RecursiveTypeMapperInterface
+     */
+    private $recursiveTypeMapper;
 
     /**
      * @param string[] $controllers A list of controllers name in the container.
-     * @param RegistryInterface $registry
-     * @param ContainerInterface|null $container The container we will fetch controllers from. If not specified, container from the registry is used instead.
+     * @param ControllerQueryProviderFactory $queryProviderFactory
+     * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(array $controllers, RegistryInterface $registry, ContainerInterface $container = null)
+    public function __construct(array $controllers, ControllerQueryProviderFactory $queryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $controllersContainer)
     {
         $this->controllers = $controllers;
-        $this->registry = $registry;
-        $this->container = $container ?: $registry;
+        $this->queryProviderFactory = $queryProviderFactory;
+        $this->controllersContainer = $controllersContainer;
+        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     /**
@@ -45,8 +49,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         $queryList = [];
 
         foreach ($this->controllers as $controllerName) {
-            $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->registry);
+            $controller = $this->controllersContainer->get($controllerName);
+            $queryProvider = $this->queryProviderFactory->buildQueryProvider($controller, $this->recursiveTypeMapper);
             $queryList = array_merge($queryList, $queryProvider->getQueries());
         }
 
@@ -61,8 +65,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         $mutationList = [];
 
         foreach ($this->controllers as $controllerName) {
-            $controller = $this->container->get($controllerName);
-            $queryProvider = new ControllerQueryProvider($controller, $this->registry);
+            $controller = $this->controllersContainer->get($controllerName);
+            $queryProvider = $this->queryProviderFactory->buildQueryProvider($controller, $this->recursiveTypeMapper);
             $mutationList = array_merge($mutationList, $queryProvider->getMutations());
         }
 

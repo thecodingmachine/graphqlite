@@ -8,7 +8,10 @@ use function get_class;
 use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use function is_object;
 use Iterator;
@@ -28,16 +31,13 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use phpDocumentor\Reflection\Types\Integer;
 use ReflectionClass;
-use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
-use TheCodingMachine\GraphQL\Controllers\Registry\RegistryInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
@@ -73,21 +73,29 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     private $authorizationService;
     /**
-     * @var RegistryInterface
+     * @var ContainerInterface
      */
     private $registry;
 
     /**
      * @param object $controller
+     * @param AnnotationReader $annotationReader
+     * @param RecursiveTypeMapperInterface $typeMapper
+     * @param HydratorInterface $hydrator
+     * @param AuthenticationServiceInterface $authenticationService
+     * @param AuthorizationServiceInterface $authorizationService
+     * @param ContainerInterface $registry The registry is used to fetch custom return types by container identifier (using the returnType parameter of the Type annotation)
      */
-    public function __construct($controller, RegistryInterface $registry)
+    public function __construct($controller, AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
+                                HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
+                                AuthorizationServiceInterface $authorizationService, ContainerInterface $registry)
     {
         $this->controller = $controller;
-        $this->annotationReader = $registry->getAnnotationReader();
-        $this->typeMapper = $registry->getTypeMapper();
-        $this->hydrator = $registry->getHydrator();
-        $this->authenticationService = $registry->getAuthenticationService();
-        $this->authorizationService = $registry->getAuthorizationService();
+        $this->annotationReader = $annotationReader;
+        $this->typeMapper = $typeMapper;
+        $this->hydrator = $hydrator;
+        $this->authenticationService = $authenticationService;
+        $this->authorizationService = $authorizationService;
         $this->registry = $registry;
     }
 
@@ -108,14 +116,22 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return QueryField[]
+     * @return array<string, QueryField> QueryField indexed by name.
      */
     public function getFields(): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations(Annotations\Field::class, true);
         $sourceFields = $this->getSourceFields();
 
-        return array_merge($fieldAnnotations, $sourceFields);
+        $fields = [];
+        foreach ($fieldAnnotations as $field) {
+            $fields[$field->name] = $field;
+        }
+        foreach ($sourceFields as $field) {
+            $fields[$field->name] = $field;
+        }
+
+        return $fields;
     }
 
     /**
@@ -169,6 +185,9 @@ class ControllerQueryProvider implements QueryProviderInterface
 
                 if ($queryAnnotation->getReturnType()) {
                     $type = $this->registry->get($queryAnnotation->getReturnType());
+                    if (!$type instanceof OutputType) {
+                        throw new \InvalidArgumentException("The 'returnType' parameter in @Type annotation should contain a container identifier that points to an entry that implements GraphQL\\Type\\Definition\\OutputType.");
+                    }
                 } else {
                     $phpdocType = null;
                     $returnType = $refMethod->getReturnType();
@@ -472,7 +491,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
         } else {
-            $graphQlType = new UnionType($unionTypes, $this->registry->getTypeMapper());
+            $graphQlType = new UnionType($unionTypes, $this->typeMapper);
         }
 
         /* elseif (count($filteredDocBlockTypes) === 1) {

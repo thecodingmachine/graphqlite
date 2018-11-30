@@ -5,7 +5,8 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\SchemaConfig;
-use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
+use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -14,7 +15,7 @@ use TheCodingMachine\GraphQL\Controllers\Registry\Registry;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, Registry $registry, SchemaConfig $config = null)
+    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, SchemaConfig $config = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();
@@ -35,9 +36,17 @@ class Schema extends \GraphQL\Type\Schema
 
         $config->setQuery($query);
         $config->setMutation($mutation);
-        $config->setTypeLoader(function(string $name) use ($registry) {
-            return $registry->get($name);
+
+        $config->setTypes(function() use ($recursiveTypeMapper) {
+            return $recursiveTypeMapper->getOutputTypes();
         });
+
+        /*$config->setTypeLoader(function(string $name) use ($recursiveTypeMapper) {
+            // FIXME: TYPELOADER IS COMPLETELY FALSE.
+            // We need to find a type FROM a GraphQL type name
+            // Therefore, we need to modify the TypeMapperInterface.
+            return $registry->get($name);
+        });*/
 
         parent::__construct($config);
     }
