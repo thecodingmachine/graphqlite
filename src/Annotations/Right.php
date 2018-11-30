@@ -18,7 +18,7 @@ class Right
     private $name;
 
     /**
-     * @param array $values
+     * @param array<string, mixed> $values
      *
      * @throws \BadMethodCallException
      */

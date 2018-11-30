@@ -13,7 +13,7 @@ interface HydratorInterface
     /**
      * Hydrates/returns an object based on a PHP array and a GraphQL type.
      *
-     * @param array $data
+     * @param mixed[] $data
      * @param InputType $type
      * @return object
      */

@@ -25,7 +25,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param array<string,ObjectType> $types
      */
-    public function setTypes(array $types)
+    public function setTypes(array $types): void
     {
         $this->types = $types;
     }
@@ -40,7 +40,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param array<string,InputType> $inputTypes
      */
-    public function setInputTypes(array $inputTypes)
+    public function setInputTypes(array $inputTypes): void
     {
         $this->inputTypes = $inputTypes;
     }
