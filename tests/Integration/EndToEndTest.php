@@ -11,10 +11,12 @@ use Mouf\Picotainer\Picotainer;
 use PhpParser\Comment\Doc;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Util\Type;
+use function print_r;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
+use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
@@ -32,7 +34,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
-class EndToEndTest /*extends TestCase*/
+class EndToEndTest extends TestCase
 {
     /**
      * @var ContainerInterface
@@ -43,11 +45,20 @@ class EndToEndTest /*extends TestCase*/
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
-                return new Schema($container->get(QueryProviderInterface::class), $container->get(BasicAutoWiringContainer::class));
+                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(BasicAutoWiringContainer::class),
-                    $container->get(BasicAutoWiringContainer::class), new NullCache());
+                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(ControllerQueryProviderFactory::class),
+                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), new NullCache());
+            },
+            ControllerQueryProviderFactory::class => function(ContainerInterface $container) {
+                return new ControllerQueryProviderFactory(
+                    $container->get(AnnotationReader::class),
+                    $container->get(HydratorInterface::class),
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class),
+                    $container->get(BasicAutoWiringContainer::class)
+                );
             },
             BasicAutoWiringContainer::class => function(ContainerInterface $container) {
                 return new BasicAutoWiringContainer(new EmptyContainer());
@@ -70,7 +81,10 @@ class EndToEndTest /*extends TestCase*/
                     );
             },
             TypeGenerator::class => function(ContainerInterface $container) {
-                return new TypeGenerator();
+                return new TypeGenerator(
+                    $container->get(AnnotationReader::class),
+                    $container->get(ControllerQueryProviderFactory::class)
+                );
             },
             AnnotationReader::class => function(ContainerInterface $container) {
                 return new AnnotationReader(new DoctrineAnnotationReader());
@@ -97,6 +111,9 @@ class EndToEndTest /*extends TestCase*/
         query {
             getContacts {
                 name
+                ... on User {
+                    email
+                }
             }
         }
         ';
@@ -106,7 +123,18 @@ class EndToEndTest /*extends TestCase*/
             $queryString
         );
 
-        var_dump($result);
+        $this->assertSame([
+            'getContacts' => [
+                [
+                    'name' => 'Joe'
+                ],
+                [
+                    'name' => 'Bill',
+                    'email' => 'bill@example.com'
+                ]
+
+            ]
+        ], $result->toArray()['data']);
     }
 
 }

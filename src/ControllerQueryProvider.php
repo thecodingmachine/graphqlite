@@ -116,14 +116,22 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return QueryField[]
+     * @return array<string, QueryField> QueryField indexed by name.
      */
     public function getFields(): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations(Annotations\Field::class, true);
         $sourceFields = $this->getSourceFields();
 
-        return array_merge($fieldAnnotations, $sourceFields);
+        $fields = [];
+        foreach ($fieldAnnotations as $field) {
+            $fields[$field->name] = $field;
+        }
+        foreach ($sourceFields as $field) {
+            $fields[$field->name] = $field;
+        }
+
+        return $fields;
     }
 
     /**

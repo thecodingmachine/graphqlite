@@ -22,7 +22,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
+            public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
             {
                 if ($className === TestObject::class) {
                     return new ObjectType([

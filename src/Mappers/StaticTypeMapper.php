@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 use function array_keys;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use TheCodingMachine\GraphQL\Controllers\Mappers\Interfaces\InterfacesResolverInterface;
 
@@ -15,14 +16,14 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\Interfaces\InterfacesResolverIn
 final class StaticTypeMapper implements TypeMapperInterface
 {
     /**
-     * @var array<string,OutputType>
+     * @var array<string,ObjectType>
      */
     private $types;
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
      *
-     * @param array<string,OutputType> $types
+     * @param array<string,ObjectType> $types
      */
     public function setTypes(array $types)
     {
@@ -60,10 +61,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $className
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return OutputType
+     * @return ObjectType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
         if (isset($this->types[$className])) {
             return $this->types[$className];

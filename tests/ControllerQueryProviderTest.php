@@ -158,8 +158,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->assertCount(2, $fields);
 
-        $this->assertSame('customField', $fields[0]->name);
-        $this->assertSame('test', $fields[1]->name);
+        $this->assertSame('customField', $fields['customField']->name);
+        $this->assertSame('test', $fields['test']->name);
     }
 
     public function testLoggedInSourceField()
@@ -182,7 +182,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
-        $this->assertSame('testBool', $fields[2]->name);
+        $this->assertSame('testBool', $fields['testBool']->name);
 
     }
 
@@ -205,7 +205,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $fields = $queryProvider->getFields();
         $this->assertCount(3, $fields);
 
-        $this->assertSame('testRight', $fields[2]->name);
+        $this->assertSame('testRight', $fields['testRight']->name);
 
     }
 
@@ -232,9 +232,9 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $fields = $queryProvider->getFields();
         $this->assertCount(1, $fields);
 
-        $this->assertSame('test', $fields[0]->name);
-        $this->assertInstanceOf(NonNull::class, $fields[0]->getType());
-        $this->assertInstanceOf(IDType::class, $fields[0]->getType()->getWrappedType());
+        $this->assertSame('test', $fields['test']->name);
+        $this->assertInstanceOf(NonNull::class, $fields['test']->getType());
+        $this->assertInstanceOf(IDType::class, $fields['test']->getType()->getWrappedType());
     }
 
     public function testFromSourceFieldsInterface()
@@ -251,7 +251,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $fields = $queryProvider->getFields();
         $this->assertCount(1, $fields);
 
-        $this->assertSame('test', $fields[0]->name);
+        $this->assertSame('test', $fields['test']->name);
 
     }
 

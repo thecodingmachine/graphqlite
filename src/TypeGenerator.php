@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use function get_parent_class;
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
@@ -22,6 +23,10 @@ class TypeGenerator
      * @var ControllerQueryProviderFactory
      */
     private $controllerQueryProviderFactory;
+    /**
+     * @var array<string, ObjectType>
+     */
+    private $cache = [];
 
     public function __construct(AnnotationReader $annotationReader,
                                 ControllerQueryProviderFactory $controllerQueryProviderFactory)
@@ -46,18 +51,34 @@ class TypeGenerator
             throw MissingAnnotationException::missingTypeException();
         }
 
-        $type = new ObjectType([
-            'name' => $this->getName($refTypeClass, $typeField),
-            'fields' => function() use ($annotatedObject, $recursiveTypeMapper) {
-                $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($annotatedObject, $recursiveTypeMapper);
-                return $fieldProvider->getFields();
-            },
-            'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
-                return $recursiveTypeMapper->findInterfaces($typeField->getClass());
-            }
-        ]);
+        $typeName = $this->getName($refTypeClass, $typeField);
 
-        return $type;
+        if (!isset($this->cache[$typeName])) {
+            $this->cache[$typeName] = new ObjectType([
+                'name' => $typeName,
+                'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $typeField) {
+                    $parentClass = get_parent_class($typeField->getClass());
+                    $parentType = null;
+                    if ($parentClass !== false) {
+                        if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
+                            $parentType = $recursiveTypeMapper->mapClassToType($parentClass);
+                        }
+                    }
+
+                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($annotatedObject, $recursiveTypeMapper);
+                    $fields = $fieldProvider->getFields();
+                    if ($parentType !== null) {
+                        $fields = $parentType->getFields() + $fields;
+                    }
+                    return $fields;
+                },
+                'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
+                    return $recursiveTypeMapper->findInterfaces($typeField->getClass());
+                }
+            ]);
+        }
+
+        return $this->cache[$typeName];
     }
 
     private function getName(ReflectionClass $refTypeClass, Type $type): string

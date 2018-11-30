@@ -8,6 +8,7 @@ use function array_map;
 use function array_merge;
 use function array_unique;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 
 class CompositeTypeMapper implements TypeMapperInterface
@@ -53,10 +54,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @param string $className
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return OutputType
+     * @return ObjectType
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): OutputType
+    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
