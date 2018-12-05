@@ -151,8 +151,6 @@ class ControllerQueryProvider implements QueryProviderInterface
 
         $queryList = [];
 
-        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
-
         $oldDeclaringClass = null;
         $context = null;
 
@@ -274,8 +272,6 @@ class ControllerQueryProvider implements QueryProviderInterface
 
         $objectClass = $typeField->getClass();
         $objectRefClass = new \ReflectionClass($objectClass);
-
-        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
         $oldDeclaringClass = null;
         $context = null;

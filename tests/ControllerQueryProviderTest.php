@@ -15,8 +15,12 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
@@ -349,6 +353,50 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType::test, cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
+        $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithIterableReturnType()
+    {
+        $controller = new TestControllerWithIterableReturnType();
+
+        $queryProvider = $this->buildControllerQueryProvider($controller);
+
+        $this->expectException(TypeMappingException::class);
+        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
+        $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithArrayReturnType()
+    {
+        $controller = new TestControllerWithArrayReturnType();
+
+        $queryProvider = $this->buildControllerQueryProvider($controller);
+
+        $this->expectException(TypeMappingException::class);
+        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType::test is type-hinted to array. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]');
+        $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithArrayParams()
+    {
+        $controller = new TestControllerWithArrayParam();
+
+        $queryProvider = $this->buildControllerQueryProvider($controller);
+
+        $this->expectException(TypeMappingException::class);
+        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam::test is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
+        $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithIterableParams()
+    {
+        $controller = new TestControllerWithIterableParam();
+
+        $queryProvider = $this->buildControllerQueryProvider($controller);
+
+        $this->expectException(TypeMappingException::class);
+        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
         $queryProvider->getQueries();
     }
 }
