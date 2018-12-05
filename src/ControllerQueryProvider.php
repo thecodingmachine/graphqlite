@@ -181,7 +181,13 @@ class ControllerQueryProvider implements QueryProviderInterface
                 $methodName = $refMethod->getName();
                 $name = $queryAnnotation->getName() ?: $methodName;
 
-                $args = $this->mapParameters($refMethod, $docBlockObj);
+                $parameters = $refMethod->getParameters();
+                if ($injectSource === true) {
+                    $first_parameter = array_shift($parameters);
+                    // TODO: check that $first_parameter type is correct.
+                }
+
+                $args = $this->mapParameters($parameters, $docBlockObj);
 
                 if ($queryAnnotation->getReturnType()) {
                     $type = $this->registry->get($queryAnnotation->getReturnType());
@@ -208,14 +214,6 @@ class ControllerQueryProvider implements QueryProviderInterface
                     }
                 }
 
-                //$sourceType = null;
-                if ($injectSource === true) {
-                    /*$sourceArr = */\array_shift($args);
-                    // Security check: if the first parameter of the correct type?
-                    //$sourceType = $sourceArr['type'];
-                    /* @var $sourceType TypeInterface */
-                    // TODO
-                }
                 $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], null, $this->hydrator, $docBlock->getComment(), $injectSource);
             }
         }
@@ -304,7 +302,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             $docComment = $refMethod->getDocComment() ?: '/** */';
             $docBlockObj = $docBlockFactory->create($docComment, $context);
 
-            $args = $this->mapParameters($refMethod, $docBlockObj);
+            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
 
             $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
 
@@ -372,17 +370,17 @@ class ControllerQueryProvider implements QueryProviderInterface
     /**
      * Note: there is a bug in $refMethod->allowsNull that forces us to use $standardRefMethod->allowsNull instead.
      *
-     * @param \ReflectionMethod $refMethod
+     * @param \ReflectionParameter[] $refParameters
      * @return array[] An array of ['type'=>Type, 'default'=>val]
      * @throws MissingTypeHintException
      */
-    private function mapParameters(\ReflectionMethod $refMethod, DocBlock $docBlock): array
+    private function mapParameters(array $refParameters, DocBlock $docBlock): array
     {
         $args = [];
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
-        foreach ($refMethod->getParameters() as $parameter) {
+        foreach ($refParameters as $parameter) {
             $parameterType = $parameter->getType();
             $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
 
