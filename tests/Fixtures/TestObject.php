@@ -36,7 +36,7 @@ class TestObject
         return $this->testBool;
     }
 
-    public function getTestRight(): string
+    public function testRight(): string
     {
         return "foo";
     }
