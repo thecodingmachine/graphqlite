@@ -198,7 +198,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                     $phpdocType = null;
                     $returnType = $refMethod->getReturnType();
                     if ($returnType !== null) {
-                        $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
+                        $phpdocType = $typeResolver->resolve((string) $returnType);
                     } else {
                         $phpdocType = new Mixed_();
                     }
@@ -304,8 +304,6 @@ class ControllerQueryProvider implements QueryProviderInterface
 
             $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
 
-            $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
-
             if ($sourceField->isId()) {
                 $type = GraphQLType::id();
                 if (!$refMethod->getReturnType()->allowsNull()) {
@@ -314,10 +312,17 @@ class ControllerQueryProvider implements QueryProviderInterface
             } elseif ($sourceField->getReturnType()) {
                 $type = $this->registry->get($sourceField->getReturnType());
             } else {
+                $returnType = $refMethod->getReturnType();
+                if ($returnType !== null) {
+                    $phpdocType = $typeResolver->resolve((string) $returnType);
+                } else {
+                    $phpdocType = new Mixed_();
+                }
+
                 $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
 
                 try {
-                    $type = $this->mapType($phpdocType, $docBlockReturnType, $refMethod->getReturnType()->allowsNull(), false);
+                    $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
                 } catch (TypeMappingException $e) {
                     throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
                 }
