@@ -15,6 +15,8 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
@@ -23,6 +25,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
@@ -315,5 +318,27 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertSame('TestObject', $unionQuery->getType()->getWrappedType()->getTypes()[0]->name);
         $this->assertInstanceOf(ObjectType::class, $unionQuery->getType()->getWrappedType()->getTypes()[1]);
         $this->assertSame('TestObject2', $unionQuery->getType()->getWrappedType()->getTypes()[1]->name);
+    }
+
+    public function testQueryProviderWithInvalidInputType()
+    {
+        $controller = new TestControllerWithInvalidInputType();
+
+        $queryProvider = $this->buildControllerQueryProvider($controller);
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For parameter $foo, in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType::test, cannot map class "Exception" to a known GraphQL input type. Check your TypeMapper configuration.');
+        $queryProvider->getQueries();
+    }
+
+    public function testQueryProviderWithInvalidReturnType()
+    {
+        $controller = new TestControllerWithInvalidReturnType();
+
+        $queryProvider = $this->buildControllerQueryProvider($controller);
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType::test, cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
+        $queryProvider->getQueries();
     }
 }

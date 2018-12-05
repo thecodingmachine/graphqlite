@@ -203,6 +203,8 @@ class ControllerQueryProvider implements QueryProviderInterface
                         $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
                     } catch (TypeMappingException $e) {
                         throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
+                    } catch (CannotMapTypeException $e) {
+                        throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
                     }
                 }
 
@@ -406,6 +408,8 @@ class ControllerQueryProvider implements QueryProviderInterface
                 ];
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
+            } catch (CannotMapTypeException $e) {
+                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
             }
 
             if ($parameter->allowsNull()) {
