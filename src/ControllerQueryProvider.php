@@ -9,6 +9,7 @@ use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use Psr\Container\ContainerInterface;
+use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
@@ -195,23 +196,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                         throw new \InvalidArgumentException("The 'returnType' parameter in @Type annotation should contain a container identifier that points to an entry that implements GraphQL\\Type\\Definition\\OutputType.");
                     }
                 } else {
-                    $phpdocType = null;
-                    $returnType = $refMethod->getReturnType();
-                    if ($returnType !== null) {
-                        $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
-                    } else {
-                        $phpdocType = new Mixed_();
-                    }
-
-                    $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
-
-                    try {
-                        $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
-                    } catch (TypeMappingException $e) {
-                        throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
-                    } catch (CannotMapTypeException $e) {
-                        throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
-                    }
+                    $type = $this->mapReturnType($refMethod, $docBlockObj);
                 }
 
                 $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], null, $this->hydrator, $docBlock->getComment(), $injectSource);
@@ -219,6 +204,32 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         return $queryList;
+    }
+
+    /**
+     * @return GraphQLType&OutputType
+     */
+    private function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj): GraphQLType
+    {
+        $returnType = $refMethod->getReturnType();
+        if ($returnType !== null) {
+            $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+            $phpdocType = $typeResolver->resolve((string) $returnType);
+        } else {
+            $phpdocType = new Mixed_();
+        }
+
+        $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
+
+        try {
+            /** @var GraphQLType&OutputType $type */
+            $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
+        } catch (TypeMappingException $e) {
+            throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
+        } catch (CannotMapTypeException $e) {
+            throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
+        }
+        return $type;
     }
 
     private function getDocBlocReturnType(DocBlock $docBlock, \ReflectionMethod $refMethod): ?Type
@@ -304,8 +315,6 @@ class ControllerQueryProvider implements QueryProviderInterface
 
             $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
 
-            $phpdocType = $typeResolver->resolve((string) $refMethod->getReturnType());
-
             if ($sourceField->isId()) {
                 $type = GraphQLType::id();
                 if (!$refMethod->getReturnType()->allowsNull()) {
@@ -314,13 +323,7 @@ class ControllerQueryProvider implements QueryProviderInterface
             } elseif ($sourceField->getReturnType()) {
                 $type = $this->registry->get($sourceField->getReturnType());
             } else {
-                $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
-
-                try {
-                    $type = $this->mapType($phpdocType, $docBlockReturnType, $refMethod->getReturnType()->allowsNull(), false);
-                } catch (TypeMappingException $e) {
-                    throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
-                }
+                $type = $this->mapReturnType($refMethod, $docBlockObj);
             }
 
             $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlock->getComment(), false);

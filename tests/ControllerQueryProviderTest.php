@@ -22,6 +22,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
@@ -226,6 +227,15 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $this->expectException(FieldNotFoundException::class);
         $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
+        $queryProvider->getFields();
+    }
+
+    public function testSourceFieldHasMissingReturnType()
+    {
+        $queryProvider = $this->buildControllerQueryProvider(new TestTypeMissingReturnType());
+
+        $this->expectException(TypeMappingException::class);
+        $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
         $queryProvider->getFields();
     }
 
