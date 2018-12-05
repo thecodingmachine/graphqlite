@@ -17,11 +17,12 @@ class InterfaceFromObjectType extends \GraphQL\Type\Definition\InterfaceType
     public function __construct(ObjectType $type, RecursiveTypeMapperInterface $typeMapper)
     {
         $name = $type->name.'Interface';
-        $fields = $type->getFields();
 
         parent::__construct([
             'name' => $name,
-            'fields' => $fields,
+            'fields' => function() use ($type) {
+                return $type->getFields();
+            },
             'description' => $type->description,
             'resolveType' => function($value) use ($typeMapper) {
                 if (!is_object($value)) {
