@@ -191,7 +191,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 if ($queryAnnotation->getReturnType()) {
                     $type = $this->registry->get($queryAnnotation->getReturnType());
                     if (!$type instanceof OutputType) {
-                        throw new \InvalidArgumentException("The 'returnType' parameter in @Type annotation should contain a container identifier that points to an entry that implements GraphQL\\Type\\Definition\\OutputType.");
+                        throw new \InvalidArgumentException(sprintf("In %s::%s, the 'returnType' parameter in @Type annotation should contain a container identifier that points to an entry that implements GraphQL\\Type\\Definition\\OutputType. The '%s' container entry does not implement GraphQL\\Type\\Definition\\OutputType", $refMethod->getDeclaringClass()->getName(), $refMethod->getName(), $queryAnnotation->getReturnType()));
                     }
                 } else {
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
