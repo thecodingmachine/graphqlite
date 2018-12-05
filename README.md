@@ -358,8 +358,8 @@ class PostType extends AbstractAnnotatedObjectType
 }
 ```
 
-By putting the `@SourceField` in the class docblock, you let GraphQL-controllers now that the type should expose the
-`getName` method of the underlying `Post` object.
+By putting the `@SourceField` in the class docblock, you let GraphQL-controllers know that the type exposes the
+`getName` method of the underlying `Post` object (GraphQL-controllers will look for methods named `name()`, `getName()` and `isName()`).
 
 For the `@SourceField` annotation to work, you need to add a `@Type` annotation that will let the GraphQL-controllers
 library now the underlying type.

@@ -330,13 +330,17 @@ class ControllerQueryProvider implements QueryProviderInterface
 
     private function getMethodFromPropertyName(\ReflectionClass $reflectionClass, string $propertyName): \ReflectionMethod
     {
-        $upperCasePropertyName = \ucfirst($propertyName);
-        if ($reflectionClass->hasMethod('get'.$upperCasePropertyName)) {
-            $methodName = 'get'.$upperCasePropertyName;
-        } elseif ($reflectionClass->hasMethod('is'.$upperCasePropertyName)) {
-            $methodName = 'is'.$upperCasePropertyName;
+        if ($reflectionClass->hasMethod($propertyName)) {
+            $methodName = $propertyName;
         } else {
-            throw FieldNotFoundException::missingField($reflectionClass->getName(), $propertyName);
+            $upperCasePropertyName = \ucfirst($propertyName);
+            if ($reflectionClass->hasMethod('get'.$upperCasePropertyName)) {
+                $methodName = 'get'.$upperCasePropertyName;
+            } elseif ($reflectionClass->hasMethod('is'.$upperCasePropertyName)) {
+                $methodName = 'is'.$upperCasePropertyName;
+            } else {
+                throw FieldNotFoundException::missingField($reflectionClass->getName(), $propertyName);
+            }
         }
 
         return $reflectionClass->getMethod($methodName);
