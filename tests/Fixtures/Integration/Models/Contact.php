@@ -23,4 +23,9 @@ class Contact
     {
         return $this->name;
     }
+
+    public function getManager(): ?Contact
+    {
+        return null;
+    }
 }

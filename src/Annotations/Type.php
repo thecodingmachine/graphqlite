@@ -46,6 +46,6 @@ class Type
      */
     public function getClass(): string
     {
-        return $this->className;
+        return ltrim($this->className, '\\');
     }
 }
