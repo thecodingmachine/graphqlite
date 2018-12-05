@@ -483,16 +483,18 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         $unionTypes = [];
+        $lastException = null;
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
                 $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), $mapToInputType);
             } catch (TypeMappingException | CannotMapTypeException $e) {
                 // We have several types. It is ok not to be able to match one.
+                $lastException = $e;
             }
         }
 
-        if (empty($unionTypes)) {
-            throw TypeMappingException::createFromType($docBlockType);
+        if (empty($unionTypes) && $lastException !== null) {
+            throw $lastException;
         }
 
         if (count($unionTypes) === 1) {
