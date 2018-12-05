@@ -3,11 +3,13 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use function array_map;
 use function array_merge;
 use function get_class;
 use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use phpDocumentor\Reflection\Types\Nullable;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
@@ -483,7 +485,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         $unionTypes = [];
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
-                $unionTypes[] = $this->toGraphQlType($singleDocBlockType, $mapToInputType);
+                $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), $mapToInputType);
             } catch (TypeMappingException | CannotMapTypeException $e) {
                 // We have several types. It is ok not to be able to match one.
             }
@@ -568,6 +570,20 @@ class ControllerQueryProvider implements QueryProviderInterface
         return array_filter($docBlockTypeHints, function ($item) {
             return !$item instanceof Null_;
         });
+    }
+
+    /**
+     * Drops "Nullable" types and return the core type.
+     *
+     * @param Type $typeHint
+     * @return Type
+     */
+    private function dropNullableType(Type $typeHint): Type
+    {
+        if ($typeHint instanceof Nullable) {
+            return $typeHint->getActualType();
+        }
+        return $typeHint;
     }
 
     /**

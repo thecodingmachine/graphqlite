@@ -36,7 +36,10 @@ class TestObject
         return $this->testBool;
     }
 
-    public function testRight(): string
+    /**
+     * @return ?string
+     */
+    public function testRight()
     {
         return "foo";
     }
