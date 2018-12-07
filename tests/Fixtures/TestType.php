@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
  * @SourceField(name="test")
  * @SourceField(name="testBool", logged=true)
  * @SourceField(name="testRight", right=@Right(name="FOOBAR"))
+ * @SourceField(name="sibling")
  */
 class TestType
 {

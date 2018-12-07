@@ -9,7 +9,10 @@ use function get_class;
 use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Nullable;
+use phpDocumentor\Reflection\Types\Self_;
+use phpDocumentor\Reflection\Types\Static_;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
@@ -215,6 +218,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         if ($returnType !== null) {
             $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
             $phpdocType = $typeResolver->resolve((string) $returnType);
+            $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         } else {
             $phpdocType = new Mixed_();
         }
@@ -394,6 +398,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 throw MissingTypeHintException::missingTypeHint($parameter);
             }
             $phpdocType = $typeResolver->resolve($type);
+            $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
 
             /** @var DocBlock\Tags\Param[] $paramTags */
             $paramTags = $docBlock->getTagsByName('param');
@@ -606,5 +611,19 @@ class ControllerQueryProvider implements QueryProviderInterface
         }
 
         return false;
+    }
+
+    /**
+     * Resolves "self" types into the class type.
+     *
+     * @param Type $type
+     * @return Type
+     */
+    private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
+    {
+        if ($type instanceof Self_) {
+            return new Object_(new Fqsen('\\'.$reflectionClass->getName()));
+        }
+        return $type;
     }
 }

@@ -43,4 +43,9 @@ class TestObject
     {
         return "foo";
     }
+
+    public function getSibling(self $foo): self
+    {
+        return new self('foo');
+    }
 }
