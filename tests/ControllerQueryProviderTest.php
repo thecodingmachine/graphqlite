@@ -164,10 +164,15 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $fields = $queryProvider->getFields();
 
-        $this->assertCount(2, $fields);
+        $this->assertCount(3, $fields);
 
         $this->assertSame('customField', $fields['customField']->name);
         $this->assertSame('test', $fields['test']->name);
+        // Test the "self" name resolution
+        $this->assertSame('sibling', $fields['sibling']->name);
+        $this->assertInstanceOf(NonNull::class, $fields['sibling']->getType());
+        $this->assertInstanceOf(ObjectType::class, $fields['sibling']->getType()->getWrappedType());
+        $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
     }
 
     public function testLoggedInSourceField()
@@ -188,7 +193,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         );
 
         $fields = $queryProvider->getFields();
-        $this->assertCount(3, $fields);
+        $this->assertCount(4, $fields);
 
         $this->assertSame('testBool', $fields['testBool']->name);
 
@@ -211,7 +216,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         );
 
         $fields = $queryProvider->getFields();
-        $this->assertCount(3, $fields);
+        $this->assertCount(4, $fields);
 
         $this->assertSame('testRight', $fields['testRight']->name);
 
