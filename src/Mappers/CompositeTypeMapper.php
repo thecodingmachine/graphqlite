@@ -10,6 +10,8 @@ use function array_unique;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
+use function is_array;
+use function iterator_to_array;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {
@@ -30,7 +32,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      */
     public function __construct(iterable $typeMappers)
     {
-        $this->typeMappers = $typeMappers;
+        $this->typeMappers = is_array($typeMappers) ? $typeMappers: iterator_to_array($typeMappers);
     }
 
     /**

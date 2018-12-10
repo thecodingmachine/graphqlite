@@ -5,6 +5,8 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use function array_map;
 use function array_merge;
+use function is_array;
+use function iterator_to_array;
 
 /**
  * A query provider that aggregates several query providers together.
@@ -21,7 +23,7 @@ class AggregateQueryProvider implements QueryProviderInterface
      */
     public function __construct(iterable $queryProviders)
     {
-        $this->queryProviders = $queryProviders;
+        $this->queryProviders = is_array($queryProviders) ? $queryProviders : iterator_to_array($queryProviders);
     }
 
     /**
