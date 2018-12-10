@@ -36,7 +36,7 @@ class TypeGenerator
     }
 
     /**
-     * @param object $annotatedObject An object with a @Type annotation.
+     * @param object $annotatedObject An object with a Type annotation.
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return ObjectType
      * @throws \ReflectionException
