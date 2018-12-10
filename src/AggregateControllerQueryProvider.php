@@ -33,7 +33,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
      * @param ControllerQueryProviderFactory $queryProviderFactory
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(array $controllers, ControllerQueryProviderFactory $queryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $controllersContainer)
+    public function __construct(iterable $controllers, ControllerQueryProviderFactory $queryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $controllersContainer)
     {
         $this->controllers = $controllers;
         $this->queryProviderFactory = $queryProviderFactory;

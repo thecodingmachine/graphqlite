@@ -19,7 +19,7 @@ class AggregateQueryProvider implements QueryProviderInterface
     /**
      * @param QueryProviderInterface[] $queryProviders
      */
-    public function __construct(array $queryProviders)
+    public function __construct(iterable $queryProviders)
     {
         $this->queryProviders = $queryProviders;
     }
