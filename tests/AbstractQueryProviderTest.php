@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
@@ -22,6 +23,7 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 
@@ -197,7 +199,8 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getHydrator(),
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
-            $this->getRegistry()
+            $this->getRegistry(),
+            new CachedDocBlockFactory(new ArrayCache())
         );
     }
 
@@ -216,7 +219,8 @@ abstract class AbstractQueryProviderTest extends TestCase
                 $this->getHydrator(),
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService(),
-                $this->getRegistry());
+                $this->getRegistry(),
+                new CachedDocBlockFactory(new ArrayCache()));
         }
         return $this->controllerQueryProviderFactory;
     }

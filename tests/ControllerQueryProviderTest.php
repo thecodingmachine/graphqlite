@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
+use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam;
@@ -31,6 +32,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterfa
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
@@ -189,7 +191,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
                 }
             },
             new VoidAuthorizationService(),
-            new EmptyContainer()
+            new EmptyContainer(),
+            new CachedDocBlockFactory(new ArrayCache())
         );
 
         $fields = $queryProvider->getFields();
@@ -212,7 +215,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
                 {
                     return true;
                 }
-            },new EmptyContainer()
+            },new EmptyContainer(),
+            new CachedDocBlockFactory(new ArrayCache())
         );
 
         $fields = $queryProvider->getFields();
@@ -268,7 +272,8 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
             $this->getHydrator(),
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
-            new EmptyContainer()
+            new EmptyContainer(),
+            new CachedDocBlockFactory(new ArrayCache())
         );
         $fields = $queryProvider->getFields();
         $this->assertCount(1, $fields);
