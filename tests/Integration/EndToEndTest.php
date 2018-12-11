@@ -14,6 +14,7 @@ use PHPUnit\Util\Type;
 use function print_r;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
@@ -27,6 +28,7 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\QueryProviderInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
+use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Schema;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
@@ -57,7 +59,8 @@ class EndToEndTest extends TestCase
                     $container->get(HydratorInterface::class),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class),
-                    $container->get(BasicAutoWiringContainer::class)
+                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(CachedDocBlockFactory::class)
                 );
             },
             BasicAutoWiringContainer::class => function(ContainerInterface $container) {
@@ -97,6 +100,9 @@ class EndToEndTest extends TestCase
                         return new Contact($data['name']);
                     }
                 };
+            },
+            CachedDocBlockFactory::class => function() {
+                return new CachedDocBlockFactory(new ArrayCache());
             }
         ]);
     }

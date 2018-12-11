@@ -3,23 +3,16 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
-use function array_map;
 use function array_merge;
-use function get_class;
-use function gettype;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
-use phpDocumentor\Reflection\Types\Static_;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
-use function is_object;
 use Iterator;
 use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
@@ -28,7 +21,6 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Compound;
-use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
@@ -82,6 +74,10 @@ class ControllerQueryProvider implements QueryProviderInterface
      * @var ContainerInterface
      */
     private $registry;
+    /**
+     * @var CachedDocBlockFactory
+     */
+    private $cachedDocBlockFactory;
 
     /**
      * @param object $controller
@@ -94,7 +90,8 @@ class ControllerQueryProvider implements QueryProviderInterface
      */
     public function __construct($controller, AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
-                                AuthorizationServiceInterface $authorizationService, ContainerInterface $registry)
+                                AuthorizationServiceInterface $authorizationService, ContainerInterface $registry,
+                                CachedDocBlockFactory $cachedDocBlockFactory)
     {
         $this->controller = $controller;
         $this->annotationReader = $annotationReader;
@@ -103,6 +100,7 @@ class ControllerQueryProvider implements QueryProviderInterface
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
         $this->registry = $registry;
+        $this->cachedDocBlockFactory = $cachedDocBlockFactory;
     }
 
     /**
@@ -149,8 +147,6 @@ class ControllerQueryProvider implements QueryProviderInterface
     private function getFieldsByAnnotations(string $annotationName, bool $injectSource): array
     {
         $refClass = new \ReflectionClass($this->controller);
-        $docBlockFactory = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
-        $contextFactory = new ContextFactory();
 
         //$refClass = ReflectionClass::createFromInstance($this->controller);
 
@@ -168,19 +164,8 @@ class ControllerQueryProvider implements QueryProviderInterface
                     continue;
                 }
 
-                $docComment = $refMethod->getDocComment() ?: '/** */';
-
-                // context is changing based on the class the method is declared in.
-                // we assume methods will be returned packed by classes so we do this little cache
-                if ($oldDeclaringClass !== $refMethod->getDeclaringClass()->getName()) {
-                    $context = $contextFactory->createFromReflector($refMethod);
-                    $oldDeclaringClass = $refMethod->getDeclaringClass()->getName();
-                }
-
-                $docBlockObj = $docBlockFactory->create($docComment, $context);
-
-                // TODO: change CommentParser to use $docBlockObj methods instead.
-                $docBlock = new CommentParser($refMethod->getDocComment());
+                $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+                $docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
                 $methodName = $refMethod->getName();
                 $name = $queryAnnotation->getName() ?: $methodName;
@@ -202,7 +187,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
                 }
 
-                $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], null, $this->hydrator, $docBlock->getComment(), $injectSource);
+                $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], null, $this->hydrator, $docBlockComment, $injectSource);
             }
         }
 
@@ -256,8 +241,6 @@ class ControllerQueryProvider implements QueryProviderInterface
     private function getSourceFields(): array
     {
         $refClass = new \ReflectionClass($this->controller);
-        $docBlockFactory = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
-        $contextFactory = new ContextFactory();
 
         /** @var SourceField[] $sourceFields */
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
@@ -300,20 +283,12 @@ class ControllerQueryProvider implements QueryProviderInterface
                 throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
             }
 
-            $docBlock = new CommentParser($refMethod->getDocComment());
-
             $methodName = $refMethod->getName();
 
 
-            // context is changing based on the class the method is declared in.
-            // we assume methods will be returned packed by classes so we do this little cache
-            if ($oldDeclaringClass !== $refMethod->getDeclaringClass()->getName()) {
-                $context = $contextFactory->createFromReflector($refMethod);
-                $oldDeclaringClass = $refMethod->getDeclaringClass()->getName();
-            }
+            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+            $docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
-            $docComment = $refMethod->getDocComment() ?: '/** */';
-            $docBlockObj = $docBlockFactory->create($docComment, $context);
 
             $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
 
@@ -328,7 +303,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                 $type = $this->mapReturnType($refMethod, $docBlockObj);
             }
 
-            $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlock->getComment(), false);
+            $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlockComment, false);
 
         }
         return $queryList;
