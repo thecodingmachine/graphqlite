@@ -27,9 +27,10 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
 
+        $this->assertSame([TestObject::class], $mapper->getSupportedClasses());
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
-        $this->assertSame([TestObject::class], $mapper->getSupportedClasses());
+        $this->assertInstanceOf(ObjectType::class, $mapper->mapNameToType('Foo', $this->getTypeMapper()));
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToType(\stdClass::class, $this->getTypeMapper());

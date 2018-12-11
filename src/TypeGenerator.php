@@ -51,7 +51,7 @@ class TypeGenerator
             throw MissingAnnotationException::missingTypeException();
         }
 
-        $typeName = $this->getName($refTypeClass, $typeField);
+        $typeName = $this->getName($refTypeClass->getName(), $typeField);
 
         if (!isset($this->cache[$typeName])) {
             $this->cache[$typeName] = new ObjectType([
@@ -81,10 +81,13 @@ class TypeGenerator
         return $this->cache[$typeName];
     }
 
-    private function getName(ReflectionClass $refTypeClass, Type $type): string
+    /**
+     * @param string $className The type class name
+     * @param Type $type
+     * @return string
+     */
+    public function getName(string $className, Type $type): string
     {
-        $className = $refTypeClass->getName();
-
         if ($prevPos = strrpos($className, '\\')) {
             $className = substr($className, $prevPos + 1);
         }

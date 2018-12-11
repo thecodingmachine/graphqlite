@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use function array_keys;
+use function filemtime;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
@@ -38,11 +39,15 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @var int|null
      */
-    private $cacheTtl;
+    private $globTtl;
     /**
-     * @var array<string,string>|null
+     * @var array<string,string> Maps a domain class to the GraphQL type annotated class
      */
-    private $map;
+    private $mapClassToTypeArray = [];
+    /**
+     * @var array<string,string> Maps a GraphQL type name to the GraphQL type annotated class
+     */
+    private $mapNameToType = [];
     /**
      * @var ContainerInterface
      */
@@ -51,18 +56,27 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var TypeGenerator
      */
     private $typeGenerator;
+    /**
+     * @var int|null
+     */
+    private $mapTtl;
+    /**
+     * @var bool
+     */
+    private $fullMapComputed = false;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
     {
         $this->namespace = $namespace;
         $this->container = $container;
         $this->annotationReader = $annotationReader;
         $this->cache = $cache;
-        $this->cacheTtl = $cacheTtl;
+        $this->globTtl = $globTtl;
         $this->typeGenerator = $typeGenerator;
+        $this->mapTtl = $mapTtl;
     }
 
     /**
@@ -72,25 +86,23 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     private function getMap(): array
     {
-        if ($this->map === null) {
+        if ($this->fullMapComputed === false) {
             $key = 'globTypeMapper_'.str_replace('\\', '_', $this->namespace);
-            $this->map = $this->cache->get($key);
-            if ($this->map === null) {
-                $this->map = $this->buildMap();
-                $this->cache->set($key, $this->map, $this->cacheTtl);
+            $this->mapClassToTypeArray = $this->cache->get($key);
+            if ($this->mapClassToTypeArray === null) {
+                $this->buildMap();
+                // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
+                // Defaults to 2 seconds.
+                $this->cache->set($key, $this->mapClassToTypeArray, $this->globTtl);
             }
         }
-        return $this->map;
+        return $this->mapClassToTypeArray;
     }
 
-    /**
-     * @return array<string,string> Maps the class name of a target object to the class name of the GraphQL Type class.
-     */
-    private function buildMap(): array
+    private function buildMap(): void
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true));
+        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true));
         $classes = $explorer->getClasses();
-        $map = [];
         foreach ($classes as $className) {
             if (!\class_exists($className)) {
                 continue;
@@ -105,12 +117,87 @@ final class GlobTypeMapper implements TypeMapperInterface
             if ($type === null) {
                 continue;
             }
-            if (isset($map[$type->getClass()])) {
-                throw DuplicateMappingException::create($type->getClass(), $map[$type->getClass()], $className);
+            if (isset($this->mapClassToTypeArray[$type->getClass()])) {
+                if ($this->mapClassToTypeArray[$type->getClass()] === $className) {
+                    // Already mapped. Let's continue
+                    continue;
+                }
+                throw DuplicateMappingException::create($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
             }
-            $map[$type->getClass()] = $className;
+            $this->storeTypeInCache($className, $type, $refClass->getFileName());
         }
-        return $map;
+        $this->fullMapComputed = true;
+    }
+
+    /**
+     * Stores in cache the mapping TypeClass <=> Object class <=> GraphQL type name.
+     */
+    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName)
+    {
+        $objectClassName = $type->getClass();
+        $this->mapClassToTypeArray[$objectClassName] = $typeClassName;
+        $this->cache->set('globTypeMapperByClass_'.str_replace('\\', '_', $objectClassName), [
+            'filemtime' => filemtime($typeFileName),
+            'typeFileName' => $typeFileName,
+            'typeClass' => $typeClassName
+        ], $this->mapTtl);
+        $typeName = $this->typeGenerator->getName($typeClassName, $type);
+        $this->mapNameToType[$typeName] = $typeClassName;
+        $this->cache->set('globTypeMapperByName_'.$typeName, [
+            'filemtime' => filemtime($typeFileName),
+            'typeFileName' => $typeFileName,
+            'typeClass' => $typeClassName
+        ], $this->mapTtl);
+    }
+
+    private function getTypeFromCacheByObjectClass(string $className): ?string
+    {
+        if (isset($this->mapClassToTypeArray[$className])) {
+            return $this->mapClassToTypeArray[$className];
+        }
+
+        // Let's try from the cache
+        $item = $this->cache->get('globTypeMapperByClass_'.str_replace('\\', '_', $className));
+        if ($item !== null) {
+            [
+                'filemtime' => $filemtime,
+                'typeFileName' => $typeFileName,
+                'typeClass' => $typeClassName
+            ] = $item;
+
+            if ($filemtime === $filemtime($typeFileName)) {
+                $this->mapClassToTypeArray[$className] = $typeClassName;
+                return $typeClassName;
+            }
+        }
+
+        // cache miss
+        return null;
+    }
+
+    private function getTypeFromCacheByGraphQLTypeName(string $graphqlTypeName): ?string
+    {
+        if (isset($this->mapNameToType[$graphqlTypeName])) {
+            return $this->mapNameToType[$graphqlTypeName];
+        }
+
+        // Let's try from the cache
+        $item = $this->cache->get('globTypeMapperByName_'.$graphqlTypeName);
+        if ($item !== null) {
+            [
+                'filemtime' => $filemtime,
+                'typeFileName' => $typeFileName,
+                'typeClass' => $typeClassName
+            ] = $item;
+
+            if ($filemtime === $filemtime($typeFileName)) {
+                $this->mapNameToType[$graphqlTypeName] = $typeClassName;
+                return $typeClassName;
+            }
+        }
+
+        // cache miss
+        return null;
     }
 
     /**
@@ -121,8 +208,13 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToType(string $className): bool
     {
-        $map = $this->getMap();
-        return isset($map[$className]);
+        $typeClassName = $this->getTypeFromCacheByObjectClass($className);
+
+        if ($typeClassName === null) {
+            $this->buildMap();
+        }
+
+        return isset($this->mapClassToTypeArray[$className]);
     }
 
     /**
@@ -135,11 +227,16 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
-        $map = $this->getMap();
-        if (!isset($map[$className])) {
+        $typeClassName = $this->getTypeFromCacheByObjectClass($className);
+
+        if ($typeClassName === null) {
+            $this->buildMap();
+        }
+
+        if (!isset($this->mapClassToTypeArray[$className])) {
             throw CannotMapTypeException::createForType($className);
         }
-        return $this->typeGenerator->mapAnnotatedObject($this->container->get($map[$className]), $recursiveTypeMapper);
+        return $this->typeGenerator->mapAnnotatedObject($this->container->get($this->mapClassToTypeArray[$className]), $recursiveTypeMapper);
     }
 
     /**
@@ -173,5 +270,28 @@ final class GlobTypeMapper implements TypeMapperInterface
     public function mapClassToInputType(string $className): InputType
     {
         throw CannotMapTypeException::createForInputType($className);
+    }
+
+    /**
+     * Returns a GraphQL type by name (can be either an input or output type)
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return \GraphQL\Type\Definition\Type&(InputType|OutputType)
+     * @throws CannotMapTypeException
+     * @throws \ReflectionException
+     */
+    public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): \GraphQL\Type\Definition\Type
+    {
+        $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
+
+        if ($typeClassName === null) {
+            $this->buildMap();
+        }
+
+        if (!isset($this->mapNameToType[$typeName])) {
+            throw CannotMapTypeException::createForName($typeName);
+        }
+        return $this->typeGenerator->mapAnnotatedObject($this->container->get($this->mapNameToType[$typeName]), $recursiveTypeMapper);
     }
 }

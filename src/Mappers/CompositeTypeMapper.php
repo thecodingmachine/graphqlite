@@ -10,6 +10,7 @@ use function array_unique;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use function is_array;
 use function iterator_to_array;
 
@@ -114,5 +115,17 @@ class CompositeTypeMapper implements TypeMapperInterface
             }
         }
         throw CannotMapTypeException::createForInputType($className);
+    }
+
+    /**
+     * Returns a GraphQL type by name (can be either an input or output type)
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return Type&(InputType|OutputType)
+     */
+    public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+    {
+        // TODO: Implement mapNameToType() method.
     }
 }

@@ -69,6 +69,28 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             {
                 return [TestObject::class];
             }
+
+            /**
+             * Returns a GraphQL type by name (can be either an input or output type)
+             *
+             * @param string $typeName The name of the GraphQL type
+             * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+             * @return Type&(InputType|OutputType)
+             */
+            public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+            {
+                switch ($typeName) {
+                    case 'TestObject':
+                        return new ObjectType([
+                            'name'    => 'TestObject',
+                            'fields'  => [
+                                'test'   => Type::string(),
+                            ],
+                        ]);
+                    default:
+                        throw CannotMapTypeException::createForName($typeName);
+                }
+            }
         };
 
         $this->composite = new CompositeTypeMapper([$typeMapper1]);

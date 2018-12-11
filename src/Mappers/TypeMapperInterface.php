@@ -33,6 +33,15 @@ interface TypeMapperInterface
     public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType;
 
     /**
+     * Returns a GraphQL type by name (can be either an input or output type)
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return Type&(InputType|OutputType)
+     */
+    public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type;
+
+    /**
      * Returns the list of classes that have matching input GraphQL types.
      *
      * @return string[]
