@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use function array_merge;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Nullable;
