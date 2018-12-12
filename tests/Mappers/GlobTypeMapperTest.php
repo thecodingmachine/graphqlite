@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Mouf\Picotainer\Picotainer;
+use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
@@ -25,7 +26,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), $cache);
 
         $this->assertSame([TestObject::class], $mapper->getSupportedClasses());
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
@@ -33,6 +36,10 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $mapper->mapNameToType('Foo', $this->getTypeMapper()));
         $this->assertTrue($mapper->canMapNameToType('Foo'));
         $this->assertFalse($mapper->canMapNameToType('NotExists'));
+
+        $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), $cache);
+        $this->assertTrue($anotherMapperSameCache->canMapClassToType(TestObject::class));
+        $this->assertTrue($anotherMapperSameCache->canMapNameToType('Foo'));
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToType(\stdClass::class, $this->getTypeMapper());
