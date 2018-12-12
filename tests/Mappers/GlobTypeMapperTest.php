@@ -32,6 +32,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapNameToType('Foo', $this->getTypeMapper()));
         $this->assertTrue($mapper->canMapNameToType('Foo'));
+        $this->assertFalse($mapper->canMapNameToType('NotExists'));
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToType(\stdClass::class, $this->getTypeMapper());
@@ -68,6 +69,22 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(ClassNotFoundException::class);
         $this->expectExceptionMessage("Could not autoload class 'Foobar' defined in @Type annotation of class 'TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\BadClassType\\TestType'");
         $mapper->canMapClassToType(TestType::class);
+    }
+
+    public function testGlobTypeMapperNameNotFoundException()
+    {
+        $container = new Picotainer([
+            FooType::class => function() {
+                return new FooType();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NullCache());
+
+        $this->expectException(CannotMapTypeException::class);
+        $mapper->mapNameToType('NotExists', $this->getTypeMapper());
     }
 
     public function testGlobTypeMapperInputType()

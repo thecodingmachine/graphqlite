@@ -68,8 +68,12 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($recursiveMapper->canMapNameToType('ClassA'));
         $this->assertTrue($recursiveMapper->canMapNameToType('ClassB'));
         $this->assertTrue($recursiveMapper->canMapNameToType('ClassAInterface'));
+        $this->assertFalse($recursiveMapper->canMapNameToType('NotExists'));
         $this->assertSame('ClassA', $recursiveMapper->mapNameToType('ClassA')->name);
         $this->assertSame('ClassAInterface', $recursiveMapper->mapNameToType('ClassAInterface')->name);
+
+        $this->expectException(CannotMapTypeException::class);
+        $recursiveMapper->mapNameToType('NotExists');
     }
 
 
@@ -137,4 +141,16 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(CannotMapTypeException::class);
         $recursiveMapper->mapClassToInterfaceOrType('Not exists');
     }
+
+    public function testGetOutputTypes()
+    {
+        $recursiveMapper = $this->getTypeMapper();
+
+        $outputTypes = $recursiveMapper->getOutputTypes();
+        $this->assertArrayHasKey('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Interfaces\\ClassA', $outputTypes);
+        $this->assertArrayHasKey('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Interfaces\\ClassB', $outputTypes);
+        $this->assertArrayNotHasKey('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Interfaces\\ClassC', $outputTypes);
+    }
+
+
 }

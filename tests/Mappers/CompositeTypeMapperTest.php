@@ -133,4 +133,10 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(CannotMapTypeException::class);
         $this->composite->mapClassToInputType(\Exception::class);
     }
+
+    public function testException3(): void
+    {
+        $this->expectException(CannotMapTypeException::class);
+        $this->composite->mapNameToType('NotExists', $this->getTypeMapper());
+    }
 }
