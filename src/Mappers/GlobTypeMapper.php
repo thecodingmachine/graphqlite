@@ -88,12 +88,15 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         if ($this->fullMapComputed === false) {
             $key = 'globTypeMapper_'.str_replace('\\', '_', $this->namespace);
+            $keyNameCache = 'globTypeMapper_names_'.str_replace('\\', '_', $this->namespace);
             $this->mapClassToTypeArray = $this->cache->get($key);
-            if ($this->mapClassToTypeArray === null) {
+            $this->mapNameToType = $this->cache->get($keyNameCache);
+            if ($this->mapClassToTypeArray === null || $this->mapNameToType === null) {
                 $this->buildMap();
                 // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
                 // Defaults to 2 seconds.
                 $this->cache->set($key, $this->mapClassToTypeArray, $this->globTtl);
+                $this->cache->set($keyNameCache, $this->mapNameToType, $this->globTtl);
             }
         }
         return $this->mapClassToTypeArray;
@@ -211,7 +214,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
         if ($typeClassName === null) {
-            $this->buildMap();
+            $this->getMap();
         }
 
         return isset($this->mapClassToTypeArray[$className]);
@@ -230,7 +233,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
         if ($typeClassName === null) {
-            $this->buildMap();
+            $this->getMap();
         }
 
         if (!isset($this->mapClassToTypeArray[$className])) {
@@ -286,7 +289,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
 
         if ($typeClassName === null) {
-            $this->buildMap();
+            $this->getMap();
         }
 
         if (!isset($this->mapNameToType[$typeName])) {
@@ -309,7 +312,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             return true;
         }
 
-        $this->buildMap();
+        $this->getMap();
 
         return isset($this->mapNameToType[$typeName]);
     }
