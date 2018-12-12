@@ -27,12 +27,18 @@ class TypeGenerator
      * @var array<string, ObjectType>
      */
     private $cache = [];
+    /**
+     * @var NamingStrategyInterface
+     */
+    private $namingStrategy;
 
     public function __construct(AnnotationReader $annotationReader,
-                                ControllerQueryProviderFactory $controllerQueryProviderFactory)
+                                ControllerQueryProviderFactory $controllerQueryProviderFactory,
+                                NamingStrategyInterface $namingStrategy)
     {
         $this->annotationReader = $annotationReader;
         $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
+        $this->namingStrategy = $namingStrategy;
     }
 
     /**
@@ -51,7 +57,7 @@ class TypeGenerator
             throw MissingAnnotationException::missingTypeException();
         }
 
-        $typeName = $this->getName($refTypeClass->getName(), $typeField);
+        $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
 
         if (!isset($this->cache[$typeName])) {
             $this->cache[$typeName] = new ObjectType([
@@ -79,27 +85,5 @@ class TypeGenerator
         }
 
         return $this->cache[$typeName];
-    }
-
-    /**
-     * @param string $className The type class name
-     * @param Type $type
-     * @return string
-     */
-    public function getName(string $className, Type $type): string
-    {
-        if ($prevPos = strrpos($className, '\\')) {
-            $className = substr($className, $prevPos + 1);
-        }
-        // By default, if the class name ends with Type, let's take the name of the class for the type
-        if (substr($className, -4) === 'Type') {
-            return substr($className, 0, -4);
-        }
-        // Else, let's take the name of the targeted class
-        $className = $type->getClass();
-        if ($prevPos = strrpos($className, '\\')) {
-            $className = substr($className, $prevPos + 1);
-        }
-        return $className;
     }
 }

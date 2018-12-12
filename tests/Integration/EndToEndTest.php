@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
+use TheCodingMachine\GraphQL\Controllers\NamingStrategyInterface;
 use TheCodingMachine\GraphQL\Controllers\QueryProviderInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
@@ -74,20 +75,22 @@ class EndToEndTest extends TestCase
                 return new VoidAuthenticationService();
             },
             RecursiveTypeMapperInterface::class => function(ContainerInterface $container) {
-                return new RecursiveTypeMapper($container->get(TypeMapperInterface::class), new NamingStrategy(), new ArrayCache());
+                return new RecursiveTypeMapper($container->get(TypeMapperInterface::class), $container->get(NamingStrategyInterface::class), new ArrayCache());
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
+                    $container->get(NamingStrategyInterface::class),
                     new ArrayCache()
                     );
             },
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
-                    $container->get(ControllerQueryProviderFactory::class)
+                    $container->get(ControllerQueryProviderFactory::class),
+                    $container->get(NamingStrategyInterface::class)
                 );
             },
             AnnotationReader::class => function(ContainerInterface $container) {
@@ -101,6 +104,9 @@ class EndToEndTest extends TestCase
                         return new Contact($data['name']);
                     }
                 };
+            },
+            NamingStrategyInterface::class => function() {
+                return new NamingStrategy();
             },
             CachedDocBlockFactory::class => function() {
                 return new CachedDocBlockFactory(new ArrayCache());

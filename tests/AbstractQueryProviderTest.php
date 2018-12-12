@@ -237,7 +237,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getTypeGenerator(): TypeGenerator
     {
         if ($this->typeGenerator === null) {
-            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory());
+            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy());
         }
         return $this->typeGenerator;
     }
