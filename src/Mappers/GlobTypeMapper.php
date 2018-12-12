@@ -121,10 +121,10 @@ final class GlobTypeMapper implements TypeMapperInterface
                 continue;
             }
             if (isset($this->mapClassToTypeArray[$type->getClass()])) {
-                if ($this->mapClassToTypeArray[$type->getClass()] === $className) {
+                /*if ($this->mapClassToTypeArray[$type->getClass()] === $className) {
                     // Already mapped. Let's continue
                     continue;
-                }
+                }*/
                 throw DuplicateMappingException::create($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
             }
             $this->storeTypeInCache($className, $type, $refClass->getFileName());
