@@ -14,6 +14,7 @@ use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
 /**
@@ -64,18 +65,23 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var bool
      */
     private $fullMapComputed = false;
+    /**
+     * @var NamingStrategy
+     */
+    private $namingStrategy;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategy $namingStrategy, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
     {
         $this->namespace = $namespace;
+        $this->typeGenerator = $typeGenerator;
         $this->container = $container;
         $this->annotationReader = $annotationReader;
+        $this->namingStrategy = $namingStrategy;
         $this->cache = $cache;
         $this->globTtl = $globTtl;
-        $this->typeGenerator = $typeGenerator;
         $this->mapTtl = $mapTtl;
     }
 
@@ -144,7 +150,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             'typeFileName' => $typeFileName,
             'typeClass' => $typeClassName
         ], $this->mapTtl);
-        $typeName = $this->typeGenerator->getName($typeClassName, $type);
+        $typeName = $this->namingStrategy->getOutputTypeName($typeClassName, $type);
         $this->mapNameToType[$typeName] = $typeClassName;
         $this->cache->set('globTypeMapperByName_'.$typeName, [
             'filemtime' => filemtime($typeFileName),
