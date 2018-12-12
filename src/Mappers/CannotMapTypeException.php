@@ -18,6 +18,11 @@ class CannotMapTypeException extends \Exception
         return new self('cannot map class "'.$className.'" to a known GraphQL input type. Check your TypeMapper configuration.');
     }
 
+    public static function createForName(string $name): self
+    {
+        return new self('cannot find GraphQL type "'.$name.'". Check your TypeMapper configuration.');
+    }
+
     public static function wrapWithParamInfo(self $previous, \ReflectionParameter $parameter): self
     {
         $message = sprintf('For parameter $%s, in %s::%s, %s',

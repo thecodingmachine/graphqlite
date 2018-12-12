@@ -147,7 +147,37 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     return [TestObject::class, TestObject2::class];
                 }
-            });
+
+                /**
+                 * Returns a GraphQL type by name (can be either an input or output type)
+                 *
+                 * @param string $typeName The name of the GraphQL type
+                 * @return Type&(InputType|OutputType)
+                 * @throws CannotMapTypeException
+                 */
+                public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+                {
+                    switch ($typeName) {
+                        case 'TestObject':
+                            return $this->testObjectType;
+                        case 'TestObject2':
+                            return $this->testObjectType2;
+                        default:
+                            throw CannotMapTypeException::createForName($typeName);
+                    }
+                }
+
+                /**
+                 * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+                 *
+                 * @param string $typeName The name of the GraphQL type
+                 * @return bool
+                 */
+                public function canMapNameToType(string $typeName): bool
+                {
+                    return $typeName === 'TestObject' || $typeName === 'TestObject2';
+                }
+            }, new NamingStrategy(), new ArrayCache());
         }
         return $this->typeMapper;
     }

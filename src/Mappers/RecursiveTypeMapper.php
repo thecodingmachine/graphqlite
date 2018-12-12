@@ -11,6 +11,8 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use Psr\SimpleCache\CacheInterface;
+use TheCodingMachine\GraphQL\Controllers\NamingStrategyInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\InterfaceFromObjectType;
 
 /**
@@ -39,9 +41,32 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     private $interfaces = [];
 
-    public function __construct(TypeMapperInterface $typeMapper)
+    /**
+     * @var NamingStrategyInterface
+     */
+    private $namingStrategy;
+
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+
+    /**
+     * @var int|null
+     */
+    private $ttl;
+
+    /**
+     * @var array<string, string> An array mapping a GraphQL interface name to the PHP class name that triggered its generation.
+     */
+    private $interfaceToClassNameMap;
+
+    public function __construct(TypeMapperInterface $typeMapper, NamingStrategyInterface $namingStrategy, CacheInterface $cache, ?int $ttl = null)
     {
         $this->typeMapper = $typeMapper;
+        $this->namingStrategy = $namingStrategy;
+        $this->cache = $cache;
+        $this->ttl = $ttl;
     }
 
     /**
@@ -88,7 +113,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     }
 
     /**
-     * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
+     * Maps a PHP fully qualified class name to a GraphQL type. Returns an interface if possible (if the class
+     * has children) or returns an output type otherwise.
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
      * @return OutputType&Type
@@ -106,12 +132,52 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $supportedClasses = $this->getClassTree();
             if (!empty($supportedClasses[$closestClassName]->getChildren())) {
                 // Cast as an interface
-                $this->interfaces[$closestClassName] = new InterfaceFromObjectType($objectType, $this);
+                $this->interfaces[$closestClassName] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $this);
             } else {
                 $this->interfaces[$closestClassName] = $objectType;
             }
         }
         return $this->interfaces[$closestClassName];
+    }
+
+    /**
+     * Build a map mapping GraphQL interface names to the PHP class name of the object creating this interface.
+     *
+     * @return array<string, string>
+     */
+    private function buildInterfaceToClassNameMap(): array
+    {
+        $map = [];
+        $supportedClasses = $this->getClassTree();
+        foreach ($supportedClasses as $className => $mappedClass) {
+            if (!empty($mappedClass->getChildren())) {
+                $objectType = $this->typeMapper->mapClassToType($className, $this);
+                $interfaceName = $this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name);
+                $map[$interfaceName] = $className;
+            }
+        }
+        return $map;
+    }
+
+    /**
+     * Returns a map mapping GraphQL interface names to the PHP class name of the object creating this interface.
+     * The map may come from the cache.
+     *
+     * @return array<string, string>
+     */
+    private function getInterfaceToClassNameMap(): array
+    {
+        if ($this->interfaceToClassNameMap === null) {
+            $key = 'recursiveTypeMapper_interfaceToClassNameMap';
+            $this->interfaceToClassNameMap = $this->cache->get($key);
+            if ($this->interfaceToClassNameMap === null) {
+                $this->interfaceToClassNameMap = $this->buildInterfaceToClassNameMap();
+                // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
+                // Defaults to 2 seconds.
+                $this->cache->set($key, $this->interfaceToClassNameMap, $this->ttl);
+            }
+        }
+        return $this->interfaceToClassNameMap;
     }
 
     /**
@@ -209,5 +275,49 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $types[$supportedClass] = $this->typeMapper->mapClassToType($supportedClass, $this);
         }
         return $types;
+    }
+
+    /**
+     * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return bool
+     */
+    public function canMapNameToType(string $typeName): bool
+    {
+        $result = $this->typeMapper->canMapNameToType($typeName);
+        if ($result === true) {
+            return true;
+        }
+
+        // Maybe the type is an interface?
+        $interfaceToClassNameMap = $this->getInterfaceToClassNameMap();
+        if (isset($interfaceToClassNameMap[$typeName])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns a GraphQL type by name (can be either an input or output type)
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return Type&(InputType|OutputType)
+     */
+    public function mapNameToType(string $typeName): Type
+    {
+        if ($this->typeMapper->canMapNameToType($typeName)) {
+            return $this->typeMapper->mapNameToType($typeName, $this);
+        }
+
+        // Maybe the type is an interface?
+        $interfaceToClassNameMap = $this->getInterfaceToClassNameMap();
+        if (isset($interfaceToClassNameMap[$typeName])) {
+            $className = $interfaceToClassNameMap[$typeName];
+            return $this->mapClassToInterfaceOrType($className);
+        }
+
+        throw CannotMapTypeException::createForName($typeName);
     }
 }

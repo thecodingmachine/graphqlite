@@ -30,7 +30,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         ]);
         $this->typeMapper->setInputTypes([
             TestObject::class => new InputObjectType([
-                'name'    => 'TestObject',
+                'name'    => 'TestInputObject',
                 'fields'  => [
                     'test'   => Type::string(),
                 ],
@@ -47,6 +47,11 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
         $this->assertInstanceOf(InputObjectType::class, $this->typeMapper->mapClassToInputType(TestObject::class));
         $this->assertSame([TestObject::class], $this->typeMapper->getSupportedClasses());
+        $this->assertSame('TestObject', $this->typeMapper->mapNameToType('TestObject', $this->getTypeMapper())->name);
+        $this->assertSame('TestInputObject', $this->typeMapper->mapNameToType('TestInputObject', $this->getTypeMapper())->name);
+        $this->assertTrue($this->typeMapper->canMapNameToType('TestObject'));
+        $this->assertTrue($this->typeMapper->canMapNameToType('TestInputObject'));
+        $this->assertFalse($this->typeMapper->canMapNameToType('NotExists'));
     }
 
     public function testException1(): void
@@ -59,5 +64,11 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
     {
         $this->expectException(CannotMapTypeException::class);
         $this->typeMapper->mapClassToInputType(\Exception::class);
+    }
+
+    public function testException3(): void
+    {
+        $this->expectException(CannotMapTypeException::class);
+        $this->typeMapper->mapNameToType('notExists', $this->getTypeMapper());
     }
 }

@@ -6,6 +6,7 @@ use function array_keys;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQL\Controllers\Mappers\Interfaces\InterfacesResolverInterface;
 
 /**
@@ -31,14 +32,14 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @var array<string,InputType>
+     * @var array<string,InputType&Type>
      */
     private $inputTypes;
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
      *
-     * @param array<string,InputType> $inputTypes
+     * @param array<string,InputType&Type> $inputTypes
      */
     public function setInputTypes(array $inputTypes): void
     {
@@ -106,5 +107,49 @@ final class StaticTypeMapper implements TypeMapperInterface
             return $this->inputTypes[$className];
         }
         throw CannotMapTypeException::createForInputType($className);
+    }
+
+    /**
+     * Returns a GraphQL type by name (can be either an input or output type)
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return Type&(InputType|OutputType)
+     * @throws CannotMapTypeException
+     */
+    public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+    {
+        foreach ($this->types as $type) {
+            if ($type->name === $typeName) {
+                return $type;
+            }
+        }
+        foreach ($this->inputTypes as $inputType) {
+            if ($inputType->name === $typeName) {
+                return $inputType;
+            }
+        }
+        throw CannotMapTypeException::createForName($typeName);
+    }
+
+    /**
+     * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return bool
+     */
+    public function canMapNameToType(string $typeName): bool
+    {
+        foreach ($this->types as $type) {
+            if ($type->name === $typeName) {
+                return true;
+            }
+        }
+        foreach ($this->inputTypes as $inputType) {
+            if ($inputType->name === $typeName) {
+                return true;
+            }
+        }
+        return false;
     }
 }

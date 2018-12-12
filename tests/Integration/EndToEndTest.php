@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Integration;
 use function class_exists;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Exception;
+use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
 use GraphQL\Type\Definition\InputType;
 use Mouf\Picotainer\Picotainer;
@@ -25,6 +26,7 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
 use TheCodingMachine\GraphQL\Controllers\QueryProviderInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
@@ -35,6 +37,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
+use function var_dump;
 
 class EndToEndTest extends TestCase
 {
@@ -73,7 +76,7 @@ class EndToEndTest extends TestCase
                 return new VoidAuthenticationService();
             },
             RecursiveTypeMapperInterface::class => function(ContainerInterface $container) {
-                return new RecursiveTypeMapper($container->get(TypeMapperInterface::class));
+                return new RecursiveTypeMapper($container->get(TypeMapperInterface::class), new NamingStrategy(), new ArrayCache());
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
@@ -140,7 +143,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray()['data']);
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
 }
