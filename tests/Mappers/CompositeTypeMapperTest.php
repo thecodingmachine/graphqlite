@@ -91,6 +91,17 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                         throw CannotMapTypeException::createForName($typeName);
                 }
             }
+
+            /**
+             * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+             *
+             * @param string $typeName The name of the GraphQL type
+             * @return bool
+             */
+            public function canMapNameToType(string $typeName): bool
+            {
+                return $typeName === 'TestObject';
+            }
         };
 
         $this->composite = new CompositeTypeMapper([$typeMapper1]);
@@ -106,6 +117,9 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class, $this->getTypeMapper()));
         $this->assertInstanceOf(InputObjectType::class, $this->composite->mapClassToInputType(TestObject::class));
         $this->assertSame([TestObject::class], $this->composite->getSupportedClasses());
+        $this->assertInstanceOf(ObjectType::class, $this->composite->mapNameToType('TestObject', $this->getTypeMapper()));
+        $this->assertTrue($this->composite->canMapNameToType('TestObject'));
+        $this->assertFalse($this->composite->canMapNameToType('NotExists'));
     }
 
     public function testException1(): void

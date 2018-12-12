@@ -31,6 +31,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapNameToType('Foo', $this->getTypeMapper()));
+        $this->assertTrue($mapper->canMapNameToType('Foo'));
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToType(\stdClass::class, $this->getTypeMapper());

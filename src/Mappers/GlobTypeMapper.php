@@ -294,4 +294,23 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
         return $this->typeGenerator->mapAnnotatedObject($this->container->get($this->mapNameToType[$typeName]), $recursiveTypeMapper);
     }
+
+    /**
+     * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return bool
+     */
+    public function canMapNameToType(string $typeName): bool
+    {
+        $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
+
+        if ($typeClassName !== null) {
+            return true;
+        }
+
+        $this->buildMap();
+
+        return isset($this->mapNameToType[$typeName]);
+    }
 }

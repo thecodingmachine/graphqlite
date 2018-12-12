@@ -41,12 +41,10 @@ class Schema extends \GraphQL\Type\Schema
             return $recursiveTypeMapper->getOutputTypes();
         });
 
-        /*$config->setTypeLoader(function(string $name) use ($recursiveTypeMapper) {
-            // FIXME: TYPELOADER IS COMPLETELY FALSE.
+        $config->setTypeLoader(function(string $name) use ($recursiveTypeMapper) {
             // We need to find a type FROM a GraphQL type name
-            // Therefore, we need to modify the TypeMapperInterface.
-            return $registry->get($name);
-        });*/
+            return $recursiveTypeMapper->mapNameToType($name);
+        });
 
         parent::__construct($config);
     }

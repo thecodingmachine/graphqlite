@@ -166,7 +166,18 @@ abstract class AbstractQueryProviderTest extends TestCase
                             throw CannotMapTypeException::createForName($typeName);
                     }
                 }
-            });
+
+                /**
+                 * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+                 *
+                 * @param string $typeName The name of the GraphQL type
+                 * @return bool
+                 */
+                public function canMapNameToType(string $typeName): bool
+                {
+                    return $typeName === 'TestObject' || $typeName === 'TestObject2';
+                }
+            }, new NamingStrategy(), new ArrayCache());
         }
         return $this->typeMapper;
     }

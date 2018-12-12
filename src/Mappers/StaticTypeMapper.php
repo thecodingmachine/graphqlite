@@ -131,4 +131,25 @@ final class StaticTypeMapper implements TypeMapperInterface
         }
         throw CannotMapTypeException::createForName($typeName);
     }
+
+    /**
+     * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return bool
+     */
+    public function canMapNameToType(string $typeName): bool
+    {
+        foreach ($this->types as $type) {
+            if ($type->name === $typeName) {
+                return true;
+            }
+        }
+        foreach ($this->inputTypes as $inputType) {
+            if ($inputType->name === $typeName) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

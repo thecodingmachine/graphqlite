@@ -11,13 +11,12 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 class InterfaceFromObjectType extends \GraphQL\Type\Definition\InterfaceType
 {
     /**
+     * @param string $name The name of the interface
      * @param ObjectType $type
      * @param RecursiveTypeMapperInterface $typeMapper
      */
-    public function __construct(ObjectType $type, RecursiveTypeMapperInterface $typeMapper)
+    public function __construct(string $name, ObjectType $type, RecursiveTypeMapperInterface $typeMapper)
     {
-        $name = $type->name.'Interface';
-
         parent::__construct([
             'name' => $name,
             'fields' => function() use ($type) {

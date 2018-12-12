@@ -126,6 +126,27 @@ class CompositeTypeMapper implements TypeMapperInterface
      */
     public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
     {
-        // TODO: Implement mapNameToType() method.
+        foreach ($this->typeMappers as $typeMapper) {
+            if ($typeMapper->canMapNameToType($typeName)) {
+                return $typeMapper->mapNameToType($typeName, $recursiveTypeMapper);
+            }
+        }
+        throw CannotMapTypeException::createForName($typeName);
+    }
+
+    /**
+     * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return bool
+     */
+    public function canMapNameToType(string $typeName): bool
+    {
+        foreach ($this->typeMappers as $typeMapper) {
+            if ($typeMapper->canMapNameToType($typeName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
