@@ -16,7 +16,6 @@ use function print_r;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
-use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
@@ -37,7 +36,6 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
-use function var_dump;
 
 class EndToEndTest extends TestCase
 {
@@ -54,7 +52,7 @@ class EndToEndTest extends TestCase
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(ControllerQueryProviderFactory::class),
-                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), new NullCache());
+                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), new ArrayCache());
             },
             ControllerQueryProviderFactory::class => function(ContainerInterface $container) {
                 return new ControllerQueryProviderFactory(
@@ -83,7 +81,7 @@ class EndToEndTest extends TestCase
                     $container->get(TypeGenerator::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
-                    new NullCache()
+                    new ArrayCache()
                     );
             },
             TypeGenerator::class => function(ContainerInterface $container) {
@@ -127,6 +125,25 @@ class EndToEndTest extends TestCase
         }
         ';
 
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'getContacts' => [
+                [
+                    'name' => 'Joe'
+                ],
+                [
+                    'name' => 'Bill',
+                    'email' => 'bill@example.com'
+                ]
+
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
             $schema,
             $queryString
