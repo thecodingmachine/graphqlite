@@ -1,0 +1,7 @@
+{
+  "docs": {
+    "Installation": ["getting-started", "symfony-bundle", "other-frameworks"],
+    "First Category": ["doc2"],
+    "Second Category": ["doc3"]
+  }
+}
