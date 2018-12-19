@@ -11,8 +11,10 @@ use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use ReflectionMethod;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
@@ -49,6 +51,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var array<string,string> Maps a GraphQL type name to the GraphQL type annotated class
      */
     private $mapNameToType = [];
+    /**
+     * @var array<string,string[]> Maps a domain class to the factory method that creates the input type in the form [classname, methodname]
+     */
+    private $mapClassToFactory = [];
     /**
      * @var ContainerInterface
      */
@@ -123,17 +129,29 @@ final class GlobTypeMapper implements TypeMapperInterface
 
             $type = $this->annotationReader->getTypeAnnotation($refClass);
 
-            if ($type === null) {
-                continue;
+            if ($type !== null) {
+                if (isset($this->mapClassToTypeArray[$type->getClass()])) {
+                    /*if ($this->mapClassToTypeArray[$type->getClass()] === $className) {
+                        // Already mapped. Let's continue
+                        continue;
+                    }*/
+                    throw DuplicateMappingException::createForType($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
+                }
+                $this->storeTypeInCache($className, $type, $refClass->getFileName());
             }
-            if (isset($this->mapClassToTypeArray[$type->getClass()])) {
-                /*if ($this->mapClassToTypeArray[$type->getClass()] === $className) {
-                    // Already mapped. Let's continue
-                    continue;
-                }*/
-                throw DuplicateMappingException::create($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
+
+            foreach ($refClass->getMethods() as $method) {
+                //FIXME: we must analyze a refMethod and get the InputType out of it!
+
+                $factory = $this->annotationReader->getFactoryAnnotation($method);
+                if ($factory !== null) {
+                    if (isset($this->mapClassToFactory[$type->getClass()])) {
+                        throw DuplicateMappingException::createForFactory($type->getClass(), $this->mapClassToFactory[$type->getClass()][0], $this->mapClassToFactory[$type->getClass()][1], $className, $method->name);
+                    }
+                    $this->storeInputTypeInCache($method, $factory, $refClass->getFileName());
+                }
             }
-            $this->storeTypeInCache($className, $type, $refClass->getFileName());
+
         }
         $this->fullMapComputed = true;
     }
@@ -141,7 +159,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping TypeClass <=> Object class <=> GraphQL type name.
      */
-    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName)
+    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName): void
     {
         $objectClassName = $type->getClass();
         $this->mapClassToTypeArray[$objectClassName] = $typeClassName;
@@ -158,6 +176,15 @@ final class GlobTypeMapper implements TypeMapperInterface
             'typeClass' => $typeClassName
         ], $this->mapTtl);
     }
+
+    /**
+     * Stores in cache the mapping between InputType name <=> Object class
+     */
+    private function storeInputTypeInCache(ReflectionMethod $refMethod, Factory $factory, string $fileName): void
+    {
+
+    }
+
 
     private function getTypeFromCacheByObjectClass(string $className): ?string
     {

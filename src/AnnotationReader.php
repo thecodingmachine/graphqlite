@@ -9,6 +9,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
@@ -69,6 +70,13 @@ class AnnotationReader
             return $annotation instanceof SourceField;
         });
         return $sourceFields;
+    }
+
+    public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
+    {
+        /** @var Factory|null $factoryAnnotation */
+        $factoryAnnotation = $this->reader->getMethodAnnotation($refMethod, Factory::class);
+        return $factoryAnnotation;
     }
 
     /**

@@ -148,8 +148,6 @@ class ControllerQueryProvider implements QueryProviderInterface
     {
         $refClass = new \ReflectionClass($this->controller);
 
-        //$refClass = ReflectionClass::createFromInstance($this->controller);
-
         $queryList = [];
 
         $oldDeclaringClass = null;
