@@ -9,21 +9,46 @@ If you are using Symfony 4+, checkout the [Symfony bundle](symfony-bundle.md).
 GraphQL-Controllers requires:
 
 - A PSR-11 compatible container
-- A router (or a PSR-15 middleware) to receive the requests
+- A PSR-16 cache
+
+Additionally, you will need a way to route the HTTP requests to the underlying GraphQL library.
+thecodingmachine/graphql-controllers uses internally webonix/graphql-php. This library plays well with PSR-7 requests
+and there is a PSR-15 middleware available. We will use those in this sample.   
 
 In this sample, we will focus on getting a working version of GraphQL-Controllers using:
 
-- Zend Stratigility for the PSR-15 middleware
+- Zend Stratigility for the PSR-7 server
+- "phps-cans/psr7-middleware-graphql" to route PSR-7 requests to the GraphQL engine
 - mouf/picotainer (a micro-container) for the PSR-11 container
+- symfony/cache for the PSR-16 cache
 
-You can really use any middleware (or no middleware), and any PSR-11 compatible container.
+The choice of the libraries is really up to you. You can adapt it based on your needs.
 
 **composer.json**
 ```json
 {
-  
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {
+    "thecodingmachine/graphql-controllers": "^3",
+    "phps-cans/psr7-middleware-graphql": "^0.2",
+    "zendframework/zend-diactoros": "^2",
+    "zendframework/zend-stratigility": "^3",
+    "mouf/picotainer": "^1.1",
+    "symfony/cache": "^4.2"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
 ```
+
+We now need to initialize Stratigility:
+
+TODO
+
 
 
 
