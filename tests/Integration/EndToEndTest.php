@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
 use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -80,6 +81,7 @@ class EndToEndTest extends TestCase
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
+                    $container->get(InputTypeGenerator::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
@@ -88,6 +90,13 @@ class EndToEndTest extends TestCase
             },
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
+                    $container->get(AnnotationReader::class),
+                    $container->get(ControllerQueryProviderFactory::class),
+                    $container->get(NamingStrategyInterface::class)
+                );
+            },
+            InputTypeGenerator::class => function(ContainerInterface $container) {
+                return new InputTypeGenerator(
                     $container->get(AnnotationReader::class),
                     $container->get(ControllerQueryProviderFactory::class),
                     $container->get(NamingStrategyInterface::class)

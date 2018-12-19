@@ -51,14 +51,12 @@ class ControllerQueryProviderFactory
     }
 
     /**
-     * @param object $controller
      * @param RecursiveTypeMapperInterface $typeMapper
      * @return ControllerQueryProvider
      */
-    public function buildQueryProvider($controller, RecursiveTypeMapperInterface $typeMapper): ControllerQueryProvider
+    public function buildQueryProvider(RecursiveTypeMapperInterface $typeMapper): ControllerQueryProvider
     {
         return new ControllerQueryProvider(
-            $controller,
             $this->annotationReader,
             $typeMapper,
             $this->hydrator,

@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -62,10 +63,10 @@ interface RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputType&Type
+     * @return InputObjectType
      * @throws CannotMapTypeException
      */
-    public function mapClassToInputType(string $className): InputType;
+    public function mapClassToInputType(string $className): InputObjectType;
 
     /**
      * Returns an array containing all OutputTypes.

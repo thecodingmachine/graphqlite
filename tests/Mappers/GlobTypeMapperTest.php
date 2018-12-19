@@ -26,10 +26,11 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
 
         $cache = new ArrayCache();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $inputTypeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
 
         $this->assertSame([TestObject::class], $mapper->getSupportedClasses());
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
@@ -38,7 +39,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($mapper->canMapNameToType('Foo'));
         $this->assertFalse($mapper->canMapNameToType('NotExists'));
 
-        $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
+        $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
         $this->assertTrue($anotherMapperSameCache->canMapClassToType(TestObject::class));
         $this->assertTrue($anotherMapperSameCache->canMapNameToType('Foo'));
 
@@ -56,7 +57,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateTypes', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateTypes', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
@@ -72,7 +73,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\BadClassType', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\BadClassType', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
 
         $this->expectException(ClassNotFoundException::class);
         $this->expectExceptionMessage("Could not autoload class 'Foobar' defined in @Type annotation of class 'TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\BadClassType\\TestType'");
@@ -89,7 +90,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapNameToType('NotExists', $this->getTypeMapper());
@@ -105,11 +106,15 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
 
-        $this->assertFalse($mapper->canMapClassToInputType(TestObject::class));
+        $this->assertTrue($mapper->canMapClassToInputType(TestObject::class));
+
+        $inputType = $mapper->mapClassToInputType(TestObject::class, $this->getTypeMapper());
+
+        $this->assertSame('TestObjectInput', $inputType->name);
 
         $this->expectException(CannotMapTypeException::class);
-        $mapper->mapClassToInputType(TestType::class);
+        $mapper->mapClassToInputType(TestType::class, $this->getTypeMapper());
     }
 }

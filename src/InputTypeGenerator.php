@@ -28,7 +28,7 @@ class InputTypeGenerator
      */
     private $controllerQueryProviderFactory;
     /**
-     * @var array<string, ObjectType>
+     * @var array<string, InputObjectType>
      */
     private $cache = [];
     /**
@@ -53,7 +53,7 @@ class InputTypeGenerator
      */
     public function getInputTypeNameAndClassName(ReflectionMethod $method): array
     {
-        $fqsen = (string) $this->validateReturnType($method);
+        $fqsen = ltrim((string) $this->validateReturnType($method), '\\');
         $factory = $this->annotationReader->getFactoryAnnotation($method);
         if ($factory === null) {
             throw new \RuntimeException($method->getDeclaringClass()->getName().'::'.$method->getName().' has no @Factory annotation.');
@@ -86,21 +86,18 @@ class InputTypeGenerator
 
     public function mapFactoryMethod(ReflectionMethod $method, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
     {
-
         [$inputName, $className] = $this->getInputTypeNameAndClassName($method);
 
         if (!isset($this->cache[$inputName])) {
             $this->cache[$inputName] = new InputObjectType([
                 'name' => $inputName,
-                'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $typeField) {
+                // TODO: add description.
+                'fields' => function() use ($method, $recursiveTypeMapper) {
 
-                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($annotatedObject, $recursiveTypeMapper);
-                    $fields = $fieldProvider->getFields();
+                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($recursiveTypeMapper);
+                    $fields = $fieldProvider->getInputFields($method);
 
                     return $fields;
-                },
-                'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
-                    return $recursiveTypeMapper->findInterfaces($typeField->getClass());
                 }
             ]);
         }

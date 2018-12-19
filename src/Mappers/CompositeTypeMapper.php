@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 use function array_map;
 use function array_merge;
 use function array_unique;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
@@ -104,14 +105,15 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputType
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return InputObjectType
      * @throws CannotMapTypeException
      */
-    public function mapClassToInputType(string $className): InputType
+    public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToInputType($className)) {
-                return $typeMapper->mapClassToInputType($className);
+                return $typeMapper->mapClassToInputType($className, $recursiveTypeMapper);
             }
         }
         throw CannotMapTypeException::createForInputType($className);

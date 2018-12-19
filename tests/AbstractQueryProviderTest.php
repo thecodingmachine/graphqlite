@@ -36,6 +36,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $hydrator;
     private $registry;
     private $typeGenerator;
+    private $inputTypeGenerator;
     private $controllerQueryProviderFactory;
     private $annotationReader;
 
@@ -113,7 +114,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     }
                 }
 
-                public function mapClassToInputType(string $className): InputType
+                public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
@@ -220,10 +221,9 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->annotationReader;
     }
 
-    protected function buildControllerQueryProvider($controller)
+    protected function buildControllerQueryProvider()
     {
         return new ControllerQueryProvider(
-            $controller,
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getHydrator(),
@@ -240,6 +240,14 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy());
         }
         return $this->typeGenerator;
+    }
+
+    protected function getInputTypeGenerator(): InputTypeGenerator
+    {
+        if ($this->inputTypeGenerator === null) {
+            $this->inputTypeGenerator = new InputTypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy());
+        }
+        return $this->inputTypeGenerator;
     }
 
     protected function getControllerQueryProviderFactory(): ControllerQueryProviderFactory

@@ -111,7 +111,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), $namingStrategy);
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types', $typeGenerator, $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), $namingStrategy, new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), $namingStrategy, new NullCache());
 
         return new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache());
     }

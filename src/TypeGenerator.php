@@ -71,8 +71,8 @@ class TypeGenerator
                         }
                     }
 
-                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($annotatedObject, $recursiveTypeMapper);
-                    $fields = $fieldProvider->getFields();
+                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($recursiveTypeMapper);
+                    $fields = $fieldProvider->getFields($annotatedObject);
                     if ($parentType !== null) {
                         $fields = $parentType->getFields() + $fields;
                     }
