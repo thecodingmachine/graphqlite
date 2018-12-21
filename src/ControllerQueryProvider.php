@@ -374,7 +374,7 @@ class ControllerQueryProvider
      * Note: there is a bug in $refMethod->allowsNull that forces us to use $standardRefMethod->allowsNull instead.
      *
      * @param \ReflectionParameter[] $refParameters
-     * @return array[] An array of ['type'=>Type, 'default'=>val]
+     * @return array[] An array of ['type'=>Type, 'defaultValue'=>val]
      * @throws MissingTypeHintException
      */
     private function mapParameters(array $refParameters, DocBlock $docBlock): array
@@ -415,10 +415,10 @@ class ControllerQueryProvider
             }
 
             if ($parameter->allowsNull()) {
-                $arr['default'] = null;
+                $arr['defaultValue'] = null;
             }
             if ($parameter->isDefaultValueAvailable()) {
-                $arr['default'] = $parameter->getDefaultValue();
+                $arr['defaultValue'] = $parameter->getDefaultValue();
             }
 
             $args[$parameter->getName()] = $arr;

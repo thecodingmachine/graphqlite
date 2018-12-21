@@ -10,6 +10,10 @@ class User extends Contact
      * @var string
      */
     private $email;
+    /**
+     * @var User|null
+     */
+    private $manager;
 
     public function __construct(string $name, string $email)
     {

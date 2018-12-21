@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam;
@@ -68,7 +69,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->args[4]->getType());
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->args[5]->getType());
         $this->assertInstanceOf(StringType::class, $usersQuery->args[6]->getType());
-        $this->assertSame('TestObject', $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
+        $this->assertSame('TestObjectInput', $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
 
         $context = ['int' => 42, 'string' => 'foo', 'list' => [
             ['test' => 42],

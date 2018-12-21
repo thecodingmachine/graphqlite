@@ -6,11 +6,13 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Mouf\Picotainer\Picotainer;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
+use Test;
 use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 use GraphQL\Type\Definition\ObjectType;
@@ -101,6 +103,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new Picotainer([
             FooType::class => function() {
                 return new FooType();
+            },
+            TestFactory::class => function() {
+                return new TestFactory();
             }
         ]);
 

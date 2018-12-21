@@ -13,6 +13,7 @@ use ReflectionMethod;
 use ReflectionType;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 
 /**
  * This class is in charge of creating Webonix InputTypes from Factory annotations.
@@ -35,14 +36,20 @@ class InputTypeGenerator
      * @var NamingStrategyInterface
      */
     private $namingStrategy;
+    /**
+     * @var HydratorInterface
+     */
+    private $hydrator;
 
     public function __construct(AnnotationReader $annotationReader,
                                 ControllerQueryProviderFactory $controllerQueryProviderFactory,
-                                NamingStrategyInterface $namingStrategy)
+                                NamingStrategyInterface $namingStrategy,
+                                HydratorInterface $hydrator)
     {
         $this->annotationReader = $annotationReader;
         $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
         $this->namingStrategy = $namingStrategy;
+        $this->hydrator = $hydrator;
     }
 
     /**
@@ -84,22 +91,21 @@ class InputTypeGenerator
         return $phpdocType->getFqsen();
     }
 
-    public function mapFactoryMethod(ReflectionMethod $method, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+    /**
+     * @param object $factory
+     * @param string $methodName
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return InputObjectType
+     */
+    public function mapFactoryMethod($factory, string $methodName, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
     {
+        $method = new ReflectionMethod($factory, $methodName);
+
         [$inputName, $className] = $this->getInputTypeNameAndClassName($method);
 
         if (!isset($this->cache[$inputName])) {
-            $this->cache[$inputName] = new InputObjectType([
-                'name' => $inputName,
-                // TODO: add description.
-                'fields' => function() use ($method, $recursiveTypeMapper) {
-
-                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($recursiveTypeMapper);
-                    $fields = $fieldProvider->getInputFields($method);
-
-                    return $fields;
-                }
-            ]);
+            // TODO: add comment argument.
+            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->controllerQueryProviderFactory, $recursiveTypeMapper, $factory, $methodName, $this->hydrator, null);
         }
 
         return $this->cache[$inputName];

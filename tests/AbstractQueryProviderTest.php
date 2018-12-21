@@ -17,6 +17,8 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObjectWithRecursiveList;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -26,12 +28,14 @@ use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
     private $testObjectType;
     private $testObjectType2;
     private $inputTestObjectType;
+    private $inputTestObjectType2;
     private $typeMapper;
     private $hydrator;
     private $registry;
@@ -70,7 +74,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->inputTestObjectType === null) {
             $this->inputTestObjectType = new InputObjectType([
-                'name'    => 'TestObject',
+                'name'    => 'TestObjectInput',
                 'fields'  => [
                     'test'   => Type::string(),
                 ],
@@ -79,10 +83,18 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->inputTestObjectType;
     }
 
+    /*protected function getInputTestObjectType2()
+    {
+        if ($this->inputTestObjectType2 === null) {
+            $this->inputTestObjectType2 = new ResolvableInputObjectType('TestObjectInput2', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), new TestFactory(), 'myRecursiveFactory', $this->getHydrator(), null);
+        }
+        return $this->inputTestObjectType2;
+    }*/
+
     protected function getTypeMapper()
     {
         if ($this->typeMapper === null) {
-            $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()) implements TypeMapperInterface {
+            $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()/*, $this->getInputTestObjectType2()*/) implements TypeMapperInterface {
                 /**
                  * @var ObjectType
                  */
@@ -95,12 +107,17 @@ abstract class AbstractQueryProviderTest extends TestCase
                  * @var InputObjectType
                  */
                 private $inputTestObjectType;
+                /**
+                 * @var InputObjectType
+                 */
+//                private $inputTestObjectType2;
 
-                public function __construct(ObjectType $testObjectType, ObjectType $testObjectType2, InputObjectType $inputTestObjectType)
+                public function __construct(ObjectType $testObjectType, ObjectType $testObjectType2, InputObjectType $inputTestObjectType/*, InputObjectType $inputTestObjectType2*/)
                 {
                     $this->testObjectType = $testObjectType;
                     $this->testObjectType2 = $testObjectType2;
                     $this->inputTestObjectType = $inputTestObjectType;
+                    //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
                 public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
@@ -118,7 +135,9 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
-                    } else {
+                    } /*elseif ($className === TestObjectWithRecursiveList::class) {
+                        return $this->inputTestObjectType2;
+                    } */else {
                         throw CannotMapTypeException::createForInputType($className);
                     }
                 }
@@ -187,7 +206,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->hydrator === null) {
             $this->hydrator = new class implements HydratorInterface {
-                public function hydrate(array $data, InputType $type)
+                public function hydrate(array $data, InputObjectType $type)
                 {
                     return new TestObject($data['test']);
                 }
@@ -245,7 +264,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getInputTypeGenerator(): InputTypeGenerator
     {
         if ($this->inputTypeGenerator === null) {
-            $this->inputTypeGenerator = new InputTypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy());
+            $this->inputTypeGenerator = new InputTypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy(), $this->getHydrator());
         }
         return $this->inputTypeGenerator;
     }

@@ -406,8 +406,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         if (!isset($this->mapClassToFactory[$className])) {
             throw CannotMapTypeException::createForInputType($className);
         }
-        $method = new ReflectionMethod($this->mapClassToFactory[$className][0], $this->mapClassToFactory[$className][1]);
-        return $this->inputTypeGenerator->mapFactoryMethod($method, $recursiveTypeMapper);
+        return $this->inputTypeGenerator->mapFactoryMethod($this->container->get($this->mapClassToFactory[$className][0]), $this->mapClassToFactory[$className][1], $recursiveTypeMapper);
     }
 
     /**
