@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 
 use Psr\Container\ContainerInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;

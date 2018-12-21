@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
 use TheCodingMachine\GraphQL\Controllers\GraphQLException;
-use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 
 /**

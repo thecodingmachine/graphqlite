@@ -13,7 +13,7 @@ use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
 use TheCodingMachine\GraphQL\Controllers\GraphQLException;
-use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 

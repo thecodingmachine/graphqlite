@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -202,7 +203,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->typeMapper;
     }
 
-    protected function getHydrator()
+    protected function getHydrator(): HydratorInterface
     {
         if ($this->hydrator === null) {
             $this->hydrator = new class implements HydratorInterface {

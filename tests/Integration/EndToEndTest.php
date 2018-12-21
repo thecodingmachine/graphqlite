@@ -20,7 +20,7 @@ use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
-use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
 use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;

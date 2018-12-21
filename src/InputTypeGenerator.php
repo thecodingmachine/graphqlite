@@ -12,6 +12,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionType;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 

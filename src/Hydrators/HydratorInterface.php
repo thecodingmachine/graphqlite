@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQL\Controllers\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
 
