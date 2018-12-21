@@ -41,6 +41,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($mapper->canMapNameToType('Foo'));
         $this->assertFalse($mapper->canMapNameToType('NotExists'));
 
+        // Again to test cache
         $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
         $this->assertTrue($anotherMapperSameCache->canMapClassToType(TestObject::class));
         $this->assertTrue($anotherMapperSameCache->canMapNameToType('Foo'));
@@ -128,13 +129,22 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
 
         $this->assertTrue($mapper->canMapClassToInputType(TestObject::class));
 
         $inputType = $mapper->mapClassToInputType(TestObject::class, $this->getTypeMapper());
 
         $this->assertSame('TestObjectInput', $inputType->name);
+
+        // Again to test cache
+        $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
+
+        $this->assertTrue($anotherMapperSameCache->canMapClassToInputType(TestObject::class));
+        $this->assertSame('TestObjectInput', $anotherMapperSameCache->mapClassToInputType(TestObject::class, $this->getTypeMapper())->name);
+
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToInputType(TestType::class, $this->getTypeMapper());

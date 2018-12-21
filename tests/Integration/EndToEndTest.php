@@ -125,6 +125,9 @@ class EndToEndTest extends TestCase
          * @var Schema $schema
          */
         $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
         $queryString = '
         query {
             getContacts {

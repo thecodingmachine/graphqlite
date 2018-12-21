@@ -207,7 +207,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             'fileName' => $fileName,
             'factory' => $refArray
         ], $this->mapTtl);
-        $this->mapInputNameToFactory[$inputName] = [];
+        $this->mapInputNameToFactory[$inputName] = $refArray;
         $this->cache->set('globInputTypeMapperByName_'.$inputName, [
             'filemtime' => filemtime($fileName),
             'fileName' => $fileName,
@@ -453,8 +453,13 @@ final class GlobTypeMapper implements TypeMapperInterface
             return true;
         }
 
+        $factory = $this->getFactoryFromCacheByGraphQLInputTypeName($typeName);
+        if ($factory !== null) {
+            return true;
+        }
+
         $this->getMap();
 
-        return isset($this->mapNameToType[$typeName]);
+        return isset($this->mapNameToType[$typeName]) || isset($this->mapInputNameToFactory[$typeName]);
     }
 }
