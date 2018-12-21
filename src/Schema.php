@@ -41,8 +41,14 @@ class Schema extends \GraphQL\Type\Schema
             return $recursiveTypeMapper->getOutputTypes();
         });
 
-        $config->setTypeLoader(function(string $name) use ($recursiveTypeMapper) {
+        $config->setTypeLoader(function(string $name) use ($recursiveTypeMapper, $query, $mutation) {
             // We need to find a type FROM a GraphQL type name
+            if ($name === 'Query') {
+                return $query;
+            }
+            if ($name === 'Mutation') {
+                return $mutation;
+            }
             return $recursiveTypeMapper->mapNameToType($name);
         });
 

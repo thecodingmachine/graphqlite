@@ -20,7 +20,9 @@ use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
-use TheCodingMachine\GraphQL\Controllers\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
+use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
 use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -80,6 +82,7 @@ class EndToEndTest extends TestCase
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
+                    $container->get(InputTypeGenerator::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
@@ -93,17 +96,19 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class)
                 );
             },
+            InputTypeGenerator::class => function(ContainerInterface $container) {
+                return new InputTypeGenerator(
+                    $container->get(AnnotationReader::class),
+                    $container->get(ControllerQueryProviderFactory::class),
+                    $container->get(NamingStrategyInterface::class),
+                    $container->get(HydratorInterface::class)
+                );
+            },
             AnnotationReader::class => function(ContainerInterface $container) {
                 return new AnnotationReader(new DoctrineAnnotationReader());
             },
             HydratorInterface::class => function(ContainerInterface $container) {
-                return new class implements HydratorInterface
-                {
-                    public function hydrate(array $data, InputType $type)
-                    {
-                        return new Contact($data['name']);
-                    }
-                };
+                return new FactoryHydrator();
             },
             NamingStrategyInterface::class => function() {
                 return new NamingStrategy();
@@ -120,6 +125,9 @@ class EndToEndTest extends TestCase
          * @var Schema $schema
          */
         $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
         $queryString = '
         query {
             getContacts {
@@ -169,4 +177,46 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
+    public function testEndToEndInputType()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+          saveContact(
+            contact: {
+                name: "foo"
+                relations: [
+                    {
+                        name: "bar"
+                    }
+                ]
+            }
+          ) {
+            name,
+            relations {
+              name
+            }
+          }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'saveContact' => [
+                'name' => 'foo',
+                'relations' => [
+                    [
+                        'name' => 'bar'
+                    ]
+                ]
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
 }

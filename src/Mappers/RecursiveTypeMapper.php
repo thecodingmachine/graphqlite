@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use function array_flip;
 use function get_parent_class;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -254,12 +255,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputType&Type
+     * @return InputObjectType
      * @throws CannotMapTypeException
      */
-    public function mapClassToInputType(string $className): InputType
+    public function mapClassToInputType(string $className): InputObjectType
     {
-        return $this->typeMapper->mapClassToInputType($className);
+        return $this->typeMapper->mapClassToInputType($className, $this);
     }
 
     /**
@@ -309,6 +310,10 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         if ($this->typeMapper->canMapNameToType($typeName)) {
             return $this->typeMapper->mapNameToType($typeName, $this);
+        }
+
+        if ($this->typeMapper->canMapClassToInputType($typeName)) {
+            return $this->typeMapper->mapClassToInputType($typeName, $this);
         }
 
         // Maybe the type is an interface?

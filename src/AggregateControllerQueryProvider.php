@@ -50,8 +50,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->controllersContainer->get($controllerName);
-            $queryProvider = $this->queryProviderFactory->buildQueryProvider($controller, $this->recursiveTypeMapper);
-            $queryList = array_merge($queryList, $queryProvider->getQueries());
+            $queryProvider = $this->queryProviderFactory->buildQueryProvider($this->recursiveTypeMapper);
+            $queryList = array_merge($queryList, $queryProvider->getQueries($controller));
         }
 
         return $queryList;
@@ -66,8 +66,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->controllersContainer->get($controllerName);
-            $queryProvider = $this->queryProviderFactory->buildQueryProvider($controller, $this->recursiveTypeMapper);
-            $mutationList = array_merge($mutationList, $queryProvider->getMutations());
+            $queryProvider = $this->queryProviderFactory->buildQueryProvider($this->recursiveTypeMapper);
+            $mutationList = array_merge($mutationList, $queryProvider->getMutations($controller));
         }
 
         return $mutationList;

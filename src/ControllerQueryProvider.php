@@ -11,6 +11,7 @@ use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use Iterator;
@@ -44,12 +45,8 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 /**
  * A query provider that looks for queries in a "controller"
  */
-class ControllerQueryProvider implements QueryProviderInterface
+class ControllerQueryProvider
 {
-    /**
-     * @var object
-     */
-    private $controller;
     /**
      * @var AnnotationReader
      */
@@ -80,7 +77,6 @@ class ControllerQueryProvider implements QueryProviderInterface
     private $cachedDocBlockFactory;
 
     /**
-     * @param object $controller
      * @param AnnotationReader $annotationReader
      * @param RecursiveTypeMapperInterface $typeMapper
      * @param HydratorInterface $hydrator
@@ -88,12 +84,11 @@ class ControllerQueryProvider implements QueryProviderInterface
      * @param AuthorizationServiceInterface $authorizationService
      * @param ContainerInterface $registry The registry is used to fetch custom return types by container identifier (using the returnType parameter of the Type annotation)
      */
-    public function __construct($controller, AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
+    public function __construct(AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, ContainerInterface $registry,
                                 CachedDocBlockFactory $cachedDocBlockFactory)
     {
-        $this->controller = $controller;
         $this->annotationReader = $annotationReader;
         $this->typeMapper = $typeMapper;
         $this->hydrator = $hydrator;
@@ -103,29 +98,35 @@ class ControllerQueryProvider implements QueryProviderInterface
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
     }
 
+    // TODO: Add RecursiveTypeMapper in the list of parameters for getQueries and REMOVE the ControllerQueryProviderFactory.
+
     /**
+     * @param object $controller
      * @return QueryField[]
+     * @throws \ReflectionException
      */
-    public function getQueries(): array
+    public function getQueries($controller): array
     {
-        return $this->getFieldsByAnnotations(Query::class, false);
+        return $this->getFieldsByAnnotations($controller,Query::class, false);
     }
 
     /**
+     * @param object $controller
      * @return QueryField[]
+     * @throws \ReflectionException
      */
-    public function getMutations(): array
+    public function getMutations($controller): array
     {
-        return $this->getFieldsByAnnotations(Mutation::class, false);
+        return $this->getFieldsByAnnotations($controller,Mutation::class, false);
     }
 
     /**
      * @return array<string, QueryField> QueryField indexed by name.
      */
-    public function getFields(): array
+    public function getFields($controller): array
     {
-        $fieldAnnotations = $this->getFieldsByAnnotations(Annotations\Field::class, true);
-        $sourceFields = $this->getSourceFields();
+        $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true);
+        $sourceFields = $this->getSourceFields($controller);
 
         $fields = [];
         foreach ($fieldAnnotations as $field) {
@@ -139,16 +140,32 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
+     * @param ReflectionMethod $refMethod A method annotated with a Factory annotation.
+     * @return array<string, array<int, mixed>> Returns an array of fields as accepted by the InputObjectType constructor.
+     */
+    public function getInputFields(ReflectionMethod $refMethod): array
+    {
+        $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+        //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
+
+        $parameters = $refMethod->getParameters();
+
+        $args = $this->mapParameters($parameters, $docBlockObj);
+
+        return $args;
+    }
+
+    /**
+     * @param object $controller
      * @param string $annotationName
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field, false for @Query and @Mutation
      * @return QueryField[]
+     * @throws CannotMapTypeException
      * @throws \ReflectionException
      */
-    private function getFieldsByAnnotations(string $annotationName, bool $injectSource): array
+    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource): array
     {
-        $refClass = new \ReflectionClass($this->controller);
-
-        //$refClass = ReflectionClass::createFromInstance($this->controller);
+        $refClass = new \ReflectionClass($controller);
 
         $queryList = [];
 
@@ -187,7 +204,7 @@ class ControllerQueryProvider implements QueryProviderInterface
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
                 }
 
-                $queryList[] = new QueryField($name, $type, $args, [$this->controller, $methodName], null, $this->hydrator, $docBlockComment, $injectSource);
+                $queryList[] = new QueryField($name, $type, $args, [$controller, $methodName], null, $this->hydrator, $docBlockComment, $injectSource);
             }
         }
 
@@ -236,17 +253,20 @@ class ControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
+     * @param object $controller
      * @return QueryField[]
+     * @throws CannotMapTypeException
+     * @throws \ReflectionException
      */
-    private function getSourceFields(): array
+    private function getSourceFields($controller): array
     {
-        $refClass = new \ReflectionClass($this->controller);
+        $refClass = new \ReflectionClass($controller);
 
         /** @var SourceField[] $sourceFields */
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
-        if ($this->controller instanceof FromSourceFieldsInterface) {
-            $sourceFields = array_merge($sourceFields, $this->controller->getSourceFields());
+        if ($controller instanceof FromSourceFieldsInterface) {
+            $sourceFields = array_merge($sourceFields, $controller->getSourceFields());
         }
 
         if (empty($sourceFields)) {
@@ -355,7 +375,7 @@ class ControllerQueryProvider implements QueryProviderInterface
      * Note: there is a bug in $refMethod->allowsNull that forces us to use $standardRefMethod->allowsNull instead.
      *
      * @param \ReflectionParameter[] $refParameters
-     * @return array[] An array of ['type'=>Type, 'default'=>val]
+     * @return array[] An array of ['type'=>Type, 'defaultValue'=>val]
      * @throws MissingTypeHintException
      */
     private function mapParameters(array $refParameters, DocBlock $docBlock): array
@@ -396,10 +416,10 @@ class ControllerQueryProvider implements QueryProviderInterface
             }
 
             if ($parameter->allowsNull()) {
-                $arr['default'] = null;
+                $arr['defaultValue'] = null;
             }
             if ($parameter->isDefaultValueAvailable()) {
-                $arr['default'] = $parameter->getDefaultValue();
+                $arr['defaultValue'] = $parameter->getDefaultValue();
             }
 
             $args[$parameter->getName()] = $arr;

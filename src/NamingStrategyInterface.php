@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 
 interface NamingStrategyInterface
@@ -16,4 +17,6 @@ interface NamingStrategyInterface
      * Returns the GraphQL output object type name based on the type className and the Type annotation.
      */
     public function getOutputTypeName(string $typeClassName, Type $type): string;
+
+    public function getInputTypeName(string $className, Factory $factory): string;
 }

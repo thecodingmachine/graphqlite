@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 
 /**
@@ -17,15 +18,10 @@ use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 class QueryField extends FieldDefinition
 {
     /**
-     * @var HydratorInterface
-     */
-    private $hydrator;
-
-    /**
      * QueryField constructor.
      * @param string $name
      * @param OutputType&Type $type
-     * @param array[] $arguments Indexed by argument name, value: ['type'=>InputType, 'default'=>val].
+     * @param array[] $arguments Indexed by argument name, value: ['type'=>InputType, 'defaultValue'=>val].
      * @param callable|null $resolve The method to execute
      * @param string|null $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
      * @param HydratorInterface $hydrator
@@ -35,8 +31,6 @@ class QueryField extends FieldDefinition
      */
     public function __construct(string $name, OutputType $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, HydratorInterface $hydrator, ?string $comment, bool $injectSource, array $additionalConfig = [])
     {
-        // FIXME: remove hydrator since not used!!!!
-        $this->hydrator = $hydrator;
         $config = [
             'name' => $name,
             'type' => $type,
@@ -46,7 +40,7 @@ class QueryField extends FieldDefinition
             $config['description'] = $comment;
         }
 
-        $config['resolve'] = function ($source, array $args) use ($resolve, $targetMethodOnSource, $arguments, $injectSource) {
+        $config['resolve'] = function ($source, array $args) use ($resolve, $targetMethodOnSource, $arguments, $injectSource, $hydrator) {
             $toPassArgs = [];
             if ($injectSource) {
                 $toPassArgs[] = $source;
@@ -59,21 +53,21 @@ class QueryField extends FieldDefinition
                     $type = $this->stripNonNullType($type);
                     if ($type instanceof ListOfType) {
                         $subtype = $this->stripNonNullType($type->getWrappedType());
-                        $val = array_map(function ($item) use ($subtype) {
+                        $val = array_map(function ($item) use ($subtype, $hydrator) {
                             if ($subtype instanceof DateTimeType) {
                                 return new \DateTimeImmutable($item);
                             } elseif ($subtype instanceof InputObjectType) {
-                                return $this->hydrator->hydrate($item, $subtype);
-                            };
+                                return $hydrator->hydrate($item, $subtype);
+                            }
                             return $item;
                         }, $val);
                     } elseif ($type instanceof DateTimeType) {
                         $val = new \DateTimeImmutable($val);
                     } elseif ($type instanceof InputObjectType) {
-                        $val = $this->hydrator->hydrate($val, $type);
+                        $val = $hydrator->hydrate($val, $type);
                     }
-                } elseif (array_key_exists('default', $arr)) {
-                    $val = $arr['default'];
+                } elseif (array_key_exists('defaultValue', $arr)) {
+                    $val = $arr['defaultValue'];
                 } else {
                     throw new GraphQLException("Expected argument '$name' was not provided.");
                 }

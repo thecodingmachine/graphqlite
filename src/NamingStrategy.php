@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 
+use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 
 class NamingStrategy implements NamingStrategyInterface
@@ -35,5 +36,17 @@ class NamingStrategy implements NamingStrategyInterface
             $typeClassName = substr($typeClassName, $prevPos + 1);
         }
         return $typeClassName;
+    }
+
+    public function getInputTypeName(string $className, Factory $factory): string
+    {
+        $inputTypeName = $factory->getName();
+        if ($inputTypeName !== null) {
+            return $inputTypeName;
+        }
+        if ($prevPos = strrpos($className, '\\')) {
+            $className = substr($className, $prevPos + 1);
+        }
+        return $className.'Input';
     }
 }

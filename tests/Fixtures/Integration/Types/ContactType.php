@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
  * @Type(class=Contact::class)
  * @SourceField(name="name")
  * @SourceField(name="manager")
+ * @SourceField(name="relations")
  */
 class ContactType
 {

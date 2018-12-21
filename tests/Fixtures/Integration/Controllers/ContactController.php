@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Controllers;
 
 
+use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\User;
@@ -20,5 +21,15 @@ class ContactController
             new Contact('Joe'),
             new User('Bill', 'bill@example.com'),
         ];
+    }
+
+    /**
+     * @Mutation()
+     * @param Contact $contact
+     * @return Contact
+     */
+    public function saveContact(Contact $contact): Contact
+    {
+        return $contact;
     }
 }

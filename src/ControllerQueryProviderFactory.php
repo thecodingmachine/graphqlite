@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 
 use Psr\Container\ContainerInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
@@ -51,14 +52,12 @@ class ControllerQueryProviderFactory
     }
 
     /**
-     * @param object $controller
      * @param RecursiveTypeMapperInterface $typeMapper
      * @return ControllerQueryProvider
      */
-    public function buildQueryProvider($controller, RecursiveTypeMapperInterface $typeMapper): ControllerQueryProvider
+    public function buildQueryProvider(RecursiveTypeMapperInterface $typeMapper): ControllerQueryProvider
     {
         return new ControllerQueryProvider(
-            $controller,
             $this->annotationReader,
             $typeMapper,
             $this->hydrator,
