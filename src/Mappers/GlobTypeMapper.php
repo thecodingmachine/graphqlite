@@ -164,7 +164,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                     [$inputName, $className] = $this->inputTypeGenerator->getInputTypeNameAndClassName($method);
 
                     if (isset($this->mapClassToFactory[$className])) {
-                        throw DuplicateMappingException::createForFactory($className, $this->mapClassToFactory[$type->getClass()][0], $this->mapClassToFactory[$type->getClass()][1], $className, $method->name);
+                        throw DuplicateMappingException::createForFactory($className, $this->mapClassToFactory[$className][0], $this->mapClassToFactory[$className][1], $refClass->getName(), $method->name);
                     }
                     $this->storeInputTypeInCache($method, $inputName, $className, $refClass->getFileName());
                 }
@@ -421,15 +421,22 @@ final class GlobTypeMapper implements TypeMapperInterface
     public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): \GraphQL\Type\Definition\Type
     {
         $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
-
         if ($typeClassName === null) {
-            $this->getMap();
+            $factory = $this->getFactoryFromCacheByGraphQLInputTypeName($typeName);
+            if ($factory === null) {
+                $this->getMap();
+            }
         }
 
-        if (!isset($this->mapNameToType[$typeName])) {
-            throw CannotMapTypeException::createForName($typeName);
+        if (isset($this->mapNameToType[$typeName])) {
+            return $this->typeGenerator->mapAnnotatedObject($this->container->get($this->mapNameToType[$typeName]), $recursiveTypeMapper);
         }
-        return $this->typeGenerator->mapAnnotatedObject($this->container->get($this->mapNameToType[$typeName]), $recursiveTypeMapper);
+        if (isset($this->mapInputNameToFactory[$typeName])) {
+            $factory = $this->mapInputNameToFactory[$typeName];
+            return $this->inputTypeGenerator->mapFactoryMethod($this->container->get($factory[0]), $factory[1], $recursiveTypeMapper);
+        }
+
+        throw CannotMapTypeException::createForName($typeName);
     }
 
     /**

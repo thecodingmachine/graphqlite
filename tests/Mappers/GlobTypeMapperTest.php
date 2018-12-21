@@ -49,7 +49,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToType(\stdClass::class, $this->getTypeMapper());
     }
 
-    public function testGlobTypeMapperException()
+    public function testGlobTypeMapperDuplicateTypesException()
     {
         $container = new Picotainer([
             TestType::class => function() {
@@ -63,6 +63,23 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
+    }
+
+    public function testGlobTypeMapperDuplicateInputTypesException()
+    {
+        $container = new Picotainer([
+            /*TestType::class => function() {
+                return new TestType();
+            }*/
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateInputTypes', $typeGenerator, $this->getInputTypeGenerator(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), new NullCache());
+
+        $this->expectException(DuplicateMappingException::class);
+        $this->expectExceptionMessage('The class \'TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'');
+        $mapper->canMapClassToInputType(TestObject::class);
     }
 
     public function testGlobTypeMapperClassNotFoundException()
