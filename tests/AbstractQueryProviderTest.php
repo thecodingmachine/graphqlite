@@ -211,6 +211,11 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     return new TestObject($data['test']);
                 }
+
+                public function canHydrate(array $data, InputObjectType $type): bool
+                {
+                    return true;
+                }
             };
         }
         return $this->hydrator;

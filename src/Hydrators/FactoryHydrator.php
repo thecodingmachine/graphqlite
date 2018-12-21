@@ -20,12 +20,25 @@ class FactoryHydrator implements HydratorInterface
      * @param mixed[] $data
      * @param InputObjectType $type
      * @return object
+     * @throws CannotHydrateException
      */
     public function hydrate(array $data, InputObjectType $type)
     {
         if ($type instanceof ResolvableInputObjectType) {
             return $type->resolve($data);
         }
-        throw new GraphQLException('Cannot hydrate type '.$type->name);
+        throw CannotHydrateException::createForInputType($type->name);
+    }
+
+    /**
+     * Whether this hydrate can hydrate the passed data.
+     *
+     * @param mixed[] $data
+     * @param InputObjectType $type
+     * @return bool
+     */
+    public function canHydrate(array $data, InputObjectType $type): bool
+    {
+        return $type instanceof ResolvableInputObjectType;
     }
 }
