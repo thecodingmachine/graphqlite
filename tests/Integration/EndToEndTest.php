@@ -23,6 +23,7 @@ use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
+use TheCodingMachine\GraphQL\Controllers\InputTypeUtils;
 use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -83,6 +84,7 @@ class EndToEndTest extends TestCase
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
+                    $container->get(InputTypeUtils::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
@@ -98,10 +100,15 @@ class EndToEndTest extends TestCase
             },
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
-                    $container->get(AnnotationReader::class),
+                    $container->get(InputTypeUtils::class),
                     $container->get(ControllerQueryProviderFactory::class),
-                    $container->get(NamingStrategyInterface::class),
                     $container->get(HydratorInterface::class)
+                );
+            },
+            InputTypeUtils::class => function(ContainerInterface $container) {
+                return new InputTypeUtils(
+                    $container->get(AnnotationReader::class),
+                    $container->get(NamingStrategyInterface::class)
                 );
             },
             AnnotationReader::class => function(ContainerInterface $container) {

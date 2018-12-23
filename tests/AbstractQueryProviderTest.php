@@ -42,6 +42,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $registry;
     private $typeGenerator;
     private $inputTypeGenerator;
+    private $inputTypeUtils;
     private $controllerQueryProviderFactory;
     private $annotationReader;
 
@@ -270,9 +271,17 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getInputTypeGenerator(): InputTypeGenerator
     {
         if ($this->inputTypeGenerator === null) {
-            $this->inputTypeGenerator = new InputTypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy(), $this->getHydrator());
+            $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getControllerQueryProviderFactory(), $this->getHydrator());
         }
         return $this->inputTypeGenerator;
+    }
+
+    protected function getInputTypeUtils(): InputTypeUtils
+    {
+        if ($this->inputTypeUtils === null) {
+            $this->inputTypeUtils = new InputTypeUtils($this->getAnnotationReader(), new NamingStrategy());
+        }
+        return $this->inputTypeUtils;
     }
 
     protected function getControllerQueryProviderFactory(): ControllerQueryProviderFactory
