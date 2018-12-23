@@ -22,10 +22,6 @@ use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 class InputTypeGenerator
 {
     /**
-     * @var AnnotationReader
-     */
-    private $annotationReader;
-    /**
      * @var ControllerQueryProviderFactory
      */
     private $controllerQueryProviderFactory;
@@ -34,62 +30,21 @@ class InputTypeGenerator
      */
     private $cache = [];
     /**
-     * @var NamingStrategyInterface
-     */
-    private $namingStrategy;
-    /**
      * @var HydratorInterface
      */
     private $hydrator;
+    /**
+     * @var InputTypeUtils
+     */
+    private $inputTypeUtils;
 
-    public function __construct(AnnotationReader $annotationReader,
+    public function __construct(InputTypeUtils $inputTypeUtils,
                                 ControllerQueryProviderFactory $controllerQueryProviderFactory,
-                                NamingStrategyInterface $namingStrategy,
                                 HydratorInterface $hydrator)
     {
-        $this->annotationReader = $annotationReader;
+        $this->inputTypeUtils = $inputTypeUtils;
         $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
-        $this->namingStrategy = $namingStrategy;
         $this->hydrator = $hydrator;
-    }
-
-    /**
-     * Returns an array with 2 elements: [ $inputName, $className ]
-     *
-     * @param ReflectionMethod $method
-     * @return string[]
-     */
-    public function getInputTypeNameAndClassName(ReflectionMethod $method): array
-    {
-        $fqsen = ltrim((string) $this->validateReturnType($method), '\\');
-        $factory = $this->annotationReader->getFactoryAnnotation($method);
-        if ($factory === null) {
-            throw new \RuntimeException($method->getDeclaringClass()->getName().'::'.$method->getName().' has no @Factory annotation.');
-        }
-        return [$this->namingStrategy->getInputTypeName($fqsen, $factory), $fqsen];
-    }
-
-    private function validateReturnType(ReflectionMethod $refMethod): Fqsen
-    {
-        $returnType = $refMethod->getReturnType();
-        if ($returnType === null) {
-            throw MissingTypeHintException::missingReturnType($refMethod);
-        }
-
-        if ($returnType->allowsNull()) {
-            throw MissingTypeHintException::nullableReturnType($refMethod);
-        }
-
-        $type = (string) $returnType;
-
-        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
-
-        $phpdocType = $typeResolver->resolve($type);
-        if (!$phpdocType instanceof Object_) {
-            throw MissingTypeHintException::invalidReturnType($refMethod);
-        }
-
-        return $phpdocType->getFqsen();
     }
 
     /**
@@ -102,7 +57,7 @@ class InputTypeGenerator
     {
         $method = new ReflectionMethod($factory, $methodName);
 
-        [$inputName, $className] = $this->getInputTypeNameAndClassName($method);
+        [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.

@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
+use TheCodingMachine\GraphQL\Controllers\InputTypeUtils;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 
@@ -85,11 +86,15 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var InputTypeGenerator
      */
     private $inputTypeGenerator;
+    /**
+     * @var InputTypeUtils
+     */
+    private $inputTypeUtils;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategy $namingStrategy, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategy $namingStrategy, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
     {
         $this->namespace = $namespace;
         $this->typeGenerator = $typeGenerator;
@@ -100,6 +105,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->globTtl = $globTtl;
         $this->mapTtl = $mapTtl;
         $this->inputTypeGenerator = $inputTypeGenerator;
+        $this->inputTypeUtils = $inputTypeUtils;
     }
 
     /**
@@ -161,7 +167,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             foreach ($refClass->getMethods() as $method) {
                 $factory = $this->annotationReader->getFactoryAnnotation($method);
                 if ($factory !== null) {
-                    [$inputName, $className] = $this->inputTypeGenerator->getInputTypeNameAndClassName($method);
+                    [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
                     if (isset($this->mapClassToFactory[$className])) {
                         throw DuplicateMappingException::createForFactory($className, $this->mapClassToFactory[$className][0], $this->mapClassToFactory[$className][1], $refClass->getName(), $method->name);
