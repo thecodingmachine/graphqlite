@@ -41,13 +41,13 @@ use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 
-class ControllerQueryProviderTest extends AbstractQueryProviderTest
+class FieldsBuilderTest extends AbstractQueryProviderTest
 {
     public function testQueryProvider()
     {
         $controller = new TestController();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $queries = $queryProvider->getQueries($controller);
 
@@ -97,7 +97,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $mutations = $queryProvider->getMutations($controller);
 
@@ -126,7 +126,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(MissingTypeHintException::class);
         $queryProvider->getQueries($controller);
@@ -136,7 +136,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $queries = $queryProvider->getQueries($controller);
 
@@ -150,7 +150,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $queries = $queryProvider->getQueries($controller);
 
@@ -163,7 +163,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestType($this->getRegistry());
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $fields = $queryProvider->getFields($controller);
 
@@ -180,7 +180,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testLoggedInSourceField()
     {
-        $queryProvider = new ControllerQueryProvider(
+        $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getHydrator(),
@@ -204,7 +204,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testRightInSourceField()
     {
-        $queryProvider = new ControllerQueryProvider(
+        $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getHydrator(),
@@ -227,7 +227,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testMissingTypeAnnotation()
     {
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(MissingAnnotationException::class);
         $queryProvider->getFields(new TestTypeMissingAnnotation());
@@ -235,7 +235,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testSourceFieldDoesNotExists()
     {
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(FieldNotFoundException::class);
         $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::notExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
@@ -244,7 +244,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testSourceFieldHasMissingReturnType()
     {
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
@@ -253,7 +253,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testSourceFieldIsId()
     {
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
         $fields = $queryProvider->getFields(new TestTypeId());
         $this->assertCount(1, $fields);
 
@@ -264,7 +264,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testFromSourceFieldsInterface()
     {
-        $queryProvider = new ControllerQueryProvider(
+        $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getHydrator(),
@@ -284,7 +284,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $queries = $queryProvider->getQueries($controller);
 
@@ -300,7 +300,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testQueryProviderWithIterable()
     {
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $queries = $queryProvider->getQueries(new TestController());
 
@@ -316,7 +316,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
 
     public function testNoReturnTypeError()
     {
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(TypeMappingException::class);
         $queryProvider->getQueries(new TestControllerNoReturnType());
     }
@@ -325,7 +325,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $queries = $queryProvider->getQueries($controller);
 
@@ -344,7 +344,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestControllerWithInvalidInputType();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For parameter $foo, in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType::test, cannot map class "Exception" to a known GraphQL input type. Check your TypeMapper configuration.');
@@ -355,7 +355,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestControllerWithInvalidReturnType();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType::test, cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
@@ -366,7 +366,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestControllerWithIterableReturnType();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
@@ -377,7 +377,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestControllerWithArrayReturnType();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType::test is type-hinted to array. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]');
@@ -388,7 +388,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestControllerWithArrayParam();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam::test is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
@@ -399,7 +399,7 @@ class ControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestControllerWithIterableParam();
 
-        $queryProvider = $this->buildControllerQueryProvider();
+        $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');

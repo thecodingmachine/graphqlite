@@ -11,7 +11,7 @@ use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 
-class ControllerQueryProviderFactory
+class FieldsBuilderFactory
 {
     /**
      * @var AnnotationReader
@@ -53,11 +53,11 @@ class ControllerQueryProviderFactory
 
     /**
      * @param RecursiveTypeMapperInterface $typeMapper
-     * @return ControllerQueryProvider
+     * @return FieldsBuilder
      */
-    public function buildQueryProvider(RecursiveTypeMapperInterface $typeMapper): ControllerQueryProvider
+    public function buildFieldsBuilder(RecursiveTypeMapperInterface $typeMapper): FieldsBuilder
     {
-        return new ControllerQueryProvider(
+        return new FieldsBuilder(
             $this->annotationReader,
             $typeMapper,
             $this->hydrator,
