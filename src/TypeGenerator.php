@@ -20,7 +20,7 @@ class TypeGenerator
      */
     private $annotationReader;
     /**
-     * @var ControllerQueryProviderFactory
+     * @var FieldsBuilderFactory
      */
     private $controllerQueryProviderFactory;
     /**
@@ -33,7 +33,7 @@ class TypeGenerator
     private $namingStrategy;
 
     public function __construct(AnnotationReader $annotationReader,
-                                ControllerQueryProviderFactory $controllerQueryProviderFactory,
+                                FieldsBuilderFactory $controllerQueryProviderFactory,
                                 NamingStrategyInterface $namingStrategy)
     {
         $this->annotationReader = $annotationReader;
@@ -71,7 +71,7 @@ class TypeGenerator
                         }
                     }
 
-                    $fieldProvider = $this->controllerQueryProviderFactory->buildQueryProvider($recursiveTypeMapper);
+                    $fieldProvider = $this->controllerQueryProviderFactory->buildFieldsBuilder($recursiveTypeMapper);
                     $fields = $fieldProvider->getFields($annotatedObject);
                     if ($parentType !== null) {
                         $fields = $parentType->getFields() + $fields;

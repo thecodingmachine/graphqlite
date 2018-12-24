@@ -42,7 +42,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private $aggregateControllerQueryProvider;
     /**
-     * @var ControllerQueryProviderFactory
+     * @var FieldsBuilderFactory
      */
     private $controllerQueryProviderFactory;
     /**
@@ -54,7 +54,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
      */
-    public function __construct(string $namespace, ControllerQueryProviderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null)
     {
         $this->namespace = $namespace;
         $this->container = $container;

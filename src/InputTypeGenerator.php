@@ -22,7 +22,7 @@ use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 class InputTypeGenerator
 {
     /**
-     * @var ControllerQueryProviderFactory
+     * @var FieldsBuilderFactory
      */
     private $controllerQueryProviderFactory;
     /**
@@ -39,7 +39,7 @@ class InputTypeGenerator
     private $inputTypeUtils;
 
     public function __construct(InputTypeUtils $inputTypeUtils,
-                                ControllerQueryProviderFactory $controllerQueryProviderFactory,
+                                FieldsBuilderFactory $controllerQueryProviderFactory,
                                 HydratorInterface $hydrator)
     {
         $this->inputTypeUtils = $inputTypeUtils;

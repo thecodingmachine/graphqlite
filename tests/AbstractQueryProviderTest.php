@@ -247,9 +247,9 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->annotationReader;
     }
 
-    protected function buildControllerQueryProvider()
+    protected function buildFieldsBuilder(): FieldsBuilder
     {
-        return new ControllerQueryProvider(
+        return new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getHydrator(),
@@ -284,10 +284,10 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->inputTypeUtils;
     }
 
-    protected function getControllerQueryProviderFactory(): ControllerQueryProviderFactory
+    protected function getControllerQueryProviderFactory(): FieldsBuilderFactory
     {
         if ($this->controllerQueryProviderFactory === null) {
-            $this->controllerQueryProviderFactory = new ControllerQueryProviderFactory($this->getAnnotationReader(),
+            $this->controllerQueryProviderFactory = new FieldsBuilderFactory($this->getAnnotationReader(),
                 $this->getHydrator(),
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService(),

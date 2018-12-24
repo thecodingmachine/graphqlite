@@ -11,7 +11,7 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
-use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
+use TheCodingMachine\GraphQL\Controllers\FieldsBuilderFactory;
 use TheCodingMachine\GraphQL\Controllers\GraphQLException;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -35,7 +35,7 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
     /**
      * QueryField constructor.
      * @param string $name
-     * @param ControllerQueryProviderFactory $controllerQueryProviderFactory
+     * @param FieldsBuilderFactory $controllerQueryProviderFactory
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @param object $factory
      * @param string $methodName
@@ -43,14 +43,14 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
      * @param null|string $comment
      * @param array $additionalConfig
      */
-    public function __construct(string $name, ControllerQueryProviderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, $factory, string $methodName, HydratorInterface $hydrator, ?string $comment, array $additionalConfig = [])
+    public function __construct(string $name, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, $factory, string $methodName, HydratorInterface $hydrator, ?string $comment, array $additionalConfig = [])
     {
         $this->hydrator = $hydrator;
         $this->resolve = [ $factory, $methodName ];
 
         $fields = function() use ($controllerQueryProviderFactory, $factory, $methodName, $recursiveTypeMapper) {
             $method = new ReflectionMethod($factory, $methodName);
-            $fieldProvider = $controllerQueryProviderFactory->buildQueryProvider($recursiveTypeMapper);
+            $fieldProvider = $controllerQueryProviderFactory->buildFieldsBuilder($recursiveTypeMapper);
             return $fieldProvider->getInputFields($method);
         };
 

@@ -43,9 +43,9 @@ use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 /**
- * A query provider that looks for queries in a "controller"
+ * A class in charge if returning list of fields for queries / mutations / entities / input types
  */
-class ControllerQueryProvider
+class FieldsBuilder
 {
     /**
      * @var AnnotationReader
