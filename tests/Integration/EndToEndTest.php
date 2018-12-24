@@ -17,7 +17,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
-use TheCodingMachine\GraphQL\Controllers\ControllerQueryProviderFactory;
+use TheCodingMachine\GraphQL\Controllers\FieldsBuilderFactory;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
@@ -55,11 +55,11 @@ class EndToEndTest extends TestCase
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(ControllerQueryProviderFactory::class),
+                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
                     $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), new ArrayCache());
             },
-            ControllerQueryProviderFactory::class => function(ContainerInterface $container) {
-                return new ControllerQueryProviderFactory(
+            FieldsBuilderFactory::class => function(ContainerInterface $container) {
+                return new FieldsBuilderFactory(
                     $container->get(AnnotationReader::class),
                     $container->get(HydratorInterface::class),
                     $container->get(AuthenticationServiceInterface::class),
@@ -94,14 +94,14 @@ class EndToEndTest extends TestCase
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
-                    $container->get(ControllerQueryProviderFactory::class),
+                    $container->get(FieldsBuilderFactory::class),
                     $container->get(NamingStrategyInterface::class)
                 );
             },
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
-                    $container->get(ControllerQueryProviderFactory::class),
+                    $container->get(FieldsBuilderFactory::class),
                     $container->get(HydratorInterface::class)
                 );
             },
