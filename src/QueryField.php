@@ -3,11 +3,13 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use function get_class;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
@@ -65,6 +67,8 @@ class QueryField extends FieldDefinition
                         $val = new \DateTimeImmutable($val);
                     } elseif ($type instanceof InputObjectType) {
                         $val = $hydrator->hydrate($val, $type);
+                    } elseif (!$type instanceof ScalarType) {
+                        throw new \RuntimeException('Unexpected type: '.get_class($type));
                     }
                 } elseif (array_key_exists('defaultValue', $arr)) {
                     $val = $arr['defaultValue'];
