@@ -9,14 +9,30 @@ to add support for [multipart requests](https://github.com/jaydenseric/graphql-m
 
 GraphQL-Controllers supports this extension through the use of the [Ecodev/graphql-upload third party library](https://github.com/Ecodev/graphql-upload).
 
-Usage
------
+## Installation
+
+The file upload feature relies on a third party middleware (ecodev/graphql-upload). You need additional steps
+to install it.
+
+### If you are using the Symfony bundle
+
+If you are using our Symfony bundle, the file upload middleware is managed by the bundle. You have nothing to do
+and can start using it right away.
+
+### If you are using a PSR-15 compatible framework
 
 In order to use this, you must first be sure that the ecodev/graphql-upload PSR-15 middleware is part of your middleware pipe.
 
-Note: if you are using our Symfony bundle, this part is taken care of.
+Simply add `GraphQL\Upload\UploadMiddleware` to your middleware pipe.
 
-Now, you can simply type-hint against the PSR-7 `UploadedFileInterface`:
+### If you are using another framework not compatible with PSR-15
+
+Please check the [Ecodev/graphql-upload third party library documentation](https://github.com/Ecodev/graphql-upload)
+for more information on how to integrate it in your library.
+
+## Usage
+
+To handle an uploaded file, you type-hint against the PSR-7 `UploadedFileInterface`:
 
 
 ```php
