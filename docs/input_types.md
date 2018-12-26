@@ -1,4 +1,8 @@
-# Input types
+---
+id: input-types
+title: Input types
+sidebar_label: Input types
+---
 
 Let's admit you are developing an API that returns a list of cities around a location.
 
@@ -65,7 +69,7 @@ class MyFactory
      *
      * @Factory()
      */
-    public function createLongitude(float $latitude, float $longitude): Location
+    public function createLocation(float $latitude, float $longitude): Location
     {
         return new Location($latitude, $longitude);
     }
@@ -75,7 +79,17 @@ class MyFactory
 and now, you can run query like this:
 
 ```
-TODO
+mutation {
+  getCities(location: {
+              latitude: 45.0,
+              longitude: 0.0,
+            },
+            radius: 42)
+  {
+    id,
+    name
+  }
+}
 ```
 
 - Factories must be declared with the **@Factory** annotation.
@@ -87,6 +101,29 @@ A few important things to notice:
   This is usually already the case if you are using a container with auto-wiring capabilities
 - We recommend that you put the factories in the same directories as the types. 
 
+### Specifying the input type name
 
-TODO: how to specify input type name
-- The return value is used for the name of the Input Type
+The GraphQL input type name is derived from the return type of the factory.
+
+Given the factory below, the return type is "Location", therefore, the GraphQL input type will be named "LocationInput".
+
+```
+/**
+ * @Factory()
+ */
+public function createLocation(float $latitude, float $longitude): Location
+{
+    return new Location($latitude, $longitude);
+}
+```
+
+In case you want to override the input type name, you can use the "name" attribute of the @Factory annotation:
+
+```
+/**
+ * @Factory(name="MyNewInputName")
+ */
+```
+
+Notice that most of the type, the input type name will be completely transparent to you, so there is no real reason
+to want to customize it.

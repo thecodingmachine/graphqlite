@@ -52,7 +52,7 @@ Your methods can type-hint against:
 - float
 - DateTimeImmutable or DateTimeInterface
 - an array
-- any object (if you provide an hydrator for the object type)
+- any object (if you provide a [factory](input_types.md) for the object type)
 
 There is an additional support for authentication and authorization:
 
