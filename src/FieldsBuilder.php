@@ -6,13 +6,16 @@ namespace TheCodingMachine\GraphQL\Controllers;
 use function array_merge;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Upload\UploadType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use Iterator;
 use IteratorAggregate;
@@ -539,6 +542,8 @@ class FieldsBuilder
             $fqcn = (string) $type->getFqsen();
             if ($fqcn === '\\DateTimeImmutable' || $fqcn === '\\DateTimeInterface') {
                 return DateTimeType::getInstance();
+            } elseif ($fqcn === '\\'.UploadedFileInterface::class) {
+                return CustomTypesRegistry::getUploadType();
             } elseif ($fqcn === '\\DateTime') {
                 throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
             }

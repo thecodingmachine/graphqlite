@@ -40,6 +40,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
+use function var_export;
 
 class EndToEndTest extends TestCase
 {
@@ -194,17 +195,21 @@ class EndToEndTest extends TestCase
         mutation {
           saveContact(
             contact: {
-                name: "foo"
+                name: "foo",
+                birthDate: "1942-12-24 00:00:00",
                 relations: [
                     {
                         name: "bar"
+                        birthDate: "1942-12-24 00:00:00",
                     }
                 ]
             }
           ) {
             name,
+            birthDate,
             relations {
-              name
+              name,
+              birthDate
             }
           }
         }
@@ -218,9 +223,11 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'saveContact' => [
                 'name' => 'foo',
+                'birthDate' => '1942-12-24T00:00:00+00:00',
                 'relations' => [
                     [
-                        'name' => 'bar'
+                        'name' => 'bar',
+                        'birthDate' => '1942-12-24T00:00:00+00:00'
                     ]
                 ]
             ]
