@@ -1,6 +1,6 @@
 {
   "docs": {
     "Installation": ["getting-started", "symfony-bundle", "other-frameworks"],
-    "Usage": ["input-types", "file-uploads"]
+    "Usage": ["input-types", "file-uploads", "custom-output-types"]
   }
 }
