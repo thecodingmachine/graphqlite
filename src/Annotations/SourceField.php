@@ -12,7 +12,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  *   @Attribute("name", type = "string"),
  *   @Attribute("logged", type = "bool"),
  *   @Attribute("right", type = "TheCodingMachine\GraphQL\Controllers\Annotations\Right"),
- *   @Attribute("returnType", type = "string"),
+ *   @Attribute("outputType", type = "string"),
  *   @Attribute("isId", type = "bool"),
  * })
  */
@@ -36,7 +36,7 @@ class SourceField implements SourceFieldInterface
     /**
      * @var string|null
      */
-    private $returnType;
+    private $outputType;
 
     /**
      * @var bool
@@ -51,7 +51,7 @@ class SourceField implements SourceFieldInterface
         $this->name = $attributes['name'] ?? null;
         $this->logged = $attributes['logged'] ?? false;
         $this->right = $attributes['right'] ?? null;
-        $this->returnType = $attributes['returnType'] ?? null;
+        $this->outputType = $attributes['outputType'] ?? null;
         $this->id = $attributes['isId'] ?? false;
     }
 
@@ -90,9 +90,9 @@ class SourceField implements SourceFieldInterface
      *
      * @return string|null
      */
-    public function getReturnType(): ?string
+    public function getOutputType(): ?string
     {
-        return $this->returnType;
+        return $this->outputType;
     }
 
     /**

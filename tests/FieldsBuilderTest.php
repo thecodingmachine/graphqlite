@@ -40,6 +40,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
+use function var_dump;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
 {
@@ -143,7 +144,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(6, $queries);
         $fixedQuery = $queries[1];
 
-        $this->assertInstanceOf(StringType::class, $fixedQuery->getType());
+        $this->assertInstanceOf(IDType::class, $fixedQuery->getType());
     }
 
     public function testNameFromAnnotation()
@@ -191,7 +192,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
                 }
             },
             new VoidAuthorizationService(),
-            new EmptyContainer(),
+            $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache())
         );
 
@@ -214,7 +215,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
                 {
                     return true;
                 }
-            },new EmptyContainer(),
+            },
+            $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache())
         );
 
@@ -270,7 +272,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getHydrator(),
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
-            new EmptyContainer(),
+            $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache())
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface());

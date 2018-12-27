@@ -9,7 +9,7 @@ abstract class AbstractRequest
     /**
      * @var string|null
      */
-    private $returnType;
+    private $outputType;
 
     /**
      * @var string|null
@@ -21,7 +21,7 @@ abstract class AbstractRequest
      */
     public function __construct(array $attributes = [])
     {
-        $this->returnType = $attributes['returnType'] ?? null;
+        $this->outputType = $attributes['outputType'] ?? null;
         $this->name = $attributes['name'] ?? null;
     }
 
@@ -31,9 +31,9 @@ abstract class AbstractRequest
      *
      * @return string|null
      */
-    public function getReturnType(): ?string
+    public function getOutputType(): ?string
     {
-        return $this->returnType;
+        return $this->outputType;
     }
 
     /**

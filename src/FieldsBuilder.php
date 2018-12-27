@@ -10,12 +10,12 @@ use GraphQL\Upload\UploadType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use Iterator;
 use IteratorAggregate;
@@ -71,13 +71,13 @@ class FieldsBuilder
      */
     private $authorizationService;
     /**
-     * @var ContainerInterface
-     */
-    private $registry;
-    /**
      * @var CachedDocBlockFactory
      */
     private $cachedDocBlockFactory;
+    /**
+     * @var TypeResolver
+     */
+    private $typeResolver;
 
     /**
      * @param AnnotationReader $annotationReader
@@ -85,11 +85,10 @@ class FieldsBuilder
      * @param HydratorInterface $hydrator
      * @param AuthenticationServiceInterface $authenticationService
      * @param AuthorizationServiceInterface $authorizationService
-     * @param ContainerInterface $registry The registry is used to fetch custom return types by container identifier (using the returnType parameter of the Type annotation)
      */
     public function __construct(AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
-                                AuthorizationServiceInterface $authorizationService, ContainerInterface $registry,
+                                AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
                                 CachedDocBlockFactory $cachedDocBlockFactory)
     {
         $this->annotationReader = $annotationReader;
@@ -97,7 +96,7 @@ class FieldsBuilder
         $this->hydrator = $hydrator;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
-        $this->registry = $registry;
+        $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
     }
 
@@ -198,10 +197,10 @@ class FieldsBuilder
 
                 $args = $this->mapParameters($parameters, $docBlockObj);
 
-                if ($queryAnnotation->getReturnType()) {
-                    $type = $this->registry->get($queryAnnotation->getReturnType());
+                if ($queryAnnotation->getOutputType()) {
+                    $type = $this->typeResolver->mapNameToType($queryAnnotation->getOutputType());
                     if (!$type instanceof OutputType) {
-                        throw new \InvalidArgumentException(sprintf("In %s::%s, the 'returnType' parameter in @Type annotation should contain a container identifier that points to an entry that implements GraphQL\\Type\\Definition\\OutputType. The '%s' container entry does not implement GraphQL\\Type\\Definition\\OutputType", $refMethod->getDeclaringClass()->getName(), $refMethod->getName(), $queryAnnotation->getReturnType()));
+                        throw new \InvalidArgumentException(sprintf("In %s::%s, the 'outputType' parameter in @Type annotation should contain the name of an OutputType. The '%s' type does not implement GraphQL\\Type\\Definition\\OutputType", $refMethod->getDeclaringClass()->getName(), $refMethod->getName(), $queryAnnotation->getOutputType()));
                     }
                 } else {
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
@@ -320,8 +319,8 @@ class FieldsBuilder
                 if (!$refMethod->getReturnType()->allowsNull()) {
                     $type = GraphQLType::nonNull($type);
                 }
-            } elseif ($sourceField->getReturnType()) {
-                $type = $this->registry->get($sourceField->getReturnType());
+            } elseif ($sourceField->getOutputType()) {
+                $type = $this->typeResolver->mapNameToType($sourceField->getOutputType());
             } else {
                 $type = $this->mapReturnType($refMethod, $docBlockObj);
             }

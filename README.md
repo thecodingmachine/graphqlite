@@ -105,7 +105,7 @@ As an alternative, you can also manually specify the GraphqlType of your return 
 
 ```php
 /**
- * @Query(returnType=UserListType::class)
+ * @Query(outputType="UserListType")
  */
 public function users(int $limit, int $offset)
 {
@@ -118,7 +118,7 @@ You can also specify the name of an entry in the container that resolves to the 
 
 ```php
 /**
- * @Query(returnType="userListType")
+ * @Query(outputType="userListType")
  */
 public function users(int $limit, int $offset)
 {
@@ -313,13 +313,13 @@ You simply have to:
 
 Please note that the first argument of the method is the object we are calling the field on. The remaining arguments are converted to GraphQL arguments of the field.
 
-Just like the @Query and @Mutation annotations, the @Field annotation can be passed an optional "name" and "returnType" attribute:
+Just like the @Query and @Mutation annotations, the @Field annotation can be passed an optional "name" and "outputType" attribute:
 
 ```php
 class PostType extends AbstractAnnotatedObjectType
 {
     /**
-     * @Field(name="customField", returnType="myCustomField")
+     * @Field(name="customField", outputType="myCustomField")
      */
     public function getCustomField(Post $source, bool $truncate = false): CustomField
     {

@@ -34,7 +34,7 @@ interface SourceFieldInterface
      *
      * @return string|null
      */
-    public function getReturnType(): ?string;
+    public function getOutputType(): ?string;
 
     /**
      * If the GraphQL type is "ID", isID will return true.
