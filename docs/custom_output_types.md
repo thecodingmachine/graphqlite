@@ -83,9 +83,16 @@ The easiest way is to use a `StaticTypeMapper`. This class is used to register c
 // Sample code:
 $staticTypeMapper = new StaticTypeMapper();
 
+// Let's register a type that maps by default to the "MyClass" PHP class
 $staticTypeMapper->setTypes([
     MyClass::class => new MyCustomOutputType()
 ]);
+
+// If you don't want your output type to map to any PHP class by default, use:
+$staticTypeMapper->setNotMappedTypes([
+    new MyCustomOutputType()
+]);
+
 ```
 
 **Notice:** The `StaticTypeMapper` instance must be registered in your container and linked to a `CompositeTypeMapper`
