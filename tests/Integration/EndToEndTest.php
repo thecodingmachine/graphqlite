@@ -40,6 +40,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 use function var_export;
 
 class EndToEndTest extends TestCase
@@ -53,7 +54,7 @@ class EndToEndTest extends TestCase
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
-                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class));
+                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
@@ -65,9 +66,12 @@ class EndToEndTest extends TestCase
                     $container->get(HydratorInterface::class),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class),
-                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(TypeResolver::class),
                     $container->get(CachedDocBlockFactory::class)
                 );
+            },
+            TypeResolver::class => function(ContainerInterface $container) {
+                return new TypeResolver();
             },
             BasicAutoWiringContainer::class => function(ContainerInterface $container) {
                 return new BasicAutoWiringContainer(new EmptyContainer());
@@ -125,6 +129,8 @@ class EndToEndTest extends TestCase
                 return new CachedDocBlockFactory(new ArrayCache());
             }
         ]);
+
+        $this->mainContainer->get(TypeResolver::class)->registerSchema($this->mainContainer->get(Schema::class));
     }
 
     public function testEndToEnd()
