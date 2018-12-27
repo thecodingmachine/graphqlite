@@ -48,6 +48,25 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
+     * @var array<string,ObjectType|InputObjectType>
+     */
+    private $notMappedTypes = [];
+
+    /**
+     * An array containing ObjectType or InputObjectType instances that are not mapped by default to any class.
+     * ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
+     *
+     * @param array<int,ObjectType|InputObjectType> $types
+     */
+    public function setNotMappedTypes(array $types): void
+    {
+        $this->notMappedTypes = array_reduce($types, function ($result, Type $type) {
+            $result[$type->name] = $type;
+            return $result;
+        }, []);
+    }
+
+    /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
      * @param string $className
@@ -121,6 +140,9 @@ final class StaticTypeMapper implements TypeMapperInterface
      */
     public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
     {
+        if (isset($this->notMappedTypes[$typeName])) {
+            return $this->notMappedTypes[$typeName];
+        }
         foreach ($this->types as $type) {
             if ($type->name === $typeName) {
                 return $type;
@@ -152,6 +174,6 @@ final class StaticTypeMapper implements TypeMapperInterface
                 return true;
             }
         }
-        return false;
+        return isset($this->notMappedTypes[$typeName]);
     }
 }
