@@ -20,7 +20,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * @var array<string,ObjectType>
      */
-    private $types;
+    private $types = [];
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
@@ -35,7 +35,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * @var array<string,InputObjectType>
      */
-    private $inputTypes;
+    private $inputTypes = [];
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
