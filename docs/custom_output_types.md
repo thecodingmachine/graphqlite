@@ -73,7 +73,19 @@ you use.
 
 ### Symfony users
 
-TODO
+Any class extending `GraphQL\Type\Definition\ObjectType` (and available in the container) will be automatically detected 
+by Symfony and added to the schema.
+
+If you want to automatically map the output type to a given PHP class, you will have to explicitly declare the output type
+as a service and use the "graphql.output_type" tag:
+
+```yaml
+# config/services.yaml
+services:
+    App\MyOutputType:
+        tags:
+            - { name: 'graphql.output_type', class: 'App\MyPhpClass' }
+```
 
 ### Other frameworks
 

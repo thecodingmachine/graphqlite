@@ -110,5 +110,4 @@ class AnnotationReader
         } while ($refClass);
         return $annotations;
     }
-
 }
