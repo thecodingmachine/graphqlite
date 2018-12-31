@@ -76,21 +76,21 @@ class AnnotationReader
     public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName): ?AbstractRequest
     {
         /** @var AbstractRequest|null $queryAnnotation */
-        $queryAnnotation = $this->reader->getMethodAnnotation($refMethod, $annotationName);
+        $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationName);
         return $queryAnnotation;
     }
 
     public function getLoggedAnnotation(ReflectionMethod $refMethod): ?Logged
     {
         /** @var Logged|null $loggedAnnotation */
-        $loggedAnnotation = $this->reader->getMethodAnnotation($refMethod, Logged::class);
+        $loggedAnnotation = $this->getMethodAnnotation($refMethod, Logged::class);
         return $loggedAnnotation;
     }
 
     public function getRightAnnotation(ReflectionMethod $refMethod): ?Right
     {
         /** @var Right|null $rightAnnotation */
-        $rightAnnotation = $this->reader->getMethodAnnotation($refMethod, Right::class);
+        $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
         return $rightAnnotation;
     }
 
@@ -107,7 +107,7 @@ class AnnotationReader
     public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
     {
         /** @var Factory|null $factoryAnnotation */
-        $factoryAnnotation = $this->reader->getMethodAnnotation($refMethod, Factory::class);
+        $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
         return $factoryAnnotation;
     }
 
@@ -142,6 +142,31 @@ class AnnotationReader
             $refClass = $refClass->getParentClass();
         } while ($refClass);
         return null;
+    }
+
+    /**
+     * Returns a method annotation and handles correctly errors.
+     *
+     * @return object|null
+     */
+    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass)
+    {
+        try {
+            return $this->reader->getMethodAnnotation($refMethod, $annotationClass);
+        } catch (AnnotationException $e) {
+            switch ($this->mode) {
+                case self::STRICT_MODE:
+                    throw $e;
+                case self::LAX_MODE:
+                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                        throw $e;
+                    } else {
+                        return null;
+                    }
+                default:
+                    throw new \RuntimeException("Unexpected mode '$this->mode'."); // @codeCoverageIgnore
+            }
+        }
     }
 
     /**

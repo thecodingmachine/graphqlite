@@ -10,5 +10,11 @@ namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations;
  */
 class ClassWithInvalidTypeAnnotation
 {
+    /**
+     * @Field
+     */
+    public function testMethod()
+    {
 
+    }
 }

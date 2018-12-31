@@ -7,6 +7,8 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use ReflectionClass;
+use ReflectionMethod;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
@@ -83,5 +85,27 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getClassAnnotations(new ReflectionClass(ClassWithInvalidClassAnnotation::class), Type::class);
     }
 
+    public function testMethodStrictMode()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
+        $this->expectException(AnnotationException::class);
+        $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
+    }
+
+    public function testMethodLaxModeWithBadAnnotation()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
+
+        $type = $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
+        $this->assertNull($type);
+    }
+
+    public function testMethodLaxModeWithSmellyAnnotation()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
+
+        $this->expectException(AnnotationException::class);
+        $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidTypeAnnotation::class, 'testMethod'), Field::class);
+    }
 }
