@@ -4,9 +4,13 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 
+use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\Reader;
+use function in_array;
 use ReflectionClass;
 use ReflectionMethod;
+use function strpos;
+use function substr;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
@@ -22,13 +26,44 @@ class AnnotationReader
      */
     private $reader;
 
-    public function __construct(Reader $reader)
+    // In this mode, no exceptions will be thrown for incorrect annotations (unless the name of the annotation we are looking for is part of the docblock)
+    const LAX_MODE = 'LAX_MODE';
+    // In this mode, exceptions will be thrown for any incorrect annotations.
+    const STRICT_MODE = 'STRICT_MODE';
+
+    /**
+     * Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
+     *
+     * @var string[]
+     */
+    private $strictNamespaces;
+
+    /**
+     * If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
+     *
+     * @var string
+     */
+    private $mode;
+
+    /**
+     * AnnotationReader constructor.
+     * @param Reader $reader
+     * @param string $mode One of self::LAX_MODE or self::STRICT_MODE
+     * @param array $strictNamespaces
+     */
+    public function __construct(Reader $reader, string $mode = self::STRICT_MODE, array $strictNamespaces = [])
     {
         $this->reader = $reader;
+        if (!in_array($mode, [self::LAX_MODE, self::STRICT_MODE], true)) {
+            throw new \InvalidArgumentException('The mode passed must be one of AnnotationReader::LAX_MODE, AnnotationReader::STRICT_MODE');
+        }
+        $this->mode = $mode;
+        $this->strictNamespaces = $strictNamespaces;
     }
 
     public function getTypeAnnotation(ReflectionClass $refClass): ?Type
     {
+        // TODO: customize the way errors are handled here!
         try {
             /** @var Type|null $typeField */
             $typeField = $this->getClassAnnotation($refClass, Type::class);
@@ -41,21 +76,21 @@ class AnnotationReader
     public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName): ?AbstractRequest
     {
         /** @var AbstractRequest|null $queryAnnotation */
-        $queryAnnotation = $this->reader->getMethodAnnotation($refMethod, $annotationName);
+        $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationName);
         return $queryAnnotation;
     }
 
     public function getLoggedAnnotation(ReflectionMethod $refMethod): ?Logged
     {
         /** @var Logged|null $loggedAnnotation */
-        $loggedAnnotation = $this->reader->getMethodAnnotation($refMethod, Logged::class);
+        $loggedAnnotation = $this->getMethodAnnotation($refMethod, Logged::class);
         return $loggedAnnotation;
     }
 
     public function getRightAnnotation(ReflectionMethod $refMethod): ?Right
     {
         /** @var Right|null $rightAnnotation */
-        $rightAnnotation = $this->reader->getMethodAnnotation($refMethod, Right::class);
+        $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
         return $rightAnnotation;
     }
 
@@ -65,17 +100,14 @@ class AnnotationReader
     public function getSourceFields(ReflectionClass $refClass): array
     {
         /** @var SourceField[] $sourceFields */
-        $sourceFields = $this->getClassAnnotations($refClass);
-        $sourceFields = \array_filter($sourceFields, function($annotation): bool {
-            return $annotation instanceof SourceField;
-        });
+        $sourceFields = $this->getClassAnnotations($refClass, SourceField::class);
         return $sourceFields;
     }
 
     public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
     {
         /** @var Factory|null $factoryAnnotation */
-        $factoryAnnotation = $this->reader->getMethodAnnotation($refMethod, Factory::class);
+        $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
         return $factoryAnnotation;
     }
 
@@ -87,7 +119,23 @@ class AnnotationReader
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass)
     {
         do {
-            $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
+            $type = null;
+            try {
+                $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
+            } catch (AnnotationException $e) {
+                switch ($this->mode) {
+                    case self::STRICT_MODE:
+                        throw $e;
+                    case self::LAX_MODE:
+                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                            throw $e;
+                        } else {
+                            return null;
+                        }
+                    default:
+                        throw new \RuntimeException("Unexpected mode '$this->mode'."); // @codeCoverageIgnore
+                }
+            }
             if ($type !== null) {
                 return $type;
             }
@@ -97,18 +145,75 @@ class AnnotationReader
     }
 
     /**
+     * Returns a method annotation and handles correctly errors.
+     *
+     * @return object|null
+     */
+    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass)
+    {
+        try {
+            return $this->reader->getMethodAnnotation($refMethod, $annotationClass);
+        } catch (AnnotationException $e) {
+            switch ($this->mode) {
+                case self::STRICT_MODE:
+                    throw $e;
+                case self::LAX_MODE:
+                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                        throw $e;
+                    } else {
+                        return null;
+                    }
+                default:
+                    throw new \RuntimeException("Unexpected mode '$this->mode'."); // @codeCoverageIgnore
+            }
+        }
+    }
+
+    /**
+     * Returns true if the annotation class name is part of the docblock comment.
+     *
+     */
+    private function isErrorImportant(string $annotationClass, string $docComment, string $className): bool
+    {
+        foreach ($this->strictNamespaces as $strictNamespace) {
+            if (strpos($className, $strictNamespace) === 0) {
+                return true;
+            }
+        }
+        $shortAnnotationClass = substr($annotationClass, strrpos($annotationClass, '\\') + 1);
+        return strpos($docComment, '@'.$shortAnnotationClass) !== false;
+    }
+
+    /**
      * Returns the class annotations. Finds in the parents too.
      *
      * @return object[]
      */
-    public function getClassAnnotations(ReflectionClass $refClass): array
+    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass): array
     {
-        $annotations = [];
+        $toAddAnnotations = [];
         do {
-            $annotations = array_merge($this->reader->getClassAnnotations($refClass), $annotations);
+            try {
+                $allAnnotations = $this->reader->getClassAnnotations($refClass);
+                $toAddAnnotations[] = \array_filter($allAnnotations, function($annotation) use ($annotationClass): bool {
+                    return $annotation instanceof $annotationClass;
+                });
+            } catch (AnnotationException $e) {
+                if ($this->mode === self::STRICT_MODE) {
+                    throw $e;
+                } elseif ($this->mode === self::LAX_MODE) {
+                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                        throw $e;
+                    }
+                }
+            }
             $refClass = $refClass->getParentClass();
         } while ($refClass);
-        return $annotations;
-    }
 
+        if (!empty($toAddAnnotations)) {
+            return array_merge(...$toAddAnnotations);
+        } else {
+            return [];
+        }
+    }
 }
