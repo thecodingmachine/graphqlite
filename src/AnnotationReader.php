@@ -41,7 +41,7 @@ class AnnotationReader
     /**
      * If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
      *
-     * @var bool
+     * @var string
      */
     private $mode;
 
@@ -119,17 +119,21 @@ class AnnotationReader
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass)
     {
         do {
+            $type = null;
             try {
                 $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
             } catch (AnnotationException $e) {
-                if ($this->mode === self::STRICT_MODE) {
-                    throw $e;
-                } elseif ($this->mode === self::LAX_MODE) {
-                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                switch ($this->mode) {
+                    case self::STRICT_MODE:
                         throw $e;
-                    } else {
-                        return null;
-                    }
+                    case self::LAX_MODE:
+                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                            throw $e;
+                        } else {
+                            return null;
+                        }
+                    default:
+                        throw new \RuntimeException("Unexpected mode '$this->mode'."); // @codeCoverageIgnore
                 }
             }
             if ($type !== null) {
