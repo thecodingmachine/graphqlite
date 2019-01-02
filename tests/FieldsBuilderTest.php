@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType;
@@ -29,6 +30,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingReturnType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithFailWith;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
@@ -162,7 +164,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testSourceField()
     {
-        $controller = new TestType($this->getRegistry());
+        $controller = new TestType();
 
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -406,5 +408,39 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
         $queryProvider->getQueries($controller);
+    }
+
+    public function testFailWith()
+    {
+        $controller = new TestControllerWithFailWith();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(1, $queries);
+        $query = $queries[0];
+        $this->assertSame('testFailWith', $query->name);
+
+        $resolve = $query->resolveFn;
+        $result = $resolve('foo', []);
+
+        $this->assertNull($result);
+
+        $this->assertInstanceOf(ObjectType::class, $query->getType());
+    }
+
+    public function testSourceFieldWithFailWith()
+    {
+        $controller = new TestTypeWithFailWith();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getFields($controller);
+
+        $this->assertCount(1, $fields);
+
+        $this->assertSame('test', $fields['test']->name);
+        $this->assertInstanceOf(StringType::class, $fields['test']->getType());
     }
 }

@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use function array_merge;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Upload\UploadType;
 use phpDocumentor\Reflection\Fqsen;
@@ -179,8 +180,13 @@ class FieldsBuilder
             $queryAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, $annotationName);
 
             if ($queryAnnotation !== null) {
+                $unauthorized = false;
                 if (!$this->isAuthorized($refMethod)) {
-                    continue;
+                    $failWith = $this->annotationReader->getFailWithAnnotation($refMethod);
+                    if ($failWith === null) {
+                        continue;
+                    }
+                    $unauthorized = true;
                 }
 
                 $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
@@ -206,7 +212,19 @@ class FieldsBuilder
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
                 }
 
-                $queryList[] = new QueryField($name, $type, $args, [$controller, $methodName], null, $this->hydrator, $docBlockComment, $injectSource);
+                if (!$unauthorized) {
+                    $callable = [$controller, $methodName];
+                } else {
+                    $failWithValue = $failWith->getValue();
+                    $callable = function() use ($failWithValue) {
+                        return $failWithValue;
+                    };
+                    if ($failWithValue === null && $type instanceof NonNull) {
+                        $type = $type->getWrappedType();
+                    }
+                }
+
+                $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
             }
         }
 
@@ -290,13 +308,15 @@ class FieldsBuilder
 
         foreach ($sourceFields as $sourceField) {
             // Ignore the field if we must be logged.
-            if ($sourceField->isLogged() && !$this->authenticationService->isLogged()) {
-                continue;
-            }
-
             $right = $sourceField->getRight();
-            if ($right !== null && !$this->authorizationService->isAllowed($right->getName())) {
-                continue;
+            $unauthorized = false;
+            if (($sourceField->isLogged() && !$this->authenticationService->isLogged())
+                || ($right !== null && !$this->authorizationService->isAllowed($right->getName()))) {
+                if (!$sourceField->canFailWith()) {
+                    continue;
+                } else {
+                    $unauthorized = true;
+                }
             }
 
             try {
@@ -325,7 +345,18 @@ class FieldsBuilder
                 $type = $this->mapReturnType($refMethod, $docBlockObj);
             }
 
-            $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlockComment, false);
+            if (!$unauthorized) {
+                $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlockComment, false);
+            } else {
+                $failWithValue = $sourceField->getFailWith();
+                $callable = function() use ($failWithValue) {
+                    return $failWithValue;
+                };
+                if ($failWithValue === null && $type instanceof NonNull) {
+                    $type = $type->getWrappedType();
+                }
+                $queryList[] = new QueryField($sourceField->getName(), $type, $args, $callable, null, $this->hydrator, $docBlockComment, false);
+            }
 
         }
         return $queryList;

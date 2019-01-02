@@ -75,6 +75,37 @@ class UserController
 }
 ```
 
+Note: when you use the `@Logged` or `@Right` annotation, the field will NOT be part of the GraphQL schema
+if the current user is not logged or has not the requested right.
+
+This is a good thing as unprivileged users will not even be aware of the existence of the fields they are not supposed to see.
+This can however be a problem with some GraphQL clients as the schema is changing from one user to another.
+
+If you want to keep a constant schema, you can use the `FailWith` annotation that contains the value that
+will be returned for user with insufficient rights.
+
+```php
+class UserController
+{
+    /**
+     * If a user is not logged or if the user has not the right "CAN_VIEW_USER_LIST",
+     * the value returned will be "null"
+     *
+     * @Query
+     * @Logged
+     * @Right("CAN_VIEW_USER_LIST")
+     * @FailWith(null)
+     * @return User[]
+     */
+    public function users(int $limit, int $offset): array
+    {
+        //
+    }
+}
+```
+ 
+
+
 Type-hinting against arrays
 ---------------------------
 
@@ -376,6 +407,20 @@ class PostType extends AbstractAnnotatedObjectType
 {
 }
 ```
+
+Just like the `@Logged` and `@Right` annotations for regular fields, you can define a default value to use
+in case the user has insufficient permissions:
+
+```php
+/**
+ * @SourceField(name="status", logged=true, right=@Right(name="CAN_ACCESS_STATUS"), failWith=null)
+ */
+```
+
+The `failWith` value will be returned in case of insufficient permissions. Note that if you do not put the
+`failWith` attribute and if a user has insufficient permissions, then the field will not appear at all in the schema.
+Querying this field will therefore result in an error. 
+
 
 In some very particular cases, you might not know exactly the list of @SourceField annotations at development time.
 If you need to decide the list of @SourceField at runtime, you can implement the `FromSourceFieldsInterface`:

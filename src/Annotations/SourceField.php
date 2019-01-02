@@ -14,7 +14,10 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  *   @Attribute("right", type = "TheCodingMachine\GraphQL\Controllers\Annotations\Right"),
  *   @Attribute("outputType", type = "string"),
  *   @Attribute("isId", type = "bool"),
+ *   @Attribute("failWith", type = "mixed"),
  * })
+ *
+ * FIXME: remove idId since outputType="ID" is equivalent
  */
 class SourceField implements SourceFieldInterface
 {
@@ -44,6 +47,18 @@ class SourceField implements SourceFieldInterface
     private $id;
 
     /**
+     * The default value to use if the right is not enforced.
+     *
+     * @var mixed
+     */
+    private $failWith;
+
+    /**
+     * @var bool
+     */
+    private $hasFailWith = false;
+
+    /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
@@ -53,6 +68,10 @@ class SourceField implements SourceFieldInterface
         $this->right = $attributes['right'] ?? null;
         $this->outputType = $attributes['outputType'] ?? null;
         $this->id = $attributes['isId'] ?? false;
+        if (array_key_exists('failWith', $attributes)) {
+            $this->failWith = $attributes['failWith'];
+            $this->hasFailWith = true;
+        }
     }
 
     /**
@@ -103,5 +122,25 @@ class SourceField implements SourceFieldInterface
     public function isId(): bool
     {
         return $this->id;
+    }
+
+    /**
+     * Returns the default value to use if the right is not enforced.
+     *
+     * @return mixed
+     */
+    public function getFailWith()
+    {
+        return $this->failWith;
+    }
+
+    /**
+     * True if a default value is available if a right is not enforced.
+     *
+     * @return bool
+     */
+    public function canFailWith(): bool
+    {
+        return $this->hasFailWith;
     }
 }

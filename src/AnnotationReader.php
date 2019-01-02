@@ -14,6 +14,7 @@ use function substr;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
+use TheCodingMachine\GraphQL\Controllers\Annotations\FailWith;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
 use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
@@ -92,6 +93,13 @@ class AnnotationReader
         /** @var Right|null $rightAnnotation */
         $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
         return $rightAnnotation;
+    }
+
+    public function getFailWithAnnotation(ReflectionMethod $refMethod): ?FailWith
+    {
+        /** @var FailWith|null $failWithAnnotation */
+        $failWithAnnotation = $this->getMethodAnnotation($refMethod, FailWith::class);
+        return $failWithAnnotation;
     }
 
     /**
