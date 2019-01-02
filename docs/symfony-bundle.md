@@ -58,23 +58,29 @@ class AppKernel extends Kernel
 }
 ```
 
-### Step 3 (optionnal): Create a configuration file
+### Step 3 (optional): Create a configuration file
 
-Create a configuration file in `config/packages/graphql-controllers.yaml`:
+Create a configuration file in `config/packages/graphql_controllers.yaml`:
 
 ```yaml
-graphqlcontrollers:
+graphql_controllers:
+    namespace:
+      controllers: App\Controller\
+      types: App\Types\
     debug:
       # Include exception messages in output when an error arises
-      INCLUDE_DEBUG_MESSAGE: 0
+      INCLUDE_DEBUG_MESSAGE: false
       # Include stacktrace in output when an error arises
-      INCLUDE_TRACE: 0
+      INCLUDE_TRACE: false
       # Exceptions are not caught by the engine and propagated to Symfony
-      RETHROW_INTERNAL_EXCEPTIONS: 0
+      RETHROW_INTERNAL_EXCEPTIONS: false
       # Exceptions that do not implement ClientAware interface are 
       # not caught by the engine and propagated to Symfony.
-      RETHROW_UNSAFE_EXCEPTIONS: 1
+      RETHROW_UNSAFE_EXCEPTIONS: true
 ```
+
+The 'graphqlcontrollers.namespace.controllers' configuration variable is the namespace that will store your GraphQL controllers.
+The 'graphqlcontrollers.namespace.types' configuration variable is the namespace that will store your GraphQL types and factories.
 
 ## Configure the bundle
 
