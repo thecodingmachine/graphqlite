@@ -442,5 +442,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertSame('test', $fields['test']->name);
         $this->assertInstanceOf(StringType::class, $fields['test']->getType());
+
+
+        $resolve = $fields['test']->resolveFn;
+        $result = $resolve('foo', []);
+
+        $this->assertNull($result);
+
+        $this->assertInstanceOf(StringType::class, $fields['test']->getType());
     }
 }
