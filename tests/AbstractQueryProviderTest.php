@@ -30,6 +30,7 @@ use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
@@ -45,6 +46,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $inputTypeUtils;
     private $controllerQueryProviderFactory;
     private $annotationReader;
+    private $typeResolver;
 
     protected function getTestObjectType()
     {
@@ -226,9 +228,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->registry === null) {
             $this->registry = $this->buildAutoWiringContainer(new Picotainer([
-                'customOutput' => function() {
+                /*'customOutput' => function() {
                     return new StringType();
-                }
+                }*/
             ]));
         }
         return $this->registry;
@@ -255,7 +257,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getHydrator(),
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
-            $this->getRegistry(),
+            $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache())
         );
     }
@@ -284,6 +286,15 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->inputTypeUtils;
     }
 
+    protected function getTypeResolver(): TypeResolver
+    {
+        if ($this->typeResolver === null) {
+            $this->typeResolver = new TypeResolver();
+            $this->typeResolver->registerSchema(new \GraphQL\Type\Schema([]));
+        }
+        return $this->typeResolver;
+    }
+
     protected function getControllerQueryProviderFactory(): FieldsBuilderFactory
     {
         if ($this->controllerQueryProviderFactory === null) {
@@ -291,7 +302,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 $this->getHydrator(),
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService(),
-                $this->getRegistry(),
+                $this->getTypeResolver(),
                 new CachedDocBlockFactory(new ArrayCache()));
         }
         return $this->controllerQueryProviderFactory;

@@ -36,6 +36,14 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
                 ],
             ])
         ]);
+        $this->typeMapper->setNotMappedTypes([
+            new ObjectType([
+                'name' => 'TestNotMappedObject',
+                'fields'  => [
+                    'test'   => Type::string(),
+                ]
+            ])
+        ]);
     }
 
     public function testStaticTypeMapper(): void
@@ -49,8 +57,10 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame([TestObject::class], $this->typeMapper->getSupportedClasses());
         $this->assertSame('TestObject', $this->typeMapper->mapNameToType('TestObject', $this->getTypeMapper())->name);
         $this->assertSame('TestInputObject', $this->typeMapper->mapNameToType('TestInputObject', $this->getTypeMapper())->name);
+        $this->assertSame('TestNotMappedObject', $this->typeMapper->mapNameToType('TestNotMappedObject', $this->getTypeMapper())->name);
         $this->assertTrue($this->typeMapper->canMapNameToType('TestObject'));
         $this->assertTrue($this->typeMapper->canMapNameToType('TestInputObject'));
+        $this->assertTrue($this->typeMapper->canMapNameToType('TestNotMappedObject'));
         $this->assertFalse($this->typeMapper->canMapNameToType('NotExists'));
     }
 

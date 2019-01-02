@@ -7,6 +7,8 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\SchemaConfig;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -15,7 +17,7 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, SchemaConfig $config = null)
+    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, SchemaConfig $config = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();
@@ -49,8 +51,16 @@ class Schema extends \GraphQL\Type\Schema
             if ($name === 'Mutation') {
                 return $mutation;
             }
+
+            $type = CustomTypesRegistry::mapNameToType($name);
+            if ($type !== null) {
+                return $type;
+            }
+
             return $recursiveTypeMapper->mapNameToType($name);
         });
+
+        $typeResolver->registerSchema($this);
 
         parent::__construct($config);
     }

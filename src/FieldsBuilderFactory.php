@@ -4,12 +4,12 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 
-use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 
 class FieldsBuilderFactory
 {
@@ -30,24 +30,24 @@ class FieldsBuilderFactory
      */
     private $authorizationService;
     /**
-     * @var ContainerInterface
-     */
-    private $registry;
-    /**
      * @var CachedDocBlockFactory
      */
     private $cachedDocBlockFactory;
+    /**
+     * @var TypeResolver
+     */
+    private $typeResolver;
 
     public function __construct(AnnotationReader $annotationReader,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
-                                AuthorizationServiceInterface $authorizationService, ContainerInterface $registry,
+                                AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
                                 CachedDocBlockFactory $cachedDocBlockFactory)
     {
         $this->annotationReader = $annotationReader;
         $this->hydrator = $hydrator;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
-        $this->registry = $registry;
+        $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
     }
 
@@ -63,7 +63,7 @@ class FieldsBuilderFactory
             $this->hydrator,
             $this->authenticationService,
             $this->authorizationService,
-            $this->registry,
+            $this->typeResolver,
             $this->cachedDocBlockFactory
         );
     }

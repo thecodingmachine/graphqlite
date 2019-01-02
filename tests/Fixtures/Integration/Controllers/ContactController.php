@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Controllers;
 
 
+use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
