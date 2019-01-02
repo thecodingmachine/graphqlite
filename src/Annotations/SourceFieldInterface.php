@@ -42,4 +42,18 @@ interface SourceFieldInterface
      * @return bool
      */
     public function isId(): bool;
+
+    /**
+     * Returns the default value to use if the right is not enforced.
+     *
+     * @return mixed
+     */
+    public function getFailWith();
+
+    /**
+     * True if a default value is available if a right is not enforced.
+     *
+     * @return bool
+     */
+    public function canFailWith();
 }
