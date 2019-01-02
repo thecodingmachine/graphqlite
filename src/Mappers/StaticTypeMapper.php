@@ -56,7 +56,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      * An array containing ObjectType or InputObjectType instances that are not mapped by default to any class.
      * ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
      *
-     * @param array<int,ObjectType|InputObjectType> $types
+     * @param array<int,Type> $types
      */
     public function setNotMappedTypes(array $types): void
     {
