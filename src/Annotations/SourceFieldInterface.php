@@ -30,7 +30,7 @@ interface SourceFieldInterface
 
     /**
      * Returns the GraphQL return type of the request (as a string).
-     * The string can represent the FQCN of the type or an entry in the container resolving to the GraphQL type.
+     * The string is the GraphQL output type name.
      *
      * @return string|null
      */

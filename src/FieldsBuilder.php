@@ -496,7 +496,6 @@ class FieldsBuilder
             }
         }
 
-
         return $graphQlType;
     }
 
