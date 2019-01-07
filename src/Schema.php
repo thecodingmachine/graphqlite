@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\Type;
 use GraphQL\Type\SchemaConfig;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -26,13 +27,37 @@ class Schema extends \GraphQL\Type\Schema
         $query = new ObjectType([
             'name' => 'Query',
             'fields' => function() use ($queryProvider) {
+                $queries = $queryProvider->getQueries();
+                if (empty($queries)) {
+                    return [
+                        'dummyQuery' => [
+                            'type' => Type::string(),
+                            'description' => 'A placeholder query used by thecodingmachine/graphql-controllers when there are no declared queries.',
+                            'resolve' => function () {
+                                return 'This is a placeholder query. Please create a query using the @Query annotation.';
+                            }
+                        ]
+                    ];
+                }
                 return $queryProvider->getQueries();
             }
         ]);
         $mutation = new ObjectType([
             'name' => 'Mutation',
             'fields' => function() use ($queryProvider) {
-                return $queryProvider->getMutations();
+                $mutations = $queryProvider->getMutations();
+                if (empty($mutations)) {
+                    return [
+                        'dummyMutation' => [
+                            'type' => Type::string(),
+                            'description' => 'A placeholder query used by thecodingmachine/graphql-controllers when there are no declared mutations.',
+                            'resolve' => function () {
+                                return 'This is a placeholder mutation. Please create a mutation using the @Mutation annotation.';
+                            }
+                        ]
+                    ];
+                }
+                return $mutations;
             }
         ]);
 
