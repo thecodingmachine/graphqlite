@@ -19,7 +19,7 @@ class UnionType extends \GraphQL\Type\Definition\UnionType
         foreach ($types as $type) {
             $name .= $type->name;
             if (!$type instanceof ObjectType) {
-                throw new \InvalidArgumentException('A Union type can only contain objects. Scalars, lists, etc... are not allowed.');
+                throw InvalidTypesInUnionException::notObjectType();
             }
         }
         parent::__construct([

@@ -80,7 +80,10 @@ class PorpaginasTypeMapper implements TypeMapperInterface
                                 if (!isset($args['limit']) && isset($args['offset'])) {
                                     throw PorpaginasMissingParameterException::missingLimit();
                                 }
-                                return $root->take($args['offset'], $args['limit']);
+                                if (isset($args['limit'])) {
+                                    return $root->take($args['offset'] ?? 0, $args['limit']);
+                                }
+                                return $root;
                             }
                         ],
                         'count' => [

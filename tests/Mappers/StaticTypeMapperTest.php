@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
+use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
@@ -80,5 +81,11 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
     {
         $this->expectException(CannotMapTypeException::class);
         $this->typeMapper->mapNameToType('notExists', $this->getTypeMapper());
+    }
+
+    public function testUnsupportedSubtypes(): void
+    {
+        $this->expectException(CannotMapTypeException::class);
+        $this->typeMapper->mapClassToType(TestObject::class, new StringType(), $this->getTypeMapper());
     }
 }

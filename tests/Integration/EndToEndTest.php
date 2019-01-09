@@ -330,5 +330,40 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('In the items field of a result set, you cannot add a "offset" without also adding a "limit"', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
-    }
+
+
+        // Let's run a query with no limit offset
+        $invalidQueryString = '
+        query {
+            getContactsIterator {
+                items {
+                    name
+                    ... on User {
+                        email
+                    }
+                }
+                count
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $invalidQueryString
+        );
+
+        $this->assertSame([
+            'getContactsIterator' => [
+                'items' => [
+                    [
+                        'name' => 'Joe'
+                    ],
+                    [
+                        'name' => 'Bill',
+                        'email' => 'bill@example.com'
+                    ]
+                ],
+                'count' => 2
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);    }
 }
