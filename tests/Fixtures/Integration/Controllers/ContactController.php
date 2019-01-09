@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Controllers;
 
 
+use Porpaginas\Arrays\ArrayResult;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
@@ -32,5 +33,17 @@ class ContactController
     public function saveContact(Contact $contact): Contact
     {
         return $contact;
+    }
+
+    /**
+     * @Query()
+     * @return Contact[]
+     */
+    public function getContactsIterator(): ArrayResult
+    {
+        return new ArrayResult([
+            new Contact('Joe'),
+            new User('Bill', 'bill@example.com'),
+        ]);
     }
 }

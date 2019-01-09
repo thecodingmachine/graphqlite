@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use RuntimeException;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
 
 /**
  * Resolves a type by its GraphQL name.
@@ -28,7 +29,7 @@ class TypeResolver
     /**
      * @param string $typeName
      * @return Type
-     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      */
     public function mapNameToType(string $typeName): Type
     {

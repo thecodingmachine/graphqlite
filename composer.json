@@ -26,7 +26,11 @@
         "satooshi/php-coveralls": "^1.0",
         "symfony/cache": "^4.1.4",
         "mouf/picotainer": "^1.1",
-        "phpstan/phpstan": "^0.10.5"
+        "phpstan/phpstan": "^0.10.5",
+        "beberlei/porpaginas": "^1.2"
+    },
+    "suggest": {
+        "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
     },
     "autoload": {
         "psr-4": {

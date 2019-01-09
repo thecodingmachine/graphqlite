@@ -67,7 +67,7 @@ class TypeGenerator
                     $parentType = null;
                     if ($parentClass !== false) {
                         if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
-                            $parentType = $recursiveTypeMapper->mapClassToType($parentClass);
+                            $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
                         }
                     }
 

@@ -24,7 +24,9 @@ use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
 use TheCodingMachine\GraphQL\Controllers\InputTypeUtils;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
@@ -86,6 +88,12 @@ class EndToEndTest extends TestCase
                 return new RecursiveTypeMapper($container->get(TypeMapperInterface::class), $container->get(NamingStrategyInterface::class), new ArrayCache());
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
+                return new CompositeTypeMapper([
+                    $container->get(GlobTypeMapper::class),
+                    $container->get(PorpaginasTypeMapper::class),
+                ]);
+            },
+            GlobTypeMapper::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
@@ -95,6 +103,9 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     new ArrayCache()
                     );
+            },
+            PorpaginasTypeMapper::class => function() {
+                return new PorpaginasTypeMapper();
             },
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
@@ -236,6 +247,65 @@ class EndToEndTest extends TestCase
                         'birthDate' => '1942-12-24T00:00:00+00:00'
                     ]
                 ]
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndPorpaginas()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
+        $queryString = '
+        query {
+            getContactsIterator {
+                items(limit: 1, offset: 1) {
+                    name
+                    ... on User {
+                        email
+                    }
+                }
+                count
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'getContactsIterator' => [
+                'items' => [
+                    [
+                        'name' => 'Bill',
+                        'email' => 'bill@example.com'
+                    ]
+                ],
+                'count' => 2
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Let's redo this to test cache.
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'getContactsIterator' => [
+                'items' => [
+                    [
+                        'name' => 'Bill',
+                        'email' => 'bill@example.com'
+                    ]
+                ],
+                'count' => 2
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }

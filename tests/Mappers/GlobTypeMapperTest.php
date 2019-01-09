@@ -36,7 +36,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->assertSame([TestObject::class], $mapper->getSupportedClasses());
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
-        $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
+        $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, null, $this->getTypeMapper()));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapNameToType('Foo', $this->getTypeMapper()));
         $this->assertTrue($mapper->canMapNameToType('Foo'));
         $this->assertFalse($mapper->canMapNameToType('NotExists'));
@@ -47,7 +47,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($anotherMapperSameCache->canMapNameToType('Foo'));
 
         $this->expectException(CannotMapTypeException::class);
-        $mapper->mapClassToType(\stdClass::class, $this->getTypeMapper());
+        $mapper->mapClassToType(\stdClass::class, null, $this->getTypeMapper());
     }
 
     public function testGlobTypeMapperDuplicateTypesException()

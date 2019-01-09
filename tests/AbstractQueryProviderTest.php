@@ -124,7 +124,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
-                public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;

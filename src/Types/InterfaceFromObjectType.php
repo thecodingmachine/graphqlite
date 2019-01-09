@@ -15,7 +15,7 @@ class InterfaceFromObjectType extends \GraphQL\Type\Definition\InterfaceType
      * @param ObjectType $type
      * @param RecursiveTypeMapperInterface $typeMapper
      */
-    public function __construct(string $name, ObjectType $type, RecursiveTypeMapperInterface $typeMapper)
+    public function __construct(string $name, ObjectType $type, ?ObjectType $subType, RecursiveTypeMapperInterface $typeMapper)
     {
         parent::__construct([
             'name' => $name,
@@ -23,14 +23,14 @@ class InterfaceFromObjectType extends \GraphQL\Type\Definition\InterfaceType
                 return $type->getFields();
             },
             'description' => $type->description,
-            'resolveType' => function($value) use ($typeMapper) {
+            'resolveType' => function($value) use ($typeMapper, $subType) {
                 if (!is_object($value)) {
                     throw new \InvalidArgumentException('Expected object for resolveType. Got: "'.gettype($value).'"');
                 }
 
                 $className = get_class($value);
 
-                return $typeMapper->mapClassToType($className);
+                return $typeMapper->mapClassToType($className, $subType);
             }
         ]);
     }

@@ -5,8 +5,10 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use function array_merge;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\WrappingType;
 use GraphQL\Upload\UploadType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Nullable;
@@ -14,6 +16,7 @@ use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
 use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
@@ -163,7 +166,7 @@ class FieldsBuilder
      * @param string $annotationName
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field, false for @Query and @Mutation
      * @return QueryField[]
-     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      * @throws \ReflectionException
      */
     private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource): array
@@ -252,7 +255,7 @@ class FieldsBuilder
             $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
         } catch (TypeMappingException $e) {
             throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
-        } catch (CannotMapTypeException $e) {
+        } catch (CannotMapTypeExceptionInterface $e) {
             throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
         }
         return $type;
@@ -275,7 +278,7 @@ class FieldsBuilder
     /**
      * @param object $controller
      * @return QueryField[]
-     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      * @throws \ReflectionException
      */
     private function getSourceFields($controller): array
@@ -444,7 +447,7 @@ class FieldsBuilder
                 ];
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
-            } catch (CannotMapTypeException $e) {
+            } catch (CannotMapTypeExceptionInterface $e) {
                 throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
             }
 
@@ -474,11 +477,11 @@ class FieldsBuilder
             $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType);
         } else {
             try {
-                $graphQlType = $this->toGraphQlType($type, $mapToInputType);
+                $graphQlType = $this->toGraphQlType($type, null, $mapToInputType);
                 if (!$isNullable) {
                     $graphQlType = GraphQLType::nonNull($graphQlType);
                 }
-            } catch (TypeMappingException | CannotMapTypeException $e) {
+            } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
                 // Is the type iterable? If yes, let's analyze the docblock
                 // TODO: it would be better not to go through an exception for this.
                 if ($type instanceof Object_) {
@@ -486,7 +489,7 @@ class FieldsBuilder
                     $refClass = new ReflectionClass($fqcn);
                     // Note : $refClass->isIterable() is only accessible in PHP 7.2
                     if ($refClass->implementsInterface(Iterator::class) || $refClass->implementsInterface(IteratorAggregate::class)) {
-                        $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType);
+                        $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable);
                     } else {
                         throw $e;
                     }
@@ -518,8 +521,8 @@ class FieldsBuilder
         $lastException = null;
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
-                $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), $mapToInputType);
-            } catch (TypeMappingException | CannotMapTypeException $e) {
+                $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), null, $mapToInputType);
+            } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
                 // We have several types. It is ok not to be able to match one.
                 $lastException = $e;
             }
@@ -550,14 +553,73 @@ class FieldsBuilder
     }
 
     /**
+     * Maps a type where the main PHP type is an iterator
+     */
+    private function mapIteratorDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable): GraphQLType
+    {
+        if ($docBlockType === null) {
+            throw TypeMappingException::createFromType($type);
+        }
+        if (!$isNullable) {
+            // Let's check a "null" value in the docblock
+            $isNullable = $this->isNullable($docBlockType);
+        }
+
+        $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockType);
+        if (empty($filteredDocBlockTypes)) {
+            throw TypeMappingException::createFromType($type);
+        }
+
+        $unionTypes = [];
+        $lastException = null;
+        foreach ($filteredDocBlockTypes as $singleDocBlockType) {
+            try {
+                $singleDocBlockType = $this->getTypeInArray($singleDocBlockType);
+                if ($singleDocBlockType !== null) {
+                    $subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false);
+                } else {
+                    $subGraphQlType = null;
+                }
+
+                $unionTypes[] = $this->toGraphQlType($type, $subGraphQlType, false);
+
+                // TODO: add here a scan of the $type variable and do stuff if it is iterable.
+                // TODO: remove the iterator type if specified in the docblock (@return Iterator|User[])
+                // TODO: check there is at least one array (User[])
+            } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
+                // We have several types. It is ok not to be able to match one.
+                $lastException = $e;
+            }
+        }
+
+        if (empty($unionTypes) && $lastException !== null) {
+            // We have an issue, let's try without the subType
+            return $this->mapDocBlockType($type, $docBlockType, $isNullable, false);
+        }
+
+        if (count($unionTypes) === 1) {
+            $graphQlType = $unionTypes[0];
+        } else {
+            $graphQlType = new UnionType($unionTypes, $this->typeMapper);
+        }
+
+        if (!$isNullable) {
+            $graphQlType = GraphQLType::nonNull($graphQlType);
+        }
+        return $graphQlType;
+    }
+
+    /**
      * Casts a Type to a GraphQL type.
      * Does not deal with nullable.
      *
      * @param Type $type
+     * @param GraphQLType|null $subType
      * @param bool $mapToInputType
-     * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
+     * @return GraphQLType (InputType&GraphQLType)|(OutputType&GraphQLType)
+     * @throws CannotMapTypeExceptionInterface
      */
-    private function toGraphQlType(Type $type, bool $mapToInputType): GraphQLType
+    private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType): GraphQLType
     {
         if ($type instanceof Integer) {
             return GraphQLType::int();
@@ -581,10 +643,10 @@ class FieldsBuilder
             if ($mapToInputType) {
                 return $this->typeMapper->mapClassToInputType($className);
             } else {
-                return $this->typeMapper->mapClassToInterfaceOrType($className);
+                return $this->typeMapper->mapClassToInterfaceOrType($className, $subType);
             }
         } elseif ($type instanceof Array_) {
-            return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQlType($type->getValueType(), $mapToInputType)));
+            return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQlType($type->getValueType(), $subType, $mapToInputType)));
         } else {
             throw TypeMappingException::createFromType($type);
         }
@@ -620,6 +682,23 @@ class FieldsBuilder
             return $typeHint->getActualType();
         }
         return $typeHint;
+    }
+
+    /**
+     * Resolves a list type.
+     *
+     * @param Type $typeHint
+     * @return Type|null
+     */
+    private function getTypeInArray(Type $typeHint): ?Type
+    {
+        $typeHint = $this->dropNullableType($typeHint);
+
+        if (!$typeHint instanceof Array_) {
+            return null;
+        }
+
+        return $this->dropNullableType($typeHint->getValueType());
     }
 
     /**
