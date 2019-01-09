@@ -77,7 +77,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
                                 'offset' => Type::int(),
                             ],
                             'resolve' => function (Result $root, $args) {
-                                if ($args['limit'] === null && $args['offset'] !== 'null') {
+                                if (!isset($args['limit']) && isset($args['offset'])) {
                                     throw PorpaginasMissingParameterException::missingLimit();
                                 }
                                 return $root->take($args['offset'], $args['limit']);

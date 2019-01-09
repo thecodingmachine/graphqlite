@@ -314,10 +314,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             return $this->typeMapper->mapNameToType($typeName, $this);
         }
 
-        if ($this->typeMapper->canMapClassToInputType($typeName)) {
-            return $this->typeMapper->mapClassToInputType($typeName, $this);
-        }
-
         // Maybe the type is an interface?
         $interfaceToClassNameMap = $this->getInterfaceToClassNameMap();
         if (isset($interfaceToClassNameMap[$typeName])) {
