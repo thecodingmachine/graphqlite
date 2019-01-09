@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 use ReflectionMethod;
 
-class CannotMapTypeException extends \Exception
+class CannotMapTypeException extends \Exception implements CannotMapTypeExceptionInterface
 {
     public static function createForType(string $className): self
     {
@@ -23,7 +23,7 @@ class CannotMapTypeException extends \Exception
         return new self('cannot find GraphQL type "'.$name.'". Check your TypeMapper configuration.');
     }
 
-    public static function wrapWithParamInfo(self $previous, \ReflectionParameter $parameter): self
+    public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, \ReflectionParameter $parameter): self
     {
         $message = sprintf('For parameter $%s, in %s::%s, %s',
             $parameter->getName(),
@@ -34,7 +34,7 @@ class CannotMapTypeException extends \Exception
         return new self($message, 0, $previous);
     }
 
-    public static function wrapWithReturnInfo(self $previous, ReflectionMethod $method): self
+    public static function wrapWithReturnInfo(CannotMapTypeExceptionInterface $previous, ReflectionMethod $method): self
     {
         $message = sprintf('For return type of %s::%s, %s',
             $method->getDeclaringClass()->getName(),
@@ -42,5 +42,10 @@ class CannotMapTypeException extends \Exception
             $previous->getMessage());
 
         return new self($message, 0, $previous);
+    }
+
+    public static function mustBeOutputType($subTypeName): self
+    {
+        return new self('type "'.$subTypeName.'" must be an output type.');
     }
 }

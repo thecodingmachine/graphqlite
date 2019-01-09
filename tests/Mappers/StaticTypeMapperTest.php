@@ -52,7 +52,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->assertFalse($this->typeMapper->canMapClassToType(\Exception::class));
         $this->assertTrue($this->typeMapper->canMapClassToInputType(TestObject::class));
         $this->assertFalse($this->typeMapper->canMapClassToInputType(\Exception::class));
-        $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class, $this->getTypeMapper()));
+        $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class, null, $this->getTypeMapper()));
         $this->assertInstanceOf(InputObjectType::class, $this->typeMapper->mapClassToInputType(TestObject::class, $this->getTypeMapper()));
         $this->assertSame([TestObject::class], $this->typeMapper->getSupportedClasses());
         $this->assertSame('TestObject', $this->typeMapper->mapNameToType('TestObject', $this->getTypeMapper())->name);
@@ -67,7 +67,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
     public function testException1(): void
     {
         $this->expectException(CannotMapTypeException::class);
-        $this->typeMapper->mapClassToType(\Exception::class, $this->getTypeMapper());
+        $this->typeMapper->mapClassToType(\Exception::class, null, $this->getTypeMapper());
     }
 
     public function testException2(): void

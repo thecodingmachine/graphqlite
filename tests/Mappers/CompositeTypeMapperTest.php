@@ -22,7 +22,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
             {
                 if ($className === TestObject::class) {
                     return new ObjectType([
@@ -114,7 +114,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->assertFalse($this->composite->canMapClassToType(\Exception::class));
         $this->assertTrue($this->composite->canMapClassToInputType(TestObject::class));
         $this->assertFalse($this->composite->canMapClassToInputType(\Exception::class));
-        $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class, $this->getTypeMapper()));
+        $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class, null, $this->getTypeMapper()));
         $this->assertInstanceOf(InputObjectType::class, $this->composite->mapClassToInputType(TestObject::class, $this->getTypeMapper()));
         $this->assertSame([TestObject::class], $this->composite->getSupportedClasses());
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapNameToType('TestObject', $this->getTypeMapper()));
@@ -125,7 +125,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function testException1(): void
     {
         $this->expectException(CannotMapTypeException::class);
-        $this->composite->mapClassToType(\Exception::class, $this->getTypeMapper());
+        $this->composite->mapClassToType(\Exception::class, null, $this->getTypeMapper());
     }
 
     public function testException2(): void

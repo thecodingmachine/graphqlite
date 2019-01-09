@@ -37,11 +37,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $this->assertFalse($typeMapper->canMapClassToType(ClassC::class));
         $this->assertTrue($recursiveTypeMapper->canMapClassToType(ClassC::class));
-        $this->assertSame($objectType, $recursiveTypeMapper->mapClassToType(ClassC::class));
+        $this->assertSame($objectType, $recursiveTypeMapper->mapClassToType(ClassC::class, null));
 
         $this->assertFalse($recursiveTypeMapper->canMapClassToType(ClassA::class));
         $this->expectException(CannotMapTypeException::class);
-        $recursiveTypeMapper->mapClassToType(ClassA::class);
+        $recursiveTypeMapper->mapClassToType(ClassA::class, null);
     }
 
     public function testMapNameToType()
@@ -120,15 +120,15 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
     {
         $recursiveMapper = $this->getTypeMapper();
 
-        $type = $recursiveMapper->mapClassToInterfaceOrType(ClassA::class);
+        $type = $recursiveMapper->mapClassToInterfaceOrType(ClassA::class, null);
         $this->assertInstanceOf(InterfaceType::class, $type);
         $this->assertSame('ClassAInterface', $type->name);
 
-        $classAObjectType = $recursiveMapper->mapClassToType(ClassA::class);
+        $classAObjectType = $recursiveMapper->mapClassToType(ClassA::class, null);
         $this->assertInstanceOf(ObjectType::class, $classAObjectType);
         $this->assertCount(1, $classAObjectType->getInterfaces());
 
-        $type = $recursiveMapper->mapClassToInterfaceOrType(ClassC::class);
+        $type = $recursiveMapper->mapClassToInterfaceOrType(ClassC::class, null);
         $this->assertInstanceOf(ObjectType::class, $type);
         $this->assertSame('ClassB', $type->name);
 
@@ -136,12 +136,12 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertCount(1, $interfaces);
         $this->assertSame('ClassAInterface', $interfaces[0]->name);
 
-        $classBObjectType = $recursiveMapper->mapClassToType(ClassC::class);
+        $classBObjectType = $recursiveMapper->mapClassToType(ClassC::class, null);
         $this->assertInstanceOf(ObjectType::class, $classBObjectType);
         $this->assertCount(1, $classBObjectType->getInterfaces());
 
         $this->expectException(CannotMapTypeException::class);
-        $recursiveMapper->mapClassToInterfaceOrType('Not exists');
+        $recursiveMapper->mapClassToInterfaceOrType('Not exists', null);
     }
 
     public function testGetOutputTypes()

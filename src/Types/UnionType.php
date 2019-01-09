@@ -31,7 +31,7 @@ class UnionType extends \GraphQL\Type\Definition\UnionType
                 }
 
                 $className = get_class($value);
-                return $typeMapper->mapClassToInterfaceOrType($className);
+                return $typeMapper->mapClassToInterfaceOrType($className, null);
             }
         ]);
     }

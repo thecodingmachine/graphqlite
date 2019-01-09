@@ -27,11 +27,12 @@ interface TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
+     * @param OutputType|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return ObjectType
-     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType;
+    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType;
 
     /**
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
@@ -51,7 +52,7 @@ interface TypeMapperInterface
     public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type;
 
     /**
-     * Returns the list of classes that have matching input GraphQL types.
+     * Returns the list of classes that have matching GraphQL types.
      *
      * @return string[]
      */

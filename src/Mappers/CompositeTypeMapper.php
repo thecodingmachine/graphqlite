@@ -57,15 +57,16 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className
+     * @param OutputType|null $subType
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return ObjectType
-     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
-                return $typeMapper->mapClassToType($className, $recursiveTypeMapper);
+                return $typeMapper->mapClassToType($className, $subType, $recursiveTypeMapper);
             }
         }
         throw CannotMapTypeException::createForType($className);
@@ -107,7 +108,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      * @param string $className
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return InputObjectType
-     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
     {

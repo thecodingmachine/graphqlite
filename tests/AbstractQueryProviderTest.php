@@ -124,7 +124,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
-                public function mapClassToType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -186,6 +186,8 @@ abstract class AbstractQueryProviderTest extends TestCase
                             return $this->testObjectType;
                         case 'TestObject2':
                             return $this->testObjectType2;
+                        case 'TestObjectInput':
+                            return $this->inputTestObjectType;
                         default:
                             throw CannotMapTypeException::createForName($typeName);
                     }
@@ -199,7 +201,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                  */
                 public function canMapNameToType(string $typeName): bool
                 {
-                    return $typeName === 'TestObject' || $typeName === 'TestObject2';
+                    return $typeName === 'TestObject' || $typeName === 'TestObject2' || $typeName === 'TestObjectInput';
                 }
             }, new NamingStrategy(), new ArrayCache());
         }

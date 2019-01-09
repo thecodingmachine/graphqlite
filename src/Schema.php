@@ -39,7 +39,7 @@ class Schema extends \GraphQL\Type\Schema
                         ]
                     ];
                 }
-                return $queryProvider->getQueries();
+                return $queries;
             }
         ]);
         $mutation = new ObjectType([
