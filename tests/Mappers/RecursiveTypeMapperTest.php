@@ -33,7 +33,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             ClassB::class => $objectType
         ]);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache());
+        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
 
         $this->assertFalse($typeMapper->canMapClassToType(ClassC::class));
         $this->assertTrue($recursiveTypeMapper->canMapClassToType(ClassC::class));
@@ -55,7 +55,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             ClassB::class => $objectType
         ]);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache());
+        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
 
         $this->assertTrue($recursiveTypeMapper->canMapNameToType('Foobar'));
         $this->assertSame($objectType, $recursiveTypeMapper->mapNameToType('Foobar'));
@@ -88,7 +88,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             ClassB::class => $inputObjectType
         ]);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache());
+        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
 
         $this->assertFalse($recursiveTypeMapper->canMapClassToInputType(ClassC::class));
 
@@ -109,11 +109,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $namingStrategy = new NamingStrategy();
 
-        $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), $namingStrategy);
+        $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), $namingStrategy, $this->getTypeRegistry());
 
         $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), $namingStrategy, new NullCache());
 
-        return new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache());
+        return new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
     }
 
     public function testMapClassToInterfaceOrType()

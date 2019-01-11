@@ -102,6 +102,26 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             {
                 return $typeName === 'TestObject';
             }
+
+            public function canExtendTypeForClass(string $className, ObjectType $type): bool
+            {
+                return false;
+            }
+
+            public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            {
+                throw CannotMapTypeException::createForExtendType($className, $type);
+            }
+
+            public function canExtendTypeForName(string $typeName, ObjectType $type): bool
+            {
+                return false;
+            }
+
+            public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            {
+                throw CannotMapTypeException::createForExtendName($typeName, $type);
+            }
         };
 
         $this->composite = new CompositeTypeMapper([$typeMapper1]);

@@ -42,6 +42,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
+use TheCodingMachine\GraphQL\Controllers\TypeRegistry;
 use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 use function var_export;
 
@@ -85,7 +86,12 @@ class EndToEndTest extends TestCase
                 return new VoidAuthenticationService();
             },
             RecursiveTypeMapperInterface::class => function(ContainerInterface $container) {
-                return new RecursiveTypeMapper($container->get(TypeMapperInterface::class), $container->get(NamingStrategyInterface::class), new ArrayCache());
+                return new RecursiveTypeMapper(
+                    $container->get(TypeMapperInterface::class),
+                    $container->get(NamingStrategyInterface::class),
+                    new ArrayCache(),
+                    $container->get(TypeRegistry::class)
+                );
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeTypeMapper([
@@ -111,8 +117,12 @@ class EndToEndTest extends TestCase
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
                     $container->get(FieldsBuilderFactory::class),
-                    $container->get(NamingStrategyInterface::class)
+                    $container->get(NamingStrategyInterface::class),
+                    $container->get(TypeRegistry::class)
                 );
+            },
+            TypeRegistry::class => function() {
+                return new TypeRegistry();
             },
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
@@ -157,6 +167,7 @@ class EndToEndTest extends TestCase
         query {
             getContacts {
                 name
+                uppercaseName
                 ... on User {
                     email
                 }
@@ -172,10 +183,12 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'getContacts' => [
                 [
-                    'name' => 'Joe'
+                    'name' => 'Joe',
+                    'uppercaseName' => 'JOE'
                 ],
                 [
                     'name' => 'Bill',
+                    'uppercaseName' => 'BILL',
                     'email' => 'bill@example.com'
                 ]
 
@@ -191,10 +204,12 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'getContacts' => [
                 [
-                    'name' => 'Joe'
+                    'name' => 'Joe',
+                    'uppercaseName' => 'JOE'
                 ],
                 [
                     'name' => 'Bill',
+                    'uppercaseName' => 'BILL',
                     'email' => 'bill@example.com'
                 ]
 
@@ -257,8 +272,6 @@ class EndToEndTest extends TestCase
          * @var Schema $schema
          */
         $schema = $this->mainContainer->get(Schema::class);
-
-        $schema->assertValid();
 
         $queryString = '
         query {

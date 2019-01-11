@@ -15,4 +15,9 @@ class MissingAnnotationException extends \RuntimeException
     {
         return new self('GraphQL type classes must provide a @Type annotation.');
     }
+
+    public static function missingExtendTypeException(): self
+    {
+        return new self('Expected a @ExtendType annotation.');
+    }
 }

@@ -13,6 +13,7 @@ use function strpos;
 use function substr;
 use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQL\Controllers\Annotations\ExtendType;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\FailWith;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
@@ -64,14 +65,24 @@ class AnnotationReader
 
     public function getTypeAnnotation(ReflectionClass $refClass): ?Type
     {
-        // TODO: customize the way errors are handled here!
         try {
-            /** @var Type|null $typeField */
-            $typeField = $this->getClassAnnotation($refClass, Type::class);
+            /** @var Type|null $type */
+            $type = $this->getClassAnnotation($refClass, Type::class);
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapException($e, $refClass->getName());
         }
-        return $typeField;
+        return $type;
+    }
+
+    public function getExtendTypeAnnotation(ReflectionClass $refClass): ?ExtendType
+    {
+        try {
+            /** @var ExtendType|null $extendType */
+            $extendType = $this->getClassAnnotation($refClass, ExtendType::class);
+        } catch (ClassNotFoundException $e) {
+            throw ClassNotFoundException::wrapException($e, $refClass->getName());
+        }
+        return $extendType;
     }
 
     public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName): ?AbstractRequest

@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
@@ -47,6 +48,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $controllerQueryProviderFactory;
     private $annotationReader;
     private $typeResolver;
+    private $typeRegistry;
 
     protected function getTestObjectType()
     {
@@ -151,34 +153,16 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return $className === TestObject::class || $className === TestObject2::class;
                 }
 
-                /**
-                 * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
-                 *
-                 * @param string $className
-                 * @return bool
-                 */
                 public function canMapClassToInputType(string $className): bool
                 {
                     return $className === TestObject::class || $className === TestObject2::class;
                 }
 
-                /**
-                 * Returns the list of classes that have matching input GraphQL types.
-                 *
-                 * @return string[]
-                 */
                 public function getSupportedClasses(): array
                 {
                     return [TestObject::class, TestObject2::class];
                 }
 
-                /**
-                 * Returns a GraphQL type by name (can be either an input or output type)
-                 *
-                 * @param string $typeName The name of the GraphQL type
-                 * @return Type&(InputType|OutputType)
-                 * @throws CannotMapTypeException
-                 */
                 public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
                 {
                     switch ($typeName) {
@@ -193,17 +177,31 @@ abstract class AbstractQueryProviderTest extends TestCase
                     }
                 }
 
-                /**
-                 * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
-                 *
-                 * @param string $typeName The name of the GraphQL type
-                 * @return bool
-                 */
                 public function canMapNameToType(string $typeName): bool
                 {
                     return $typeName === 'TestObject' || $typeName === 'TestObject2' || $typeName === 'TestObjectInput';
                 }
-            }, new NamingStrategy(), new ArrayCache());
+
+                public function canExtendTypeForClass(string $className, ObjectType $type): bool
+                {
+                    return false;
+                }
+
+                public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                {
+                    throw CannotMapTypeException::createForExtendType($className, $type);
+                }
+
+                public function canExtendTypeForName(string $typeName, ObjectType $type): bool
+                {
+                    return false;
+                }
+
+                public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                {
+                    throw CannotMapTypeException::createForExtendName($typeName, $type);
+                }
+            }, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
         }
         return $this->typeMapper;
     }
@@ -267,7 +265,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getTypeGenerator(): TypeGenerator
     {
         if ($this->typeGenerator === null) {
-            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy());
+            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy(), $this->getTypeRegistry());
         }
         return $this->typeGenerator;
     }
@@ -308,5 +306,13 @@ abstract class AbstractQueryProviderTest extends TestCase
                 new CachedDocBlockFactory(new ArrayCache()));
         }
         return $this->controllerQueryProviderFactory;
+    }
+
+    protected function getTypeRegistry(): TypeRegistry
+    {
+        if ($this->typeRegistry === null) {
+            $this->typeRegistry = new TypeRegistry();
+        }
+        return $this->typeRegistry;
     }
 }

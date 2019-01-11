@@ -74,4 +74,44 @@ interface TypeMapperInterface
      * @return InputObjectType
      */
     public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType;
+
+    /**
+     * Returns true if this type mapper can extend an existing type for the $className FQCN
+     *
+     * @param string $className
+     * @param ObjectType $type
+     * @return bool
+     */
+    public function canExtendTypeForClass(string $className, ObjectType $type): bool;
+
+    /**
+     * Extends the existing GraphQL type that is mapped to $className.
+     *
+     * @param string $className
+     * @param ObjectType $type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return ObjectType
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType;
+
+    /**
+     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     *
+     * @param string $typeName
+     * @param ObjectType $type
+     * @return bool
+     */
+    public function canExtendTypeForName(string $typeName, ObjectType $type): bool;
+
+    /**
+     * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
+     *
+     * @param string $typeName
+     * @param ObjectType $type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @return ObjectType
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType;
 }
