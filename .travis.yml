@@ -1,15 +1,18 @@
 language: php
-php:
-- 7.1
-- 7.2
-- 7.3
 cache:
   directories:
     - $HOME/.composer/cache
 env:
   matrix:
-  - PREFER_LOWEST="--prefer-lowest"
-  - PREFER_LOWEST=""
+    - php: 7.3
+      env: PREFER_LOWEST=""
+    - php: 7.2
+      env: PREFER_LOWEST=""
+    - php: 7.1
+      env: PREFER_LOWEST=""
+    - php: 7.1
+      env: PREFER_LOWEST="--prefer-lowest"
+
 before_script:
 - composer update --prefer-dist $PREFER_LOWEST
 script:

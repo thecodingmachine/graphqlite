@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use ReflectionClass;
 use ReflectionMethod;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
@@ -88,6 +89,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     private $fullMapComputed = false;
     /**
+     * @var bool
+     */
+    private $fullExtendMapComputed = false;
+    /**
      * @var NamingStrategy
      */
     private $namingStrategy;
@@ -99,6 +104,14 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var InputTypeUtils
      */
     private $inputTypeUtils;
+    /**
+     * The array of globbed classes.
+     * Only instantiable classes are returned.
+     * Key: fully qualified class name
+     *
+     * @var array<string,ReflectionClass>
+     */
+    private $classes;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
@@ -120,9 +133,9 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Returns an array of fully qualified class names.
      *
-     * @return array<string,string>
+     * @return array<string, array<string,string>>
      */
-    private function getMap(): array
+    private function getMaps(): array
     {
         if ($this->fullMapComputed === false) {
             $namespace = str_replace('\\', '_', $this->namespace);
@@ -134,7 +147,11 @@ final class GlobTypeMapper implements TypeMapperInterface
             $this->mapNameToType = $this->cache->get($keyNameCache);
             $this->mapClassToFactory = $this->cache->get($keyInputClassCache);
             $this->mapInputNameToFactory = $this->cache->get($keyInputNameCache);
-            if ($this->mapClassToTypeArray === null || $this->mapNameToType === null || $this->mapClassToFactory === null || $this->mapInputNameToFactory) {
+            if ($this->mapClassToTypeArray === null ||
+                $this->mapNameToType === null ||
+                $this->mapClassToFactory === null ||
+                $this->mapInputNameToFactory
+            ) {
                 $this->buildMap();
                 // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
                 // Defaults to 2 seconds.
@@ -143,23 +160,106 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $this->cache->set($keyInputClassCache, $this->mapClassToFactory, $this->globTtl);
                 $this->cache->set($keyInputNameCache, $this->mapInputNameToFactory, $this->globTtl);
             }
+            $this->fullMapComputed = true;
         }
-        return $this->mapClassToTypeArray;
+        return [
+            'mapClassToTypeArray' => $this->mapClassToTypeArray,
+            'mapNameToType' => $this->mapNameToType,
+            'mapClassToFactory' => $this->mapClassToFactory,
+            'mapInputNameToFactory' => $this->mapInputNameToFactory,
+        ];
+    }
+
+    private function getMapClassToType(): array
+    {
+        return $this->getMaps()['mapClassToTypeArray'];
+    }
+
+    private function getMapNameToType(): array
+    {
+        return $this->getMaps()['mapNameToType'];
+    }
+
+    private function getMapClassToFactory(): array
+    {
+        return $this->getMaps()['mapClassToFactory'];
+    }
+
+    private function getMapInputNameToFactory(): array
+    {
+        return $this->getMaps()['mapInputNameToFactory'];
+    }
+
+    /**
+     * Returns an array of fully qualified class names.
+     *
+     * @return array<string,array<string,string>>
+     */
+    private function getExtendMaps(): array
+    {
+        if ($this->fullExtendMapComputed === false) {
+            $namespace = str_replace('\\', '_', $this->namespace);
+            $keyExtendClassCache = 'globTypeMapperExtend_'.$namespace;
+            $keyExtendNameCache = 'globTypeMapperExtend_names_'.$namespace;
+            $this->mapClassToExtendTypeArray = $this->cache->get($keyExtendClassCache);
+            $this->mapNameToExtendType = $this->cache->get($keyExtendNameCache);
+            if ($this->mapClassToExtendTypeArray === null ||
+                $this->mapNameToExtendType === null
+            ) {
+                $this->buildExtendMap();
+                // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
+                // Defaults to 2 seconds.
+                $this->cache->set($keyExtendClassCache, $this->mapClassToExtendTypeArray, $this->globTtl);
+                $this->cache->set($keyExtendNameCache, $this->mapNameToExtendType, $this->globTtl);
+            }
+            $this->fullExtendMapComputed = true;
+        }
+        return [
+            'mapClassToExtendTypeArray' => $this->mapClassToExtendTypeArray,
+            'mapNameToExtendType' => $this->mapNameToExtendType,
+        ];
+    }
+
+    private function getMapClassToExtendTypeArray(): array
+    {
+        return $this->getExtendMaps()['mapClassToExtendTypeArray'];
+    }
+
+    private function getMapNameToExtendType(): array
+    {
+        return $this->getExtendMaps()['mapNameToExtendType'];
+    }
+
+    /**
+     * Returns the array of globbed classes.
+     * Only instantiable classes are returned.
+     *
+     * @return array<string,ReflectionClass> Key: fully qualified class name
+     */
+    private function getClassList(): array
+    {
+        if ($this->classes === null) {
+            $this->classes = [];
+            $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true));
+            $classes = $explorer->getClasses();
+            foreach ($classes as $className) {
+                if (!\class_exists($className)) {
+                    continue;
+                }
+                $refClass = new \ReflectionClass($className);
+                if (!$refClass->isInstantiable()) {
+                    continue;
+                }
+                $this->classes[$className] = $refClass;
+            }
+        }
+        return $this->classes;
     }
 
     private function buildMap(): void
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true));
-        $classes = $explorer->getClasses();
-        foreach ($classes as $className) {
-            if (!\class_exists($className)) {
-                continue;
-            }
-            $refClass = new \ReflectionClass($className);
-            if (!$refClass->isInstantiable()) {
-                continue;
-            }
-
+        $classes = $this->getClassList();
+        foreach ($classes as $className => $refClass) {
             $type = $this->annotationReader->getTypeAnnotation($refClass);
 
             if ($type !== null) {
@@ -171,12 +271,6 @@ final class GlobTypeMapper implements TypeMapperInterface
                     throw DuplicateMappingException::createForType($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
                 }
                 $this->storeTypeInCache($className, $type, $refClass->getFileName());
-            }
-
-            $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
-
-            if ($extendType !== null) {
-                $this->storeExtendTypeInCache($className, $extendType, $refClass->getFileName());
             }
 
             foreach ($refClass->getMethods() as $method) {
@@ -192,7 +286,18 @@ final class GlobTypeMapper implements TypeMapperInterface
             }
 
         }
-        $this->fullMapComputed = true;
+    }
+
+    private function buildExtendMap(): void
+    {
+        $classes = $this->getClassList();
+        foreach ($classes as $className => $refClass) {
+            $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
+
+            if ($extendType !== null) {
+                $this->storeExtendTypeInCache($className, $extendType, $refClass->getFileName());
+            }
+        }
     }
 
     /**
@@ -250,6 +355,25 @@ final class GlobTypeMapper implements TypeMapperInterface
         ], $this->mapTtl);
 
         // TODO: this is kind of a hack. Ideally, we would need to find the GraphQL type name from the class name.
+
+        // FIXME: this is WRONG! we need to get the NAME of the GraphQL type from the $extendTypeClassName
+        // The only thing we have is the name of the main class (in $extendType->getClass())
+        // From there, we need to FIND the name of the type. We need a $recursiveTypeMapper->mapClassToTypeName method.
+
+        // OOOOOOR: MAYBE WE DONT STORE THIS ASSOCIATION AT ALL!! => How???
+
+        // OOOOOOR again: ExtendType is targetting the GraphQL NAME and not the type!!! @ExtendType(name="Foo") => But that does not work, we also need the class name just above!
+
+
+        // YET ANOTHER IDEA: global refactor:
+        // Instead of returning types, we return TypeFactories.
+        // A type factory is an interface with:
+        // - className
+        // - typeName
+        // - list of field factories
+        // - list of files used to build it with timestamp. Any change in one file and the type is no longer valid
+        // A type factory is serializable.
+
         $type = new Type(['class'=>$extendType->getClass()]);
         $typeName = $this->namingStrategy->getOutputTypeName($extendTypeClassName, $type);
         $this->mapNameToExtendType[$typeName][$extendTypeClassName] = $extendTypeClassName;
@@ -435,7 +559,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
         if ($typeClassName === null) {
-            $this->getMap();
+            $this->getMaps();
         }
 
         return isset($this->mapClassToTypeArray[$className]);
@@ -455,7 +579,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
         if ($typeClassName === null) {
-            $this->getMap();
+            $this->getMaps();
         }
 
         if (!isset($this->mapClassToTypeArray[$className])) {
@@ -471,7 +595,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function getSupportedClasses(): array
     {
-        return array_keys($this->getMap());
+        return array_keys($this->getMapClassToType());
     }
 
     /**
@@ -485,7 +609,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $factory = $this->getFactoryFromCacheByObjectClass($className);
 
         if ($factory === null) {
-            $this->getMap();
+            $this->getMaps();
         }
         return isset($this->mapClassToFactory[$className]);
     }
@@ -503,7 +627,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $factory = $this->getFactoryFromCacheByObjectClass($className);
 
         if ($factory === null) {
-            $this->getMap();
+            $this->getMaps();
         }
 
         if (!isset($this->mapClassToFactory[$className])) {
@@ -527,7 +651,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         if ($typeClassName === null) {
             $factory = $this->getFactoryFromCacheByGraphQLInputTypeName($typeName);
             if ($factory === null) {
-                $this->getMap();
+                $this->getMaps();
             }
         }
 
@@ -561,7 +685,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             return true;
         }
 
-        $this->getMap();
+        $this->getMaps();
 
         return isset($this->mapNameToType[$typeName]) || isset($this->mapInputNameToFactory[$typeName]);
     }
@@ -578,7 +702,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $extendTypeClassName = $this->getExtendTypesFromCacheByObjectClass($className);
 
         if ($extendTypeClassName === null) {
-            $this->getMap();
+            $this->getExtendMaps();
         }
 
         return isset($this->mapClassToExtendTypeArray[$className]);
@@ -598,7 +722,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $extendTypeClassNames = $this->getExtendTypesFromCacheByObjectClass($className);
 
         if ($extendTypeClassNames === null) {
-            $this->getMap();
+            $this->getExtendMaps();
         }
 
         if (!isset($this->mapClassToExtendTypeArray[$className])) {
@@ -631,7 +755,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             return true;
         }*/
 
-        $this->getMap();
+        $this->getExtendMaps();
 
         return isset($this->mapNameToExtendType[$typeName])/* || isset($this->mapInputNameToFactory[$typeName])*/;
     }
@@ -651,7 +775,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         if ($extendTypeClassNames === null) {
             /*$factory = $this->getFactoryFromCacheByGraphQLInputTypeName($typeName);
             if ($factory === null) {*/
-                $this->getMap();
+                $this->getExtendMaps();
             //}
         }
 

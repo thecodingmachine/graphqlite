@@ -278,6 +278,7 @@ class EndToEndTest extends TestCase
             getContactsIterator {
                 items(limit: 1, offset: 1) {
                     name
+                    uppercaseName
                     ... on User {
                         email
                     }
@@ -297,6 +298,7 @@ class EndToEndTest extends TestCase
                 'items' => [
                     [
                         'name' => 'Bill',
+                        'uppercaseName' => 'BILL',
                         'email' => 'bill@example.com'
                     ]
                 ],
@@ -369,7 +371,7 @@ class EndToEndTest extends TestCase
             'getContactsIterator' => [
                 'items' => [
                     [
-                        'name' => 'Joe'
+                        'name' => 'Joe',
                     ],
                     [
                         'name' => 'Bill',
