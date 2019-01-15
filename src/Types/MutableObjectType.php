@@ -101,7 +101,7 @@ class MutableObjectType extends ObjectType
 
             $this->finalFields = parent::getFields();
             foreach ($this->fieldsCallables as $fieldsCallable) {
-                $this->finalFields += $fieldsCallable();
+                $this->finalFields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->finalFields;
             }
         }
 
