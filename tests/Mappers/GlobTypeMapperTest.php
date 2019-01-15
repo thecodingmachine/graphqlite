@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
@@ -148,5 +149,40 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToInputType(TestType::class, $this->getTypeMapper());
+    }
+
+    public function testGlobTypeMapperExtend()
+    {
+        $container = new Picotainer([
+            FooType::class => function() {
+                return new FooType();
+            },
+            FooExtendType::class => function() {
+                return new FooExtendType();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
+
+        $type = $mapper->mapClassToType(TestObject::class, null, $this->getTypeMapper());
+
+        $this->assertTrue($mapper->canExtendTypeForClass(TestObject::class, $type, $this->getTypeMapper()));
+        $mapper->extendTypeForClass(TestObject::class, $type, $this->getTypeMapper());
+        $mapper->extendTypeForName('TestObject', $type, $this->getTypeMapper());
+        $this->assertTrue($mapper->canExtendTypeForName('TestObject', $type, $this->getTypeMapper()));
+        $this->assertFalse($mapper->canExtendTypeForName('NotExists', $type, $this->getTypeMapper()));
+
+        // Again to test cache
+        $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
+        $this->assertTrue($anotherMapperSameCache->canExtendTypeForClass(TestObject::class, $type, $this->getTypeMapper()));
+        $this->assertTrue($anotherMapperSameCache->canExtendTypeForName('TestObject', $type, $this->getTypeMapper()));
+
+        $this->expectException(CannotMapTypeException::class);
+        $mapper->extendTypeForClass(\stdClass::class, $type, $this->getTypeMapper());
     }
 }

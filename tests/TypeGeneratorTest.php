@@ -3,7 +3,7 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TypeFoo;
-use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class TypeGeneratorTest extends AbstractQueryProviderTest
 {
@@ -14,6 +14,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         $type = $typeGenerator->mapAnnotatedObject(new TypeFoo(), $this->getTypeMapper());
 
         $this->assertSame('TestObject', $type->name);
+        $type->freeze();
         $this->assertCount(1, $type->getFields());
     }
 
@@ -23,5 +24,18 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
 
         $this->expectException(MissingAnnotationException::class);
         $typeGenerator->mapAnnotatedObject(new \stdClass(), $this->getTypeMapper());
+    }
+
+    public function testextendAnnotatedObjectException()
+    {
+        $typeGenerator = $this->getTypeGenerator();
+
+        $type = new MutableObjectType([
+            'name' => 'foo',
+            'fields' => []
+        ]);
+
+        $this->expectException(MissingAnnotationException::class);
+        $typeGenerator->extendAnnotatedObject(new \stdClass(), $type, $this->getTypeMapper());
     }
 }

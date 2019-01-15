@@ -9,8 +9,7 @@ use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundExc
 use TheCodingMachine\GraphQL\Controllers\MissingAnnotationException;
 
 /**
- * The Type annotation must be put in a GraphQL type class docblock and is used to map to the underlying PHP class
- * this is exposed via this type.
+ * The ExtendType annotation must be put in a GraphQL type class docblock and is used to add additional fields to the underlying PHP class.
  *
  * @Annotation
  * @Target({"CLASS"})
@@ -18,7 +17,7 @@ use TheCodingMachine\GraphQL\Controllers\MissingAnnotationException;
  *   @Attribute("class", type = "string"),
  * })
  */
-class Type
+class ExtendType
 {
     /**
      * @var string
@@ -31,7 +30,7 @@ class Type
     public function __construct(array $attributes = [])
     {
         if (!isset($attributes['class'])) {
-            throw new BadMethodCallException('In annotation @Type, missing compulsory parameter "class".');
+            throw new BadMethodCallException('In annotation @ExtendType, missing compulsory parameter "class".');
         }
         $this->class = $attributes['class'];
         if (!class_exists($this->class)) {

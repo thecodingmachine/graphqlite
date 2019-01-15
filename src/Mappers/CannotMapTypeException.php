@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Mappers;
 
 
+use GraphQL\Type\Definition\ObjectType;
 use ReflectionMethod;
 
 class CannotMapTypeException extends \Exception implements CannotMapTypeExceptionInterface
@@ -47,5 +48,15 @@ class CannotMapTypeException extends \Exception implements CannotMapTypeExceptio
     public static function mustBeOutputType($subTypeName): self
     {
         return new self('type "'.$subTypeName.'" must be an output type.');
+    }
+
+    public static function createForExtendType(string $className, ObjectType $type): self
+    {
+        return new self('cannot extend GraphQL type "'.$type->name.'" mapped by class "'.$className.'". Check your TypeMapper configuration.');
+    }
+
+    public static function createForExtendName(string $name, ObjectType $type): self
+    {
+        return new self('cannot extend GraphQL type "'.$type->name.'" with type "'.$name.'". Check your TypeMapper configuration.');
     }
 }

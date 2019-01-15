@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\TypeMappingException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class CompositeTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -22,10 +23,10 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
             {
                 if ($className === TestObject::class) {
-                    return new ObjectType([
+                    return new MutableObjectType([
                         'name'    => 'TestObject',
                         'fields'  => [
                             'test'   => Type::string(),
@@ -81,7 +82,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             {
                 switch ($typeName) {
                     case 'TestObject':
-                        return new ObjectType([
+                        return new MutableObjectType([
                             'name'    => 'TestObject',
                             'fields'  => [
                                 'test'   => Type::string(),
@@ -102,6 +103,31 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             {
                 return $typeName === 'TestObject';
             }
+
+            public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+            {
+                return false;
+            }
+
+            public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+            {
+                throw CannotMapTypeException::createForExtendType($className, $type);
+            }
+
+            public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+            {
+                return true;
+            }
+
+            public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+            {
+                $type->addFields(function() {
+                    return [
+                        'test2' => Type::int()
+                    ];
+                });
+                //throw CannotMapTypeException::createForExtendName($typeName, $type);
+            }
         };
 
         $this->composite = new CompositeTypeMapper([$typeMapper1]);
@@ -120,6 +146,23 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapNameToType('TestObject', $this->getTypeMapper()));
         $this->assertTrue($this->composite->canMapNameToType('TestObject'));
         $this->assertFalse($this->composite->canMapNameToType('NotExists'));
+
+
+        $type = new MutableObjectType([
+            'name'    => 'TestObject',
+            'fields'  => [
+                'test'   => Type::string(),
+            ],
+        ]);
+
+        $this->assertFalse($this->composite->canExtendTypeForClass('foo', $type, $this->getTypeMapper()));
+        $this->assertTrue($this->composite->canExtendTypeForName('foo', $type, $this->getTypeMapper()));
+
+
+        $this->composite->extendTypeForName('foo', $type, $this->getTypeMapper());
+
+        $type->freeze();
+        $this->assertCount(2, $type->getFields());
     }
 
     public function testException1(): void
