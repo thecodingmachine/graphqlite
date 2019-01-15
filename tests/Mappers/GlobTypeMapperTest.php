@@ -171,16 +171,16 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $type = $mapper->mapClassToType(TestObject::class, null, $this->getTypeMapper());
 
-        $this->assertTrue($mapper->canExtendTypeForClass(TestObject::class, $type));
-        $this->assertInstanceOf(ObjectType::class, $mapper->extendTypeForClass(TestObject::class, $type, $this->getTypeMapper()));
-        $this->assertInstanceOf(ObjectType::class, $mapper->extendTypeForName('Foo', $type, $this->getTypeMapper()));
-        $this->assertTrue($mapper->canExtendTypeForName('Foo'));
-        $this->assertFalse($mapper->canExtendTypeForName('NotExists'));
+        $this->assertTrue($mapper->canExtendTypeForClass(TestObject::class, $type, $this->getTypeMapper()));
+        $mapper->extendTypeForClass(TestObject::class, $type, $this->getTypeMapper());
+        $mapper->extendTypeForName('TestObject', $type, $this->getTypeMapper());
+        $this->assertTrue($mapper->canExtendTypeForName('TestObject', $type, $this->getTypeMapper()));
+        $this->assertFalse($mapper->canExtendTypeForName('NotExists', $type, $this->getTypeMapper()));
 
         // Again to test cache
         $anotherMapperSameCache = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
-        $this->assertTrue($anotherMapperSameCache->canExtendTypeForClass(TestObject::class, $type));
-        $this->assertTrue($anotherMapperSameCache->canExtendTypeForName('Foo', $type));
+        $this->assertTrue($anotherMapperSameCache->canExtendTypeForClass(TestObject::class, $type, $this->getTypeMapper()));
+        $this->assertTrue($anotherMapperSameCache->canExtendTypeForName('TestObject', $type, $this->getTypeMapper()));
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->extendTypeForClass(\stdClass::class, $type, $this->getTypeMapper());

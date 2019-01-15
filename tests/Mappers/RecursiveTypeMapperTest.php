@@ -18,13 +18,14 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types\ClassBType;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 {
 
     public function testMapClassToType()
     {
-        $objectType = new ObjectType([
+        $objectType = new MutableObjectType([
             'name' => 'Foobar'
         ]);
 
@@ -46,7 +47,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
     public function testMapNameToType()
     {
-        $objectType = new ObjectType([
+        $objectType = new MutableObjectType([
             'name' => 'Foobar'
         ]);
 

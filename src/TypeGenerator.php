@@ -8,6 +8,8 @@ use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeAnnotatedObjectType;
 
 /**
  * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
@@ -22,7 +24,7 @@ class TypeGenerator
     /**
      * @var FieldsBuilderFactory
      */
-    private $controllerQueryProviderFactory;
+    private $fieldsBuilderFactory;
     /**
      * @var NamingStrategyInterface
      */
@@ -33,12 +35,12 @@ class TypeGenerator
     private $typeRegistry;
 
     public function __construct(AnnotationReader $annotationReader,
-                                FieldsBuilderFactory $controllerQueryProviderFactory,
+                                FieldsBuilderFactory $fieldsBuilderFactory,
                                 NamingStrategyInterface $namingStrategy,
                                 TypeRegistry $typeRegistry)
     {
         $this->annotationReader = $annotationReader;
-        $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
+        $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->namingStrategy = $namingStrategy;
         $this->typeRegistry = $typeRegistry;
     }
@@ -49,7 +51,7 @@ class TypeGenerator
      * @return ObjectType
      * @throws \ReflectionException
      */
-    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): TypeAnnotatedObjectType
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
@@ -65,7 +67,9 @@ class TypeGenerator
             return $this->typeRegistry->getObjectType($typeName);
         }
 
-        return new ObjectType([
+        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilderFactory, $recursiveTypeMapper);
+
+        /*return new ObjectType([
             'name' => $typeName,
             'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $typeField) {
                 $parentClass = get_parent_class($typeField->getClass());
@@ -86,15 +90,15 @@ class TypeGenerator
             'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
                 return $recursiveTypeMapper->findInterfaces($typeField->getClass());
             }
-        ]);
+        ]);*/
     }
 
     /**
      * @param object $annotatedObject An object with a ExtendType annotation.
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      */
-    public function extendAnnotatedObject($annotatedObject, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function extendAnnotatedObject($annotatedObject, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
@@ -107,13 +111,15 @@ class TypeGenerator
         //$typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $extendTypeAnnotation);
         $typeName = $type->name;
 
-        if ($this->typeRegistry->hasType($typeName)) {
+        /*if ($this->typeRegistry->hasType($typeName)) {
             throw new GraphQLException(sprintf('Tried to extend GraphQL type "%s" that is already stored in the type registry.', $typeName));
         }
 
-        return new ObjectType([
-            'name' => $typeName,
-            'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $type) {
+        if (!$type instanceof MutableObjectType) {
+            throw new \RuntimeException('TEMP EXCEPTION');
+        }*/
+
+        $type->addFields(function() use ($annotatedObject, $recursiveTypeMapper) {
                 /*$parentClass = get_parent_class($extendTypeAnnotation->getClass());
                 $parentType = null;
                 if ($parentClass !== false) {
@@ -122,19 +128,38 @@ class TypeGenerator
                     }
                 }*/
 
-                $fieldProvider = $this->controllerQueryProviderFactory->buildFieldsBuilder($recursiveTypeMapper);
-                $fields = $fieldProvider->getFields($annotatedObject);
+                $fieldProvider = $this->fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
+                return $fieldProvider->getFields($annotatedObject);
                 /*if ($parentType !== null) {
                     $fields = $parentType->getFields() + $fields;
                 }*/
+            });
 
-                $fields = $type->getFields() + $fields;
 
-                return $fields;
-            },
-            'interfaces' => function() use ($type) {
-                return $type->getInterfaces();
-            }
-        ]);
+//        return new ObjectType([
+//            'name' => $typeName,
+//            'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $type) {
+//                /*$parentClass = get_parent_class($extendTypeAnnotation->getClass());
+//                $parentType = null;
+//                if ($parentClass !== false) {
+//                    if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
+//                        $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
+//                    }
+//                }*/
+//
+//                $fieldProvider = $this->fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
+//                $fields = $fieldProvider->getFields($annotatedObject);
+//                /*if ($parentType !== null) {
+//                    $fields = $parentType->getFields() + $fields;
+//                }*/
+//
+//                $fields = $type->getFields() + $fields;
+//
+//                return $fields;
+//            },
+//            'interfaces' => function() use ($type) {
+//                return $type->getInterfaces();
+//            }
+//        ]);
     }
 }

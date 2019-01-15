@@ -10,6 +10,7 @@ use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class StaticTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -22,7 +23,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
     {
         $this->typeMapper = new StaticTypeMapper();
         $this->typeMapper->setTypes([
-            TestObject::class => new ObjectType([
+            TestObject::class => new MutableObjectType([
                 'name'    => 'TestObject',
                 'fields'  => [
                     'test'   => Type::string(),

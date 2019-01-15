@@ -15,6 +15,7 @@ use Porpaginas\Result;
 use RuntimeException;
 use function strpos;
 use function substr;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class PorpaginasTypeMapper implements TypeMapperInterface
 {
@@ -43,7 +44,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * @return ObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
     {
         if (!$this->canMapClassToType($className)) {
             throw CannotMapTypeException::createForType($className);
@@ -55,7 +56,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
         return $this->getObjectType($subType);
     }
 
-    private function getObjectType(OutputType $subType): ObjectType
+    private function getObjectType(OutputType $subType): MutableObjectType
     {
         if (!isset($subType->name)) {
             throw new RuntimeException('Cannot get name property from sub type '.get_class($subType));
@@ -66,7 +67,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
         $typeName = 'PorpaginasResult_'.$name;
 
         if (!isset($this->cache[$typeName])) {
-            $this->cache[$typeName] = new ObjectType([
+            $this->cache[$typeName] = new MutableObjectType([
                 'name' => $typeName,
                 'fields' => function() use ($subType) {
                     return [
@@ -177,10 +178,11 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      *
      * @param string $className
-     * @param ObjectType $type
+     * @param MutableObjectType $type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return bool
      */
-    public function canExtendTypeForClass(string $className, ObjectType $type): bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
     {
         return false;
     }
@@ -189,12 +191,11 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Extends the existing GraphQL type that is mapped to $className.
      *
      * @param string $className
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
         throw CannotMapTypeException::createForExtendType($className, $type);
     }
@@ -203,10 +204,11 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      *
      * @param string $typeName
-     * @param ObjectType $type
+     * @param MutableObjectType $type
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return bool
      */
-    public function canExtendTypeForName(string $typeName, ObjectType $type): bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
     {
         return false;
     }
@@ -215,12 +217,11 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
      * @param string $typeName
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
     }

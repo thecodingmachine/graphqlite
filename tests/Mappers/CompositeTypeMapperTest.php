@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
 use TheCodingMachine\GraphQL\Controllers\TypeMappingException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class CompositeTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -22,10 +23,10 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
             {
                 if ($className === TestObject::class) {
-                    return new ObjectType([
+                    return new MutableObjectType([
                         'name'    => 'TestObject',
                         'fields'  => [
                             'test'   => Type::string(),
@@ -103,22 +104,22 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                 return $typeName === 'TestObject';
             }
 
-            public function canExtendTypeForClass(string $className, ObjectType $type): bool
+            public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
             {
                 return false;
             }
 
-            public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
             {
                 throw CannotMapTypeException::createForExtendType($className, $type);
             }
 
-            public function canExtendTypeForName(string $typeName, ObjectType $type): bool
+            public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
             {
                 return false;
             }
 
-            public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+            public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
             {
                 throw CannotMapTypeException::createForExtendName($typeName, $type);
             }

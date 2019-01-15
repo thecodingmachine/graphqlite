@@ -317,6 +317,7 @@ class EndToEndTest extends TestCase
                 'items' => [
                     [
                         'name' => 'Bill',
+                        'uppercaseName' => 'BILL',
                         'email' => 'bill@example.com'
                     ]
                 ],

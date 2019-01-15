@@ -17,6 +17,7 @@ use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQL\Controllers\NamingStrategyInterface;
 use TheCodingMachine\GraphQL\Controllers\TypeRegistry;
 use TheCodingMachine\GraphQL\Controllers\Types\InterfaceFromObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.
@@ -94,11 +95,11 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type)
-     * @param (OutputType&ObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
-     * @return ObjectType
+     * @param (OutputType&MutableObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): ObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         $closestClassName = $this->findClosestMatchingParent($className);
         if ($closestClassName === null) {
@@ -108,11 +109,20 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
         // In the event this type was already part of cache, let's not extend it.
         if ($this->typeRegistry->hasType($type->name)) {
-            return $type;
+            $cachedType = $this->typeRegistry->getType($type->name);
+            if ($cachedType !== $type) {
+                throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
+            }
+            //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+                return $type;
+            //}
         }
 
-        $type = $this->extendType($className, $type);
         $this->typeRegistry->registerType($type);
+
+        $this->extendType($className, $type);
+
+        $type->freeze();
 
         return $type;
     }
@@ -137,15 +147,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Extends a type using available type extenders.
      *
      * @param string $className
-     * @param ObjectType $type
-     * @return ObjectType
+     * @param MutableObjectType $type
      * @throws CannotMapTypeExceptionInterface
      */
-    private function extendType(string $className, ObjectType $type): ObjectType
+    private function extendType(string $className, MutableObjectType $type): void
     {
         $classes = [];
         do {
-            if ($this->typeMapper->canExtendTypeForClass($className, $type)) {
+            if ($this->typeMapper->canExtendTypeForClass($className, $type, $this)) {
                 $classes[] = $className;
             }
         } while ($className = get_parent_class($className));
@@ -153,10 +162,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         // Let's apply extenders from the most basic type.
         $classes = array_reverse($classes);
         foreach ($classes as $class) {
-            $type = $this->typeMapper->extendTypeForClass($class, $type, $this);
+            $this->typeMapper->extendTypeForClass($class, $type, $this);
         }
-
-        return $type;
     }
 
     /**
@@ -361,13 +368,25 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         }
         if ($this->typeMapper->canMapNameToType($typeName)) {
             $type = $this->typeMapper->mapNameToType($typeName, $this);
-            if (!$this->typeRegistry->hasType($typeName)) {
-                if ($type instanceof ObjectType) {
-                    if ($this->typeMapper->canExtendTypeForName($typeName, $type)) {
-                        $type = $this->typeMapper->extendTypeForName($typeName, $type, $this);
-                    }
-                    $this->typeRegistry->registerType($type);
+
+            if ($this->typeRegistry->hasType($typeName)) {
+                $cachedType = $this->typeRegistry->getType($typeName);
+                if ($cachedType !== $type) {
+                    throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
                 }
+                if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+                    return $type;
+                }
+            }
+
+            if (!$this->typeRegistry->hasType($typeName)) {
+                $this->typeRegistry->registerType($type);
+            }
+            if ($type instanceof ObjectType) {
+                if ($this->typeMapper->canExtendTypeForName($typeName, $type, $this)) {
+                    $type = $this->typeMapper->extendTypeForName($typeName, $type, $this);
+                }
+                $type->freeze();
             }
             return $type;
         }

@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use function is_array;
 use function iterator_to_array;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {
@@ -59,10 +60,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      * @param string $className
      * @param OutputType|null $subType
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
+     * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
@@ -157,13 +158,13 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      *
      * @param string $className
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @return bool
      */
-    public function canExtendTypeForClass(string $className, ObjectType $type): bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
-            if ($typeMapper->canExtendTypeForClass($className, $type)) {
+            if ($typeMapper->canExtendTypeForClass($className, $type, $recursiveTypeMapper)) {
                 return true;
             }
         }
@@ -174,32 +175,30 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Extends the existing GraphQL type that is mapped to $className.
      *
      * @param string $className
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
         foreach ($this->typeMappers as $typeMapper) {
-            if ($typeMapper->canExtendTypeForClass($className, $type)) {
-                $type = $typeMapper->extendTypeForClass($className, $type, $recursiveTypeMapper);
+            if ($typeMapper->canExtendTypeForClass($className, $type, $recursiveTypeMapper)) {
+                $typeMapper->extendTypeForClass($className, $type, $recursiveTypeMapper);
             }
         }
-        return $type;
     }
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      *
      * @param string $typeName
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @return bool
      */
-    public function canExtendTypeForName(string $typeName, ObjectType $type): bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
-            if ($typeMapper->canExtendTypeForName($typeName, $type)) {
+            if ($typeMapper->canExtendTypeForName($typeName, $type, $recursiveTypeMapper)) {
                 return true;
             }
         }
@@ -210,18 +209,16 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
      * @param string $typeName
-     * @param ObjectType $type
+     * @param MutableObjectType $type
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+    public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
         foreach ($this->typeMappers as $typeMapper) {
-            if ($typeMapper->canExtendTypeForName($typeName, $type)) {
-                $type = $typeMapper->extendTypeForName($typeName, $type, $recursiveTypeMapper);
+            if ($typeMapper->canExtendTypeForName($typeName, $type, $recursiveTypeMapper)) {
+                $typeMapper->extendTypeForName($typeName, $type, $recursiveTypeMapper);
             }
         }
-        return $type;
     }
 }

@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 /**
  * Maps a PHP class to a GraphQL type.
@@ -29,11 +30,11 @@ interface RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
-     * @param (OutputType&ObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param (OutputType&MutableObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      * @return ObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): ObjectType;
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).

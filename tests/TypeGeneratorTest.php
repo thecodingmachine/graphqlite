@@ -14,6 +14,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         $type = $typeGenerator->mapAnnotatedObject(new TypeFoo(), $this->getTypeMapper());
 
         $this->assertSame('TestObject', $type->name);
+        $type->freeze();
         $this->assertCount(1, $type->getFields());
     }
 

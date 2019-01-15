@@ -30,6 +30,7 @@ use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
 use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 
@@ -50,10 +51,10 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeResolver;
     private $typeRegistry;
 
-    protected function getTestObjectType()
+    protected function getTestObjectType(): MutableObjectType
     {
         if ($this->testObjectType === null) {
-            $this->testObjectType = new ObjectType([
+            $this->testObjectType = new MutableObjectType([
                 'name'    => 'TestObject',
                 'fields'  => [
                     'test'   => Type::string(),
@@ -63,10 +64,10 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->testObjectType;
     }
 
-    protected function getTestObjectType2()
+    protected function getTestObjectType2(): MutableObjectType
     {
         if ($this->testObjectType2 === null) {
-            $this->testObjectType2 = new ObjectType([
+            $this->testObjectType2 = new MutableObjectType([
                 'name'    => 'TestObject2',
                 'fields'  => [
                     'test'   => Type::string(),
@@ -76,7 +77,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->testObjectType2;
     }
 
-    protected function getInputTestObjectType()
+    protected function getInputTestObjectType(): InputObjectType
     {
         if ($this->inputTestObjectType === null) {
             $this->inputTestObjectType = new InputObjectType([
@@ -126,7 +127,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
-                public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -182,22 +183,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return $typeName === 'TestObject' || $typeName === 'TestObject2' || $typeName === 'TestObjectInput';
                 }
 
-                public function canExtendTypeForClass(string $className, ObjectType $type): bool
+                public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForClass(string $className, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
                 {
                     throw CannotMapTypeException::createForExtendType($className, $type);
                 }
 
-                public function canExtendTypeForName(string $typeName, ObjectType $type): bool
+                public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForName(string $typeName, ObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): ObjectType
+                public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
                 {
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
