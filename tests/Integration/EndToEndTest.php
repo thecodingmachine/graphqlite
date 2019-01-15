@@ -96,6 +96,7 @@ class EndToEndTest extends TestCase
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeTypeMapper([
                     $container->get(GlobTypeMapper::class),
+                    $container->get(GlobTypeMapper::class.'2'),
                     $container->get(PorpaginasTypeMapper::class),
                 ]);
             },
@@ -110,6 +111,17 @@ class EndToEndTest extends TestCase
                     new ArrayCache()
                     );
             },
+            GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
+                return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Models',
+                    $container->get(TypeGenerator::class),
+                    $container->get(InputTypeGenerator::class),
+                    $container->get(InputTypeUtils::class),
+                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(AnnotationReader::class),
+                    $container->get(NamingStrategyInterface::class),
+                    new ArrayCache()
+                );
+            },
             PorpaginasTypeMapper::class => function() {
                 return new PorpaginasTypeMapper();
             },
@@ -118,7 +130,8 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(FieldsBuilderFactory::class),
                     $container->get(NamingStrategyInterface::class),
-                    $container->get(TypeRegistry::class)
+                    $container->get(TypeRegistry::class),
+                    $container->get(BasicAutoWiringContainer::class)
                 );
             },
             TypeRegistry::class => function() {

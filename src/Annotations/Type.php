@@ -21,32 +21,52 @@ use TheCodingMachine\GraphQL\Controllers\MissingAnnotationException;
 class Type
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $class;
+
+    /**
+     * Is the class having the annotation a GraphQL type itself?
+     *
+     * @var bool
+     */
+    private $selfType = false;
 
     /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
     {
-        if (!isset($attributes['class'])) {
-            throw new BadMethodCallException('In annotation @Type, missing compulsory parameter "class".');
-        }
-        $this->class = $attributes['class'];
-        if (!class_exists($this->class)) {
-            throw ClassNotFoundException::couldNotFindClass($this->class);
+        if (isset($attributes['class'])) {
+            $this->setClass($attributes['class']);
+            if (!class_exists($this->class)) {
+                throw ClassNotFoundException::couldNotFindClass($this->class);
+            }
+        } else {
+            $this->selfType = true;
         }
     }
 
     /**
-     * Returns the name of the GraphQL query/mutation/field.
-     * If not specified, the name of the method should be used instead.
+     * Returns the fully qualified class name of the targeted class.
      *
      * @return string
      */
     public function getClass(): string
     {
-        return ltrim($this->class, '\\');
+        if ($this->class === null) {
+            throw new \RuntimeException('Empty class for @Type annotation. You MUST create the Type annotation object using the GraphQL-Controllers AnnotationReader');
+        }
+        return $this->class;
+    }
+
+    public function setClass(string $class): void
+    {
+        $this->class = ltrim($class, '\\');
+    }
+
+    public function isSelfType(): bool
+    {
+        return $this->selfType;
     }
 }

@@ -572,7 +572,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             $typeClassName = $map[$className];
         }
 
-        return $this->typeGenerator->mapAnnotatedObject($this->container->get($typeClassName), $recursiveTypeMapper);
+        return $this->typeGenerator->mapAnnotatedObject($typeClassName, $recursiveTypeMapper);
     }
 
     /**
@@ -653,7 +653,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         if (isset($typeClassName)) {
-            return $this->typeGenerator->mapAnnotatedObject($this->container->get($typeClassName), $recursiveTypeMapper);
+            return $this->typeGenerator->mapAnnotatedObject($typeClassName, $recursiveTypeMapper);
         }
         if (isset($factory)) {
             return $this->inputTypeGenerator->mapFactoryMethod($this->container->get($factory[0]), $factory[1], $recursiveTypeMapper);

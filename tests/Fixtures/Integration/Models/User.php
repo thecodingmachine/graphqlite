@@ -3,17 +3,18 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models;
 
+use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 
+/**
+ * @Type()
+ */
 class User extends Contact
 {
     /**
      * @var string
      */
     private $email;
-    /**
-     * @var User|null
-     */
-    private $manager;
 
     public function __construct(string $name, string $email)
     {
@@ -22,6 +23,7 @@ class User extends Contact
     }
 
     /**
+     * @Field(name="email")
      * @return string
      */
     public function getEmail(): string

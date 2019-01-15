@@ -168,7 +168,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $fields = $queryProvider->getFields($controller);
+        $fields = $queryProvider->getFields($controller, true);
 
         $this->assertCount(3, $fields);
 
@@ -198,7 +198,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache())
         );
 
-        $fields = $queryProvider->getFields(new TestType());
+        $fields = $queryProvider->getFields(new TestType(), true);
         $this->assertCount(4, $fields);
 
         $this->assertSame('testBool', $fields['testBool']->name);
@@ -222,7 +222,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache())
         );
 
-        $fields = $queryProvider->getFields(new TestType());
+        $fields = $queryProvider->getFields(new TestType(), true);
         $this->assertCount(4, $fields);
 
         $this->assertSame('testRight', $fields['testRight']->name);
@@ -234,7 +234,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(MissingAnnotationException::class);
-        $queryProvider->getFields(new TestTypeMissingAnnotation());
+        $queryProvider->getFields(new TestTypeMissingAnnotation(), true);
     }
 
     public function testSourceFieldDoesNotExists()
@@ -243,7 +243,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->expectException(FieldNotFoundException::class);
         $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::notExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
-        $queryProvider->getFields(new TestTypeMissingField());
+        $queryProvider->getFields(new TestTypeMissingField(), true);
     }
 
     public function testSourceFieldHasMissingReturnType()
@@ -252,13 +252,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->expectException(TypeMappingException::class);
         $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
-        $queryProvider->getFields(new TestTypeMissingReturnType());
+        $queryProvider->getFields(new TestTypeMissingReturnType(), true);
     }
 
     public function testSourceFieldIsId()
     {
         $queryProvider = $this->buildFieldsBuilder();
-        $fields = $queryProvider->getFields(new TestTypeId());
+        $fields = $queryProvider->getFields(new TestTypeId(), true);
         $this->assertCount(1, $fields);
 
         $this->assertSame('test', $fields['test']->name);
@@ -277,7 +277,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache())
         );
-        $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface());
+        $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);
 
         $this->assertSame('test', $fields['test']->name);
@@ -436,7 +436,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $fields = $queryProvider->getFields($controller);
+        $fields = $queryProvider->getFields($controller, true);
 
         $this->assertCount(1, $fields);
 
