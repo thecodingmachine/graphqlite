@@ -2,8 +2,8 @@ language: php
 cache:
   directories:
     - $HOME/.composer/cache
-env:
-  matrix:
+matrix:
+  include:
     - php: 7.3
       env: PREFER_LOWEST=""
     - php: 7.2
