@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class TypeRegistryTest extends TestCase
 {
@@ -52,4 +53,26 @@ class TypeRegistryTest extends TestCase
         $this->assertFalse($registry->hasType('Bar'));
 
     }
+
+    public function testGetMutableObjectType()
+    {
+        $type = new MutableObjectType([
+            'name' => 'Foo',
+            'fields' => function() {return [];}
+        ]);
+        $type2 = new ObjectType([
+            'name' => 'FooBar',
+            'fields' => function() {return [];}
+        ]);
+
+        $registry = new TypeRegistry();
+        $registry->registerType($type);
+        $registry->registerType($type2);
+
+        $this->assertSame($type, $registry->getMutableObjectType('Foo'));
+
+        $this->expectException(GraphQLException::class);
+        $this->assertSame($type, $registry->getMutableObjectType('FooBar'));
+    }
+
 }

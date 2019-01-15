@@ -3,8 +3,6 @@
 
 namespace TheCodingMachine\GraphQL\Controllers\Types;
 
-use GraphQL\Type\Definition\ObjectType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\FieldsBuilderFactory;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
 

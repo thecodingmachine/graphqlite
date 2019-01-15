@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQL\Controllers\NamingStrategyInterface;
 use TheCodingMachine\GraphQL\Controllers\TypeRegistry;
 use TheCodingMachine\GraphQL\Controllers\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeAnnotatedObjectType;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.
@@ -44,6 +45,11 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * @var array<string,OutputType&Type>
      */
     private $interfaces = [];
+
+    /**
+     * @var array<string,MutableObjectType> Key: FQCN
+     */
+    private $classToTypeCache = [];
 
     /**
      * @var NamingStrategyInterface
@@ -101,6 +107,10 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
+        if (isset($this->classToTypeCache[$className])) {
+            return $this->classToTypeCache[$className];
+        }
+
         $closestClassName = $this->findClosestMatchingParent($className);
         if ($closestClassName === null) {
             throw CannotMapTypeException::createForType($className);
@@ -119,6 +129,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         }
 
         $this->typeRegistry->registerType($type);
+        $this->classToTypeCache[$className] = $type;
 
         $this->extendType($className, $type);
 
