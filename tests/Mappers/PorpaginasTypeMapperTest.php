@@ -75,4 +75,13 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
 
         $this->assertFalse($mapper->canMapClassToInputType('foo'));
     }
+
+    public function testMapNameToType()
+    {
+        $mapper = new PorpaginasTypeMapper();
+
+        $type = $mapper->mapNameToType('PorpaginasResult_TestObject', $this->getTypeMapper());
+
+        $this->assertSame('PorpaginasResult_TestObject', $type->name);
+    }
 }
