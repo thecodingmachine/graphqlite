@@ -84,6 +84,22 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->typeMapper->mapNameToType('notExists', $this->getTypeMapper());
     }
 
+    public function testException4()
+    {
+        $type = new MutableObjectType(['name'=>'foo']);
+
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $this->typeMapper->extendTypeForClass('foo', $type, $this->getTypeMapper());
+    }
+
+    public function testException5()
+    {
+        $type = new MutableObjectType(['name'=>'foo']);
+
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $this->typeMapper->extendTypeForName('foo', $type, $this->getTypeMapper());
+    }
+
     public function testUnsupportedSubtypes(): void
     {
         $this->expectException(CannotMapTypeException::class);

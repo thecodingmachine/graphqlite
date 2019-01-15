@@ -80,7 +80,7 @@ class AnnotationReader
             /** @var ExtendType|null $extendType */
             $extendType = $this->getClassAnnotation($refClass, ExtendType::class);
         } catch (ClassNotFoundException $e) {
-            throw ClassNotFoundException::wrapException($e, $refClass->getName());
+            throw ClassNotFoundException::wrapExceptionForExtendTag($e, $refClass->getName());
         }
         return $extendType;
     }

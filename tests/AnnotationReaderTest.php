@@ -8,9 +8,11 @@ use PHPUnit\Framework\TestCase;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use ReflectionClass;
 use ReflectionMethod;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
+use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
 
 class AnnotationReaderTest extends TestCase
@@ -107,5 +109,14 @@ class AnnotationReaderTest extends TestCase
 
         $this->expectException(AnnotationException::class);
         $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidTypeAnnotation::class, 'testMethod'), Field::class);
+    }
+
+    public function testExtendAnnotationException()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
+
+        $this->expectException(ClassNotFoundException::class);
+        $this->expectExceptionMessage("Could not autoload class 'foo' defined in @ExtendType annotation of class 'TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
+        $annotationReader->getExtendTypeAnnotation(new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class));
     }
 }

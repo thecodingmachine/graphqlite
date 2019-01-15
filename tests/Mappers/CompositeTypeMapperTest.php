@@ -82,7 +82,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             {
                 switch ($typeName) {
                     case 'TestObject':
-                        return new ObjectType([
+                        return new MutableObjectType([
                             'name'    => 'TestObject',
                             'fields'  => [
                                 'test'   => Type::string(),
@@ -116,12 +116,17 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
 
             public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
             {
-                return false;
+                return true;
             }
 
             public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
             {
-                throw CannotMapTypeException::createForExtendName($typeName, $type);
+                $type->addFields(function() {
+                    return [
+                        'test2' => Type::int()
+                    ];
+                });
+                //throw CannotMapTypeException::createForExtendName($typeName, $type);
             }
         };
 
@@ -141,6 +146,23 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapNameToType('TestObject', $this->getTypeMapper()));
         $this->assertTrue($this->composite->canMapNameToType('TestObject'));
         $this->assertFalse($this->composite->canMapNameToType('NotExists'));
+
+
+        $type = new MutableObjectType([
+            'name'    => 'TestObject',
+            'fields'  => [
+                'test'   => Type::string(),
+            ],
+        ]);
+
+        $this->assertFalse($this->composite->canExtendTypeForClass('foo', $type, $this->getTypeMapper()));
+        $this->assertTrue($this->composite->canExtendTypeForName('foo', $type, $this->getTypeMapper()));
+
+
+        $this->composite->extendTypeForName('foo', $type, $this->getTypeMapper());
+
+        $type->freeze();
+        $this->assertCount(2, $type->getFields());
     }
 
     public function testException1(): void

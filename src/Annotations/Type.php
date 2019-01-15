@@ -23,7 +23,7 @@ class Type
     /**
      * @var string
      */
-    private $className;
+    private $class;
 
     /**
      * @param mixed[] $attributes
@@ -33,9 +33,9 @@ class Type
         if (!isset($attributes['class'])) {
             throw new BadMethodCallException('In annotation @Type, missing compulsory parameter "class".');
         }
-        $this->className = $attributes['class'];
-        if (!class_exists($this->className)) {
-            throw ClassNotFoundException::couldNotFindClass($this->className);
+        $this->class = $attributes['class'];
+        if (!class_exists($this->class)) {
+            throw ClassNotFoundException::couldNotFindClass($this->class);
         }
     }
 
@@ -47,6 +47,6 @@ class Type
      */
     public function getClass(): string
     {
-        return ltrim($this->className, '\\');
+        return ltrim($this->class, '\\');
     }
 }

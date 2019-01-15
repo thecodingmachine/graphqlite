@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\StringType;
 use Porpaginas\Arrays\ArrayResult;
 use RuntimeException;
 use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -48,6 +49,24 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeExceptionInterface::class);
         $mapper->mapClassToInputType('foo', $this->getTypeMapper());
+    }
+
+    public function testException6()
+    {
+        $mapper = new PorpaginasTypeMapper();
+        $type = new MutableObjectType(['name'=>'foo']);
+
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $mapper->extendTypeForClass('foo', $type, $this->getTypeMapper());
+    }
+
+    public function testException7()
+    {
+        $mapper = new PorpaginasTypeMapper();
+        $type = new MutableObjectType(['name'=>'foo']);
+
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $mapper->extendTypeForName('foo', $type, $this->getTypeMapper());
     }
 
     public function testCanMapClassToInputType()

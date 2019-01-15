@@ -17,4 +17,9 @@ class ClassNotFoundException extends InvalidArgumentException
     {
         return new self($e->getMessage()." defined in @Type annotation of class '$className'");
     }
+
+    public static function wrapExceptionForExtendTag(self $e, string $className): self
+    {
+        return new self($e->getMessage()." defined in @ExtendType annotation of class '$className'");
+    }
 }
