@@ -20,7 +20,7 @@ class MutableObjectType extends ObjectType
     public const STATUS_FROZEN = 'frozen';
 
     /**
-     * @var bool
+     * @var string
      */
     private $status;
 
@@ -34,11 +34,6 @@ class MutableObjectType extends ObjectType
      */
     private $finalFields;
 
-    /**
-     * @param object $annotatedObject
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @param Type $typeField
-     */
     public function __construct(array $config)
     {
         $this->status = self::STATUS_PENDING;

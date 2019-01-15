@@ -374,7 +374,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 if ($cachedType !== $type) {
                     throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
                 }
-                if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+                if ($cachedType instanceof MutableObjectType && $cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
                     return $type;
                 }
             }
@@ -382,9 +382,9 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             if (!$this->typeRegistry->hasType($typeName)) {
                 $this->typeRegistry->registerType($type);
             }
-            if ($type instanceof ObjectType) {
+            if ($type instanceof MutableObjectType) {
                 if ($this->typeMapper->canExtendTypeForName($typeName, $type, $this)) {
-                    $type = $this->typeMapper->extendTypeForName($typeName, $type, $this);
+                    $this->typeMapper->extendTypeForName($typeName, $type, $this);
                 }
                 $type->freeze();
             }

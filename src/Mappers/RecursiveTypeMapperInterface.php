@@ -31,7 +31,7 @@ interface RecursiveTypeMapperInterface
      *
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
      * @param (OutputType&MutableObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
-     * @return ObjectType
+     * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType;

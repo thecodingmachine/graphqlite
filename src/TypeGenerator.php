@@ -48,10 +48,10 @@ class TypeGenerator
     /**
      * @param object $annotatedObject An object with a Type annotation.
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
+     * @return MutableObjectType
      * @throws \ReflectionException
      */
-    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): TypeAnnotatedObjectType
+    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
     {
         $refTypeClass = new \ReflectionClass($annotatedObject);
 
@@ -64,7 +64,7 @@ class TypeGenerator
         $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
 
         if ($this->typeRegistry->hasType($typeName)) {
-            return $this->typeRegistry->getObjectType($typeName);
+            return $this->typeRegistry->getMutableObjectType($typeName);
         }
 
         return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilderFactory, $recursiveTypeMapper);

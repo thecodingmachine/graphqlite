@@ -20,7 +20,7 @@ use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 class PorpaginasTypeMapper implements TypeMapperInterface
 {
     /**
-     * @var array<string, ObjectType>
+     * @var array<string, MutableObjectType>
      */
     private $cache = [];
 
@@ -41,7 +41,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * @param string $className The exact class name to look for (this function does not look into parent classes).
      * @param OutputType|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return ObjectType
+     * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType

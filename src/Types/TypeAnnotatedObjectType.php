@@ -18,11 +18,6 @@ class TypeAnnotatedObjectType extends MutableObjectType
      */
     private $className;
 
-    /**
-     * @param object $annotatedObject
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @param Type $typeField
-     */
     public function __construct(string $className, array $config)
     {
         $this->className = $className;

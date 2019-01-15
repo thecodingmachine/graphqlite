@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 /**
  * A cache used to store already FULLY COMPUTED types.
@@ -15,7 +16,7 @@ use GraphQL\Type\Definition\Type;
 class TypeRegistry
 {
     /**
-     * @var array<string,NamedType&Type&(ObjectType|InterfaceType)>
+     * @var array<string,NamedType&Type&(MutableObjectType|InterfaceType)>
      */
     private $outputTypes = [];
 
@@ -51,11 +52,11 @@ class TypeRegistry
         return $this->outputTypes[$typeName];
     }
 
-    public function getObjectType(string $typeName): ObjectType
+    public function getMutableObjectType(string $typeName): MutableObjectType
     {
         $type = $this->getType($typeName);
-        if (!$type instanceof ObjectType) {
-            throw new GraphQLException('Expected GraphQL type "'.$typeName.'" to be an ObjectType. Got a '.get_class($type));
+        if (!$type instanceof MutableObjectType) {
+            throw new GraphQLException('Expected GraphQL type "'.$typeName.'" to be an MutableObjectType. Got a '.get_class($type));
         }
         return $type;
     }
