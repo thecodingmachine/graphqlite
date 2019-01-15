@@ -640,15 +640,22 @@ final class GlobTypeMapper implements TypeMapperInterface
         if ($typeClassName === null) {
             $factory = $this->getFactoryFromCacheByGraphQLInputTypeName($typeName);
             if ($factory === null) {
-                $this->getMaps();
+                $mapNameToType = $this->getMapNameToType();
+                if (isset($mapNameToType[$typeName])) {
+                    $typeClassName = $mapNameToType[$typeName];
+                } else {
+                    $mapInputNameToFactory = $this->getMapInputNameToFactory();
+                    if (isset($mapInputNameToFactory[$typeName])) {
+                        $factory = $mapInputNameToFactory[$typeName];
+                    }
+                }
             }
         }
 
-        if (isset($this->mapNameToType[$typeName])) {
-            return $this->typeGenerator->mapAnnotatedObject($this->container->get($this->mapNameToType[$typeName]), $recursiveTypeMapper);
+        if (isset($typeClassName)) {
+            return $this->typeGenerator->mapAnnotatedObject($this->container->get($typeClassName), $recursiveTypeMapper);
         }
-        if (isset($this->mapInputNameToFactory[$typeName])) {
-            $factory = $this->mapInputNameToFactory[$typeName];
+        if (isset($factory)) {
             return $this->inputTypeGenerator->mapFactoryMethod($this->container->get($factory[0]), $factory[1], $recursiveTypeMapper);
         }
 
