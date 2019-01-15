@@ -142,7 +142,7 @@ class TypeGenerator
                 }*/
 
                 $fieldProvider = $this->fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
-                return $fieldProvider->getFields($annotatedObject, true);
+                return $fieldProvider->getFields($annotatedObject);
                 /*if ($parentType !== null) {
                     $fields = $parentType->getFields() + $fields;
                 }*/
