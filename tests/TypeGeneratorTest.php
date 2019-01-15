@@ -2,16 +2,28 @@
 
 namespace TheCodingMachine\GraphQL\Controllers;
 
+use Mouf\Picotainer\Picotainer;
+use stdClass;
 use TheCodingMachine\GraphQL\Controllers\Fixtures\TypeFoo;
 use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
 
 class TypeGeneratorTest extends AbstractQueryProviderTest
 {
+    private $container;
+
+    public function setUp()
+    {
+        $this->container = new Picotainer([
+            TypeFoo::class => function() { return new TypeFoo(); },
+            stdClass::class => function() { return new stdClass(); }
+        ]);
+    }
+
     public function testNameAndFields()
     {
         $typeGenerator = $this->getTypeGenerator();
 
-        $type = $typeGenerator->mapAnnotatedObject(new TypeFoo(), $this->getTypeMapper());
+        $type = $typeGenerator->mapAnnotatedObject(TypeFoo::class, $this->getTypeMapper(), $this->container);
 
         $this->assertSame('TestObject', $type->name);
         $type->freeze();
@@ -23,7 +35,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         $typeGenerator = $this->getTypeGenerator();
 
         $this->expectException(MissingAnnotationException::class);
-        $typeGenerator->mapAnnotatedObject(new \stdClass(), $this->getTypeMapper());
+        $typeGenerator->mapAnnotatedObject(stdClass::class, $this->getTypeMapper(), $this->container);
     }
 
     public function testextendAnnotatedObjectException()
@@ -36,6 +48,6 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         ]);
 
         $this->expectException(MissingAnnotationException::class);
-        $typeGenerator->extendAnnotatedObject(new \stdClass(), $type, $this->getTypeMapper());
+        $typeGenerator->extendAnnotatedObject(new stdClass(), $type, $this->getTypeMapper());
     }
 }

@@ -37,7 +37,11 @@ class TypeAnnotatedObjectType extends MutableObjectType
                 }
 
                 $fieldProvider = $fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
-                $fields = $fieldProvider->getFields($annotatedObject);
+                if ($annotatedObject !== null) {
+                    $fields = $fieldProvider->getFields($annotatedObject);
+                } else {
+                    $fields = $fieldProvider->getSelfFields($className);
+                }
                 if ($parentType !== null) {
                     $fields = $parentType->getFields() + $fields;
                 }

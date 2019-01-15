@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use function get_parent_class;
 use GraphQL\Type\Definition\ObjectType;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
@@ -33,27 +34,33 @@ class TypeGenerator
      * @var TypeRegistry
      */
     private $typeRegistry;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     public function __construct(AnnotationReader $annotationReader,
                                 FieldsBuilderFactory $fieldsBuilderFactory,
                                 NamingStrategyInterface $namingStrategy,
-                                TypeRegistry $typeRegistry)
+                                TypeRegistry $typeRegistry,
+                                ContainerInterface $container)
     {
         $this->annotationReader = $annotationReader;
         $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->namingStrategy = $namingStrategy;
         $this->typeRegistry = $typeRegistry;
+        $this->container = $container;
     }
 
     /**
-     * @param object $annotatedObject An object with a Type annotation.
+     * @param string $annotatedObjectClassName The FQCN of an object with a Type annotation.
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return MutableObjectType
      * @throws \ReflectionException
      */
-    public function mapAnnotatedObject($annotatedObject, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
+    public function mapAnnotatedObject(string $annotatedObjectClassName, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
     {
-        $refTypeClass = new \ReflectionClass($annotatedObject);
+        $refTypeClass = new \ReflectionClass($annotatedObjectClassName);
 
         $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
 
@@ -65,6 +72,12 @@ class TypeGenerator
 
         if ($this->typeRegistry->hasType($typeName)) {
             return $this->typeRegistry->getMutableObjectType($typeName);
+        }
+
+        if (!$typeField->isSelfType()) {
+            $annotatedObject = $this->container->get($annotatedObjectClassName);
+        } else {
+            $annotatedObject = null;
         }
 
         return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilderFactory, $recursiveTypeMapper);
@@ -129,7 +142,7 @@ class TypeGenerator
                 }*/
 
                 $fieldProvider = $this->fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
-                return $fieldProvider->getFields($annotatedObject);
+                return $fieldProvider->getFields($annotatedObject, true);
                 /*if ($parentType !== null) {
                     $fields = $parentType->getFields() + $fields;
                 }*/

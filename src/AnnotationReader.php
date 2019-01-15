@@ -68,6 +68,9 @@ class AnnotationReader
         try {
             /** @var Type|null $type */
             $type = $this->getClassAnnotation($refClass, Type::class);
+            if ($type !== null && $type->isSelfType()) {
+                $type->setClass($refClass->getName());
+            }
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapException($e, $refClass->getName());
         }

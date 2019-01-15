@@ -146,6 +146,23 @@ class FieldsBuilder
     }
 
     /**
+     * Track Field annotation in a self targeted type
+     *
+     * @return array<string, QueryField> QueryField indexed by name.
+     */
+    public function getSelfFields(string $className): array
+    {
+        $fieldAnnotations = $this->getFieldsByAnnotations(null, Annotations\Field::class, false, $className);
+
+        $fields = [];
+        foreach ($fieldAnnotations as $field) {
+            $fields[$field->name] = $field;
+        }
+
+        return $fields;
+    }
+
+    /**
      * @param ReflectionMethod $refMethod A method annotated with a Factory annotation.
      * @return array<string, array<int, mixed>> Returns an array of fields as accepted by the InputObjectType constructor.
      */
@@ -164,14 +181,18 @@ class FieldsBuilder
     /**
      * @param object $controller
      * @param string $annotationName
-     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field, false for @Query and @Mutation
+     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
      * @return QueryField[]
      * @throws CannotMapTypeExceptionInterface
      * @throws \ReflectionException
      */
-    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource): array
+    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource, ?string $sourceClassName = null): array
     {
-        $refClass = new \ReflectionClass($controller);
+        if ($sourceClassName !== null) {
+            $refClass = new \ReflectionClass($sourceClassName);
+        } else {
+            $refClass = new \ReflectionClass($controller);
+        }
 
         $queryList = [];
 
@@ -227,7 +248,11 @@ class FieldsBuilder
                     }
                 }
 
-                $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
+                if ($sourceClassName !== null) {
+                    $queryList[] = new QueryField($name, $type, $args, null, $callable[1], $this->hydrator, $docBlockComment, $injectSource);
+                } else {
+                    $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
+                }
             }
         }
 
