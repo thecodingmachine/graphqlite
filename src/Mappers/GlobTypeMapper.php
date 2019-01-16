@@ -113,11 +113,15 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var array<string,ReflectionClass>
      */
     private $classes;
+    /**
+     * @var bool
+     */
+    private $recursive;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategy $namingStrategy, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategy $namingStrategy, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->typeGenerator = $typeGenerator;
@@ -129,6 +133,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->mapTtl = $mapTtl;
         $this->inputTypeGenerator = $inputTypeGenerator;
         $this->inputTypeUtils = $inputTypeUtils;
+        $this->recursive = $recursive;
     }
 
     /**
@@ -241,7 +246,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         if ($this->classes === null) {
             $this->classes = [];
-            $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true));
+            $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
             $classes = $explorer->getClasses();
             foreach ($classes as $className) {
                 if (!\class_exists($className)) {
