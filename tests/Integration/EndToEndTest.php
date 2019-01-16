@@ -44,6 +44,7 @@ use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
 use TheCodingMachine\GraphQL\Controllers\TypeRegistry;
 use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
+use function var_dump;
 use function var_export;
 
 class EndToEndTest extends TestCase
@@ -394,5 +395,68 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);    }
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    /**
+     * This tests is used to be sure that the PorpaginasIterator types are not mixed up when cached (because it has a subtype)
+     */
+    public function testEndToEnd2Iterators()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            getContactsIterator {
+                items(limit: 1, offset: 1) {
+                    name
+                    uppercaseName
+                    ... on User {
+                        email
+                    }
+                }
+                count
+            }
+            
+            getProducts {
+                items {
+                    name
+                    price
+                }
+                count            
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'getContactsIterator' => [
+                'items' => [
+                    [
+                        'name' => 'Bill',
+                        'uppercaseName' => 'BILL',
+                        'email' => 'bill@example.com'
+                    ]
+                ],
+                'count' => 2
+            ],
+            'getProducts' => [
+                'items' => [
+                    [
+                        'name' => 'Foo',
+                        'price' => 42.0,
+                    ]
+                ],
+                'count' => 1
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+    }
 }
