@@ -49,12 +49,21 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @var RecursiveTypeMapperInterface
      */
     private $recursiveTypeMapper;
+    /**
+     * @var bool
+     */
+    private $recursive;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
+     * @param FieldsBuilderFactory $controllerQueryProviderFactory
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @param ContainerInterface $container The container we will fetch controllers from.
+     * @param CacheInterface $cache
+     * @param int|null $cacheTtl
+     * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null)
+    public function __construct(string $namespace, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->container = $container;
@@ -62,6 +71,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $this->cacheTtl = $cacheTtl;
         $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->recursive = $recursive;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -95,7 +105,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function buildInstancesList(): array
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true));
+        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
         $classes = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
