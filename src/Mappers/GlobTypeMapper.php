@@ -264,6 +264,11 @@ final class GlobTypeMapper implements TypeMapperInterface
 
     private function buildMap(): void
     {
+        $this->mapClassToTypeArray = [];
+        $this->mapNameToType = [];
+        $this->mapClassToFactory = [];
+        $this->mapInputNameToFactory = [];
+
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
             $type = $this->annotationReader->getTypeAnnotation($refClass);
