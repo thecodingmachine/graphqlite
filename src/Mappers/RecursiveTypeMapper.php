@@ -196,19 +196,23 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         if ($closestClassName === null) {
             throw CannotMapTypeException::createForType($className);
         }
-        if (!isset($this->interfaces[$closestClassName])) {
+        $cacheKey = $closestClassName;
+        if ($subType !== null) {
+            $cacheKey .= '__`__'.$subType->name;
+        }
+        if (!isset($this->interfaces[$cacheKey])) {
             $objectType = $this->mapClassToType($className, $subType);
 
             $supportedClasses = $this->getClassTree();
             if (isset($supportedClasses[$closestClassName]) && !empty($supportedClasses[$closestClassName]->getChildren())) {
                 // Cast as an interface
-                $this->interfaces[$closestClassName] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
-                $this->typeRegistry->registerType($this->interfaces[$closestClassName]);
+                $this->interfaces[$cacheKey] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
+                $this->typeRegistry->registerType($this->interfaces[$cacheKey]);
             } else {
-                $this->interfaces[$closestClassName] = $objectType;
+                $this->interfaces[$cacheKey] = $objectType;
             }
         }
-        return $this->interfaces[$closestClassName];
+        return $this->interfaces[$cacheKey];
     }
 
     /**

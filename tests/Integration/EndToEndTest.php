@@ -436,8 +436,6 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        var_dump($result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS));
-
         $this->assertSame([
             'getContactsIterator' => [
                 'items' => [
@@ -448,6 +446,15 @@ class EndToEndTest extends TestCase
                     ]
                 ],
                 'count' => 2
+            ],
+            'getProducts' => [
+                'items' => [
+                    [
+                        'name' => 'Foo',
+                        'price' => 42.0,
+                    ]
+                ],
+                'count' => 1
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
 

@@ -35,7 +35,7 @@ class Product
     }
 
     /**
-     * @Field()
+     * @Field(name="name")
      * @return string
      */
     public function getName(): string
@@ -44,7 +44,7 @@ class Product
     }
 
     /**
-     * @Field()
+     * @Field(name="price")
      * @return float
      */
     public function getPrice(): float
