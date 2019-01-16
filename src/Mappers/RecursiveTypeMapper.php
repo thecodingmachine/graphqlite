@@ -107,8 +107,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
-        if (isset($this->classToTypeCache[$className])) {
-            return $this->classToTypeCache[$className];
+        $cacheKey = $className;
+        if ($subType !== null) {
+            $cacheKey .= '__`__'.$subType->name;
+        }
+        if (isset($this->classToTypeCache[$cacheKey])) {
+            return $this->classToTypeCache[$cacheKey];
         }
 
         $closestClassName = $this->findClosestMatchingParent($className);
@@ -129,7 +133,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         }
 
         $this->typeRegistry->registerType($type);
-        $this->classToTypeCache[$className] = $type;
+        $this->classToTypeCache[$cacheKey] = $type;
 
         $this->extendType($className, $type);
 
