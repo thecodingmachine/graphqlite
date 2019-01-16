@@ -23,7 +23,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapper()
     {
         $container = new Picotainer([
-            FooType::class => function() {
+            FooType::class => function () {
                 return new FooType();
             }
         ]);
@@ -54,7 +54,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapperDuplicateTypesException()
     {
         $container = new Picotainer([
-            TestType::class => function() {
+            TestType::class => function () {
                 return new TestType();
             }
         ]);
@@ -87,7 +87,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapperClassNotFoundException()
     {
         $container = new Picotainer([
-            TestType::class => function() {
+            TestType::class => function () {
                 return new TestType();
             }
         ]);
@@ -104,7 +104,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapperNameNotFoundException()
     {
         $container = new Picotainer([
-            FooType::class => function() {
+            FooType::class => function () {
                 return new FooType();
             }
         ]);
@@ -120,10 +120,10 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapperInputType()
     {
         $container = new Picotainer([
-            FooType::class => function() {
+            FooType::class => function () {
                 return new FooType();
             },
-            TestFactory::class => function() {
+            TestFactory::class => function () {
                 return new TestFactory();
             }
         ]);
@@ -154,10 +154,10 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapperExtend()
     {
         $container = new Picotainer([
-            FooType::class => function() {
+            FooType::class => function () {
                 return new FooType();
             },
-            FooExtendType::class => function() {
+            FooExtendType::class => function () {
                 return new FooExtendType();
             }
         ]);
@@ -184,5 +184,19 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->extendTypeForClass(\stdClass::class, $type, $this->getTypeMapper());
+    }
+
+    public function testEmptyGlobTypeMapper()
+    {
+        $container = new Picotainer([]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Controllers', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $cache);
+
+        $this->assertSame([], $mapper->getSupportedClasses());
     }
 }
