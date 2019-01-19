@@ -14,3 +14,35 @@
 
 @media only screen and (min-width: 1500px) {
 }
+
+.alert {
+    padding: 20px;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.alert a {
+    color: #ddd;
+    font-weight: bold;
+}
+
+.alert a:hover {
+    color: #bbb;
+}
+
+
+.alert.alert-success {
+    background-color: #4CAF50;
+}
+
+.alert.alert-info {
+    background-color: #2196F3;
+}
+
+.alert.alert-warning {
+    background-color: #ff9800;
+}
+
+.alert.alert-error {
+    background-color: #f44336;
+}
