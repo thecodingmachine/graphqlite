@@ -259,7 +259,8 @@ abstract class AbstractQueryProviderTest extends TestCase
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache())
+            new CachedDocBlockFactory(new ArrayCache()),
+            new NamingStrategy()
         );
     }
 
@@ -304,7 +305,8 @@ abstract class AbstractQueryProviderTest extends TestCase
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService(),
                 $this->getTypeResolver(),
-                new CachedDocBlockFactory(new ArrayCache()));
+                new CachedDocBlockFactory(new ArrayCache()),
+                new NamingStrategy());
         }
         return $this->controllerQueryProviderFactory;
     }

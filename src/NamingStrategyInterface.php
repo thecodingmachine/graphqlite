@@ -19,4 +19,9 @@ interface NamingStrategyInterface
     public function getOutputTypeName(string $typeClassName, Type $type): string;
 
     public function getInputTypeName(string $className, Factory $factory): string;
+
+    /**
+     * Returns the name of a GraphQL field from the name of the annotated method.
+     */
+    public function getFieldNameFromMethodName(string $methodName): string;
 }

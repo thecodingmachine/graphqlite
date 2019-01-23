@@ -195,7 +195,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             },
             new VoidAuthorizationService(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache())
+            new CachedDocBlockFactory(new ArrayCache()),
+            new NamingStrategy()
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -219,7 +220,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
                 }
             },
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache())
+            new CachedDocBlockFactory(new ArrayCache()),
+            new NamingStrategy()
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -275,7 +277,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache())
+            new CachedDocBlockFactory(new ArrayCache()),
+            new NamingStrategy()
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);

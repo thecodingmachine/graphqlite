@@ -4,6 +4,10 @@
 namespace TheCodingMachine\GraphQL\Controllers;
 
 
+use function lcfirst;
+use function strlen;
+use function strpos;
+use function substr;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
 use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
 
@@ -48,5 +52,20 @@ class NamingStrategy implements NamingStrategyInterface
             $className = substr($className, $prevPos + 1);
         }
         return $className.'Input';
+    }
+
+    /**
+     * Returns the name of a GraphQL field from the name of the annotated method.
+     */
+    public function getFieldNameFromMethodName(string $methodName): string
+    {
+        // Let's remove any "get" or "is".
+        if (strpos($methodName, 'get') === 0 && strlen($methodName) > 3) {
+            return lcfirst(substr($methodName, 3));
+        }
+        if (strpos($methodName, 'is') === 0 && strlen($methodName) > 2) {
+            return lcfirst(substr($methodName, 2));
+        }
+        return $methodName;
     }
 }

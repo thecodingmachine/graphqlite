@@ -82,18 +82,15 @@ class FieldsBuilder
      * @var TypeResolver
      */
     private $typeResolver;
-
     /**
-     * @param AnnotationReader $annotationReader
-     * @param RecursiveTypeMapperInterface $typeMapper
-     * @param HydratorInterface $hydrator
-     * @param AuthenticationServiceInterface $authenticationService
-     * @param AuthorizationServiceInterface $authorizationService
+     * @var NamingStrategyInterface
      */
+    private $namingStrategy;
+
     public function __construct(AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
-                                CachedDocBlockFactory $cachedDocBlockFactory)
+                                CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy)
     {
         $this->annotationReader = $annotationReader;
         $this->typeMapper = $typeMapper;
@@ -102,6 +99,7 @@ class FieldsBuilder
         $this->authorizationService = $authorizationService;
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
+        $this->namingStrategy = $namingStrategy;
     }
 
     // TODO: Add RecursiveTypeMapper in the list of parameters for getQueries and REMOVE the ControllerQueryProviderFactory.
@@ -217,7 +215,7 @@ class FieldsBuilder
                 $docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
                 $methodName = $refMethod->getName();
-                $name = $queryAnnotation->getName() ?: $methodName;
+                $name = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
                 $parameters = $refMethod->getParameters();
                 if ($injectSource === true) {

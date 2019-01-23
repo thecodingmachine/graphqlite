@@ -44,7 +44,7 @@ class Product
     }
 
     /**
-     * @Field(name="price")
+     * @Field()
      * @return float
      */
     public function getPrice(): float
