@@ -60,21 +60,14 @@ You can now perform a test query and get the answer:
 <td style="width:50%">
 <strong>Query</strong>
 <pre><code>{
-  products {
-    name
-  }
+  hello(name: "David")
 }</code></pre>
 </td>
 <td style="width:50%">
 <strong>Answer</strong>
 <pre><code class="hljs css language-json">{
   "data": {
-    "products": [
-      {
-        "name": "Mouf"
-      }
-    ]
-  }
+    "hello": "Hello David"
 }</code></pre>
 </td>
 </tr>
@@ -108,7 +101,6 @@ Let's assume you want to return a product:
 
 ```php
 use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
 
 class ProductController
 {
@@ -132,10 +124,82 @@ This error tells you that your class `Product` is not a valid GraphQL type. To c
 an annotation to this class.
 
 ```php
-TODO
+namespace App\Entities;
+
+use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
+use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+
+/**
+ * @Type()
+ */
+class Product
+{
+    // ...
+
+    /**
+     * @Field()
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @Field()
+     */
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+}
 ```
 
-TODO @Type, @Field
+The `@Type` annotation is used to inform GraphQL-Controllers that the `Product` class is a GraphQL type.
+The `@Field` annotation is used to define the GraphQL fields.
+
+<div class="alert alert-info"><strong>Heads up!</strong> The <code>@Field</code> annotation must be put on a 
+<strong>public method</strong>.
+You cannot annotate a property (unlike Doctrine ORM where you annotate only properties).
+</div>
+
+
+If you are already used to GraphQL, the "[Type language](https://graphql.org/learn/schema/#type-language)"
+representation for this type is:
+
+```graphql
+Type Product {
+    name: String!
+    price: Float
+}
+```
+
+We are now ready to run our test query:
+
+<table style="width:100%; display: table">
+<tr>
+<td style="width:50%">
+<strong>Query</strong>
+<pre><code>{
+  products {
+    name
+  }
+}</code></pre>
+</td>
+<td style="width:50%">
+<strong>Answer</strong>
+<pre><code class="hljs css language-json">{
+  "data": {
+    "products": [
+      {
+        "name": "Mouf"
+      }
+    ]
+  }
+}</code></pre>
+</td>
+</tr>
+</table>
+
 
 <div class="alert alert-info"><strong>Heads up!</strong> If you are used to 
 <a href="https://en.wikipedia.org/wiki/Domain-driven_design">Domain driven design</a>, you probably
@@ -146,14 +210,21 @@ directly (maybe because it is part of a third party library), there is another w
 the domain class. We will explore that in the next chapter.
 </div>
 
+## Working with annotations
 
+If you have never worked with annotations before, here are a few things you should know:
 
-
-
-
-
-TODO: working with annotations.
-Doctrine annotations => do not forget the "use".
-Advice: use a plugin for your IDE 
-Eclipse: https://marketplace.eclipse.org/content/doctrine-plugin
-PHPStorm: https://plugins.jetbrains.com/plugin/7320-php-annotations
+- PHP has no native support for annotations, so annotations are added via a third-party library called Doctrine Annotations.
+- Annotations must be declared in PHP Docblocks. A Docblock lives at the top of a class/method and must start with "/**"
+- Annotations are namespaced. You must not forget the "use" statement at the beginning of each file using an annotation.
+  For instance:
+  ```php
+  use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+  ```
+- Doctrine Annotations are hugely popular and used in many other libraries. They are widely supported in PHP IDEs.
+  We highly recommend you add support for Doctrine annotations in your preferred IDE:
+   - use [*PHP Annotations* if you use PHPStorm](https://plugins.jetbrains.com/plugin/7320-php-annotations)
+   - use [*Doctrine plugin* if you use Eclipse](https://marketplace.eclipse.org/content/doctrine-plugin)
+   - Netbeans has native support
+   - ...
+    
