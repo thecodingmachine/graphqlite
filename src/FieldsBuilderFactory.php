@@ -37,11 +37,15 @@ class FieldsBuilderFactory
      * @var TypeResolver
      */
     private $typeResolver;
+    /**
+     * @var NamingStrategyInterface
+     */
+    private $namingStrategy;
 
     public function __construct(AnnotationReader $annotationReader,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
-                                CachedDocBlockFactory $cachedDocBlockFactory)
+                                CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy)
     {
         $this->annotationReader = $annotationReader;
         $this->hydrator = $hydrator;
@@ -49,6 +53,7 @@ class FieldsBuilderFactory
         $this->authorizationService = $authorizationService;
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
+        $this->namingStrategy = $namingStrategy;
     }
 
     /**
@@ -64,7 +69,8 @@ class FieldsBuilderFactory
             $this->authenticationService,
             $this->authorizationService,
             $this->typeResolver,
-            $this->cachedDocBlockFactory
+            $this->cachedDocBlockFactory,
+            $this->namingStrategy
         );
     }
 }

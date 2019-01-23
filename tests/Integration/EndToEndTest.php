@@ -71,7 +71,8 @@ class EndToEndTest extends TestCase
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class),
                     $container->get(TypeResolver::class),
-                    $container->get(CachedDocBlockFactory::class)
+                    $container->get(CachedDocBlockFactory::class),
+                    $container->get(NamingStrategyInterface::class)
                 );
             },
             TypeResolver::class => function(ContainerInterface $container) {
@@ -179,7 +180,7 @@ class EndToEndTest extends TestCase
 
         $queryString = '
         query {
-            getContacts {
+            contacts {
                 name
                 uppercaseName
                 ... on User {
@@ -195,7 +196,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'getContacts' => [
+            'contacts' => [
                 [
                     'name' => 'Joe',
                     'uppercaseName' => 'JOE'
@@ -216,7 +217,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'getContacts' => [
+            'contacts' => [
                 [
                     'name' => 'Joe',
                     'uppercaseName' => 'JOE'
@@ -289,7 +290,7 @@ class EndToEndTest extends TestCase
 
         $queryString = '
         query {
-            getContactsIterator {
+            contactsIterator {
                 items(limit: 1, offset: 1) {
                     name
                     uppercaseName
@@ -308,7 +309,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'getContactsIterator' => [
+            'contactsIterator' => [
                 'items' => [
                     [
                         'name' => 'Bill',
@@ -327,7 +328,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'getContactsIterator' => [
+            'contactsIterator' => [
                 'items' => [
                     [
                         'name' => 'Bill',
@@ -342,7 +343,7 @@ class EndToEndTest extends TestCase
         // Let's run a query with no limit but an offset
         $invalidQueryString = '
         query {
-            getContactsIterator {
+            contactsIterator {
                 items(offset: 1) {
                     name
                     ... on User {
@@ -365,7 +366,7 @@ class EndToEndTest extends TestCase
         // Let's run a query with no limit offset
         $invalidQueryString = '
         query {
-            getContactsIterator {
+            contactsIterator {
                 items {
                     name
                     ... on User {
@@ -383,7 +384,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'getContactsIterator' => [
+            'contactsIterator' => [
                 'items' => [
                     [
                         'name' => 'Joe',
@@ -410,7 +411,7 @@ class EndToEndTest extends TestCase
 
         $queryString = '
         query {
-            getContactsIterator {
+            contactsIterator {
                 items(limit: 1, offset: 1) {
                     name
                     uppercaseName
@@ -421,7 +422,7 @@ class EndToEndTest extends TestCase
                 count
             }
             
-            getProducts {
+            products {
                 items {
                     name
                     price
@@ -437,7 +438,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'getContactsIterator' => [
+            'contactsIterator' => [
                 'items' => [
                     [
                         'name' => 'Bill',
@@ -447,7 +448,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ],
-            'getProducts' => [
+            'products' => [
                 'items' => [
                     [
                         'name' => 'Foo',
