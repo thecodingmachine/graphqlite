@@ -58,7 +58,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->name);
 
-        $this->assertCount(8, $usersQuery->args);
+        $this->assertCount(9, $usersQuery->args);
         $this->assertSame('int', $usersQuery->args[0]->name);
         $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
         $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType());
@@ -72,6 +72,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->args[4]->getType());
         $this->assertInstanceOf(DateTimeType::class, $usersQuery->args[5]->getType());
         $this->assertInstanceOf(StringType::class, $usersQuery->args[6]->getType());
+        $this->assertInstanceOf(IDType::class, $usersQuery->args[8]->getType());
         $this->assertSame('TestObjectInput', $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
 
         $context = ['int' => 42, 'string' => 'foo', 'list' => [
@@ -81,19 +82,20 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             'boolean' => true,
             'float' => 4.2,
             'dateTimeImmutable' => '2017-01-01 01:01:01',
-            'dateTime' => '2017-01-01 01:01:01'
+            'dateTime' => '2017-01-01 01:01:01',
+            'id' => 42
         ];
 
         $resolve = $usersQuery->resolveFn;
         $result = $resolve('foo', $context);
 
         $this->assertInstanceOf(TestObject::class, $result);
-        $this->assertSame('foo424212true4.22017010101010120170101010101default', $result->getTest());
+        $this->assertSame('foo424212true4.22017010101010120170101010101default42', $result->getTest());
 
         unset($context['string']); // Testing null default value
         $result = $resolve('foo', $context);
 
-        $this->assertSame('424212true4.22017010101010120170101010101default', $result->getTest());
+        $this->assertSame('424212true4.22017010101010120170101010101default42', $result->getTest());
     }
 
     public function testMutations()

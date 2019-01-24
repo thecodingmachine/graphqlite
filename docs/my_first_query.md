@@ -28,27 +28,26 @@ class MyController
 }
 ```
 
-- The `MyController` class does not need to extend any base class. For GraphQL-Controllers, a controller is simply a
-  simple class.
+- The `MyController` class does not need to extend any base class. For GraphQL-Controllers, a controller can be any
+  class.
 - The query method is annotated with a `@Query` annotation
 - The `MyController` class must be in the controllers namespace. You configured this namespace when you installed 
-GraphqlControllers. By default, in Symfony, the controllers namespace is `App\Controller`.
+GraphQL-Controllers. By default, in Symfony, the controllers namespace is `App\Controller`.
   
 <div class="alert alert-warning"><strong>Heads up!</strong> The <code>MyController</code> class must exist in the container of your 
-application and the container identifier MUST be the fully qualified class name.</div> 
-
-<div class="alert alert-info">If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
+application and the container identifier MUST be the fully qualified class name.<br/><br/>
+If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
 is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
-declare it.</div>
+declare it.</div> 
 
 ## Testing the query
 
-By default, the GraphQL endpoint is "/graphql".
+By default, the GraphQL endpoint is "/graphql". You can send HTTP requests to this endpoint and get responses.
 
 The easiest way to test a GraphQL endpoint is to use [GraphiQL](https://github.com/graphql/graphiql) or 
 [Altair](https://altair.sirmuel.design/) test clients.
 
-These clients come with Chrome and Firefox plugins.
+These clients are available as Chrome or Firefox plugins.
 
 <div class="alert alert-info"><strong>Symfony users:</strong> If you are using the Symfony bundle, GraphiQL is also directly embedded.
 Simply head to <code>http://[path-to-my-app]/graphiql</code></div>
@@ -180,7 +179,7 @@ We are now ready to run our test query:
 <td style="width:50%">
 <strong>Query</strong>
 <pre><code>{
-  products {
+  product(id: 42) {
     name
   }
 }</code></pre>
@@ -189,11 +188,9 @@ We are now ready to run our test query:
 <strong>Answer</strong>
 <pre><code class="hljs css language-json">{
   "data": {
-    "products": [
-      {
+    "product": {
         "name": "Mouf"
-      }
-    ]
+    }
   }
 }</code></pre>
 </td>
@@ -222,9 +219,9 @@ If you have never worked with annotations before, here are a few things you shou
   use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
   ```
 - Doctrine Annotations are hugely popular and used in many other libraries. They are widely supported in PHP IDEs.
-  We highly recommend you add support for Doctrine annotations in your preferred IDE:
-   - use [*PHP Annotations* if you use PHPStorm](https://plugins.jetbrains.com/plugin/7320-php-annotations)
-   - use [*Doctrine plugin* if you use Eclipse](https://marketplace.eclipse.org/content/doctrine-plugin)
+  We highly recommend you add support for Doctrine annotations in your favorite IDE:
+   - use [*"PHP Annotations"* if you use PHPStorm](https://plugins.jetbrains.com/plugin/7320-php-annotations)
+   - use [*"Doctrine plugin"* if you use Eclipse](https://marketplace.eclipse.org/content/doctrine-plugin)
    - Netbeans has native support
    - ...
     

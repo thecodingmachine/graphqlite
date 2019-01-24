@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQL\Controllers;
 
 use function get_class;
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
@@ -13,6 +14,7 @@ use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
+use TheCodingMachine\GraphQL\Controllers\Types\ID;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -58,6 +60,8 @@ class QueryField extends FieldDefinition
                         $val = array_map(function ($item) use ($subtype, $hydrator) {
                             if ($subtype instanceof DateTimeType) {
                                 return new \DateTimeImmutable($item);
+                            } elseif ($subtype instanceof ID) {
+                                return new ID($item);
                             } elseif ($subtype instanceof InputObjectType) {
                                 return $hydrator->hydrate($item, $subtype);
                             }
@@ -65,6 +69,8 @@ class QueryField extends FieldDefinition
                         }, $val);
                     } elseif ($type instanceof DateTimeType) {
                         $val = new \DateTimeImmutable($val);
+                    } elseif ($type instanceof IDType) {
+                        $val = new ID($val);
                     } elseif ($type instanceof InputObjectType) {
                         $val = $hydrator->hydrate($val, $type);
                     } elseif (!$type instanceof ScalarType) {
