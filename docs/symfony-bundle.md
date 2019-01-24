@@ -66,7 +66,9 @@ Create a configuration file in `config/packages/graphql_controllers.yaml`:
 graphql_controllers:
     namespace:
       controllers: App\Controller\
-      types: App\Types\
+      types: 
+      - App\Types\
+      - App\Models\
     debug:
       # Include exception messages in output when an error arises
       INCLUDE_DEBUG_MESSAGE: false
@@ -79,8 +81,11 @@ graphql_controllers:
       RETHROW_UNSAFE_EXCEPTIONS: true
 ```
 
-The 'graphqlcontrollers.namespace.controllers' configuration variable is the namespace that will store your GraphQL controllers.
-The 'graphqlcontrollers.namespace.types' configuration variable is the namespace that will store your GraphQL types and factories.
+The 'graphqlcontrollers.namespace.controllers' configuration variable is the namespace(s) that will store your GraphQL controllers.
+The 'graphqlcontrollers.namespace.types' configuration variable is the namespace(s) that will store your GraphQL types and factories.
+
+For both 'graphqlcontrollers.namespace.controllers' and 'graphqlcontrollers.namespace.types', you can pass a string (the namespace to target)
+or an array of strings if you have several namespaces to track.
 
 ## Configure the bundle
 

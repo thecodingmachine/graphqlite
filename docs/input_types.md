@@ -125,5 +125,5 @@ In case you want to override the input type name, you can use the "name" attribu
  */
 ```
 
-Notice that most of the type, the input type name will be completely transparent to you, so there is no real reason
+Most of the time, the input type name will be completely transparent to you, so there is no real reason
 to want to customize it.
