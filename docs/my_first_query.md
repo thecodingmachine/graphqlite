@@ -156,6 +156,10 @@ class Product
 The `@Type` annotation is used to inform GraphQL-Controllers that the `Product` class is a GraphQL type.
 The `@Field` annotation is used to define the GraphQL fields.
 
+The `Product` class must be in the types namespace. You configured this namespace when you installed 
+GraphQL-Controllers. By default, in Symfony, the types namespace is any namespace starting with `App\` so you can
+put a type anywhere in your application code.
+
 <div class="alert alert-info"><strong>Heads up!</strong> The <code>@Field</code> annotation must be put on a 
 <strong>public method</strong>.
 You cannot annotate a property (unlike Doctrine ORM where you annotate only properties).
