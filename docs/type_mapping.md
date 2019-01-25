@@ -27,8 +27,50 @@ Scalar PHP types can be type-hinted to the corresponding GraphQL types:
 
 GraphQL comes with a native "ID" type. PHP has no such type.
 
-TODO: develop a ID PHP class type? (for input types?)
+If you want to expose an "ID" type in your GraphQL model, you have 2 solutions:
 
+### Solution 1: force the outputType
+
+```php
+/**
+ * @Field(outputType="ID")
+ */
+public function getId(): string
+{
+
+}
+```
+
+Using the "outputType" attribute of the `@Field` annotation, you can force the output type to "ID".
+You can learn more about [forcing output types in the "custom output types" documentation](custom_output_types.md).
+
+### Solution 2: use the "ID" class
+
+```php
+use TheCodingMachine\GraphQL\Controllers\Types\ID;
+
+/**
+ * @Field
+ */
+public function getId(): ID
+{
+
+}
+```
+
+Note that you can also use the "ID" class as an input type:
+
+```php
+use TheCodingMachine\GraphQL\Controllers\Types\ID;
+
+/**
+ * @Mutation
+ */
+public function save(ID $id, string $name): Product
+{
+
+}
+```
 
 ## Mapping of dates
 
