@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
+use TheCodingMachine\GraphQL\Controllers\Types\ID;
 use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
 use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
 use Iterator;
@@ -654,19 +655,23 @@ class FieldsBuilder
             return GraphQLType::float();
         } elseif ($type instanceof Object_) {
             $fqcn = (string) $type->getFqsen();
-            if ($fqcn === '\\DateTimeImmutable' || $fqcn === '\\DateTimeInterface') {
-                return DateTimeType::getInstance();
-            } elseif ($fqcn === '\\'.UploadedFileInterface::class) {
-                return CustomTypesRegistry::getUploadType();
-            } elseif ($fqcn === '\\DateTime') {
-                throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
-            }
-
-            $className = ltrim($type->getFqsen(), '\\');
-            if ($mapToInputType) {
-                return $this->typeMapper->mapClassToInputType($className);
-            } else {
-                return $this->typeMapper->mapClassToInterfaceOrType($className, $subType);
+            switch ($fqcn) {
+                case '\\DateTimeImmutable':
+                case '\\DateTimeInterface':
+                    return DateTimeType::getInstance();
+                case '\\'.UploadedFileInterface::class:
+                    return CustomTypesRegistry::getUploadType();
+                case '\\DateTime':
+                    throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+                case '\\'.ID::class:
+                    return GraphQLType::id();
+                default:
+                    $className = ltrim($type->getFqsen(), '\\');
+                    if ($mapToInputType) {
+                        return $this->typeMapper->mapClassToInputType($className);
+                    } else {
+                        return $this->typeMapper->mapClassToInterfaceOrType($className, $subType);
+                    }
             }
         } elseif ($type instanceof Array_) {
             return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQlType($type->getValueType(), $subType, $mapToInputType)));
