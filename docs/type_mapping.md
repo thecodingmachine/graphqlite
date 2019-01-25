@@ -23,6 +23,22 @@ Scalar PHP types can be type-hinted to the corresponding GraphQL types:
 - bool
 - float
 
+## Mapping of arrays
+
+You can type-hint against arrays (or iterators) as long as you add a detailed `@return` statement in the PHP-Doc:
+
+```php
+/**
+ * @Query
+ * @return User[] <=== we specify that the array is an array of User objects.
+ */
+public function users(int $limit, int $offset): array
+{
+    // Some code that returns an array of "users".
+    // This completely replaces the "resolve" method.
+}
+```
+
 ## Mapping of ID type
 
 GraphQL comes with a native "ID" type. PHP has no such type.
@@ -121,13 +137,19 @@ public function getProducts(\DateTime $fromDate): array // BAD
 }
 ```
 
+## Union types
+--------------
 
+You can create a GraphQL union type "on the fly", using the pipe (|) operator in the PHPDoc:
 
-TODO: ID
-
-TODO: Union type
-
-TODO: External type
-TODO: Extend class
-TODO: Sourcefield (other doc)
+```php
+/**
+ * @Query
+ * @return Company|Contact <== can return a company OR a contact
+ */
+public function companyOrContact(int $id)
+{
+    // Some code that returns a company or a contact.
+}
+```
 
