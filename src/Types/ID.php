@@ -2,6 +2,7 @@
 namespace TheCodingMachine\GraphQL\Controllers\Types;
 
 
+use InvalidArgumentException;
 use TheCodingMachine\GraphQL\Controllers\GraphQLException;
 
 /**
@@ -14,7 +15,7 @@ class ID
     public function __construct($value)
     {
         if (! is_scalar($value) && (! is_object($value) || ! method_exists($value, '__toString'))) {
-            throw new GraphQLException('ID constructor cannot be passed a non scalar value.');
+            throw new InvalidArgumentException('ID constructor cannot be passed a non scalar value.');
         }
         $this->value = $value;
     }

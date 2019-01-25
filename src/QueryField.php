@@ -7,11 +7,14 @@ use function get_class;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
+use InvalidArgumentException;
+use function is_array;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
 use TheCodingMachine\GraphQL\Controllers\Types\ID;
@@ -52,30 +55,7 @@ class QueryField extends FieldDefinition
             foreach ($arguments as $name => $arr) {
                 $type = $arr['type'];
                 if (isset($args[$name])) {
-                    $val = $args[$name];
-
-                    $type = $this->stripNonNullType($type);
-                    if ($type instanceof ListOfType) {
-                        $subtype = $this->stripNonNullType($type->getWrappedType());
-                        $val = array_map(function ($item) use ($subtype, $hydrator) {
-                            if ($subtype instanceof DateTimeType) {
-                                return new \DateTimeImmutable($item);
-                            } elseif ($subtype instanceof ID) {
-                                return new ID($item);
-                            } elseif ($subtype instanceof InputObjectType) {
-                                return $hydrator->hydrate($item, $subtype);
-                            }
-                            return $item;
-                        }, $val);
-                    } elseif ($type instanceof DateTimeType) {
-                        $val = new \DateTimeImmutable($val);
-                    } elseif ($type instanceof IDType) {
-                        $val = new ID($val);
-                    } elseif ($type instanceof InputObjectType) {
-                        $val = $hydrator->hydrate($val, $type);
-                    } elseif (!$type instanceof ScalarType) {
-                        throw new \RuntimeException('Unexpected type: '.get_class($type));
-                    }
+                    $val = $this->castVal($args[$name], $type, $hydrator);
                 } elseif (array_key_exists('defaultValue', $arr)) {
                     $val = $arr['defaultValue'];
                 } else {
@@ -105,5 +85,34 @@ class QueryField extends FieldDefinition
             return $this->stripNonNullType($type->getWrappedType());
         }
         return $type;
+    }
+
+    /**
+     * Casts a value received from GraphQL into an argument passed to a method.
+     *
+     * @param mixed $val
+     * @param InputType $type
+     * @return mixed
+     */
+    private function castVal($val, InputType $type, HydratorInterface $hydrator)
+    {
+        $type = $this->stripNonNullType($type);
+        if ($type instanceof ListOfType) {
+            if (!is_array($val)) {
+                throw new InvalidArgumentException('Expected GraphQL List but value passed is not an array.');
+            }
+            return array_map(function($item) use ($type, $hydrator) {
+                return $this->castVal($item, $type->getWrappedType(), $hydrator);
+            }, $val);
+        } elseif ($type instanceof DateTimeType) {
+            return new \DateTimeImmutable($val);
+        } elseif ($type instanceof IDType) {
+            return new ID($val);
+        } elseif ($type instanceof InputObjectType) {
+            return $hydrator->hydrate($val, $type);
+        } elseif (!$type instanceof ScalarType) {
+            throw new \RuntimeException('Unexpected type: '.get_class($type));
+        }
+        return $val;
     }
 }
