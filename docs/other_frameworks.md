@@ -12,8 +12,79 @@ GraphQL-Controllers requires:
 - A PSR-16 cache
 
 Additionally, you will need a way to route the HTTP requests to the underlying GraphQL library.
-thecodingmachine/graphql-controllers uses internally webonix/graphql-php. This library plays well with PSR-7 requests
-and there is a PSR-15 middleware available. We will use those in this sample.   
+thecodingmachine/graphql-controllers uses internally [webonyx/graphql-php](http://webonyx.github.io/graphql-php/).
+This library plays well with PSR-7 requests and there is a PSR-15 middleware available.
+
+## Generating a GraphQL schema.
+
+GraphQL-Controllers purpose is to generate a [Webonyx GraphQL `Schema`](https://webonyx.github.io/graphql-php/type-system/schema/).
+
+The easiest way to create such a schema is to use the `SchemaFactory` class.
+
+```php
+use TheCodingMachine\GraphQL\Controllers\SchemaFactory;
+
+// $cache is a PSR-16 compatible cache
+// $container is a PSR-11 compatible container
+$factory = new SchemaFactory($cache, $container);
+$factory->addControllerNamespace('App\\Controllers\\')
+        ->addTypeNamespace('App\\');
+
+$schema = $factory->createSchema();
+```
+
+You can now use the schema to resolve GraphQL queries (using [Webonyx's GraphQL facade](https://webonyx.github.io/graphql-php/getting-started/#hello-world) 
+or the [StandardServer class](https://webonyx.github.io/graphql-php/executing-queries/#using-server)).
+
+## Absolutely minimal sample
+
+The smallest working example using no framework is:
+
+```php
+<?php
+use GraphQL\GraphQL;
+use GraphQL\Type\Schema;
+use TheCodingMachine\GraphQL\Controllers\SchemaFactory;
+
+// $cache is a PSR-16 compatible cache
+// $container is a PSR-11 compatible container
+$factory = new SchemaFactory($cache, $container);
+$factory->addControllerNamespace('App\\Controllers\\')
+        ->addTypeNamespace('App\\');
+
+$schema = $factory->createSchema();
+
+$rawInput = file_get_contents('php://input');
+$input = json_decode($rawInput, true);
+$query = $input['query'];
+$variableValues = isset($input['variables']) ? $input['variables'] : null;
+
+$result = GraphQL::executeQuery($schema, $query, null, null, $variableValues);
+$output = $result->toArray();
+
+header('Content-Type: application/json');
+echo json_encode($output);
+```
+
+## Factory options
+
+The `SchemaFactory` class comes with a number of methods that you can use to customize your GraphQL-Controllers settings.
+
+```php
+// Configure an authentication service (to resolve the @Logged annotations)
+$factory->setAuthenticationService(new VoidAuthenticationService());
+// Configure an authorization service (to resolve the @Right annotations)
+$factory->setAuthorizationService(new VoidAuthorizationService())
+// Change the naming convention of GraphQL types globally
+$factory->setNamingStrategy(new NamingStrategy())
+// Add a custom type mapper
+$factory->addTypeMapper($typeMapper)
+// Add custom options to the Webonyx underlying Schema
+$factory->setSchemaConfig($schemaConfig);
+```
+
+
+## A more advanced sample
 
 In this sample, we will focus on getting a working version of GraphQL-Controllers using:
 
