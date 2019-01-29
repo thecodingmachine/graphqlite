@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 use function get_class;
 use GraphQL\Type\Definition\FieldDefinition;
@@ -11,11 +11,11 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
-use TheCodingMachine\GraphQL\Controllers\FieldsBuilderFactory;
-use TheCodingMachine\GraphQL\Controllers\GraphQLException;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
+use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
+use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\DateTimeType;
 
 /**
  * A GraphQL input object that can be resolved using a factory

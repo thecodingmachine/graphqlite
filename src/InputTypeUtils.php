@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Object_;

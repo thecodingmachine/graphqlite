@@ -6,7 +6,7 @@ sidebar_label: My first query
 
 ## Creating a controller
 
-In GraphQL-Controllers, GraphQL queries are creating by writing methods in "controller" classes.
+In GraphQLite, GraphQL queries are creating by writing methods in "controller" classes.
 Each query method must be annotated with the `@Query` annotation.
 
 Here is a sample of a "hello world" query:
@@ -14,7 +14,7 @@ Here is a sample of a "hello world" query:
 ```php
 namespace App\Controllers;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class MyController
 {
@@ -28,11 +28,11 @@ class MyController
 }
 ```
 
-- The `MyController` class does not need to extend any base class. For GraphQL-Controllers, a controller can be any
+- The `MyController` class does not need to extend any base class. For GraphQLite, a controller can be any
   class.
 - The query method is annotated with a `@Query` annotation
 - The `MyController` class must be in the controllers namespace. You configured this namespace when you installed 
-GraphQL-Controllers. By default, in Symfony, the controllers namespace is `App\Controller`.
+GraphQLite. By default, in Symfony, the controllers namespace is `App\Controller`.
   
 <div class="alert alert-warning"><strong>Heads up!</strong> The <code>MyController</code> class must exist in the container of your 
 application and the container identifier MUST be the fully qualified class name.<br/><br/>
@@ -75,7 +75,7 @@ You can now perform a test query and get the answer:
 
 ![](../img/query1.png)
 
-Internally, GraphQL-Controllers created a query and added it to its internal type system.
+Internally, GraphQLite created a query and added it to its internal type system.
 
 If you are already used to GraphQL, you could represent this in "[Type language](https://graphql.org/learn/schema/#type-language)"
 like this:
@@ -86,11 +86,11 @@ Type Query {
 }
 ```
 
-But with GraphQL-Controllers you don't need to use the *Type language* at all. The philosophy of GraphQL-Controllers
-is that you do PHP code, you put annotations and GraphQL-Controllers is creating the GraphQL types for you. That means
+But with GraphQLite you don't need to use the *Type language* at all. The philosophy of GraphQLite
+is that you do PHP code, you put annotations and GraphQLite is creating the GraphQL types for you. That means
 less boilerplate code!
 
-Internally, GraphQL-Controllers will do the mapping between PHP types and GraphQL types.
+Internally, GraphQLite will do the mapping between PHP types and GraphQL types.
 
 ## Creating your first type
 
@@ -99,7 +99,7 @@ So far, we simply declared a query. But we did not yet declare a type.
 Let's assume you want to return a product:
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class ProductController
 {
@@ -125,8 +125,8 @@ an annotation to this class.
 ```php
 namespace App\Entities;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @Type()
@@ -153,11 +153,11 @@ class Product
 }
 ```
 
-The `@Type` annotation is used to inform GraphQL-Controllers that the `Product` class is a GraphQL type.
+The `@Type` annotation is used to inform GraphQLite that the `Product` class is a GraphQL type.
 The `@Field` annotation is used to define the GraphQL fields.
 
 The `Product` class must be in the types namespace. You configured this namespace when you installed 
-GraphQL-Controllers. By default, in Symfony, the types namespace is any namespace starting with `App\` so you can
+GraphQLite. By default, in Symfony, the types namespace is any namespace starting with `App\` so you can
 put a type anywhere in your application code.
 
 <div class="alert alert-info"><strong>Heads up!</strong> The <code>@Field</code> annotation must be put on a 
@@ -220,7 +220,7 @@ If you have never worked with annotations before, here are a few things you shou
 - Annotations are namespaced. You must not forget the "use" statement at the beginning of each file using an annotation.
   For instance:
   ```php
-  use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+  use TheCodingMachine\GraphQLite\Annotations\Query;
   ```
 - Doctrine Annotations are hugely popular and used in many other libraries. They are widely supported in PHP IDEs.
   We highly recommend you add support for Doctrine annotations in your favorite IDE:

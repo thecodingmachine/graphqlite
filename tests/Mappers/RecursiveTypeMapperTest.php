@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Type\Definition\InputObjectType;
@@ -9,16 +9,16 @@ use GraphQL\Type\Definition\ObjectType;
 use Mouf\Picotainer\Picotainer;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
-use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassA;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassB;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassC;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types\ClassAType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types\ClassBType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
-use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA;
+use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB;
+use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassC;
+use TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types\ClassAType;
+use TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types\ClassBType;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\TypeGenerator;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -112,7 +112,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry());
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQL\Controllers\AnnotationReader(new AnnotationReader()), $namingStrategy, new NullCache());
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, new NullCache());
 
         return new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
     }
@@ -150,9 +150,9 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $recursiveMapper = $this->getTypeMapper();
 
         $outputTypes = $recursiveMapper->getOutputTypes();
-        $this->assertArrayHasKey('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Interfaces\\ClassA', $outputTypes);
-        $this->assertArrayHasKey('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Interfaces\\ClassB', $outputTypes);
-        $this->assertArrayNotHasKey('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Interfaces\\ClassC', $outputTypes);
+        $this->assertArrayHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassA', $outputTypes);
+        $this->assertArrayHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassB', $outputTypes);
+        $this->assertArrayNotHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassC', $outputTypes);
     }
 
 

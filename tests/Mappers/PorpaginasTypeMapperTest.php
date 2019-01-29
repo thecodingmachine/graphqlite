@@ -1,13 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\StringType;
 use Porpaginas\Arrays\ArrayResult;
 use RuntimeException;
-use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
 {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Containers;
+namespace TheCodingMachine\GraphQLite\Containers;
 
 use Psr\Container\NotFoundExceptionInterface;
 

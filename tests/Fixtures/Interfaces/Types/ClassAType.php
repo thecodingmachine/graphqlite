@@ -1,11 +1,11 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces\ClassA;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA;
 
 /**
  * @Type(class=ClassA::class)

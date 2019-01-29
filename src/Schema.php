@@ -1,15 +1,15 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\SchemaConfig;
-use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\CustomTypesRegistry;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -32,7 +32,7 @@ class Schema extends \GraphQL\Type\Schema
                     return [
                         'dummyQuery' => [
                             'type' => Type::string(),
-                            'description' => 'A placeholder query used by thecodingmachine/graphql-controllers when there are no declared queries.',
+                            'description' => 'A placeholder query used by thecodingmachine/graphqlite when there are no declared queries.',
                             'resolve' => function () {
                                 return 'This is a placeholder query. Please create a query using the @Query annotation.';
                             }
@@ -50,7 +50,7 @@ class Schema extends \GraphQL\Type\Schema
                     return [
                         'dummyMutation' => [
                             'type' => Type::string(),
-                            'description' => 'A placeholder query used by thecodingmachine/graphql-controllers when there are no declared mutations.',
+                            'description' => 'A placeholder query used by thecodingmachine/graphqlite when there are no declared mutations.',
                             'resolve' => function () {
                                 return 'This is a placeholder mutation. Please create a mutation using the @Mutation annotation.';
                             }

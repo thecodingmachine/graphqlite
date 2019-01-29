@@ -1,14 +1,14 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use function get_class;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 /**
  * A cache used to store already FULLY COMPUTED types.

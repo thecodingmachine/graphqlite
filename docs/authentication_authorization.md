@@ -7,22 +7,22 @@ sidebar_label: Authentication and authorization
 You might not want to expose your GraphQL API to anyone. Or you might want to keep some queries / mutations or fields
 reserved to some users.
 
-GraphQL-Controllers offers some control over what a user can do with your API based on authentication (whether the user
+GraphQLite offers some control over what a user can do with your API based on authentication (whether the user
 is logged or not) or authorization (what rights the user have).
 
-<div class="alert alert-info"><strong>Heads up!</strong> GraphQL-Controllers does not handle authentication or 
-authorization. It is up to you (or your framework) to handle that. [GraphQL-Controllers plugs into your framework
+<div class="alert alert-info"><strong>Heads up!</strong> GraphQLite does not handle authentication or 
+authorization. It is up to you (or your framework) to handle that. [GraphQLite plugs into your framework
 to fetch whether you are authenticated or not and the list of your rights.](#connectframework)
 </div>
 
 ## The @Logged and @Right annotations
 
-GraphQL-Controllers exposes 2 annotations (`@Logged` and `@Right`) that you can use to restrict access to a resource.
+GraphQLite exposes 2 annotations (`@Logged` and `@Right`) that you can use to restrict access to a resource.
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 
 class UserController
 {
@@ -90,9 +90,9 @@ You can therefore decide in a GraphQL type who can see what:
 ```php
 namespace App\Entities;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 
 /**
  * @Type()
@@ -113,20 +113,20 @@ class Product
 ```
 
 <a name="connectframework"></a>
-## Connecting GraphQL-Controllers to your framework's security module
+## Connecting GraphQLite to your framework's security module
 
-GraphQL-Controllers needs to know if a user is logged or not, and what rights it has.
+GraphQLite needs to know if a user is logged or not, and what rights it has.
 But this is specific of the framework you use.
 
-To plug GraphQL-Controllers to your framework's security, you will have to provide 2 classes implementing the 
-`TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface`
-and the `TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface`.
+To plug GraphQLite to your framework's security, you will have to provide 2 classes implementing the 
+`TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface`
+and the `TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface`.
 
-<div class="alert alert-info"><strong>Symfony users:</strong> The GraphQL-Controllers bundle comes with the classes linking 
-GraphQL-Controllers to the security bundle. So you don't have to do anything.
+<div class="alert alert-info"><strong>Symfony users:</strong> The GraphQLite bundle comes with the classes linking 
+GraphQLite to the security bundle. So you don't have to do anything.
 </div>
 
-These 2 interfaces act as adapters between GraphQL-Controllers and your framework:
+These 2 interfaces act as adapters between GraphQLite and your framework:
 
 ```php
 interface AuthenticationServiceInterface

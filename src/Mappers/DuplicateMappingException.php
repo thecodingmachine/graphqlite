@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 
 class DuplicateMappingException extends \RuntimeException

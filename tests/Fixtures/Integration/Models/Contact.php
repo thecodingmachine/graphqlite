@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models;
+namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 
 use DateTimeInterface;

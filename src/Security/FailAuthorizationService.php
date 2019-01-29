@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Security;
+namespace TheCodingMachine\GraphQLite\Security;
 
 /**
  * A fake authorization service with a user that has no rights

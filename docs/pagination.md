@@ -6,7 +6,7 @@ sidebar_label: Pagination
 
 It is quite common to have to paginate over large result sets.
 
-GraphQL-Controllers offers a simple way to do that using [Porpaginas](https://github.com/beberlei/porpaginas).
+GraphQLite offers a simple way to do that using [Porpaginas](https://github.com/beberlei/porpaginas).
 
 Porpaginas is a set of PHP interfaces that can be implemented by result iterators. It comes with a native support for
 PHP arrays, Doctrine and [TDBM](https://thecodingmachine.github.io/tdbm/doc/limit_offset_resultset.html).
@@ -35,7 +35,7 @@ class MyController
 Notice that:
 
 - the method return type MUST BE `Porpaginas\Result` or a class implementing `Porpaginas\Result`
-- you MUST add a `@return` statement to help GraphQL-Controllers find the type of the list
+- you MUST add a `@return` statement to help GraphQLite find the type of the list
 
 Once this is done, you can paginate directly from your GraphQL query:
 

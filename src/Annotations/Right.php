@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQL\Controllers\Annotations;
+namespace TheCodingMachine\GraphQLite\Annotations;
 
 /**
  * @Annotation

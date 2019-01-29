@@ -1,12 +1,12 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceFieldInterface;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\FromSourceFieldsInterface;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\FromSourceFieldsInterface;
 
 /**
  * @Type(class=TestObject::class)

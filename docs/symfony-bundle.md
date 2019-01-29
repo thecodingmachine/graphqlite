@@ -4,7 +4,7 @@ title: Getting started with Symfony
 sidebar_label: Symfony bundle
 ---
 
-The GraphQL-Controllers bundle is compatible with Symfony 4+.
+The GraphQLite bundle is compatible with Symfony 4+.
 From your Symfony 4+ project, run the following command:
 
 Applications that use Symfony Flex
@@ -13,7 +13,7 @@ Applications that use Symfony Flex
 Open a command console, enter your project directory and execute:
 
 ```console
-$ composer require thecodingmachine/graphql-controllers-bundle
+$ composer require thecodingmachine/graphqlite-bundle
 ```
 
 Applications that don't use Symfony Flex
@@ -25,7 +25,7 @@ Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```console
-$ composer require thecodingmachine/graphql-controllers-bundle
+$ composer require thecodingmachine/graphqlite-bundle
 ```
 
 This command requires you to have Composer installed globally, as explained
@@ -48,7 +48,7 @@ class AppKernel extends Kernel
     {
         $bundles = array(
             // ...
-            new TheCodingMachine\GraphQL\Controllers\Bundle\GraphQLControllersBundle,
+            new TheCodingMachine\GraphQLite\Bundle\GraphQLiteBundle,
         );
 
         // ...
@@ -60,10 +60,10 @@ class AppKernel extends Kernel
 
 ### Step 3 (optional): Create a configuration file
 
-Create a configuration file in `config/packages/graphql_controllers.yaml`:
+Create a configuration file in `config/packages/graphqlite.yaml`:
 
 ```yaml
-graphql_controllers:
+graphqlite:
     namespace:
       controllers: App\Controller\
       types: 
@@ -81,18 +81,18 @@ graphql_controllers:
       RETHROW_UNSAFE_EXCEPTIONS: true
 ```
 
-The 'graphqlcontrollers.namespace.controllers' configuration variable is the namespace(s) that will store your GraphQL controllers.
-The 'graphqlcontrollers.namespace.types' configuration variable is the namespace(s) that will store your GraphQL types and factories.
+The 'graphqlite.namespace.controllers' configuration variable is the namespace(s) that will store your GraphQLite controllers.
+The 'graphqlite.namespace.types' configuration variable is the namespace(s) that will store your GraphQL types and factories.
 
-For both 'graphqlcontrollers.namespace.controllers' and 'graphqlcontrollers.namespace.types', you can pass a string (the namespace to target)
+For both 'graphqlite.namespace.controllers' and 'graphqlite.namespace.types', you can pass a string (the namespace to target)
 or an array of strings if you have several namespaces to track.
 
 ## Configure the bundle
 
-Using `config/packages/graphql-controllers.yaml`, you can configure how exceptions will be handled.
+Using `config/packages/graphqlite.yaml`, you can configure how exceptions will be handled.
 
 By default (with no configuration), the `RETHROW_UNSAFE_EXCEPTIONS` mode will be used: any exception will be propagated
 to Symfony, unless it implements the `GraphQL\Error\ClientAware` exception.
 
 The debug parameters (`INCLUDE_DEBUG_MESSAGE`, `INCLUDE_TRACE`, `RETHROW_INTERNAL_EXCEPTIONS` and `RETHROW_UNSAFE_EXCEPTIONS`),
-are detailed in the [documentation of the Webonix GraphQL-PHP library that is used by "GraphQL-Controllers"](https://webonyx.github.io/graphql-php/error-handling/).
+are detailed in the [documentation of the Webonix GraphQL-PHP library that is used by "GraphQLite"](https://webonyx.github.io/graphql-php/error-handling/).

@@ -1,5 +1,5 @@
 <?php
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use ReflectionMethod;
 use \ReflectionParameter;

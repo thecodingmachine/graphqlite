@@ -4,7 +4,7 @@ title: Inheritance and interfaces
 sidebar_label: Inheritance and interfaces
 ---
 
-Some of your entities may extend other entities. GraphQL-controllers will do its best to represent this hierarchy of objects in GraphQL using interfaces.
+Some of your entities may extend other entities. GraphQLite will do its best to represent this hierarchy of objects in GraphQL using interfaces.
 
 Let's say you have 2 classes: `Contact` and `User` (which extends `Contact`)
 
@@ -54,7 +54,7 @@ contact {
 }
 ``` 
 
-Behind the scene, GraphQL-controllers will detect that the `Contact` class is extended by the `User` class. Because the
+Behind the scene, GraphQLite will detect that the `Contact` class is extended by the `User` class. Because the
 class is extended, a GraphQL `ContactInterface` interface is created dynamically. You don't have to do anything.
 The GraphQL `User` type will automatically implement this `ContactInterface`. The interface contains all the fields
 available in the `Contact` type.
@@ -76,7 +76,7 @@ type User implements ContactInterface {
 }
 ```
 
-<div class="alert alert-warning">Right now, there is no way to explicitly declare a GraphQL interface using GraphQL-Controllers.
-GraphQL-Controllers automatically declares interfaces when it sees an inheritance relationship between to classes that
+<div class="alert alert-warning">Right now, there is no way to explicitly declare a GraphQL interface using GraphQLite.
+GraphQLite automatically declares interfaces when it sees an inheritance relationship between to classes that
 are GraphQL types.
 </div>

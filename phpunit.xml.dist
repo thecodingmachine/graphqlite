@@ -12,7 +12,7 @@
          bootstrap="vendor/autoload.php"
 >
     <testsuites>
-        <testsuite name="Graphql controllers Test Suite">
+        <testsuite name="GraphQLite Test Suite">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>

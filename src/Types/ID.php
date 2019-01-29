@@ -1,9 +1,9 @@
 <?php
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 
 use InvalidArgumentException;
-use TheCodingMachine\GraphQL\Controllers\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLException;
 
 /**
  * A class that maps to the GraphQL ID type.

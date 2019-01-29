@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use function array_merge;
 use GraphQL\Type\Definition\InputType;
@@ -15,13 +15,13 @@ use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
-use TheCodingMachine\GraphQL\Controllers\Types\CustomTypesRegistry;
-use TheCodingMachine\GraphQL\Controllers\Types\ID;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
-use TheCodingMachine\GraphQL\Controllers\Types\UnionType;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Types\CustomTypesRegistry;
+use TheCodingMachine\GraphQLite\Types\ID;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Types\UnionType;
 use Iterator;
 use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
@@ -38,16 +38,16 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use phpDocumentor\Reflection\Types\Integer;
 use ReflectionClass;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Reflection\CommentParser;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Reflection\CommentParser;
+use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 /**

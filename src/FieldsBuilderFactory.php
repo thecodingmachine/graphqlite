@@ -1,15 +1,15 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 class FieldsBuilderFactory
 {

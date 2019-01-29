@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;

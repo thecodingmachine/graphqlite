@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Interfaces;
+namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
 
 
 class ClassA

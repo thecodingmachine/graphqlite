@@ -1,14 +1,14 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 use Exception;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ObjectType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * An object type built from the Type annotation

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations;
+namespace TheCodingMachine\GraphQLite\Fixtures\Annotations;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 
 /**
  * @ExtendType(class="foo")

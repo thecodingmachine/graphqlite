@@ -52,8 +52,8 @@ $name = $translationService->getProductName($productId, $language);
 Using `@ExtendType`, you can add an additional `name` field to your product:
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Annotations\ExtendType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\Field;
 use App\Entities\Product;
 
 /**
@@ -86,7 +86,7 @@ Let's break this sample:
  */
 ```
 
-With the `@ExtendType` annotation, we tell GraphQL-Controllers that we want to add fields in the GraphQL type mapped to
+With the `@ExtendType` annotation, we tell GraphQLite that we want to add fields in the GraphQL type mapped to
 the `Product` PHP class.
 
 ```php
@@ -104,7 +104,7 @@ class ProductType
 ```
 
 
-- The `ProductType` class must be in the types namespace. You configured this namespace when you installed GraphQL-Controllers.
+- The `ProductType` class must be in the types namespace. You configured this namespace when you installed GraphQLite.
 - The `ProductType` class is actually a **service**. You can therefore inject dependencies in it (like the `$translationService` in this example)
 
 <div class="alert alert-warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your 

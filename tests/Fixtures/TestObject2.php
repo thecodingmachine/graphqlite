@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
 class TestObject2
 {

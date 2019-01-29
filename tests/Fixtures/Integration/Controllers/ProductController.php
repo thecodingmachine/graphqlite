@@ -1,16 +1,16 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 
 use Porpaginas\Arrays\ArrayResult;
 use Psr\Http\Message\UploadedFileInterface;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Product;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
 
 class ProductController
 {

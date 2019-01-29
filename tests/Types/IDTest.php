@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;

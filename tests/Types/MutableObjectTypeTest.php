@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;

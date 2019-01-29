@@ -1,17 +1,17 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use TheCodingMachine\GraphQL\Controllers\TypeMappingException;
+use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\TypeMappingException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class CompositeTypeMapperTest extends AbstractQueryProviderTest
 {

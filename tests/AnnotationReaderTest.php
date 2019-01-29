@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use InvalidArgumentException;
@@ -8,12 +8,12 @@ use PHPUnit\Framework\TestCase;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use ReflectionClass;
 use ReflectionMethod;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
 
 class AnnotationReaderTest extends TestCase
 {
@@ -49,7 +49,7 @@ class AnnotationReaderTest extends TestCase
 
     public function testLaxModeWithBadAnnotationAndStrictNamespace()
     {
-        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQL\\Controllers\\Fixtures']);
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQLite\\Fixtures']);
 
         $this->expectException(AnnotationException::class);
         $annotationReader->getTypeAnnotation(new ReflectionClass(ClassWithInvalidClassAnnotation::class));
@@ -81,7 +81,7 @@ class AnnotationReaderTest extends TestCase
 
     public function testGetAnnotationsLaxModeWithBadAnnotationAndStrictNamespace()
     {
-        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQL\\Controllers\\Fixtures']);
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQLite\\Fixtures']);
 
         $this->expectException(AnnotationException::class);
         $annotationReader->getClassAnnotations(new ReflectionClass(ClassWithInvalidClassAnnotation::class), Type::class);
@@ -116,7 +116,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
         $this->expectException(ClassNotFoundException::class);
-        $this->expectExceptionMessage("Could not autoload class 'foo' defined in @ExtendType annotation of class 'TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
+        $this->expectExceptionMessage("Could not autoload class 'foo' defined in @ExtendType annotation of class 'TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
         $annotationReader->getExtendTypeAnnotation(new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class));
     }
 }

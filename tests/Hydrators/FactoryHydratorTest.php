@@ -1,11 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Hydrators;
+namespace TheCodingMachine\GraphQLite\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 
 class FactoryHydratorTest extends TestCase
 {

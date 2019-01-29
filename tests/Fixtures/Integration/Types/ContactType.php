@@ -1,13 +1,13 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
 use function strtoupper;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 /**
  * @Type(class=Contact::class)

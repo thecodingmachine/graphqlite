@@ -1,14 +1,14 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateInputTypes;
+namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes;
 
 use DateTimeInterface;
 use function implode;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObjectWithRecursiveList;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
 
 class TestFactory
 {

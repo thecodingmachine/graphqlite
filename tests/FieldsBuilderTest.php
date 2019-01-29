@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Type\Definition\BooleanType;
@@ -14,34 +14,34 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use Symfony\Component\Cache\Simple\ArrayCache;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerNoReturnType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithFailWith;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInputType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableReturnType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeId;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingAnnotation;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingReturnType;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithFailWith;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeWithSourceFieldInterface;
-use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
-use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
+use TheCodingMachine\GraphQLite\Fixtures\TestController;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use function var_dump;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
@@ -246,7 +246,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(FieldNotFoundException::class);
-        $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::notExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::isNotExists()");
+        $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQLite\Fixtures\TestObject::notExists()\", \"TheCodingMachine\GraphQLite\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQLite\Fixtures\TestObject::isNotExists()");
         $queryProvider->getFields(new TestTypeMissingField(), true);
     }
 
@@ -255,7 +255,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
-        $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
+        $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQLite\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
         $queryProvider->getFields(new TestTypeMissingReturnType(), true);
     }
 
@@ -356,7 +356,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For parameter $foo, in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidInputType::test, cannot map class "Exception" to a known GraphQL input type. Check your TypeMapper configuration.');
+        $this->expectExceptionMessage('For parameter $foo, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType::test, cannot map class "Exception" to a known GraphQL input type. Check your TypeMapper configuration.');
         $queryProvider->getQueries($controller);
     }
 
@@ -367,7 +367,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithInvalidReturnType::test, cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType::test, cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
         $queryProvider->getQueries($controller);
     }
 
@@ -378,7 +378,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
-        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
+        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
         $queryProvider->getQueries($controller);
     }
 
@@ -389,7 +389,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
-        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayReturnType::test is type-hinted to array. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]');
+        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType::test is type-hinted to array. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]');
         $queryProvider->getQueries($controller);
     }
 
@@ -400,7 +400,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
-        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithArrayParam::test is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
+        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam::test is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
         $queryProvider->getQueries($controller);
     }
 
@@ -411,7 +411,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(TypeMappingException::class);
-        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQL\Controllers\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
+        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
         $queryProvider->getQueries($controller);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Security;
+namespace TheCodingMachine\GraphQLite\Security;
 
 /**
  * A fake authentication service that always returns that the current user is NOT authenticated.

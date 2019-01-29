@@ -21,16 +21,16 @@
 ];*/
 
 const siteConfig = {
-  title: 'GraphQL-Controllers', // Title for your website.
+  title: 'GraphQLite', // Title for your website.
   tagline: 'GraphQL in PHP made easy',
   url: 'https://thecodingmachine.github.io/', // Your website URL
-  baseUrl: '/graphql-controllers/', // Base URL for your project */
+  baseUrl: '/graphqlite/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
 
   // Used for publishing and more
-  projectName: 'graphql-controllers',
+  projectName: 'graphqlite',
   organizationName: 'thecodingmachine',
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
@@ -39,7 +39,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
-    {href: 'https://github.com/thecodingmachine/graphql-controllers', label: 'GitHub'},
+    {href: 'https://github.com/thecodingmachine/graphqlite', label: 'GitHub'},
     /*{doc: 'doc4', label: 'API'},*/
     {page: 'help', label: 'Help'},
     /*{blog: true, label: 'Blog'},*/
@@ -49,8 +49,8 @@ const siteConfig = {
   //users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/graphql-controllers.svg',
-  footerIcon: 'img/graphql-controllers.svg',
+  headerIcon: 'img/graphqlite.svg',
+  footerIcon: 'img/graphqlite.svg',
   favicon: 'img/logo.svg',
 
   /* Colors for website */

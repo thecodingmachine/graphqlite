@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 
 use function array_map;
@@ -14,7 +14,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use function is_array;
 use function iterator_to_array;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {

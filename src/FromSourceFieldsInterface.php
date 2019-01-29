@@ -1,9 +1,9 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceFieldInterface;
+use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 
 /**
  * This interface exposes dynamically a list of SourceFields.

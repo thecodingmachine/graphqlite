@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 
 use function array_flip;
@@ -14,11 +14,11 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\SimpleCache\CacheInterface;
-use TheCodingMachine\GraphQL\Controllers\NamingStrategyInterface;
-use TheCodingMachine\GraphQL\Controllers\TypeRegistry;
-use TheCodingMachine\GraphQL\Controllers\Types\InterfaceFromObjectType;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeAnnotatedObjectType;
+use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\TypeRegistry;
+use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.

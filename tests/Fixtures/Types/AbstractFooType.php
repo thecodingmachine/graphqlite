@@ -1,16 +1,16 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 /**
- * @Type(class=TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::class)
+ * @Type(class=TheCodingMachine\GraphQLite\Fixtures\TestObject::class)
  * @SourceField(name="test")
  * @SourceField(name="testBool", logged=true)
  * @SourceField(name="testRight", right=@Right(name="FOOBAR"))

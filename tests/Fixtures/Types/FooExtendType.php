@@ -1,15 +1,15 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
 use function strtoupper;
-use TheCodingMachine\GraphQL\Controllers\Annotations\ExtendType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 /**
- * @ExtendType(class=TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::class)
+ * @ExtendType(class=TheCodingMachine\GraphQLite\Fixtures\TestObject::class)
  */
 class FooExtendType
 {

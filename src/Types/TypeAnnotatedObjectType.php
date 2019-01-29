@@ -1,10 +1,10 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
-use TheCodingMachine\GraphQL\Controllers\FieldsBuilderFactory;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
 /**
  * An object type built from the Type annotation

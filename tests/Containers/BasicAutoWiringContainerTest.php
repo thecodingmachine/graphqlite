@@ -1,13 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Containers;
+namespace TheCodingMachine\GraphQLite\Containers;
 
 use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestType;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
 class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
 {

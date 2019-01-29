@@ -1,13 +1,13 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use RuntimeException;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 
 /**
  * Resolves a type by its GraphQL name.

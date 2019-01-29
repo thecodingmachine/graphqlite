@@ -7,7 +7,7 @@ sidebar_label: File uploads
 GraphQL does not support natively the notion of file uploads, but an extension to the GraphQL protocol was proposed
 to add support for [multipart requests](https://github.com/jaydenseric/graphql-multipart-request-spec).
 
-GraphQL-Controllers supports this extension through the use of the [Ecodev/graphql-upload third party library](https://github.com/Ecodev/graphql-upload).
+GraphQLite supports this extension through the use of the [Ecodev/graphql-upload third party library](https://github.com/Ecodev/graphql-upload).
 
 ## Installation
 

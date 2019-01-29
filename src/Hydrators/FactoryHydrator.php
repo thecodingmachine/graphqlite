@@ -1,12 +1,12 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Hydrators;
+namespace TheCodingMachine\GraphQLite\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
-use TheCodingMachine\GraphQL\Controllers\GraphQLException;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 
 /**
  * Hydrates input types based on the Factory annotation.

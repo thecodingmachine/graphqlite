@@ -1,10 +1,10 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 
 class InvalidTypesInUnionException extends \InvalidArgumentException implements CannotMapTypeExceptionInterface
 {

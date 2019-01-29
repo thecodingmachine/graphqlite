@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 
 use Doctrine\Common\Annotations\AnnotationException;
@@ -11,15 +11,15 @@ use ReflectionClass;
 use ReflectionMethod;
 use function strpos;
 use function substr;
-use TheCodingMachine\GraphQL\Controllers\Annotations\AbstractRequest;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
-use TheCodingMachine\GraphQL\Controllers\Annotations\ExtendType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
-use TheCodingMachine\GraphQL\Controllers\Annotations\FailWith;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class AnnotationReader
 {

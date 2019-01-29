@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Annotations;
+namespace TheCodingMachine\GraphQLite\Annotations;
 
 /**
  * Factories are methods used to declare GraphQL input types.

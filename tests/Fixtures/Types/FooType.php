@@ -1,11 +1,11 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class FooType extends AbstractFooType
 {

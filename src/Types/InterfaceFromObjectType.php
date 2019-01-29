@@ -1,12 +1,12 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
 class InterfaceFromObjectType extends \GraphQL\Type\Definition\InterfaceType
 {

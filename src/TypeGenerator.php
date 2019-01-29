@@ -1,16 +1,16 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use function get_parent_class;
 use GraphQL\Type\Definition\ObjectType;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeAnnotatedObjectType;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 
 /**
  * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
