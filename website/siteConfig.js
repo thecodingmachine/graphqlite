@@ -23,8 +23,8 @@
 const siteConfig = {
   title: 'GraphQLite', // Title for your website.
   tagline: 'GraphQL in PHP made easy',
-  url: 'https://thecodingmachine.github.io/', // Your website URL
-  baseUrl: '/graphqlite/', // Base URL for your project */
+  url: 'https://graphqline.thecodingmachine.com/', // Your website URL
+  baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
