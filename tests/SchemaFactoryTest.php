@@ -6,7 +6,7 @@ use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Cache\Simple\ApcuCache;
+use Symfony\Component\Cache\Simple\PhpFilesCache;
 use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
 use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
@@ -20,7 +20,7 @@ class SchemaFactoryTest extends TestCase
     public function testCreateSchema(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ApcuCache();
+        $cache = new PhpFilesCache();
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -36,7 +36,7 @@ class SchemaFactoryTest extends TestCase
     public function testSetters(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ApcuCache();
+        $cache = new PhpFilesCache();
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -58,7 +58,7 @@ class SchemaFactoryTest extends TestCase
     public function testException(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ApcuCache();
+        $cache = new PhpFilesCache();
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -69,7 +69,7 @@ class SchemaFactoryTest extends TestCase
     public function testException2(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ApcuCache();
+        $cache = new PhpFilesCache();
 
         $factory = new SchemaFactory($cache, $container);
         $factory->addTypeNamespace('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration');
