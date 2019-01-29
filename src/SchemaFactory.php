@@ -1,0 +1,231 @@
+<?php
+
+
+namespace TheCodingMachine\GraphQL\Controllers;
+
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
+use Doctrine\Common\Cache\ApcuCache;
+use GraphQL\Type\SchemaConfig;
+use Psr\Container\ContainerInterface;
+use Psr\SimpleCache\CacheInterface;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
+use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQL\Controllers\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\PorpaginasTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQL\Controllers\Security\FailAuthenticationService;
+use TheCodingMachine\GraphQL\Controllers\Security\FailAuthorizationService;
+use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
+
+/**
+ * A class to help getting started with GraphQLControllers.
+ * It is in charge of creating a schema with most sensible defaults.
+ */
+class SchemaFactory
+{
+    private $controllerNamespaces = [];
+    private $typeNamespaces = [];
+    /**
+     * @var QueryProviderInterface[]
+     */
+    private $queryProviders = [];
+    /**
+     * @var TypeMapperInterface[]
+     */
+    private $typeMappers = [];
+    private $doctrineAnnotationReader;
+    /**
+     * @var HydratorInterface|null
+     */
+    private $hydrator;
+    /**
+     * @var AuthenticationServiceInterface|null
+     */
+    private $authenticationService;
+    /**
+     * @var AuthorizationServiceInterface|null
+     */
+    private $authorizationService;
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+    /**
+     * @var NamingStrategyInterface|null
+     */
+    private $namingStrategy;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+    /**
+     * @var SchemaConfig
+     */
+    private $schemaConfig;
+
+    public function __construct(CacheInterface $cache, ContainerInterface $container)
+    {
+        $this->cache = $cache;
+        $this->container = $container;
+    }
+
+    /**
+     * Registers a namespace that can contain GraphQL controllers.
+     */
+    public function addControllerNamespace(string $namespace): self
+    {
+        $this->controllerNamespaces[] = $namespace;
+        return $this;
+    }
+
+    /**
+     * Registers a namespace that can contain GraphQL types.
+     */
+    public function addTypeNamespace(string $namespace): self
+    {
+        $this->typeNamespaces[] = $namespace;
+        return $this;
+    }
+
+    /**
+     * Registers a query provider.
+     */
+    public function addQueryProvider(QueryProviderInterface $queryProvider): self
+    {
+        $this->queryProviders[] = $queryProvider;
+        return $this;
+    }
+
+    /**
+     * Registers a type mapper.
+     */
+    public function addTypeMapper(TypeMapperInterface $typeMapper): self
+    {
+        $this->typeMappers[] = $typeMapper;
+        return $this;
+    }
+
+    public function setDoctrineAnnotationReader(Reader $annotationReader): self
+    {
+        $this->doctrineAnnotationReader = $annotationReader;
+        return $this;
+    }
+
+    /**
+     * Returns a cached Doctrine annotation reader.
+     * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
+     */
+    private function getDoctrineAnnotationReader(): Reader
+    {
+        if ($this->doctrineAnnotationReader === null) {
+            AnnotationRegistry::registerLoader('class_exists');
+            $doctrineAnnotationReader = new DoctrineAnnotationReader();
+
+            if (function_exists('apcu_fetch')) {
+                $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, new ApcuCache(), true);
+            }
+
+            return $doctrineAnnotationReader;
+        }
+        return $this->doctrineAnnotationReader;
+    }
+
+    public function setHydrator(HydratorInterface $hydrator): self
+    {
+        $this->hydrator = $hydrator;
+        return $this;
+    }
+
+    public function setAuthenticationService(AuthenticationServiceInterface $authenticationService): self
+    {
+        $this->authenticationService = $authenticationService;
+        return $this;
+    }
+
+    public function setAuthorizationService(AuthorizationServiceInterface $authorizationService): self
+    {
+        $this->authorizationService = $authorizationService;
+        return $this;
+    }
+
+    public function setNamingStrategy(NamingStrategyInterface $namingStrategy): self
+    {
+        $this->namingStrategy = $namingStrategy;
+        return $this;
+    }
+
+    public function setSchemaConfig(SchemaConfig $schemaConfig): self
+    {
+        $this->schemaConfig = $schemaConfig;
+        return $this;
+    }
+
+    public function createSchema(): Schema
+    {
+        $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
+        $hydrator = $this->hydrator ?: new FactoryHydrator();
+        $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
+        $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver = new TypeResolver();
+        $cachedDocBlockFactory = new CachedDocBlockFactory($this->cache);
+        $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry = new TypeRegistry();
+
+        $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy);
+
+        $typeGenerator = new TypeGenerator($annotationReader, $fieldsBuilderFactory, $namingStrategy, $typeRegistry, $this->container);
+        $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $hydrator);
+
+        $typeMappers = [];
+
+        foreach ($this->typeNamespaces as $typeNamespace) {
+            $typeMappers[] = new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
+                $this->container, $annotationReader, $namingStrategy, $this->cache);
+        }
+
+        foreach ($this->typeMappers as $typeMapper) {
+            $typeMappers[] = $typeMapper;
+        }
+
+        if ($typeMappers === []) {
+            throw new GraphQLException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
+        }
+
+        $typeMappers[] = new PorpaginasTypeMapper();
+
+        $compositeTypeMapper = new CompositeTypeMapper($typeMappers);
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
+
+        $queryProviders = [];
+        foreach ($this->controllerNamespaces as $controllerNamespace) {
+            $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilderFactory, $recursiveTypeMapper,
+                $this->container, $this->cache);
+        }
+
+        foreach ($this->queryProviders as $queryProvider) {
+            $queryProviders[] = $queryProvider;
+        }
+
+        if ($queryProviders === []) {
+            throw new GraphQLException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
+        }
+
+        // TODO: configure ttl for cache?
+
+        $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
+
+        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig);
+    }
+}

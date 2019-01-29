@@ -81,8 +81,12 @@ class CompositeTypeMapper implements TypeMapperInterface
     public function getSupportedClasses(): array
     {
         if ($this->supportedClasses === null) {
-            $supportedClassesArrays = array_map(function(TypeMapperInterface $typeMapper) { return $typeMapper->getSupportedClasses(); }, $this->typeMappers);
-            $this->supportedClasses = array_unique(array_merge(...$supportedClassesArrays));
+            if ($this->typeMappers === []) {
+                $this->supportedClasses = [];
+            } else {
+                $supportedClassesArrays = array_map(function(TypeMapperInterface $typeMapper) { return $typeMapper->getSupportedClasses(); }, $this->typeMappers);
+                $this->supportedClasses = array_unique(array_merge(...$supportedClassesArrays));
+            }
         }
         return $this->supportedClasses;
     }

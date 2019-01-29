@@ -24,7 +24,7 @@ class InputTypeGenerator
     /**
      * @var FieldsBuilderFactory
      */
-    private $controllerQueryProviderFactory;
+    private $fieldsBuilderFactory;
     /**
      * @var array<string, InputObjectType>
      */
@@ -39,11 +39,11 @@ class InputTypeGenerator
     private $inputTypeUtils;
 
     public function __construct(InputTypeUtils $inputTypeUtils,
-                                FieldsBuilderFactory $controllerQueryProviderFactory,
+                                FieldsBuilderFactory $fieldsBuilderFactory,
                                 HydratorInterface $hydrator)
     {
         $this->inputTypeUtils = $inputTypeUtils;
-        $this->controllerQueryProviderFactory = $controllerQueryProviderFactory;
+        $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->hydrator = $hydrator;
     }
 
@@ -61,7 +61,7 @@ class InputTypeGenerator
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->controllerQueryProviderFactory, $recursiveTypeMapper, $factory, $methodName, $this->hydrator, null);
+            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $factory, $methodName, $this->hydrator, null);
         }
 
         return $this->cache[$inputName];
