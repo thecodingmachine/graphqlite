@@ -313,11 +313,15 @@ class Product
           <Features />
           <FeatureCallout />
             <Container background="dark">
-                <h2 style={{textAlign: 'center'}}>Get started!</h2>
+                <h2 id="try" style={{textAlign: 'center', paddingTop: 40, paddingBottom: 40}}>Get started!</h2>
             </Container>
           <Sample1 />
           <Sample2 />
           <Sample3 />
+            <Container >
+            <a class="button" href="docs/my-first-query" >Learn more by reading the Getting started guide</a>
+            </Container>
+
             <Showcase/>
         </div>
       </div>
