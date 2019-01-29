@@ -50,7 +50,7 @@ const siteConfig = {
 
   /* path to images for header/footer */
   headerIcon: 'img/graphql-controllers.svg',
-  footerIcon: 'img/docusaurus.svg',
+  footerIcon: 'img/graphql-controllers.svg',
   favicon: 'img/logo.svg',
 
   /* Colors for website */
