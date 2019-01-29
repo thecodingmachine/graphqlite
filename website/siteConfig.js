@@ -23,8 +23,8 @@
 const siteConfig = {
   title: 'GraphQLite', // Title for your website.
   tagline: 'GraphQL in PHP made easy',
-  url: 'https://graphqlite.thecodingmachine.com', // Your website URL
-  cname: 'graphqlite.thecodingmachine.com', // Your website URL
+  url: 'https://graphqlite.thecodingmachine.io', // Your website URL
+  cname: 'graphqlite.thecodingmachine.io', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -93,6 +93,8 @@ const siteConfig = {
   // Open Graph and Twitter card images.
   ogImage: 'img/docusaurus.png',
   twitterImage: 'img/docusaurus.png',
+
+  editUrl: 'https://github.com/thecodingmachine/graphqlite/edit/master/docs/',
 
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
