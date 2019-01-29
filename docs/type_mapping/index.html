@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type mapping · GraphQLite</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;The job of GraphQLite is to create GraphQL types from PHP types.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type mapping · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqline.thecodingmachine.com//index.html"/><meta property="og:description" content="&lt;p&gt;The job of GraphQLite is to create GraphQL types from PHP types.&lt;/p&gt;
+"/><meta property="og:image" content="https://graphqline.thecodingmachine.com/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqline.thecodingmachine.com/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class=""><a href="/help" target="_self">Help</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Usage</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Installation</h3><ul><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/symfony-bundle">Symfony bundle</a></li><li class="navListItem"><a class="navItem" href="/docs/other-frameworks">Other frameworks / No framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Usage</h3><ul><li class="navListItem"><a class="navItem" href="/docs/my-first-query">My first query</a></li><li class="navListItem"><a class="navItem" href="/docs/mutations">Mutations</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/type_mapping">Type mapping</a></li><li class="navListItem"><a class="navItem" href="/docs/extend_type">Extending a type</a></li><li class="navListItem"><a class="navItem" href="/docs/authentication_authorization">Authentication and authorization</a></li><li class="navListItem"><a class="navItem" href="/docs/external_type_declaration">External type declaration</a></li><li class="navListItem"><a class="navItem" href="/docs/input-types">Input types</a></li><li class="navListItem"><a class="navItem" href="/docs/inheritance">Inheritance and interfaces</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced</h3><ul><li class="navListItem"><a class="navItem" href="/docs/file-uploads">File uploads</a></li><li class="navListItem"><a class="navItem" href="/docs/custom-output-types">Custom output types</a></li><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Reference</h3><ul><li class="navListItem"><a class="navItem" href="/docs/annotations_reference">Annotations reference</a></li></ul></div></div></section></div><script>
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Type mapping</h1></header><article><div><span><p>The job of GraphQLite is to create GraphQL types from PHP types.</p>
+<p>Internally, GraphQLite uses a &quot;type mapper&quot;.</p>
+<h2><a class="anchor" aria-hidden="true" id="mapping-a-php-class-to-a-graphql-type"></a><a href="#mapping-a-php-class-to-a-graphql-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mapping a PHP class to a GraphQL type</h2>
+<p>The <a href="/docs/my-first-query">&quot;my first query&quot;</a> documentation page
+already explains how to use the <code>@Type</code> annotation to map a PHP class to a GraphQL type. Please refer to this documentation
+for class mapping</p>
+<h2><a class="anchor" aria-hidden="true" id="mapping-of-scalar-types"></a><a href="#mapping-of-scalar-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mapping of scalar types</h2>
+<p>Scalar PHP types can be type-hinted to the corresponding GraphQL types:</p>
+<ul>
+<li>string</li>
+<li>int</li>
+<li>bool</li>
+<li>float</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="mapping-of-arrays"></a><a href="#mapping-of-arrays" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mapping of arrays</h2>
+<p>You can type-hint against arrays (or iterators) as long as you add a detailed <code>@return</code> statement in the PHP-Doc:</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Query</span>
+ * <span class="hljs-doctag">@return</span> User[] &lt;=== we specify that the array is an array of User objects.
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">users</span><span class="hljs-params">(int $limit, int $offset)</span>: <span class="hljs-title">array</span>
+</span>{
+    <span class="hljs-comment">// Some code that returns an array of "users".</span>
+    <span class="hljs-comment">// This completely replaces the "resolve" method.</span>
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="mapping-of-id-type"></a><a href="#mapping-of-id-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mapping of ID type</h2>
+<p>GraphQL comes with a native &quot;ID&quot; type. PHP has no such type.</p>
+<p>If you want to expose an &quot;ID&quot; type in your GraphQL model, you have 2 solutions:</p>
+<h3><a class="anchor" aria-hidden="true" id="solution-1-force-the-outputtype"></a><a href="#solution-1-force-the-outputtype" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Solution 1: force the outputType</h3>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Field</span>(outputType="ID")
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+</span>{
+
+}
+</code></pre>
+<p>Using the &quot;outputType&quot; attribute of the <code>@Field</code> annotation, you can force the output type to &quot;ID&quot;.
+You can learn more about <a href="/docs/custom-output-types">forcing output types in the &quot;custom output types&quot; documentation</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="solution-2-use-the-id-class"></a><a href="#solution-2-use-the-id-class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Solution 2: use the &quot;ID&quot; class</h3>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">ID</span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Field</span>
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span>: <span class="hljs-title">ID</span>
+</span>{
+
+}
+</code></pre>
+<p>Note that you can also use the &quot;ID&quot; class as an input type:</p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">ID</span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Mutation</span>
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">save</span><span class="hljs-params">(ID $id, string $name)</span>: <span class="hljs-title">Product</span>
+</span>{
+
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="mapping-of-dates"></a><a href="#mapping-of-dates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mapping of dates</h2>
+<p>Out of the box, GraphQL does not have a <code>DateTime</code> type, but we took the liberty to add one, with sensible defaults.</p>
+<p>When used as an output type (i.e. in a &quot;return type&quot;), <code>DateTimeImmutable</code> or <code>DateTimeInterface</code> PHP classes are
+automatically mapped to this <code>DateTime</code> GraphQL type.</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Field</span>
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDate</span><span class="hljs-params">()</span>: \<span class="hljs-title">DateTimeInterface</span>
+</span>{
+
+}
+</code></pre>
+<p>The &quot;date&quot; field will be of type &quot;DateTime&quot;. In the returned JSON response to a query, the date is formatted as a string
+in the ISO8601 format (aka ATOM format).</p>
+<p>When used in an &quot;input type&quot; (i.e. in arguments of a method), the <code>DateTime</code> PHP class is not supported.
+Only the <code>DateTimeImmutable</code> PHP class is mapped.</p>
+<div class="alert alert-success">This is ok:</div>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Query</span>
+ * <span class="hljs-doctag">@return</span> Product[]
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getProducts</span><span class="hljs-params">(\DateTimeImmutable $fromDate)</span>: <span class="hljs-title">array</span>
+</span>{
+
+}
+</code></pre>
+<div class="alert alert-error">But <code>DateTime</code> input type is not supported:</div>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Query</span>
+ * <span class="hljs-doctag">@return</span> Product[]
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getProducts</span><span class="hljs-params">(\DateTime $fromDate)</span>: <span class="hljs-title">array</span> // <span class="hljs-title">BAD</span>
+</span>{
+
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="union-types"></a><a href="#union-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Union types</h2>
+<hr>
+<p>You can create a GraphQL union type &quot;on the fly&quot;, using the pipe (|) operator in the PHPDoc:</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Query</span>
+ * <span class="hljs-doctag">@return</span> Company|Contact &lt;== can return a company OR a contact
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">companyOrContact</span><span class="hljs-params">(int $id)</span>
+</span>{
+    <span class="hljs-comment">// Some code that returns a company or a contact.</span>
+}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/mutations"><span class="arrow-prev">← </span><span>Mutations</span></a><a class="docs-next button" href="/docs/extend_type"><span>Extending a type</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#mapping-a-php-class-to-a-graphql-type">Mapping a PHP class to a GraphQL type</a></li><li><a href="#mapping-of-scalar-types">Mapping of scalar types</a></li><li><a href="#mapping-of-arrays">Mapping of arrays</a></li><li><a href="#mapping-of-id-type">Mapping of ID type</a><ul class="toc-headings"><li><a href="#solution-1-force-the-outputtype">Solution 1: force the outputType</a></li><li><a href="#solution-2-use-the-id-class">Solution 2: use the &quot;ID&quot; class</a></li></ul></li><li><a href="#mapping-of-dates">Mapping of dates</a></li><li><a href="#union-types">Union types</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/graphqlite.svg" alt="GraphQLite" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/en/getting-started">Install</a><a href="/docs/en/my-first-query">Getting started</a><a href="/docs/en/annotations_reference">Reference</a></div><div><h5>More</h5><a href="https://thecodingmachine.io" target="_blank">Blog</a><a href="https://github.com/thecodingmachine/graphqlite" target="_blank">GitHub</a><a class="github-button" href="https://github.com/thecodingmachine/graphqlite" data-icon="octicon-star" data-show-count="true" aria-label="Star thecodingmachine/graphqlite on GitHub">Star</a></div></section><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div></body></html>

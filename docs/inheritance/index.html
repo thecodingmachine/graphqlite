@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Inheritance and interfaces · GraphQLite</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Some of your entities may extend other entities. GraphQLite will do its best to represent this hierarchy of objects in GraphQL using interfaces.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Inheritance and interfaces · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqline.thecodingmachine.com//index.html"/><meta property="og:description" content="&lt;p&gt;Some of your entities may extend other entities. GraphQLite will do its best to represent this hierarchy of objects in GraphQL using interfaces.&lt;/p&gt;
+"/><meta property="og:image" content="https://graphqline.thecodingmachine.com/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqline.thecodingmachine.com/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class=""><a href="/help" target="_self">Help</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Usage</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Installation</h3><ul><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/symfony-bundle">Symfony bundle</a></li><li class="navListItem"><a class="navItem" href="/docs/other-frameworks">Other frameworks / No framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Usage</h3><ul><li class="navListItem"><a class="navItem" href="/docs/my-first-query">My first query</a></li><li class="navListItem"><a class="navItem" href="/docs/mutations">Mutations</a></li><li class="navListItem"><a class="navItem" href="/docs/type_mapping">Type mapping</a></li><li class="navListItem"><a class="navItem" href="/docs/extend_type">Extending a type</a></li><li class="navListItem"><a class="navItem" href="/docs/authentication_authorization">Authentication and authorization</a></li><li class="navListItem"><a class="navItem" href="/docs/external_type_declaration">External type declaration</a></li><li class="navListItem"><a class="navItem" href="/docs/input-types">Input types</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/inheritance">Inheritance and interfaces</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced</h3><ul><li class="navListItem"><a class="navItem" href="/docs/file-uploads">File uploads</a></li><li class="navListItem"><a class="navItem" href="/docs/custom-output-types">Custom output types</a></li><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Reference</h3><ul><li class="navListItem"><a class="navItem" href="/docs/annotations_reference">Annotations reference</a></li></ul></div></div></section></div><script>
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Inheritance and interfaces</h1></header><article><div><span><p>Some of your entities may extend other entities. GraphQLite will do its best to represent this hierarchy of objects in GraphQL using interfaces.</p>
+<p>Let's say you have 2 classes: <code>Contact</code> and <code>User</code> (which extends <code>Contact</code>)</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Type</span>
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Contact</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Type</span>
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Contact</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>Both classes are also declared as GraphQL types (using the <code>@Type</code> annotation).</p>
+<p>Now, let's assume you have a query that returns a contact:</p>
+<pre><code class="hljs"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ContactController</span>
+</span>{
+    <span class="hljs-comment">/**
+     * @Query()
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getContact</span><span class="hljs-params">()</span>: Contact
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</code></pre>
+<p>When writing a GraphQL query, you can query using fragments:</p>
+<pre><code class="hljs css language-graphql">contact {
+    name
+    <span class="hljs-built_in">..</span>.<span class="hljs-built_in"> User </span>{
+       email
+    }
+}
+</code></pre>
+<p>Behind the scene, GraphQLite will detect that the <code>Contact</code> class is extended by the <code>User</code> class. Because the
+class is extended, a GraphQL <code>ContactInterface</code> interface is created dynamically. You don't have to do anything.
+The GraphQL <code>User</code> type will automatically implement this <code>ContactInterface</code>. The interface contains all the fields
+available in the <code>Contact</code> type.</p>
+<p>Written in &quot;<a href="https://graphql.org/learn/schema/#type-language">GraphQL type language</a>&quot;, the representation of types
+would look like this:</p>
+<pre><code class="hljs css language-graphql"><span class="hljs-title">interface</span> <span class="hljs-type">ContactInterface</span> {
+    // <span class="hljs-type">List</span> <span class="hljs-keyword">of</span> fields declared <span class="hljs-keyword">in</span> <span class="hljs-type">Contact</span> <span class="hljs-keyword">class</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-type">Contact</span> implements <span class="hljs-type">ContactInterface</span> {
+    // <span class="hljs-type">List</span> <span class="hljs-title">of</span> <span class="hljs-title">fields</span> <span class="hljs-title">declared</span> <span class="hljs-title">in</span> <span class="hljs-type">Contact</span> <span class="hljs-title">class</span>
+}</span>
+
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-type">User</span> implements <span class="hljs-type">ContactInterface</span> {
+    // <span class="hljs-type">List</span> <span class="hljs-title">of</span> <span class="hljs-title">fields</span> <span class="hljs-title">declared</span> <span class="hljs-title">in</span> <span class="hljs-type">Contact</span> <span class="hljs-title">and</span> <span class="hljs-type">User</span> <span class="hljs-title">classes</span>
+}</span>
+</code></pre>
+<div class="alert alert-warning">Right now, there is no way to explicitly declare a GraphQL interface using GraphQLite.
+GraphQLite automatically declares interfaces when it sees an inheritance relationship between to classes that
+are GraphQL types.
+</div>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/input-types"><span class="arrow-prev">← </span><span>Input types</span></a><a class="docs-next button" href="/docs/file-uploads"><span>File uploads</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/graphqlite.svg" alt="GraphQLite" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/en/getting-started">Install</a><a href="/docs/en/my-first-query">Getting started</a><a href="/docs/en/annotations_reference">Reference</a></div><div><h5>More</h5><a href="https://thecodingmachine.io" target="_blank">Blog</a><a href="https://github.com/thecodingmachine/graphqlite" target="_blank">GitHub</a><a class="github-button" href="https://github.com/thecodingmachine/graphqlite" data-icon="octicon-star" data-show-count="true" aria-label="Star thecodingmachine/graphqlite on GitHub">Star</a></div></section><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div></body></html>
