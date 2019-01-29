@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="https://graphqlite.thecodingmachine.com/img/logo.svg" alt="GraphQLite logo" width="250" height="250" />
+    <img src="https://graphqlite.thecodingmachine.io/img/logo.svg" alt="GraphQLite logo" width="250" height="250" />
 </p>
 <h3 align="center">GraphQLite</h3>
 <p align="center">GraphQL in PHP made easy.</p>
