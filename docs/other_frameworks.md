@@ -88,7 +88,7 @@ $factory->setSchemaConfig($schemaConfig);
 
 In this sample, we will focus on getting a working version of GraphQL-Controllers using:
 
-- Zend Stratigility for the PSR-7 server
+- [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) for the PSR-7 server
 - "phps-cans/psr7-middleware-graphql" to route PSR-7 requests to the GraphQL engine
 - mouf/picotainer (a micro-container) for the PSR-11 container
 - symfony/cache for the PSR-16 cache
@@ -106,8 +106,10 @@ The choice of the libraries is really up to you. You can adapt it based on your 
   "require": {
     "thecodingmachine/graphql-controllers": "^3",
     "phps-cans/psr7-middleware-graphql": "^0.2",
+    "middlewares/payload": "^2.1",
     "zendframework/zend-diactoros": "^2",
     "zendframework/zend-stratigility": "^3",
+    "zendframework/zend-httphandlerrunner": "^1.0",
     "mouf/picotainer": "^1.1",
     "symfony/cache": "^4.2"
   },
@@ -118,49 +120,130 @@ The choice of the libraries is really up to you. You can adapt it based on your 
 
 We now need to initialize Stratigility:
 
-TODO
-
-
-
-
-```bash
-$ composer require thecodingmachine/graphql-controllers
-```
-
-The package contains a PSR-15 compatible middleware: `TheCodingMachine\GraphQL\Controllers\GraphQLMiddleware`.
-Put this middleware in your middleware pipe.
-
-The middleware expects a GraphQL schema to be created. This package comes with a GraphQL schema compatible with Webonix
-schemas that will automatically be filled from the GraphQL controllers you will write.
-
-Controllers will be fetched from the container (it must be PSR-11 compliant).
-
-Pseudo-code to initialize the middleware looks like this:
-
+**/index.php**
 ```php
-$registry = new Registry(
-  $container, // The container containing the controllers (PSR-11 compliant),
-  $authorizationService // Object to manage authorization (the @Right annotation)  
-  $authenticationService, // Object to manage authentication (the @Logged annotation)
-  $annotationReader, // A Doctrine annotation reader
-  $typeMapper, // Object used to map PHP classes to GraphQL types.
-  $hydrator, // Object used to create Objects from sent data (mostly for mutation)
+<?php
+
+use Zend\Diactoros\Response;
+use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\ServerRequestFactory;
+use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
+use Zend\Stratigility\Middleware\ErrorResponseGenerator;
+use Zend\Stratigility\MiddlewarePipe;
+use Zend\Diactoros\Server;
+use Zend\HttpHandlerRunner\RequestHandlerRunner;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$container = require 'config/container.php';
+
+$serverRequestFactory = [ServerRequestFactory::class, 'fromGlobals'];
+
+$errorResponseGenerator = function (Throwable $e) {
+    $generator = new ErrorResponseGenerator();
+    return $generator($e, new ServerRequest(), new Response());
+};
+
+$runner = new RequestHandlerRunner(
+    $container->get(MiddlewarePipe::class),
+    new SapiStreamEmitter(),
+    $serverRequestFactory,
+    $errorResponseGenerator
 );
-
-$queryProvider = new AggregateControllerQueryProvider([
-        "myController1", // These are the name of entries in the container to fetch the GraphQL controllers
-        "myController2"
-    ],
-    $registry
-  );
+$runner->run();
 ```
 
-Alternatively, you can use auto-discovery of the controllers if you put them in a common namespace:
+We are initializing a Zend RequestHandler (that receives requests) and we now pass it a Zend Stratigility `MiddlewarePipe`.
+This `MiddlewarePipe` comes from the container. The container is declared in the `config/container.php` file:
 
+**config/container.php**
 ```php
-$queryProvider = new GlobControllerQueryProvider('App\\GraphQL\\Controllers', $this->getRegistry(), $container, $cache, $cacheTtl);
+<?php
+
+use GraphQL\Server\StandardServer;
+use GraphQL\Type\Schema;
+use Mouf\Picotainer\Picotainer;
+use PsCs\Middleware\Graphql\WebonyxGraphqlMiddleware;
+use Psr\Container\ContainerInterface;
+use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Simple\ApcuCache;
+use TheCodingMachine\GraphQL\Controllers\SchemaFactory;
+use Zend\Diactoros\ResponseFactory;
+use Zend\Diactoros\StreamFactory;
+use Zend\Stratigility\MiddlewarePipe;
+
+// Picotainer is a minimalist PSR-11 container.
+return new Picotainer([
+    MiddlewarePipe::class => function(ContainerInterface $container) {
+        $pipe = new MiddlewarePipe();
+        $pipe->pipe(new JsonPayload()); // JsonPayload converts JSON body into a parser PHP array
+        $pipe->pipe($container->get(WebonyxGraphqlMiddleware::class));
+        return $pipe;
+    },
+    // The WebonyxGraphqlMiddleware is a PSR-15 compatible middleware that exposes Webonyx schemas 
+    WebonyxGraphqlMiddleware::class => function(ContainerInterface $container) {
+        return new WebonyxGraphqlMiddleware(
+            $container->get(StandardServer::class),
+            new ResponseFactory(),
+            new StreamFactory()
+        );
+    },
+    StandardServer::class => function(ContainerInterface $container) {
+        return new StandardServer([
+            'schema' => $container->get(Schema::class)
+        ]);
+    },
+    CacheInterface::class => function() {
+        return new ApcuCache();
+    },
+    Schema::class => function(ContainerInterface $container) {
+        // The magic happens here. We create a schema using GraphQL-Controllers SchemaFactory
+        $factory = new SchemaFactory($container->get(CacheInterface::class), $container);
+        $factory->addControllerNamespace('App\\Controllers\\');
+        $factory->addTypeNamespace('App\\');
+        return $factory->createSchema();
+    }
+]);
 ```
 
-The application will look into the 'App\\GraphQL\\Controllers' namespace for GraphQL controllers. It assumes that the 
+Now, we need to add a first query. To do this, we create a controller.
+The application will look into the 'App\\Controllers' namespace for GraphQL controllers. It assumes that the 
 container contains an entry whose name is the fully qualified class name of the container.
-Note: $cache is a PSR-16 compatible cache.
+
+
+**src/Controllers/MyController.php**
+```php
+namespace App\Controllers;
+
+use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+
+class MyController
+{
+    /**
+     * @Query
+     */
+    public function hello(string $name): string
+    {
+        return 'Hello '.$name;
+    }
+}
+```
+
+... and we need to declare the controller in the container:
+
+**config/container.php**
+```php
+use App\Controllers\MyController;
+
+return new Picotainer([
+    // ...
+    MyController::class => function() {
+        return new MyController();
+    },
+]);
+```
+
+And we are done!
+You can now test your query using your favorite GraphQL client:
+
+![](../img/query1.png)
