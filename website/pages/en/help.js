@@ -22,18 +22,15 @@ function Help(props) {
   const supportLinks = [
     {
       content: `Learn more using the [documentation on this site.](${docUrl(
-        'doc1.html',
+        'my-first-query',
       )})`,
       title: 'Browse Docs',
     },
     {
-      content: 'Ask questions about the documentation and project',
+      content: 'The best way to ask questions about the documentation and project is to [open an issue on Github](https://github.com/thecodingmachine/graphqlite/issues)',
       title: 'Join the community',
     },
-    {
-      content: "Find out what's new with this project",
-      title: 'Stay up to date',
-    },
+
   ];
 
   return (
@@ -43,7 +40,7 @@ function Help(props) {
           <header className="postHeader">
             <h1>Need help?</h1>
           </header>
-          <p>This project is maintained by a dedicated group of people.</p>
+          <p>This project is maintained by <a href="https://thecodingmachine.com">TheCodingMachine</a> and the community at large. Any pull request is welcome!</p>
           <GridBlock contents={supportLinks} layout="threeColumn" />
         </div>
       </Container>
