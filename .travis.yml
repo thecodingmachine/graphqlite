@@ -2,9 +2,10 @@ language: php
 cache:
   directories:
     - $HOME/.composer/cache
-matrix:
+jobs:
   include:
-    - php: 7.3
+    - stage: test
+      php: 7.3
       env: PREFER_LOWEST=""
       before_script:
         - &composerupdate
@@ -15,30 +16,32 @@ matrix:
         - composer phpstan
       after_script:
         - ./vendor/bin/coveralls -v
-    - php: 7.2
+    - stage: test
+      php: 7.2
       env: PREFER_LOWEST=""
       before_script:
         - *composerupdate
       script:
         - *phpunit
-    - php: 7.1
+    - stage: test
+      php: 7.1
       env: PREFER_LOWEST=""
       before_script:
         - *composerupdate
       script:
         - *phpunit
-    - php: 7.1
+    - stage: test
+      php: 7.1
       env: PREFER_LOWEST="--prefer-lowest"
       before_script:
         - *composerupdate
       script:
         - *phpunit
-    - name: "Doc generation"
+    - stage: doc
+      if: branch = master
+      name: "Doc generation"
       language: node_js
       node_js: 8
-      branches:
-        only:
-          - master
       cache:
         yarn: true
       script:
