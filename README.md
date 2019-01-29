@@ -16,5 +16,5 @@ Note: v1 and v2 of this library was built on top of `youshido/graphql`.
 
 This library allows you to write your GraphQL queries in simple-to-write controllers.
 
-### [Read the documentation](https://graphqlite.thecodingmachine.com)
+### [Read the documentation](https://graphqlite.thecodingmachine.io)
 
