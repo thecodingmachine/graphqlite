@@ -6,7 +6,7 @@ sidebar_label: Custom output types
 
 ## Why do I need this?
 
-In some special cases, you want to override the GraphQL return type that is attributed by default by GraphQL-Controllers.
+In some special cases, you want to override the GraphQL return type that is attributed by default by GraphQLite.
 
 Here is a sample:
 
@@ -26,7 +26,7 @@ class ProductType
 }
 ```
 
-In the example above, GraphQL-Controllers will generate a GraphQL schema with a field "id" of type "string".
+In the example above, GraphQLite will generate a GraphQL schema with a field "id" of type "string".
 
 ```graphql
 type Product {
@@ -34,10 +34,10 @@ type Product {
 }
 ```
 
-GraphQL comes with an "ID" scalar type. But PHP has no such type. So GraphQL-Controllers does not know when a variable
+GraphQL comes with an "ID" scalar type. But PHP has no such type. So GraphQLite does not know when a variable
 is an ID or not.
 
-You can help GraphQL-Controllers by manually specifying the output type to use:
+You can help GraphQLite by manually specifying the output type to use:
 
 ```php
     /**
@@ -58,7 +58,7 @@ You can use the **outputType** attribute in the following annotations:
 
 ## Registering a custom output type (advanced)
 
-If you have special needs, you can design your own output type. GraphQL-Controllers runs on top of webonyx/graphql.
+If you have special needs, you can design your own output type. GraphQLite runs on top of webonyx/graphql.
 
 In order to create a custom output type, you need to:
 

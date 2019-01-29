@@ -51,11 +51,11 @@ If you try to run this code, you will get the following error:
 CannotMapTypeException: cannot map class "Location" to a known GraphQL input type. Check your TypeMapper configuration.
 ```
 
-You are running into this error because GraphQL-Controllers does not know how to handle the `Location` object.
+You are running into this error because GraphQLite does not know how to handle the `Location` object.
 
 In GraphQL, an object passed in parameter of a query or mutation (or any field) is called an **Input Type**.
 
-In order to declare that type, in GraphQL-Controllers, we will declare a **Factory**.
+In order to declare that type, in GraphQLite, we will declare a **Factory**.
 
 A **Factory** is a method that takes in parameter all the fields of the input type and return an object.
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Annotations;
+namespace TheCodingMachine\GraphQLite\Annotations;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.
@@ -11,7 +11,7 @@ namespace TheCodingMachine\GraphQL\Controllers\Annotations;
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("logged", type = "bool"),
- *   @Attribute("right", type = "TheCodingMachine\GraphQL\Controllers\Annotations\Right"),
+ *   @Attribute("right", type = "TheCodingMachine\GraphQLite\Annotations\Right"),
  *   @Attribute("outputType", type = "string"),
  *   @Attribute("isId", type = "bool"),
  *   @Attribute("failWith", type = "mixed"),

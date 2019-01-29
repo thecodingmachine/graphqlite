@@ -1,13 +1,13 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use ArrayObject;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Logged;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Mutation;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 
 class TestControllerNoReturnType
 {

@@ -1,16 +1,16 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class StaticTypeMapperTest extends AbstractQueryProviderTest
 {

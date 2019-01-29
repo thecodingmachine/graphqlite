@@ -1,5 +1,5 @@
 {
-    "name": "thecodingmachine/graphql-controllers",
+    "name": "thecodingmachine/graphqlite",
     "description": "Write your GraphQL queries in simple to write controllers (using webonix/graphql-php).",
     "license": "MIT",
     "type": "library",
@@ -35,12 +35,12 @@
     },
     "autoload": {
         "psr-4": {
-            "TheCodingMachine\\GraphQL\\Controllers\\": "src/"
+            "TheCodingMachine\\GraphQLite\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "TheCodingMachine\\GraphQL\\Controllers\\": "tests/"
+            "TheCodingMachine\\GraphQLite\\": "tests/"
         }
     },
     "scripts": {

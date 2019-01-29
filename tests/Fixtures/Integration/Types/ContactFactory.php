@@ -1,13 +1,13 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
 
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 class ContactFactory
 {

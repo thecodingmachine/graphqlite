@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Integration;
+namespace TheCodingMachine\GraphQLite\Integration;
 
 use function class_exists;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
@@ -16,34 +16,34 @@ use function print_r;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
-use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
-use TheCodingMachine\GraphQL\Controllers\FieldsBuilderFactory;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQL\Controllers\GlobControllerQueryProvider;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
-use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
-use TheCodingMachine\GraphQL\Controllers\InputTypeUtils;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CompositeTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\PorpaginasTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
-use TheCodingMachine\GraphQL\Controllers\NamingStrategyInterface;
-use TheCodingMachine\GraphQL\Controllers\QueryProviderInterface;
-use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
-use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
-use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
-use TheCodingMachine\GraphQL\Controllers\Schema;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
-use TheCodingMachine\GraphQL\Controllers\TypeRegistry;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
+use TheCodingMachine\GraphQLite\InputTypeGenerator;
+use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\QueryProviderInterface;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Schema;
+use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\TypeGenerator;
+use TheCodingMachine\GraphQLite\TypeRegistry;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use function var_dump;
 use function var_export;
 
@@ -61,7 +61,7 @@ class EndToEndTest extends TestCase
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
+                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
                     $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), new ArrayCache());
             },
             FieldsBuilderFactory::class => function(ContainerInterface $container) {
@@ -103,7 +103,7 @@ class EndToEndTest extends TestCase
                 ]);
             },
             GlobTypeMapper::class => function(ContainerInterface $container) {
-                return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Types',
+                return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -114,7 +114,7 @@ class EndToEndTest extends TestCase
                     );
             },
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
-                return new GlobTypeMapper('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Models',
+                return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),

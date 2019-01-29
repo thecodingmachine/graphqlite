@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Annotations;
+namespace TheCodingMachine\GraphQLite\Annotations;
 
 
 abstract class AbstractRequest

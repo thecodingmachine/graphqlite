@@ -1,10 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Simple\NullCache;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestController;
+use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
 class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
 {
@@ -34,7 +34,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQL\\Controllers', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), $container, new NullCache());
+        $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), $container, new NullCache());
 
         $queries = $globControllerQueryProvider->getQueries();
         $this->assertCount(6, $queries);

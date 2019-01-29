@@ -1,15 +1,15 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 use function array_keys;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQL\Controllers\Mappers\Interfaces\InterfacesResolverInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Mappers\Interfaces\InterfacesResolverInterface;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 /**
  * A simple implementation of the TypeMapperInterface that expects mapping to be passed in a setter.

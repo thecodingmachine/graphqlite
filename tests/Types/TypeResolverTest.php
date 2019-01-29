@@ -1,12 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Schema;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class TypeResolverTest extends TestCase
 {

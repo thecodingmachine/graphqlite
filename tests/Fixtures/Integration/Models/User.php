@@ -1,10 +1,10 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Integration\Models;
+namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @Type()

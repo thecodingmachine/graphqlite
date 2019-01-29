@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Reflection;
+namespace TheCodingMachine\GraphQLite\Reflection;
 
 use function filemtime;
 use phpDocumentor\Reflection\DocBlock;

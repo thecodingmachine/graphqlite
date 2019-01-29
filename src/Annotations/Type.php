@@ -1,12 +1,12 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Annotations;
+namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
 use function class_exists;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions\ClassNotFoundException;
-use TheCodingMachine\GraphQL\Controllers\MissingAnnotationException;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\MissingAnnotationException;
 
 /**
  * The Type annotation must be put in a GraphQL type class docblock and is used to map to the underlying PHP class
@@ -55,7 +55,7 @@ class Type
     public function getClass(): string
     {
         if ($this->class === null) {
-            throw new \RuntimeException('Empty class for @Type annotation. You MUST create the Type annotation object using the GraphQL-Controllers AnnotationReader');
+            throw new \RuntimeException('Empty class for @Type annotation. You MUST create the Type annotation object using the GraphQLite AnnotationReader');
         }
         return $this->class;
     }

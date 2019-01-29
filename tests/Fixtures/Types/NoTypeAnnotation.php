@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
 /**
  * A class with no Type annotation.

@@ -1,18 +1,18 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Simple\PhpFilesCache;
-use TheCodingMachine\GraphQL\Controllers\Containers\BasicAutoWiringContainer;
-use TheCodingMachine\GraphQL\Controllers\Containers\EmptyContainer;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CompositeTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
+use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
 class SchemaFactoryTest extends TestCase
 {
@@ -24,8 +24,8 @@ class SchemaFactoryTest extends TestCase
 
         $factory = new SchemaFactory($cache, $container);
 
-        $factory->addControllerNamespace('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers');
-        $factory->addTypeNamespace('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration');
+        $factory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
+        $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $factory->addQueryProvider(new AggregateQueryProvider([]));
 
         $schema = $factory->createSchema();
@@ -40,8 +40,8 @@ class SchemaFactoryTest extends TestCase
 
         $factory = new SchemaFactory($cache, $container);
 
-        $factory->addControllerNamespace('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration\\Controllers');
-        $factory->addTypeNamespace('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration');
+        $factory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
+        $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $factory->setDoctrineAnnotationReader(new \Doctrine\Common\Annotations\AnnotationReader())
                 ->setHydrator(new FactoryHydrator())
                 ->setAuthenticationService(new VoidAuthenticationService())
@@ -72,7 +72,7 @@ class SchemaFactoryTest extends TestCase
         $cache = new PhpFilesCache();
 
         $factory = new SchemaFactory($cache, $container);
-        $factory->addTypeNamespace('TheCodingMachine\\GraphQL\\Controllers\\Fixtures\\Integration');
+        $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
         $this->expectException(GraphQLException::class);
         $factory->createSchema();

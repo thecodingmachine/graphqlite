@@ -1,9 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 interface NamingStrategyInterface
 {

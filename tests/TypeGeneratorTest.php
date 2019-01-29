@@ -1,11 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use Mouf\Picotainer\Picotainer;
 use stdClass;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TypeFoo;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Fixtures\TypeFoo;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeGeneratorTest extends AbstractQueryProviderTest
 {

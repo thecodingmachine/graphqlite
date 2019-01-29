@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Annotations\Exceptions;
+namespace TheCodingMachine\GraphQLite\Annotations\Exceptions;
 
 
 use InvalidArgumentException;

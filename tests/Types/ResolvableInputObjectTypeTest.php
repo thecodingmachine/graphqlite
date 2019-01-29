@@ -1,13 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
-use TheCodingMachine\GraphQL\Controllers\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject2;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObjectWithRecursiveList;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQL\Controllers\GraphQLException;
+use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
+use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
+use TheCodingMachine\GraphQLite\GraphQLException;
 
 class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
 {
@@ -37,7 +37,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
         $this->assertSame(true, $obj->isTestBool());
 
         $this->expectException(GraphQLException::class);
-        $this->expectExceptionMessage("Expected argument 'string' was not provided in GraphQL input type 'InputObject' used in factory 'TheCodingMachine\GraphQL\Controllers\Fixtures\Types\TestFactory::myFactory()'");
+        $this->expectExceptionMessage("Expected argument 'string' was not provided in GraphQL input type 'InputObject' used in factory 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myFactory()'");
         $inputType->resolve([]);
     }
 

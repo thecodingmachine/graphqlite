@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use function get_parent_class;
 use GraphQL\Type\Definition\InputObjectType;
@@ -11,10 +11,10 @@ use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 
 /**
  * This class is in charge of creating Webonix InputTypes from Factory annotations.

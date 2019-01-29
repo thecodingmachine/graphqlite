@@ -1,10 +1,10 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\DuplicateTypes;
+namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateTypes;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 /**
  * @Type(class=TestObject::class)

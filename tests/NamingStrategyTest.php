@@ -1,9 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
 
 class NamingStrategyTest extends TestCase
 {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 
 use function get_class;
@@ -15,7 +15,7 @@ use Porpaginas\Result;
 use RuntimeException;
 use function strpos;
 use function substr;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class PorpaginasTypeMapper implements TypeMapperInterface
 {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
@@ -11,24 +11,24 @@ use Doctrine\Common\Cache\ApcuCache;
 use GraphQL\Type\SchemaConfig;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\FactoryHydrator;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Mappers\CompositeTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\PorpaginasTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapper;
-use TheCodingMachine\GraphQL\Controllers\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQL\Controllers\Reflection\CachedDocBlockFactory;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQL\Controllers\Security\FailAuthenticationService;
-use TheCodingMachine\GraphQL\Controllers\Security\FailAuthorizationService;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQL\Controllers\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQL\Controllers\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
+use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
+use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
+use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 /**
- * A class to help getting started with GraphQLControllers.
+ * A class to help getting started with GraphQLite.
  * It is in charge of creating a schema with most sensible defaults.
  */
 class SchemaFactory

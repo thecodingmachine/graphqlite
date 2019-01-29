@@ -1,9 +1,9 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\BadClassType;
+namespace TheCodingMachine\GraphQLite\Fixtures\BadClassType;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @Type(class=Foobar::class)

@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers\Security;
+namespace TheCodingMachine\GraphQLite\Security;
 
 use PHPUnit\Framework\TestCase;
 

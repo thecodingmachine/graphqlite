@@ -1,11 +1,11 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Types;
+namespace TheCodingMachine\GraphQLite\Types;
 
 
 use GraphQL\Type\Definition\ObjectType;
-use TheCodingMachine\GraphQL\Controllers\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
 class UnionType extends \GraphQL\Type\Definition\UnionType
 {

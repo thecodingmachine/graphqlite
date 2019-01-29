@@ -1,17 +1,14 @@
-[![Latest Stable Version](https://poser.pugx.org/thecodingmachine/graphql-controllers/v/stable)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
-[![Total Downloads](https://poser.pugx.org/thecodingmachine/graphql-controllers/downloads)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
-[![Latest Unstable Version](https://poser.pugx.org/thecodingmachine/graphql-controllers/v/unstable)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
-[![License](https://poser.pugx.org/thecodingmachine/graphql-controllers/license)](https://packagist.org/packages/thecodingmachine/graphql-controllers)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/graphql-controllers/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/thecodingmachine/graphql-controllers/?branch=master)
-[![Build Status](https://travis-ci.org/thecodingmachine/graphql-controllers.svg?branch=master)](https://travis-ci.org/thecodingmachine/graphql-controllers)
-[![Coverage Status](https://coveralls.io/repos/thecodingmachine/graphql-controllers/badge.svg?branch=master&service=github)](https://coveralls.io/github/thecodingmachine/graphql-controllers?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/thecodingmachine/graphqlite/v/stable)](https://packagist.org/packages/thecodingmachine/graphqlite)
+[![Total Downloads](https://poser.pugx.org/thecodingmachine/graphqlite/downloads)](https://packagist.org/packages/thecodingmachine/graphqlite)
+[![Latest Unstable Version](https://poser.pugx.org/thecodingmachine/graphqlite/v/unstable)](https://packagist.org/packages/thecodingmachine/graphqlite)
+[![License](https://poser.pugx.org/thecodingmachine/graphqlite/license)](https://packagist.org/packages/thecodingmachine/graphqlite)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/graphqlite/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/thecodingmachine/graphqlite/?branch=master)
+[![Build Status](https://travis-ci.org/thecodingmachine/graphqlite.svg?branch=master)](https://travis-ci.org/thecodingmachine/graphqlite)
+[![Coverage Status](https://coveralls.io/repos/thecodingmachine/graphqlite/badge.svg?branch=master&service=github)](https://coveralls.io/github/thecodingmachine/graphqlite?branch=master)
 
 
-# DEPRECATED.
-# This library has moved to https://github.com/thecodingmachine/graphqlite
-
-GraphQL controllers
-===================
+GraphQLite
+==========
 
 A utility library on top of `webonyx/graphql-php` library.
 

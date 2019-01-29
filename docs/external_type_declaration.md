@@ -25,13 +25,13 @@ For instance:
 - You are doing domain-drive design and don't want to clutter your domain object with annotations from the view layer
 - ...
 
-Hopefully, GraphQL-Controllers lets you declare a type without touching the targeted class.
+Hopefully, GraphQLite lets you declare a type without touching the targeted class.
 
 Actually, you can use the `@Type` annotation on a service (just like the [@ExtendType annotation](extend_type.md)):
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Field;
 use App\Entities\Product;
 
 /**
@@ -64,7 +64,7 @@ Let's break this sample:
  */
 ```
 
-With the "class" attribute of the `@Type` annotation, we tell GraphQL-Controllers that we want to create a GraphQL type 
+With the "class" attribute of the `@Type` annotation, we tell GraphQLite that we want to create a GraphQL type 
 mapped to the `Product` PHP class.
 
 ```php
@@ -82,7 +82,7 @@ class ProductType
 }
 ```
 
-- The `ProductType` class must be in the types namespace. You configured this namespace when you installed GraphQL-Controllers.
+- The `ProductType` class must be in the types namespace. You configured this namespace when you installed GraphQLite.
 - The `ProductType` class is actually a **service**. You can therefore inject dependencies in it (like the `$translationService` in this example)
 
 <div class="alert alert-warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your 
@@ -138,11 +138,11 @@ class ProductType
 
 This is a lot of boilerplate code.
 
-GraphQL-Controllers provides a shortcut for this:
+GraphQLite provides a shortcut for this:
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use App\Entities\Product;
 
 /**
@@ -155,17 +155,17 @@ class ProductType
 }
 ```
 
-By putting the `@SourceField` in the class docblock, you let GraphQL-controllers know that the type exposes the
-`getName` method of the underlying `Product` object (GraphQL-controllers will look for methods named `name()`, `getName()` and `isName()`).
+By putting the `@SourceField` in the class docblock, you let GraphQLite know that the type exposes the
+`getName` method of the underlying `Product` object (GraphQLite will look for methods named `name()`, `getName()` and `isName()`).
 
 ### Managing rights
 
 You can also check for logged users or users with a specific right using the `logged` and `right` properties of the annotation:
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use App\Entities\Product;
 
 /**
@@ -197,7 +197,7 @@ In some very particular cases, you might not know exactly the list of `@SourceFi
 If you need to decide the list of `@SourceField` at runtime, you can implement the `FromSourceFieldsInterface`:
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\FromSourceFieldsInterface;
+use TheCodingMachine\GraphQLite\FromSourceFieldsInterface;
 
 /**
  * @Type(class=Product::class)

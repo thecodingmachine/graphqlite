@@ -66,7 +66,7 @@ class HomeSplash extends React.Component {
           <PromoSection>
             <Button href="#try">Try It Out</Button>
             <Button href={docUrl('getting-started')}>Install</Button>
-            <Button href="https://github.com/thecodingmachine/graphql-controllers">GitHub</Button>
+            <Button href="https://github.com/thecodingmachine/graphqlite">GitHub</Button>
           </PromoSection>
         </div>
       </SplashContainer>
@@ -136,7 +136,7 @@ class Index extends React.Component {
 
 You focus on your PHP code.
 
-GraphQL-Controllers comes with an advanced *type-mapper* that automatically translate your PHP types into GraphQL types.`,
+GraphQLite comes with an advanced *type-mapper* that automatically translate your PHP types into GraphQL types.`,
                       },
                       {
                           content: '```php\n' +

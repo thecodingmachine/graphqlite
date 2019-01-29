@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures\Annotations;
+namespace TheCodingMachine\GraphQLite\Fixtures\Annotations;
 
 /**
  * No namespace here

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
 
 /**
  * @SourceField(name="test")

@@ -51,12 +51,12 @@ class Footer extends React.Component {
           <div>
             <h5>More</h5>
             <a href="https://thecodingmachine.io" target="_blank">Blog</a>
-            <a href="https://github.com/thecodingmachine/graphql-controllers" target="_blank">GitHub</a>
+            <a href="https://github.com/thecodingmachine/graphqlite" target="_blank">GitHub</a>
             <a className="github-button"
-               href="https://github.com/thecodingmachine/graphql-controllers"
+               href="https://github.com/thecodingmachine/graphqlite"
                data-icon="octicon-star"
                data-show-count="true"
-               aria-label="Star thecodingmachine/graphql-controllers on GitHub">Star</a>
+               aria-label="Star thecodingmachine/graphqlite on GitHub">Star</a>
           </div>
         </section>
 

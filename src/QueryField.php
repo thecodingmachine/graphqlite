@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use function get_class;
 use GraphQL\Type\Definition\FieldDefinition;
@@ -15,9 +15,9 @@ use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use function is_array;
-use TheCodingMachine\GraphQL\Controllers\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQL\Controllers\Types\DateTimeType;
-use TheCodingMachine\GraphQL\Controllers\Types\ID;
+use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Types\DateTimeType;
+use TheCodingMachine\GraphQLite\Types\ID;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.

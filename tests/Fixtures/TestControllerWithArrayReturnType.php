@@ -1,10 +1,10 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use ArrayObject;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithArrayReturnType
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQL\Controllers;
+namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeRegistryTest extends TestCase
 {

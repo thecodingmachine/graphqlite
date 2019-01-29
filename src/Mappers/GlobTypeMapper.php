@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Mappers;
+namespace TheCodingMachine\GraphQLite\Mappers;
 
 use function array_keys;
 use function filemtime;
@@ -15,15 +15,15 @@ use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use TheCodingMachine\GraphQL\Controllers\AnnotationReader;
-use TheCodingMachine\GraphQL\Controllers\Annotations\ExtendType;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Factory;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
-use TheCodingMachine\GraphQL\Controllers\InputTypeGenerator;
-use TheCodingMachine\GraphQL\Controllers\InputTypeUtils;
-use TheCodingMachine\GraphQL\Controllers\NamingStrategy;
-use TheCodingMachine\GraphQL\Controllers\TypeGenerator;
-use TheCodingMachine\GraphQL\Controllers\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\InputTypeGenerator;
+use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\TypeGenerator;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).

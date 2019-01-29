@@ -4,9 +4,9 @@ title: Type mapping
 sidebar_label: Type mapping
 ---
 
-The job of GraphQL-Controllers is to create GraphQL types from PHP types.
+The job of GraphQLite is to create GraphQL types from PHP types.
 
-Internally, GraphQL-Controllers uses a "type mapper".
+Internally, GraphQLite uses a "type mapper".
 
 ## Mapping a PHP class to a GraphQL type
 
@@ -63,7 +63,7 @@ You can learn more about [forcing output types in the "custom output types" docu
 ### Solution 2: use the "ID" class
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Types\ID;
+use TheCodingMachine\GraphQLite\Types\ID;
 
 /**
  * @Field
@@ -77,7 +77,7 @@ public function getId(): ID
 Note that you can also use the "ID" class as an input type:
 
 ```php
-use TheCodingMachine\GraphQL\Controllers\Types\ID;
+use TheCodingMachine\GraphQLite\Types\ID;
 
 /**
  * @Mutation

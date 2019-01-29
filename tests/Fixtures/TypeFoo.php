@@ -1,15 +1,15 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQL\Controllers\Fixtures;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
-use TheCodingMachine\GraphQL\Controllers\Annotations\SourceField;
-use TheCodingMachine\GraphQL\Controllers\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * A type whose class name does not END with Type
  *
- * @Type(class=TheCodingMachine\GraphQL\Controllers\Fixtures\TestObject::class)
+ * @Type(class=TheCodingMachine\GraphQLite\Fixtures\TestObject::class)
  * @SourceField(name="test")
  */
 class TypeFoo
