@@ -24,7 +24,7 @@ First, declare a query in your controller:
 class ProductController
 {
     /**
-     * @Query
+     * @Query()
      */
     public function product(string $id): Product
     {
