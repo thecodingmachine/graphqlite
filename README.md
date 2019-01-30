@@ -8,13 +8,61 @@
 
 ---
 
-A utility library on top of `webonyx/graphql-php` library that allows you to write your GraphQL queries in simple-to-write controllers.
+A library that allows you to write your GraphQL queries in simple-to-write controllers.
 
 ## Features
 
 * Create a complete GraphQL API by simply annotating your PHP classes
 * Framework agnostic, but Symfony bundle available!
 * Comes with batteries included :battery:: queries, mutations, mapping of arrays / iterators, file uploads, extendable types and more!
+
+## Basic example
+
+First, declare a query in your controller:
+
+```php
+class ProductController
+{
+    /**
+     * @Query
+     */
+    public function product(string $id): Product
+    {
+        // Some code that looks for a product and returns it.
+    }
+}
+```
+
+Then, annotate the `Product` class to declare what fields are exposed to the GraphQL API:
+
+```php
+/**
+ * @Type()
+ */
+class Product
+{
+    /**
+     * @Field()
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    // ...
+}
+```
+
+That's it, you're good to go :tada:! Query and enjoy!
+
+```grapql
+{
+  product(id: 42) {
+    name
+  }
+}
+```
+
+Want to learn more? Head to the [documentation](https://graphqlite.thecodingmachine.io/)!
 
 ## Badges
 
