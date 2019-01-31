@@ -4,22 +4,22 @@ title: Getting started with any framework
 sidebar_label: Other frameworks / No framework
 ---
 
-If you are using Symfony 4+, checkout the [Symfony bundle](symfony-bundle.md).
+If you are using **Symfony 4.x**, checkout the [Symfony bundle](symfony-bundle.md).
 
-GraphQLite requires:
+## Installation
 
-- A PSR-11 compatible container
-- A PSR-16 cache
+Open a terminal in your current project directory and run:
 
-Additionally, you will need a way to route the HTTP requests to the underlying GraphQL library.
-thecodingmachine/graphqlite uses internally [webonyx/graphql-php](http://webonyx.github.io/graphql-php/).
-This library plays well with PSR-7 requests and there is a PSR-15 middleware available.
+```console
+$ composer require thecodingmachine/graphqlite
+```
 
-## Generating a GraphQL schema.
+## Integration
 
-GraphQLite purpose is to generate a [Webonyx GraphQL `Schema`](https://webonyx.github.io/graphql-php/type-system/schema/).
+GraphQLite relies on the [webonyx/graphql-php](http://webonyx.github.io/graphql-php/) library internally.
 
-The easiest way to create such a schema is to use the `SchemaFactory` class.
+This library requires a [Schema](https://webonyx.github.io/graphql-php/type-system/schema/) in order to resolve
+GraphQL queries and we provide a `SchemaFactory` class to create such a schema:
 
 ```php
 use TheCodingMachine\GraphQLite\SchemaFactory;
@@ -33,10 +33,25 @@ $factory->addControllerNamespace('App\\Controllers\\')
 $schema = $factory->createSchema();
 ```
 
-You can now use the schema to resolve GraphQL queries (using [Webonyx's GraphQL facade](https://webonyx.github.io/graphql-php/getting-started/#hello-world) 
-or the [StandardServer class](https://webonyx.github.io/graphql-php/executing-queries/#using-server)).
+You can now use this schema with [Webonyx GraphQL facade](https://webonyx.github.io/graphql-php/getting-started/#hello-world) 
+or the [StandardServer class](https://webonyx.github.io/graphql-php/executing-queries/#using-server).
 
-## Absolutely minimal sample
+The `SchemaFactory` class also comes with a number of methods that you can use to customize your GraphQLite settings.
+
+```php
+// Configure an authentication service (to resolve the @Logged annotations).
+$factory->setAuthenticationService(new VoidAuthenticationService());
+// Configure an authorization service (to resolve the @Right annotations).
+$factory->setAuthorizationService(new VoidAuthorizationService());
+// Change the naming convention of GraphQL types globally.
+$factory->setNamingStrategy(new NamingStrategy());
+// Add a custom type mapper.
+$factory->addTypeMapper($typeMapper);
+// Add custom options to the Webonyx underlying Schema.
+$factory->setSchemaConfig($schemaConfig);
+```
+
+## Minimal example
 
 The smallest working example using no framework is:
 
@@ -66,36 +81,22 @@ header('Content-Type: application/json');
 echo json_encode($output);
 ```
 
-## Factory options
+## Advanced example
 
-The `SchemaFactory` class comes with a number of methods that you can use to customize your GraphQLite settings.
+When using a framework, you will need a way to route your HTTP requests to the `webonyx/graphql-php` library. 
+By chance, it plays well with PSR-7 requests and there is a PSR-15 middleware available.
 
-```php
-// Configure an authentication service (to resolve the @Logged annotations)
-$factory->setAuthenticationService(new VoidAuthenticationService());
-// Configure an authorization service (to resolve the @Right annotations)
-$factory->setAuthorizationService(new VoidAuthorizationService())
-// Change the naming convention of GraphQL types globally
-$factory->setNamingStrategy(new NamingStrategy())
-// Add a custom type mapper
-$factory->addTypeMapper($typeMapper)
-// Add custom options to the Webonyx underlying Schema
-$factory->setSchemaConfig($schemaConfig);
-```
+In this example, we will focus on getting a working version of GraphQLite using:
 
-
-## A more advanced sample
-
-In this sample, we will focus on getting a working version of GraphQLite using:
-
-- [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) for the PSR-7 server
-- "phps-cans/psr7-middleware-graphql" to route PSR-7 requests to the GraphQL engine
-- mouf/picotainer (a micro-container) for the PSR-11 container
-- symfony/cache for the PSR-16 cache
+- [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) as a PSR-7 server
+- `phps-cans/psr7-middleware-graphql` to route PSR-7 requests to the GraphQL engine
+- `mouf/picotainer` (a micro-container) for the PSR-11 container
+- `symfony/cache ` for the PSR-16 cache
 
 The choice of the libraries is really up to you. You can adapt it based on your needs.
 
 **composer.json**
+
 ```json
 {
   "autoload": {
@@ -118,9 +119,8 @@ The choice of the libraries is really up to you. You can adapt it based on your 
 }
 ```
 
-We now need to initialize Stratigility:
+**index.php**
 
-**/index.php**
 ```php
 <?php
 
@@ -153,10 +153,11 @@ $runner = new RequestHandlerRunner(
 $runner->run();
 ```
 
-We are initializing a Zend RequestHandler (that receives requests) and we now pass it a Zend Stratigility `MiddlewarePipe`.
-This `MiddlewarePipe` comes from the container. The container is declared in the `config/container.php` file:
+Here we are initializing a Zend `RequestHandler` (it receives requests) and we pass it to a Zend Stratigility `MiddlewarePipe`.
+This `MiddlewarePipe` comes from the container declared in the `config/container.php` file:
 
 **config/container.php**
+
 ```php
 <?php
 
@@ -176,11 +177,13 @@ use Zend\Stratigility\MiddlewarePipe;
 return new Picotainer([
     MiddlewarePipe::class => function(ContainerInterface $container) {
         $pipe = new MiddlewarePipe();
-        $pipe->pipe(new JsonPayload()); // JsonPayload converts JSON body into a parser PHP array
+        // JsonPayload converts JSON body into a parser PHP array.
+        $pipe->pipe(new JsonPayload());
         $pipe->pipe($container->get(WebonyxGraphqlMiddleware::class));
         return $pipe;
     },
-    // The WebonyxGraphqlMiddleware is a PSR-15 compatible middleware that exposes Webonyx schemas 
+    // The WebonyxGraphqlMiddleware is a PSR-15 compatible
+    // middleware that exposes Webonyx schemas. 
     WebonyxGraphqlMiddleware::class => function(ContainerInterface $container) {
         return new WebonyxGraphqlMiddleware(
             $container->get(StandardServer::class),
@@ -197,7 +200,7 @@ return new Picotainer([
         return new ApcuCache();
     },
     Schema::class => function(ContainerInterface $container) {
-        // The magic happens here. We create a schema using GraphQLite SchemaFactory
+        // The magic happens here. We create a schema using GraphQLite SchemaFactory.
         $factory = new SchemaFactory($container->get(CacheInterface::class), $container);
         $factory->addControllerNamespace('App\\Controllers\\');
         $factory->addTypeNamespace('App\\');
@@ -206,12 +209,14 @@ return new Picotainer([
 ]);
 ```
 
-Now, we need to add a first query. To do this, we create a controller.
-The application will look into the 'App\\Controllers' namespace for GraphQLite controllers. It assumes that the 
-container contains an entry whose name is the fully qualified class name of the container.
+Now, we need to add a first query and therefore create a controller.
+The application will look into the `App\Controllers` namespace for GraphQLite controllers.
+
+It assumes that the container contains an entry whose name is the fully qualified class name of the container.
 
 
 **src/Controllers/MyController.php**
+
 ```php
 namespace App\Controllers;
 
@@ -229,21 +234,19 @@ class MyController
 }
 ```
 
-... and we need to declare the controller in the container:
-
 **config/container.php**
+
 ```php
 use App\Controllers\MyController;
 
 return new Picotainer([
     // ...
+    
+    // We declare the controller in the container.
     MyController::class => function() {
         return new MyController();
     },
 ]);
 ```
 
-And we are done!
-You can now test your query using your favorite GraphQL client:
-
-![](../img/query1.png)
+And we are done! You can now test your query using your favorite GraphQL client.

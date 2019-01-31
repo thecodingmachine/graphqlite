@@ -6,10 +6,9 @@ sidebar_label: My first query
 
 ## Creating a controller
 
-In GraphQLite, GraphQL queries are creating by writing methods in "controller" classes.
-Each query method must be annotated with the `@Query` annotation.
+In GraphQLite, GraphQL queries are creating by writing methods in *controller* classes.
 
-Here is a sample of a "hello world" query:
+Each query method must be annotated with the `@Query` annotation. For instance:
 
 ```php
 namespace App\Controllers;
@@ -23,55 +22,29 @@ class MyController
      */
     public function hello(string $name): string
     {
-        return 'Hello '.$name;
+        return 'Hello ' . $name;
     }
 }
 ```
 
-- The `MyController` class does not need to extend any base class. For GraphQLite, a controller can be any
-  class.
-- The query method is annotated with a `@Query` annotation
-- The `MyController` class must be in the controllers namespace. You configured this namespace when you installed 
-GraphQLite. By default, in Symfony, the controllers namespace is `App\Controller`.
-  
-<div class="alert alert-warning"><strong>Heads up!</strong> The <code>MyController</code> class must exist in the container of your 
-application and the container identifier MUST be the fully qualified class name.<br/><br/>
-If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
-is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
-declare it.</div> 
+<div class="alert alert-info">
+    The <code>MyController</code> class must be in the controllers namespace which has been defined when you installed GraphQLite. 
+    By default, in Symfony, the controllers namespace is <code>App\Controller</code>.
+</div>
 
 ## Testing the query
 
-By default, the GraphQL endpoint is "/graphql". You can send HTTP requests to this endpoint and get responses.
+The default GraphQL endpoint is `/graphql`.
 
 The easiest way to test a GraphQL endpoint is to use [GraphiQL](https://github.com/graphql/graphiql) or 
-[Altair](https://altair.sirmuel.design/) test clients.
+[Altair](https://altair.sirmuel.design/) test clients (they are available as Chrome or Firefox plugins)
 
-These clients are available as Chrome or Firefox plugins.
+<div class="alert alert-info">
+    If you are using the Symfony bundle, GraphiQL is also directly embedded.<br>
+    Simply head to <code>http://[path-to-my-app]/graphiql</code>
+</div>
 
-<div class="alert alert-info"><strong>Symfony users:</strong> If you are using the Symfony bundle, GraphiQL is also directly embedded.
-Simply head to <code>http://[path-to-my-app]/graphiql</code></div>
-
-You can now perform a test query and get the answer:
-
-<table style="width:100%; display: table">
-<tr>
-<td style="width:50%">
-<strong>Query</strong>
-<pre><code>{
-  hello(name: "David")
-}</code></pre>
-</td>
-<td style="width:50%">
-<strong>Answer</strong>
-<pre><code class="hljs css language-json">{
-  "data": {
-    "hello": "Hello David"
-}</code></pre>
-</td>
-</tr>
-</table>
-
+Here a query using our simple *Hello World* example:
 
 ![](../img/query1.png)
 
