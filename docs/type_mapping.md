@@ -10,7 +10,7 @@ Internally, GraphQLite uses a "type mapper".
 
 ## Mapping a PHP class to a GraphQL type
 
-The ["my first query"](my_first_query.md) documentation page 
+The ["my first query"](queries.md) documentation page 
 already explains how to use the `@Type` annotation to map a PHP class to a GraphQL type. Please refer to this documentation
 for class mapping
 

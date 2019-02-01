@@ -2,7 +2,7 @@
   "docs": {
     "Introduction": ["features"],
     "Installation": ["getting-started", "symfony-bundle", "other-frameworks"],
-    "Usage": ["my-first-query", "mutations", "type_mapping", "extend_type", "authentication_authorization", "external_type_declaration", "input-types", "inheritance"],
+    "Usage": ["queries", "mutations", "type_mapping", "extend_type", "authentication_authorization", "external_type_declaration", "input-types", "inheritance"],
     "Advanced": ["file-uploads", "custom-output-types", "troubleshooting"],
     "Reference": ["annotations_reference"]
   }

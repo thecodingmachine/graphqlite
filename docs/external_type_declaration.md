@@ -4,7 +4,7 @@ title: External type declaration
 sidebar_label: External type declaration
 ---
 
-The "[My first query](my_first_query.md)" documentation page explains how to declare a GraphQL type by putting a `@Type`
+The "[My first query](queries.md)" documentation page explains how to declare a GraphQL type by putting a `@Type`
 annotation on the class you want to expose:
 
 ```php

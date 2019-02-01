@@ -61,8 +61,8 @@ use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 
-// $cache is a PSR-16 compatible cache
-// $container is a PSR-11 compatible container
+// $cache is a PSR-16 compatible cache.
+// $container is a PSR-11 compatible container.
 $factory = new SchemaFactory($cache, $container);
 $factory->addControllerNamespace('App\\Controllers\\')
         ->addTypeNamespace('App\\');
