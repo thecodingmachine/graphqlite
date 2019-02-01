@@ -95,7 +95,7 @@ const siteConfig = {
   twitterImage: 'img/docusaurus.png',
 
   editUrl: 'https://github.com/thecodingmachine/graphqlite/edit/master/docs/',
-
+  gaTrackingId: 'UA-10196481-8',
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
 
