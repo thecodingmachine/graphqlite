@@ -38,7 +38,7 @@ jobs:
       script:
         - *phpunit
     - stage: doc
-      if: branch = master
+      if: branch = master AND type = push
       name: "Doc generation"
       language: node_js
       node_js: 8
