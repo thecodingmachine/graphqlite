@@ -1,17 +1,17 @@
 ---
 id: mutations
-title: Writing mutations
+title: Mutations
 sidebar_label: Mutations
 ---
 
-In GraphQLite, mutations are created [just like queries](queries.md).
+In GraphQLite, mutations are created [like queries](queries.md).
 
-To create a mutation, you annotate a method in a controller with the `@Mutation` annotation.
+To create a mutation, you must annotate a method in a controller with the `@Mutation` annotation.
 
-Here is a sample of a "saveProduct" query:
+For instance:
 
 ```php
-namespace App\Controllers;
+namespace App\Controller;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 

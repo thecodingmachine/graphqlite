@@ -81,8 +81,6 @@ class ProductController
 
 As the `Product` class is not a scalar type, you must tell GraphQLite how to handle it:
 
-
-
 ```php
 namespace App\Entities;
 
