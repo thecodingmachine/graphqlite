@@ -116,7 +116,7 @@ The `@Type` annotation is used to inform GraphQLite that the `Product` class is 
 
 The `@Field` annotation is used to define the GraphQL fields. This annotation must be put on a **public method**.
 
-The `Product` class must be in the types namespace. As for *controller* classes, you configured this namespace when you installed 
+The `Product` class must be in the *types* namespace. As for *controller* classes, you configured this namespace when you installed 
 GraphQLite. By default, in Symfony, the types namespace is any namespace starting with `App\` so you can
 put a type anywhere in your application code.
 
