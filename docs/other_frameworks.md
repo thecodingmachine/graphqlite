@@ -207,8 +207,8 @@ return new Picotainer([
 ```
 
 Now, we need to add a first query. To do this, we create a controller.
-The application will look into the 'App\\Controllers' namespace for GraphQLite controllers. It assumes that the 
-container contains an entry whose name is the fully qualified class name of the container.
+The application will look into the `App\Controllers` namespace for GraphQLite controllers. It assumes that the 
+container contains an entry whose name is the fully qualified class name of the container.	container has an entry whose name is its fully qualified class name.
 
 
 **src/Controllers/MyController.php**
