@@ -8,17 +8,21 @@ Fields exposed in a GraphQL type do not need to be all part of the same class.
 
 Use the `@ExtendType` annotation to add additional fields to a type that is already declared.
 
-<div class="alert alert-info"><strong>Heads up!</strong> Extending a type has nothing to do with type inheritance.
-If you are looking for a way to expose a class and its children classes, <a href="inheritance">have a look at 
-the "Inheritance" documentation page</a>
+<div class="alert alert-info">
+    Extending a type has nothing to do with type inheritance. 
+    If you are looking for a way to expose a class and its children classes, have a look at 
+    the <a href="inheritance">Inheritance</a> section</a>
 </div>
-
-## The @ExtendType annotation
 
 Let's assume you have a `Product` class. In order to get the name of a product, there is no `getName()` method in 
 the product because the name needs to be translated in the correct language. You have a `TranslationService` to do that.
 
 ```php
+namespace App\Entities;
+
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
 /**
  * @Type()
  */
@@ -52,6 +56,8 @@ $name = $translationService->getProductName($productId, $language);
 Using `@ExtendType`, you can add an additional `name` field to your product:
 
 ```php
+namespace App\Types;
+
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use App\Entities\Product;

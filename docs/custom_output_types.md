@@ -4,11 +4,9 @@ title: Custom output types
 sidebar_label: Custom output types
 ---
 
-## Why do I need this?
-
 In some special cases, you want to override the GraphQL return type that is attributed by default by GraphQLite.
 
-Here is a sample:
+For instance:
 
 ```php
 /**
@@ -26,7 +24,7 @@ class ProductType
 }
 ```
 
-In the example above, GraphQLite will generate a GraphQL schema with a field "id" of type "string".
+In the example above, GraphQLite will generate a GraphQL schema with a field `id` of type `string`:
 
 ```graphql
 type Product {
@@ -34,8 +32,8 @@ type Product {
 }
 ```
 
-GraphQL comes with an "ID" scalar type. But PHP has no such type. So GraphQLite does not know when a variable
-is an ID or not.
+GraphQL comes with an `ID` scalar type. But PHP has no such type. So GraphQLite does not know when a variable
+is an `ID` or not.
 
 You can help GraphQLite by manually specifying the output type to use:
 
@@ -47,27 +45,28 @@ You can help GraphQLite by manually specifying the output type to use:
 
 ## Usage
 
-The **outputType** attribute will map the return value of the method to the output type passed in parameter.
+The `outputType` attribute will map the return value of the method to the output type passed in parameter.
 
-You can use the **outputType** attribute in the following annotations:
+You can use the `outputType` attribute in the following annotations:
 
-- `@Query`
-- `@Mutation`
-- `@Field`
-- `@SourceField`
+* `@Query`
+* `@Mutation`
+* `@Field`
+* `@SourceField`
 
 ## Registering a custom output type (advanced)
 
-If you have special needs, you can design your own output type. GraphQLite runs on top of webonyx/graphql.
-
 In order to create a custom output type, you need to:
 
-1. design a class that extends `GraphQL\Type\Definition\ObjectType`
-2. register this class in the GraphQL schema
+1. Design a class that extends `GraphQL\Type\Definition\ObjectType`.
+2. Register this class in the GraphQL schema.
 
-In order to [create your custom output type, check out the Webonyx documentation](https://webonyx.github.io/graphql-php/type-system/object-types/).
+You'll find more details on the [Webonyx documentation](https://webonyx.github.io/graphql-php/type-system/object-types/).
 
-In order to find existing types, the schema is using "type mappers" (classes implementing the `TypeMapperInterface` interface).
+---
+
+In order to find existing types, the schema is using *type mappers* (classes implementing the `TypeMapperInterface` interface).
+
 You need to make sure that one of these type mappers can return an instance of your type. The way you do this will depend on the framework
 you use.
 
@@ -77,7 +76,7 @@ Any class extending `GraphQL\Type\Definition\ObjectType` (and available in the c
 by Symfony and added to the schema.
 
 If you want to automatically map the output type to a given PHP class, you will have to explicitly declare the output type
-as a service and use the "graphql.output_type" tag:
+as a service and use the `graphql.output_type` tag:
 
 ```yaml
 # config/services.yaml
@@ -107,5 +106,5 @@ $staticTypeMapper->setNotMappedTypes([
 
 ```
 
-**Notice:** The `StaticTypeMapper` instance must be registered in your container and linked to a `CompositeTypeMapper`
+The `StaticTypeMapper` instance MUST be registered in your container and linked to a `CompositeTypeMapper`
 that will aggregate all the type mappers of the application.

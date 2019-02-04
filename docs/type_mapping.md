@@ -4,28 +4,74 @@ title: Type mapping
 sidebar_label: Type mapping
 ---
 
-The job of GraphQLite is to create GraphQL types from PHP types.
+As explained in the [queries](queries.md) section, the job of GraphQLite is to create GraphQL types from PHP types.
 
-Internally, GraphQLite uses a "type mapper".
-
-## Mapping a PHP class to a GraphQL type
-
-The ["my first query"](my_first_query.md) documentation page 
-already explains how to use the `@Type` annotation to map a PHP class to a GraphQL type. Please refer to this documentation
-for class mapping
-
-## Mapping of scalar types
+## Scalar mapping
 
 Scalar PHP types can be type-hinted to the corresponding GraphQL types:
 
-- string
-- int
-- bool
-- float
+* `string`
+* `int`
+* `bool`
+* `float`
 
-## Mapping of arrays
+For instance:
 
-You can type-hint against arrays (or iterators) as long as you add a detailed `@return` statement in the PHP-Doc:
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+class MyController
+{
+    /**
+     * @Query
+     */
+    public function hello(string $name): string
+    {
+        return 'Hello ' . $name;
+    }
+}
+```
+
+## Class mapping
+
+When returning a PHP class in a query, you must annotate this class using `@Type` and `@Field` annotations:
+
+```php
+namespace App\Entities;
+
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
+/**
+ * @Type()
+ */
+class Product
+{
+    // ...
+
+    /**
+     * @Field()
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @Field()
+     */
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+}
+```
+
+## Array mapping
+
+You can type-hint against arrays (or iterators) as long as you add a detailed `@return` statement in the PHPDoc.
 
 ```php
 /**
@@ -35,17 +81,16 @@ You can type-hint against arrays (or iterators) as long as you add a detailed `@
 public function users(int $limit, int $offset): array
 {
     // Some code that returns an array of "users".
-    // This completely replaces the "resolve" method.
 }
 ```
 
-## Mapping of ID type
+## ID mapping
 
-GraphQL comes with a native "ID" type. PHP has no such type.
+GraphQL comes with a native `ID` type. PHP has no such type.
 
-If you want to expose an "ID" type in your GraphQL model, you have 2 solutions:
+There are two ways with GraphQLite to handle such type.
 
-### Solution 1: force the outputType
+### Force the outputType
 
 ```php
 /**
@@ -53,14 +98,15 @@ If you want to expose an "ID" type in your GraphQL model, you have 2 solutions:
  */
 public function getId(): string
 {
-
+    // ...
 }
 ```
 
-Using the "outputType" attribute of the `@Field` annotation, you can force the output type to "ID".
-You can learn more about [forcing output types in the "custom output types" documentation](custom_output_types.md).
+Using the `outputType` attribute of the `@Field` annotation, you can force the output type to `ID`.
 
-### Solution 2: use the "ID" class
+You can learn more about forcing output types in the [custom output types section](custom_output_types.md).
+
+### ID class
 
 ```php
 use TheCodingMachine\GraphQLite\Types\ID;
@@ -70,11 +116,11 @@ use TheCodingMachine\GraphQLite\Types\ID;
  */
 public function getId(): ID
 {
-
+    // ...
 }
 ```
 
-Note that you can also use the "ID" class as an input type:
+Note that you can also use the `ID` class as an input type:
 
 ```php
 use TheCodingMachine\GraphQLite\Types\ID;
@@ -84,15 +130,15 @@ use TheCodingMachine\GraphQLite\Types\ID;
  */
 public function save(ID $id, string $name): Product
 {
-
+    // ...
 }
 ```
 
-## Mapping of dates
+## Date mapping
 
 Out of the box, GraphQL does not have a `DateTime` type, but we took the liberty to add one, with sensible defaults.
 
-When used as an output type (i.e. in a "return type"), `DateTimeImmutable` or `DateTimeInterface` PHP classes are 
+When used as an output type, `DateTimeImmutable` or `DateTimeInterface` PHP classes are 
 automatically mapped to this `DateTime` GraphQL type.
 
 ```php
@@ -101,51 +147,25 @@ automatically mapped to this `DateTime` GraphQL type.
  */
 public function getDate(): \DateTimeInterface
 {
-
+    return $this->date;
 }
 ```
 
-The "date" field will be of type "DateTime". In the returned JSON response to a query, the date is formatted as a string
-in the ISO8601 format (aka ATOM format).
+The `date` field will be of type `DateTime`. In the returned JSON response to a query, the date is formatted as a string
+in the **ISO8601** format (aka ATOM format).
 
-When used in an "input type" (i.e. in arguments of a method), the <code>DateTime</code> PHP class is not supported. 
-Only the <code>DateTimeImmutable</code> PHP class is mapped. 
-
-<div class="alert alert-success">This is ok:</div>
-
-```php
-/**
- * @Query
- * @return Product[]
- */
-public function getProducts(\DateTimeImmutable $fromDate): array
-{
-
-}
-```
-
-<div class="alert alert-error">But <code>DateTime</code> input type is not supported:</div>
-
-```php
-/**
- * @Query
- * @return Product[]
- */
-public function getProducts(\DateTime $fromDate): array // BAD
-{
-
-}
-```
+<div class="alert alert-error">
+    PHP <code>DateTime</code> type is not supported.
+</div>
 
 ## Union types
---------------
 
-You can create a GraphQL union type "on the fly", using the pipe (|) operator in the PHPDoc:
+You can create a GraphQL union type *on the fly* using the pipe `|` operator in the PHPDoc:
 
 ```php
 /**
  * @Query
- * @return Company|Contact <== can return a company OR a contact
+ * @return Company|Contact <== can return a company OR a contact.
  */
 public function companyOrContact(int $id)
 {

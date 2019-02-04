@@ -41,9 +41,6 @@ const siteConfig = {
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
     {href: 'https://github.com/thecodingmachine/graphqlite', label: 'GitHub'},
-    /*{doc: 'doc4', label: 'API'},*/
-    {page: 'help', label: 'Help'},
-    /*{blog: true, label: 'Blog'},*/
   ],
 
   // If you have users set above, you add it here:
