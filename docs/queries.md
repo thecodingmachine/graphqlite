@@ -4,7 +4,7 @@ title: Queries
 sidebar_label: Queries
 ---
 
-In GraphQLite, GraphQL queries are creating by writing methods in *controller* classes.
+In GraphQLite, GraphQL queries are created by writing methods in *controller* classes.
 
 Those classes must be in the controllers namespaces which has been defined when you configured GraphQLite.
 For instance, in Symfony, the controllers namespace is `App\Controller` by default.
@@ -39,6 +39,9 @@ Type Query {
 ```
 
 As you can see, GraphQLite will automatically do the mapping between PHP types and GraphQL types.
+
+<div class="alert alert-warning"><strong>Heads up!</strong> If you are not using a framework with an autowiring container (like Symfony or Laravel), please be aware that the <code>MyController</code> class must exist in the container of your application. Furthermore, the identifier of the controller in the container MUST be the fully qualified class name of controller.<br/><br/>
+declare it.</div>
 
 ## Testing the query
 
@@ -116,9 +119,8 @@ The `@Type` annotation is used to inform GraphQLite that the `Product` class is 
 
 The `@Field` annotation is used to define the GraphQL fields. This annotation must be put on a **public method**.
 
-The `Product` class must be in the *types* namespace. As for *controller* classes, you configured this namespace when you installed 
-GraphQLite. By default, in Symfony, the types namespace is any namespace starting with `App\` so you can
-put a type anywhere in your application code.
+The `Product` class must be in one of the *types* namespaces. As for *controller* classes, you configured this namespace when you installed 
+GraphQLite. By default, in Symfony, the allowed types namespaces are `App\Entity` and `App\Types`.
 
 This query is equivalent to the following [GraphQL type language](https://graphql.org/learn/schema/#type-language):
 
