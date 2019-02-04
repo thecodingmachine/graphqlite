@@ -14,12 +14,22 @@ Open a terminal in your current project directory and run:
 $ composer require thecodingmachine/graphqlite
 ```
 
-## Integration
+## Requirements
+
+In order to bbotstrap GraphQLite, you will need:
+
+- A PSR-11 compatible container
+- A PSR-16 cache
+
+Additionally, you will have to route the HTTP requests to the underlying GraphQL library.
 
 GraphQLite relies on the [webonyx/graphql-php](http://webonyx.github.io/graphql-php/) library internally.
+This library plays well with PSR-7 requests and there is a [PSR-15 middleware available](https://github.com/phps-cans/psr7-middleware-graphql).
 
-This library requires a [Schema](https://webonyx.github.io/graphql-php/type-system/schema/) in order to resolve
-GraphQL queries and we provide a `SchemaFactory` class to create such a schema:
+## Integration
+
+Webonyx/graphql-php library requires a [Schema](https://webonyx.github.io/graphql-php/type-system/schema/) in order to resolve
+GraphQL queries. We provide a `SchemaFactory` class to create such a schema:
 
 ```php
 use TheCodingMachine\GraphQLite\SchemaFactory;
