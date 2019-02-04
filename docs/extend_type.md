@@ -84,10 +84,58 @@ class ProductType
 }
 ```
 
-As for the `Product` class, `ProductType`  must be in the *types* namespace.
+Let's break this sample:
 
-Using the [Type language](https://graphql.org/learn/schema/#type-language) notation, we defined a type extension for
-the GraphQL `Product` type:
+```php
+/**
+ * @ExtendType(class=Product::class)
+ */
+```
+
+With the `@ExtendType` annotation, we tell GraphQLite that we want to add fields in the GraphQL type mapped to
+the `Product` PHP class.
+
+```php
+class ProductType
+{
+    private $translationService;
+    
+    public function __construct(TranslationServiceInterface $translationService)
+    {
+        $this->translationService = $translationService;
+    }
+    
+    // ...
+}
+```
+
+
+- The `ProductType` class must be in the types namespace. You configured this namespace when you installed GraphQLite.
+- The `ProductType` class is actually a **service**. You can therefore inject dependencies in it (like the `$translationService` in this example)
+
+<div class="alert alert-warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your 
+application and the container identifier MUST be the fully qualified class name.<br/><br/>
+If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
+is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
+declare it.</div> 
+
+```php
+/**
+ * @Field()
+ */
+public function getName(Product $product, string $language): string
+{
+    return $this->translationService->getProductName($product->getId(), $language);
+}
+```
+
+The `@Field` annotation is used to add the "name" field to the `Product` type.
+
+Take a close look at the signature. The first parameter is the "resolved object" we are working on.
+Any additional parameters are used as arguments.
+
+Using the "[Type language](https://graphql.org/learn/schema/#type-language)" notation, we defined a type extension for
+the GraphQL "Product" type:
 
 ```graphql
 Extend type Product {
