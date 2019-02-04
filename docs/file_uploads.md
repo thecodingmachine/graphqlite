@@ -23,7 +23,7 @@ Simply add `GraphQL\Upload\UploadMiddleware` to your middleware pipe.
 ## If you are using another framework not compatible with PSR-15
 
 Please check the Ecodev/graphql-upload library [documentation](https://github.com/Ecodev/graphql-upload)
-for more information on how to integrate it in your library.
+for more information on how to integrate it in your framework.
 
 ## Usage
 

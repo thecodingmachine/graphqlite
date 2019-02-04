@@ -9,7 +9,7 @@ In some cases, you cannot or do not want to put an annotation on a domain class.
 For instance:
 
 * The class you want to annotate is part of a third party library and you cannot modify it
-* You are doing domain-drive design and don't want to clutter your domain object with annotations from the view layer
+* You are doing domain-driven design and don't want to clutter your domain object with annotations from the view layer
 * etc.
 
 ## `@Type` annotation with the `class` attribute

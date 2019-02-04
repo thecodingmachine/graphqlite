@@ -212,7 +212,7 @@ return new Picotainer([
 Now, we need to add a first query and therefore create a controller.
 The application will look into the `App\Controllers` namespace for GraphQLite controllers.
 
-It assumes that the container contains an entry whose name is the fully qualified class name of the container.
+It assumes that the container has an entry whose name is the controller's fully qualified class name.
 
 
 **src/Controllers/MyController.php**
@@ -250,3 +250,5 @@ return new Picotainer([
 ```
 
 And we are done! You can now test your query using your favorite GraphQL client.
+
+![](../img/query1.png)
