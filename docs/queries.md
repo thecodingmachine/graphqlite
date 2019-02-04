@@ -4,7 +4,7 @@ title: Queries
 sidebar_label: Queries
 ---
 
-In GraphQLite, GraphQL queries are creating by writing methods in *controller* classes.
+In GraphQLite, GraphQL queries are created by writing methods in *controller* classes.
 
 Those classes must be in the controllers namespaces which has been defined when you configured GraphQLite.
 For instance, in Symfony, the controllers namespace is `App\Controller` by default.
