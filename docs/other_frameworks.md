@@ -16,7 +16,7 @@ $ composer require thecodingmachine/graphqlite
 
 ## Requirements
 
-In order to bbotstrap GraphQLite, you will need:
+In order to bootstrap GraphQLite, you will need:
 
 - A PSR-11 compatible container
 - A PSR-16 cache
