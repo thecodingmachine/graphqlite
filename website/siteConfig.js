@@ -102,6 +102,12 @@ const siteConfig = {
   // Show documentation's last update time.
   // enableUpdateTime: true,
 
+  algolia: {
+    apiKey: '8fcce617e281864dc03c68d17f6206db',
+    indexName: 'graphqlite_thecodingmachine',
+    algoliaOptions: {} // Optional, if provided by Algolia
+  },
+
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
   //   repoUrl: 'https://github.com/facebook/test-site',
