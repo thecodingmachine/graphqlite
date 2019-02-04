@@ -4,6 +4,11 @@ title: GraphQLite
 sidebar_label: GraphQLite
 ---
 
+<p align="center">
+    <img src="https://graphqlite.thecodingmachine.io/img/logo.svg" alt="GraphQLite logo" width="250" height="250" />
+</p>
+
+
 A PHP library that allows you to write your GraphQL queries in simple-to-write controllers.
 
 ## Features
