@@ -42,7 +42,12 @@ The `ProductType` class must be in the *types* namespace. You configured this na
 
 The `ProductType` class is actually a **service**. You can therefore inject dependencies in it.
 
-The first parameter of the `id` field is the *resolved object* we are working on. Any additional parameters are used as arguments.
+<div class="alert alert-warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your application and the container identifier MUST be the fully qualified class name.<br/><br/>
+If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
+is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
+declare it.</div> 
+
+In methods with a `@Field` annotaiton, the first parameter is the *resolved object* we are working on. Any additional parameters are used as arguments.
 
 ## `@SourceField` annotation
 
