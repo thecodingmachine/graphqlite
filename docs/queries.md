@@ -40,8 +40,7 @@ Type Query {
 
 As you can see, GraphQLite will automatically do the mapping between PHP types and GraphQL types.
 
-<div class="alert alert-warning"><strong>Heads up!</strong> If you are not using a framework with an autowiring container (like Symfony or Laravel), please be aware that the <code>MyController</code> class must exist in the container of your application. Furthermore, the identifier of the controller in the container MUST be the fully qualified class name of controller.<br/><br/>
-declare it.</div>
+<div class="alert alert-warning"><strong>Heads up!</strong> If you are not using a framework with an autowiring container (like Symfony or Laravel), please be aware that the <code>MyController</code> class must exist in the container of your application. Furthermore, the identifier of the controller in the container MUST be the fully qualified class name of controller.</div>
 
 ## Testing the query
 
