@@ -323,24 +323,6 @@ class FieldsBuilder
     }
 
     /**
-     * @param object $controller
-     * @return QueryField[]
-     * @throws CannotMapTypeExceptionInterface
-     * @throws \ReflectionException
-     */
-    private function getSourceFields($controller): array
-    {
-        $refClass = new \ReflectionClass($controller);
-
-        /** @var SourceField[] $sourceFields */
-        $sourceFields = $this->annotationReader->getSourceFields($refClass);
-
-        if ($controller instanceof FromSourceFieldsInterface) {
-            $sourceFields = array_merge($sourceFields, $controller->getSourceFields());
-        }
-    }
-
-    /**
      * @param array<int, SourceFieldInterface> $sourceFields
      * @return QueryField[]
      * @throws CannotMapTypeException
