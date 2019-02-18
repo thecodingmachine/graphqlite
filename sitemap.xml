@@ -17,4 +17,5 @@
 <url> <loc>https://graphqlite.thecodingmachine.io/docs/symfony-bundle</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://graphqlite.thecodingmachine.io/docs/symfony-bundle" /> </url>
 <url> <loc>https://graphqlite.thecodingmachine.io/docs/troubleshooting</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://graphqlite.thecodingmachine.io/docs/troubleshooting" /> </url>
 <url> <loc>https://graphqlite.thecodingmachine.io/docs/type_mapping</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://graphqlite.thecodingmachine.io/docs/type_mapping" /> </url>
+<url> <loc>https://graphqlite.thecodingmachine.io/docs/universal_service_providers</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://graphqlite.thecodingmachine.io/docs/universal_service_providers" /> </url>
 </urlset>
