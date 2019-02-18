@@ -44,9 +44,23 @@ return [
      */
     'controllers' => 'App\\Http\\Controllers',
     'types' => 'App\\',
-    'debug' => Debug::RETHROW_UNSAFE_EXCEPTIONS
+    'debug' => Debug::RETHROW_UNSAFE_EXCEPTIONS,
+    'uri' => '/graphql'
 ];
 ```
 
 The debug parameters are detailed in the [documentation of the Webonyx GraphQL library](https://webonyx.github.io/graphql-php/error-handling/)
 which is used internally by GraphQLite.
+
+
+## Adding GraphQL DevTools
+
+GraphQLite does not include additional GraphQL tooling, such as the GraphiQL editor.
+To integrate a web UI to query your GraphQL endpoint with your Laravel installation, 
+we recommend installing GraphQL Playground
+
+```console
+$ composer require mll-lab/laravel-graphql-playground
+```
+
+You can also use any external client with GraphQLite, make sure to point it to the URL defined in the config (`'/graphql'` by default).

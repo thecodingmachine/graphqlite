@@ -25,6 +25,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
@@ -181,6 +182,20 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $fields['sibling']->getType());
         $this->assertInstanceOf(ObjectType::class, $fields['sibling']->getType()->getWrappedType());
         $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
+    }
+
+    public function testSourceFieldOnSelfType()
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getSelfFields(TestSelfType::class, true);
+
+        $this->assertCount(1, $fields);
+
+        $this->assertSame('test', $fields['test']->name);
+        $resolve = $fields['test']->resolveFn;
+        $obj = new TestSelfType();
+        $this->assertEquals('foo', $resolve($obj, []));
     }
 
     public function testLoggedInSourceField()

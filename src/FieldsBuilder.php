@@ -15,6 +15,7 @@ use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -130,14 +131,26 @@ class FieldsBuilder
      */
     public function getFields($controller): array
     {
+
         $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true);
-        $sourceFields = $this->getSourceFields($controller);
+
+        $refClass = new \ReflectionClass($controller);
+
+        /** @var SourceField[] $sourceFields */
+        $sourceFields = $this->annotationReader->getSourceFields($refClass);
+
+        if ($controller instanceof FromSourceFieldsInterface) {
+            $sourceFields = array_merge($sourceFields, $controller->getSourceFields());
+        }
+
+        $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
+
 
         $fields = [];
         foreach ($fieldAnnotations as $field) {
             $fields[$field->name] = $field;
         }
-        foreach ($sourceFields as $field) {
+        foreach ($fieldsFromSourceFields as $field) {
             $fields[$field->name] = $field;
         }
 
@@ -153,8 +166,18 @@ class FieldsBuilder
     {
         $fieldAnnotations = $this->getFieldsByAnnotations(null, Annotations\Field::class, false, $className);
 
+        $refClass = new \ReflectionClass($className);
+
+        /** @var SourceField[] $sourceFields */
+        $sourceFields = $this->annotationReader->getSourceFields($refClass);
+
+        $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
+
         $fields = [];
         foreach ($fieldAnnotations as $field) {
+            $fields[$field->name] = $field;
+        }
+        foreach ($fieldsFromSourceFields as $field) {
             $fields[$field->name] = $field;
         }
 
@@ -315,7 +338,17 @@ class FieldsBuilder
         if ($controller instanceof FromSourceFieldsInterface) {
             $sourceFields = array_merge($sourceFields, $controller->getSourceFields());
         }
+    }
 
+    /**
+     * @param array<int, SourceFieldInterface> $sourceFields
+     * @return QueryField[]
+     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws \ReflectionException
+     */
+    private function getQueryFieldsFromSourceFields(array $sourceFields, ReflectionClass $refClass): array
+    {
         if (empty($sourceFields)) {
             return [];
         }
