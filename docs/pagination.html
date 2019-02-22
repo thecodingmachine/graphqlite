@@ -8,7 +8,57 @@
 
               ga('create', 'UA-10196481-8', 'auto');
               ga('send', 'pageview');
-            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/pagination.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Paginating large result sets</h1></header><article><div><span><p>It is quite common to have to paginate over large result sets.</p>
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Advanced</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/features">GraphQLite</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Installation</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/symfony-bundle">Symfony bundle</a></li><li class="navListItem"><a class="navItem" href="/docs/laravel-package">Laravel package</a></li><li class="navListItem"><a class="navItem" href="/docs/universal_service_providers">Universal service providers</a></li><li class="navListItem"><a class="navItem" href="/docs/other-frameworks">Other frameworks / No framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Usage</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/queries">Queries</a></li><li class="navListItem"><a class="navItem" href="/docs/mutations">Mutations</a></li><li class="navListItem"><a class="navItem" href="/docs/type_mapping">Type mapping</a></li><li class="navListItem"><a class="navItem" href="/docs/extend_type">Extending a type</a></li><li class="navListItem"><a class="navItem" href="/docs/authentication_authorization">Authentication and authorization</a></li><li class="navListItem"><a class="navItem" href="/docs/external_type_declaration">External type declaration</a></li><li class="navListItem"><a class="navItem" href="/docs/input-types">Input types</a></li><li class="navListItem"><a class="navItem" href="/docs/inheritance">Inheritance and interfaces</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/file-uploads">File uploads</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/pagination">Pagination</a></li><li class="navListItem"><a class="navItem" href="/docs/custom-output-types">Custom output types</a></li><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Reference</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/annotations_reference">Annotations reference</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/pagination.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Paginating large result sets</h1></header><article><div><span><p>It is quite common to have to paginate over large result sets.</p>
 <p>GraphQLite offers a simple way to do that using <a href="https://github.com/beberlei/porpaginas">Porpaginas</a>.</p>
 <p>Porpaginas is a set of PHP interfaces that can be implemented by result iterators. It comes with a native support for
 PHP arrays, Doctrine and <a href="https://thecodingmachine.github.io/tdbm/doc/limit_offset_resultset.html">TDBM</a>.</p>
@@ -45,7 +95,7 @@ PHP arrays, Doctrine and <a href="https://thecodingmachine.github.io/tdbm/doc/li
 </code></pre>
 <p>Results are wrapped into an item field. You can use the &quot;limit&quot; and &quot;offset&quot; parameters to apply pagination automatically.</p>
 <p>The &quot;count&quot; field returns the <strong>total count</strong> of items.</p>
-</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#usage">Usage</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/file-uploads"><span class="arrow-prev">← </span><span>File uploads</span></a><a class="docs-next button" href="/docs/custom-output-types"><span>Custom output types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#usage">Usage</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
