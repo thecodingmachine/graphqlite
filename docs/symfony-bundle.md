@@ -20,6 +20,7 @@ $ composer require thecodingmachine/graphqlite-bundle
 
 Enable the library by adding it to the list of registered bundles in the `app/AppKernel.php` file:
 
+**app/AppKernel.php**
 ```php
 <?php
 
@@ -35,8 +36,18 @@ class AppKernel extends Kernel
 }
 ```
 
+Now, enable the "graphql/" route by editing the `config/routes.yaml` file:
+
+**config/routes.yaml**
+```yaml
+# Add these 2 lines to config/routes.yaml
+graphqlite_bundle:
+  resource: '@GraphqliteBundle/Resources/config/routes.xml'
+```
+
 Last but not least, create the configuration file at `config/packages/graphqlite.yaml`:
 
+**config/packages/graphqlite.yaml**
 ```yaml
 graphqlite:
     namespace:
