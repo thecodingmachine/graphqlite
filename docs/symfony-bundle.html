@@ -67,6 +67,7 @@
 <pre><code class="hljs css language-console"><span class="hljs-meta">$</span><span class="bash"> composer require thecodingmachine/graphqlite-bundle</span>
 </code></pre>
 <p>Enable the library by adding it to the list of registered bundles in the <code>app/AppKernel.php</code> file:</p>
+<p><strong>app/AppKernel.php</strong></p>
 <pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppKernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Kernel</span>
@@ -80,7 +81,14 @@
     }
 }
 </code></pre>
+<p>Now, enable the &quot;graphql/&quot; route by editing the <code>config/routes.yaml</code> file:</p>
+<p><strong>config/routes.yaml</strong></p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># Add these 2 lines to config/routes.yaml</span>
+<span class="hljs-attr">graphqlite_bundle:</span>
+<span class="hljs-attr">  resource:</span> <span class="hljs-string">'@GraphqliteBundle/Resources/config/routes.xml'</span>
+</code></pre>
 <p>Last but not least, create the configuration file at <code>config/packages/graphqlite.yaml</code>:</p>
+<p><strong>config/packages/graphqlite.yaml</strong></p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">graphqlite:</span>
 <span class="hljs-attr">    namespace:</span>
       <span class="hljs-comment"># The namespace(s) that will store your GraphQLite controllers.</span>
