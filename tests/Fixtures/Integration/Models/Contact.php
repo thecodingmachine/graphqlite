@@ -6,7 +6,11 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
+/**
+ * @Type()
+ */
 class Contact
 {
     /**

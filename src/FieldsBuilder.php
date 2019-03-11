@@ -336,12 +336,16 @@ class FieldsBuilder
         }
 
         $typeField = $this->annotationReader->getTypeAnnotation($refClass);
+        $extendTypeField = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
-        if ($typeField === null) {
+        if ($typeField !== null) {
+            $objectClass = $typeField->getClass();
+        } elseif ($extendTypeField !== null) {
+            $objectClass = $extendTypeField->getClass();
+        } else {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
         }
 
-        $objectClass = $typeField->getClass();
         $objectRefClass = new \ReflectionClass($objectClass);
 
         $oldDeclaringClass = null;
