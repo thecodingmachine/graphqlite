@@ -23,6 +23,8 @@ class SchemaFactoryTest extends TestCase
         $cache = new PhpFilesCache();
 
         $factory = new SchemaFactory($cache, $container);
+        $factory->setAuthenticationService(new VoidAuthenticationService());
+        $factory->setAuthorizationService(new VoidAuthorizationService());
 
         $factory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
