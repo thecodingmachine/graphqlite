@@ -6,7 +6,9 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
@@ -50,5 +52,16 @@ class Product
     public function getPrice(): float
     {
         return $this->price;
+    }
+
+    /**
+     * @Field()
+     * @Right("YOU_DONT_HAVE_THIS_RIGHT")
+     * @FailWith(null)
+     * @return string
+     */
+    public function getUnauthorized(): string
+    {
+        return 'You are not allowed to see this';
     }
 }
