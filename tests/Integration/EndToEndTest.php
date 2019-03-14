@@ -426,6 +426,7 @@ class EndToEndTest extends TestCase
                 items {
                     name
                     price
+                    unauthorized
                 }
                 count            
             }
@@ -453,6 +454,7 @@ class EndToEndTest extends TestCase
                     [
                         'name' => 'Foo',
                         'price' => 42.0,
+                        'unauthorized' => null
                     ]
                 ],
                 'count' => 1

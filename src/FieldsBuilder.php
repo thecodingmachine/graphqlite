@@ -258,9 +258,7 @@ class FieldsBuilder
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
                 }
 
-                if (!$unauthorized) {
-                    $callable = [$controller, $methodName];
-                } else {
+                if ($unauthorized) {
                     $failWithValue = $failWith->getValue();
                     $callable = function() use ($failWithValue) {
                         return $failWithValue;
@@ -268,12 +266,14 @@ class FieldsBuilder
                     if ($failWithValue === null && $type instanceof NonNull) {
                         $type = $type->getWrappedType();
                     }
-                }
-
-                if ($sourceClassName !== null) {
-                    $queryList[] = new QueryField($name, $type, $args, null, $callable[1], $this->hydrator, $docBlockComment, $injectSource);
-                } else {
                     $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
+                } else {
+                    $callable = [$controller, $methodName];
+                    if ($sourceClassName !== null) {
+                        $queryList[] = new QueryField($name, $type, $args, null, $callable[1], $this->hydrator, $docBlockComment, $injectSource);
+                    } else {
+                        $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
+                    }
                 }
             }
         }
