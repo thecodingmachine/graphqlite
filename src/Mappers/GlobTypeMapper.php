@@ -394,7 +394,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 'typeClass' => $typeClassName
             ] = $item;
 
-            if ($filemtime === filemtime($typeFileName)) {
+            if ($filemtime === @filemtime($typeFileName)) {
                 $this->mapClassToTypeArray[$className] = $typeClassName;
                 return $typeClassName;
             }
@@ -419,7 +419,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 'typeClass' => $typeClassName
             ] = $item;
 
-            if ($filemtime === filemtime($typeFileName)) {
+            if ($filemtime === @filemtime($typeFileName)) {
                 $this->mapNameToType[$graphqlTypeName] = $typeClassName;
                 return $typeClassName;
             }
@@ -447,7 +447,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 'factory' => $factory
             ] = $item;
 
-            if ($filemtime === filemtime($typeFileName)) {
+            if ($filemtime === @filemtime($typeFileName)) {
                 $this->mapClassToFactory[$className] = $factory;
                 return $factory;
             }
@@ -476,7 +476,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 'extendTypeClasses' => $extendTypeClassNames
             ] = $item;
 
-            if ($filemtime === filemtime($typeFileName)) {
+            if ($filemtime === @filemtime($typeFileName)) {
                 $this->mapClassToExtendTypeArray[$className] = $extendTypeClassNames;
                 return $extendTypeClassNames;
             }
@@ -505,7 +505,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 'extendTypeClasses' => $extendTypeClassNames
             ] = $item;
 
-            if ($filemtime === filemtime($typeFileName)) {
+            if ($filemtime === @filemtime($typeFileName)) {
                 $this->mapNameToExtendType[$graphqlTypeName] = $extendTypeClassNames;
                 return $extendTypeClassNames;
             }
@@ -533,7 +533,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 'factory' => $factory
             ] = $item;
 
-            if ($filemtime === filemtime($typeFileName)) {
+            if ($filemtime === @filemtime($typeFileName)) {
                 $this->mapInputNameToFactory[$graphqlTypeName] = $factory;
                 return $factory;
             }
