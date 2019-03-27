@@ -31,7 +31,7 @@ class NamingStrategy implements NamingStrategyInterface
             $typeClassName = substr($typeClassName, $prevPos + 1);
         }
         // By default, if the class name ends with Type, let's take the name of the class for the type
-        if (substr($typeClassName, -4) === 'Type') {
+        if (!$type->isSelfType() && substr($typeClassName, -4) === 'Type') {
             return substr($typeClassName, 0, -4);
         }
         // Else, let's take the name of the targeted class

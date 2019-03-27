@@ -346,8 +346,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     public function getOutputTypes(): array
     {
         $types = [];
+        $typeNames = [];
         foreach ($this->typeMapper->getSupportedClasses() as $supportedClass) {
-            $types[$supportedClass] = $this->mapClassToType($supportedClass, null);
+            $type = $this->mapClassToType($supportedClass, null);
+            $types[$supportedClass] = $type;
+            if (isset($typeNames[$type->name])) {
+                throw DuplicateMappingException::createForTypeName($type->name, $typeNames[$type->name], $supportedClass);
+            }
+            $typeNames[$type->name] = $supportedClass;
         }
         return $types;
     }

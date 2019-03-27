@@ -15,4 +15,9 @@ class DuplicateMappingException extends \RuntimeException
     {
         throw new self("The class '$sourceClass' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: '$className1::$method1' and '$className2::$method2'");
     }
+
+    public static function createForTypeName(string $type, string $sourceClass1, string $sourceClass2): self
+    {
+        throw new self("The type '$type' is created by 2 different classes: '$sourceClass1' and '$sourceClass2'");
+    }
 }
