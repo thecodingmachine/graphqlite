@@ -86,4 +86,16 @@ class MutableObjectTypeTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->type->addFields(function() {});
     }
+
+    public function testNoFieldsType()
+    {
+        $type = new MutableObjectType([
+            'name'    => 'TestObject',
+            'fields'  => [],
+        ]);
+        $type->freeze();
+        $this->expectException(NoFieldsException::class);
+        $this->expectExceptionMessage('The GraphQL object type "TestObject" has no fields defined. Please check that some fields are defined (using the @Field annotation). If some fields are defined, please check that at least one is visible to the current user.');
+        $type->getFields();
+    }
 }
