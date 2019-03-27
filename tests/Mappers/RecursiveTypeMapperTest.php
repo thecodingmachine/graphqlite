@@ -155,5 +155,28 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertArrayNotHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassC', $outputTypes);
     }
 
+    public function testDuplicateDetection()
+    {
+        $objectType = new MutableObjectType([
+            'name' => 'Foobar'
+        ]);
 
+        $typeMapper1 = new StaticTypeMapper();
+        $typeMapper1->setTypes([
+            ClassB::class => $objectType
+        ]);
+
+        $typeMapper2 = new StaticTypeMapper();
+        $typeMapper2->setTypes([
+            ClassA::class => $objectType
+        ]);
+
+        $compositeTypeMapper = new CompositeTypeMapper([$typeMapper1, $typeMapper2]);
+
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+
+        $this->expectException(DuplicateMappingException::class);
+        $this->expectExceptionMessage("The type 'Foobar' is created by 2 different classes: 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB' and 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA'");
+        $recursiveTypeMapper->getOutputTypes();
+    }
 }
