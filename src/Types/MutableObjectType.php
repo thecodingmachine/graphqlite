@@ -103,6 +103,9 @@ class MutableObjectType extends ObjectType
             foreach ($this->fieldsCallables as $fieldsCallable) {
                 $this->finalFields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->finalFields;
             }
+            if (empty($this->finalFields)) {
+                throw NoFieldsException::create($this->name);
+            }
         }
 
         return $this->finalFields;
