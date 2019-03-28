@@ -6,11 +6,8 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use function array_keys;
 use function filemtime;
 use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
-use phpDocumentor\Reflection\Types\Nullable;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
@@ -18,11 +15,9 @@ use ReflectionMethod;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
-use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
-use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -99,10 +94,6 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var bool
      */
     private $fullMapNameToExtendTypeArrayComputed = false;
-    /**
-     * @var bool
-     */
-    private $fullExtendMapComputed = false;
     /**
      * @var NamingStrategyInterface
      */
