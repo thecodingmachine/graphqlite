@@ -264,6 +264,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->mapClassToFactory = [];
         $this->mapInputNameToFactory = [];
 
+        /** @var ReflectionClass[] $classes */
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
             $type = $this->annotationReader->getTypeAnnotation($refClass);
@@ -279,7 +280,12 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $this->storeTypeInCache($className, $type, $refClass->getFileName());
             }
 
+            $isAbstract = $refClass->isAbstract();
+
             foreach ($refClass->getMethods() as $method) {
+                if (!$method->isPublic() || ($isAbstract && !$method->isStatic())) {
+                    continue;
+                }
                 $factory = $this->annotationReader->getFactoryAnnotation($method);
                 if ($factory !== null) {
                     [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
