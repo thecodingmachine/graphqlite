@@ -165,6 +165,8 @@ class AnnotationReader
         } while ($refClass);
         return null;
     }
+    
+    private $methodAnnotationCache = [];
 
     /**
      * Returns a method annotation and handles correctly errors.
@@ -173,8 +175,13 @@ class AnnotationReader
      */
     private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass)
     {
+        $cacheKey = $refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName().'_'.$annotationClass;
+        if (isset($this->methodAnnotationCache[$cacheKey])) {
+            return $this->methodAnnotationCache[$cacheKey];
+        }
+
         try {
-            return $this->reader->getMethodAnnotation($refMethod, $annotationClass);
+            return $this->methodAnnotationCache[$cacheKey] = $this->reader->getMethodAnnotation($refMethod, $annotationClass);
         } catch (AnnotationException $e) {
             switch ($this->mode) {
                 case self::STRICT_MODE:
