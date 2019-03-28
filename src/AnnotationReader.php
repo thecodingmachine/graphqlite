@@ -128,7 +128,6 @@ class AnnotationReader
 
     public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
     {
-        $this->store[$refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName()] = 1;
         /** @var Factory|null $factoryAnnotation */
         $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
         return $factoryAnnotation;

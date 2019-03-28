@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
+use GraphQL\Type\Definition\InputType;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
