@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
+use phpDocumentor\Reflection\Types\Nullable;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
@@ -205,11 +206,10 @@ final class GlobTypeMapper implements TypeMapperInterface
         return $this->getMaps()['mapInputNameToFactory'];
     }
 
-    private function getMapClassToExtendTypeArray(RecursiveTypeMapperInterface $recursiveTypeMapper): array
+    private function getMapClassToExtendTypeArray(): array
     {
         if ($this->fullMapClassToExtendTypeArrayComputed === false) {
             $namespace = str_replace('\\', '_', $this->namespace);
-            error_log('MAPCLASS '.$namespace);
             $keyExtendClassCache = 'globTypeMapperExtend_'.$namespace;
             $this->mapClassToExtendTypeArray = $this->cache->get($keyExtendClassCache);
             if ($this->mapClassToExtendTypeArray === null) {
@@ -318,7 +318,7 @@ final class GlobTypeMapper implements TypeMapperInterface
 
     private function buildMapNameToExtendTypeArray(RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
-        $this->mapClassToExtendTypeArray = [];
+        $this->mapNameToExtendType = [];
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
             $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
@@ -386,7 +386,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Stores in cache the mapping ExtendTypeClass <=> Object class.
+     * Stores in cache the mapping ExtendTypeClass <=> name class.
      */
     private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName, RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
@@ -397,7 +397,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->cache->set('globExtendTypeMapperByName_'.$typeName, [
             'filemtime' => filemtime($typeFileName),
             'fileName' => $typeFileName,
-            'extendTypeClasses' => $this->mapClassToExtendTypeArray[$objectClassName]
+            'extendTypeClasses' => $this->mapNameToExtendType[$typeName]
         ], $this->mapTtl);
     }
 
@@ -731,7 +731,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $extendTypeClassName = $this->getExtendTypesFromCacheByObjectClass($className);
 
         if ($extendTypeClassName === null) {
-            $map = $this->getMapClassToExtendTypeArray($recursiveTypeMapper);
+            $map = $this->getMapClassToExtendTypeArray();
         }
 
         return isset($this->mapClassToExtendTypeArray[$className]);
@@ -750,7 +750,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $extendTypeClassNames = $this->getExtendTypesFromCacheByObjectClass($className);
 
         if ($extendTypeClassNames === null) {
-            $this->getMapClassToExtendTypeArray($recursiveTypeMapper);
+            $this->getMapClassToExtendTypeArray();
         }
 
         if (!isset($this->mapClassToExtendTypeArray[$className])) {
