@@ -37,7 +37,7 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
      * @param string $name
      * @param FieldsBuilderFactory $controllerQueryProviderFactory
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @param object $factory
+     * @param object|string $factory
      * @param string $methodName
      * @param HydratorInterface $hydrator
      * @param null|string $comment

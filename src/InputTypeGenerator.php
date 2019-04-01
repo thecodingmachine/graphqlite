@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Object_;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionType;
@@ -48,20 +49,26 @@ class InputTypeGenerator
     }
 
     /**
-     * @param object $factory
+     * @param string $factory
      * @param string $methodName
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return InputObjectType
      */
-    public function mapFactoryMethod($factory, string $methodName, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+    public function mapFactoryMethod(string $factory, string $methodName, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container): InputObjectType
     {
         $method = new ReflectionMethod($factory, $methodName);
+
+        if ($method->isStatic()) {
+            $object = $factory;
+        } else {
+            $object = $container->get($factory);
+        }
 
         [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $factory, $methodName, $this->hydrator, null);
+            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $object, $methodName, $this->hydrator, null);
         }
 
         return $this->cache[$inputName];
