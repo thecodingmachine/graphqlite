@@ -4,7 +4,10 @@
 namespace TheCodingMachine\GraphQLite;
 
 use phpDocumentor\Reflection\Fqsen;
+use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
+use phpDocumentor\Reflection\Types\Self_;
+use ReflectionClass;
 use ReflectionMethod;
 
 class InputTypeUtils
@@ -57,10 +60,25 @@ class InputTypeUtils
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
         $phpdocType = $typeResolver->resolve($type);
+        $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         if (!$phpdocType instanceof Object_) {
             throw MissingTypeHintException::invalidReturnType($refMethod);
         }
 
         return $phpdocType->getFqsen();
+    }
+
+    /**
+     * Resolves "self" types into the class type.
+     *
+     * @param Type $type
+     * @return Type
+     */
+    private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
+    {
+        if ($type instanceof Self_) {
+            return new Object_(new Fqsen('\\'.$reflectionClass->getName()));
+        }
+        return $type;
     }
 }

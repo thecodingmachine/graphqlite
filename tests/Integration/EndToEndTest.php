@@ -462,4 +462,28 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
 
     }
+
+    public function testEndToEndStaticFactories()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            echoFilters(filter: {values: ["foo", "bar"]})
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoFilters' => [ "foo", "bar" ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
 }
