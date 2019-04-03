@@ -6,8 +6,10 @@ namespace TheCodingMachine\GraphQLite;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use Symfony\Component\Lock\Factory as LockFactory;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -53,6 +55,10 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @var bool
      */
     private $recursive;
+    /**
+     * @var LockFactory
+     */
+    private $lockFactory;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
@@ -72,6 +78,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->recursive = $recursive;
+        $store = new SemaphoreStore();
+        $this->lockFactory = new LockFactory($store);
+
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -93,11 +102,22 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             $key = 'globQueryProvider_'.str_replace('\\', '_', $this->namespace);
             $this->instancesList = $this->cache->get($key);
             if ($this->instancesList === null) {
-                $this->instancesList = $this->buildInstancesList();
+                $this->instancesList = $this->lockAndBuildInstanceList();
                 $this->cache->set($key, $this->instancesList, $this->cacheTtl);
             }
         }
         return $this->instancesList;
+    }
+
+    private function lockAndBuildInstanceList(): array
+    {
+        $lock = $this->lockFactory->createLock('buildInstanceList_'.$this->namespace, 5);
+        $lock->acquire(true);
+        try {
+            return $this->buildInstancesList();
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
