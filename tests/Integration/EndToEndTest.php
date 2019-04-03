@@ -16,6 +16,9 @@ use function print_r;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
@@ -62,7 +65,7 @@ class EndToEndTest extends TestCase
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
-                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), new ArrayCache());
+                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
             },
             FieldsBuilderFactory::class => function(ContainerInterface $container) {
                 return new FieldsBuilderFactory(
@@ -110,6 +113,7 @@ class EndToEndTest extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
+                    $container->get(LockFactory::class),
                     new ArrayCache()
                     );
             },
@@ -121,6 +125,7 @@ class EndToEndTest extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
+                    $container->get(LockFactory::class),
                     new ArrayCache()
                 );
             },
@@ -163,6 +168,14 @@ class EndToEndTest extends TestCase
             },
             CachedDocBlockFactory::class => function() {
                 return new CachedDocBlockFactory(new ArrayCache());
+            },
+            LockFactory::class => function() {
+                if (extension_loaded('sysvsem')) {
+                    $lockStore = new SemaphoreStore();
+                } else {
+                    $lockStore = new FlockStore(sys_get_temp_dir());
+                }
+                return new LockFactory($lockStore);
             }
         ]);
 

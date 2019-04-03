@@ -8,9 +8,14 @@ use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Cache\ApcuCache;
+use function extension_loaded;
 use GraphQL\Type\SchemaConfig;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Lock\Store\SemaphoreStore;
+use function sys_get_temp_dir;
 use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
@@ -72,6 +77,10 @@ class SchemaFactory
      * @var SchemaConfig
      */
     private $schemaConfig;
+    /**
+     * @var LockFactory
+     */
+    private $lockFactory;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -181,6 +190,13 @@ class SchemaFactory
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
 
+        if (extension_loaded('sysvsem')) {
+            $lockStore = new SemaphoreStore();
+        } else {
+            $lockStore = new FlockStore(sys_get_temp_dir());
+        }
+        $lockFactory = new LockFactory($lockStore);
+
         $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
             $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy);
 
@@ -192,7 +208,7 @@ class SchemaFactory
 
         foreach ($this->typeNamespaces as $typeNamespace) {
             $typeMappers[] = new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
-                $this->container, $annotationReader, $namingStrategy, $this->cache);
+                $this->container, $annotationReader, $namingStrategy, $lockFactory, $this->cache);
         }
 
         foreach ($this->typeMappers as $typeMapper) {
@@ -211,7 +227,7 @@ class SchemaFactory
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
             $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilderFactory, $recursiveTypeMapper,
-                $this->container, $this->cache);
+                $this->container, $lockFactory, $this->cache);
         }
 
         foreach ($this->queryProviders as $queryProvider) {

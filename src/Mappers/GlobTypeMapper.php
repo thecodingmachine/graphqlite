@@ -129,7 +129,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, LockFactory $lockFactory, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->typeGenerator = $typeGenerator;
@@ -142,8 +142,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->inputTypeGenerator = $inputTypeGenerator;
         $this->inputTypeUtils = $inputTypeUtils;
         $this->recursive = $recursive;
-        $store = new SemaphoreStore();
-        $this->lockFactory = new LockFactory($store);
+        $this->lockFactory = $lockFactory;
     }
 
     /**
