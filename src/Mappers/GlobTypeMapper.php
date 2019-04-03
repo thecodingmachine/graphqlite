@@ -166,7 +166,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             if ($this->mapClassToTypeArray === null ||
                 $this->mapNameToType === null ||
                 $this->mapClassToFactory === null ||
-                $this->mapInputNameToFactory
+                $this->mapInputNameToFactory === null
             ) {
                 $lock = $this->lockFactory->createLock('buildmap_'.$this->namespace, 5);
                 if (!$lock->acquire()) {
