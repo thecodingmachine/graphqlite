@@ -15,6 +15,9 @@ use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
@@ -50,6 +53,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $annotationReader;
     private $typeResolver;
     private $typeRegistry;
+    private $lockFactory;
 
     protected function getTestObjectType(): MutableObjectType
     {
@@ -317,5 +321,18 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeRegistry = new TypeRegistry();
         }
         return $this->typeRegistry;
+    }
+
+    protected function getLockFactory(): LockFactory
+    {
+        if ($this->lockFactory === null) {
+            if (extension_loaded('sysvsem')) {
+                $lockStore = new SemaphoreStore();
+            } else {
+                $lockStore = new FlockStore(sys_get_temp_dir());
+            }
+            $this->lockFactory = new LockFactory($lockStore);
+        }
+        return $this->lockFactory;
     }
 }

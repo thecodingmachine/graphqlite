@@ -69,7 +69,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @param int|null $cacheTtl
      * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilderFactory $fieldsBuilderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, FieldsBuilderFactory $fieldsBuilderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->container = $container;
@@ -78,9 +78,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->recursive = $recursive;
-        $store = new SemaphoreStore();
-        $this->lockFactory = new LockFactory($store);
-
+        $this->lockFactory = $lockFactory;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider

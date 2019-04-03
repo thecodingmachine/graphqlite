@@ -34,7 +34,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), $container, new NullCache());
+        $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), $container, $this->getLockFactory(), new NullCache());
 
         $queries = $globControllerQueryProvider->getQueries();
         $this->assertCount(6, $queries);
