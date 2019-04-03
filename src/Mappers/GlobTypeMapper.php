@@ -13,6 +13,7 @@ use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Lock\Lock;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
@@ -167,7 +168,15 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $this->mapClassToFactory === null ||
                 $this->mapInputNameToFactory
             ) {
-                $this->lockAndBuildMap();
+                $lock = $this->lockFactory->createLock('buildmap_'.$this->namespace, 5);
+                if ($lock->isAcquired()) {
+                    // Lock is being held right now. Generation is happening.
+                    // Let's wait and fetch the result from the cache.
+                    $lock->acquire(true);
+                    $lock->release();
+                    return $this->getMaps();
+                }
+                $this->lockAndBuildMap($lock);
                 // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
                 // Defaults to 2 seconds.
                 $this->cache->set($keyClassCache, $this->mapClassToTypeArray, $this->globTtl);
@@ -212,7 +221,16 @@ final class GlobTypeMapper implements TypeMapperInterface
             $keyExtendClassCache = 'globTypeMapperExtend_'.$namespace;
             $this->mapClassToExtendTypeArray = $this->cache->get($keyExtendClassCache);
             if ($this->mapClassToExtendTypeArray === null) {
-                $this->buildMapClassToExtendTypeArray();
+                $lock = $this->lockFactory->createLock('buildmapclassextend_'.$this->namespace, 5);
+                if ($lock->isAcquired()) {
+                    // Lock is being held right now. Generation is happening.
+                    // Let's wait and fetch the result from the cache.
+                    $lock->acquire(true);
+                    $lock->release();
+                    return $this->getMapClassToExtendTypeArray();
+                }
+
+                $this->buildMapClassToExtendTypeArray($lock);
                 // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
                 // Defaults to 2 seconds.
                 $this->cache->set($keyExtendClassCache, $this->mapClassToExtendTypeArray, $this->globTtl);
@@ -229,7 +247,16 @@ final class GlobTypeMapper implements TypeMapperInterface
             $keyExtendNameCache = 'globTypeMapperExtend_names_'.$namespace;
             $this->mapNameToExtendType = $this->cache->get($keyExtendNameCache);
             if ($this->mapNameToExtendType === null) {
-                $this->buildMapNameToExtendTypeArray($recursiveTypeMapper);
+                $lock = $this->lockFactory->createLock('buildmapnameextend_'.$this->namespace, 5);
+                if ($lock->isAcquired()) {
+                    // Lock is being held right now. Generation is happening.
+                    // Let's wait and fetch the result from the cache.
+                    $lock->acquire(true);
+                    $lock->release();
+                    return $this->getMapNameToExtendType($recursiveTypeMapper);
+                }
+
+                $this->buildMapNameToExtendTypeArray($lock, $recursiveTypeMapper);
                 // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
                 // Defaults to 2 seconds.
                 $this->cache->set($keyExtendNameCache, $this->mapNameToExtendType, $this->globTtl);
@@ -265,9 +292,8 @@ final class GlobTypeMapper implements TypeMapperInterface
         return $this->classes;
     }
 
-    private function lockAndBuildMap(): void
+    private function lockAndBuildMap(Lock $lock): void
     {
-        $lock = $this->lockFactory->createLock('buildmap_'.$this->namespace, 5);
         $lock->acquire(true);
         try {
             $this->buildMap();
@@ -319,9 +345,8 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
     }
 
-    private function buildMapClassToExtendTypeArray(): void
+    private function buildMapClassToExtendTypeArray(Lock $lock): void
     {
-        $lock = $this->lockFactory->createLock('buildmapclassextend_'.$this->namespace, 5);
         $lock->acquire(true);
         try {
             $this->mapClassToExtendTypeArray = [];
@@ -338,9 +363,8 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
     }
 
-    private function buildMapNameToExtendTypeArray(RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    private function buildMapNameToExtendTypeArray(Lock $lock, RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
-        $lock = $this->lockFactory->createLock('buildmapnameextend_'.$this->namespace, 5);
         $lock->acquire(true);
         try {
             $this->mapNameToExtendType = [];

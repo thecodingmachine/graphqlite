@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\Lock\Store\SemaphoreStore;
+use Symfony\Component\Lock\Lock;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use Symfony\Component\Lock\Factory as LockFactory;
@@ -100,16 +100,24 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             $key = 'globQueryProvider_'.str_replace('\\', '_', $this->namespace);
             $this->instancesList = $this->cache->get($key);
             if ($this->instancesList === null) {
-                $this->instancesList = $this->lockAndBuildInstanceList();
+                $lock = $this->lockFactory->createLock('buildInstanceList_'.$this->namespace, 5);
+                if ($lock->isAcquired()) {
+                    // Lock is being held right now. Generation is happening.
+                    // Let's wait and fetch the result from the cache.
+                    $lock->acquire(true);
+                    $lock->release();
+                    return $this->getInstancesList();
+                }
+
+                $this->instancesList = $this->lockAndBuildInstanceList($lock);
                 $this->cache->set($key, $this->instancesList, $this->cacheTtl);
             }
         }
         return $this->instancesList;
     }
 
-    private function lockAndBuildInstanceList(): array
+    private function lockAndBuildInstanceList(Lock $lock): array
     {
-        $lock = $this->lockFactory->createLock('buildInstanceList_'.$this->namespace, 5);
         $lock->acquire(true);
         try {
             return $this->buildInstancesList();
