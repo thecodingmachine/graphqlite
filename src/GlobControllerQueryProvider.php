@@ -101,29 +101,24 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             $this->instancesList = $this->cache->get($key);
             if ($this->instancesList === null) {
                 $lock = $this->lockFactory->createLock('buildInstanceList_'.$this->namespace, 5);
-                if ($lock->isAcquired()) {
+                if (!$lock->acquire()) {
                     // Lock is being held right now. Generation is happening.
                     // Let's wait and fetch the result from the cache.
                     $lock->acquire(true);
                     $lock->release();
                     return $this->getInstancesList();
                 }
+                $lock->acquire(true);
+                try {
+                    return $this->buildInstancesList();
+                } finally {
+                    $lock->release();
+                }
 
-                $this->instancesList = $this->lockAndBuildInstanceList($lock);
                 $this->cache->set($key, $this->instancesList, $this->cacheTtl);
             }
         }
         return $this->instancesList;
-    }
-
-    private function lockAndBuildInstanceList(Lock $lock): array
-    {
-        $lock->acquire(true);
-        try {
-            return $this->buildInstancesList();
-        } finally {
-            $lock->release();
-        }
     }
 
     /**
