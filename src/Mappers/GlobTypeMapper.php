@@ -12,6 +12,8 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
@@ -119,6 +121,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var bool
      */
     private $recursive;
+    /**
+     * @var LockFactory
+     */
+    private $lockFactory;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
@@ -136,6 +142,8 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->inputTypeGenerator = $inputTypeGenerator;
         $this->inputTypeUtils = $inputTypeUtils;
         $this->recursive = $recursive;
+        $store = new SemaphoreStore();
+        $this->lockFactory = new LockFactory($store);
     }
 
     /**
@@ -160,7 +168,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $this->mapClassToFactory === null ||
                 $this->mapInputNameToFactory
             ) {
-                $this->buildMap();
+                $this->lockAndBuildMap();
                 // This is a very short lived cache. Useful to avoid overloading a server in case of heavy load.
                 // Defaults to 2 seconds.
                 $this->cache->set($keyClassCache, $this->mapClassToTypeArray, $this->globTtl);
@@ -258,6 +266,17 @@ final class GlobTypeMapper implements TypeMapperInterface
         return $this->classes;
     }
 
+    private function lockAndBuildMap(): void
+    {
+        $lock = $this->lockFactory->createLock('buildmap_'.$this->namespace, 5);
+        $lock->acquire(true);
+        try {
+            $this->buildMap();
+        } finally {
+            $lock->release();
+        }
+    }
+
     private function buildMap(): void
     {
         $this->mapClassToTypeArray = [];
@@ -303,27 +322,39 @@ final class GlobTypeMapper implements TypeMapperInterface
 
     private function buildMapClassToExtendTypeArray(): void
     {
-        $this->mapClassToExtendTypeArray = [];
-        $classes = $this->getClassList();
-        foreach ($classes as $className => $refClass) {
-            $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
+        $lock = $this->lockFactory->createLock('buildmapclassextend_'.$this->namespace, 5);
+        $lock->acquire(true);
+        try {
+            $this->mapClassToExtendTypeArray = [];
+            $classes = $this->getClassList();
+            foreach ($classes as $className => $refClass) {
+                $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
-            if ($extendType !== null) {
-                $this->storeExtendTypeMapperByClassInCache($className, $extendType, $refClass->getFileName());
+                if ($extendType !== null) {
+                    $this->storeExtendTypeMapperByClassInCache($className, $extendType, $refClass->getFileName());
+                }
             }
+        } finally {
+            $lock->release();
         }
     }
 
     private function buildMapNameToExtendTypeArray(RecursiveTypeMapperInterface $recursiveTypeMapper): void
     {
-        $this->mapNameToExtendType = [];
-        $classes = $this->getClassList();
-        foreach ($classes as $className => $refClass) {
-            $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
+        $lock = $this->lockFactory->createLock('buildmapnameextend_'.$this->namespace, 5);
+        $lock->acquire(true);
+        try {
+            $this->mapNameToExtendType = [];
+            $classes = $this->getClassList();
+            foreach ($classes as $className => $refClass) {
+                $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
-            if ($extendType !== null) {
-                $this->storeExtendTypeMapperByNameInCache($className, $extendType, $refClass->getFileName(), $recursiveTypeMapper);
+                if ($extendType !== null) {
+                    $this->storeExtendTypeMapperByNameInCache($className, $extendType, $refClass->getFileName(), $recursiveTypeMapper);
+                }
             }
+        } finally {
+            $lock->release();
         }
     }
 
