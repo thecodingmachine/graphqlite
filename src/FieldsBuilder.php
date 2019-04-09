@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\CustomTypesRegistry;
 use TheCodingMachine\GraphQLite\Types\ID;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -65,9 +66,9 @@ class FieldsBuilder
      */
     private $typeMapper;
     /**
-     * @var HydratorInterface
+     * @var ArgumentResolver
      */
-    private $hydrator;
+    private $argumentResolver;
     /**
      * @var AuthenticationServiceInterface
      */
@@ -90,13 +91,13 @@ class FieldsBuilder
     private $namingStrategy;
 
     public function __construct(AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
-                                HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
+                                ArgumentResolver $argumentResolver, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
                                 CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy)
     {
         $this->annotationReader = $annotationReader;
         $this->typeMapper = $typeMapper;
-        $this->hydrator = $hydrator;
+        $this->argumentResolver = $argumentResolver;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
         $this->typeResolver = $typeResolver;
@@ -266,13 +267,13 @@ class FieldsBuilder
                     if ($failWithValue === null && $type instanceof NonNull) {
                         $type = $type->getWrappedType();
                     }
-                    $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
+                    $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->argumentResolver, $docBlockComment, $injectSource);
                 } else {
                     $callable = [$controller, $methodName];
                     if ($sourceClassName !== null) {
-                        $queryList[] = new QueryField($name, $type, $args, null, $callable[1], $this->hydrator, $docBlockComment, $injectSource);
+                        $queryList[] = new QueryField($name, $type, $args, null, $callable[1], $this->argumentResolver, $docBlockComment, $injectSource);
                     } else {
-                        $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->hydrator, $docBlockComment, $injectSource);
+                        $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->argumentResolver, $docBlockComment, $injectSource);
                     }
                 }
             }
@@ -392,7 +393,7 @@ class FieldsBuilder
             }
 
             if (!$unauthorized) {
-                $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->hydrator, $docBlockComment, false);
+                $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->argumentResolver, $docBlockComment, false);
             } else {
                 $failWithValue = $sourceField->getFailWith();
                 $callable = function() use ($failWithValue) {
@@ -401,7 +402,7 @@ class FieldsBuilder
                 if ($failWithValue === null && $type instanceof NonNull) {
                     $type = $type->getWrappedType();
                 }
-                $queryList[] = new QueryField($sourceField->getName(), $type, $args, $callable, null, $this->hydrator, $docBlockComment, false);
+                $queryList[] = new QueryField($sourceField->getName(), $type, $args, $callable, null, $this->argumentResolver, $docBlockComment, false);
             }
 
         }

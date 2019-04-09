@@ -19,7 +19,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             new TestFactory(),
             'myFactory',
-            $this->getHydrator(),
+            $this->getArgumentResolver(),
             'my comment');
 
         $this->assertSame('InputObject', $inputType->name);
@@ -48,7 +48,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             new TestFactory(),
             'myListFactory',
-            $this->getHydrator(),
+            $this->getArgumentResolver(),
             null);
 
         $obj = $inputType->resolve(['date' => '2018-12-25', 'stringList' =>

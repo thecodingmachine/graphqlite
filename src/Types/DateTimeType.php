@@ -53,7 +53,10 @@ class DateTimeType extends ScalarType
      */
     public function parseValue($value): ?DateTimeImmutable
     {
-        return DateTimeImmutable::createFromFormat(DateTime::ATOM, $value) ?: null;
+        if ($value === null) {
+            return null;
+        }
+        return new DateTimeImmutable($value);
     }
 
     /**
