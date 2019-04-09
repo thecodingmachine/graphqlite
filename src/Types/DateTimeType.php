@@ -6,10 +6,10 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use DateTime;
 use DateTimeImmutable;
+use Exception;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Language\AST\Node;
 use GraphQL\Language\AST\StringValueNode;
-use GraphQL\Language\AST\ValueNode;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Utils\Utils;
 
@@ -75,6 +75,7 @@ class DateTimeType extends ScalarType
             return $valueNode->value;
         }
 
-        return null;
+        // Intentionally without message, as all information already in wrapped Exception
+        throw new Exception();
     }
 }
