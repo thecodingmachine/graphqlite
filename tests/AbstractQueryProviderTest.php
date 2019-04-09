@@ -33,6 +33,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -42,9 +43,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $testObjectType;
     private $testObjectType2;
     private $inputTestObjectType;
-    private $inputTestObjectType2;
     private $typeMapper;
     private $hydrator;
+    private $argumentResolver;
     private $registry;
     private $typeGenerator;
     private $inputTypeGenerator;
@@ -229,6 +230,14 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->hydrator;
     }
 
+    protected function getArgumentResolver(): ArgumentResolver
+    {
+        if ($this->argumentResolver === null) {
+            $this->argumentResolver = new ArgumentResolver($this->getHydrator());
+        }
+        return $this->argumentResolver;
+    }
+
     protected function getRegistry()
     {
         if ($this->registry === null) {
@@ -259,7 +268,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         return new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
-            $this->getHydrator(),
+            $this->getArgumentResolver(),
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
             $this->getTypeResolver(),
@@ -279,7 +288,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getInputTypeGenerator(): InputTypeGenerator
     {
         if ($this->inputTypeGenerator === null) {
-            $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getControllerQueryProviderFactory(), $this->getHydrator());
+            $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getControllerQueryProviderFactory(), $this->getArgumentResolver());
         }
         return $this->inputTypeGenerator;
     }

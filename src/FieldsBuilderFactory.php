@@ -9,6 +9,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 class FieldsBuilderFactory
@@ -65,7 +66,7 @@ class FieldsBuilderFactory
         return new FieldsBuilder(
             $this->annotationReader,
             $typeMapper,
-            $this->hydrator,
+            new ArgumentResolver($this->hydrator),
             $this->authenticationService,
             $this->authorizationService,
             $this->typeResolver,

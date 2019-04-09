@@ -203,7 +203,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
-            $this->getHydrator(),
+            $this->getArgumentResolver(),
             new class implements AuthenticationServiceInterface {
                 public function isLogged(): bool
                 {
@@ -228,7 +228,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
-            $this->getHydrator(),
+            $this->getArgumentResolver(),
             new VoidAuthenticationService(),
             new class implements AuthorizationServiceInterface {
                 public function isAllowed(string $right): bool
@@ -290,7 +290,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
-            $this->getHydrator(),
+            $this->getArgumentResolver(),
             new VoidAuthenticationService(),
             new VoidAuthorizationService(),
             $this->getTypeResolver(),
