@@ -114,7 +114,7 @@ class Contact
     }
 
     /**
-     * Here, we are testing overriding the field in the extend class.
+     * This getter will be overridden in the extend class.
      *
      * @Field()
      * @return string

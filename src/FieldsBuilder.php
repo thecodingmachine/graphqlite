@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite;
 
 use function array_merge;
+use function get_parent_class;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
@@ -15,6 +16,7 @@ use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -222,7 +224,21 @@ class FieldsBuilder
         $oldDeclaringClass = null;
         $context = null;
 
+        $closestMatchingTypeClass = null;
+        if ($annotationName === Field::class) {
+            $parent = get_parent_class($refClass->getName());
+            if ($parent !== null) {
+                $closestMatchingTypeClass = $this->typeMapper->findClosestMatchingParent($parent);
+            }
+        }
+
         foreach ($refClass->getMethods() as $refMethod) {
+            if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $refMethod->getDeclaringClass()->getName()) {
+                // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
+                // We will merge the fields anyway.
+                break;
+            }
+
             // First, let's check the "Query" or "Mutation" or "Field" annotation
             $queryAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, $annotationName);
 

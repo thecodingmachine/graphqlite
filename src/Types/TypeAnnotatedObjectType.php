@@ -43,6 +43,7 @@ class TypeAnnotatedObjectType extends MutableObjectType
                     $fields = $fieldProvider->getSelfFields($className);
                 }
                 if ($parentType !== null) {
+                    // Note: with +=, the keys already present are not overloaded
                     $fields += $parentType->getFields();
                 }
                 return $fields;

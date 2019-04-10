@@ -148,7 +148,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * @param string $className
      * @return string|null
      */
-    private function findClosestMatchingParent(string $className): ?string
+    public function findClosestMatchingParent(string $className): ?string
     {
         do {
             if ($this->typeMapper->canMapClassToType($className)) {

@@ -94,4 +94,12 @@ interface RecursiveTypeMapperInterface
      * @return Type&(InputType|OutputType)
      */
     public function mapNameToType(string $typeName): Type;
+
+    /**
+     * Returns the closest parent that can be mapped, or null if nothing can be matched.
+     *
+     * @param string $className
+     * @return string|null
+     */
+    public function findClosestMatchingParent(string $className): ?string;
 }
