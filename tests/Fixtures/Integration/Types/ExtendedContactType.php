@@ -22,4 +22,15 @@ class ExtendedContactType
     {
         return strtoupper($contact->getName());
     }
+
+    /**
+     * Here, we are testing overriding the field in the extend class.
+     *
+     * @Field()
+     * @return string
+     */
+    public function company(Contact $contact): string
+    {
+        return $contact->getName().' Ltd';
+    }
 }

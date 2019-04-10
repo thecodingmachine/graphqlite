@@ -199,6 +199,7 @@ class EndToEndTest extends TestCase
         query {
             contacts {
                 name
+                company
                 uppercaseName
                 ... on User {
                     email
@@ -216,10 +217,12 @@ class EndToEndTest extends TestCase
             'contacts' => [
                 [
                     'name' => 'Joe',
+                    'company' => 'Joe Ltd',
                     'uppercaseName' => 'JOE'
                 ],
                 [
                     'name' => 'Bill',
+                    'company' => 'Bill Ltd',
                     'uppercaseName' => 'BILL',
                     'email' => 'bill@example.com'
                 ]
@@ -237,10 +240,12 @@ class EndToEndTest extends TestCase
             'contacts' => [
                 [
                     'name' => 'Joe',
+                    'company' => 'Joe Ltd',
                     'uppercaseName' => 'JOE'
                 ],
                 [
                     'name' => 'Bill',
+                    'company' => 'Bill Ltd',
                     'uppercaseName' => 'BILL',
                     'email' => 'bill@example.com'
                 ]

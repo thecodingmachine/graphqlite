@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
@@ -33,6 +34,10 @@ class Contact
      * @var DateTimeInterface
      */
     private $birthDate;
+    /**
+     * @var string
+     */
+    private $company;
 
     public function __construct(string $name)
     {
@@ -106,5 +111,24 @@ class Contact
     public function setBirthDate(DateTimeInterface $birthDate): void
     {
         $this->birthDate = $birthDate;
+    }
+
+    /**
+     * This getter will be overridden in the extend class.
+     *
+     * @Field()
+     * @return string
+     */
+    public function getCompany(): string
+    {
+        return $this->company;
+    }
+
+    /**
+     * @param string $company
+     */
+    public function setCompany(string $company): void
+    {
+        $this->company = $company;
     }
 }
