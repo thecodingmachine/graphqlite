@@ -46,6 +46,7 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\TypeRegistry;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use function var_dump;
 use function var_export;
@@ -148,7 +149,7 @@ class EndToEndTest extends TestCase
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
                     $container->get(FieldsBuilderFactory::class),
-                    $container->get(HydratorInterface::class)
+                    $container->get(ArgumentResolver::class)
                 );
             },
             InputTypeUtils::class => function(ContainerInterface $container) {
@@ -162,6 +163,9 @@ class EndToEndTest extends TestCase
             },
             HydratorInterface::class => function(ContainerInterface $container) {
                 return new FactoryHydrator();
+            },
+            ArgumentResolver::class => function(ContainerInterface $container) {
+                return new ArgumentResolver($container->get(HydratorInterface::class));
             },
             NamingStrategyInterface::class => function() {
                 return new NamingStrategy();

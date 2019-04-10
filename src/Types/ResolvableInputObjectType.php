@@ -23,9 +23,9 @@ use TheCodingMachine\GraphQLite\Types\DateTimeType;
 class ResolvableInputObjectType extends InputObjectType implements ResolvableInputInterface
 {
     /**
-     * @var HydratorInterface
+     * @var ArgumentResolver
      */
-    private $hydrator;
+    private $argumentResolver;
 
     /**
      * @var callable&array<int, object|string>
@@ -39,13 +39,13 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @param object|string $factory
      * @param string $methodName
-     * @param HydratorInterface $hydrator
+     * @param ArgumentResolver $argumentResolver
      * @param null|string $comment
      * @param array $additionalConfig
      */
-    public function __construct(string $name, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, $factory, string $methodName, HydratorInterface $hydrator, ?string $comment, array $additionalConfig = [])
+    public function __construct(string $name, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, $factory, string $methodName, ArgumentResolver $argumentResolver, ?string $comment, array $additionalConfig = [])
     {
-        $this->hydrator = $hydrator;
+        $this->argumentResolver = $argumentResolver;
         $this->resolve = [ $factory, $methodName ];
 
         $fields = function() use ($controllerQueryProviderFactory, $factory, $methodName, $recursiveTypeMapper) {
@@ -76,24 +76,7 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
         foreach ($this->getFields() as $name => $field) {
             $type = $field->getType();
             if (isset($args[$name])) {
-                $val = $args[$name];
-
-                $type = $this->stripNonNullType($type);
-                if ($type instanceof ListOfType) {
-                    $subtype = $this->stripNonNullType($type->getWrappedType());
-                    $val = array_map(function ($item) use ($subtype) {
-                        if ($subtype instanceof DateTimeType) {
-                            return new \DateTimeImmutable($item);
-                        } elseif ($subtype instanceof InputObjectType) {
-                            return $this->hydrator->hydrate($item, $subtype);
-                        }
-                        return $item;
-                    }, $val);
-                } elseif ($type instanceof DateTimeType) {
-                    $val = new \DateTimeImmutable($val);
-                } elseif ($type instanceof InputObjectType) {
-                    $val = $this->hydrator->hydrate($val, $type);
-                }
+                $val = $this->argumentResolver->resolve($args[$name], $type);
             } elseif ($field->defaultValueExists()) {
                 $val = $field->defaultValue;
             } else {
@@ -106,13 +89,5 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
         $resolve = $this->resolve;
 
         return $resolve(...$toPassArgs);
-    }
-    
-    private function stripNonNullType(Type $type): Type
-    {
-        if ($type instanceof NonNull) {
-            return $this->stripNonNullType($type->getWrappedType());
-        }
-        return $type;
     }
 }

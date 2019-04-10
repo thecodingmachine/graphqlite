@@ -385,14 +385,14 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         $objectClassName = $type->getClass();
         $this->mapClassToTypeArray[$objectClassName] = $typeClassName;
-        $this->cache->set('globTypeMapperByClass_'.str_replace('\\', '_', $objectClassName), [
+        $this->cache->set('globTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $objectClassName), [
             'filemtime' => filemtime($typeFileName),
             'fileName' => $typeFileName,
             'typeClass' => $typeClassName
         ], $this->mapTtl);
         $typeName = $this->namingStrategy->getOutputTypeName($typeClassName, $type);
         $this->mapNameToType[$typeName] = $typeClassName;
-        $this->cache->set('globTypeMapperByName_'.$typeName, [
+        $this->cache->set('globTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$typeName, [
             'filemtime' => filemtime($typeFileName),
             'fileName' => $typeFileName,
             'typeClass' => $typeClassName
@@ -406,13 +406,13 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         $refArray = [$refMethod->getDeclaringClass()->getName(), $refMethod->getName()];
         $this->mapClassToFactory[$className] = $refArray;
-        $this->cache->set('globInputTypeMapperByClass_'.str_replace('\\', '_', $className), [
+        $this->cache->set('globInputTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $className), [
             'filemtime' => filemtime($fileName),
             'fileName' => $fileName,
             'factory' => $refArray
         ], $this->mapTtl);
         $this->mapInputNameToFactory[$inputName] = $refArray;
-        $this->cache->set('globInputTypeMapperByName_'.$inputName, [
+        $this->cache->set('globInputTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$inputName, [
             'filemtime' => filemtime($fileName),
             'fileName' => $fileName,
             'factory' => $refArray
@@ -427,7 +427,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         $objectClassName = $extendType->getClass();
         $this->mapClassToExtendTypeArray[$objectClassName][$extendTypeClassName] = $extendTypeClassName;
-        $this->cache->set('globExtendTypeMapperByClass_'.str_replace('\\', '_', $objectClassName), [
+        $this->cache->set('globExtendTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $objectClassName), [
             'filemtime' => filemtime($typeFileName),
             'fileName' => $typeFileName,
             'extendTypeClasses' => $this->mapClassToExtendTypeArray[$objectClassName]
@@ -443,7 +443,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeName = $targetType->name;
 
         $this->mapNameToExtendType[$typeName][$extendTypeClassName] = $extendTypeClassName;
-        $this->cache->set('globExtendTypeMapperByName_'.$typeName, [
+        $this->cache->set('globExtendTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$typeName, [
             'filemtime' => filemtime($typeFileName),
             'fileName' => $typeFileName,
             'extendTypeClasses' => $this->mapNameToExtendType[$typeName]
@@ -457,7 +457,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globTypeMapperByClass_'.str_replace('\\', '_', $className));
+        $item = $this->cache->get('globTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $className));
         if ($item !== null) {
             [
                 'filemtime' => $filemtime,
@@ -482,7 +482,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globTypeMapperByName_'.$graphqlTypeName);
+        $item = $this->cache->get('globTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$graphqlTypeName);
         if ($item !== null) {
             [
                 'filemtime' => $filemtime,
@@ -510,7 +510,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globInputTypeMapperByClass_'.str_replace('\\', '_', $className));
+        $item = $this->cache->get('globInputTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $className));
         if ($item !== null) {
             [
                 'filemtime' => $filemtime,
@@ -539,7 +539,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globExtendTypeMapperByClass_'.str_replace('\\', '_', $className));
+        $item = $this->cache->get('globExtendTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $className));
         if ($item !== null) {
             [
                 'filemtime' => $filemtime,
@@ -568,7 +568,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globExtendTypeMapperByName_'.$graphqlTypeName);
+        $item = $this->cache->get('globExtendTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$graphqlTypeName);
         if ($item !== null) {
             [
                 'filemtime' => $filemtime,
@@ -596,7 +596,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globInputTypeMapperByName_'.$graphqlTypeName);
+        $item = $this->cache->get('globInputTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$graphqlTypeName);
         if ($item !== null) {
             [
                 'filemtime' => $filemtime,

@@ -15,6 +15,7 @@ use ReflectionType;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 
 /**
@@ -31,9 +32,9 @@ class InputTypeGenerator
      */
     private $cache = [];
     /**
-     * @var HydratorInterface
+     * @var ArgumentResolver
      */
-    private $hydrator;
+    private $argumentResolver;
     /**
      * @var InputTypeUtils
      */
@@ -41,11 +42,11 @@ class InputTypeGenerator
 
     public function __construct(InputTypeUtils $inputTypeUtils,
                                 FieldsBuilderFactory $fieldsBuilderFactory,
-                                HydratorInterface $hydrator)
+                                ArgumentResolver $argumentResolver)
     {
         $this->inputTypeUtils = $inputTypeUtils;
         $this->fieldsBuilderFactory = $fieldsBuilderFactory;
-        $this->hydrator = $hydrator;
+        $this->argumentResolver = $argumentResolver;
     }
 
     /**
@@ -68,7 +69,7 @@ class InputTypeGenerator
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $object, $methodName, $this->hydrator, null);
+            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $object, $methodName, $this->argumentResolver, null);
         }
 
         return $this->cache[$inputName];

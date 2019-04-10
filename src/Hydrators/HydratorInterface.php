@@ -11,7 +11,7 @@ use GraphQL\Type\Definition\InputObjectType;
 interface HydratorInterface
 {
     /**
-     * Whether this hydrate can hydrate the passed data.
+     * Whether this hydrator can hydrate the passed data.
      *
      * @param mixed[] $data
      * @param InputObjectType $type

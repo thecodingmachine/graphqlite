@@ -30,6 +30,7 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 /**
@@ -183,6 +184,7 @@ class SchemaFactory
     {
         $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
         $hydrator = $this->hydrator ?: new FactoryHydrator();
+        $argumentResolver = new ArgumentResolver($hydrator);
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
         $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver = new TypeResolver();
@@ -202,7 +204,7 @@ class SchemaFactory
 
         $typeGenerator = new TypeGenerator($annotationReader, $fieldsBuilderFactory, $namingStrategy, $typeRegistry, $this->container);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $hydrator);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $argumentResolver);
 
         $typeMappers = [];
 
