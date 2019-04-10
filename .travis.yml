@@ -37,6 +37,19 @@ jobs:
         - *composerupdate
       script:
         - *phpunit
+    - stage: test_dependencies
+      php: 7.3
+      env: PREFER_LOWEST=""
+      before_script:
+        - mkdir -p tests/dependencies
+        - rsync -av . tests/dependencies/copy/ --exclude tests --exclude vendor
+        - cd tests/dependencies
+        - git clone https://github.com/thecodingmachine/graphqlite-bundle.git
+        - ./makeComposerLocal.php graphqlite-bundle/composer.json
+        - cd graphqlite-bundle
+        - composer install
+      script:
+        - vendor/bin/phpunit
     - stage: doc
       if: branch = master AND type = push
       name: "Doc generation"
@@ -49,3 +62,6 @@ jobs:
         - git config --global user.email "${GH_EMAIL}"
         - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
         - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages
+matrix:
+  allow_failures:
+    - stage: test_dependencies
