@@ -45,7 +45,7 @@ jobs:
         - rsync -av . tests/dependencies/copy/ --exclude tests --exclude vendor
         - cd tests/dependencies
         - git clone https://github.com/thecodingmachine/graphqlite-bundle.git
-        - ./makeComposerLocal.php graphqlite-bundle/composer.json
+        - php ./makeComposerLocal.php graphqlite-bundle/composer.json
         - cd graphqlite-bundle
         - composer install
       script:
