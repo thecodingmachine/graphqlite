@@ -13,8 +13,8 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 
 /**
- * This class is in charge of creating Webonix GraphQL types from annotated objects that do not extend the
- * Webonix ObjectType class.
+ * This class is in charge of creating Webonyx GraphQL types from annotated objects that do not extend the
+ * Webonyx ObjectType class.
  */
 class TypeGenerator
 {

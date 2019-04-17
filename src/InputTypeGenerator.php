@@ -19,7 +19,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 
 /**
- * This class is in charge of creating Webonix InputTypes from Factory annotations.
+ * This class is in charge of creating Webonyx InputTypes from Factory annotations.
  */
 class InputTypeGenerator
 {
