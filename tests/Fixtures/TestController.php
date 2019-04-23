@@ -107,4 +107,12 @@ class TestController
     {
         return new TestObject2('foo');
     }
+
+    /**
+     * @Query(outputType="[ID!]!")
+     */
+    public function testFixComplexReturnType(): array
+    {
+        return ['42'];
+    }
 }

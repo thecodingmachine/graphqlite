@@ -524,11 +524,6 @@ class FieldsBuilder
         return $args;
     }
 
-    /**
-     * @param Type $type
-     * @param Type|null $docBlockType
-     * @return GraphQLType
-     */
     private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): GraphQLType
     {
         $graphQlType = null;

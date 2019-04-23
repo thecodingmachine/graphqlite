@@ -55,7 +55,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->name);
 
@@ -146,10 +146,27 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $fixedQuery = $queries[1];
 
         $this->assertInstanceOf(IDType::class, $fixedQuery->getType());
+    }
+
+    public function testQueryProviderWithComplexFixedReturnType()
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(7, $queries);
+        $fixedQuery = $queries[6];
+
+        $this->assertInstanceOf(NonNull::class, $fixedQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $fixedQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $fixedQuery->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(IDType::class, $fixedQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
     }
 
     public function testNameFromAnnotation()
@@ -312,7 +329,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $iterableQuery = $queries[3];
 
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
@@ -328,7 +345,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries(new TestController());
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $iterableQuery = $queries[4];
 
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
@@ -353,7 +370,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $unionQuery = $queries[5];
 
         $this->assertInstanceOf(NonNull::class, $unionQuery->getType());
