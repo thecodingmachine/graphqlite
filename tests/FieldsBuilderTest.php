@@ -24,8 +24,11 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
@@ -36,6 +39,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -55,7 +59,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $usersQuery = $queries[0];
         $this->assertSame('test', $usersQuery->name);
 
@@ -146,10 +150,27 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $fixedQuery = $queries[1];
 
         $this->assertInstanceOf(IDType::class, $fixedQuery->getType());
+    }
+
+    public function testQueryProviderWithComplexFixedReturnType()
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(7, $queries);
+        $fixedQuery = $queries[6];
+
+        $this->assertInstanceOf(NonNull::class, $fixedQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $fixedQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $fixedQuery->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(IDType::class, $fixedQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
     }
 
     public function testNameFromAnnotation()
@@ -312,7 +333,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $iterableQuery = $queries[3];
 
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
@@ -328,7 +349,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries(new TestController());
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $iterableQuery = $queries[4];
 
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
@@ -353,7 +374,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(6, $queries);
+        $this->assertCount(7, $queries);
         $unionQuery = $queries[5];
 
         $this->assertInstanceOf(NonNull::class, $unionQuery->getType());
@@ -470,5 +491,29 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertNull($result);
 
         $this->assertInstanceOf(StringType::class, $fields['test']->getType());
+    }
+
+    public function testSourceFieldBadOutputTypeException()
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $this->expectExceptionMessage('For @SourceField "test" declared in "TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType", cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
+        $queryProvider->getFields(new TestSourceFieldBadOutputType(), true);
+    }
+
+    public function testSourceFieldBadOutputType2Exception()
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $this->expectExceptionMessage('For @SourceField "test" declared in "TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2", Syntax Error: Expected ], found <EOF>');
+        $queryProvider->getFields(new TestSourceFieldBadOutputType2(), true);
+    }
+
+    public function testBadOutputTypeException()
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType::test, cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
+        $queryProvider->getFields(new TestFieldBadOutputType(), true);
     }
 }
