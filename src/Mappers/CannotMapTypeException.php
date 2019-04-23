@@ -4,8 +4,12 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 
+use GraphQL\Error\SyntaxError;
 use GraphQL\Type\Definition\ObjectType;
+use ReflectionClass;
 use ReflectionMethod;
+use function sprintf;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
 
 class CannotMapTypeException extends \Exception implements CannotMapTypeExceptionInterface
 {
@@ -24,6 +28,11 @@ class CannotMapTypeException extends \Exception implements CannotMapTypeExceptio
         return new self('cannot find GraphQL type "'.$name.'". Check your TypeMapper configuration.');
     }
 
+    public static function createForParseError(SyntaxError $error): self
+    {
+        return new self($error->getMessage(), $error->getCode(), $error);
+    }
+
     public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, \ReflectionParameter $parameter): self
     {
         $message = sprintf('For parameter $%s, in %s::%s, %s',
@@ -40,6 +49,16 @@ class CannotMapTypeException extends \Exception implements CannotMapTypeExceptio
         $message = sprintf('For return type of %s::%s, %s',
             $method->getDeclaringClass()->getName(),
             $method->getName(),
+            $previous->getMessage());
+
+        return new self($message, 0, $previous);
+    }
+
+    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceField $sourceField): self
+    {
+        $message = sprintf('For @SourceField "%s" declared in "%s", %s',
+            $sourceField->getName(),
+            $class->getName(),
             $previous->getMessage());
 
         return new self($message, 0, $previous);

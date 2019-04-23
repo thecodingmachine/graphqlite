@@ -16,6 +16,7 @@ use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
+use function sprintf;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
@@ -267,9 +268,10 @@ class FieldsBuilder
                 $args = $this->mapParameters($parameters, $docBlockObj);
 
                 if ($queryAnnotation->getOutputType()) {
-                    $type = $this->typeResolver->mapNameToType($queryAnnotation->getOutputType());
-                    if (!$type instanceof OutputType) {
-                        throw new \InvalidArgumentException(sprintf("In %s::%s, the 'outputType' parameter in @Type annotation should contain the name of an OutputType. The '%s' type does not implement GraphQL\\Type\\Definition\\OutputType", $refMethod->getDeclaringClass()->getName(), $refMethod->getName(), $queryAnnotation->getOutputType()));
+                    try {
+                        $type = $this->typeResolver->mapNameToOutputType($queryAnnotation->getOutputType());
+                    } catch (CannotMapTypeExceptionInterface $e) {
+                        throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
                     }
                 } else {
                     $type = $this->mapReturnType($refMethod, $docBlockObj);
@@ -403,7 +405,11 @@ class FieldsBuilder
                     $type = GraphQLType::nonNull($type);
                 }
             } elseif ($sourceField->getOutputType()) {
-                $type = $this->typeResolver->mapNameToType($sourceField->getOutputType());
+                try {
+                    $type = $this->typeResolver->mapNameToOutputType($sourceField->getOutputType());
+                } catch (CannotMapTypeExceptionInterface $e) {
+                    throw CannotMapTypeException::wrapWithSourceField($e, $refClass, $sourceField);
+                }
             } else {
                 $type = $this->mapReturnType($refMethod, $docBlockObj);
             }
