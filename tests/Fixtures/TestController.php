@@ -23,9 +23,10 @@ class TestController
      * @param string $withDefault
      * @param null|string $string
      * @param ID|null $id
+     * @param TestEnum $enum
      * @return TestObject
      */
-    public function test(int $int, array $list, ?bool $boolean, ?float $float, ?\DateTimeImmutable $dateTimeImmutable, ?\DateTimeInterface $dateTime, string $withDefault = 'default', ?string $string = null, ID $id = null): TestObject
+    public function test(int $int, array $list, ?bool $boolean, ?float $float, ?\DateTimeImmutable $dateTimeImmutable, ?\DateTimeInterface $dateTime, string $withDefault = 'default', ?string $string = null, ID $id = null, TestEnum $enum = null): TestObject
     {
         $str = '';
         foreach ($list as $test) {
@@ -34,7 +35,7 @@ class TestController
             }
             $str .= $test->getTest();
         }
-        return new TestObject($string.$int.$str.($boolean?'true':'false').$float.$dateTimeImmutable->format('YmdHis').$dateTime->format('YmdHis').$withDefault.($id !== null ? $id->val() : ''));
+        return new TestObject($string.$int.$str.($boolean?'true':'false').$float.$dateTimeImmutable->format('YmdHis').$dateTime->format('YmdHis').$withDefault.($id !== null ? $id->val() : '').$enum->getValue());
     }
 
     /**

@@ -29,7 +29,8 @@
         "symfony/cache": "^4.1.4",
         "mouf/picotainer": "^1.1",
         "phpstan/phpstan": "^0.11",
-        "beberlei/porpaginas": "^1.2"
+        "beberlei/porpaginas": "^1.2",
+        "myclabs/php-enum": "^1.7"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
