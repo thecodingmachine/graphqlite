@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\CustomTypesRegistry;
@@ -92,11 +93,16 @@ class FieldsBuilder
      * @var NamingStrategyInterface
      */
     private $namingStrategy;
+    /**
+     * @var RootTypeMapperInterface
+     */
+    private $rootTypeMapper;
 
     public function __construct(AnnotationReader $annotationReader, RecursiveTypeMapperInterface $typeMapper,
                                 ArgumentResolver $argumentResolver, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
-                                CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy)
+                                CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy,
+                                RootTypeMapperInterface $rootTypeMapper)
     {
         $this->annotationReader = $annotationReader;
         $this->typeMapper = $typeMapper;
@@ -106,6 +112,7 @@ class FieldsBuilder
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy = $namingStrategy;
+        $this->rootTypeMapper = $rootTypeMapper;
     }
 
     // TODO: Add RecursiveTypeMapper in the list of parameters for getQueries and REMOVE the ControllerQueryProviderFactory.
@@ -199,7 +206,7 @@ class FieldsBuilder
 
         $parameters = $refMethod->getParameters();
 
-        $args = $this->mapParameters($parameters, $docBlockObj);
+        $args = $this->mapParameters($parameters, $docBlockObj, $refMethod);
 
         return $args;
     }
@@ -265,7 +272,7 @@ class FieldsBuilder
                     // TODO: check that $first_parameter type is correct.
                 }
 
-                $args = $this->mapParameters($parameters, $docBlockObj);
+                $args = $this->mapParameters($parameters, $docBlockObj, $refMethod);
 
                 if ($queryAnnotation->getOutputType()) {
                     try {
@@ -318,7 +325,7 @@ class FieldsBuilder
 
         try {
             /** @var GraphQLType&OutputType $type */
-            $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false);
+            $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false, $refMethod, $docBlockObj);
         } catch (TypeMappingException $e) {
             throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
         } catch (CannotMapTypeExceptionInterface $e) {
@@ -397,7 +404,7 @@ class FieldsBuilder
             $docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
 
-            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
+            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $refMethod);
 
             if ($sourceField->isId()) {
                 $type = GraphQLType::id();
@@ -480,7 +487,7 @@ class FieldsBuilder
      * @return array[] An array of ['type'=>Type, 'defaultValue'=>val]
      * @throws MissingTypeHintException
      */
-    private function mapParameters(array $refParameters, DocBlock $docBlock): array
+    private function mapParameters(array $refParameters, DocBlock $docBlock, ReflectionMethod $refMethod): array
     {
         $args = [];
 
@@ -509,7 +516,7 @@ class FieldsBuilder
 
             try {
                 $arr = [
-                    'type' => $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true),
+                    'type' => $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $refMethod, $docBlock, $parameter->getName()),
                 ];
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
@@ -530,15 +537,15 @@ class FieldsBuilder
         return $args;
     }
 
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): GraphQLType
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
     {
         $graphQlType = null;
 
         if ($type instanceof Array_ || $type instanceof Iterable_ || $type instanceof Mixed_) {
-            $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType);
+            $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
         } else {
             try {
-                $graphQlType = $this->toGraphQlType($type, null, $mapToInputType);
+                $graphQlType = $this->toGraphQlType($type, null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
                 if (!$isNullable) {
                     $graphQlType = GraphQLType::nonNull($graphQlType);
                 }
@@ -550,7 +557,7 @@ class FieldsBuilder
                     $refClass = new ReflectionClass($fqcn);
                     // Note : $refClass->isIterable() is only accessible in PHP 7.2
                     if ($refClass->implementsInterface(Iterator::class) || $refClass->implementsInterface(IteratorAggregate::class)) {
-                        $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable);
+                        $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable, $refMethod, $docBlockObj, $argumentName);
                     } else {
                         throw $e;
                     }
@@ -563,7 +570,7 @@ class FieldsBuilder
         return $graphQlType;
     }
 
-    private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType): GraphQLType
+    private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
     {
         if ($docBlockType === null) {
             throw TypeMappingException::createFromType($type);
@@ -582,7 +589,7 @@ class FieldsBuilder
         $lastException = null;
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
-                $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), null, $mapToInputType);
+                $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
             } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
                 // We have several types. It is ok not to be able to match one.
                 $lastException = $e;
@@ -616,7 +623,7 @@ class FieldsBuilder
     /**
      * Maps a type where the main PHP type is an iterator
      */
-    private function mapIteratorDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable): GraphQLType
+    private function mapIteratorDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
     {
         if ($docBlockType === null) {
             throw TypeMappingException::createFromType($type);
@@ -637,12 +644,12 @@ class FieldsBuilder
             try {
                 $singleDocBlockType = $this->getTypeInArray($singleDocBlockType);
                 if ($singleDocBlockType !== null) {
-                    $subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false);
+                    $subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
                 } else {
                     $subGraphQlType = null;
                 }
 
-                $unionTypes[] = $this->toGraphQlType($type, $subGraphQlType, false);
+                $unionTypes[] = $this->toGraphQlType($type, $subGraphQlType, false, $refMethod, $docBlockObj);
 
                 // TODO: add here a scan of the $type variable and do stuff if it is iterable.
                 // TODO: remove the iterator type if specified in the docblock (@return Iterator|User[])
@@ -655,7 +662,7 @@ class FieldsBuilder
 
         if (empty($unionTypes) && $lastException !== null) {
             // We have an issue, let's try without the subType
-            return $this->mapDocBlockType($type, $docBlockType, $isNullable, false);
+            return $this->mapDocBlockType($type, $docBlockType, $isNullable, false, $refMethod, $docBlockObj);
         }
 
         if (count($unionTypes) === 1) {
@@ -680,41 +687,17 @@ class FieldsBuilder
      * @return GraphQLType (InputType&GraphQLType)|(OutputType&GraphQLType)
      * @throws CannotMapTypeExceptionInterface
      */
-    private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType): GraphQLType
+    private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
     {
-        if ($type instanceof Integer) {
-            return GraphQLType::int();
-        } elseif ($type instanceof String_) {
-            return GraphQLType::string();
-        } elseif ($type instanceof Boolean) {
-            return GraphQLType::boolean();
-        } elseif ($type instanceof Float_) {
-            return GraphQLType::float();
-        } elseif ($type instanceof Object_) {
-            $fqcn = (string) $type->getFqsen();
-            switch ($fqcn) {
-                case '\\DateTimeImmutable':
-                case '\\DateTimeInterface':
-                    return DateTimeType::getInstance();
-                case '\\'.UploadedFileInterface::class:
-                    return CustomTypesRegistry::getUploadType();
-                case '\\DateTime':
-                    throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
-                case '\\'.ID::class:
-                    return GraphQLType::id();
-                default:
-                    $className = ltrim($type->getFqsen(), '\\');
-                    if ($mapToInputType) {
-                        return $this->typeMapper->mapClassToInputType($className);
-                    } else {
-                        return $this->typeMapper->mapClassToInterfaceOrType($className, $subType);
-                    }
-            }
-        } elseif ($type instanceof Array_) {
-            return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQlType($type->getValueType(), $subType, $mapToInputType)));
+        if ($mapToInputType === true) {
+            $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         } else {
+            $mappedType = $this->rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+        }
+        if ($mappedType === null) {
             throw TypeMappingException::createFromType($type);
         }
+        return $mappedType;
     }
 
     /**
