@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 
+use GraphQL\Error\Error;
 use GraphQL\Error\SyntaxError;
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
@@ -28,7 +29,7 @@ class CannotMapTypeException extends \Exception implements CannotMapTypeExceptio
         return new self('cannot find GraphQL type "'.$name.'". Check your TypeMapper configuration.');
     }
 
-    public static function createForParseError(SyntaxError $error): self
+    public static function createForParseError(Error $error): self
     {
         return new self($error->getMessage(), $error->getCode(), $error);
     }

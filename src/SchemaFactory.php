@@ -22,6 +22,7 @@ use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -45,6 +46,10 @@ class SchemaFactory
      * @var QueryProviderInterface[]
      */
     private $queryProviders = [];
+    /**
+     * @var RootTypeMapperInterface[]
+     */
+    private $rootTypeMappers = [];
     /**
      * @var TypeMapperInterface[]
      */
@@ -113,6 +118,15 @@ class SchemaFactory
     public function addQueryProvider(QueryProviderInterface $queryProvider): self
     {
         $this->queryProviders[] = $queryProvider;
+        return $this;
+    }
+
+    /**
+     * Registers a root type mapper.
+     */
+    public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper): self
+    {
+        $this->rootTypeMappers[] = $rootTypeMapper;
         return $this;
     }
 
@@ -200,7 +214,7 @@ class SchemaFactory
         $lockFactory = new LockFactory($lockStore);
 
         $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy);
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $this->rootTypeMappers);
 
         $typeGenerator = new TypeGenerator($annotationReader, $fieldsBuilderFactory, $namingStrategy, $typeRegistry, $this->container);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);

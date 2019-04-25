@@ -8,6 +8,7 @@ use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -76,6 +77,7 @@ class FieldsBuilderFactory
     public function buildFieldsBuilder(RecursiveTypeMapperInterface $typeMapper): FieldsBuilder
     {
         $rootTypeMappers = $this->rootTypeMappers;
+        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
         $rootTypeMappers[] = new BaseTypeMapper($typeMapper);
         return new FieldsBuilder(
             $this->annotationReader,

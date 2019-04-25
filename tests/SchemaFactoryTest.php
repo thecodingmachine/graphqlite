@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
@@ -50,6 +51,7 @@ class SchemaFactoryTest extends TestCase
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper([]))
+                ->addRootTypeMapper(new CompositeRootTypeMapper([]))
                 ->setSchemaConfig(new SchemaConfig());
 
         $schema = $factory->createSchema();
