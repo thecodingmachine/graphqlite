@@ -54,7 +54,7 @@ class Product
 
 That's it, you're good to go :tada:! Query and enjoy!
 
-```grapql
+```graphql
 {
   product(id: 42) {
     name
