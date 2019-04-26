@@ -173,3 +173,48 @@ public function companyOrContact(int $id)
 }
 ```
 
+## Enum types
+
+<small>Available in GraphQLite 3.1+</small>
+
+PHP has no native support for enum types. Hopefully, there are a number of PHP libraries that emulate enums in PHP.
+The most commonly used library is [myclabs/php-enum](https://github.com/myclabs/php-enum) and GraphQLite comes with
+native support for it.
+
+You will first need to install [myclabs/php-enum](https://github.com/myclabs/php-enum):
+
+```bash
+$ composer require myclabs/php-enum
+```
+
+Now, any class extending the `MyCLabs\Enum\Enum` class will be mapped to a GraphQL enum:
+
+```php
+use MyCLabs\Enum\Enum;
+
+class StatusEnum extends Enum
+{
+    private const ON = 'on';
+    private const OFF = 'off';
+    private const PENDING = 'pending';
+}
+```
+
+```php
+/**
+ * @Query
+ * @return User[]
+ */
+public function users(StatusEnum $status): array
+{
+    if ($status === StatusEum::ON()) {
+        // ...
+    }
+    // ...
+}
+```
+
+<div class="alert alert-info">There are many enumeration library in PHP and you might be using another library.
+If you want to add support for your own library, this is not extremely difficult to do. You need to register a custom
+"RootTypeMapper" with GraphQLite. You can learn more about <em>type mappers</em> in the <a href="internals.md">"internals" documentation</a>
+and <a href="https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Root/MyCLabsEnumTypeMapper.php">copy/paste and adapt the root type mapper used for myclabs/php-enum</a>.</div>

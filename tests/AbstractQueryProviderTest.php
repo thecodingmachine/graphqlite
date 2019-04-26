@@ -27,6 +27,9 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
@@ -273,7 +276,11 @@ abstract class AbstractQueryProviderTest extends TestCase
             new VoidAuthorizationService(),
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
-            new NamingStrategy()
+            new NamingStrategy(),
+            new CompositeRootTypeMapper([
+                new MyCLabsEnumTypeMapper(),
+                new BaseTypeMapper($this->getTypeMapper())
+            ])
         );
     }
 

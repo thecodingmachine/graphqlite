@@ -6,6 +6,10 @@ namespace TheCodingMachine\GraphQLite;
 
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -42,11 +46,19 @@ class FieldsBuilderFactory
      * @var NamingStrategyInterface
      */
     private $namingStrategy;
+    /**
+     * @var RootTypeMapperInterface[]
+     */
+    private $rootTypeMappers;
 
+    /**
+     * @param RootTypeMapperInterface[] $rootTypeMappers
+     */
     public function __construct(AnnotationReader $annotationReader,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
-                                CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy)
+                                CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy,
+                                array $rootTypeMappers = [])
     {
         $this->annotationReader = $annotationReader;
         $this->hydrator = $hydrator;
@@ -55,6 +67,7 @@ class FieldsBuilderFactory
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy = $namingStrategy;
+        $this->rootTypeMappers = $rootTypeMappers;
     }
 
     /**
@@ -63,6 +76,9 @@ class FieldsBuilderFactory
      */
     public function buildFieldsBuilder(RecursiveTypeMapperInterface $typeMapper): FieldsBuilder
     {
+        $rootTypeMappers = $this->rootTypeMappers;
+        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
+        $rootTypeMappers[] = new BaseTypeMapper($typeMapper);
         return new FieldsBuilder(
             $this->annotationReader,
             $typeMapper,
@@ -71,7 +87,8 @@ class FieldsBuilderFactory
             $this->authorizationService,
             $this->typeResolver,
             $this->cachedDocBlockFactory,
-            $this->namingStrategy
+            $this->namingStrategy,
+            new CompositeRootTypeMapper($rootTypeMappers)
         );
     }
 }

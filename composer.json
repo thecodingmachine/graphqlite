@@ -29,7 +29,8 @@
         "symfony/cache": "^4.1.4",
         "mouf/picotainer": "^1.1",
         "phpstan/phpstan": "^0.11",
-        "beberlei/porpaginas": "^1.2"
+        "beberlei/porpaginas": "^1.2",
+        "myclabs/php-enum": "^1.6.6"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
@@ -49,7 +50,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "3.0.x-dev"
+            "dev-master": "3.1.x-dev"
         }
     }
 }
