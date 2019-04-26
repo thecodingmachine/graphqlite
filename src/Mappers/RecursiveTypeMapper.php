@@ -283,6 +283,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     private function getClassTree(): array
     {
         if ($this->mappedClasses === null) {
+            $this->mappedClasses = [];
             $supportedClasses = array_flip($this->typeMapper->getSupportedClasses());
             foreach ($supportedClasses as $supportedClass => $foo) {
                 $this->getMappedClass($supportedClass, $supportedClasses);

@@ -13,7 +13,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
 
 /**
- * Maps an class extending MyClabs enums to a GraphQL type
+ * Maps an class extending MyCLabs enums to a GraphQL type
  */
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {

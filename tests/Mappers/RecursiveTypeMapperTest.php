@@ -179,4 +179,15 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->expectExceptionMessage("The type 'Foobar' is created by 2 different classes: 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB' and 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA'");
         $recursiveTypeMapper->getOutputTypes();
     }
+
+    /**
+     * Tests that the RecursiveTypeMapper behaves correctly if there are no types to map.
+     */
+    public function testMapNoTypes()
+    {
+        $recursiveTypeMapper = new RecursiveTypeMapper(new CompositeTypeMapper([]), new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+
+        $this->expectException(CannotMapTypeException::class);
+        $recursiveTypeMapper->mapNameToType('Foo');
+    }
 }
