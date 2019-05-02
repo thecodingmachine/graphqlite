@@ -131,9 +131,6 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      */
     public function mapNameToType(string $typeName): Type
     {
-        if ($this->recursiveTypeMapper === null) {
-            throw new BadMethodCallException('You must initialize the PorpaginasTypeMapper with PorpaginasTypeMapper::setRecursiveTypeMapper before using it.');
-        }
         if (!$this->canMapNameToType($typeName)) {
             throw CannotMapTypeException::createForName($typeName);
         }

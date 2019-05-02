@@ -65,13 +65,6 @@ class TypeGenerator
      */
     public function mapAnnotatedObject(string $annotatedObjectClassName): MutableObjectType
     {
-        if ($this->recursiveTypeMapper === null) {
-            throw new \RuntimeException('TypeGenerator::setRecursiveTypeMapper must be called while setting up GraphQLite.');
-        }
-        if ($this->fieldsBuilder === null) {
-            throw new \RuntimeException('TypeGenerator::setFieldsBuilder must be called while setting up GraphQLite.');
-        }
-
         $refTypeClass = new ReflectionClass($annotatedObjectClassName);
 
         $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
