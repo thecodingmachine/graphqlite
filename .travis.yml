@@ -8,6 +8,7 @@ jobs:
       php: 7.3
       env: PREFER_LOWEST=""
       before_script:
+        - git branch
         - &composerupdate
           composer update --prefer-dist $PREFER_LOWEST
       script:
