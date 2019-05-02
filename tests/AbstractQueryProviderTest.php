@@ -53,7 +53,6 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeGenerator;
     private $inputTypeGenerator;
     private $inputTypeUtils;
-    private $fieldsBuilderFactory;
     private $fieldsBuilder;
     private $annotationReader;
     private $typeResolver;
@@ -339,20 +338,6 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeResolver->registerSchema(new \GraphQL\Type\Schema([]));
         }
         return $this->typeResolver;
-    }
-
-    protected function getFieldsBuilderFactory(): FieldsBuilderFactory
-    {
-        if ($this->fieldsBuilderFactory === null) {
-            $this->fieldsBuilderFactory = new FieldsBuilderFactory($this->getAnnotationReader(),
-                $this->getHydrator(),
-                new VoidAuthenticationService(),
-                new VoidAuthorizationService(),
-                $this->getTypeResolver(),
-                new CachedDocBlockFactory(new ArrayCache()),
-                new NamingStrategy());
-        }
-        return $this->fieldsBuilderFactory;
     }
 
     protected function getTypeRegistry(): TypeRegistry

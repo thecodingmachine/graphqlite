@@ -225,11 +225,12 @@ class SchemaFactory
         // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
         $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
 
+        $argumentResolver = new ArgumentResolver($hydrator);
 
-        $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper);
-
-        $fieldsBuilder = $fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
+        $fieldsBuilder = new FieldsBuilder(
+            $annotationReader, $recursiveTypeMapper, $argumentResolver, $authenticationService,
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper
+        );
 
 
         $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
@@ -253,7 +254,7 @@ class SchemaFactory
 
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
-            $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilderFactory, $recursiveTypeMapper,
+            $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilder,
                 $this->container, $lockFactory, $this->cache);
         }
 

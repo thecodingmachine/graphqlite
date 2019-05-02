@@ -2,27 +2,18 @@
 
 namespace TheCodingMachine\GraphQLite\Integration;
 
-use function class_exists;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use Exception;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\InputType;
 use Mouf\Picotainer\Picotainer;
-use PhpParser\Comment\Doc;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Util\Type;
-use function print_r;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
@@ -53,8 +44,6 @@ use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use function var_dump;
-use function var_export;
 
 class EndToEndTest extends TestCase
 {
@@ -70,19 +59,8 @@ class EndToEndTest extends TestCase
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), null, $container->get(RootTypeMapperInterface::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
-                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
-            },
-            FieldsBuilderFactory::class => function(ContainerInterface $container) {
-                return new FieldsBuilderFactory(
-                    $container->get(AnnotationReader::class),
-                    $container->get(HydratorInterface::class),
-                    $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class),
-                    $container->get(TypeResolver::class),
-                    $container->get(CachedDocBlockFactory::class),
-                    $container->get(NamingStrategyInterface::class)
-                );
+                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
+                    $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
             },
             FieldsBuilder::class => function(ContainerInterface $container) {
                 return new FieldsBuilder(

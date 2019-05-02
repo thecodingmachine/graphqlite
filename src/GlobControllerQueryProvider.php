@@ -44,13 +44,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private $aggregateControllerQueryProvider;
     /**
-     * @var FieldsBuilderFactory
+     * @var FieldsBuilder
      */
-    private $fieldsBuilderFactory;
-    /**
-     * @var RecursiveTypeMapperInterface
-     */
-    private $recursiveTypeMapper;
+    private $fieldsBuilder;
     /**
      * @var bool
      */
@@ -62,21 +58,19 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
-     * @param FieldsBuilderFactory $fieldsBuilderFactory
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @param FieldsBuilder $fieldsBuilder
      * @param ContainerInterface $container The container we will fetch controllers from.
      * @param CacheInterface $cache
      * @param int|null $cacheTtl
      * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilderFactory $fieldsBuilderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->container = $container;
         $this->cache = $cache;
         $this->cacheTtl = $cacheTtl;
-        $this->fieldsBuilderFactory = $fieldsBuilderFactory;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->fieldsBuilder = $fieldsBuilder;
         $this->recursive = $recursive;
         $this->lockFactory = $lockFactory;
     }
@@ -84,7 +78,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
     {
         if ($this->aggregateControllerQueryProvider === null) {
-            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilderFactory, $this->recursiveTypeMapper, $this->container);
+            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilder, $this->container);
         }
         return $this->aggregateControllerQueryProvider;
     }
