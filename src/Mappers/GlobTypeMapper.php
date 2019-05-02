@@ -126,11 +126,15 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var LockFactory
      */
     private $lockFactory;
+    /**
+     * @var RecursiveTypeMapperInterface
+     */
+    private $recursiveTypeMapper;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, LockFactory $lockFactory, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, LockFactory $lockFactory, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->typeGenerator = $typeGenerator;
@@ -144,6 +148,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->inputTypeUtils = $inputTypeUtils;
         $this->recursive = $recursive;
         $this->lockFactory = $lockFactory;
+        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     /**
@@ -248,7 +253,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         return $this->mapClassToExtendTypeArray;
     }
 
-    private function getMapNameToExtendType(RecursiveTypeMapperInterface $recursiveTypeMapper): array
+    private function getMapNameToExtendType(): array
     {
         if ($this->fullMapNameToExtendTypeArrayComputed === false) {
             $namespace = str_replace('\\', '_', $this->namespace);
@@ -261,11 +266,11 @@ final class GlobTypeMapper implements TypeMapperInterface
                     // Let's wait and fetch the result from the cache.
                     $lock->acquire(true);
                     $lock->release();
-                    return $this->getMapNameToExtendType($recursiveTypeMapper);
+                    return $this->getMapNameToExtendType();
                 }
                 $lock->acquire(true);
                 try {
-                    $this->buildMapNameToExtendTypeArray($recursiveTypeMapper);
+                    $this->buildMapNameToExtendTypeArray();
                 } finally {
                     $lock->release();
                 }
@@ -365,7 +370,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
     }
 
-    private function buildMapNameToExtendTypeArray(RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    private function buildMapNameToExtendTypeArray(): void
     {
         $this->mapNameToExtendType = [];
         $classes = $this->getClassList();
@@ -373,7 +378,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
             if ($extendType !== null) {
-                $this->storeExtendTypeMapperByNameInCache($className, $extendType, $refClass->getFileName(), $recursiveTypeMapper);
+                $this->storeExtendTypeMapperByNameInCache($className, $extendType, $refClass->getFileName());
             }
         }
     }
@@ -437,9 +442,9 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping ExtendTypeClass <=> name class.
      */
-    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName): void
     {
-        $targetType = $recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
+        $targetType = $this->recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
         $typeName = $targetType->name;
 
         $this->mapNameToExtendType[$typeName][$extendTypeClassName] = $extendTypeClassName;
@@ -638,11 +643,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
      * @param OutputType|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
@@ -654,7 +658,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             $typeClassName = $map[$className];
         }
 
-        return $this->typeGenerator->mapAnnotatedObject($typeClassName, $recursiveTypeMapper);
+        return $this->typeGenerator->mapAnnotatedObject($typeClassName);
     }
 
     /**
@@ -688,11 +692,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return InputObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+    public function mapClassToInputType(string $className): InputObjectType
     {
         $factory = $this->getFactoryFromCacheByObjectClass($className);
 
@@ -704,19 +707,18 @@ final class GlobTypeMapper implements TypeMapperInterface
             $factory = $map[$className];
         }
 
-        return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $recursiveTypeMapper, $this->container);
+        return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
     }
 
     /**
      * Returns a GraphQL type by name (can be either an input or output type)
      *
      * @param string $typeName The name of the GraphQL type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return \GraphQL\Type\Definition\Type&(InputType|OutputType)
      * @throws CannotMapTypeExceptionInterface
      * @throws \ReflectionException
      */
-    public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): \GraphQL\Type\Definition\Type
+    public function mapNameToType(string $typeName): \GraphQL\Type\Definition\Type
     {
         $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
         if ($typeClassName === null) {
@@ -735,10 +737,10 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         if (isset($typeClassName)) {
-            return $this->typeGenerator->mapAnnotatedObject($typeClassName, $recursiveTypeMapper);
+            return $this->typeGenerator->mapAnnotatedObject($typeClassName);
         }
         if (isset($factory)) {
-            return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $recursiveTypeMapper, $this->container);
+            return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
         }
 
         throw CannotMapTypeException::createForName($typeName);
@@ -775,7 +777,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @param MutableObjectType $type
      * @return bool
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
     {
         $extendTypeClassName = $this->getExtendTypesFromCacheByObjectClass($className);
 
@@ -791,10 +793,9 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @param string $className
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    public function extendTypeForClass(string $className, MutableObjectType $type): void
     {
         $extendTypeClassNames = $this->getExtendTypesFromCacheByObjectClass($className);
 
@@ -807,7 +808,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         foreach ($this->mapClassToExtendTypeArray[$className] as $extendedTypeClass) {
-            $this->typeGenerator->extendAnnotatedObject($this->container->get($extendedTypeClass), $type, $recursiveTypeMapper);
+            $this->typeGenerator->extendAnnotatedObject($this->container->get($extendedTypeClass), $type);
         }
     }
 
@@ -818,7 +819,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @param MutableObjectType $type
      * @return bool
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
     {
         $typeClassNames = $this->getExtendTypesFromCacheByGraphQLTypeName($typeName);
 
@@ -831,7 +832,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             return true;
         }*/
 
-        $map = $this->getMapNameToExtendType($recursiveTypeMapper);
+        $map = $this->getMapNameToExtendType();
 
         return isset($map[$typeName])/* || isset($this->mapInputNameToFactory[$typeName])*/;
     }
@@ -841,16 +842,15 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         $extendTypeClassNames = $this->getExtendTypesFromCacheByGraphQLTypeName($typeName);
         if ($extendTypeClassNames === null) {
             /*$factory = $this->getFactoryFromCacheByGraphQLInputTypeName($typeName);
             if ($factory === null) {*/
-                $map = $this->getMapNameToExtendType($recursiveTypeMapper);
+                $map = $this->getMapNameToExtendType();
                 if (!isset($map[$typeName])) {
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
@@ -861,7 +861,7 @@ final class GlobTypeMapper implements TypeMapperInterface
 
 
         foreach ($extendTypeClassNames as $extendedTypeClass) {
-            $this->typeGenerator->extendAnnotatedObject($this->container->get($extendedTypeClass), $type, $recursiveTypeMapper);
+            $this->typeGenerator->extendAnnotatedObject($this->container->get($extendedTypeClass), $type);
         }
 
         /*if (isset($this->mapInputNameToFactory[$typeName])) {

@@ -83,11 +83,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $className
      * @param OutputType|null $subType
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         // TODO: add support for $subType
         if ($subType !== null) {
@@ -125,11 +124,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return InputObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+    public function mapClassToInputType(string $className): InputObjectType
     {
         if (isset($this->inputTypes[$className])) {
             return $this->inputTypes[$className];
@@ -141,11 +139,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Returns a GraphQL type by name (can be either an input or output type)
      *
      * @param string $typeName The name of the GraphQL type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return Type&(InputType|OutputType)
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+    public function mapNameToType(string $typeName): Type
     {
         if (isset($this->notMappedTypes[$typeName])) {
             return $this->notMappedTypes[$typeName];
@@ -189,10 +186,9 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $className
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return bool
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
     {
         return false;
     }
@@ -202,10 +198,9 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $className
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    public function extendTypeForClass(string $className, MutableObjectType $type): void
     {
         throw CannotMapTypeException::createForExtendType($className, $type);
     }
@@ -215,10 +210,9 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @return bool
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
     {
         return false;
     }
@@ -228,10 +222,9 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+    public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
     }

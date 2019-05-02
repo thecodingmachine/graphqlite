@@ -48,6 +48,6 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         ]);
 
         $this->expectException(MissingAnnotationException::class);
-        $typeGenerator->extendAnnotatedObject(new stdClass(), $type, $this->getTypeMapper());
+        $typeGenerator->extendAnnotatedObject(new stdClass(), $type);
     }
 }

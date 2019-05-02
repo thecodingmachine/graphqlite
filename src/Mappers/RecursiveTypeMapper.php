@@ -119,7 +119,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         if ($closestClassName === null) {
             throw CannotMapTypeException::createForType($className);
         }
-        $type = $this->typeMapper->mapClassToType($closestClassName, $subType, $this);
+        $type = $this->typeMapper->mapClassToType($closestClassName, $subType);
 
         // In the event this type was already part of cache, let's not extend it.
         if ($this->typeRegistry->hasType($type->name)) {
@@ -169,7 +169,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         $classes = [];
         do {
-            if ($this->typeMapper->canExtendTypeForClass($className, $type, $this)) {
+            if ($this->typeMapper->canExtendTypeForClass($className, $type)) {
                 $classes[] = $className;
             }
         } while ($className = get_parent_class($className));
@@ -177,7 +177,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         // Let's apply extenders from the most basic type.
         $classes = array_reverse($classes);
         foreach ($classes as $class) {
-            $this->typeMapper->extendTypeForClass($class, $type, $this);
+            $this->typeMapper->extendTypeForClass($class, $type);
         }
     }
 
@@ -335,7 +335,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     public function mapClassToInputType(string $className): InputObjectType
     {
-        return $this->typeMapper->mapClassToInputType($className, $this);
+        return $this->typeMapper->mapClassToInputType($className);
     }
 
     /**
@@ -393,7 +393,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             return $this->typeRegistry->getType($typeName);
         }
         if ($this->typeMapper->canMapNameToType($typeName)) {
-            $type = $this->typeMapper->mapNameToType($typeName, $this);
+            $type = $this->typeMapper->mapNameToType($typeName);
 
             if ($this->typeRegistry->hasType($typeName)) {
                 $cachedType = $this->typeRegistry->getType($typeName);
@@ -409,8 +409,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 $this->typeRegistry->registerType($type);
             }
             if ($type instanceof MutableObjectType) {
-                if ($this->typeMapper->canExtendTypeForName($typeName, $type, $this)) {
-                    $this->typeMapper->extendTypeForName($typeName, $type, $this);
+                if ($this->typeMapper->canExtendTypeForName($typeName, $type)) {
+                    $this->typeMapper->extendTypeForName($typeName, $type);
                 }
                 $type->freeze();
             }

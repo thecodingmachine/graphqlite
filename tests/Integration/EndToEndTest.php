@@ -121,11 +121,7 @@ class EndToEndTest extends TestCase
                 );
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
-                return new CompositeTypeMapper([
-                    $container->get(GlobTypeMapper::class),
-                    $container->get(GlobTypeMapper::class.'2'),
-                    $container->get(PorpaginasTypeMapper::class),
-                ]);
+                return new CompositeTypeMapper();
             },
             GlobTypeMapper::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
@@ -135,6 +131,7 @@ class EndToEndTest extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(LockFactory::class),
                     new ArrayCache()
                     );
@@ -147,19 +144,22 @@ class EndToEndTest extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(LockFactory::class),
                     new ArrayCache()
                 );
             },
-            PorpaginasTypeMapper::class => function() {
-                return new PorpaginasTypeMapper();
+            PorpaginasTypeMapper::class => function(ContainerInterface $container) {
+                return new PorpaginasTypeMapper($container->get(RecursiveTypeMapperInterface::class));
             },
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(TypeRegistry::class),
-                    $container->get(BasicAutoWiringContainer::class)
+                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
+                    $container->get(FieldsBuilder::class)
                 );
             },
             TypeRegistry::class => function() {
@@ -168,7 +168,8 @@ class EndToEndTest extends TestCase
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
-                    $container->get(ArgumentResolver::class)
+                    $container->get(ArgumentResolver::class),
+                    $container->get(FieldsBuilder::class)
                 );
             },
             InputTypeUtils::class => function(ContainerInterface $container) {
@@ -207,10 +208,10 @@ class EndToEndTest extends TestCase
                 ]);
             }
         ]);
-        $this->mainContainer->get(TypeGenerator::class)->setFieldsBuilder($this->mainContainer->get(FieldsBuilder::class));
-        $this->mainContainer->get(TypeGenerator::class)->setRecursiveTypeMapper($this->mainContainer->get(RecursiveTypeMapperInterface::class));
-        $this->mainContainer->get(InputTypeGenerator::class)->setFieldsBuilder($this->mainContainer->get(FieldsBuilder::class));
         $this->mainContainer->get(TypeResolver::class)->registerSchema($this->mainContainer->get(Schema::class));
+        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class));
+        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class.'2'));
+        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(PorpaginasTypeMapper::class));
     }
 
     public function testEndToEnd()

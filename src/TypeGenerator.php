@@ -46,21 +46,15 @@ class TypeGenerator
     public function __construct(AnnotationReader $annotationReader,
                                 NamingStrategyInterface $namingStrategy,
                                 TypeRegistry $typeRegistry,
-                                ContainerInterface $container)
+                                ContainerInterface $container,
+                                RecursiveTypeMapperInterface $recursiveTypeMapper,
+                                FieldsBuilder $fieldsBuilder)
     {
         $this->annotationReader = $annotationReader;
         $this->namingStrategy = $namingStrategy;
         $this->typeRegistry = $typeRegistry;
         $this->container = $container;
-    }
-
-    public function setRecursiveTypeMapper(RecursiveTypeMapperInterface $recursiveTypeMapper)
-    {
         $this->recursiveTypeMapper = $recursiveTypeMapper;
-    }
-
-    public function setFieldsBuilder(FieldsBuilder $fieldsBuilder)
-    {
         $this->fieldsBuilder = $fieldsBuilder;
     }
 
@@ -127,9 +121,8 @@ class TypeGenerator
     /**
      * @param object $annotatedObject An object with a ExtendType annotation.
      * @param MutableObjectType $type
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      */
-    public function extendAnnotatedObject($annotatedObject, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function extendAnnotatedObject($annotatedObject, MutableObjectType $type)
     {
         $refTypeClass = new ReflectionClass($annotatedObject);
 

@@ -50,7 +50,7 @@ class SchemaFactoryTest extends TestCase
                 ->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
-                ->addTypeMapper(new CompositeTypeMapper([]))
+                ->addTypeMapper(new CompositeTypeMapper())
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
                 ->setSchemaConfig(new SchemaConfig());
 

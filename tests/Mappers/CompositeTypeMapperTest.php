@@ -23,7 +23,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function setUp()
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
+            public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
             {
                 if ($className === TestObject::class) {
                     return new MutableObjectType([
@@ -37,7 +37,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                 }
             }
 
-            public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+            public function mapClassToInputType(string $className): InputObjectType
             {
                 if ($className === TestObject::class) {
                     return new InputObjectType([
@@ -75,10 +75,9 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * Returns a GraphQL type by name (can be either an input or output type)
              *
              * @param string $typeName The name of the GraphQL type
-             * @param RecursiveTypeMapperInterface $recursiveTypeMapper
              * @return Type&(InputType|OutputType)
              */
-            public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+            public function mapNameToType(string $typeName): Type
             {
                 switch ($typeName) {
                     case 'TestObject':
@@ -104,22 +103,22 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                 return $typeName === 'TestObject';
             }
 
-            public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+            public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
             {
                 return false;
             }
 
-            public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+            public function extendTypeForClass(string $className, MutableObjectType $type): void
             {
                 throw CannotMapTypeException::createForExtendType($className, $type);
             }
 
-            public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+            public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
             {
                 return true;
             }
 
-            public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+            public function extendTypeForName(string $typeName, MutableObjectType $type): void
             {
                 $type->addFields(function() {
                     return [
@@ -130,7 +129,8 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             }
         };
 
-        $this->composite = new CompositeTypeMapper([$typeMapper1]);
+        $this->composite = new CompositeTypeMapper();
+        $this->composite->addTypeMapper($typeMapper1);
     }
 
 

@@ -136,7 +136,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
-                public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
+                public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -147,7 +147,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     }
                 }
 
-                public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+                public function mapClassToInputType(string $className): InputObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
@@ -173,7 +173,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return [TestObject::class, TestObject2::class];
                 }
 
-                public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+                public function mapNameToType(string $typeName): Type
                 {
                     switch ($typeName) {
                         case 'TestObject':
@@ -192,22 +192,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return $typeName === 'TestObject' || $typeName === 'TestObject2' || $typeName === 'TestObjectInput';
                 }
 
-                public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+                public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+                public function extendTypeForClass(string $className, MutableObjectType $type): void
                 {
                     throw CannotMapTypeException::createForExtendType($className, $type);
                 }
 
-                public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+                public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+                public function extendTypeForName(string $typeName, MutableObjectType $type): void
                 {
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
@@ -311,9 +311,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->typeGenerator !== null) {
             return $this->typeGenerator;
         }
-        $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry());
-        $this->typeGenerator->setRecursiveTypeMapper($this->getTypeMapper());
-        $this->typeGenerator->setFieldsBuilder($this->getFieldsBuilder());
+        $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry(), $this->getTypeMapper(), $this->getFieldsBuilder());
         return $this->typeGenerator;
     }
 
@@ -322,8 +320,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->inputTypeGenerator !== null) {
             return $this->inputTypeGenerator;
         }
-        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getArgumentResolver());
-        $this->inputTypeGenerator->setFieldsBuilder($this->getFieldsBuilder());
+        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getArgumentResolver(), $this->getFieldsBuilder());
         return $this->inputTypeGenerator;
     }
 

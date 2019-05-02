@@ -41,29 +41,16 @@ class InputTypeGenerator
     private $fieldsBuilder;
 
     public function __construct(InputTypeUtils $inputTypeUtils,
-                                ArgumentResolver $argumentResolver)
+                                ArgumentResolver $argumentResolver,
+                                FieldsBuilder $fieldsBuilder)
     {
         $this->inputTypeUtils = $inputTypeUtils;
         $this->argumentResolver = $argumentResolver;
-    }
-
-    public function setFieldsBuilder(FieldsBuilder $fieldsBuilder)
-    {
         $this->fieldsBuilder = $fieldsBuilder;
     }
 
-    /**
-     * @param string $factory
-     * @param string $methodName
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return InputObjectType
-     */
-    public function mapFactoryMethod(string $factory, string $methodName, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container): InputObjectType
+    public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): InputObjectType
     {
-        if ($this->fieldsBuilder === null) {
-            throw new \RuntimeException('InputTypeGenerator::setFieldsBuilder must be called while setting up GraphQLite.');
-        }
-
         $method = new ReflectionMethod($factory, $methodName);
 
         if ($method->isStatic()) {
