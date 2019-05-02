@@ -508,10 +508,13 @@ class FieldsBuilder
 
             $type = (string) $parameterType;
             if ($type === '') {
-                throw MissingTypeHintException::missingTypeHint($parameter);
+                $phpdocType = new Mixed_();
+                $allowsNull = false;
+                //throw MissingTypeHintException::missingTypeHint($parameter);
+            } else {
+                $phpdocType = $typeResolver->resolve($type);
+                $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
             }
-            $phpdocType = $typeResolver->resolve($type);
-            $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
 
             $docBlockType = $docBlockTypes[$parameter->getName()] ?? null;
 
