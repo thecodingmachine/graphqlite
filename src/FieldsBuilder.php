@@ -493,6 +493,15 @@ class FieldsBuilder
 
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
+        $docBlockTypes = [];
+        if (!empty($refParameters)) {
+            /** @var DocBlock\Tags\Param[] $paramTags */
+            $paramTags = $docBlock->getTagsByName('param');
+            foreach ($paramTags as $paramTag) {
+                $docBlockTypes[$paramTag->getVariableName()] = $paramTag->getType();
+            }
+        }
+
         foreach ($refParameters as $parameter) {
             $parameterType = $parameter->getType();
             $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
@@ -504,15 +513,7 @@ class FieldsBuilder
             $phpdocType = $typeResolver->resolve($type);
             $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
 
-            /** @var DocBlock\Tags\Param[] $paramTags */
-            $paramTags = $docBlock->getTagsByName('param');
-            $docBlockType = null;
-            foreach ($paramTags as $paramTag) {
-                if ($paramTag->getVariableName() === $parameter->getName()) {
-                    $docBlockType = $paramTag->getType();
-                    break;
-                }
-            }
+            $docBlockType = $docBlockTypes[$parameter->getName()] ?? null;
 
             try {
                 $arr = [
