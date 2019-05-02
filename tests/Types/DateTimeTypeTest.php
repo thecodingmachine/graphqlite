@@ -13,7 +13,7 @@ class DateTimeTypeTest extends TestCase
 
     public function testSerialize(): void
     {
-        $dateTimeType = DateTimeType::getInstance();
+        $dateTimeType = new DateTimeType();
 
         $this->assertSame('2019-05-05T10:10:10+00:00', $dateTimeType->serialize(new DateTimeImmutable('2019-05-05T10:10:10+00:00')));
 
@@ -23,7 +23,7 @@ class DateTimeTypeTest extends TestCase
 
     public function testParseLiteral(): void
     {
-        $dateTimeType = DateTimeType::getInstance();
+        $dateTimeType = new DateTimeType();
 
         $this->assertSame('2019-05-05T10:10:10+00:00', $dateTimeType->parseLiteral(new StringValueNode(['value' => '2019-05-05T10:10:10+00:00'])));
 
@@ -34,7 +34,7 @@ class DateTimeTypeTest extends TestCase
 
     public function testParseValue(): void
     {
-        $dateTimeType = DateTimeType::getInstance();
+        $dateTimeType = new DateTimeType();
 
 
         $this->assertNull($dateTimeType->parseValue(null));

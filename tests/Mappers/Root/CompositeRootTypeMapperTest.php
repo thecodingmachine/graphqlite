@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
@@ -21,6 +22,11 @@ class CompositeRootTypeMapperTest extends TestCase
             }
 
             public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+            {
+                return null;
+            }
+
+            public function mapNameToType(string $typeName): ?NamedType
             {
                 return null;
             }

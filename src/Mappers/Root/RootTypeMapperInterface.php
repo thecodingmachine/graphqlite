@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
@@ -25,4 +26,14 @@ interface RootTypeMapperInterface
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType;
 
     public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType;
+
+    /**
+     * Returns a GraphQL type by name.
+     * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType", it should
+     * also map these types by name in the "mapNameToType" method.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return NamedType|null
+     */
+    public function mapNameToType(string $typeName): ?NamedType;
 }

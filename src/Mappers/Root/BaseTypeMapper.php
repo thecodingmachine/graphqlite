@@ -5,8 +5,10 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use GraphQL\Upload\UploadType;
 use function ltrim;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
@@ -95,9 +97,9 @@ class BaseTypeMapper implements RootTypeMapperInterface
             switch ($fqcn) {
                 case '\\DateTimeImmutable':
                 case '\\DateTimeInterface':
-                    return DateTimeType::getInstance();
+                    return self::getDateTimeType();
                 case '\\'.UploadedFileInterface::class:
-                    return CustomTypesRegistry::getUploadType();
+                    return self::getUploadType();
                 case '\\DateTime':
                     throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
                 case '\\'.ID::class:
@@ -106,6 +108,48 @@ class BaseTypeMapper implements RootTypeMapperInterface
                     return null;
             }
         }
+        return null;
+    }
+
+    private static $uploadType;
+
+    private static function getUploadType(): UploadType
+    {
+        if (self::$uploadType === null) {
+            self::$uploadType = new UploadType();
+        }
+        return self::$uploadType;
+    }
+
+    private static $dateTimeType;
+
+    private static function getDateTimeType(): DateTimeType
+    {
+        if (self::$dateTimeType === null) {
+            self::$dateTimeType = new DateTimeType();
+        }
+        return self::$dateTimeType;
+    }
+
+    /**
+     * Returns a GraphQL type by name.
+     * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType", it should
+     * also map these types by name in the "mapNameToType" method.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return NamedType|null
+     */
+    public function mapNameToType(string $typeName): ?NamedType
+    {
+        // No need to map base types, only types added by us.
+        if ($typeName === 'Upload') {
+            return self::getUploadType();
+        }
+
+        if ($typeName === 'DateTime') {
+            return self::getDateTimeType();
+        }
+
         return null;
     }
 }

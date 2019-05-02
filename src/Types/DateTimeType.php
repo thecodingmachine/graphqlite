@@ -15,17 +15,6 @@ use GraphQL\Utils\Utils;
 
 class DateTimeType extends ScalarType
 {
-    private static $instance;
-
-    public static function getInstance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
-
     /**
      * @var string
      */

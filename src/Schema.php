@@ -8,6 +8,9 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\SchemaConfig;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\CustomTypesRegistry;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
@@ -18,10 +21,15 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, SchemaConfig $config = null)
+    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, SchemaConfig $config = null, RootTypeMapperInterface $rootTypeMapper = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();
+        }
+
+        if ($rootTypeMapper === null) {
+            // For compatibility reasons with 3.0, the $rootTypeMapper parameter is optional.
+            $rootTypeMapper = new BaseTypeMapper($recursiveTypeMapper);
         }
 
         $query = new ObjectType([
@@ -68,7 +76,7 @@ class Schema extends \GraphQL\Type\Schema
             return $recursiveTypeMapper->getOutputTypes();
         });
 
-        $config->setTypeLoader(function(string $name) use ($recursiveTypeMapper, $query, $mutation) {
+        $config->setTypeLoader(function(string $name) use ($recursiveTypeMapper, $query, $mutation, $rootTypeMapper) {
             // We need to find a type FROM a GraphQL type name
             if ($name === 'Query') {
                 return $query;
@@ -77,7 +85,7 @@ class Schema extends \GraphQL\Type\Schema
                 return $mutation;
             }
 
-            $type = CustomTypesRegistry::mapNameToType($name);
+            $type = $rootTypeMapper->mapNameToType($name);
             if ($type !== null) {
                 return $type;
             }
