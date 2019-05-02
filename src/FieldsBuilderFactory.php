@@ -47,18 +47,15 @@ class FieldsBuilderFactory
      */
     private $namingStrategy;
     /**
-     * @var RootTypeMapperInterface[]
+     * @var RootTypeMapperInterface
      */
-    private $rootTypeMappers;
+    private $rootTypeMapper;
 
-    /**
-     * @param RootTypeMapperInterface[] $rootTypeMappers
-     */
     public function __construct(AnnotationReader $annotationReader,
                                 HydratorInterface $hydrator, AuthenticationServiceInterface $authenticationService,
                                 AuthorizationServiceInterface $authorizationService, TypeResolver $typeResolver,
                                 CachedDocBlockFactory $cachedDocBlockFactory, NamingStrategyInterface $namingStrategy,
-                                array $rootTypeMappers = [])
+                                RootTypeMapperInterface $rootTypeMapper = null)
     {
         $this->annotationReader = $annotationReader;
         $this->hydrator = $hydrator;
@@ -67,7 +64,7 @@ class FieldsBuilderFactory
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy = $namingStrategy;
-        $this->rootTypeMappers = $rootTypeMappers;
+        $this->rootTypeMapper = $rootTypeMapper;
     }
 
     /**
@@ -76,9 +73,18 @@ class FieldsBuilderFactory
      */
     public function buildFieldsBuilder(RecursiveTypeMapperInterface $typeMapper): FieldsBuilder
     {
-        $rootTypeMappers = $this->rootTypeMappers;
-        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
-        $rootTypeMappers[] = new BaseTypeMapper($typeMapper);
+        // Compatibility with v3.0: the rootTypeMapper can be null.
+        if ($this->rootTypeMapper === null) {
+            $rootTypeMapper = new CompositeRootTypeMapper([
+                new MyCLabsEnumTypeMapper(),
+                new BaseTypeMapper($typeMapper)
+            ]);
+        } else {
+            $rootTypeMapper = new CompositeRootTypeMapper([
+                $this->rootTypeMapper,
+                new BaseTypeMapper($typeMapper)
+            ]);
+        }
         return new FieldsBuilder(
             $this->annotationReader,
             $typeMapper,
@@ -88,7 +94,7 @@ class FieldsBuilderFactory
             $this->typeResolver,
             $this->cachedDocBlockFactory,
             $this->namingStrategy,
-            new CompositeRootTypeMapper($rootTypeMappers)
+            $rootTypeMapper
         );
     }
 }

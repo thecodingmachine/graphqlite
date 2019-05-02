@@ -32,6 +32,9 @@ use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -62,7 +65,7 @@ class EndToEndTest extends TestCase
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
-                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class));
+                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), null, $container->get(RootTypeMapperInterface::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
@@ -180,6 +183,11 @@ class EndToEndTest extends TestCase
                     $lockStore = new FlockStore(sys_get_temp_dir());
                 }
                 return new LockFactory($lockStore);
+            },
+            RootTypeMapperInterface::class => function() {
+                return new CompositeRootTypeMapper([
+                    new MyCLabsEnumTypeMapper()
+                ]);
             }
         ]);
 

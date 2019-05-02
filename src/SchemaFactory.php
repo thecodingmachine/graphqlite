@@ -22,6 +22,9 @@ use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -213,8 +216,14 @@ class SchemaFactory
         }
         $lockFactory = new LockFactory($lockStore);
 
+        $rootTypeMappers = $this->rootTypeMappers;
+        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
+        // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
+        $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
+
+
         $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $this->rootTypeMappers);
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper);
 
         $typeGenerator = new TypeGenerator($annotationReader, $fieldsBuilderFactory, $namingStrategy, $typeRegistry, $this->container);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
@@ -258,6 +267,6 @@ class SchemaFactory
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
-        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig);
+        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig, $compositeRootTypeMapper);
     }
 }
