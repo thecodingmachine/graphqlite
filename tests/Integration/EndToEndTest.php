@@ -20,6 +20,7 @@ use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
@@ -32,6 +33,7 @@ use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
@@ -81,6 +83,22 @@ class EndToEndTest extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class)
                 );
+            },
+            FieldsBuilder::class => function(ContainerInterface $container) {
+                return new FieldsBuilder(
+                    $container->get(AnnotationReader::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
+                    $container->get(ArgumentResolver::class),
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class),
+                    $container->get(TypeResolver::class),
+                    $container->get(CachedDocBlockFactory::class),
+                    $container->get(NamingStrategyInterface::class),
+                    $container->get(RootTypeMapperInterface::class)
+                );
+            },
+            ArgumentResolver::class => function(ContainerInterface $container) {
+                return new ArgumentResolver($container->get(HydratorInterface::class));
             },
             TypeResolver::class => function(ContainerInterface $container) {
                 return new TypeResolver();
@@ -139,7 +157,6 @@ class EndToEndTest extends TestCase
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
-                    $container->get(FieldsBuilderFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(TypeRegistry::class),
                     $container->get(BasicAutoWiringContainer::class)
@@ -151,7 +168,6 @@ class EndToEndTest extends TestCase
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
-                    $container->get(FieldsBuilderFactory::class),
                     $container->get(ArgumentResolver::class)
                 );
             },
@@ -184,13 +200,16 @@ class EndToEndTest extends TestCase
                 }
                 return new LockFactory($lockStore);
             },
-            RootTypeMapperInterface::class => function() {
+            RootTypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeRootTypeMapper([
-                    new MyCLabsEnumTypeMapper()
+                    new MyCLabsEnumTypeMapper(),
+                    new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
                 ]);
             }
         ]);
-
+        $this->mainContainer->get(TypeGenerator::class)->setFieldsBuilder($this->mainContainer->get(FieldsBuilder::class));
+        $this->mainContainer->get(TypeGenerator::class)->setRecursiveTypeMapper($this->mainContainer->get(RecursiveTypeMapperInterface::class));
+        $this->mainContainer->get(InputTypeGenerator::class)->setFieldsBuilder($this->mainContainer->get(FieldsBuilder::class));
         $this->mainContainer->get(TypeResolver::class)->registerSchema($this->mainContainer->get(Schema::class));
     }
 

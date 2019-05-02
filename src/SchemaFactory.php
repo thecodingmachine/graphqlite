@@ -216,18 +216,9 @@ class SchemaFactory
         }
         $lockFactory = new LockFactory($lockStore);
 
-        $rootTypeMappers = $this->rootTypeMappers;
-        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
-        // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
-        $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
-
-
-        $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper);
-
-        $typeGenerator = new TypeGenerator($annotationReader, $fieldsBuilderFactory, $namingStrategy, $typeRegistry, $this->container);
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $argumentResolver);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $argumentResolver);
 
         $typeMappers = [];
 
@@ -248,6 +239,21 @@ class SchemaFactory
 
         $compositeTypeMapper = new CompositeTypeMapper($typeMappers);
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
+
+        $rootTypeMappers = $this->rootTypeMappers;
+        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
+        $rootTypeMappers[] = new BaseTypeMapper($recursiveTypeMapper);
+        // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
+        $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
+
+
+        $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper);
+
+        $fieldsBuilder = $fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
+        $typeGenerator->setRecursiveTypeMapper($recursiveTypeMapper);
+        $typeGenerator->setFieldsBuilder($fieldsBuilder);
+        $inputTypeGenerator->setFieldsBuilder($fieldsBuilder);
 
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {

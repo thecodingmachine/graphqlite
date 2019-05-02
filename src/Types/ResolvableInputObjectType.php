@@ -11,6 +11,7 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
 use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
@@ -35,23 +36,21 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
     /**
      * QueryField constructor.
      * @param string $name
-     * @param FieldsBuilderFactory $controllerQueryProviderFactory
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
+     * @param FieldsBuilder $fieldsBuilder
      * @param object|string $factory
      * @param string $methodName
      * @param ArgumentResolver $argumentResolver
      * @param null|string $comment
      * @param array $additionalConfig
      */
-    public function __construct(string $name, FieldsBuilderFactory $controllerQueryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, $factory, string $methodName, ArgumentResolver $argumentResolver, ?string $comment, array $additionalConfig = [])
+    public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ArgumentResolver $argumentResolver, ?string $comment, array $additionalConfig = [])
     {
         $this->argumentResolver = $argumentResolver;
         $this->resolve = [ $factory, $methodName ];
 
-        $fields = function() use ($controllerQueryProviderFactory, $factory, $methodName, $recursiveTypeMapper) {
+        $fields = function() use ($fieldsBuilder, $factory, $methodName) {
             $method = new ReflectionMethod($factory, $methodName);
-            $fieldProvider = $controllerQueryProviderFactory->buildFieldsBuilder($recursiveTypeMapper);
-            return $fieldProvider->getInputFields($method);
+            return $fieldsBuilder->getInputFields($method);
         };
 
         $config = [

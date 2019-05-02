@@ -24,10 +24,6 @@ use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 class InputTypeGenerator
 {
     /**
-     * @var FieldsBuilderFactory
-     */
-    private $fieldsBuilderFactory;
-    /**
      * @var array<string, InputObjectType>
      */
     private $cache = [];
@@ -39,14 +35,21 @@ class InputTypeGenerator
      * @var InputTypeUtils
      */
     private $inputTypeUtils;
+    /**
+     * @var FieldsBuilder
+     */
+    private $fieldsBuilder;
 
     public function __construct(InputTypeUtils $inputTypeUtils,
-                                FieldsBuilderFactory $fieldsBuilderFactory,
                                 ArgumentResolver $argumentResolver)
     {
         $this->inputTypeUtils = $inputTypeUtils;
-        $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->argumentResolver = $argumentResolver;
+    }
+
+    public function setFieldsBuilder(FieldsBuilder $fieldsBuilder)
+    {
+        $this->fieldsBuilder = $fieldsBuilder;
     }
 
     /**
@@ -57,6 +60,10 @@ class InputTypeGenerator
      */
     public function mapFactoryMethod(string $factory, string $methodName, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container): InputObjectType
     {
+        if ($this->fieldsBuilder === null) {
+            throw new \RuntimeException('InputTypeGenerator::setFieldsBuilder must be called while setting up GraphQLite.');
+        }
+
         $method = new ReflectionMethod($factory, $methodName);
 
         if ($method->isStatic()) {
@@ -69,7 +76,7 @@ class InputTypeGenerator
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $object, $methodName, $this->argumentResolver, null);
+            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, $this->argumentResolver, null);
         }
 
         return $this->cache[$inputName];

@@ -40,7 +40,7 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
             }
         };
 
-        $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), $container);
+        $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $this->getFieldsBuilderFactory(), $this->getTypeMapper(), $container);
 
         $queries = $aggregateQueryProvider->getQueries();
         $this->assertCount(7, $queries);

@@ -3,7 +3,7 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
 /**
@@ -23,11 +23,11 @@ class TypeAnnotatedObjectType extends MutableObjectType
         parent::__construct($config);
     }
 
-    public static function createFromAnnotatedClass(string $typeName, string $className, $annotatedObject, FieldsBuilderFactory $fieldsBuilderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper): self
+    public static function createFromAnnotatedClass(string $typeName, string $className, $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper): self
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilderFactory) {
+            'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder) {
                 $parentClass = get_parent_class($className);
                 $parentType = null;
                 if ($parentClass !== false) {
@@ -36,11 +36,10 @@ class TypeAnnotatedObjectType extends MutableObjectType
                     }
                 }
 
-                $fieldProvider = $fieldsBuilderFactory->buildFieldsBuilder($recursiveTypeMapper);
                 if ($annotatedObject !== null) {
-                    $fields = $fieldProvider->getFields($annotatedObject);
+                    $fields = $fieldsBuilder->getFields($annotatedObject);
                 } else {
-                    $fields = $fieldProvider->getSelfFields($className);
+                    $fields = $fieldsBuilder->getSelfFields($className);
                 }
                 if ($parentType !== null) {
                     $finalFields = $parentType->getFields();

@@ -53,7 +53,8 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeGenerator;
     private $inputTypeGenerator;
     private $inputTypeUtils;
-    private $controllerQueryProviderFactory;
+    private $fieldsBuilderFactory;
+    private $fieldsBuilder;
     private $annotationReader;
     private $typeResolver;
     private $typeRegistry;
@@ -284,19 +285,45 @@ abstract class AbstractQueryProviderTest extends TestCase
         );
     }
 
+    protected function getFieldsBuilder(): FieldsBuilder
+    {
+        if ($this->fieldsBuilder === null) {
+            $this->fieldsBuilder = $this->buildFieldsBuilder(
+                $this->getAnnotationReader(),
+                $this->getTypeMapper(),
+                $this->getArgumentResolver(),
+                new VoidAuthenticationService(),
+                new VoidAuthorizationService(),
+                $this->getTypeResolver(),
+                new CachedDocBlockFactory(new ArrayCache()),
+                new NamingStrategy(),
+                new CompositeRootTypeMapper([
+                    new MyCLabsEnumTypeMapper(),
+                    new BaseTypeMapper($this->getTypeMapper())
+                ])
+            );
+        }
+        return $this->fieldsBuilder;
+    }
+
     protected function getTypeGenerator(): TypeGenerator
     {
-        if ($this->typeGenerator === null) {
-            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry());
+        if ($this->typeGenerator !== null) {
+            return $this->typeGenerator;
         }
+        $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry());
+        $this->typeGenerator->setRecursiveTypeMapper($this->getTypeMapper());
+        $this->typeGenerator->setFieldsBuilder($this->getFieldsBuilder());
         return $this->typeGenerator;
     }
 
     protected function getInputTypeGenerator(): InputTypeGenerator
     {
-        if ($this->inputTypeGenerator === null) {
-            $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getControllerQueryProviderFactory(), $this->getArgumentResolver());
+        if ($this->inputTypeGenerator !== null) {
+            return $this->inputTypeGenerator;
         }
+        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getArgumentResolver());
+        $this->inputTypeGenerator->setFieldsBuilder($this->getFieldsBuilder());
         return $this->inputTypeGenerator;
     }
 
@@ -317,10 +344,10 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->typeResolver;
     }
 
-    protected function getControllerQueryProviderFactory(): FieldsBuilderFactory
+    protected function getFieldsBuilderFactory(): FieldsBuilderFactory
     {
-        if ($this->controllerQueryProviderFactory === null) {
-            $this->controllerQueryProviderFactory = new FieldsBuilderFactory($this->getAnnotationReader(),
+        if ($this->fieldsBuilderFactory === null) {
+            $this->fieldsBuilderFactory = new FieldsBuilderFactory($this->getAnnotationReader(),
                 $this->getHydrator(),
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService(),
@@ -328,7 +355,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 new CachedDocBlockFactory(new ArrayCache()),
                 new NamingStrategy());
         }
-        return $this->controllerQueryProviderFactory;
+        return $this->fieldsBuilderFactory;
     }
 
     protected function getTypeRegistry(): TypeRegistry
