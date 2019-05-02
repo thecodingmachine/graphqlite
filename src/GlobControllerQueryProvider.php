@@ -104,7 +104,8 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
                 }
                 $lock->acquire(true);
                 try {
-                    return $this->buildInstancesList();
+                    $this->instancesList = $this->buildInstancesList();
+                    return $this->instancesList;
                 } finally {
                     $lock->release();
                 }
