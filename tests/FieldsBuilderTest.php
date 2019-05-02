@@ -143,8 +143,35 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(MissingTypeHintException::class);
+        $this->expectException(TypeMappingException::class);
         $queryProvider->getQueries($controller);
+    }
+
+    public function testTypeInDocBlock()
+    {
+        $controller = new class
+        {
+            /**
+             * @Query
+             * @param int $typeHintInDocBlock
+             * @return string
+             */
+            public function test($typeHintInDocBlock)
+            {
+                return 'foo';
+            }
+        };
+
+        $queryProvider = $this->buildFieldsBuilder();
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(1, $queries);
+        $query = $queries[0];
+
+        $this->assertInstanceOf(NonNull::class, $query->args[0]->getType());
+        $this->assertInstanceOf(IntType::class, $query->args[0]->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $query->getType());
+        $this->assertInstanceOf(StringType::class, $query->getType()->getWrappedType());
     }
 
     public function testQueryProviderWithFixedReturnType()
