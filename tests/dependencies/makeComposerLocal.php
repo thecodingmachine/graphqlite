@@ -12,4 +12,8 @@ $composer['repositories'] = [
     ]
 ];
 
+$branch = exec('git rev-parse --abbrev-ref HEAD');
+
+$composer['require']['thecodingmachine/graphqlite'] = 'dev-'.$branch;
+
 file_put_contents($file, json_encode($composer));
