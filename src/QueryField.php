@@ -3,6 +3,10 @@
 
 namespace TheCodingMachine\GraphQLite;
 
+use function array_filter;
+use function array_map;
+use function array_unshift;
+use function array_values;
 use function get_class;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\IDType;
@@ -12,11 +16,15 @@ use GraphQL\Type\Definition\LeafType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use function is_array;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
@@ -32,7 +40,7 @@ class QueryField extends FieldDefinition
      * QueryField constructor.
      * @param string $name
      * @param OutputType&Type $type
-     * @param array[] $arguments Indexed by argument name, value: ['type'=>InputType, 'defaultValue'=>val].
+     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param callable|null $resolve The method to execute
      * @param string|null $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
      * @param ArgumentResolver $argumentResolver
@@ -40,34 +48,21 @@ class QueryField extends FieldDefinition
      * @param bool $injectSource Whether to inject the source object (for Fields), or null for Query and Mutations
      * @param array $additionalConfig
      */
-    public function __construct(string $name, OutputType $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, ArgumentResolver $argumentResolver, ?string $comment, bool $injectSource, array $additionalConfig = [])
+    public function __construct(string $name, OutputType $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, ?string $comment, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
             'type' => $type,
-            'args' => array_map(function(array $item) { return $item['type']; }, $arguments)
+            'args' => self::getInputTypeArgs($arguments)
         ];
         if ($comment) {
             $config['description'] = $comment;
         }
 
-        $config['resolve'] = function ($source, array $args) use ($resolve, $targetMethodOnSource, $arguments, $injectSource, $argumentResolver) {
-            $toPassArgs = [];
-            if ($injectSource) {
-                $toPassArgs[] = $source;
-            }
-            foreach ($arguments as $name => $arr) {
-                $type = $arr['type'];
-                if (isset($args[$name])) {
-                    $val = $argumentResolver->resolve($args[$name], $type);
-                } elseif (array_key_exists('defaultValue', $arr)) {
-                    $val = $arr['defaultValue'];
-                } else {
-                    throw new GraphQLException("Expected argument '$name' was not provided.");
-                }
-
-                $toPassArgs[] = $val;
-            }
+        $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
+            $toPassArgs = array_values(array_map(function(ParameterInterface $parameter) use ($source, $args, $context, $info) {
+                return $parameter->resolve($source, $args, $context, $info);
+            }, $arguments));
 
             if ($resolve !== null) {
                 return $resolve(...$toPassArgs);
@@ -84,10 +79,20 @@ class QueryField extends FieldDefinition
     }
 
     /**
+     * @param ParameterInterface[] $args
+     * @return array<string, InputType>
+     */
+    public static function getInputTypeArgs(array $args): array
+    {
+        $inputTypeArgs = array_filter($args, static function(ParameterInterface $parameter) { return $parameter instanceof InputTypeParameter; });
+        return array_map(static function(InputTypeParameter $parameter) { return $parameter->getType(); }, $inputTypeArgs);
+    }
+
+    /**
      * @param mixed $value A value that will always be returned by this field.
      * @return QueryField
      */
-    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ArgumentResolver $argumentResolver, ?string $comment): self
+    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ?string $comment): self
     {
         if ($value === null && $type instanceof NonNull) {
             $type = $type->getWrappedType();
@@ -95,16 +100,19 @@ class QueryField extends FieldDefinition
         $callable = function() use ($value) {
             return $value;
         };
-        return new self($name, $type, $arguments, $callable, null, $argumentResolver, $comment, false);
+        return new self($name, $type, $arguments, $callable, null, $comment);
     }
 
-    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ArgumentResolver $argumentResolver, ?string $comment): self
+    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ?string $comment): self
     {
-        return new self($name, $type, $arguments, null, $targetMethodOnSource, $argumentResolver, $comment, false);
+        return new self($name, $type, $arguments, null, $targetMethodOnSource, $comment);
     }
 
-    public static function externalField(string $name, OutputType $type, array $arguments, $callable, ArgumentResolver $argumentResolver, ?string $comment, bool $injectSource): self
+    public static function externalField(string $name, OutputType $type, array $arguments, $callable, ?string $comment, bool $injectSource): self
     {
-        return new self($name, $type, $arguments, $callable, null, $argumentResolver, $comment, $injectSource);
+        if ($injectSource === true) {
+            array_unshift($arguments, new SourceParameter());
+        }
+        return new self($name, $type, $arguments, $callable, null, $comment);
     }
 }
