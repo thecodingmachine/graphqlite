@@ -286,19 +286,15 @@ class FieldsBuilder
 
                 if ($unauthorized) {
                     $failWithValue = $failWith->getValue();
-                    $callable = function() use ($failWithValue) {
-                        return $failWithValue;
-                    };
                     if ($failWithValue === null && $type instanceof NonNull) {
                         $type = $type->getWrappedType();
                     }
-                    $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->argumentResolver, $docBlockComment, $injectSource);
+                    $queryList[] = QueryField::alwaysReturn($name, $type, $args, $failWithValue, $this->argumentResolver, $docBlockComment);
                 } else {
-                    $callable = [$controller, $methodName];
                     if ($sourceClassName !== null) {
-                        $queryList[] = new QueryField($name, $type, $args, null, $callable[1], $this->argumentResolver, $docBlockComment, $injectSource);
+                        $queryList[] = QueryField::selfField($name, $type, $args, $methodName, $this->argumentResolver, $docBlockComment);
                     } else {
-                        $queryList[] = new QueryField($name, $type, $args, $callable, null, $this->argumentResolver, $docBlockComment, $injectSource);
+                        $queryList[] = QueryField::externalField($name, $type, $args, [$controller, $methodName], $this->argumentResolver, $docBlockComment, $injectSource);
                     }
                 }
             }
@@ -422,18 +418,14 @@ class FieldsBuilder
             }
 
             if (!$unauthorized) {
-                $queryList[] = new QueryField($sourceField->getName(), $type, $args, null, $methodName, $this->argumentResolver, $docBlockComment, false);
+                $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $this->argumentResolver, $docBlockComment);
             } else {
                 $failWithValue = $sourceField->getFailWith();
-                $callable = function() use ($failWithValue) {
-                    return $failWithValue;
-                };
                 if ($failWithValue === null && $type instanceof NonNull) {
                     $type = $type->getWrappedType();
                 }
-                $queryList[] = new QueryField($sourceField->getName(), $type, $args, $callable, null, $this->argumentResolver, $docBlockComment, false);
+                $queryList[] = QueryField::alwaysReturn($sourceField->getName(), $type, $args, $failWithValue, $this->argumentResolver, $docBlockComment);
             }
-
         }
         return $queryList;
     }
