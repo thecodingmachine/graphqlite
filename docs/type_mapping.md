@@ -175,7 +175,7 @@ public function companyOrContact(int $id)
 
 ## Enum types
 
-<small>Available in GraphQLite 3.1+</small>
+<small>Available in GraphQLite 4.0+</small>
 
 PHP has no native support for enum types. Hopefully, there are a number of PHP libraries that emulate enums in PHP.
 The most commonly used library is [myclabs/php-enum](https://github.com/myclabs/php-enum) and GraphQLite comes with
@@ -218,3 +218,14 @@ public function users(StatusEnum $status): array
 If you want to add support for your own library, this is not extremely difficult to do. You need to register a custom
 "RootTypeMapper" with GraphQLite. You can learn more about <em>type mappers</em> in the <a href="internals.md">"internals" documentation</a>
 and <a href="https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Root/MyCLabsEnumTypeMapper.php">copy/paste and adapt the root type mapper used for myclabs/php-enum</a>.</div>
+
+## More scalar types
+
+<small>Available in GraphQLite 4.0+</small>
+
+GraphQL supports "custom" scalar types. GraphQLite supports adding more GraphQL scalar types.
+
+If you need more types, you can check the [GraphQLite Misc. Types library](https://github.com/thecodingmachine/graphqlite-misc-types).
+It adds support for more scalar types out of the box in GraphQLite.
+
+Or if you have some special needs, [you can develop your own scalar types](custom-types.md#registering-a-custom-scalar-type-advanced).
