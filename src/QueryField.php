@@ -82,4 +82,29 @@ class QueryField extends FieldDefinition
         $config += $additionalConfig;
         parent::__construct($config);
     }
+
+    /**
+     * @param mixed $value A value that will always be returned by this field.
+     * @return QueryField
+     */
+    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ArgumentResolver $argumentResolver, ?string $comment): self
+    {
+        if ($value === null && $type instanceof NonNull) {
+            $type = $type->getWrappedType();
+        }
+        $callable = function() use ($value) {
+            return $value;
+        };
+        return new self($name, $type, $arguments, $callable, null, $argumentResolver, $comment, false);
+    }
+
+    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ArgumentResolver $argumentResolver, ?string $comment): self
+    {
+        return new self($name, $type, $arguments, null, $targetMethodOnSource, $argumentResolver, $comment, false);
+    }
+
+    public static function externalField(string $name, OutputType $type, array $arguments, $callable, ArgumentResolver $argumentResolver, ?string $comment, bool $injectSource): self
+    {
+        return new self($name, $type, $arguments, $callable, null, $argumentResolver, $comment, $injectSource);
+    }
 }
