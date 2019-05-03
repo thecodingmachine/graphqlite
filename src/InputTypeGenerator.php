@@ -24,10 +24,6 @@ use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 class InputTypeGenerator
 {
     /**
-     * @var FieldsBuilderFactory
-     */
-    private $fieldsBuilderFactory;
-    /**
      * @var array<string, InputObjectType>
      */
     private $cache = [];
@@ -39,23 +35,21 @@ class InputTypeGenerator
      * @var InputTypeUtils
      */
     private $inputTypeUtils;
+    /**
+     * @var FieldsBuilder
+     */
+    private $fieldsBuilder;
 
     public function __construct(InputTypeUtils $inputTypeUtils,
-                                FieldsBuilderFactory $fieldsBuilderFactory,
-                                ArgumentResolver $argumentResolver)
+                                ArgumentResolver $argumentResolver,
+                                FieldsBuilder $fieldsBuilder)
     {
         $this->inputTypeUtils = $inputTypeUtils;
-        $this->fieldsBuilderFactory = $fieldsBuilderFactory;
         $this->argumentResolver = $argumentResolver;
+        $this->fieldsBuilder = $fieldsBuilder;
     }
 
-    /**
-     * @param string $factory
-     * @param string $methodName
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
-     * @return InputObjectType
-     */
-    public function mapFactoryMethod(string $factory, string $methodName, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container): InputObjectType
+    public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): InputObjectType
     {
         $method = new ReflectionMethod($factory, $methodName);
 
@@ -69,7 +63,7 @@ class InputTypeGenerator
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilderFactory, $recursiveTypeMapper, $object, $methodName, $this->argumentResolver, null);
+            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, $this->argumentResolver, null);
         }
 
         return $this->cache[$inputName];

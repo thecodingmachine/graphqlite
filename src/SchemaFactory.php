@@ -22,6 +22,9 @@ use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -213,36 +216,45 @@ class SchemaFactory
         }
         $lockFactory = new LockFactory($lockStore);
 
-        $fieldsBuilderFactory = new FieldsBuilderFactory($annotationReader, $hydrator, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $this->rootTypeMappers);
+        $compositeTypeMapper = new CompositeTypeMapper();
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
 
-        $typeGenerator = new TypeGenerator($annotationReader, $fieldsBuilderFactory, $namingStrategy, $typeRegistry, $this->container);
+        $rootTypeMappers = $this->rootTypeMappers;
+        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
+        $rootTypeMappers[] = new BaseTypeMapper($recursiveTypeMapper);
+        // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
+        $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
+
+        $argumentResolver = new ArgumentResolver($hydrator);
+
+        $fieldsBuilder = new FieldsBuilder(
+            $annotationReader, $recursiveTypeMapper, $argumentResolver, $authenticationService,
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper
+        );
+
+
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $argumentResolver);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $argumentResolver, $fieldsBuilder);
 
-        $typeMappers = [];
-
-        foreach ($this->typeNamespaces as $typeNamespace) {
-            $typeMappers[] = new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
-                $this->container, $annotationReader, $namingStrategy, $lockFactory, $this->cache);
-        }
-
-        foreach ($this->typeMappers as $typeMapper) {
-            $typeMappers[] = $typeMapper;
-        }
-
-        if ($typeMappers === []) {
+        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
             throw new GraphQLException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
-        $typeMappers[] = new PorpaginasTypeMapper();
+        foreach ($this->typeNamespaces as $typeNamespace) {
+            $compositeTypeMapper->addTypeMapper(new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
+                $this->container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $lockFactory, $this->cache));
+        }
 
-        $compositeTypeMapper = new CompositeTypeMapper($typeMappers);
-        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
+        foreach ($this->typeMappers as $typeMapper) {
+            $compositeTypeMapper->addTypeMapper($typeMapper);
+        }
+
+        $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
 
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
-            $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilderFactory, $recursiveTypeMapper,
+            $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilder,
                 $this->container, $lockFactory, $this->cache);
         }
 
@@ -258,6 +270,6 @@ class SchemaFactory
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
-        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig);
+        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig, $compositeRootTypeMapper);
     }
 }

@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
@@ -39,10 +40,23 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             }
             return new EnumType([
                 'name' => $type->getFqsen()->getName(),
-                'description' => 'One of the films in the Star Wars Trilogy',
                 'values' => $constInstances
             ]);
         }
+        return null;
+    }
+
+    /**
+     * Returns a GraphQL type by name.
+     * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType", it should
+     * also map these types by name in the "mapNameToType" method.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return NamedType|null
+     */
+    public function mapNameToType(string $typeName): ?NamedType
+    {
+        // We cannot map back by name. Hopefully, this is not an issue.
         return null;
     }
 }

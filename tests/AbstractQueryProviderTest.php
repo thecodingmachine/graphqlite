@@ -53,7 +53,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeGenerator;
     private $inputTypeGenerator;
     private $inputTypeUtils;
-    private $controllerQueryProviderFactory;
+    private $fieldsBuilder;
     private $annotationReader;
     private $typeResolver;
     private $typeRegistry;
@@ -135,7 +135,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
-                public function mapClassToType(string $className, ?OutputType $subType, RecursiveTypeMapperInterface $recursiveTypeMapper): MutableObjectType
+                public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -146,7 +146,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     }
                 }
 
-                public function mapClassToInputType(string $className, RecursiveTypeMapperInterface $recursiveTypeMapper): InputObjectType
+                public function mapClassToInputType(string $className): InputObjectType
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
@@ -172,7 +172,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return [TestObject::class, TestObject2::class];
                 }
 
-                public function mapNameToType(string $typeName, RecursiveTypeMapperInterface $recursiveTypeMapper): Type
+                public function mapNameToType(string $typeName): Type
                 {
                     switch ($typeName) {
                         case 'TestObject':
@@ -191,22 +191,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return $typeName === 'TestObject' || $typeName === 'TestObject2' || $typeName === 'TestObjectInput';
                 }
 
-                public function canExtendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+                public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForClass(string $className, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+                public function extendTypeForClass(string $className, MutableObjectType $type): void
                 {
                     throw CannotMapTypeException::createForExtendType($className, $type);
                 }
 
-                public function canExtendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): bool
+                public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForName(string $typeName, MutableObjectType $type, RecursiveTypeMapperInterface $recursiveTypeMapper): void
+                public function extendTypeForName(string $typeName, MutableObjectType $type): void
                 {
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
@@ -284,19 +284,42 @@ abstract class AbstractQueryProviderTest extends TestCase
         );
     }
 
+    protected function getFieldsBuilder(): FieldsBuilder
+    {
+        if ($this->fieldsBuilder === null) {
+            $this->fieldsBuilder = $this->buildFieldsBuilder(
+                $this->getAnnotationReader(),
+                $this->getTypeMapper(),
+                $this->getArgumentResolver(),
+                new VoidAuthenticationService(),
+                new VoidAuthorizationService(),
+                $this->getTypeResolver(),
+                new CachedDocBlockFactory(new ArrayCache()),
+                new NamingStrategy(),
+                new CompositeRootTypeMapper([
+                    new MyCLabsEnumTypeMapper(),
+                    new BaseTypeMapper($this->getTypeMapper())
+                ])
+            );
+        }
+        return $this->fieldsBuilder;
+    }
+
     protected function getTypeGenerator(): TypeGenerator
     {
-        if ($this->typeGenerator === null) {
-            $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), $this->getControllerQueryProviderFactory(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry());
+        if ($this->typeGenerator !== null) {
+            return $this->typeGenerator;
         }
+        $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry(), $this->getTypeMapper(), $this->getFieldsBuilder());
         return $this->typeGenerator;
     }
 
     protected function getInputTypeGenerator(): InputTypeGenerator
     {
-        if ($this->inputTypeGenerator === null) {
-            $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getControllerQueryProviderFactory(), $this->getArgumentResolver());
+        if ($this->inputTypeGenerator !== null) {
+            return $this->inputTypeGenerator;
         }
+        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getArgumentResolver(), $this->getFieldsBuilder());
         return $this->inputTypeGenerator;
     }
 
@@ -315,20 +338,6 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeResolver->registerSchema(new \GraphQL\Type\Schema([]));
         }
         return $this->typeResolver;
-    }
-
-    protected function getControllerQueryProviderFactory(): FieldsBuilderFactory
-    {
-        if ($this->controllerQueryProviderFactory === null) {
-            $this->controllerQueryProviderFactory = new FieldsBuilderFactory($this->getAnnotationReader(),
-                $this->getHydrator(),
-                new VoidAuthenticationService(),
-                new VoidAuthorizationService(),
-                $this->getTypeResolver(),
-                new CachedDocBlockFactory(new ArrayCache()),
-                new NamingStrategy());
-        }
-        return $this->controllerQueryProviderFactory;
     }
 
     protected function getTypeRegistry(): TypeRegistry

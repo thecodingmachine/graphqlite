@@ -2,26 +2,18 @@
 
 namespace TheCodingMachine\GraphQLite\Integration;
 
-use function class_exists;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use Exception;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\InputType;
 use Mouf\Picotainer\Picotainer;
-use PhpParser\Comment\Doc;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Util\Type;
-use function print_r;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\AnnotationReader;
-use TheCodingMachine\GraphQLite\FieldsBuilderFactory;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
@@ -32,6 +24,10 @@ use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -48,8 +44,6 @@ use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use function var_dump;
-use function var_export;
 
 class EndToEndTest extends TestCase
 {
@@ -62,22 +56,27 @@ class EndToEndTest extends TestCase
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
-                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class));
+                return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), null, $container->get(RootTypeMapperInterface::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilderFactory::class),
-                    $container->get(RecursiveTypeMapperInterface::class), $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
+                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
+                    $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
             },
-            FieldsBuilderFactory::class => function(ContainerInterface $container) {
-                return new FieldsBuilderFactory(
+            FieldsBuilder::class => function(ContainerInterface $container) {
+                return new FieldsBuilder(
                     $container->get(AnnotationReader::class),
-                    $container->get(HydratorInterface::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
+                    $container->get(ArgumentResolver::class),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class),
                     $container->get(TypeResolver::class),
                     $container->get(CachedDocBlockFactory::class),
-                    $container->get(NamingStrategyInterface::class)
+                    $container->get(NamingStrategyInterface::class),
+                    $container->get(RootTypeMapperInterface::class)
                 );
+            },
+            ArgumentResolver::class => function(ContainerInterface $container) {
+                return new ArgumentResolver($container->get(HydratorInterface::class));
             },
             TypeResolver::class => function(ContainerInterface $container) {
                 return new TypeResolver();
@@ -100,11 +99,7 @@ class EndToEndTest extends TestCase
                 );
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
-                return new CompositeTypeMapper([
-                    $container->get(GlobTypeMapper::class),
-                    $container->get(GlobTypeMapper::class.'2'),
-                    $container->get(PorpaginasTypeMapper::class),
-                ]);
+                return new CompositeTypeMapper();
             },
             GlobTypeMapper::class => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
@@ -114,6 +109,7 @@ class EndToEndTest extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(LockFactory::class),
                     new ArrayCache()
                     );
@@ -126,20 +122,22 @@ class EndToEndTest extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(LockFactory::class),
                     new ArrayCache()
                 );
             },
-            PorpaginasTypeMapper::class => function() {
-                return new PorpaginasTypeMapper();
+            PorpaginasTypeMapper::class => function(ContainerInterface $container) {
+                return new PorpaginasTypeMapper($container->get(RecursiveTypeMapperInterface::class));
             },
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
-                    $container->get(FieldsBuilderFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(TypeRegistry::class),
-                    $container->get(BasicAutoWiringContainer::class)
+                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
+                    $container->get(FieldsBuilder::class)
                 );
             },
             TypeRegistry::class => function() {
@@ -148,8 +146,8 @@ class EndToEndTest extends TestCase
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
-                    $container->get(FieldsBuilderFactory::class),
-                    $container->get(ArgumentResolver::class)
+                    $container->get(ArgumentResolver::class),
+                    $container->get(FieldsBuilder::class)
                 );
             },
             InputTypeUtils::class => function(ContainerInterface $container) {
@@ -180,10 +178,18 @@ class EndToEndTest extends TestCase
                     $lockStore = new FlockStore(sys_get_temp_dir());
                 }
                 return new LockFactory($lockStore);
+            },
+            RootTypeMapperInterface::class => function(ContainerInterface $container) {
+                return new CompositeRootTypeMapper([
+                    new MyCLabsEnumTypeMapper(),
+                    new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
+                ]);
             }
         ]);
-
         $this->mainContainer->get(TypeResolver::class)->registerSchema($this->mainContainer->get(Schema::class));
+        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class));
+        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class.'2'));
+        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(PorpaginasTypeMapper::class));
     }
 
     public function testEndToEnd()

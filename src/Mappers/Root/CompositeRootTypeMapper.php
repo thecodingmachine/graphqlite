@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use function is_array;
 use function iterator_to_array;
@@ -42,6 +43,25 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
     {
         foreach ($this->rootTypeMappers as $rootTypeMapper) {
             $mappedType = $rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            if ($mappedType !== null) {
+                return $mappedType;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a GraphQL type by name.
+     * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType", it should
+     * also map these types by name in the "mapNameToType" method.
+     *
+     * @param string $typeName The name of the GraphQL type
+     * @return NamedType|null
+     */
+    public function mapNameToType(string $typeName): ?NamedType
+    {
+        foreach ($this->rootTypeMappers as $rootTypeMapper) {
+            $mappedType = $rootTypeMapper->mapNameToType($typeName);
             if ($mappedType !== null) {
                 return $mappedType;
             }

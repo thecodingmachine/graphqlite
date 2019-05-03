@@ -25,6 +25,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
@@ -550,5 +551,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(CannotMapTypeExceptionInterface::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType::test, cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
         $queryProvider->getFields(new TestFieldBadOutputType(), true);
+    }
+
+    public function testDoubleReturnException()
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        $this->expectException(InvalidDocBlockException::class);
+        $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Fixtures\\TestDoubleReturnTag::test has several @return annotations.');
+        $queryProvider->getFields(new TestDoubleReturnTag(), true);
     }
 }

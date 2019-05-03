@@ -12,4 +12,6 @@ $composer['repositories'] = [
     ]
 ];
 
+$composer['require']['thecodingmachine/graphqlite'] = '4.0.x-dev';
+
 file_put_contents($file, json_encode($composer));

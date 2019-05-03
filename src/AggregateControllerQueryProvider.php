@@ -20,25 +20,20 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
      */
     private $controllersContainer;
     /**
-     * @var FieldsBuilderFactory
+     * @var FieldsBuilder
      */
-    private $queryProviderFactory;
-    /**
-     * @var RecursiveTypeMapperInterface
-     */
-    private $recursiveTypeMapper;
+    private $fieldsBuilder;
 
     /**
      * @param string[] $controllers A list of controllers name in the container.
-     * @param FieldsBuilderFactory $queryProviderFactory
+     * @param FieldsBuilder $fieldsBuilder
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(iterable $controllers, FieldsBuilderFactory $queryProviderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $controllersContainer)
+    public function __construct(iterable $controllers, FieldsBuilder $fieldsBuilder, ContainerInterface $controllersContainer)
     {
         $this->controllers = $controllers;
-        $this->queryProviderFactory = $queryProviderFactory;
+        $this->fieldsBuilder = $fieldsBuilder;
         $this->controllersContainer = $controllersContainer;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     /**
@@ -50,8 +45,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->controllersContainer->get($controllerName);
-            $queryProvider = $this->queryProviderFactory->buildFieldsBuilder($this->recursiveTypeMapper);
-            $queryList = array_merge($queryList, $queryProvider->getQueries($controller));
+            $queryList = array_merge($queryList, $this->fieldsBuilder->getQueries($controller));
         }
 
         return $queryList;
@@ -66,8 +60,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         foreach ($this->controllers as $controllerName) {
             $controller = $this->controllersContainer->get($controllerName);
-            $queryProvider = $this->queryProviderFactory->buildFieldsBuilder($this->recursiveTypeMapper);
-            $mutationList = array_merge($mutationList, $queryProvider->getMutations($controller));
+            $mutationList = array_merge($mutationList, $this->fieldsBuilder->getMutations($controller));
         }
 
         return $mutationList;
