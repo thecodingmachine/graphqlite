@@ -89,6 +89,9 @@ class QueryField extends FieldDefinition
      */
     public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ArgumentResolver $argumentResolver, ?string $comment): self
     {
+        if ($value === null && $type instanceof NonNull) {
+            $type = $type->getWrappedType();
+        }
         $callable = function() use ($value) {
             return $value;
         };

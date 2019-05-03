@@ -286,9 +286,6 @@ class FieldsBuilder
 
                 if ($unauthorized) {
                     $failWithValue = $failWith->getValue();
-                    if ($failWithValue === null && $type instanceof NonNull) {
-                        $type = $type->getWrappedType();
-                    }
                     $queryList[] = QueryField::alwaysReturn($name, $type, $args, $failWithValue, $this->argumentResolver, $docBlockComment);
                 } else {
                     if ($sourceClassName !== null) {
@@ -421,9 +418,6 @@ class FieldsBuilder
                 $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $this->argumentResolver, $docBlockComment);
             } else {
                 $failWithValue = $sourceField->getFailWith();
-                if ($failWithValue === null && $type instanceof NonNull) {
-                    $type = $type->getWrappedType();
-                }
                 $queryList[] = QueryField::alwaysReturn($sourceField->getName(), $type, $args, $failWithValue, $this->argumentResolver, $docBlockComment);
             }
         }
