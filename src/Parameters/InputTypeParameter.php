@@ -26,7 +26,7 @@ class InputTypeParameter implements ParameterInterface
     /**
      * @var bool
      */
-    private $hasDefaultValue;
+    private $doesHaveDefaultValue;
     private $defaultValue;
     /**
      * @var ArgumentResolver
@@ -45,7 +45,7 @@ class InputTypeParameter implements ParameterInterface
     {
         $this->name = $name;
         $this->type = $type;
-        $this->hasDefaultValue = $hasDefaultValue;
+        $this->doesHaveDefaultValue = $hasDefaultValue;
         $this->defaultValue = $defaultValue;
         $this->argumentResolver = $argumentResolver;
     }
@@ -63,7 +63,7 @@ class InputTypeParameter implements ParameterInterface
             return $this->argumentResolver->resolve($args[$this->name], $this->type);
         }
 
-        if ($this->hasDefaultValue) {
+        if ($this->doesHaveDefaultValue) {
             return $this->defaultValue;
         }
 
@@ -76,5 +76,21 @@ class InputTypeParameter implements ParameterInterface
     public function getType(): InputType
     {
         return $this->type;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasDefaultValue(): bool
+    {
+        return $this->doesHaveDefaultValue;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultValue()
+    {
+        return $this->defaultValue;
     }
 }

@@ -80,12 +80,20 @@ class QueryField extends FieldDefinition
 
     /**
      * @param ParameterInterface[] $args
-     * @return array<string, InputType>
+     * @return array<string, array<string, mixed|InputType>>
      */
     public static function getInputTypeArgs(array $args): array
     {
         $inputTypeArgs = array_filter($args, static function(ParameterInterface $parameter) { return $parameter instanceof InputTypeParameter; });
-        return array_map(static function(InputTypeParameter $parameter) { return $parameter->getType(); }, $inputTypeArgs);
+        return array_map(static function(InputTypeParameter $parameter) {
+                $desc = [
+                    'type' => $parameter->getType()
+                ];
+                if ($parameter->hasDefaultValue()) {
+                    $desc['defaultValue'] = $parameter->getDefaultValue();
+                }
+                return $desc;
+            }, $inputTypeArgs);
     }
 
     /**

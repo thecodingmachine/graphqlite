@@ -25,7 +25,6 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
     private $resolve;
 
     /**
-     * QueryField constructor.
      * @param string $name
      * @param FieldsBuilder $fieldsBuilder
      * @param object|string $factory
