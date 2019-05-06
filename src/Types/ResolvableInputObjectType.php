@@ -97,12 +97,7 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
             try {
                 $toPassArgs[] = $parameter->resolve($source, $args, $context, $resolveInfo);
             } catch (MissingArgumentException $e) {
-                if (is_string($this->resolve[0])) {
-                    $factoryName = $this->resolve[0];
-                } else {
-                    $factoryName = get_class($this->resolve[0]);
-                }
-                throw MissingArgumentException::wrapWithFactoryContext($e, $this->name, $factoryName, $this->resolve[1]);
+                throw MissingArgumentException::wrapWithFactoryContext($e, $this->name, $this->resolve);
             }
         }
 

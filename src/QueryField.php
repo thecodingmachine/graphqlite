@@ -64,12 +64,7 @@ class QueryField extends FieldDefinition
                 try {
                     return $parameter->resolve($source, $args, $context, $info);
                 } catch (MissingArgumentException $e) {
-                    if (is_string($resolve[0])) {
-                        $factoryName = $resolve[0];
-                    } else {
-                        $factoryName = get_class($resolve[0]);
-                    }
-                    throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $factoryName, $resolve[1]);
+                    throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
                 }
             }, $arguments));
 
