@@ -43,9 +43,7 @@ class QueryField extends FieldDefinition
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param callable|null $resolve The method to execute
      * @param string|null $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
-     * @param ArgumentResolver $argumentResolver
      * @param null|string $comment
-     * @param bool $injectSource Whether to inject the source object (for Fields), or null for Query and Mutations
      * @param array $additionalConfig
      */
     public function __construct(string $name, OutputType $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, ?string $comment, array $additionalConfig = [])
@@ -53,7 +51,7 @@ class QueryField extends FieldDefinition
         $config = [
             'name' => $name,
             'type' => $type,
-            'args' => self::getInputTypeArgs($arguments)
+            'args' => InputTypeUtils::getInputTypeArgs($arguments)
         ];
         if ($comment) {
             $config['description'] = $comment;
@@ -76,24 +74,6 @@ class QueryField extends FieldDefinition
 
         $config += $additionalConfig;
         parent::__construct($config);
-    }
-
-    /**
-     * @param ParameterInterface[] $args
-     * @return array<string, array<string, mixed|InputType>>
-     */
-    public static function getInputTypeArgs(array $args): array
-    {
-        $inputTypeArgs = array_filter($args, static function(ParameterInterface $parameter) { return $parameter instanceof InputTypeParameter; });
-        return array_map(static function(InputTypeParameter $parameter) {
-                $desc = [
-                    'type' => $parameter->getType()
-                ];
-                if ($parameter->hasDefaultValue()) {
-                    $desc['defaultValue'] = $parameter->getDefaultValue();
-                }
-                return $desc;
-            }, $inputTypeArgs);
     }
 
     /**

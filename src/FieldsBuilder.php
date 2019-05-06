@@ -199,19 +199,16 @@ class FieldsBuilder
 
     /**
      * @param ReflectionMethod $refMethod A method annotated with a Factory annotation.
-     * @return array<string, array<int, mixed>> Returns an array of fields as accepted by the InputObjectType constructor.
+     * @return array<string, ParameterInterface> Returns an array of parameters.
      */
-    public function getInputFields(ReflectionMethod $refMethod): array
+    public function getParameters(ReflectionMethod $refMethod): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = $refMethod->getParameters();
 
-        $args = $this->mapParameters($parameters, $docBlockObj, $refMethod);
-
-        // TODO: move this out of "QueryField"
-        return QueryField::getInputTypeArgs($args);
+        return $this->mapParameters($parameters, $docBlockObj, $refMethod);
     }
 
     /**

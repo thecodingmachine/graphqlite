@@ -8,6 +8,8 @@ use GraphQL\Type\Definition\InputObjectType;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\QueryField;
 
 /**
  * A GraphQL input object that can be resolved using a factory
@@ -40,7 +42,9 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
 
         $fields = function() use ($fieldsBuilder, $factory, $methodName) {
             $method = new ReflectionMethod($factory, $methodName);
-            return $fieldsBuilder->getInputFields($method);
+            $args = $fieldsBuilder->getParameters($method);
+
+            return InputTypeUtils::getInputTypeArgs($args);
         };
 
         $config = [
