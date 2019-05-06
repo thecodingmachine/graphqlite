@@ -21,8 +21,10 @@ use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use function is_array;
+use function is_string;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
@@ -58,8 +60,17 @@ class QueryField extends FieldDefinition
         }
 
         $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
-            $toPassArgs = array_values(array_map(function(ParameterInterface $parameter) use ($source, $args, $context, $info) {
-                return $parameter->resolve($source, $args, $context, $info);
+            $toPassArgs = array_values(array_map(function(ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
+                try {
+                    return $parameter->resolve($source, $args, $context, $info);
+                } catch (MissingArgumentException $e) {
+                    if (is_string($resolve[0])) {
+                        $factoryName = $resolve[0];
+                    } else {
+                        $factoryName = get_class($resolve[0]);
+                    }
+                    throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $factoryName, $resolve[1]);
+                }
             }, $arguments));
 
             if ($resolve !== null) {

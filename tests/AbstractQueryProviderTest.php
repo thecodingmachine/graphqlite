@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
@@ -219,7 +220,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->hydrator === null) {
             $this->hydrator = new class implements HydratorInterface {
-                public function hydrate(array $data, InputObjectType $type)
+                public function hydrate($source, array $data, $context, ResolveInfo $resolveInfo,InputObjectType $type)
                 {
                     return new TestObject($data['test']);
                 }

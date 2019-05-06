@@ -4,8 +4,10 @@
 namespace TheCodingMachine\GraphQLite\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
 use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 
 /**
@@ -22,10 +24,10 @@ class FactoryHydrator implements HydratorInterface
      * @return object
      * @throws CannotHydrateException
      */
-    public function hydrate(array $data, InputObjectType $type)
+    public function hydrate($source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type)
     {
-        if ($type instanceof ResolvableInputObjectType) {
-            return $type->resolve($data);
+        if ($type instanceof ResolvableInputInterface) {
+            return $type->resolve($source, $data, $context, $resolveInfo);
         }
         throw CannotHydrateException::createForInputType($type->name);
     }
@@ -39,6 +41,6 @@ class FactoryHydrator implements HydratorInterface
      */
     public function canHydrate(array $data, InputObjectType $type): bool
     {
-        return $type instanceof ResolvableInputObjectType;
+        return $type instanceof ResolvableInputInterface;
     }
 }

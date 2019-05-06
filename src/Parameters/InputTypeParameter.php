@@ -60,14 +60,14 @@ class InputTypeParameter implements ParameterInterface
     public function resolve($source, $args, $context, ResolveInfo $info)
     {
         if (isset($args[$this->name])) {
-            return $this->argumentResolver->resolve($args[$this->name], $this->type);
+            return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);
         }
 
         if ($this->doesHaveDefaultValue) {
             return $this->defaultValue;
         }
 
-        throw new GraphQLException("Expected argument '{$this->name}' was not provided.");
+        throw MissingArgumentException::create($this->name);
     }
 
     /**

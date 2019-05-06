@@ -87,7 +87,6 @@ class InputTypeUtils
         return $type;
     }
 
-
     /**
      * Maps an array of ParameterInterface to an array of field descriptors as accepted by Webonyx.
      *
