@@ -339,16 +339,21 @@ final class GlobTypeMapper implements TypeMapperInterface
                     continue;
                 }
                 $factory = $this->annotationReader->getFactoryAnnotation($method);
-                if ($factory !== null && $factory->isDefault()) {
+
+                if ($factory !== null) {
                     [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
-                    if (isset($this->mapClassToFactory[$className])) {
-                        throw DuplicateMappingException::createForFactory($className, $this->mapClassToFactory[$className][0], $this->mapClassToFactory[$className][1], $refClass->getName(), $method->name);
+                    if ($factory->isDefault()) {
+                        if (isset($this->mapClassToFactory[$className])) {
+                            throw DuplicateMappingException::createForFactory($className, $this->mapClassToFactory[$className][0], $this->mapClassToFactory[$className][1], $refClass->getName(), $method->name);
+                        }
+                    } else {
+                        // If this is not the default factory, let's not map the class name to the factory.
+                        $className = null;
                     }
                     $this->storeInputTypeInCache($method, $inputName, $className, $refClass->getFileName());
                 }
             }
-
         }
     }
 
@@ -407,15 +412,17 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping between InputType name <=> Object class
      */
-    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, string $className, string $fileName): void
+    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, string $fileName): void
     {
         $refArray = [$refMethod->getDeclaringClass()->getName(), $refMethod->getName()];
-        $this->mapClassToFactory[$className] = $refArray;
-        $this->cache->set('globInputTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $className), [
-            'filemtime' => filemtime($fileName),
-            'fileName' => $fileName,
-            'factory' => $refArray
-        ], $this->mapTtl);
+        if ($className !== null) {
+            $this->mapClassToFactory[$className] = $refArray;
+            $this->cache->set('globInputTypeMapperByClass_'.str_replace('\\', '_', $this->namespace).'_'.str_replace('\\', '_', $className), [
+                'filemtime' => filemtime($fileName),
+                'fileName' => $fileName,
+                'factory' => $refArray
+            ], $this->mapTtl);
+        }
         $this->mapInputNameToFactory[$inputName] = $refArray;
         $this->cache->set('globInputTypeMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$inputName, [
             'filemtime' => filemtime($fileName),

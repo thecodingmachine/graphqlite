@@ -284,16 +284,14 @@ class EndToEndTest extends TestCase
                 relations: [
                     {
                         name: "bar"
-                        birthDate: "1942-12-24 00:00:00",
                     }
-                ]
+                ]   
             }
           ) {
             name,
             birthDate,
             relations {
-              name,
-              birthDate
+              name
             }
           }
         }
@@ -311,7 +309,6 @@ class EndToEndTest extends TestCase
                 'relations' => [
                     [
                         'name' => 'bar',
-                        'birthDate' => '1942-12-24T00:00:00+00:00'
                     ]
                 ]
             ]
