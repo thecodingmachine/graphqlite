@@ -93,6 +93,10 @@ class SchemaFactory
      * @var SchemaConfig
      */
     private $schemaConfig;
+    /**
+     * @var int
+     */
+    private $globTtl = 2;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -200,11 +204,41 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * Sets the time to live time of the cache for annotations in files.
+     * By default this is set to 2 seconds which is ok for development environments.
+     * Set this to "null" (i.e. infinity) for production environments.
+     */
+    public function setGlobTtl(?int $globTtl): self
+    {
+        $this->globTtl = $globTtl;
+        return $this;
+    }
+
+    /**
+     * Sets GraphQLite in "prod" mode (cache settings optimized for best performance).
+     *
+     * This is a shortcut for `$schemaFactory->setGlobTtl(null)`
+     */
+    public function prodMode(): self
+    {
+        return $this->setGlobTtl(null);
+    }
+
+    /**
+     * Sets GraphQLite in "dev" mode (this is the default mode: cache settings optimized for best developer experience).
+     *
+     * This is a shortcut for `$schemaFactory->setGlobTtl(2)`
+     */
+    public function devMode(): self
+    {
+        return $this->setGlobTtl(2);
+    }
+
     public function createSchema(): Schema
     {
         $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
         $hydrator = $this->hydrator ?: new FactoryHydrator();
-        $argumentResolver = new ArgumentResolver($hydrator);
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
         $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver = new TypeResolver();
@@ -251,7 +285,7 @@ class SchemaFactory
 
         foreach ($this->typeNamespaces as $typeNamespace) {
             $compositeTypeMapper->addTypeMapper(new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
-                $this->container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $lockFactory, $this->cache));
+                $this->container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $lockFactory, $this->cache, $this->globTtl));
         }
 
         foreach ($this->typeMappers as $typeMapper) {
@@ -263,7 +297,7 @@ class SchemaFactory
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
             $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilder,
-                $this->container, $lockFactory, $this->cache);
+                $this->container, $lockFactory, $this->cache, $this->globTtl);
         }
 
         foreach ($this->queryProviders as $queryProvider) {
