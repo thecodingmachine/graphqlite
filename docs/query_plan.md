@@ -38,6 +38,8 @@ With GraphQLite, you can answer this question by tapping into the `ResolveInfo` 
 
 ## Fetching the query plan
 
+<small>Available in GraphQLite 4.0+</small>
+
 ```php
 use GraphQL\Type\Definition\ResolveInfo;
 
