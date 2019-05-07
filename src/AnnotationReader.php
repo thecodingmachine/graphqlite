@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite;
 
 
+use function array_merge;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\Reader;
 use function in_array;
@@ -20,6 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class AnnotationReader
 {
@@ -134,6 +136,16 @@ class AnnotationReader
     }
 
     /**
+     * @return UseInputType[]
+     */
+    public function getUseInputTypeAnnotations(ReflectionClass $refClass): array
+    {
+        /** @var UseInputType[] $useInputTypes */
+        $useInputTypes = $this->getMethodAnnotations($refClass, UseInputType::class);
+        return $useInputTypes;
+    }
+
+    /**
      * Returns a class annotation. Finds in the parents if not found in the main class.
      *
      * @return object|null
@@ -224,7 +236,7 @@ class AnnotationReader
         do {
             try {
                 $allAnnotations = $this->reader->getClassAnnotations($refClass);
-                $toAddAnnotations[] = \array_filter($allAnnotations, function($annotation) use ($annotationClass): bool {
+                $toAddAnnotations[] = \array_filter($allAnnotations, static function($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
             } catch (AnnotationException $e) {
@@ -244,5 +256,31 @@ class AnnotationReader
         } else {
             return [];
         }
+    }
+
+    /**
+     * Returns the method's annotations.
+     *
+     * @return object[]
+     */
+    public function getMethodAnnotations(ReflectionMethod $refMethod, string $annotationClass): array
+    {
+        $toAddAnnotations = [];
+        try {
+            $allAnnotations = $this->reader->getMethodAnnotations($refMethod);
+            $toAddAnnotations = \array_filter($allAnnotations, static function($annotation) use ($annotationClass): bool {
+                return $annotation instanceof $annotationClass;
+            });
+        } catch (AnnotationException $e) {
+            if ($this->mode === self::STRICT_MODE) {
+                throw $e;
+            } elseif ($this->mode === self::LAX_MODE) {
+                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                    throw $e;
+                }
+            }
+        }
+
+        return $toAddAnnotations;
     }
 }

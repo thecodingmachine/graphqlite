@@ -2,6 +2,8 @@
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use BadMethodCallException;
+
 /**
  * Use this annotation to force using a specific input type for an input argument.
  *

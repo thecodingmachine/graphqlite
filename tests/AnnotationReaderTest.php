@@ -119,4 +119,28 @@ class AnnotationReaderTest extends TestCase
         $this->expectExceptionMessage("Could not autoload class 'foo' defined in @ExtendType annotation of class 'TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
         $annotationReader->getExtendTypeAnnotation(new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class));
     }
+
+    public function testMethodsStrictMode()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
+
+        $this->expectException(AnnotationException::class);
+        $annotationReader->getMethodAnnotations(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
+    }
+
+    public function testMethodsLaxModeWithBadAnnotation()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
+
+        $type = $annotationReader->getMethodAnnotations(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
+        $this->assertSame([], $type);
+    }
+
+    public function testGetMethodsAnnotationsLaxModeWithBadAnnotationAndStrictNamespace()
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQLite\\Fixtures']);
+
+        $this->expectException(AnnotationException::class);
+        $annotationReader->getMethodAnnotations(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Type::class);
+    }
 }
