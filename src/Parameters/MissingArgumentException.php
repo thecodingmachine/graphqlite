@@ -5,15 +5,9 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 
 
 use function get_class;
-use GraphQL\Error\Error;
-use GraphQL\Error\SyntaxError;
-use GraphQL\Type\Definition\ObjectType;
 use function is_array;
 use function is_string;
-use ReflectionClass;
-use ReflectionMethod;
 use function sprintf;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
 
 class MissingArgumentException extends \BadMethodCallException
 {
