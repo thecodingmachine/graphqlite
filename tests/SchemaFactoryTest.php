@@ -52,7 +52,9 @@ class SchemaFactoryTest extends TestCase
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper())
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
-                ->setSchemaConfig(new SchemaConfig());
+                ->setSchemaConfig(new SchemaConfig())
+                ->devMode()
+                ->prodMode();
 
         $schema = $factory->createSchema();
 
