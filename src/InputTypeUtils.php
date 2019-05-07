@@ -3,12 +3,17 @@
 
 namespace TheCodingMachine\GraphQLite;
 
+use function array_filter;
+use function array_map;
+use GraphQL\Type\Definition\InputType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 class InputTypeUtils
 {
@@ -80,5 +85,25 @@ class InputTypeUtils
             return new Object_(new Fqsen('\\'.$reflectionClass->getName()));
         }
         return $type;
+    }
+
+    /**
+     * Maps an array of ParameterInterface to an array of field descriptors as accepted by Webonyx.
+     *
+     * @param ParameterInterface[] $args
+     * @return array<string, array<string, mixed|InputType>>
+     */
+    public static function getInputTypeArgs(array $args): array
+    {
+        $inputTypeArgs = array_filter($args, static function(ParameterInterface $parameter) { return $parameter instanceof InputTypeParameter; });
+        return array_map(static function(InputTypeParameter $parameter) {
+            $desc = [
+                'type' => $parameter->getType()
+            ];
+            if ($parameter->hasDefaultValue()) {
+                $desc['defaultValue'] = $parameter->getDefaultValue();
+            }
+            return $desc;
+        }, $inputTypeArgs);
     }
 }

@@ -5,9 +5,15 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use function get_class;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
+use function is_object;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\QueryField;
 
 /**
  * A GraphQL input object that can be resolved using a factory
@@ -23,9 +29,16 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
      * @var callable&array<int, object|string>
      */
     private $resolve;
+    /**
+     * @var ParameterInterface[]
+     */
+    private $parameters;
+    /**
+     * @var FieldsBuilder
+     */
+    private $fieldsBuilder;
 
     /**
-     * QueryField constructor.
      * @param string $name
      * @param FieldsBuilder $fieldsBuilder
      * @param object|string $factory
@@ -38,10 +51,10 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
     {
         $this->argumentResolver = $argumentResolver;
         $this->resolve = [ $factory, $methodName ];
+        $this->fieldsBuilder = $fieldsBuilder;
 
-        $fields = function() use ($fieldsBuilder, $factory, $methodName) {
-            $method = new ReflectionMethod($factory, $methodName);
-            return $fieldsBuilder->getInputFields($method);
+        $fields = function() {
+            return InputTypeUtils::getInputTypeArgs($this->getParameters());
         };
 
         $config = [
@@ -57,23 +70,35 @@ class ResolvableInputObjectType extends InputObjectType implements ResolvableInp
     }
 
     /**
-     * @param array $args
+     * @return ParameterInterface[]
+     */
+    private function getParameters(): array
+    {
+        if ($this->parameters === null) {
+            $method = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
+            $this->parameters = $this->fieldsBuilder->getParameters($method);
+        }
+        return $this->parameters;
+    }
+
+    /**
+     * @param object $source
+     * @param array<string, mixed> $args
+     * @param mixed $context
+     * @param ResolveInfo $resolveInfo
      * @return object
      */
-    public function resolve(array $args)
+    public function resolve($source, array $args, $context, ResolveInfo $resolveInfo)
     {
-        $toPassArgs = [];
-        foreach ($this->getFields() as $name => $field) {
-            $type = $field->getType();
-            if (isset($args[$name])) {
-                $val = $this->argumentResolver->resolve($args[$name], $type);
-            } elseif ($field->defaultValueExists()) {
-                $val = $field->defaultValue;
-            } else {
-                throw new GraphQLException("Expected argument '$name' was not provided in GraphQL input type '".$this->name."' used in factory '".get_class($this->resolve[0]).'::'.$this->resolve[1]."()'");
-            }
+        $parameters = $this->getParameters();
 
-            $toPassArgs[] = $val;
+        $toPassArgs = [];
+        foreach ($parameters as $parameter) {
+            try {
+                $toPassArgs[] = $parameter->resolve($source, $args, $context, $resolveInfo);
+            } catch (MissingArgumentException $e) {
+                throw MissingArgumentException::wrapWithFactoryContext($e, $this->name, $this->resolve);
+            }
         }
 
         $resolve = $this->resolve;

@@ -11,6 +11,7 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
@@ -44,6 +45,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -98,13 +100,14 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         ];
 
         $resolve = $usersQuery->resolveFn;
-        $result = $resolve('foo', $context);
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+        $result = $resolve('foo', $context, null, $resolveInfo);
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertSame('foo424212true4.22017010101010120170101010101default42on', $result->getTest());
 
         unset($context['string']); // Testing null default value
-        $result = $resolve('foo', $context);
+        $result = $resolve('foo', $context, null, $resolveInfo);
 
         $this->assertSame('424212true4.22017010101010120170101010101default42on', $result->getTest());
     }
@@ -122,7 +125,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('mutation', $mutation->name);
 
         $resolve = $mutation->resolveFn;
-        $result = $resolve('foo', ['testObject' => ['test' => 42]]);
+        $result = $resolve('foo', ['testObject' => ['test' => 42]], null, $this->createMock(ResolveInfo::class));
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
@@ -249,7 +252,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('test', $fields['test']->name);
         $resolve = $fields['test']->resolveFn;
         $obj = new TestSelfType();
-        $this->assertEquals('foo', $resolve($obj, []));
+        $this->assertEquals('foo', $resolve($obj, [], null, $this->createMock(ResolveInfo::class)));
     }
 
     public function testLoggedInSourceField()
@@ -500,7 +503,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('testFailWith', $query->name);
 
         $resolve = $query->resolveFn;
-        $result = $resolve('foo', []);
+        $result = $resolve('foo', [], null, $this->createMock(ResolveInfo::class));
 
         $this->assertNull($result);
 
@@ -522,7 +525,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
 
         $resolve = $fields['test']->resolveFn;
-        $result = $resolve('foo', []);
+        $result = $resolve('foo', [], null, $this->createMock(ResolveInfo::class));
 
         $this->assertNull($result);
 
@@ -559,5 +562,25 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(InvalidDocBlockException::class);
         $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Fixtures\\TestDoubleReturnTag::test has several @return annotations.');
         $queryProvider->getFields(new TestDoubleReturnTag(), true);
+    }
+
+    public function testMissingArgument()
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(7, $queries);
+        $usersQuery = $queries[0];
+        $context = [];
+
+        $resolve = $usersQuery->resolveFn;
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        $this->expectException(MissingArgumentException::class);
+        $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL query/mutation/field 'test' used in method 'TheCodingMachine\GraphQLite\Fixtures\TestController::test()'");
+        $resolve('foo', $context, null, $resolveInfo);
     }
 }

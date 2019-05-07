@@ -3,6 +3,8 @@
 namespace TheCodingMachine\GraphQLite\Types;
 
 
+use GraphQL\Type\Definition\ResolveInfo;
+
 /**
  * A GraphQL input object that can be resolved
  */
@@ -14,5 +16,5 @@ interface ResolvableInputInterface
      * @param array $args
      * @return object
      */
-    public function resolve(array $args);
+    public function resolve($source, array $args, $context, ResolveInfo $resolveInfo);
 }

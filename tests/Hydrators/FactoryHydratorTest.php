@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
@@ -26,9 +27,9 @@ class FactoryHydratorTest extends TestCase
         $this->assertTrue($factoryHydrator->canHydrate([], $resolvableInputObjectType));
         $this->assertFalse($factoryHydrator->canHydrate([], $badObjectType));
 
-        $this->assertEquals(new stdClass(), $factoryHydrator->hydrate([], $resolvableInputObjectType));
+        $this->assertEquals(new stdClass(), $factoryHydrator->hydrate(null, [], null, $this->createMock(ResolveInfo::class), $resolvableInputObjectType));
 
         $this->expectException(CannotHydrateException::class);
-        $factoryHydrator->hydrate([], $badObjectType);
+        $factoryHydrator->hydrate(null, [], null, $this->createMock(ResolveInfo::class), $badObjectType);
     }
 }

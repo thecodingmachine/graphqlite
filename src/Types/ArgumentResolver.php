@@ -11,6 +11,7 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\LeafType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use function is_array;
@@ -38,22 +39,23 @@ class ArgumentResolver
      * @param InputType $type
      * @return mixed
      */
-    public function resolve($val, InputType $type)
+    public function resolve($source, $val, $context, ResolveInfo $resolveInfo, InputType $type)
     {
         $type = $this->stripNonNullType($type);
         if ($type instanceof ListOfType) {
             if (!is_array($val)) {
                 throw new InvalidArgumentException('Expected GraphQL List but value passed is not an array.');
             }
-            return array_map(function($item) use ($type) {
-                return $this->resolve($item, $type->getWrappedType());
+            return array_map(function($item) use ($type, $source, $context, $resolveInfo) {
+                return $this->resolve($source, $item, $context, $resolveInfo, $type->getWrappedType());
             }, $val);
         } elseif ($type instanceof IDType) {
             return new ID($val);
         } elseif ($type instanceof LeafType) {
             return $type->parseValue($val);
         } elseif ($type instanceof InputObjectType) {
-            return $this->hydrator->hydrate($val, $type);
+            // TODO: can we get rid of HydratorInterface? Since the ResolvableInputInterface seems to be as good.
+            return $this->hydrator->hydrate($source, $val, $context, $resolveInfo, $type);
         } else {
             throw new \RuntimeException('Unexpected type: '.get_class($type));
         }

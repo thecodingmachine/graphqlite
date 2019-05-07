@@ -22,6 +22,8 @@ use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\CustomTypesRegistry;
@@ -197,18 +199,16 @@ class FieldsBuilder
 
     /**
      * @param ReflectionMethod $refMethod A method annotated with a Factory annotation.
-     * @return array<string, array<int, mixed>> Returns an array of fields as accepted by the InputObjectType constructor.
+     * @return array<string, ParameterInterface> Returns an array of parameters.
      */
-    public function getInputFields(ReflectionMethod $refMethod): array
+    public function getParameters(ReflectionMethod $refMethod): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = $refMethod->getParameters();
 
-        $args = $this->mapParameters($parameters, $docBlockObj, $refMethod);
-
-        return $args;
+        return $this->mapParameters($parameters, $docBlockObj, $refMethod);
     }
 
     /**
@@ -286,12 +286,12 @@ class FieldsBuilder
 
                 if ($unauthorized) {
                     $failWithValue = $failWith->getValue();
-                    $queryList[] = QueryField::alwaysReturn($name, $type, $args, $failWithValue, $this->argumentResolver, $docBlockComment);
+                    $queryList[] = QueryField::alwaysReturn($name, $type, $args, $failWithValue, $docBlockComment);
                 } else {
                     if ($sourceClassName !== null) {
-                        $queryList[] = QueryField::selfField($name, $type, $args, $methodName, $this->argumentResolver, $docBlockComment);
+                        $queryList[] = QueryField::selfField($name, $type, $args, $methodName, $docBlockComment);
                     } else {
-                        $queryList[] = QueryField::externalField($name, $type, $args, [$controller, $methodName], $this->argumentResolver, $docBlockComment, $injectSource);
+                        $queryList[] = QueryField::externalField($name, $type, $args, [$controller, $methodName], $docBlockComment, $injectSource);
                     }
                 }
             }
@@ -415,10 +415,10 @@ class FieldsBuilder
             }
 
             if (!$unauthorized) {
-                $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $this->argumentResolver, $docBlockComment);
+                $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $docBlockComment);
             } else {
                 $failWithValue = $sourceField->getFailWith();
-                $queryList[] = QueryField::alwaysReturn($sourceField->getName(), $type, $args, $failWithValue, $this->argumentResolver, $docBlockComment);
+                $queryList[] = QueryField::alwaysReturn($sourceField->getName(), $type, $args, $failWithValue, $docBlockComment);
             }
         }
         return $queryList;
@@ -470,7 +470,7 @@ class FieldsBuilder
      * Note: there is a bug in $refMethod->allowsNull that forces us to use $standardRefMethod->allowsNull instead.
      *
      * @param \ReflectionParameter[] $refParameters
-     * @return array[] An array of ['type'=>Type, 'defaultValue'=>val]
+     * @return array<string, ParameterInterface>
      * @throws MissingTypeHintException
      */
     private function mapParameters(array $refParameters, DocBlock $docBlock, ReflectionMethod $refMethod): array
@@ -505,23 +505,24 @@ class FieldsBuilder
             $docBlockType = $docBlockTypes[$parameter->getName()] ?? null;
 
             try {
-                $arr = [
-                    'type' => $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $refMethod, $docBlock, $parameter->getName()),
-                ];
+                $type = $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $refMethod, $docBlock, $parameter->getName());
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
             } catch (CannotMapTypeExceptionInterface $e) {
                 throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
             }
 
+            $hasDefaultValue = false;
+            $defaultValue = null;
             if ($parameter->allowsNull()) {
-                $arr['defaultValue'] = null;
+                $hasDefaultValue = true;
             }
             if ($parameter->isDefaultValueAvailable()) {
-                $arr['defaultValue'] = $parameter->getDefaultValue();
+                $hasDefaultValue = true;
+                $defaultValue = $parameter->getDefaultValue();
             }
 
-            $args[$parameter->getName()] = $arr;
+            $args[$parameter->getName()] = new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
         }
 
         return $args;

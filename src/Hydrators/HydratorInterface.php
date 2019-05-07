@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
 
 /**
  * Hydrates an object given an array and a GraphQL type.
@@ -27,5 +28,5 @@ interface HydratorInterface
      * @return object
      * @throws CannotHydrateException
      */
-    public function hydrate(array $data, InputObjectType $type);
+    public function hydrate($source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type);
 }
