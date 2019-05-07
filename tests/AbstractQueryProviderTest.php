@@ -26,6 +26,8 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -281,6 +283,9 @@ abstract class AbstractQueryProviderTest extends TestCase
             new CompositeRootTypeMapper([
                 new MyCLabsEnumTypeMapper(),
                 new BaseTypeMapper($this->getTypeMapper())
+            ]),
+            new CompositeParameterMapper([
+                new ResolveInfoParameterMapper()
             ])
         );
     }

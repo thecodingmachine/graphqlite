@@ -104,7 +104,7 @@ public function getId(): string
 
 Using the `outputType` attribute of the `@Field` annotation, you can force the output type to `ID`.
 
-You can learn more about forcing output types in the [custom output types section](custom_output_types.md).
+You can learn more about forcing output types in the [custom types section](custom_types.md).
 
 ### ID class
 

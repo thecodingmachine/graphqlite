@@ -10,8 +10,9 @@ sidebar_label: Internals
 The core of GraphQLite is its ability to map PHP types to GraphQL types. This mapping is performed by a series of
 "type mappers".
 
-GraphQLite contains 3 categories of type mappers:
+GraphQLite contains 4 categories of type mappers:
 
+- **Parameter mappers**
 - **Root type mappers**
 - **Recursive (class) type mappers**
 - **(class) type mappers**
@@ -99,3 +100,26 @@ This is the role of the "recursive type mapper".
 Imagine that class "B" extends class "A" and class "A" maps to GraphQL type "AType".
 
 Since "B" *is a* "A", the "recursive type mapper" role is to make sure that "B" will also map to GraphQL type "AType". 
+
+## Parameter mappers
+
+"Parameter mappers" are used to decide what argument should be injected into a parameter.
+
+Let's have a look at a simple query:
+
+```php
+/**
+ * @Query
+ * @return Product[]
+ */
+public function products(ResolveInfo $info): array
+```
+
+As you may know, [the `ResolveInfo` object injected in this query comes from Webonyx/GraphQL-PHP library](query_plan.md).
+GraphQLite knows that is must inject a `ResolveInfo` instance because it comes with a `ResolveInfoParameterMapper` class
+that implements the [`ParameterMapperInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ParameterMapperInterface.php)).
+
+You can register your own parameter mappers using the `SchemaFactory::addParameterMapper()` method.
+
+<div class="alert alert-info">Use a parameter mapper if you want to inject an argument in a method and if this argument
+is not a GraphQL input type</div>
