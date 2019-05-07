@@ -119,7 +119,8 @@ As you may know, [the `ResolveInfo` object injected in this query comes from Web
 GraphQLite knows that is must inject a `ResolveInfo` instance because it comes with a `ResolveInfoParameterMapper` class
 that implements the [`ParameterMapperInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ParameterMapperInterface.php)).
 
-You can register your own parameter mappers using the `SchemaFactory::addParameterMapper()` method.
+You can register your own parameter mappers using the `SchemaFactory::addParameterMapper()` method, or by tagging the
+service as "graphql.parameter_mapper" if you are using the Symfony bundle.
 
 <div class="alert alert-info">Use a parameter mapper if you want to inject an argument in a method and if this argument
 is not a GraphQL input type</div>
