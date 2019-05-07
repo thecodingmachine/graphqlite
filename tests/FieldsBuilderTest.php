@@ -29,6 +29,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestResolveInfo;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
@@ -44,6 +45,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -273,7 +275,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([])
+            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ])
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -300,7 +302,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([])
+            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ])
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -359,7 +361,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([])
+            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ])
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);

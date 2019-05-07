@@ -22,6 +22,7 @@ use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -230,7 +231,7 @@ class SchemaFactory
         $argumentResolver = new ArgumentResolver($hydrator);
 
         $parameterMappers = $this->parameterMappers;
-        // TODO: add ResolveInfo parameter mapper when ready.
+        $parameterMappers[] = new ResolveInfoParameterMapper();
         $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
 
         $fieldsBuilder = new FieldsBuilder(

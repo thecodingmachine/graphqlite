@@ -3,6 +3,7 @@
     "Introduction": ["features"],
     "Installation": ["getting-started", "symfony-bundle", "laravel-package", "universal_service_providers", "other-frameworks"],
     "Usage": ["queries", "mutations", "type_mapping", "extend_type", "authentication_authorization", "external_type_declaration", "input-types", "inheritance"],
+    "Performance": ["query-plan"],
     "Advanced": ["file-uploads", "pagination", "custom-types", "internals", "troubleshooting", "migrating"],
     "Reference": ["annotations_reference"]
   }
