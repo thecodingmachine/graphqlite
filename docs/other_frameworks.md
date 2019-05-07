@@ -59,6 +59,14 @@ $factory->setNamingStrategy(new NamingStrategy());
 $factory->addTypeMapper($typeMapper);
 // Add custom options to the Webonyx underlying Schema.
 $factory->setSchemaConfig($schemaConfig);
+// Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.
+$factory->setGlobTtl(2);
+// Enables prod-mode (cache settings optimized for best performance).
+// This is a shortcut for `$schemaFactory->setGlobTtl(null)`
+$factory->prodMode();
+// Enables dev-mode (this is the default mode: cache settings optimized for best developer experience).
+// This is a shortcut for `$schemaFactory->setGlobTtl(2)`
+$factory->devMode();
 ```
 
 ## Minimal example
