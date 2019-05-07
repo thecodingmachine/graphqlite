@@ -20,6 +20,8 @@ use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -57,6 +59,10 @@ class SchemaFactory
      * @var TypeMapperInterface[]
      */
     private $typeMappers = [];
+    /**
+     * @var ParameterMapperInterface[]
+     */
+    private $parameterMappers = [];
     private $doctrineAnnotationReader;
     /**
      * @var HydratorInterface|null
@@ -86,10 +92,6 @@ class SchemaFactory
      * @var SchemaConfig
      */
     private $schemaConfig;
-    /**
-     * @var LockFactory
-     */
-    private $lockFactory;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -227,9 +229,14 @@ class SchemaFactory
 
         $argumentResolver = new ArgumentResolver($hydrator);
 
+        $parameterMappers = $this->parameterMappers;
+        // TODO: add ResolveInfo parameter mapper when ready.
+        $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
+
         $fieldsBuilder = new FieldsBuilder(
             $annotationReader, $recursiveTypeMapper, $argumentResolver, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper
+            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper,
+            $compositeParameterMapper
         );
 
 

@@ -21,6 +21,8 @@ use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -72,7 +74,8 @@ class EndToEndTest extends TestCase
                     $container->get(TypeResolver::class),
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
-                    $container->get(RootTypeMapperInterface::class)
+                    $container->get(RootTypeMapperInterface::class),
+                    $container->get(ParameterMapperInterface::class)
                 );
             },
             ArgumentResolver::class => function(ContainerInterface $container) {
@@ -183,6 +186,11 @@ class EndToEndTest extends TestCase
                 return new CompositeRootTypeMapper([
                     new MyCLabsEnumTypeMapper(),
                     new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
+                ]);
+            },
+            ParameterMapperInterface::class => function(ContainerInterface $container) {
+                return new CompositeParameterMapper([
+
                 ]);
             }
         ]);

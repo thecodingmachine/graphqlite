@@ -43,6 +43,7 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -271,7 +272,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new BaseTypeMapper($this->getTypeMapper())
+            new BaseTypeMapper($this->getTypeMapper()),
+            new CompositeParameterMapper([])
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -297,7 +299,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new BaseTypeMapper($this->getTypeMapper())
+            new BaseTypeMapper($this->getTypeMapper()),
+            new CompositeParameterMapper([])
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -355,7 +358,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new BaseTypeMapper($this->getTypeMapper())
+            new BaseTypeMapper($this->getTypeMapper()),
+            new CompositeParameterMapper([])
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);
