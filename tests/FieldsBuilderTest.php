@@ -45,6 +45,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -561,5 +562,25 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(InvalidDocBlockException::class);
         $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Fixtures\\TestDoubleReturnTag::test has several @return annotations.');
         $queryProvider->getFields(new TestDoubleReturnTag(), true);
+    }
+
+    public function testMissingArgument()
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(7, $queries);
+        $usersQuery = $queries[0];
+        $context = [];
+
+        $resolve = $usersQuery->resolveFn;
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        $this->expectException(MissingArgumentException::class);
+        $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL query/mutation/field 'test' used in method 'TheCodingMachine\GraphQLite\Fixtures\TestController::test()'");
+        $resolve('foo', $context, null, $resolveInfo);
     }
 }
