@@ -339,7 +339,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                     continue;
                 }
                 $factory = $this->annotationReader->getFactoryAnnotation($method);
-                if ($factory !== null) {
+                if ($factory !== null && $factory->isDefault()) {
                     [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
                     if (isset($this->mapClassToFactory[$className])) {
