@@ -35,7 +35,7 @@ class UseInputType
         if (!isset($values['for'], $values['type'])) {
             throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: "@UseInputType(for="$input", type="MyInputType")"');
         }
-        $this->for = $values['for'];
+        $this->for = ltrim($values['for'], '$');
         $this->type = $values['type'];
     }
 

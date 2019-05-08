@@ -26,6 +26,7 @@ use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -35,6 +36,7 @@ use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 
 class TypeMapper implements ParameterMapperInterface
@@ -42,7 +44,7 @@ class TypeMapper implements ParameterMapperInterface
     /**
      * @var PhpDocumentorTypeResolver
      */
-    private $typeResolver;
+    private $phpDocumentorTypeResolver;
     /**
      * @var RecursiveTypeMapperInterface
      */
@@ -55,15 +57,27 @@ class TypeMapper implements ParameterMapperInterface
      * @var RootTypeMapperInterface
      */
     private $rootTypeMapper;
+    /**
+     * @var TypeResolver
+     */
+    private $typeResolver;
+    /**
+     * @var AnnotationReader
+     */
+    private $annotationReader;
 
     public function __construct(RecursiveTypeMapperInterface $typeMapper,
                                 ArgumentResolver $argumentResolver,
-                                RootTypeMapperInterface $rootTypeMapper)
+                                RootTypeMapperInterface $rootTypeMapper,
+                                TypeResolver $typeResolver,
+                                AnnotationReader $annotationReader)
     {
         $this->recursiveTypeMapper = $typeMapper;
         $this->argumentResolver = $argumentResolver;
         $this->rootTypeMapper = $rootTypeMapper;
-        $this->typeResolver = new PhpDocumentorTypeResolver();
+        $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
+        $this->typeResolver = $typeResolver;
+        $this->annotationReader = $annotationReader;
     }
 
     /**
@@ -73,7 +87,7 @@ class TypeMapper implements ParameterMapperInterface
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {
-            $phpdocType = $this->typeResolver->resolve((string) $returnType);
+            $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $returnType);
             $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         } else {
             $phpdocType = new Mixed_();
@@ -111,27 +125,36 @@ class TypeMapper implements ParameterMapperInterface
      */
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, array $paramTags): ParameterInterface
     {
-        $parameterType = $parameter->getType();
-        $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
-
-        $type = (string) $parameterType;
-        if ($type === '') {
-            $phpdocType = new Mixed_();
-            $allowsNull = false;
-            //throw MissingTypeHintException::missingTypeHint($parameter);
+        $useInputType = $this->annotationReader->getUseInputTypeAnnotation($parameter);
+        if ($useInputType) {
+            try {
+                $type = $this->typeResolver->mapNameToInputType($useInputType->getType());
+            } catch (CannotMapTypeExceptionInterface $e) {
+                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+            }
         } else {
-            $phpdocType = $this->typeResolver->resolve($type);
-            $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
-        }
+            $parameterType = $parameter->getType();
+            $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
 
-        $docBlockType = $paramTags[$parameter->getName()] ?? null;
+            $type = (string) $parameterType;
+            if ($type === '') {
+                $phpdocType = new Mixed_();
+                $allowsNull = false;
+                //throw MissingTypeHintException::missingTypeHint($parameter);
+            } else {
+                $phpdocType = $this->phpDocumentorTypeResolver->resolve($type);
+                $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
+            }
 
-        try {
-            $type = $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $parameter->getDeclaringFunction(), $docBlock, $parameter->getName());
-        } catch (TypeMappingException $e) {
-            throw TypeMappingException::wrapWithParamInfo($e, $parameter);
-        } catch (CannotMapTypeExceptionInterface $e) {
-            throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+            $docBlockType = $paramTags[$parameter->getName()] ?? null;
+
+            try {
+                $type = $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $parameter->getDeclaringFunction(), $docBlock, $parameter->getName());
+            } catch (TypeMappingException $e) {
+                throw TypeMappingException::wrapWithParamInfo($e, $parameter);
+            } catch (CannotMapTypeExceptionInterface $e) {
+                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+            }
         }
 
         $hasDefaultValue = false;

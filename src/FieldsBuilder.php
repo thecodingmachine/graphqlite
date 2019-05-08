@@ -116,7 +116,7 @@ class FieldsBuilder
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy = $namingStrategy;
-        $this->typeMapper = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper);
+        $this->typeMapper = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver, $annotationReader);
         $this->parameterMapper = $parameterMapper;
     }
 

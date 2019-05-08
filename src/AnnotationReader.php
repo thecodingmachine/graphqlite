@@ -10,6 +10,7 @@ use Doctrine\Common\Annotations\Reader;
 use function in_array;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionParameter;
 use function strpos;
 use function substr;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
@@ -138,11 +139,22 @@ class AnnotationReader
     /**
      * @return UseInputType[]
      */
-    public function getUseInputTypeAnnotations(ReflectionClass $refClass): array
+    private function getUseInputTypeAnnotations(ReflectionMethod $refMethod): array
     {
         /** @var UseInputType[] $useInputTypes */
-        $useInputTypes = $this->getMethodAnnotations($refClass, UseInputType::class);
+        $useInputTypes = $this->getMethodAnnotations($refMethod, UseInputType::class);
         return $useInputTypes;
+    }
+
+    public function getUseInputTypeAnnotation(ReflectionParameter $refParameter): ?UseInputType
+    {
+        $annotations = $this->getUseInputTypeAnnotations($refParameter->getDeclaringFunction());
+        foreach ($annotations as $annotation) {
+            if ($annotation->getFor() === $refParameter->getName()) {
+                return $annotation;
+            }
+        }
+        return null;
     }
 
     /**
@@ -265,6 +277,11 @@ class AnnotationReader
      */
     public function getMethodAnnotations(ReflectionMethod $refMethod, string $annotationClass): array
     {
+        $cacheKey = $refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName().'_s_'.$annotationClass;
+        if (isset($this->methodAnnotationCache[$cacheKey])) {
+            return $this->methodAnnotationCache[$cacheKey];
+        }
+
         $toAddAnnotations = [];
         try {
             $allAnnotations = $this->reader->getMethodAnnotations($refMethod);
@@ -281,6 +298,6 @@ class AnnotationReader
             }
         }
 
-        return $toAddAnnotations;
+        return $this->methodAnnotationCache[$cacheKey] = $toAddAnnotations;
     }
 }
