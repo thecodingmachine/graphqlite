@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 
+use function array_merge;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 
 class Filter
@@ -28,6 +29,11 @@ class Filter
     public function getValues(): array
     {
         return $this->values;
+    }
+
+    public function mergeValues(array $values)
+    {
+        $this->values = array_merge($this->values, $values);
     }
 
     /**

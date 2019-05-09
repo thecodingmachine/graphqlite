@@ -16,7 +16,7 @@ class FilterController
      */
     public function echoFilters(Filter $filter): array
     {
-        return $filter->getValues();
+        return array_map(static function($item) { return (string) $item; }, $filter->getValues());
     }
 
     /**
