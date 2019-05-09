@@ -125,10 +125,10 @@ class TypeMapper implements ParameterMapperInterface
      */
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, array $paramTags): ParameterInterface
     {
-        $useInputType = $this->annotationReader->getUseInputTypeAnnotation($parameter);
+        $useInputType = $this->annotationReader->getParameterAnnotation($parameter);
         if ($useInputType) {
             try {
-                $type = $this->typeResolver->mapNameToInputType($useInputType->getType());
+                $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());
             } catch (CannotMapTypeExceptionInterface $e) {
                 throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
             }

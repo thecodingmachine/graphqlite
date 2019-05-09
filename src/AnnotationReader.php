@@ -22,7 +22,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Annotations\UseInputType;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 
 class AnnotationReader
 {
@@ -137,18 +137,18 @@ class AnnotationReader
     }
 
     /**
-     * @return UseInputType[]
+     * @return Parameter[]
      */
-    private function getUseInputTypeAnnotations(ReflectionMethod $refMethod): array
+    private function getParameterAnnotations(ReflectionMethod $refMethod): array
     {
-        /** @var UseInputType[] $useInputTypes */
-        $useInputTypes = $this->getMethodAnnotations($refMethod, UseInputType::class);
+        /** @var Parameter[] $useInputTypes */
+        $useInputTypes = $this->getMethodAnnotations($refMethod, Parameter::class);
         return $useInputTypes;
     }
 
-    public function getUseInputTypeAnnotation(ReflectionParameter $refParameter): ?UseInputType
+    public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
     {
-        $annotations = $this->getUseInputTypeAnnotations($refParameter->getDeclaringFunction());
+        $annotations = $this->getParameterAnnotations($refParameter->getDeclaringFunction());
         foreach ($annotations as $annotation) {
             if ($annotation->getFor() === $refParameter->getName()) {
                 return $annotation;

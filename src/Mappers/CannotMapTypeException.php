@@ -70,6 +70,11 @@ class CannotMapTypeException extends \Exception implements CannotMapTypeExceptio
         return new self('type "'.$subTypeName.'" must be an output type.');
     }
 
+    public static function mustBeInputType($subTypeName): self
+    {
+        return new self('type "'.$subTypeName.'" must be an input type.');
+    }
+
     public static function createForExtendType(string $className, ObjectType $type): self
     {
         return new self('cannot extend GraphQL type "'.$type->name.'" mapped by class "'.$className.'". Check your TypeMapper configuration.');

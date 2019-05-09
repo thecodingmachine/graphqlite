@@ -11,10 +11,10 @@ use BadMethodCallException;
  * @Target({"METHOD"})
  * @Attributes({
  *   @Attribute("for", type = "string"),
- *   @Attribute("type", type = "string")
+ *   @Attribute("inputType", type = "string")
  * })
  */
-class UseInputType
+class Parameter
 {
     /**
      * @var string
@@ -23,7 +23,7 @@ class UseInputType
     /**
      * @var string
      */
-    private $type;
+    private $inputType;
 
     /**
      * @param array<string, mixed> $values
@@ -32,11 +32,11 @@ class UseInputType
      */
     public function __construct(array $values)
     {
-        if (!isset($values['for'], $values['type'])) {
-            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: "@UseInputType(for="$input", type="MyInputType")"');
+        if (!isset($values['for'], $values['inputType'])) {
+            throw new BadMethodCallException('The @Parameter annotation must be passed a target and an input type. For instance: "@Parameter(for="$input", inputType="MyInputType")"');
         }
         $this->for = ltrim($values['for'], '$');
-        $this->type = $values['type'];
+        $this->inputType = $values['inputType'];
     }
 
     /**
@@ -50,8 +50,8 @@ class UseInputType
     /**
      * @return string
      */
-    public function getType(): string
+    public function getInputType(): string
     {
-        return $this->type;
+        return $this->inputType;
     }
 }

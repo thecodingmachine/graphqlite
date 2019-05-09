@@ -7,14 +7,14 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Annotations\UseInputType;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 class ContactFactory
 {
     /**
      * @Factory()
-     * @UseInputType(for="$relations", type="[ContactRefInput!]!")
+     * @Parameter(for="$relations", inputType="[ContactRefInput!]!")
      * @param string $name
      * @param Contact|null $manager
      * @param Contact[] $relations

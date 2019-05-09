@@ -70,7 +70,7 @@ class TypeResolver
     {
         $type = $this->mapNameToType($typeName);
         if (!$type instanceof InputType || ($type instanceof WrappingType && !$type->getWrappedType() instanceof InputType)) {
-            throw CannotMapTypeException::mustBeOutputType($typeName);
+            throw CannotMapTypeException::mustBeInputType($typeName);
         }
         return $type;
     }
