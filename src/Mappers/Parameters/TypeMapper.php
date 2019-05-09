@@ -27,6 +27,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -120,15 +121,11 @@ class TypeMapper implements ParameterMapperInterface
         return $docBlockReturnType;
     }
 
-    /**
-     * @param array<string, DocBlock\Tags\Param> $paramTags
-     */
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, array $paramTags): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
     {
-        $useInputType = $this->annotationReader->getParameterAnnotation($parameter);
-        if ($useInputType) {
+        if ($parameterAnnotation && $parameterAnnotation->getInputType() !== null) {
             try {
-                $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());
+                $type = $this->typeResolver->mapNameToInputType($parameterAnnotation->getInputType());
             } catch (CannotMapTypeExceptionInterface $e) {
                 throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
             }
@@ -146,10 +143,8 @@ class TypeMapper implements ParameterMapperInterface
                 $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
             }
 
-            $docBlockType = $paramTags[$parameter->getName()] ?? null;
-
             try {
-                $type = $this->mapType($phpdocType, $docBlockType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $parameter->getDeclaringFunction(), $docBlock, $parameter->getName());
+                $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $parameter->getDeclaringFunction(), $docBlock, $parameter->getName());
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
             } catch (CannotMapTypeExceptionInterface $e) {
