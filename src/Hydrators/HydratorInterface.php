@@ -6,6 +6,21 @@ namespace TheCodingMachine\GraphQLite\Hydrators;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 
+
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// TODO: we can get rid of Hydrators completely
+// Because the only input type accepted by TypeMapperInterface is now a RecursiveMutableInputObjectType!!!
+
 /**
  * Hydrates an object given an array and a GraphQL type.
  */

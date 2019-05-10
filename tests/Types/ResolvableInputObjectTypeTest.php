@@ -16,7 +16,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
 
     public function testResolve(): void
     {
-        $inputType = new ResolvableInputObjectType('InputObject',
+        $inputType = new ResolvableMutableInputObjectType('InputObject',
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myFactory',
@@ -46,7 +46,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
 
     public function testListResolve(): void
     {
-        $inputType = new ResolvableInputObjectType('InputObject2',
+        $inputType = new ResolvableMutableInputObjectType('InputObject2',
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myListFactory',

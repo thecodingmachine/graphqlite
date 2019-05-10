@@ -25,6 +25,8 @@ use GraphQL\Type\Definition\InputType;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -699,10 +701,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return ResolvableMutableInputInterface
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className): InputObjectType
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         $factory = $this->getFactoryFromCacheByObjectClass($className);
 
@@ -875,5 +877,31 @@ final class GlobTypeMapper implements TypeMapperInterface
             $factory = $this->mapInputNameToFactory[$typeName];
             return $this->inputTypeGenerator->mapFactoryMethod($this->container->get($factory[0]), $factory[1], $recursiveTypeMapper);
         }*/
+    }
+
+    /**
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @return bool
+     */
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool
+    {
+        // TODO: implement this!
+        return false;
+    }
+
+    /**
+     * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void
+    {
+        // TODO: implement this!
+        throw CannotMapTypeException::createForDecorateName($typeName, $type);
     }
 }

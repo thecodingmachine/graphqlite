@@ -3,22 +3,17 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use function get_class;
-use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
-use function is_object;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\QueryField;
 
 /**
  * A GraphQL input object that can be resolved using a factory
  */
-class ResolvableInputObjectType extends InputObjectType implements ResolvableInputInterface
+class ResolvableMutableInputObjectType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
     /**
      * @var ArgumentResolver

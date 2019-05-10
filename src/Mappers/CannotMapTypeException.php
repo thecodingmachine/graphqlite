@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Error\Error;
 use GraphQL\Error\SyntaxError;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
 use ReflectionMethod;
@@ -83,5 +84,10 @@ class CannotMapTypeException extends \Exception implements CannotMapTypeExceptio
     public static function createForExtendName(string $name, ObjectType $type): self
     {
         return new self('cannot extend GraphQL type "'.$type->name.'" with type "'.$name.'". Check your TypeMapper configuration.');
+    }
+
+    public static function createForDecorateName(string $name, InputObjectType $type): self
+    {
+        return new self('cannot decorate GraphQL input type "'.$type->name.'" with type "'.$name.'". Check your TypeMapper configuration.');
     }
 }

@@ -17,6 +17,8 @@ use RuntimeException;
 use function strpos;
 use function substr;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class PorpaginasTypeMapper implements TypeMapperInterface
 {
@@ -174,9 +176,9 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return ResolvableMutableInputInterface
      */
-    public function mapClassToInputType(string $className): InputObjectType
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         throw CannotMapTypeException::createForInputType($className);
     }
@@ -227,5 +229,29 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
+    }
+
+    /**
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @return bool
+     */
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool
+    {
+        return false;
+    }
+
+    /**
+     * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void
+    {
+        throw CannotMapTypeException::createForDecorateName($typeName, $type);
     }
 }

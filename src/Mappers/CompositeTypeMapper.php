@@ -15,6 +15,8 @@ use GraphQL\Type\Definition\Type;
 use function is_array;
 use function iterator_to_array;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {
@@ -107,10 +109,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return ResolvableMutableInputInterface
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className): InputObjectType
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToInputType($className)) {
@@ -214,6 +216,39 @@ class CompositeTypeMapper implements TypeMapperInterface
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canExtendTypeForName($typeName, $type)) {
                 $typeMapper->extendTypeForName($typeName, $type);
+            }
+        }
+    }
+
+    /**
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @return bool
+     */
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool
+    {
+        foreach ($this->typeMappers as $typeMapper) {
+            if ($typeMapper->canDecorateInputTypeForName($typeName, $type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void
+    {
+        foreach ($this->typeMappers as $typeMapper) {
+            if ($typeMapper->canDecorateInputTypeForName($typeName, $type)) {
+                $typeMapper->decorateInputTypeForName($typeName, $type);
             }
         }
     }

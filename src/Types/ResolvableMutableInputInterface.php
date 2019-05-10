@@ -8,7 +8,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 /**
  * A GraphQL input object that can be resolved
  */
-interface ResolvableInputInterface
+interface ResolvableMutableInputInterface extends MutableInputInterface
 {
     /**
      * Resolves the arguments into an object.

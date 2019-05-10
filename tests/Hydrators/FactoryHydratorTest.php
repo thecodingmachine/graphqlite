@@ -6,13 +6,13 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class FactoryHydratorTest extends TestCase
 {
     public function testHydratorNotFound()
     {
-        $resolvableInputObjectType = $this->getMockBuilder(ResolvableInputObjectType::class)
+        $resolvableInputObjectType = $this->getMockBuilder(ResolvableMutableInputObjectType::class)
             ->disableOriginalConstructor()
             ->setMethods(['resolve'])
             ->getMock();

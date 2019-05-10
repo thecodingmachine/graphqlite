@@ -9,7 +9,10 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Mappers\Interfaces\InterfacesResolverInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 /**
  * Maps a PHP class to a GraphQL type
@@ -69,9 +72,9 @@ interface TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return ResolvableMutableInputInterface&Type
      */
-    public function mapClassToInputType(string $className): InputObjectType;
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface;
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
@@ -108,4 +111,22 @@ interface TypeMapperInterface
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForName(string $typeName, MutableObjectType $type): void;
+
+    /**
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @return bool
+     */
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool;
+
+    /**
+     * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputObjectType $type
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void;
 }
