@@ -2,7 +2,7 @@
 <ruleset>
     <arg name="basepath" value="."/>
     <arg name="extensions" value="php"/>
-    <arg name="parallel" value="80"/>
+    <arg name="parallel" value="16"/>
     <arg name="cache" value=".php_cs.cache"/>
     <arg name="colors"/>
 
@@ -12,6 +12,9 @@
     <!-- Directories to be checked -->
     <file>src</file>
     <file>tests</file>
+
+
+    <exclude-pattern>tests/dependencies/*</exclude-pattern>
 
     <!-- Include full Doctrine Coding Standard -->
     <rule ref="Doctrine"/>
