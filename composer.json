@@ -30,7 +30,8 @@
         "mouf/picotainer": "^1.1",
         "phpstan/phpstan": "^0.11",
         "beberlei/porpaginas": "^1.2",
-        "myclabs/php-enum": "^1.6.6"
+        "myclabs/php-enum": "^1.6.6",
+        "doctrine/coding-standard": "^6.0"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
@@ -46,7 +47,9 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=4 --no-progress -vvv"
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=4 --no-progress -vvv",
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf"
     },
     "extra": {
         "branch-alias": {
