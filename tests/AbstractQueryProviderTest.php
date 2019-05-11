@@ -216,12 +216,12 @@ abstract class AbstractQueryProviderTest extends TestCase
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
 
-                public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool
+                public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
                 {
                     return false;
                 }
 
-                public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void
+                public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
                 {
                     throw CannotMapTypeException::createForDecorateName($typeName, $type);
                 }

@@ -135,10 +135,10 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
              *
              * @param string $typeName
-             * @param ResolvableMutableInputObjectType $type
+             * @param ResolvableMutableInputInterface $type
              * @return bool
              */
-            public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool
+            public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
             {
                 return false;
             }
@@ -147,10 +147,10 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
              *
              * @param string $typeName
-             * @param ResolvableMutableInputObjectType $type
+             * @param ResolvableMutableInputInterface $type
              * @throws CannotMapTypeExceptionInterface
              */
-            public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void
+            public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
             {
                 throw CannotMapTypeException::createForDecorateName($typeName, $type);
             }
@@ -173,7 +173,11 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapNameToType('TestObject'));
         $this->assertTrue($this->composite->canMapNameToType('TestObject'));
         $this->assertFalse($this->composite->canMapNameToType('NotExists'));
-        $this->assertFalse($this->composite->canDecorateInputTypeForName('Foo'));
+        $this->assertFalse($this->composite->canDecorateInputTypeForName('Foo', new MockResolvableInputObjectType(['name' => 'foo',
+            'fields' => [
+            'arg' => Type::string()
+        ]]
+        )));
 
 
         $type = new MutableObjectType([

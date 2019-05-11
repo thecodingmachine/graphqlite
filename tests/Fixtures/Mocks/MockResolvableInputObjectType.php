@@ -14,7 +14,7 @@ class MockResolvableInputObjectType extends InputObjectType implements Resolvabl
 
     public function freeze(): void
     {
-        throw new BadMethodCallException('Unauthorized call to freeze in Mock object');
+        //throw new BadMethodCallException('Unauthorized call to freeze in Mock object');
     }
 
     public function getStatus(): string

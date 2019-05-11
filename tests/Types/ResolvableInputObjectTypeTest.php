@@ -24,6 +24,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             'my comment');
 
         $this->assertSame('InputObject', $inputType->name);
+        $inputType->freeze();
         $this->assertCount(2, $inputType->getFields());
         $this->assertSame('my comment', $inputType->description);
 

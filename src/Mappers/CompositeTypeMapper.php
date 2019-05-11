@@ -224,10 +224,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
      *
      * @param string $typeName
-     * @param ResolvableMutableInputObjectType $type
+     * @param ResolvableMutableInputInterface $type
      * @return bool
      */
-    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): bool
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canDecorateInputTypeForName($typeName, $type)) {
@@ -241,10 +241,10 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
      * @param string $typeName
-     * @param ResolvableMutableInputObjectType $type
+     * @param ResolvableMutableInputInterface $type
      * @throws CannotMapTypeExceptionInterface
      */
-    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputObjectType $type): void
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canDecorateInputTypeForName($typeName, $type)) {

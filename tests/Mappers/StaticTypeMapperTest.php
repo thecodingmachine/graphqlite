@@ -6,11 +6,13 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class StaticTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -31,7 +33,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
             ])
         ]);
         $this->typeMapper->setInputTypes([
-            TestObject::class => new InputObjectType([
+            TestObject::class => new MockResolvableInputObjectType([
                 'name'    => 'TestInputObject',
                 'fields'  => [
                     'test'   => Type::string(),
