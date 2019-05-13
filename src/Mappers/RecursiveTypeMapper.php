@@ -53,12 +53,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     private $classToTypeCache = [];
 
     /**
-     * @var array<string,ResolvableMutableInputInterface> Key: Input type name
+     * @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: Input type name
      */
     private $nameToInputTypeCache = [];
 
     /**
-     * @var array<string,ResolvableMutableInputInterface> Key: FQCN
+     * @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN
      */
     private $classToInputTypeCache = [];
 

@@ -16,6 +16,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 /**
@@ -67,5 +68,23 @@ class InputTypeGenerator
         }
 
         return $this->cache[$inputName];
+    }
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param ResolvableMutableInputInterface&ObjectType $inputType
+     */
+    public function decorateInputType(string $className, string $methodName, ResolvableMutableInputInterface $inputType, ContainerInterface $container): void
+    {
+        $method = new ReflectionMethod($className, $methodName);
+
+        if ($method->isStatic()) {
+            $object = $className;
+        } else {
+            $object = $container->get($className);
+        }
+
+        $inputType->decorate([$object, $methodName]);
     }
 }

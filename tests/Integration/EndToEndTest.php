@@ -515,8 +515,6 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        var_dump($result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS));
-
         $this->assertSame([
             'echoFilters' => [ "foo", "bar", "12", "42" ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);

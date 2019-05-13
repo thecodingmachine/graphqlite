@@ -109,7 +109,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return ResolvableMutableInputInterface
+     * @return ResolvableMutableInputInterface&InputObjectType
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface

@@ -37,4 +37,16 @@ class MockResolvableInputObjectType extends InputObjectType implements Resolvabl
     {
         throw new BadMethodCallException('Unauthorized call to resolve in Mock object');
     }
+
+    /**
+     * Decorates the call to the resolver with the $decorator.
+     * The $decorator MUST receive the decorated object as first parameter and MUST return an object of a compatible type.
+     * Additional parameters can be used to add fields.
+     *
+     * @param callable $decorator
+     */
+    public function decorate(callable $decorator): void
+    {
+        throw new BadMethodCallException('Unauthorized call to resolve in Mock object');
+    }
 }

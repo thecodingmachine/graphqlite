@@ -32,6 +32,19 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      * @var FieldsBuilder
      */
     private $fieldsBuilder;
+    /**
+     * The list of decorator callables to be applied.
+     *
+     * @var array<int, callable&array<int, object|string>>
+     */
+    private $decorators = [];
+    /**
+     * The list of decorator parameters to be applied.
+     * The key matches the key of $this->decorators
+     *
+     * @var array<int, ParameterInterface[]>
+     */
+    private $decoratorsParameters = [];
 
     /**
      * @param string $name
@@ -77,6 +90,18 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     }
 
     /**
+     * @return ParameterInterface[]
+     */
+    private function getParametersForDecorator(int $key): array
+    {
+        if (!isset($this->decoratorsParameters[$key])) {
+            $method = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
+            $this->decoratorsParameters[$key] = $this->fieldsBuilder->getParametersForDecorator($method);
+        }
+        return $this->decoratorsParameters[$key];
+    }
+
+    /**
      * @param object $source
      * @param array<string, mixed> $args
      * @param mixed $context
@@ -98,6 +123,34 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 
         $resolve = $this->resolve;
 
-        return $resolve(...$toPassArgs);
+        $object = $resolve(...$toPassArgs);
+
+        foreach ($this->decorators as $key => $decorator) {
+            $decoratorParameters = $this->getParametersForDecorator($key);
+
+            $toPassArgs = [ $object ];
+            foreach ($decoratorParameters as $parameter) {
+                try {
+                    $toPassArgs[] = $parameter->resolve($source, $args, $context, $resolveInfo);
+                } catch (MissingArgumentException $e) {
+                    throw MissingArgumentException::wrapWithDecoratorContext($e, $this->name, $decorator);
+                }
+            }
+
+            $object = $decorator(...$toPassArgs);
+        }
+
+        return $object;
+    }
+
+    public function decorate(callable $decorator): void
+    {
+        $this->decorators[] = $decorator;
+
+        $key = count($this->decorators)-1;
+
+        $this->addFields(function() use ($key) {
+            return InputTypeUtils::getInputTypeArgs($this->getParametersForDecorator($key));
+        });
     }
 }

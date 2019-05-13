@@ -14,6 +14,7 @@ use ReflectionParameter;
 use function strpos;
 use function substr;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
@@ -134,6 +135,13 @@ class AnnotationReader
         /** @var Factory|null $factoryAnnotation */
         $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
         return $factoryAnnotation;
+    }
+
+    public function getDecorateAnnotation(ReflectionMethod $refMethod): ?Decorate
+    {
+        /** @var Decorate|null $decorateAnnotation */
+        $decorateAnnotation = $this->getMethodAnnotation($refMethod, Decorate::class);
+        return $decorateAnnotation;
     }
 
     /**

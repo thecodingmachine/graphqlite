@@ -176,7 +176,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return ResolvableMutableInputInterface
+     * @return ResolvableMutableInputInterface&InputObjectType
      */
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {

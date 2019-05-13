@@ -36,14 +36,14 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @var array<string,ResolvableMutableInputInterface&Type>
+     * @var array<string,ResolvableMutableInputInterface&InputObjectType>
      */
     private $inputTypes = [];
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
      *
-     * @param array<string,ResolvableMutableInputInterface&Type> $inputTypes
+     * @param array<string,ResolvableMutableInputInterface&InputObjectType> $inputTypes
      */
     public function setInputTypes(array $inputTypes): void
     {
@@ -126,7 +126,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return ResolvableMutableInputInterface
+     * @return ResolvableMutableInputInterface&InputObjectType
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface

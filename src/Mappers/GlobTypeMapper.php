@@ -12,11 +12,13 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use function str_replace;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Lock;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
@@ -77,6 +79,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     private $mapInputNameToFactory = [];
     /**
+     * @var array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation)
+     */
+    private $mapInputNameToDecorator = [];
+    /**
      * @var ContainerInterface
      */
     private $container;
@@ -100,6 +106,10 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var bool
      */
     private $fullMapNameToExtendTypeArrayComputed = false;
+    /**
+     * @var bool
+     */
+    private $fullMapNameToDecoratorArrayComputed = false;
     /**
      * @var NamingStrategyInterface
      */
@@ -166,14 +176,17 @@ final class GlobTypeMapper implements TypeMapperInterface
             $keyNameCache = 'globTypeMapper_names_'.$namespace;
             $keyInputClassCache = 'globInputTypeMapper_'.$namespace;
             $keyInputNameCache = 'globInputTypeMapper_names_'.$namespace;
+            $keyDecoratorCache = 'globDecorator_names_'.$namespace;
             $this->mapClassToTypeArray = $this->cache->get($keyClassCache);
             $this->mapNameToType = $this->cache->get($keyNameCache);
             $this->mapClassToFactory = $this->cache->get($keyInputClassCache);
             $this->mapInputNameToFactory = $this->cache->get($keyInputNameCache);
+            $this->mapInputNameToDecorator = $this->cache->get($keyDecoratorCache);
             if ($this->mapClassToTypeArray === null ||
                 $this->mapNameToType === null ||
                 $this->mapClassToFactory === null ||
-                $this->mapInputNameToFactory === null
+                $this->mapInputNameToFactory === null ||
+                $this->mapInputNameToDecorator === null
             ) {
                 $lock = $this->lockFactory->createLock('buildmap_'.$this->namespace, 5);
                 if (!$lock->acquire()) {
@@ -194,6 +207,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $this->cache->set($keyNameCache, $this->mapNameToType, $this->globTtl);
                 $this->cache->set($keyInputClassCache, $this->mapClassToFactory, $this->globTtl);
                 $this->cache->set($keyInputNameCache, $this->mapInputNameToFactory, $this->globTtl);
+                $this->cache->set($keyDecoratorCache, $this->mapInputNameToDecorator, $this->globTtl);
             }
             $this->fullMapComputed = true;
         }
@@ -202,6 +216,7 @@ final class GlobTypeMapper implements TypeMapperInterface
             'mapNameToType' => $this->mapNameToType,
             'mapClassToFactory' => $this->mapClassToFactory,
             'mapInputNameToFactory' => $this->mapInputNameToFactory,
+            'mapInputNameToDecorator' => $this->mapInputNameToDecorator,
         ];
     }
 
@@ -223,6 +238,11 @@ final class GlobTypeMapper implements TypeMapperInterface
     private function getMapInputNameToFactory(): array
     {
         return $this->getMaps()['mapInputNameToFactory'];
+    }
+
+    private function getMapInputNameToDecorator(): array
+    {
+        return $this->getMaps()['mapInputNameToDecorator'];
     }
 
     private function getMapClassToExtendTypeArray(): array
@@ -317,6 +337,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->mapNameToType = [];
         $this->mapClassToFactory = [];
         $this->mapInputNameToFactory = [];
+        $this->mapInputNameToDecorator = [];
 
         /** @var ReflectionClass[] $classes */
         $classes = $this->getClassList();
@@ -354,6 +375,12 @@ final class GlobTypeMapper implements TypeMapperInterface
                         $className = null;
                     }
                     $this->storeInputTypeInCache($method, $inputName, $className, $refClass->getFileName());
+                }
+
+                $decorator = $this->annotationReader->getDecorateAnnotation($method);
+
+                if ($decorator !== null) {
+                    $this->storeDecoratorMapperByNameInCache($method, $decorator);
                 }
             }
         }
@@ -461,6 +488,21 @@ final class GlobTypeMapper implements TypeMapperInterface
             'filemtime' => filemtime($typeFileName),
             'fileName' => $typeFileName,
             'extendTypeClasses' => $this->mapNameToExtendType[$typeName]
+        ], $this->mapTtl);
+    }
+
+    /**
+     * Stores in cache the mapping ExtendTypeClass <=> name class.
+     */
+    private function storeDecoratorMapperByNameInCache(ReflectionMethod $reflectionMethod, Decorate $decorate): void
+    {
+        $typeName = $decorate->getInputTypeName();
+        $typeFileName = $reflectionMethod->getFileName();
+        $this->mapInputNameToDecorator[$typeName][] = [$reflectionMethod->getDeclaringClass()->getName(), $reflectionMethod->getName()];
+        $this->cache->set('globDecoratorMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$typeName, [
+            'filemtime' => filemtime($typeFileName),
+            'fileName' => $typeFileName,
+            'decorators' => $this->mapInputNameToDecorator[$typeName]
         ], $this->mapTtl);
     }
 
@@ -629,6 +671,34 @@ final class GlobTypeMapper implements TypeMapperInterface
     }
 
     /**
+     * @return array<int, string[]>|null A pointer to the decorators methods [$className, $methodName] or null on cache miss
+     */
+    private function getDecorateFromCacheByGraphQLInputTypeName(string $graphqlTypeName): ?array
+    {
+        if (isset($this->mapInputNameToDecorator[$graphqlTypeName])) {
+            return $this->mapInputNameToDecorator[$graphqlTypeName];
+        }
+
+        // Let's try from the cache
+        $item = $this->cache->get('globDecoratorMapperByName_'.str_replace('\\', '_', $this->namespace).'_'.$graphqlTypeName);
+        if ($item !== null) {
+            [
+                'filemtime' => $filemtime,
+                'fileName' => $typeFileName,
+                'decorators' => $decorators
+            ] = $item;
+
+            if ($filemtime === @filemtime($typeFileName)) {
+                $this->mapInputNameToDecorator[$graphqlTypeName] = $decorators;
+                return $decorators;
+            }
+        }
+
+        // cache miss
+        return null;
+    }
+
+    /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
      * @param string $className
@@ -701,7 +771,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return ResolvableMutableInputInterface
+     * @return ResolvableMutableInputInterface&InputObjectType
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface
@@ -888,20 +958,37 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
-        // TODO: implement this!
-        return false;
+        $typeClassNames = $this->getDecorateFromCacheByGraphQLInputTypeName($typeName);
+
+        if ($typeClassNames !== null) {
+            return true;
+        }
+
+        $map = $this->getMapInputNameToDecorator();
+
+        return isset($map[$typeName]);
     }
 
     /**
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
      * @param string $typeName
-     * @param ResolvableMutableInputInterface $type
+     * @param ResolvableMutableInputInterface&InputObjectType $type
      * @throws CannotMapTypeExceptionInterface
      */
     public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
     {
-        // TODO: implement this!
-        throw CannotMapTypeException::createForDecorateName($typeName, $type);
+        $decorators = $this->getDecorateFromCacheByGraphQLInputTypeName($typeName);
+        if ($decorators === null) {
+            $map = $this->getMapInputNameToDecorator();
+            if (!isset($map[$typeName])) {
+                throw CannotMapTypeException::createForDecorateName($typeName, $type);
+            }
+            $decorators = $map[$typeName];
+        }
+
+        foreach ($decorators as $decorator) {
+            $this->inputTypeGenerator->decorateInputType($decorator[0], $decorator[1], $type, $this->container);
+        }
     }
 }
