@@ -15,6 +15,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
+use ReflectionMethod;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
@@ -27,6 +28,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
+use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestResolveInfo;
@@ -562,6 +564,14 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestFieldBadOutputType(), true);
     }
 
+    public function testBadInputTypeException()
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        $this->expectException(CannotMapTypeExceptionInterface::class);
+        $this->expectExceptionMessage('For parameter $input, in TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType::testInput, cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
+        $queryProvider->getFields(new TestFieldBadInputType(), true);
+    }
+
     public function testDoubleReturnException()
     {
         $queryProvider = $this->buildFieldsBuilder();
@@ -588,5 +598,12 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(MissingArgumentException::class);
         $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL query/mutation/field 'test' used in method 'TheCodingMachine\GraphQLite\Fixtures\TestController::test()'");
         $resolve('foo', $context, null, $resolveInfo);
+    }
+
+    public function testEmptyParametersForDecorator(): void
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        // Let's test that a decorator with no parameter is working.
+        $this->assertSame([], $queryProvider->getParametersForDecorator(new ReflectionMethod(\Exception::class, 'getMessage')));
     }
 }

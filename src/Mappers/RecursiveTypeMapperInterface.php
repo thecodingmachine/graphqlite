@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 /**
  * Maps a PHP class to a GraphQL type.
@@ -66,10 +67,10 @@ interface RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return InputObjectType&ResolvableMutableInputInterface
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className): InputObjectType;
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface;
 
     /**
      * Returns an array containing all OutputTypes.

@@ -13,6 +13,7 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
 use ReflectionParameter;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -31,13 +32,10 @@ class CompositeParameterMapper implements ParameterMapperInterface
         $this->parameterMappers = is_array($parameterMappers) ? $parameterMappers : iterator_to_array($parameterMappers);
     }
 
-    /**
-     * @param array<string, DocBlock\Tags\Param> $paramTags
-     */
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, array $paramTags): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
     {
         foreach ($this->parameterMappers as $parameterMapper) {
-            $parameterObj = $parameterMapper->mapParameter($parameter, $docBlock, $paramTags);
+            $parameterObj = $parameterMapper->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotation);
             if ($parameterObj !== null) {
                 return $parameterObj;
             }

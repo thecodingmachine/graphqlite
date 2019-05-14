@@ -27,6 +27,17 @@ class MissingArgumentException extends \BadMethodCallException
         return new self($message, 0, $previous);
     }
 
+    public static function wrapWithDecoratorContext(self $previous, string $inputType, callable $callable): self
+    {
+        $message = sprintf('%s in GraphQL input type \'%s\' used in decorator \'%s\'',
+            $previous->getMessage(),
+            $inputType,
+            self::toMethod($callable)
+        );
+
+        return new self($message, 0, $previous);
+    }
+
     public static function wrapWithFieldContext(self $previous, string $name, callable $callable): self
     {
         $message = sprintf('%s in GraphQL query/mutation/field \'%s\' used in method \'%s\'',

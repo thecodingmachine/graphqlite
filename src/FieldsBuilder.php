@@ -4,6 +4,8 @@
 namespace TheCodingMachine\GraphQLite;
 
 use function array_merge;
+use function array_shift;
+use function array_unshift;
 use function get_parent_class;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ListOfType;
@@ -116,7 +118,7 @@ class FieldsBuilder
         $this->typeResolver = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy = $namingStrategy;
-        $this->typeMapper = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper);
+        $this->typeMapper = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver, $annotationReader);
         $this->parameterMapper = $parameterMapper;
     }
 
@@ -210,6 +212,27 @@ class FieldsBuilder
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = $refMethod->getParameters();
+
+        return $this->mapParameters($parameters, $docBlockObj);
+    }
+
+    /**
+     * @param ReflectionMethod $refMethod A method annotated with a Decorate annotation.
+     * @return array<string, ParameterInterface> Returns an array of parameters.
+     */
+    public function getParametersForDecorator(ReflectionMethod $refMethod): array
+    {
+        $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+        //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
+
+        $parameters = $refMethod->getParameters();
+
+        if (empty($parameters)) {
+            return [];
+        }
+
+        // Let's remove the first parameter.
+        array_shift($parameters);
 
         return $this->mapParameters($parameters, $docBlockObj);
     }
@@ -447,10 +470,12 @@ class FieldsBuilder
         }
 
         foreach ($refParameters as $parameter) {
-            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes);
+            $parameterAnnotation = $this->annotationReader->getParameterAnnotation($parameter);
+
+            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotation);
 
             if ($parameterObj === null) {
-                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes);
+                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotation);
             }
             $args[$parameter->getName()] = $parameterObj;
         }

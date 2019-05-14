@@ -16,7 +16,8 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
-use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 /**
  * This class is in charge of creating Webonyx InputTypes from Factory annotations.
@@ -24,7 +25,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
 class InputTypeGenerator
 {
     /**
-     * @var array<string, InputObjectType>
+     * @var array<string, ResolvableMutableInputObjectType>
      */
     private $cache = [];
     /**
@@ -49,7 +50,7 @@ class InputTypeGenerator
         $this->fieldsBuilder = $fieldsBuilder;
     }
 
-    public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): InputObjectType
+    public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): ResolvableMutableInputObjectType
     {
         $method = new ReflectionMethod($factory, $methodName);
 
@@ -63,9 +64,27 @@ class InputTypeGenerator
 
         if (!isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, $this->argumentResolver, null);
+            $this->cache[$inputName] = new ResolvableMutableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, $this->argumentResolver, null);
         }
 
         return $this->cache[$inputName];
+    }
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param ResolvableMutableInputInterface&ObjectType $inputType
+     */
+    public function decorateInputType(string $className, string $methodName, ResolvableMutableInputInterface $inputType, ContainerInterface $container): void
+    {
+        $method = new ReflectionMethod($className, $methodName);
+
+        if ($method->isStatic()) {
+            $object = $className;
+        } else {
+            $object = $container->get($className);
+        }
+
+        $inputType->decorate([$object, $methodName]);
     }
 }

@@ -9,6 +9,8 @@ use Symfony\Component\Cache\Simple\NullCache;
 use Test;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\FilterDecorator;
+use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
@@ -17,6 +19,8 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -198,5 +202,48 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), $cache);
 
         $this->assertSame([], $mapper->getSupportedClasses());
+    }
+
+    public function testGlobTypeMapperDecorate()
+    {
+        $container = new Picotainer([
+            FilterDecorator::class => function () {
+                return new FilterDecorator();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration\Types', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), $cache);
+
+        $inputType = new MockResolvableInputObjectType(['name'=>'FilterInput']);
+
+        $mapper->decorateInputTypeForName('FilterInput', $inputType);
+
+        $this->assertCount(3, $inputType->getDecorators());
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('cannot decorate GraphQL input type "FilterInput" with type "NotExists". Check your TypeMapper configuration.');
+        $mapper->decorateInputTypeForName('NotExists', $inputType);
+    }
+
+    public function testInvalidName()
+    {
+        $container = new Picotainer([
+            FooType::class => function () {
+                return new FooType();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), new ArrayCache());
+
+        $this->assertFalse($mapper->canExtendTypeForName('{}()/\\@:', new MutableObjectType(['name' => 'foo'])));
+        $this->assertFalse($mapper->canDecorateInputTypeForName('{}()/\\@:', new MockResolvableInputObjectType(['name' => 'foo'])));
+        $this->assertFalse($mapper->canMapNameToType('{}()/\\@:'));
     }
 }
