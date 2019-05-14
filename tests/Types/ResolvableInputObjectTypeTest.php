@@ -45,6 +45,25 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
         $inputType->resolve(null, [], null, $resolveInfo);
     }
 
+    public function testDecoratorMissingArgumentException(): void
+    {
+        $testFactory = new TestFactory();
+        $inputType = new ResolvableMutableInputObjectType('InputObject',
+            $this->getFieldsBuilder(),
+            $testFactory,
+            'myFactory',
+            $this->getArgumentResolver(),
+            'my comment');
+
+        $inputType->decorate([$testFactory, 'myDecorator']);
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        $this->expectException(MissingArgumentException::class);
+        $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL input type 'InputObject' used in decorator 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myDecorator()'");
+        $inputType->resolve(null, ['string' => 'foobar'], null, $resolveInfo);
+    }
+
     public function testListResolve(): void
     {
         $inputType = new ResolvableMutableInputObjectType('InputObject2',

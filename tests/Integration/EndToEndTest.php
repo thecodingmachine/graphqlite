@@ -506,7 +506,7 @@ class EndToEndTest extends TestCase
 
         $queryString = '
         query {
-            echoFilters(filter: {values: ["foo", "bar"], moreValues: [12, 42]})
+            echoFilters(filter: {values: ["foo", "bar"], moreValues: [12, 42], evenMoreValues: [62]})
         }
         ';
 
@@ -516,7 +516,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ "foo", "bar", "12", "42" ]
+            'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 

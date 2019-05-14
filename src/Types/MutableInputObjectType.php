@@ -8,6 +8,7 @@ use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\Type;
 
 /**
  * An input object type built from the Factory annotation.
@@ -30,7 +31,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     private $fieldsCallables = [];
 
     /**
-     * @var InputObjectField[]|null
+     * @var array<string, InputObjectField>|null
      */
     private $finalFields;
 
@@ -88,7 +89,13 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
 
             $this->finalFields = parent::getFields();
             foreach ($this->fieldsCallables as $fieldsCallable) {
-                $this->finalFields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->finalFields;
+                $fieldDefinitions = $fieldsCallable();
+                foreach ($fieldDefinitions as $name => $fieldDefinition) {
+                    if ($fieldDefinition instanceof Type) {
+                        $fieldDefinition = ['type' => $fieldDefinition];
+                    }
+                    $this->finalFields[$name] = new InputObjectField($fieldDefinition + ['name' => $name]);
+                }
             }
             if (empty($this->finalFields)) {
                 throw NoFieldsException::create($this->name);

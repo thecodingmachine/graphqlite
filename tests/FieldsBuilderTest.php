@@ -15,6 +15,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
+use ReflectionMethod;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
@@ -597,5 +598,12 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(MissingArgumentException::class);
         $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL query/mutation/field 'test' used in method 'TheCodingMachine\GraphQLite\Fixtures\TestController::test()'");
         $resolve('foo', $context, null, $resolveInfo);
+    }
+
+    public function testEmptyParametersForDecorator(): void
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        // Let's test that a decorator with no parameter is working.
+        $this->assertSame([], $queryProvider->getParametersForDecorator(new ReflectionMethod(\Exception::class, 'getMessage')));
     }
 }
