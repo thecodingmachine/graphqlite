@@ -2,7 +2,7 @@ language: php
 cache:
   directories:
     - $HOME/.composer/cache
-    - .php_cs.cache
+    - .php_cs
 jobs:
   include:
     - stage: test

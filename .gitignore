@@ -4,7 +4,7 @@
 /src/Tests/
 /build/
 /phpunit.xml
-.php_cs.cache
+/.php_cs/cache
 
 node_modules
 
