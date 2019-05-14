@@ -3,6 +3,7 @@ id: extend_input_type
 title: Extending an input type
 sidebar_label: Extending an input type
 ---
+<small>Available in GraphQLite 4.0+</small>
 
 <div class="alert alert-info">If you are not familiar with the <code>@Factory</code> tag, <a href="input-types">read first the "input types" guide</a>.</div>
 
