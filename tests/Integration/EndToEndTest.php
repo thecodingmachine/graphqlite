@@ -518,6 +518,16 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Call again to test GlobTypeMapper cache
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
     public function testEndToEndResolveInfo()
