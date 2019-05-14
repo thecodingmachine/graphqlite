@@ -1,23 +1,21 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
-
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
-use function is_array;
-use function iterator_to_array;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
+use function is_array;
+use function iterator_to_array;
 
 class CompositeRootTypeMapper implements RootTypeMapperInterface
 {
-    /**
-     * @var RootTypeMapperInterface[]
-     */
+    /** @var RootTypeMapperInterface[] */
     private $rootTypeMappers;
 
     /**
@@ -28,7 +26,7 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
         $this->rootTypeMappers = is_array($rootTypeMappers) ? $rootTypeMappers : iterator_to_array($rootTypeMappers);
     }
 
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?OutputType
     {
         foreach ($this->rootTypeMappers as $rootTypeMapper) {
             $mappedType = $rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
@@ -36,10 +34,11 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
                 return $mappedType;
             }
         }
+
         return null;
     }
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?InputType
     {
         foreach ($this->rootTypeMappers as $rootTypeMapper) {
             $mappedType = $rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
@@ -47,6 +46,7 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
                 return $mappedType;
             }
         }
+
         return null;
     }
 
@@ -56,9 +56,8 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
      * also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return NamedType|null
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName) : ?NamedType
     {
         foreach ($this->rootTypeMappers as $rootTypeMapper) {
             $mappedType = $rootTypeMapper->mapNameToType($typeName);
@@ -66,6 +65,7 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
                 return $mappedType;
             }
         }
+
         return null;
     }
 }

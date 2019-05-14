@@ -16,6 +16,7 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
+use stdClass;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
@@ -106,13 +107,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $resolve = $usersQuery->resolveFn;
         $resolveInfo = $this->createMock(ResolveInfo::class);
-        $result = $resolve('foo', $context, null, $resolveInfo);
+        $result = $resolve(new stdClass(), $context, null, $resolveInfo);
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertSame('foo424212true4.22017010101010120170101010101default42on', $result->getTest());
 
         unset($context['string']); // Testing null default value
-        $result = $resolve('foo', $context, null, $resolveInfo);
+        $result = $resolve(new stdClass(), $context, null, $resolveInfo);
 
         $this->assertSame('424212true4.22017010101010120170101010101default42on', $result->getTest());
     }
@@ -130,7 +131,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('mutation', $mutation->name);
 
         $resolve = $mutation->resolveFn;
-        $result = $resolve('foo', ['testObject' => ['test' => 42]], null, $this->createMock(ResolveInfo::class));
+        $result = $resolve(new stdClass(), ['testObject' => ['test' => 42]], null, $this->createMock(ResolveInfo::class));
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
@@ -511,7 +512,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('testFailWith', $query->name);
 
         $resolve = $query->resolveFn;
-        $result = $resolve('foo', [], null, $this->createMock(ResolveInfo::class));
+        $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
 
         $this->assertNull($result);
 
@@ -533,7 +534,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
 
         $resolve = $fields['test']->resolveFn;
-        $result = $resolve('foo', [], null, $this->createMock(ResolveInfo::class));
+        $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
 
         $this->assertNull($result);
 
@@ -597,13 +598,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->expectException(MissingArgumentException::class);
         $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL query/mutation/field 'test' used in method 'TheCodingMachine\GraphQLite\Fixtures\TestController::test()'");
-        $resolve('foo', $context, null, $resolveInfo);
+        $resolve(new stdClass(), $context, null, $resolveInfo);
     }
 
     public function testEmptyParametersForDecorator(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         // Let's test that a decorator with no parameter is working.
-        $this->assertSame([], $queryProvider->getParametersForDecorator(new ReflectionMethod(\Exception::class, 'getMessage')));
+        $this->assertSame([], $queryProvider->getParametersForDecorator(new ReflectionMethod(SchemaFactory::class, 'devMode')));
     }
 }

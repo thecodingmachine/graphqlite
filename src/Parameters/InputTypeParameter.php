@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Parameters;
 
-
-use function array_key_exists;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ResolveInfo;
-use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 /**
@@ -15,49 +13,36 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
  */
 class InputTypeParameter implements ParameterInterface
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
-    /**
-     * @var InputType
-     */
+    /** @var InputType */
     private $type;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $doesHaveDefaultValue;
+    /** @var mixed */
     private $defaultValue;
-    /**
-     * @var ArgumentResolver
-     */
+    /** @var ArgumentResolver */
     private $argumentResolver;
 
     /**
-     * InputTypeParameter constructor.
-     * @param string $name
-     * @param InputType $type
-     * @param bool $hasDefaultValue
      * @param mixed $defaultValue
-     * @param ArgumentResolver $argumentResolver
      */
     public function __construct(string $name, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
     {
-        $this->name = $name;
-        $this->type = $type;
+        $this->name                 = $name;
+        $this->type                 = $type;
         $this->doesHaveDefaultValue = $hasDefaultValue;
-        $this->defaultValue = $defaultValue;
-        $this->argumentResolver = $argumentResolver;
+        $this->defaultValue         = $defaultValue;
+        $this->argumentResolver     = $argumentResolver;
     }
 
     /**
-     * @param object $source
      * @param array<string, mixed> $args
-     * @param mixed $context
-     * @param ResolveInfo $info
+     * @param mixed                $context
+     *
      * @return mixed
      */
-    public function resolve($source, $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
     {
         if (isset($args[$this->name])) {
             return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);
@@ -70,18 +55,12 @@ class InputTypeParameter implements ParameterInterface
         throw MissingArgumentException::create($this->name);
     }
 
-    /**
-     * @return InputType
-     */
-    public function getType(): InputType
+    public function getType() : InputType
     {
         return $this->type;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasDefaultValue(): bool
+    public function hasDefaultValue() : bool
     {
         return $this->doesHaveDefaultValue;
     }

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
+
+use function array_key_exists;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.
@@ -21,29 +24,19 @@ namespace TheCodingMachine\GraphQLite\Annotations;
  */
 class SourceField implements SourceFieldInterface
 {
-    /**
-     * @var Right|null
-     */
+    /** @var Right|null */
     private $right;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $name;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $logged;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $outputType;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $id;
 
     /**
@@ -53,9 +46,7 @@ class SourceField implements SourceFieldInterface
      */
     private $failWith;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $hasFailWith = false;
 
     /**
@@ -63,23 +54,23 @@ class SourceField implements SourceFieldInterface
      */
     public function __construct(array $attributes = [])
     {
-        $this->name = $attributes['name'] ?? null;
-        $this->logged = $attributes['logged'] ?? false;
-        $this->right = $attributes['right'] ?? null;
+        $this->name       = $attributes['name'] ?? null;
+        $this->logged     = $attributes['logged'] ?? false;
+        $this->right      = $attributes['right'] ?? null;
         $this->outputType = $attributes['outputType'] ?? null;
-        $this->id = $attributes['isId'] ?? false;
-        if (array_key_exists('failWith', $attributes)) {
-            $this->failWith = $attributes['failWith'];
-            $this->hasFailWith = true;
+        $this->id         = $attributes['isId'] ?? false;
+        if (! array_key_exists('failWith', $attributes)) {
+            return;
         }
+
+        $this->failWith    = $attributes['failWith'];
+        $this->hasFailWith = true;
     }
 
     /**
      * Returns the GraphQL right to be applied to this source field.
-     *
-     * @return Right|null
      */
-    public function getRight(): ?Right
+    public function getRight() : ?Right
     {
         return $this->right;
     }
@@ -87,18 +78,13 @@ class SourceField implements SourceFieldInterface
     /**
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
-     *
-     * @return null|string
      */
-    public function getName(): ?string
+    public function getName() : ?string
     {
         return $this->name;
     }
 
-    /**
-     * @return bool
-     */
-    public function isLogged(): bool
+    public function isLogged() : bool
     {
         return $this->logged;
     }
@@ -106,20 +92,16 @@ class SourceField implements SourceFieldInterface
     /**
      * Returns the GraphQL return type of the request (as a string).
      * The string is the GraphQL output type name.
-     *
-     * @return string|null
      */
-    public function getOutputType(): ?string
+    public function getOutputType() : ?string
     {
         return $this->outputType;
     }
 
     /**
      * If the GraphQL type is "ID", isID will return true.
-     *
-     * @return bool
      */
-    public function isId(): bool
+    public function isId() : bool
     {
         return $this->id;
     }
@@ -136,10 +118,8 @@ class SourceField implements SourceFieldInterface
 
     /**
      * True if a default value is available if a right is not enforced.
-     *
-     * @return bool
      */
-    public function canFailWith(): bool
+    public function canFailWith() : bool
     {
         return $this->hasFailWith;
     }

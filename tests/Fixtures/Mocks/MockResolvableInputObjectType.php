@@ -35,7 +35,7 @@ class MockResolvableInputObjectType extends InputObjectType implements Resolvabl
      * @param array $args
      * @return object
      */
-    public function resolve($source, array $args, $context, ResolveInfo $resolveInfo)
+    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
         throw new BadMethodCallException('Unauthorized call to resolve in Mock object');
     }

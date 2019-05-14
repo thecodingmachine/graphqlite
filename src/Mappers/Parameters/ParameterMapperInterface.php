@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
-
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
@@ -12,5 +12,5 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 interface ParameterMapperInterface
 {
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface;
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation) : ?ParameterInterface;
 }

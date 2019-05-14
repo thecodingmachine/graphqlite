@@ -11,11 +11,16 @@
 
     <!-- Directories to be checked -->
     <file>src</file>
-    <file>tests</file>
+    <!-- <file>tests</file> -->
 
 
     <exclude-pattern>tests/dependencies/*</exclude-pattern>
 
     <!-- Include full Doctrine Coding Standard -->
-    <rule ref="Doctrine"/>
+    <rule ref="Doctrine">
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousInterfaceNaming.SuperfluousSuffix"/>
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousExceptionNaming.SuperfluousSuffix"/>
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming.SuperfluousPrefix"/>
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidNoReturn" />
+    </rule>
 </ruleset>

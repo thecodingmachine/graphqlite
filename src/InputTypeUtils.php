@@ -1,55 +1,56 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use function array_filter;
-use function array_map;
 use GraphQL\Type\Definition\InputType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
+use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use function array_filter;
+use function array_map;
+use function ltrim;
 
 class InputTypeUtils
 {
-    /**
-     * @var AnnotationReader
-     */
+    /** @var AnnotationReader */
     private $annotationReader;
-    /**
-     * @var NamingStrategyInterface
-     */
+    /** @var NamingStrategyInterface */
     private $namingStrategy;
 
-    public function __construct(AnnotationReader $annotationReader,
-                                NamingStrategyInterface $namingStrategy)
-    {
+    public function __construct(
+        AnnotationReader $annotationReader,
+        NamingStrategyInterface $namingStrategy
+    ) {
         $this->annotationReader = $annotationReader;
-        $this->namingStrategy = $namingStrategy;
+        $this->namingStrategy   = $namingStrategy;
     }
 
     /**
      * Returns an array with 2 elements: [ $inputName, $className ]
      *
-     * @param ReflectionMethod $method
      * @return string[]
      */
-    public function getInputTypeNameAndClassName(ReflectionMethod $method): array
+    public function getInputTypeNameAndClassName(ReflectionMethod $method) : array
     {
-        $fqsen = ltrim((string) $this->validateReturnType($method), '\\');
+        $fqsen   = ltrim((string) $this->validateReturnType($method), '\\');
         $factory = $this->annotationReader->getFactoryAnnotation($method);
         if ($factory === null) {
-            throw new \RuntimeException($method->getDeclaringClass()->getName().'::'.$method->getName().' has no @Factory annotation.');
+            throw new RuntimeException($method->getDeclaringClass()->getName() . '::' . $method->getName() . ' has no @Factory annotation.');
         }
+
         return [$this->namingStrategy->getInputTypeName($fqsen, $factory), $fqsen];
     }
 
-    private function validateReturnType(ReflectionMethod $refMethod): Fqsen
+    private function validateReturnType(ReflectionMethod $refMethod) : Fqsen
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType === null) {
@@ -62,11 +63,11 @@ class InputTypeUtils
 
         $type = (string) $returnType;
 
-        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+        $typeResolver = new TypeResolver();
 
         $phpdocType = $typeResolver->resolve($type);
         $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
-        if (!$phpdocType instanceof Object_) {
+        if (! $phpdocType instanceof Object_) {
             throw MissingTypeHintException::invalidReturnType($refMethod);
         }
 
@@ -75,15 +76,13 @@ class InputTypeUtils
 
     /**
      * Resolves "self" types into the class type.
-     *
-     * @param Type $type
-     * @return Type
      */
-    private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
+    private function resolveSelf(Type $type, ReflectionClass $reflectionClass) : Type
     {
         if ($type instanceof Self_) {
-            return new Object_(new Fqsen('\\'.$reflectionClass->getName()));
+            return new Object_(new Fqsen('\\' . $reflectionClass->getName()));
         }
+
         return $type;
     }
 
@@ -91,18 +90,23 @@ class InputTypeUtils
      * Maps an array of ParameterInterface to an array of field descriptors as accepted by Webonyx.
      *
      * @param ParameterInterface[] $args
+     *
      * @return array<string, array<string, mixed|InputType>>
      */
-    public static function getInputTypeArgs(array $args): array
+    public static function getInputTypeArgs(array $args) : array
     {
-        $inputTypeArgs = array_filter($args, static function(ParameterInterface $parameter) { return $parameter instanceof InputTypeParameter; });
-        return array_map(static function(InputTypeParameter $parameter) {
+        $inputTypeArgs = array_filter($args, static function (ParameterInterface $parameter) {
+            return $parameter instanceof InputTypeParameter;
+        });
+
+        return array_map(static function (InputTypeParameter $parameter) {
             $desc = [
-                'type' => $parameter->getType()
+                'type' => $parameter->getType(),
             ];
             if ($parameter->hasDefaultValue()) {
                 $desc['defaultValue'] = $parameter->getDefaultValue();
             }
+
             return $desc;
         }, $inputTypeArgs);
     }

@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Containers;
 
@@ -10,12 +11,22 @@ use Psr\Container\ContainerInterface;
  */
 class EmptyContainer implements ContainerInterface
 {
-    public function get($id)
+    /**
+     * @param string $id
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     */
+    public function get($id) : void
     {
         throw NotFoundException::notFound($id);
     }
 
-    public function has($id)
+    /**
+     * @param string $id
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     */
+    public function has($id) : bool
     {
         return false;
     }

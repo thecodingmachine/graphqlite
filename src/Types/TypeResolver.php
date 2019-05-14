@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
@@ -22,22 +23,18 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
  */
 class TypeResolver
 {
-    /**
-     * @var Schema
-     */
+    /** @var Schema */
     private $schema;
 
-    public function registerSchema(Schema $schema)
+    public function registerSchema(Schema $schema) : void
     {
         $this->schema = $schema;
     }
 
     /**
-     * @param string $typeName
-     * @return Type
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName) : Type
     {
         if ($this->schema === null) {
             throw new RuntimeException('You must register a schema first before resolving types.');
@@ -45,7 +42,7 @@ class TypeResolver
 
         try {
             $parsedOutputType = Parser::parseType($typeName);
-            $type = AST::typeFromAST($this->schema, $parsedOutputType);
+            $type             = AST::typeFromAST($this->schema, $parsedOutputType);
         } catch (Error $e) {
             throw CannotMapTypeException::createForParseError($e);
         }
@@ -57,21 +54,23 @@ class TypeResolver
         return $type;
     }
 
-    public function mapNameToOutputType(string $typeName): OutputType
+    public function mapNameToOutputType(string $typeName) : OutputType
     {
         $type = $this->mapNameToType($typeName);
-        if (!$type instanceof OutputType || ($type instanceof WrappingType && !$type->getWrappedType() instanceof OutputType)) {
+        if (! $type instanceof OutputType || ($type instanceof WrappingType && ! $type->getWrappedType() instanceof OutputType)) {
             throw CannotMapTypeException::mustBeOutputType($typeName);
         }
+
         return $type;
     }
 
-    public function mapNameToInputType(string $typeName): InputType
+    public function mapNameToInputType(string $typeName) : InputType
     {
         $type = $this->mapNameToType($typeName);
-        if (!$type instanceof InputType || ($type instanceof WrappingType && !$type->getWrappedType() instanceof InputType)) {
+        if (! $type instanceof InputType || ($type instanceof WrappingType && ! $type->getWrappedType() instanceof InputType)) {
             throw CannotMapTypeException::mustBeInputType($typeName);
         }
+
         return $type;
     }
 }

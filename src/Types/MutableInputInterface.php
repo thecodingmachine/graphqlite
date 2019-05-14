@@ -1,7 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+declare(strict_types=1);
 
+namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\InputType;
 
@@ -10,9 +11,9 @@ use GraphQL\Type\Definition\InputType;
  */
 interface MutableInputInterface extends InputType
 {
-    public function freeze(): void;
+    public function freeze() : void;
 
-    public function getStatus(): string;
+    public function getStatus() : string;
 
-    public function addFields(callable $fields): void;
+    public function addFields(callable $fields) : void;
 }

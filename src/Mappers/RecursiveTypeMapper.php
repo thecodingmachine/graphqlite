@@ -1,12 +1,9 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-
-use function array_flip;
-use function array_reverse;
-use function get_parent_class;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -14,12 +11,15 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\SimpleCache\CacheInterface;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
+use function array_flip;
+use function array_reverse;
+use function get_parent_class;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.
@@ -28,9 +28,7 @@ use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
  */
 class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 {
-    /**
-     * @var TypeMapperInterface
-     */
+    /** @var TypeMapperInterface */
     private $typeMapper;
 
     /**
@@ -47,63 +45,42 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     private $interfaces = [];
 
-    /**
-     * @var array<string,MutableObjectType> Key: FQCN
-     */
+    /** @var array<string,MutableObjectType> Key: FQCN */
     private $classToTypeCache = [];
 
-    /**
-     * @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: Input type name
-     */
-    private $nameToInputTypeCache = [];
-
-    /**
-     * @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN
-     */
+    /** @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN */
     private $classToInputTypeCache = [];
 
-    /**
-     * @var NamingStrategyInterface
-     */
+    /** @var NamingStrategyInterface */
     private $namingStrategy;
 
-    /**
-     * @var CacheInterface
-     */
+    /** @var CacheInterface */
     private $cache;
 
-    /**
-     * @var int|null
-     */
+    /** @var int|null */
     private $ttl;
 
-    /**
-     * @var array<string, string> An array mapping a GraphQL interface name to the PHP class name that triggered its generation.
-     */
+    /** @var array<string, string> An array mapping a GraphQL interface name to the PHP class name that triggered its generation. */
     private $interfaceToClassNameMap;
 
-    /**
-     * @var TypeRegistry
-     */
+    /** @var TypeRegistry */
     private $typeRegistry;
-
 
     public function __construct(TypeMapperInterface $typeMapper, NamingStrategyInterface $namingStrategy, CacheInterface $cache, TypeRegistry $typeRegistry, ?int $ttl = null)
     {
-        $this->typeMapper = $typeMapper;
+        $this->typeMapper     = $typeMapper;
         $this->namingStrategy = $namingStrategy;
-        $this->cache = $cache;
-        $this->ttl = $ttl;
-        $this->typeRegistry = $typeRegistry;
+        $this->cache          = $cache;
+        $this->ttl            = $ttl;
+        $this->typeRegistry   = $typeRegistry;
     }
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
-     * @return bool
      */
-    public function canMapClassToType(string $className): bool
+    public function canMapClassToType(string $className) : bool
     {
         return $this->findClosestMatchingParent($className) !== null;
     }
@@ -111,16 +88,16 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type)
-     * @param (OutputType&MutableObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
-     * @return MutableObjectType
+     * @param string      $className                                          The class name to look for (this function looks into parent classes if the class does not match a type)
+     * @param (OutputType &MutableObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType) : MutableObjectType
     {
         $cacheKey = $className;
         if ($subType !== null) {
-            $cacheKey .= '__`__'.$subType->name;
+            $cacheKey .= '__`__' . $subType->name;
         }
         if (isset($this->classToTypeCache[$cacheKey])) {
             return $this->classToTypeCache[$cacheKey];
@@ -136,10 +113,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         if ($this->typeRegistry->hasType($type->name)) {
             $cachedType = $this->typeRegistry->getType($type->name);
             if ($cachedType !== $type) {
-                throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
+                throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
             }
+
             //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
                 return $type;
+
             //}
         }
 
@@ -155,35 +134,36 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
     /**
      * Returns the closest parent that can be mapped, or null if nothing can be matched.
-     *
-     * @param string $className
-     * @return string|null
      */
-    public function findClosestMatchingParent(string $className): ?string
+    public function findClosestMatchingParent(string $className) : ?string
     {
         do {
             if ($this->typeMapper->canMapClassToType($className)) {
                 return $className;
             }
-        } while ($className = get_parent_class($className));
+            $className = get_parent_class($className);
+        } while ($className);
+
         return null;
     }
 
     /**
      * Extends a type using available type extenders.
      *
-     * @param string $className
-     * @param MutableObjectType $type
      * @throws CannotMapTypeExceptionInterface
      */
-    private function extendType(string $className, MutableObjectType $type): void
+    private function extendType(string $className, MutableObjectType $type) : void
     {
         $classes = [];
         do {
-            if ($this->typeMapper->canExtendTypeForClass($className, $type)) {
-                $classes[] = $className;
+            if (! $this->typeMapper->canExtendTypeForClass($className, $type)) {
+                $className = get_parent_class($className);
+                continue;
             }
-        } while ($className = get_parent_class($className));
+
+            $classes[] = $className;
+            $className = get_parent_class($className);
+        } while ($className !== false);
 
         // Let's apply extenders from the most basic type.
         $classes = array_reverse($classes);
@@ -196,12 +176,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type. Returns an interface if possible (if the class
      * has children) or returns an output type otherwise.
      *
-     * @param string $className The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType&ObjectType)|(OutputType&InterfaceType)|null $subType A subtype (if the main className is an iterator)
+     * @param string      $className                                   The exact class name to look for (this function does not look into parent classes).
+     * @param (OutputType &ObjectType)|(OutputType&InterfaceType)|null $subType A subtype (if the main className is an iterator)
+     *
      * @return OutputType&Type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInterfaceOrType(string $className, ?OutputType $subType): OutputType
+    public function mapClassToInterfaceOrType(string $className, ?OutputType $subType) : OutputType
     {
         $closestClassName = $this->findClosestMatchingParent($className);
         if ($closestClassName === null) {
@@ -209,13 +191,13 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         }
         $cacheKey = $closestClassName;
         if ($subType !== null) {
-            $cacheKey .= '__`__'.$subType->name;
+            $cacheKey .= '__`__' . $subType->name;
         }
-        if (!isset($this->interfaces[$cacheKey])) {
+        if (! isset($this->interfaces[$cacheKey])) {
             $objectType = $this->mapClassToType($className, $subType);
 
             $supportedClasses = $this->getClassTree();
-            if (isset($supportedClasses[$closestClassName]) && !empty($supportedClasses[$closestClassName]->getChildren())) {
+            if (isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())) {
                 // Cast as an interface
                 $this->interfaces[$cacheKey] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
                 $this->typeRegistry->registerType($this->interfaces[$cacheKey]);
@@ -223,6 +205,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 $this->interfaces[$cacheKey] = $objectType;
             }
         }
+
         return $this->interfaces[$cacheKey];
     }
 
@@ -231,17 +214,20 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @return array<string, string>
      */
-    private function buildInterfaceToClassNameMap(): array
+    private function buildInterfaceToClassNameMap() : array
     {
-        $map = [];
+        $map              = [];
         $supportedClasses = $this->getClassTree();
         foreach ($supportedClasses as $className => $mappedClass) {
-            if (!empty($mappedClass->getChildren())) {
-                $objectType = $this->mapClassToType($className, null);
-                $interfaceName = $this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name);
-                $map[$interfaceName] = $className;
+            if (empty($mappedClass->getChildren())) {
+                continue;
             }
+
+            $objectType          = $this->mapClassToType($className, null);
+            $interfaceName       = $this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name);
+            $map[$interfaceName] = $className;
         }
+
         return $map;
     }
 
@@ -251,10 +237,10 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @return array<string, string>
      */
-    private function getInterfaceToClassNameMap(): array
+    private function getInterfaceToClassNameMap() : array
     {
         if ($this->interfaceToClassNameMap === null) {
-            $key = 'recursiveTypeMapper_interfaceToClassNameMap';
+            $key                           = 'recursiveTypeMapper_interfaceToClassNameMap';
             $this->interfaceToClassNameMap = $this->cache->get($key);
             if ($this->interfaceToClassNameMap === null) {
                 $this->interfaceToClassNameMap = $this->buildInterfaceToClassNameMap();
@@ -263,16 +249,16 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 $this->cache->set($key, $this->interfaceToClassNameMap, $this->ttl);
             }
         }
+
         return $this->interfaceToClassNameMap;
     }
 
     /**
      * Finds the list of interfaces returned by $className.
      *
-     * @param string $className
      * @return InterfaceType[]
      */
-    public function findInterfaces(string $className): array
+    public function findInterfaces(string $className) : array
     {
         $interfaces = [];
         while ($className = $this->findClosestMatchingParent($className)) {
@@ -285,35 +271,35 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 break;
             }
         }
+
         return $interfaces;
     }
 
     /**
      * @return array<string,MappedClass>
      */
-    private function getClassTree(): array
+    private function getClassTree() : array
     {
         if ($this->mappedClasses === null) {
             $this->mappedClasses = [];
-            $supportedClasses = array_flip($this->typeMapper->getSupportedClasses());
+            $supportedClasses    = array_flip($this->typeMapper->getSupportedClasses());
             foreach ($supportedClasses as $supportedClass => $foo) {
                 $this->getMappedClass($supportedClass, $supportedClasses);
             }
         }
+
         return $this->mappedClasses;
     }
 
     /**
-     * @param string $className
      * @param array<string,int> $supportedClasses
-     * @return MappedClass
      */
-    private function getMappedClass(string $className, array $supportedClasses): MappedClass
+    private function getMappedClass(string $className, array $supportedClasses) : MappedClass
     {
-        if (!isset($this->mappedClasses[$className])) {
-            $mappedClass = new MappedClass(/*$className*/);
+        if (! isset($this->mappedClasses[$className])) {
+            $mappedClass                     = new MappedClass(/*$className*/);
             $this->mappedClasses[$className] = $mappedClass;
-            $parentClassName = $className;
+            $parentClassName                 = $className;
             while ($parentClassName = get_parent_class($parentClassName)) {
                 if (isset($supportedClasses[$parentClassName])) {
                     $parentMappedClass = $this->getMappedClass($parentClassName, $supportedClasses);
@@ -323,16 +309,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 }
             }
         }
+
         return $this->mappedClasses[$className];
     }
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
-     *
-     * @param string $className
-     * @return bool
      */
-    public function canMapClassToInputType(string $className): bool
+    public function canMapClassToInputType(string $className) : bool
     {
         return $this->typeMapper->canMapClassToInputType($className);
     }
@@ -340,11 +324,11 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
-     * @param string $className
      * @return InputObjectType&ResolvableMutableInputInterface
+     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
+    public function mapClassToInputType(string $className) : ResolvableMutableInputInterface
     {
         $cacheKey = $className;
         if (isset($this->classToInputTypeCache[$cacheKey])) {
@@ -357,10 +341,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         if ($this->typeRegistry->hasType($type->name)) {
             $cachedType = $this->typeRegistry->getType($type->name);
             if ($cachedType !== $type) {
-                throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
+                throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
             }
+
             //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
             return $type;
+
             //}
         }
 
@@ -382,18 +368,19 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @return array<string, OutputType>
      */
-    public function getOutputTypes(): array
+    public function getOutputTypes() : array
     {
-        $types = [];
+        $types     = [];
         $typeNames = [];
         foreach ($this->typeMapper->getSupportedClasses() as $supportedClass) {
-            $type = $this->mapClassToType($supportedClass, null);
+            $type                   = $this->mapClassToType($supportedClass, null);
             $types[$supportedClass] = $type;
             if (isset($typeNames[$type->name])) {
                 throw DuplicateMappingException::createForTypeName($type->name, $typeNames[$type->name], $supportedClass);
             }
             $typeNames[$type->name] = $supportedClass;
         }
+
         return $types;
     }
 
@@ -401,9 +388,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return bool
      */
-    public function canMapNameToType(string $typeName): bool
+    public function canMapNameToType(string $typeName) : bool
     {
         $result = $this->typeMapper->canMapNameToType($typeName);
         if ($result === true) {
@@ -412,20 +398,18 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
         // Maybe the type is an interface?
         $interfaceToClassNameMap = $this->getInterfaceToClassNameMap();
-        if (isset($interfaceToClassNameMap[$typeName])) {
-            return true;
-        }
 
-        return false;
+        return isset($interfaceToClassNameMap[$typeName]);
     }
 
     /**
      * Returns a GraphQL type by name (can be either an input or output type)
      *
      * @param string $typeName The name of the GraphQL type
+     *
      * @return Type&(InputType|OutputType)
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName) : Type
     {
         if ($this->typeRegistry->hasType($typeName)) {
             return $this->typeRegistry->getType($typeName);
@@ -436,14 +420,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             if ($this->typeRegistry->hasType($typeName)) {
                 $cachedType = $this->typeRegistry->getType($typeName);
                 if ($cachedType !== $type) {
-                    throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
+                    throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
                 }
                 if ($cachedType instanceof MutableObjectType && $cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
                     return $type;
                 }
             }
 
-            if (!$this->typeRegistry->hasType($typeName)) {
+            if (! $this->typeRegistry->hasType($typeName)) {
                 $this->typeRegistry->registerType($type);
             }
             if ($type instanceof MutableObjectType) {
@@ -458,6 +442,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 }
                 $type->freeze();
             }
+
             return $type;
         }
 
@@ -465,6 +450,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         $interfaceToClassNameMap = $this->getInterfaceToClassNameMap();
         if (isset($interfaceToClassNameMap[$typeName])) {
             $className = $interfaceToClassNameMap[$typeName];
+
             return $this->mapClassToInterfaceOrType($className, null);
         }
 

@@ -1,21 +1,24 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use function get_parent_class;
 
 /**
  * An object type built from the Type annotation
  */
 class TypeAnnotatedObjectType extends MutableObjectType
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $className;
 
+    /**
+     * @param mixed[] $config
+     */
     public function __construct(string $className, array $config)
     {
         $this->className = $className;
@@ -23,13 +26,13 @@ class TypeAnnotatedObjectType extends MutableObjectType
         parent::__construct($config);
     }
 
-    public static function createFromAnnotatedClass(string $typeName, string $className, $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper): self
+    public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper) : self
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder) {
+            'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder) {
                 $parentClass = get_parent_class($className);
-                $parentType = null;
+                $parentType  = null;
                 if ($parentClass !== false) {
                     if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
                         $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
@@ -46,17 +49,19 @@ class TypeAnnotatedObjectType extends MutableObjectType
                     foreach ($fields as $name => $field) {
                         $finalFields[$name] = $field;
                     }
+
                     return $finalFields;
                 }
+
                 return $fields;
             },
-            'interfaces' => function() use ($className, $recursiveTypeMapper) {
+            'interfaces' => static function () use ($className, $recursiveTypeMapper) {
                 return $recursiveTypeMapper->findInterfaces($className);
-            }
+            },
         ]);
     }
 
-    public function getMappedClassName(): string
+    public function getMappedClassName() : string
     {
         return $this->className;
     }

@@ -1,11 +1,9 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
-
-use function array_filter;
-use function count;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use Iterator;
@@ -26,7 +24,6 @@ use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
@@ -39,52 +36,40 @@ use TheCodingMachine\GraphQLite\TypeMappingException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
+use function array_filter;
+use function count;
+use function iterator_to_array;
 
 class TypeMapper implements ParameterMapperInterface
 {
-    /**
-     * @var PhpDocumentorTypeResolver
-     */
+    /** @var PhpDocumentorTypeResolver */
     private $phpDocumentorTypeResolver;
-    /**
-     * @var RecursiveTypeMapperInterface
-     */
+    /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
-    /**
-     * @var ArgumentResolver
-     */
+    /** @var ArgumentResolver */
     private $argumentResolver;
-    /**
-     * @var RootTypeMapperInterface
-     */
+    /** @var RootTypeMapperInterface */
     private $rootTypeMapper;
-    /**
-     * @var TypeResolver
-     */
+    /** @var TypeResolver */
     private $typeResolver;
-    /**
-     * @var AnnotationReader
-     */
-    private $annotationReader;
 
-    public function __construct(RecursiveTypeMapperInterface $typeMapper,
-                                ArgumentResolver $argumentResolver,
-                                RootTypeMapperInterface $rootTypeMapper,
-                                TypeResolver $typeResolver,
-                                AnnotationReader $annotationReader)
-    {
-        $this->recursiveTypeMapper = $typeMapper;
-        $this->argumentResolver = $argumentResolver;
-        $this->rootTypeMapper = $rootTypeMapper;
+    public function __construct(
+        RecursiveTypeMapperInterface $typeMapper,
+        ArgumentResolver $argumentResolver,
+        RootTypeMapperInterface $rootTypeMapper,
+        TypeResolver $typeResolver
+    ) {
+        $this->recursiveTypeMapper       = $typeMapper;
+        $this->argumentResolver          = $argumentResolver;
+        $this->rootTypeMapper            = $rootTypeMapper;
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
-        $this->typeResolver = $typeResolver;
-        $this->annotationReader = $annotationReader;
+        $this->typeResolver              = $typeResolver;
     }
 
     /**
      * @return GraphQLType&OutputType
      */
-    public function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj): GraphQLType
+    public function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj) : GraphQLType
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {
@@ -104,10 +89,11 @@ class TypeMapper implements ParameterMapperInterface
         } catch (CannotMapTypeExceptionInterface $e) {
             throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
         }
+
         return $type;
     }
 
-    private function getDocBlocReturnType(DocBlock $docBlock, \ReflectionMethod $refMethod): ?Type
+    private function getDocBlocReturnType(DocBlock $docBlock, ReflectionMethod $refMethod) : ?Type
     {
         /** @var Return_[] $returnTypeTags */
         $returnTypeTags = $docBlock->getTagsByName('return');
@@ -118,10 +104,11 @@ class TypeMapper implements ParameterMapperInterface
         if (isset($returnTypeTags[0])) {
             $docBlockReturnType = $returnTypeTags[0]->getType();
         }
+
         return $docBlockReturnType;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation) : ?ParameterInterface
     {
         if ($parameterAnnotation && $parameterAnnotation->getInputType() !== null) {
             try {
@@ -131,7 +118,7 @@ class TypeMapper implements ParameterMapperInterface
             }
         } else {
             $parameterType = $parameter->getType();
-            $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
+            $allowsNull    = $parameterType === null ? true : $parameterType->allowsNull();
 
             $type = (string) $parameterType;
             if ($type === '') {
@@ -153,19 +140,19 @@ class TypeMapper implements ParameterMapperInterface
         }
 
         $hasDefaultValue = false;
-        $defaultValue = null;
+        $defaultValue    = null;
         if ($parameter->allowsNull()) {
             $hasDefaultValue = true;
         }
         if ($parameter->isDefaultValueAvailable()) {
             $hasDefaultValue = true;
-            $defaultValue = $parameter->getDefaultValue();
+            $defaultValue    = $parameter->getDefaultValue();
         }
 
         return new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
     }
 
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null) : GraphQLType
     {
         $graphQlType = null;
 
@@ -174,36 +161,36 @@ class TypeMapper implements ParameterMapperInterface
         } else {
             try {
                 $graphQlType = $this->toGraphQlType($type, null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
-                if (!$isNullable) {
+                if (! $isNullable) {
                     $graphQlType = GraphQLType::nonNull($graphQlType);
                 }
             } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
                 // Is the type iterable? If yes, let's analyze the docblock
                 // TODO: it would be better not to go through an exception for this.
-                if ($type instanceof Object_) {
-                    $fqcn = (string) $type->getFqsen();
-                    $refClass = new ReflectionClass($fqcn);
-                    // Note : $refClass->isIterable() is only accessible in PHP 7.2
-                    if ($refClass->implementsInterface(Iterator::class) || $refClass->implementsInterface(IteratorAggregate::class)) {
-                        $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable, $refMethod, $docBlockObj, $argumentName);
-                    } else {
-                        throw $e;
-                    }
-                } else {
+                if (! ($type instanceof Object_)) {
                     throw $e;
                 }
+
+                $fqcn     = (string) $type->getFqsen();
+                $refClass = new ReflectionClass($fqcn);
+                // Note : $refClass->isIterable() is only accessible in PHP 7.2
+                if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
+                    throw $e;
+                }
+
+                $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable, $refMethod, $docBlockObj, $argumentName);
             }
         }
 
         return $graphQlType;
     }
 
-    private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
+    private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null) : GraphQLType
     {
         if ($docBlockType === null) {
             throw TypeMappingException::createFromType($type);
         }
-        if (!$isNullable) {
+        if (! $isNullable) {
             // Let's check a "null" value in the docblock
             $isNullable = $this->isNullable($docBlockType);
         }
@@ -213,7 +200,7 @@ class TypeMapper implements ParameterMapperInterface
             throw TypeMappingException::createFromType($type);
         }
 
-        $unionTypes = [];
+        $unionTypes    = [];
         $lastException = null;
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
@@ -242,21 +229,22 @@ class TypeMapper implements ParameterMapperInterface
             //$$graphQlType = new UnionType($graphQlTypes);
         }*/
 
-        if (!$isNullable) {
+        if (! $isNullable) {
             $graphQlType = GraphQLType::nonNull($graphQlType);
         }
+
         return $graphQlType;
     }
 
     /**
      * Maps a type where the main PHP type is an iterator
      */
-    private function mapIteratorDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
+    private function mapIteratorDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null) : GraphQLType
     {
         if ($docBlockType === null) {
             throw TypeMappingException::createFromType($type);
         }
-        if (!$isNullable) {
+        if (! $isNullable) {
             // Let's check a "null" value in the docblock
             $isNullable = $this->isNullable($docBlockType);
         }
@@ -266,7 +254,7 @@ class TypeMapper implements ParameterMapperInterface
             throw TypeMappingException::createFromType($type);
         }
 
-        $unionTypes = [];
+        $unionTypes    = [];
         $lastException = null;
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
@@ -299,9 +287,10 @@ class TypeMapper implements ParameterMapperInterface
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
         }
 
-        if (!$isNullable) {
+        if (! $isNullable) {
             $graphQlType = GraphQLType::nonNull($graphQlType);
         }
+
         return $graphQlType;
     }
 
@@ -309,13 +298,11 @@ class TypeMapper implements ParameterMapperInterface
      * Casts a Type to a GraphQL type.
      * Does not deal with nullable.
      *
-     * @param Type $type
-     * @param GraphQLType|null $subType
-     * @param bool $mapToInputType
      * @return GraphQLType (InputType&GraphQLType)|(OutputType&GraphQLType)
+     *
      * @throws CannotMapTypeExceptionInterface
      */
-    private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, string $argumentName = null): GraphQLType
+    private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null) : GraphQLType
     {
         if ($mapToInputType === true) {
             $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
@@ -325,63 +312,55 @@ class TypeMapper implements ParameterMapperInterface
         if ($mappedType === null) {
             throw TypeMappingException::createFromType($type);
         }
+
         return $mappedType;
     }
 
     /**
      * Removes "null" from the type (if it is compound). Return an array of types (not a Compound type).
      *
-     * @param Type $docBlockTypeHint
-     * @return array
+     * @return Type[]
      */
-    private function typesWithoutNullable(Type $docBlockTypeHint): array
+    private function typesWithoutNullable(Type $docBlockTypeHint) : array
     {
         if ($docBlockTypeHint instanceof Compound) {
-            $docBlockTypeHints = \iterator_to_array($docBlockTypeHint);
+            $docBlockTypeHints = iterator_to_array($docBlockTypeHint);
         } else {
             $docBlockTypeHints = [$docBlockTypeHint];
         }
-        return array_filter($docBlockTypeHints, function ($item) {
-            return !$item instanceof Null_;
+
+        return array_filter($docBlockTypeHints, static function ($item) {
+            return ! $item instanceof Null_;
         });
     }
 
     /**
      * Drops "Nullable" types and return the core type.
-     *
-     * @param Type $typeHint
-     * @return Type
      */
-    private function dropNullableType(Type $typeHint): Type
+    private function dropNullableType(Type $typeHint) : Type
     {
         if ($typeHint instanceof Nullable) {
             return $typeHint->getActualType();
         }
+
         return $typeHint;
     }
 
     /**
      * Resolves a list type.
-     *
-     * @param Type $typeHint
-     * @return Type|null
      */
-    private function getTypeInArray(Type $typeHint): ?Type
+    private function getTypeInArray(Type $typeHint) : ?Type
     {
         $typeHint = $this->dropNullableType($typeHint);
 
-        if (!$typeHint instanceof Array_) {
+        if (! $typeHint instanceof Array_) {
             return null;
         }
 
         return $this->dropNullableType($typeHint->getValueType());
     }
 
-    /**
-     * @param Type $docBlockTypeHint
-     * @return bool
-     */
-    private function isNullable(Type $docBlockTypeHint): bool
+    private function isNullable(Type $docBlockTypeHint) : bool
     {
         if ($docBlockTypeHint instanceof Null_) {
             return true;
@@ -399,15 +378,13 @@ class TypeMapper implements ParameterMapperInterface
 
     /**
      * Resolves "self" types into the class type.
-     *
-     * @param Type $type
-     * @return Type
      */
-    private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
+    private function resolveSelf(Type $type, ReflectionClass $reflectionClass) : Type
     {
         if ($type instanceof Self_) {
-            return new Object_(new Fqsen('\\'.$reflectionClass->getName()));
+            return new Object_(new Fqsen('\\' . $reflectionClass->getName()));
         }
+
         return $type;
     }
 }

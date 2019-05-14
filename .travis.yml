@@ -26,14 +26,7 @@ jobs:
       script:
         - *phpunit
     - stage: test
-      php: 7.1
-      env: PREFER_LOWEST=""
-      before_script:
-        - *composerupdate
-      script:
-        - *phpunit
-    - stage: test
-      php: 7.1
+      php: 7.2
       env: PREFER_LOWEST="--prefer-lowest"
       before_script:
         - *composerupdate

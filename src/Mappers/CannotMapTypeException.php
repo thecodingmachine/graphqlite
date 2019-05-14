@@ -1,93 +1,100 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-
+use Exception;
 use GraphQL\Error\Error;
-use GraphQL\Error\SyntaxError;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use ReflectionClass;
 use ReflectionMethod;
-use function sprintf;
+use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use function sprintf;
 
-class CannotMapTypeException extends \Exception implements CannotMapTypeExceptionInterface
+class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
-    public static function createForType(string $className): self
+    public static function createForType(string $className) : self
     {
-        return new self('cannot map class "'.$className.'" to a known GraphQL type. Check your TypeMapper configuration.');
+        return new self('cannot map class "' . $className . '" to a known GraphQL type. Check your TypeMapper configuration.');
     }
 
-    public static function createForInputType(string $className): self
+    public static function createForInputType(string $className) : self
     {
-        return new self('cannot map class "'.$className.'" to a known GraphQL input type. Check your TypeMapper configuration.');
+        return new self('cannot map class "' . $className . '" to a known GraphQL input type. Check your TypeMapper configuration.');
     }
 
-    public static function createForName(string $name): self
+    public static function createForName(string $name) : self
     {
-        return new self('cannot find GraphQL type "'.$name.'". Check your TypeMapper configuration.');
+        return new self('cannot find GraphQL type "' . $name . '". Check your TypeMapper configuration.');
     }
 
-    public static function createForParseError(Error $error): self
+    public static function createForParseError(Error $error) : self
     {
         return new self($error->getMessage(), $error->getCode(), $error);
     }
 
-    public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, \ReflectionParameter $parameter): self
+    public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, ReflectionParameter $parameter) : self
     {
-        $message = sprintf('For parameter $%s, in %s::%s, %s',
+        $message = sprintf(
+            'For parameter $%s, in %s::%s, %s',
             $parameter->getName(),
             $parameter->getDeclaringClass()->getName(),
             $parameter->getDeclaringFunction()->getName(),
-            $previous->getMessage());
+            $previous->getMessage()
+        );
 
         return new self($message, 0, $previous);
     }
 
-    public static function wrapWithReturnInfo(CannotMapTypeExceptionInterface $previous, ReflectionMethod $method): self
+    public static function wrapWithReturnInfo(CannotMapTypeExceptionInterface $previous, ReflectionMethod $method) : self
     {
-        $message = sprintf('For return type of %s::%s, %s',
+        $message = sprintf(
+            'For return type of %s::%s, %s',
             $method->getDeclaringClass()->getName(),
             $method->getName(),
-            $previous->getMessage());
+            $previous->getMessage()
+        );
 
         return new self($message, 0, $previous);
     }
 
-    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceField $sourceField): self
+    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceField $sourceField) : self
     {
-        $message = sprintf('For @SourceField "%s" declared in "%s", %s',
+        $message = sprintf(
+            'For @SourceField "%s" declared in "%s", %s',
             $sourceField->getName(),
             $class->getName(),
-            $previous->getMessage());
+            $previous->getMessage()
+        );
 
         return new self($message, 0, $previous);
     }
 
-    public static function mustBeOutputType($subTypeName): self
+    public static function mustBeOutputType(string $subTypeName) : self
     {
-        return new self('type "'.$subTypeName.'" must be an output type.');
+        return new self('type "' . $subTypeName . '" must be an output type.');
     }
 
-    public static function mustBeInputType($subTypeName): self
+    public static function mustBeInputType(string $subTypeName) : self
     {
-        return new self('type "'.$subTypeName.'" must be an input type.');
+        return new self('type "' . $subTypeName . '" must be an input type.');
     }
 
-    public static function createForExtendType(string $className, ObjectType $type): self
+    public static function createForExtendType(string $className, ObjectType $type) : self
     {
-        return new self('cannot extend GraphQL type "'.$type->name.'" mapped by class "'.$className.'". Check your TypeMapper configuration.');
+        return new self('cannot extend GraphQL type "' . $type->name . '" mapped by class "' . $className . '". Check your TypeMapper configuration.');
     }
 
-    public static function createForExtendName(string $name, ObjectType $type): self
+    public static function createForExtendName(string $name, ObjectType $type) : self
     {
-        return new self('cannot extend GraphQL type "'.$type->name.'" with type "'.$name.'". Check your TypeMapper configuration.');
+        return new self('cannot extend GraphQL type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
     }
 
-    public static function createForDecorateName(string $name, InputObjectType $type): self
+    public static function createForDecorateName(string $name, InputObjectType $type) : self
     {
-        return new self('cannot decorate GraphQL input type "'.$type->name.'" with type "'.$name.'". Check your TypeMapper configuration.');
+        return new self('cannot decorate GraphQL input type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
     }
 }

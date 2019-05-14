@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
@@ -18,5 +19,5 @@ interface FromSourceFieldsInterface
      *
      * @return SourceFieldInterface[]
      */
-    public function getSourceFields(): array;
+    public function getSourceFields() : array;
 }

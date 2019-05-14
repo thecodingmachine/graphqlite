@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use BadMethodCallException;
 use function array_key_exists;
 
 /**
@@ -21,12 +23,12 @@ class FailWith
     /**
      * @param array<string, mixed> $values
      *
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      */
     public function __construct(array $values)
     {
-        if (!array_key_exists('value', $values)) {
-            throw new \BadMethodCallException('The @FailWith annotation must be passed a defaultValue. For instance: "@FailWith(null)"');
+        if (! array_key_exists('value', $values)) {
+            throw new BadMethodCallException('The @FailWith annotation must be passed a defaultValue. For instance: "@FailWith(null)"');
         }
         $this->value = $values['value'];
     }

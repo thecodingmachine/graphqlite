@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-class GraphQLException extends \RuntimeException
+use RuntimeException;
+
+class GraphQLException extends RuntimeException
 {
 }
