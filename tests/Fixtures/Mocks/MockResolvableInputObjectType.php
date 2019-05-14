@@ -11,6 +11,8 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 class MockResolvableInputObjectType extends InputObjectType implements ResolvableMutableInputInterface
 {
+    /** @var callable[] */
+    private $decorators = [];
 
     public function freeze(): void
     {
@@ -47,6 +49,14 @@ class MockResolvableInputObjectType extends InputObjectType implements Resolvabl
      */
     public function decorate(callable $decorator): void
     {
-        throw new BadMethodCallException('Unauthorized call to resolve in Mock object');
+        $this->decorators[] = $decorator;
+    }
+
+    /**
+     * @return callable[]
+     */
+    public function getDecorators(): array
+    {
+        return $this->decorators;
     }
 }
