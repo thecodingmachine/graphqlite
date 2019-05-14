@@ -284,16 +284,14 @@ class EndToEndTest extends TestCase
                 relations: [
                     {
                         name: "bar"
-                        birthDate: "1942-12-24 00:00:00",
                     }
-                ]
+                ]   
             }
           ) {
             name,
             birthDate,
             relations {
-              name,
-              birthDate
+              name
             }
           }
         }
@@ -311,7 +309,6 @@ class EndToEndTest extends TestCase
                 'relations' => [
                     [
                         'name' => 'bar',
-                        'birthDate' => '1942-12-24T00:00:00+00:00'
                     ]
                 ]
             ]
@@ -509,7 +506,7 @@ class EndToEndTest extends TestCase
 
         $queryString = '
         query {
-            echoFilters(filter: {values: ["foo", "bar"]})
+            echoFilters(filter: {values: ["foo", "bar"], moreValues: [12, 42], evenMoreValues: [62]})
         }
         ';
 
@@ -519,7 +516,17 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ "foo", "bar" ]
+            'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Call again to test GlobTypeMapper cache
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 

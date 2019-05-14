@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 
 /**
@@ -50,6 +51,16 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * @var array<string,MutableObjectType> Key: FQCN
      */
     private $classToTypeCache = [];
+
+    /**
+     * @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: Input type name
+     */
+    private $nameToInputTypeCache = [];
+
+    /**
+     * @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN
+     */
+    private $classToInputTypeCache = [];
 
     /**
      * @var NamingStrategyInterface
@@ -330,12 +341,39 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return InputObjectType&ResolvableMutableInputInterface
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className): InputObjectType
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
-        return $this->typeMapper->mapClassToInputType($className);
+        $cacheKey = $className;
+        if (isset($this->classToInputTypeCache[$cacheKey])) {
+            return $this->classToInputTypeCache[$cacheKey];
+        }
+
+        $type = $this->typeMapper->mapClassToInputType($className);
+
+        // In the event this type was already part of cache, let's not extend it.
+        if ($this->typeRegistry->hasType($type->name)) {
+            $cachedType = $this->typeRegistry->getType($type->name);
+            if ($cachedType !== $type) {
+                throw new \RuntimeException('Cached type in registry is not the type returned by type mapper.');
+            }
+            //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+            return $type;
+            //}
+        }
+
+        $this->typeRegistry->registerType($type);
+        $this->classToInputTypeCache[$cacheKey] = $type;
+
+        if ($this->typeMapper->canDecorateInputTypeForName($type->name, $type)) {
+            $this->typeMapper->decorateInputTypeForName($type->name, $type);
+        }
+
+        $type->freeze();
+
+        return $type;
     }
 
     /**
@@ -411,6 +449,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             if ($type instanceof MutableObjectType) {
                 if ($this->typeMapper->canExtendTypeForName($typeName, $type)) {
                     $this->typeMapper->extendTypeForName($typeName, $type);
+                }
+                $type->freeze();
+            }
+            if ($type instanceof ResolvableMutableInputInterface) {
+                if ($this->typeMapper->canDecorateInputTypeForName($typeName, $type)) {
+                    $this->typeMapper->decorateInputTypeForName($typeName, $type);
                 }
                 $type->freeze();
             }

@@ -10,6 +10,8 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Mappers\Interfaces\InterfacesResolverInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 /**
  * A simple implementation of the TypeMapperInterface that expects mapping to be passed in a setter.
@@ -34,14 +36,14 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @var array<string,InputObjectType>
+     * @var array<string,ResolvableMutableInputInterface&InputObjectType>
      */
     private $inputTypes = [];
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
      *
-     * @param array<string,InputObjectType> $inputTypes
+     * @param array<string,ResolvableMutableInputInterface&InputObjectType> $inputTypes
      */
     public function setInputTypes(array $inputTypes): void
     {
@@ -49,12 +51,12 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @var array<string,MutableObjectType|InputObjectType>
+     * @var array<string,MutableObjectType|ResolvableMutableInputInterface>
      */
     private $notMappedTypes = [];
 
     /**
-     * An array containing ObjectType or InputObjectType instances that are not mapped by default to any class.
+     * An array containing ObjectType or ResolvableMutableInputInterface instances that are not mapped by default to any class.
      * ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
      *
      * @param array<int,Type> $types
@@ -124,10 +126,10 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param string $className
-     * @return InputObjectType
+     * @return ResolvableMutableInputInterface&InputObjectType
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className): InputObjectType
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         if (isset($this->inputTypes[$className])) {
             return $this->inputTypes[$className];
@@ -227,5 +229,29 @@ final class StaticTypeMapper implements TypeMapperInterface
     public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
+    }
+
+    /**
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputInterface $type
+     * @return bool
+     */
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
+    {
+        return false;
+    }
+
+    /**
+     * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
+     *
+     * @param string $typeName
+     * @param ResolvableMutableInputInterface $type
+     * @throws CannotMapTypeExceptionInterface
+     */
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
+    {
+        throw CannotMapTypeException::createForDecorateName($typeName, $type);
     }
 }

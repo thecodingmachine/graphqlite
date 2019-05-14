@@ -19,6 +19,7 @@ use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
+use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
@@ -41,7 +42,8 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
-use TheCodingMachine\GraphQLite\Types\ResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 abstract class AbstractQueryProviderTest extends TestCase
@@ -88,10 +90,10 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->testObjectType2;
     }
 
-    protected function getInputTestObjectType(): InputObjectType
+    protected function getInputTestObjectType(): MockResolvableInputObjectType
     {
         if ($this->inputTestObjectType === null) {
-            $this->inputTestObjectType = new InputObjectType([
+            $this->inputTestObjectType = new MockResolvableInputObjectType([
                 'name'    => 'TestObjectInput',
                 'fields'  => [
                     'test'   => Type::string(),
@@ -149,7 +151,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     }
                 }
 
-                public function mapClassToInputType(string $className): InputObjectType
+                public function mapClassToInputType(string $className): ResolvableMutableInputInterface
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
@@ -213,6 +215,17 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
+
+                public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
+                {
+                    return false;
+                }
+
+                public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
+                {
+                    throw CannotMapTypeException::createForDecorateName($typeName, $type);
+                }
+
             }, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
         }
         return $this->typeMapper;

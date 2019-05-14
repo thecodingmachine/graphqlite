@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\Error;
 use GraphQL\Language\Parser;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\WrappingType;
@@ -61,6 +62,15 @@ class TypeResolver
         $type = $this->mapNameToType($typeName);
         if (!$type instanceof OutputType || ($type instanceof WrappingType && !$type->getWrappedType() instanceof OutputType)) {
             throw CannotMapTypeException::mustBeOutputType($typeName);
+        }
+        return $type;
+    }
+
+    public function mapNameToInputType(string $typeName): InputType
+    {
+        $type = $this->mapNameToType($typeName);
+        if (!$type instanceof InputType || ($type instanceof WrappingType && !$type->getWrappedType() instanceof InputType)) {
+            throw CannotMapTypeException::mustBeInputType($typeName);
         }
         return $type;
     }

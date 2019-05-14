@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
 use DateTimeInterface;
 use function implode;
+use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -31,5 +32,13 @@ class TestFactory
     public function myListFactory(DateTimeInterface $date, array $stringList, array $dateList): TestObject2
     {
         return new TestObject2($date->format('Y-m-d').'-'.implode('-', $stringList).'-'.count($dateList));
+    }
+
+    /**
+     * @Decorate("InputObject")
+     */
+    public function myDecorator(TestObject $testObject, int $int): TestObject
+    {
+        return $testObject;
     }
 }

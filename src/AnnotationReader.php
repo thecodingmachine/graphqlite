@@ -4,14 +4,17 @@
 namespace TheCodingMachine\GraphQLite;
 
 
+use function array_merge;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\Reader;
 use function in_array;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionParameter;
 use function strpos;
 use function substr;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
@@ -20,6 +23,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 
 class AnnotationReader
 {
@@ -133,6 +137,34 @@ class AnnotationReader
         return $factoryAnnotation;
     }
 
+    public function getDecorateAnnotation(ReflectionMethod $refMethod): ?Decorate
+    {
+        /** @var Decorate|null $decorateAnnotation */
+        $decorateAnnotation = $this->getMethodAnnotation($refMethod, Decorate::class);
+        return $decorateAnnotation;
+    }
+
+    /**
+     * @return Parameter[]
+     */
+    private function getParameterAnnotations(ReflectionMethod $refMethod): array
+    {
+        /** @var Parameter[] $useInputTypes */
+        $useInputTypes = $this->getMethodAnnotations($refMethod, Parameter::class);
+        return $useInputTypes;
+    }
+
+    public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
+    {
+        $annotations = $this->getParameterAnnotations($refParameter->getDeclaringFunction());
+        foreach ($annotations as $annotation) {
+            if ($annotation->getFor() === $refParameter->getName()) {
+                return $annotation;
+            }
+        }
+        return null;
+    }
+
     /**
      * Returns a class annotation. Finds in the parents if not found in the main class.
      *
@@ -224,7 +256,7 @@ class AnnotationReader
         do {
             try {
                 $allAnnotations = $this->reader->getClassAnnotations($refClass);
-                $toAddAnnotations[] = \array_filter($allAnnotations, function($annotation) use ($annotationClass): bool {
+                $toAddAnnotations[] = \array_filter($allAnnotations, static function($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
             } catch (AnnotationException $e) {
@@ -244,5 +276,36 @@ class AnnotationReader
         } else {
             return [];
         }
+    }
+
+    /**
+     * Returns the method's annotations.
+     *
+     * @return object[]
+     */
+    public function getMethodAnnotations(ReflectionMethod $refMethod, string $annotationClass): array
+    {
+        $cacheKey = $refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName().'_s_'.$annotationClass;
+        if (isset($this->methodAnnotationCache[$cacheKey])) {
+            return $this->methodAnnotationCache[$cacheKey];
+        }
+
+        $toAddAnnotations = [];
+        try {
+            $allAnnotations = $this->reader->getMethodAnnotations($refMethod);
+            $toAddAnnotations = \array_filter($allAnnotations, static function($annotation) use ($annotationClass): bool {
+                return $annotation instanceof $annotationClass;
+            });
+        } catch (AnnotationException $e) {
+            if ($this->mode === self::STRICT_MODE) {
+                throw $e;
+            } elseif ($this->mode === self::LAX_MODE) {
+                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                    throw $e;
+                }
+            }
+        }
+
+        return $this->methodAnnotationCache[$cacheKey] = $toAddAnnotations;
     }
 }
