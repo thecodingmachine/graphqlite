@@ -19,6 +19,8 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -226,5 +228,22 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('cannot decorate GraphQL input type "FilterInput" with type "NotExists". Check your TypeMapper configuration.');
         $mapper->decorateInputTypeForName('NotExists', $inputType);
+    }
+
+    public function testInvalidName()
+    {
+        $container = new Picotainer([
+            FooType::class => function () {
+                return new FooType();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), new ArrayCache());
+
+        $this->assertFalse($mapper->canExtendTypeForName('{}()/\\@:', new MutableObjectType(['name' => 'foo'])));
+        $this->assertFalse($mapper->canDecorateInputTypeForName('{}()/\\@:', new MockResolvableInputObjectType(['name' => 'foo'])));
+        $this->assertFalse($mapper->canMapNameToType('{}()/\\@:'));
     }
 }

@@ -10,6 +10,7 @@ use Mouf\Picotainer\Picotainer;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
 use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA;
 use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB;
 use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassC;
@@ -19,6 +20,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -199,5 +201,20 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $recursiveTypeMapper->mapNameToType('Foo');
+    }
+
+    public function testMapNameToTypeDecorators()
+    {
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), $cache);
+
+        $recursiveTypeMapper = new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+
+        $type = $recursiveTypeMapper->mapNameToType('FilterInput');
+        $this->assertInstanceOf(ResolvableMutableInputObjectType::class, $type);
     }
 }
