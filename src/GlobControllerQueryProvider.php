@@ -56,7 +56,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $this->lockFactory   = $lockFactory;
     }
 
-    private function getAggregateControllerQueryProvider() : AggregateControllerQueryProvider
+    private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
     {
         if ($this->aggregateControllerQueryProvider === null) {
             $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilder, $this->container);
@@ -70,7 +70,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      *
      * @return string[]
      */
-    private function getInstancesList() : array
+    private function getInstancesList(): array
     {
         if ($this->instancesList === null) {
             $key                 = 'globQueryProvider_' . str_replace('\\', '_', $this->namespace);
@@ -104,7 +104,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     /**
      * @return string[]
      */
-    private function buildInstancesList() : array
+    private function buildInstancesList(): array
     {
         $explorer  = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
         $classes   = $explorer->getClasses();
@@ -130,7 +130,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     /**
      * @return QueryField[]
      */
-    public function getQueries() : array
+    public function getQueries(): array
     {
         return $this->getAggregateControllerQueryProvider()->getQueries();
     }
@@ -138,7 +138,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     /**
      * @return QueryField[]
      */
-    public function getMutations() : array
+    public function getMutations(): array
     {
         return $this->getAggregateControllerQueryProvider()->getMutations();
     }

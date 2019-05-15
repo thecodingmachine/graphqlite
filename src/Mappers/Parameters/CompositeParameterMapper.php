@@ -25,7 +25,7 @@ class CompositeParameterMapper implements ParameterMapperInterface
         $this->parameterMappers = is_array($parameterMappers) ? $parameterMappers : iterator_to_array($parameterMappers);
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation) : ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
     {
         foreach ($this->parameterMappers as $parameterMapper) {
             $parameterObj = $parameterMapper->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotation);

@@ -9,17 +9,17 @@ use function sprintf;
 
 class MissingTypeHintException extends GraphQLException
 {
-    public static function missingReturnType(ReflectionMethod $method) : self
+    public static function missingReturnType(ReflectionMethod $method): self
     {
         return new self(sprintf('Factory "%s::%s" must have a return type.', $method->getDeclaringClass()->getName(), $method->getName()));
     }
 
-    public static function invalidReturnType(ReflectionMethod $method) : self
+    public static function invalidReturnType(ReflectionMethod $method): self
     {
         return new self(sprintf('The return type of factory "%s::%s" must be an object, "%s" passed instead.', $method->getDeclaringClass()->getName(), $method->getName(), $method->getReturnType()));
     }
 
-    public static function nullableReturnType(ReflectionMethod $method) : self
+    public static function nullableReturnType(ReflectionMethod $method): self
     {
         return new self(sprintf('Factory "%s::%s" must have a non nullable return type.', $method->getDeclaringClass()->getName(), $method->getName()));
     }

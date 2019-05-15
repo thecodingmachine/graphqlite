@@ -28,7 +28,7 @@ class AggregateQueryProvider implements QueryProviderInterface
     /**
      * @return QueryField[]
      */
-    public function getQueries() : array
+    public function getQueries(): array
     {
         $queriesArray = array_map(static function (QueryProviderInterface $queryProvider) {
             return $queryProvider->getQueries();
@@ -43,7 +43,7 @@ class AggregateQueryProvider implements QueryProviderInterface
     /**
      * @return QueryField[]
      */
-    public function getMutations() : array
+    public function getMutations(): array
     {
         $mutationsArray = array_map(static function (QueryProviderInterface $queryProvider) {
             return $queryProvider->getMutations();

@@ -13,17 +13,17 @@ interface NamingStrategyInterface
      * Returns the name of the GraphQL interface from a name of GraphQL concrete type (when the interface is created
      * automatically to manage inheritance)
      */
-    public function getInterfaceNameFromConcreteName(string $concreteType) : string;
+    public function getInterfaceNameFromConcreteName(string $concreteType): string;
 
     /**
      * Returns the GraphQL output object type name based on the type className and the Type annotation.
      */
-    public function getOutputTypeName(string $typeClassName, Type $type) : string;
+    public function getOutputTypeName(string $typeClassName, Type $type): string;
 
-    public function getInputTypeName(string $className, Factory $factory) : string;
+    public function getInputTypeName(string $className, Factory $factory): string;
 
     /**
      * Returns the name of a GraphQL field from the name of the annotated method.
      */
-    public function getFieldNameFromMethodName(string $methodName) : string;
+    public function getFieldNameFromMethodName(string $methodName): string;
 }

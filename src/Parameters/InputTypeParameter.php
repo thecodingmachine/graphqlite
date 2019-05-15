@@ -55,12 +55,12 @@ class InputTypeParameter implements ParameterInterface
         throw MissingArgumentException::create($this->name);
     }
 
-    public function getType() : InputType
+    public function getType(): InputType
     {
         return $this->type;
     }
 
-    public function hasDefaultValue() : bool
+    public function hasDefaultValue(): bool
     {
         return $this->doesHaveDefaultValue;
     }

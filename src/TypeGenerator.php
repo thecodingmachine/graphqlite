@@ -51,7 +51,7 @@ class TypeGenerator
      *
      * @throws ReflectionException
      */
-    public function mapAnnotatedObject(string $annotatedObjectClassName) : MutableObjectType
+    public function mapAnnotatedObject(string $annotatedObjectClassName): MutableObjectType
     {
         $refTypeClass = new ReflectionClass($annotatedObjectClassName);
 
@@ -102,7 +102,7 @@ class TypeGenerator
     /**
      * @param object $annotatedObject An object with a ExtendType annotation.
      */
-    public function extendAnnotatedObject(object $annotatedObject, MutableObjectType $type) : void
+    public function extendAnnotatedObject(object $annotatedObject, MutableObjectType $type): void
     {
         $refTypeClass = new ReflectionClass($annotatedObject);
 

@@ -42,7 +42,7 @@ class CachedDocBlockFactory
     /**
      * Fetches a DocBlock object from a ReflectionMethod
      */
-    public function getDocBlock(ReflectionMethod $refMethod) : DocBlock
+    public function getDocBlock(ReflectionMethod $refMethod): DocBlock
     {
         $key = 'docblock_' . md5($refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName());
         if (isset($this->docBlockArrayCache[$key])) {
@@ -74,7 +74,7 @@ class CachedDocBlockFactory
         return $docBlock;
     }
 
-    private function doGetDocBlock(ReflectionMethod $refMethod) : DocBlock
+    private function doGetDocBlock(ReflectionMethod $refMethod): DocBlock
     {
         $docComment = $refMethod->getDocComment() ?: '/** */';
 

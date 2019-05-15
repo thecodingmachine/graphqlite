@@ -45,7 +45,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {
@@ -63,7 +63,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return null;
     }
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {
@@ -128,7 +128,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
     /** @var UploadType */
     private static $uploadType;
 
-    private static function getUploadType() : UploadType
+    private static function getUploadType(): UploadType
     {
         if (self::$uploadType === null) {
             self::$uploadType = new UploadType();
@@ -140,7 +140,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
     /** @var DateTimeType */
     private static $dateTimeType;
 
-    private static function getDateTimeType() : DateTimeType
+    private static function getDateTimeType(): DateTimeType
     {
         if (self::$dateTimeType === null) {
             self::$dateTimeType = new DateTimeType();
@@ -156,7 +156,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName) : ?NamedType
+    public function mapNameToType(string $typeName): ?NamedType
     {
         // No need to map base types, only types added by us.
         if ($typeName === 'Upload') {

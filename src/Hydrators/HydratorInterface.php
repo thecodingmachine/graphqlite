@@ -31,7 +31,7 @@ interface HydratorInterface
      *
      * @param mixed[] $data
      */
-    public function canHydrate(array $data, InputObjectType $type) : bool;
+    public function canHydrate(array $data, InputObjectType $type): bool;
 
     /**
      * Hydrates/returns an object based on a PHP array and a GraphQL type.
@@ -39,5 +39,5 @@ interface HydratorInterface
      * @param mixed[] $data
      * @param mixed   $context
      */
-    public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type) : object;
+    public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type): object;
 }

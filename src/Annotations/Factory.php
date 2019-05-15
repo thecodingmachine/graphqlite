@@ -41,7 +41,7 @@ class Factory
      * Returns the name of the GraphQL input type.
      * If not specified, the name of the method should be used instead.
      */
-    public function getName() : ?string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -49,7 +49,7 @@ class Factory
     /**
      * Returns true if this factory should map the return type of the factory by default.
      */
-    public function isDefault() : bool
+    public function isDefault(): bool
     {
         return $this->default;
     }

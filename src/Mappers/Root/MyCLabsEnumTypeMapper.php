@@ -20,17 +20,17 @@ use function is_a;
  */
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
         return $this->map($type);
     }
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
     {
         return $this->map($type);
     }
 
-    private function map(Type $type) : ?EnumType
+    private function map(Type $type): ?EnumType
     {
         if ($type instanceof Object_ && is_a((string) $type->getFqsen(), Enum::class, true)) {
             $enumClass      = (string) $type->getFqsen();
@@ -56,7 +56,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName) : ?NamedType
+    public function mapNameToType(string $typeName): ?NamedType
     {
         // We cannot map back by name. Hopefully, this is not an issue.
         return null;

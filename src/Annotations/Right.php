@@ -31,7 +31,7 @@ class Right
         $this->name = $values['value'] ?? $values['name'];
     }
 
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }

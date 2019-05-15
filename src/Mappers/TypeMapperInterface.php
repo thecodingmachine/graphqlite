@@ -21,7 +21,7 @@ interface TypeMapperInterface
      *
      * @param string $className The exact class name to look for (this function does not look into parent classes).
      */
-    public function canMapClassToType(string $className) : bool;
+    public function canMapClassToType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
@@ -31,14 +31,14 @@ interface TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType) : MutableObjectType;
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType;
 
     /**
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function canMapNameToType(string $typeName) : bool;
+    public function canMapNameToType(string $typeName): bool;
 
     /**
      * Returns a GraphQL type by name (can be either an input or output type)
@@ -47,60 +47,60 @@ interface TypeMapperInterface
      *
      * @return Type&(InputType|OutputType)
      */
-    public function mapNameToType(string $typeName) : Type;
+    public function mapNameToType(string $typeName): Type;
 
     /**
      * Returns the list of classes that have matching GraphQL types.
      *
      * @return string[]
      */
-    public function getSupportedClasses() : array;
+    public function getSupportedClasses(): array;
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
      */
-    public function canMapClassToInputType(string $className) : bool;
+    public function canMapClassToInputType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @return ResolvableMutableInputInterface&InputObjectType
      */
-    public function mapClassToInputType(string $className) : ResolvableMutableInputInterface;
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface;
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type) : bool;
+    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool;
 
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type) : void;
+    public function extendTypeForClass(string $className, MutableObjectType $type): void;
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type) : bool;
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool;
 
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type) : void;
+    public function extendTypeForName(string $typeName, MutableObjectType $type): void;
 
     /**
      * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
      */
-    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : bool;
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool;
 
     /**
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : void;
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void;
 }

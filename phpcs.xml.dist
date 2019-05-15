@@ -13,7 +13,6 @@
     <file>src</file>
     <!-- <file>tests</file> -->
 
-
     <exclude-pattern>tests/dependencies/*</exclude-pattern>
 
     <!-- Include full Doctrine Coding Standard -->
@@ -23,5 +22,25 @@
         <exclude name="SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming.SuperfluousPrefix"/>
         <exclude name="Squiz.Commenting.FunctionComment.InvalidNoReturn" />
         <exclude name="Generic.Formatting.MultipleStatementAlignment" />
+    </rule>
+
+    <!-- Do not align assignments -->
+    <rule ref="Generic.Formatting.MultipleStatementAlignment">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Do not align comments -->
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfterParamName">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfterParamType">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Require no space before colon in return types -->
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing">
+        <properties>
+            <property name="spacesCountBeforeColon" value="0"/>
+        </properties>
     </rule>
 </ruleset>

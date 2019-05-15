@@ -28,7 +28,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param array<string,MutableObjectType> $types
      */
-    public function setTypes(array $types) : void
+    public function setTypes(array $types): void
     {
         $this->types = $types;
     }
@@ -41,7 +41,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param array<string,ResolvableMutableInputInterface &InputObjectType> $inputTypes
      */
-    public function setInputTypes(array $inputTypes) : void
+    public function setInputTypes(array $inputTypes): void
     {
         $this->inputTypes = $inputTypes;
     }
@@ -55,7 +55,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param array<int,Type> $types
      */
-    public function setNotMappedTypes(array $types) : void
+    public function setNotMappedTypes(array $types): void
     {
         $this->notMappedTypes = array_reduce($types, static function ($result, Type $type) {
             $result[$type->name] = $type;
@@ -67,7 +67,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      */
-    public function canMapClassToType(string $className) : bool
+    public function canMapClassToType(string $className): bool
     {
         return isset($this->types[$className]);
     }
@@ -77,7 +77,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType) : MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         // TODO: add support for $subType
         if ($subType !== null) {
@@ -95,7 +95,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @return string[]
      */
-    public function getSupportedClasses() : array
+    public function getSupportedClasses(): array
     {
         return array_keys($this->types);
     }
@@ -103,7 +103,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
      */
-    public function canMapClassToInputType(string $className) : bool
+    public function canMapClassToInputType(string $className): bool
     {
         return isset($this->inputTypes[$className]);
     }
@@ -115,7 +115,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className) : ResolvableMutableInputInterface
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         if (isset($this->inputTypes[$className])) {
             return $this->inputTypes[$className];
@@ -132,7 +132,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapNameToType(string $typeName) : Type
+    public function mapNameToType(string $typeName): Type
     {
         if (isset($this->notMappedTypes[$typeName])) {
             return $this->notMappedTypes[$typeName];
@@ -155,7 +155,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function canMapNameToType(string $typeName) : bool
+    public function canMapNameToType(string $typeName): bool
     {
         foreach ($this->types as $type) {
             if ($type->name === $typeName) {
@@ -174,7 +174,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type) : bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
     {
         return false;
     }
@@ -184,7 +184,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type) : void
+    public function extendTypeForClass(string $className, MutableObjectType $type): void
     {
         throw CannotMapTypeException::createForExtendType($className, $type);
     }
@@ -192,7 +192,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type) : bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
     {
         return false;
     }
@@ -202,7 +202,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type) : void
+    public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
     }
@@ -210,7 +210,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
      */
-    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : bool
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
         return false;
     }
@@ -220,7 +220,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : void
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
     {
         throw CannotMapTypeException::createForDecorateName($typeName, $type);
     }

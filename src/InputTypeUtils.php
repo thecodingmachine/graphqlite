@@ -39,7 +39,7 @@ class InputTypeUtils
      *
      * @return string[]
      */
-    public function getInputTypeNameAndClassName(ReflectionMethod $method) : array
+    public function getInputTypeNameAndClassName(ReflectionMethod $method): array
     {
         $fqsen   = ltrim((string) $this->validateReturnType($method), '\\');
         $factory = $this->annotationReader->getFactoryAnnotation($method);
@@ -50,7 +50,7 @@ class InputTypeUtils
         return [$this->namingStrategy->getInputTypeName($fqsen, $factory), $fqsen];
     }
 
-    private function validateReturnType(ReflectionMethod $refMethod) : Fqsen
+    private function validateReturnType(ReflectionMethod $refMethod): Fqsen
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType === null) {
@@ -77,7 +77,7 @@ class InputTypeUtils
     /**
      * Resolves "self" types into the class type.
      */
-    private function resolveSelf(Type $type, ReflectionClass $reflectionClass) : Type
+    private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
     {
         if ($type instanceof Self_) {
             return new Object_(new Fqsen('\\' . $reflectionClass->getName()));
@@ -93,7 +93,7 @@ class InputTypeUtils
      *
      * @return array<string, array<string, mixed|InputType>>
      */
-    public static function getInputTypeArgs(array $args) : array
+    public static function getInputTypeArgs(array $args): array
     {
         $inputTypeArgs = array_filter($args, static function (ParameterInterface $parameter) {
             return $parameter instanceof InputTypeParameter;

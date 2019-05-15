@@ -23,9 +23,9 @@ use ReflectionMethod;
  */
 interface RootTypeMapperInterface
 {
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?OutputType;
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType;
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj) : ?InputType;
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType;
 
     /**
      * Returns a GraphQL type by name.
@@ -34,5 +34,5 @@ interface RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName) : ?NamedType;
+    public function mapNameToType(string $typeName): ?NamedType;
 }

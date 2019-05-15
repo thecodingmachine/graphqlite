@@ -86,7 +86,7 @@ class FieldsBuilder
      *
      * @throws ReflectionException
      */
-    public function getQueries(object $controller) : array
+    public function getQueries(object $controller): array
     {
         return $this->getFieldsByAnnotations($controller, Query::class, false);
     }
@@ -96,7 +96,7 @@ class FieldsBuilder
      *
      * @throws ReflectionException
      */
-    public function getMutations(object $controller) : array
+    public function getMutations(object $controller): array
     {
         return $this->getFieldsByAnnotations($controller, Mutation::class, false);
     }
@@ -104,7 +104,7 @@ class FieldsBuilder
     /**
      * @return array<string, QueryField> QueryField indexed by name.
      */
-    public function getFields(object $controller) : array
+    public function getFields(object $controller): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true);
 
@@ -135,7 +135,7 @@ class FieldsBuilder
      *
      * @return array<string, QueryField> QueryField indexed by name.
      */
-    public function getSelfFields(string $className) : array
+    public function getSelfFields(string $className): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations(null, Annotations\Field::class, false, $className);
 
@@ -162,7 +162,7 @@ class FieldsBuilder
      *
      * @return array<string, ParameterInterface> Returns an array of parameters.
      */
-    public function getParameters(ReflectionMethod $refMethod) : array
+    public function getParameters(ReflectionMethod $refMethod): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
@@ -177,7 +177,7 @@ class FieldsBuilder
      *
      * @return array<string, ParameterInterface> Returns an array of parameters.
      */
-    public function getParametersForDecorator(ReflectionMethod $refMethod) : array
+    public function getParametersForDecorator(ReflectionMethod $refMethod): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
@@ -202,7 +202,7 @@ class FieldsBuilder
      * @throws CannotMapTypeException
      * @throws ReflectionException
      */
-    private function getFieldsByAnnotations(?object $controller, string $annotationName, bool $injectSource, ?string $sourceClassName = null) : array
+    private function getFieldsByAnnotations(?object $controller, string $annotationName, bool $injectSource, ?string $sourceClassName = null): array
     {
         if ($sourceClassName !== null) {
             $refClass = new ReflectionClass($sourceClassName);
@@ -294,7 +294,7 @@ class FieldsBuilder
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
      */
-    private function getQueryFieldsFromSourceFields(array $sourceFields, ReflectionClass $refClass) : array
+    private function getQueryFieldsFromSourceFields(array $sourceFields, ReflectionClass $refClass): array
     {
         if (empty($sourceFields)) {
             return [];
@@ -369,7 +369,7 @@ class FieldsBuilder
         return $queryList;
     }
 
-    private function getMethodFromPropertyName(ReflectionClass $reflectionClass, string $propertyName) : ReflectionMethod
+    private function getMethodFromPropertyName(ReflectionClass $reflectionClass, string $propertyName): ReflectionMethod
     {
         if ($reflectionClass->hasMethod($propertyName)) {
             $methodName = $propertyName;
@@ -390,7 +390,7 @@ class FieldsBuilder
     /**
      * Checks the @Logged and @Right annotations.
      */
-    private function isAuthorized(ReflectionMethod $reflectionMethod) : bool
+    private function isAuthorized(ReflectionMethod $reflectionMethod): bool
     {
         $loggedAnnotation = $this->annotationReader->getLoggedAnnotation($reflectionMethod);
 
@@ -410,7 +410,7 @@ class FieldsBuilder
      *
      * @throws MissingTypeHintException
      */
-    private function mapParameters(array $refParameters, DocBlock $docBlock) : array
+    private function mapParameters(array $refParameters, DocBlock $docBlock): array
     {
         $args = [];
 

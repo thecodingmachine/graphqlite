@@ -30,7 +30,7 @@ class InputTypeGenerator
         $this->fieldsBuilder  = $fieldsBuilder;
     }
 
-    public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container) : ResolvableMutableInputObjectType
+    public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): ResolvableMutableInputObjectType
     {
         $method = new ReflectionMethod($factory, $methodName);
 
@@ -53,7 +53,7 @@ class InputTypeGenerator
     /**
      * @param ResolvableMutableInputInterface &ObjectType $inputType
      */
-    public function decorateInputType(string $className, string $methodName, ResolvableMutableInputInterface $inputType, ContainerInterface $container) : void
+    public function decorateInputType(string $className, string $methodName, ResolvableMutableInputInterface $inputType, ContainerInterface $container): void
     {
         $method = new ReflectionMethod($className, $methodName);
 

@@ -12,12 +12,12 @@ use function sprintf;
 
 class MissingArgumentException extends BadMethodCallException
 {
-    public static function create(string $argumentName) : self
+    public static function create(string $argumentName): self
     {
         return new self("Expected argument '" . $argumentName . "' was not provided");
     }
 
-    public static function wrapWithFactoryContext(self $previous, string $inputType, callable $callable) : self
+    public static function wrapWithFactoryContext(self $previous, string $inputType, callable $callable): self
     {
         $message = sprintf(
             '%s in GraphQL input type \'%s\' used in factory \'%s\'',
@@ -29,7 +29,7 @@ class MissingArgumentException extends BadMethodCallException
         return new self($message, 0, $previous);
     }
 
-    public static function wrapWithDecoratorContext(self $previous, string $inputType, callable $callable) : self
+    public static function wrapWithDecoratorContext(self $previous, string $inputType, callable $callable): self
     {
         $message = sprintf(
             '%s in GraphQL input type \'%s\' used in decorator \'%s\'',
@@ -41,7 +41,7 @@ class MissingArgumentException extends BadMethodCallException
         return new self($message, 0, $previous);
     }
 
-    public static function wrapWithFieldContext(self $previous, string $name, callable $callable) : self
+    public static function wrapWithFieldContext(self $previous, string $name, callable $callable): self
     {
         $message = sprintf(
             '%s in GraphQL query/mutation/field \'%s\' used in method \'%s\'',
@@ -53,7 +53,7 @@ class MissingArgumentException extends BadMethodCallException
         return new self($message, 0, $previous);
     }
 
-    private static function toMethod(callable $callable) : string
+    private static function toMethod(callable $callable): string
     {
         if (! is_array($callable)) {
             return '';

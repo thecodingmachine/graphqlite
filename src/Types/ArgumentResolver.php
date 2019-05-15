@@ -74,7 +74,7 @@ class ArgumentResolver
         throw new RuntimeException('Unexpected type: ' . get_class($type));
     }
 
-    private function stripNonNullType(Type $type) : Type
+    private function stripNonNullType(Type $type): Type
     {
         if ($type instanceof NonNull) {
             return $this->stripNonNullType($type->getWrappedType());

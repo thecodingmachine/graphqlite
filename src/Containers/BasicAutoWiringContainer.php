@@ -76,7 +76,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
-    public function has($id) : bool
+    public function has($id): bool
     {
         if (isset($this->values[$id])) {
             return true;

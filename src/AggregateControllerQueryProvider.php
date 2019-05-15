@@ -33,7 +33,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     /**
      * @return QueryField[]
      */
-    public function getQueries() : array
+    public function getQueries(): array
     {
         $queryList = [];
 
@@ -48,7 +48,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     /**
      * @return QueryField[]
      */
-    public function getMutations() : array
+    public function getMutations(): array
     {
         $mutationList = [];
 

@@ -65,7 +65,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     /**
      * @return ParameterInterface[]
      */
-    private function getParameters() : array
+    private function getParameters(): array
     {
         if ($this->parameters === null) {
             $method           = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
@@ -78,7 +78,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     /**
      * @return ParameterInterface[]
      */
-    private function getParametersForDecorator(int $key) : array
+    private function getParametersForDecorator(int $key): array
     {
         if (! isset($this->decoratorsParameters[$key])) {
             $method                           = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
@@ -92,7 +92,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      * @param array<string, mixed> $args
      * @param mixed                $context
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo) : object
+    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
         $parameters = $this->getParameters();
 
@@ -127,7 +127,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         return $object;
     }
 
-    public function decorate(callable $decorator) : void
+    public function decorate(callable $decorator): void
     {
         $this->decorators[] = $decorator;
 

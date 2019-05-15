@@ -119,7 +119,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @return array<string, array<string,string>>
      */
-    private function getMaps() : array
+    private function getMaps(): array
     {
         if ($this->fullMapComputed === false) {
             $namespace                     = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace);
@@ -176,7 +176,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,string> Maps a domain class to the GraphQL type annotated class
      */
-    private function getMapClassToType() : array
+    private function getMapClassToType(): array
     {
         return $this->getMaps()['mapClassToTypeArray'];
     }
@@ -184,7 +184,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,string> Maps a GraphQL type name to the GraphQL type annotated class
      */
-    private function getMapNameToType() : array
+    private function getMapNameToType(): array
     {
         return $this->getMaps()['mapNameToType'];
     }
@@ -192,7 +192,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,string[]> Maps a domain class to the factory method that creates the input type in the form [classname, methodname]
      */
-    private function getMapClassToFactory() : array
+    private function getMapClassToFactory(): array
     {
         return $this->getMaps()['mapClassToFactory'];
     }
@@ -200,7 +200,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname]
      */
-    private function getMapInputNameToFactory() : array
+    private function getMapInputNameToFactory(): array
     {
         return $this->getMaps()['mapInputNameToFactory'];
     }
@@ -208,7 +208,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation)
      */
-    private function getMapInputNameToDecorator() : array
+    private function getMapInputNameToDecorator(): array
     {
         return $this->getMaps()['mapInputNameToDecorator'];
     }
@@ -216,7 +216,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,array<string,string>> Maps a domain class to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN
      */
-    private function getMapClassToExtendTypeArray() : array
+    private function getMapClassToExtendTypeArray(): array
     {
         if ($this->fullMapClassToExtendTypeArrayComputed === false) {
             $namespace                       = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace);
@@ -251,7 +251,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,array<string,string>> Maps a GraphQL type name to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN
      */
-    private function getMapNameToExtendType() : array
+    private function getMapNameToExtendType(): array
     {
         if ($this->fullMapNameToExtendTypeArrayComputed === false) {
             $namespace                 = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace);
@@ -289,7 +289,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @return array<string,ReflectionClass> Key: fully qualified class name
      */
-    private function getClassList() : array
+    private function getClassList(): array
     {
         if ($this->classes === null) {
             $this->classes = [];
@@ -310,7 +310,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         return $this->classes;
     }
 
-    private function buildMap() : void
+    private function buildMap(): void
     {
         $this->mapClassToTypeArray     = [];
         $this->mapNameToType           = [];
@@ -367,7 +367,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
     }
 
-    private function buildMapClassToExtendTypeArray(Lock $lock) : void
+    private function buildMapClassToExtendTypeArray(Lock $lock): void
     {
         $lock->acquire(true);
         try {
@@ -387,7 +387,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
     }
 
-    private function buildMapNameToExtendTypeArray() : void
+    private function buildMapNameToExtendTypeArray(): void
     {
         $this->mapNameToExtendType = [];
         $classes                   = $this->getClassList();
@@ -405,7 +405,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping TypeClass <=> Object class <=> GraphQL type name.
      */
-    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName) : void
+    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName): void
     {
         $objectClassName                             = $type->getClass();
         $this->mapClassToTypeArray[$objectClassName] = $typeClassName;
@@ -426,7 +426,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping between InputType name <=> Object class
      */
-    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, string $fileName) : void
+    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, string $fileName): void
     {
         $refArray = [$refMethod->getDeclaringClass()->getName(), $refMethod->getName()];
         if ($className !== null) {
@@ -448,7 +448,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping ExtendTypeClass <=> Object class.
      */
-    private function storeExtendTypeMapperByClassInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName) : void
+    private function storeExtendTypeMapperByClassInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName): void
     {
         $objectClassName                                                         = $extendType->getClass();
         $this->mapClassToExtendTypeArray[$objectClassName][$extendTypeClassName] = $extendTypeClassName;
@@ -462,7 +462,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping ExtendTypeClass <=> name class.
      */
-    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName) : void
+    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName): void
     {
         $targetType = $this->recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
         $typeName   = $targetType->name;
@@ -478,7 +478,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping ExtendTypeClass <=> name class.
      */
-    private function storeDecoratorMapperByNameInCache(ReflectionMethod $reflectionMethod, Decorate $decorate) : void
+    private function storeDecoratorMapperByNameInCache(ReflectionMethod $reflectionMethod, Decorate $decorate): void
     {
         $typeName                                   = $decorate->getInputTypeName();
         $typeFileName                               = $reflectionMethod->getFileName();
@@ -490,7 +490,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         ], $this->mapTtl);
     }
 
-    private function getTypeFromCacheByObjectClass(string $className) : ?string
+    private function getTypeFromCacheByObjectClass(string $className): ?string
     {
         if (isset($this->mapClassToTypeArray[$className])) {
             return $this->mapClassToTypeArray[$className];
@@ -516,7 +516,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         return null;
     }
 
-    private function getTypeFromCacheByGraphQLTypeName(string $graphqlTypeName) : ?string
+    private function getTypeFromCacheByGraphQLTypeName(string $graphqlTypeName): ?string
     {
         if (isset($this->mapNameToType[$graphqlTypeName])) {
             return $this->mapNameToType[$graphqlTypeName];
@@ -545,7 +545,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return string[]|null A pointer to the factory [$className, $methodName] or null on cache miss
      */
-    private function getFactoryFromCacheByObjectClass(string $className) : ?array
+    private function getFactoryFromCacheByObjectClass(string $className): ?array
     {
         if (isset($this->mapClassToFactory[$className])) {
             return $this->mapClassToFactory[$className];
@@ -574,7 +574,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,string>|null An array of classes with the @ExtendType annotation (key and value = FQCN)
      */
-    private function getExtendTypesFromCacheByObjectClass(string $className) : ?array
+    private function getExtendTypesFromCacheByObjectClass(string $className): ?array
     {
         if (isset($this->mapClassToExtendTypeArray[$className])) {
             return $this->mapClassToExtendTypeArray[$className];
@@ -603,7 +603,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<string,string>|null An array of classes with the @ExtendType annotation (key and value = FQCN)
      */
-    private function getExtendTypesFromCacheByGraphQLTypeName(string $graphqlTypeName) : ?array
+    private function getExtendTypesFromCacheByGraphQLTypeName(string $graphqlTypeName): ?array
     {
         if (isset($this->mapNameToExtendType[$graphqlTypeName])) {
             return $this->mapNameToExtendType[$graphqlTypeName];
@@ -632,7 +632,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return string[]|null A pointer to the factory [$className, $methodName] or null on cache miss
      */
-    private function getFactoryFromCacheByGraphQLInputTypeName(string $graphqlTypeName) : ?array
+    private function getFactoryFromCacheByGraphQLInputTypeName(string $graphqlTypeName): ?array
     {
         if (isset($this->mapInputNameToFactory[$graphqlTypeName])) {
             return $this->mapInputNameToFactory[$graphqlTypeName];
@@ -661,7 +661,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * @return array<int, string[]>|null A pointer to the decorators methods [$className, $methodName] or null on cache miss
      */
-    private function getDecorateFromCacheByGraphQLInputTypeName(string $graphqlTypeName) : ?array
+    private function getDecorateFromCacheByGraphQLInputTypeName(string $graphqlTypeName): ?array
     {
         if (isset($this->mapInputNameToDecorator[$graphqlTypeName])) {
             return $this->mapInputNameToDecorator[$graphqlTypeName];
@@ -690,7 +690,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      */
-    public function canMapClassToType(string $className) : bool
+    public function canMapClassToType(string $className): bool
     {
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
@@ -711,7 +711,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType) : MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         $typeClassName = $this->getTypeFromCacheByObjectClass($className);
 
@@ -731,7 +731,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @return string[]
      */
-    public function getSupportedClasses() : array
+    public function getSupportedClasses(): array
     {
         return array_keys($this->getMapClassToType());
     }
@@ -739,7 +739,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
      */
-    public function canMapClassToInputType(string $className) : bool
+    public function canMapClassToInputType(string $className): bool
     {
         $factory = $this->getFactoryFromCacheByObjectClass($className);
 
@@ -758,7 +758,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className) : ResolvableMutableInputInterface
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         $factory = $this->getFactoryFromCacheByObjectClass($className);
 
@@ -783,7 +783,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
      */
-    public function mapNameToType(string $typeName) : \GraphQL\Type\Definition\Type
+    public function mapNameToType(string $typeName): \GraphQL\Type\Definition\Type
     {
         $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
         if ($typeClassName === null) {
@@ -816,7 +816,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function canMapNameToType(string $typeName) : bool
+    public function canMapNameToType(string $typeName): bool
     {
         $typeClassName = $this->getTypeFromCacheByGraphQLTypeName($typeName);
 
@@ -837,7 +837,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type) : bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
     {
         $extendTypeClassName = $this->getExtendTypesFromCacheByObjectClass($className);
 
@@ -853,7 +853,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type) : void
+    public function extendTypeForClass(string $className, MutableObjectType $type): void
     {
         $extendTypeClassNames = $this->getExtendTypesFromCacheByObjectClass($className);
 
@@ -873,7 +873,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type) : bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
     {
         $typeClassNames = $this->getExtendTypesFromCacheByGraphQLTypeName($typeName);
 
@@ -896,7 +896,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type) : void
+    public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         $extendTypeClassNames = $this->getExtendTypesFromCacheByGraphQLTypeName($typeName);
         if ($extendTypeClassNames === null) {
@@ -924,7 +924,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
      */
-    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : bool
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
         $typeClassNames = $this->getDecorateFromCacheByGraphQLInputTypeName($typeName);
 
@@ -944,7 +944,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : void
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
     {
         $decorators = $this->getDecorateFromCacheByGraphQLInputTypeName($typeName);
         if ($decorators === null) {

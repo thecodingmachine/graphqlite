@@ -49,7 +49,7 @@ class Type
     /**
      * Returns the fully qualified class name of the targeted class.
      */
-    public function getClass() : string
+    public function getClass(): string
     {
         if ($this->class === null) {
             throw new RuntimeException('Empty class for @Type annotation. You MUST create the Type annotation object using the GraphQLite AnnotationReader');
@@ -58,12 +58,12 @@ class Type
         return $this->class;
     }
 
-    public function setClass(string $class) : void
+    public function setClass(string $class): void
     {
         $this->class = ltrim($class, '\\');
     }
 
-    public function isSelfType() : bool
+    public function isSelfType(): bool
     {
         return $this->selfType;
     }

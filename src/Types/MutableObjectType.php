@@ -38,17 +38,17 @@ class MutableObjectType extends ObjectType
         parent::__construct($config);
     }
 
-    public function freeze() : void
+    public function freeze(): void
     {
         $this->status = self::STATUS_FROZEN;
     }
 
-    public function getStatus() : string
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    public function addFields(callable $fields) : void
+    public function addFields(callable $fields): void
     {
         if ($this->status !== self::STATUS_PENDING) {
             throw new RuntimeException('Tried to add fields to a frozen MutableObjectType.');
@@ -63,7 +63,7 @@ class MutableObjectType extends ObjectType
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
-    public function getField($name) : FieldDefinition
+    public function getField($name): FieldDefinition
     {
         if ($this->status === self::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
@@ -77,7 +77,7 @@ class MutableObjectType extends ObjectType
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
-    public function hasField($name) : bool
+    public function hasField($name): bool
     {
         if ($this->status === self::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
@@ -91,7 +91,7 @@ class MutableObjectType extends ObjectType
      *
      * @throws InvariantViolation
      */
-    public function getFields() : array
+    public function getFields(): array
     {
         if ($this->finalFields === null) {
             if ($this->status === self::STATUS_PENDING) {

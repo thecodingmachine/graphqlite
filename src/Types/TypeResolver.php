@@ -26,7 +26,7 @@ class TypeResolver
     /** @var Schema */
     private $schema;
 
-    public function registerSchema(Schema $schema) : void
+    public function registerSchema(Schema $schema): void
     {
         $this->schema = $schema;
     }
@@ -34,7 +34,7 @@ class TypeResolver
     /**
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapNameToType(string $typeName) : Type
+    public function mapNameToType(string $typeName): Type
     {
         if ($this->schema === null) {
             throw new RuntimeException('You must register a schema first before resolving types.');
@@ -54,7 +54,7 @@ class TypeResolver
         return $type;
     }
 
-    public function mapNameToOutputType(string $typeName) : OutputType
+    public function mapNameToOutputType(string $typeName): OutputType
     {
         $type = $this->mapNameToType($typeName);
         if (! $type instanceof OutputType || ($type instanceof WrappingType && ! $type->getWrappedType() instanceof OutputType)) {
@@ -64,7 +64,7 @@ class TypeResolver
         return $type;
     }
 
-    public function mapNameToInputType(string $typeName) : InputType
+    public function mapNameToInputType(string $typeName): InputType
     {
         $type = $this->mapNameToType($typeName);
         if (! $type instanceof InputType || ($type instanceof WrappingType && ! $type->getWrappedType() instanceof InputType)) {

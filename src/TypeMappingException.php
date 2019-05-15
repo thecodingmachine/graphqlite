@@ -22,7 +22,7 @@ class TypeMappingException extends GraphQLException
     /** @var Type */
     private $type;
 
-    public static function createFromType(Type $type) : self
+    public static function createFromType(Type $type): self
     {
         $e       = new self("Don't know how to handle type " . (string) $type);
         $e->type = $type;
@@ -30,7 +30,7 @@ class TypeMappingException extends GraphQLException
         return $e;
     }
 
-    public static function wrapWithParamInfo(TypeMappingException $previous, ReflectionParameter $parameter) : TypeMappingException
+    public static function wrapWithParamInfo(TypeMappingException $previous, ReflectionParameter $parameter): TypeMappingException
     {
         if ($previous->type instanceof Array_ || $previous->type instanceof Iterable_) {
             $typeStr = $previous->type instanceof Array_ ? 'array' : 'iterable';
@@ -80,7 +80,7 @@ class TypeMappingException extends GraphQLException
         return $e;
     }
 
-    public static function wrapWithReturnInfo(TypeMappingException $previous, ReflectionMethod $method) : TypeMappingException
+    public static function wrapWithReturnInfo(TypeMappingException $previous, ReflectionMethod $method): TypeMappingException
     {
         if ($previous->type instanceof Array_ || $previous->type instanceof Iterable_) {
             $typeStr = $previous->type instanceof Array_ ? 'array' : 'iterable';

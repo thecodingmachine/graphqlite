@@ -39,17 +39,17 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
         parent::__construct($config);
     }
 
-    public function freeze() : void
+    public function freeze(): void
     {
         $this->status = self::STATUS_FROZEN;
     }
 
-    public function getStatus() : string
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    public function addFields(callable $fields) : void
+    public function addFields(callable $fields): void
     {
         if ($this->status !== self::STATUS_PENDING) {
             throw new RuntimeException('Tried to add fields to a frozen MutableInputObjectType.');
@@ -62,7 +62,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
-    public function getField($name) : InputObjectField
+    public function getField($name): InputObjectField
     {
         if ($this->status === self::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a MutableInputObjectType before fetching its fields.');
@@ -76,7 +76,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
      *
      * @throws InvariantViolation
      */
-    public function getFields() : array
+    public function getFields(): array
     {
         if ($this->finalFields === null) {
             if ($this->status === self::STATUS_PENDING) {

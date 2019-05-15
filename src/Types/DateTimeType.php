@@ -23,7 +23,7 @@ class DateTimeType extends ScalarType
     /**
      * @param mixed $value
      */
-    public function serialize($value) : string
+    public function serialize($value): string
     {
         if (! $value instanceof DateTimeImmutable) {
             throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value));
@@ -35,7 +35,7 @@ class DateTimeType extends ScalarType
     /**
      * @param mixed $value
      */
-    public function parseValue($value) : ?DateTimeImmutable
+    public function parseValue($value): ?DateTimeImmutable
     {
         if ($value === null) {
             return null;

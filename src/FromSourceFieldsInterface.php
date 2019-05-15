@@ -19,5 +19,5 @@ interface FromSourceFieldsInterface
      *
      * @return SourceFieldInterface[]
      */
-    public function getSourceFields() : array;
+    public function getSourceFields(): array;
 }

@@ -12,7 +12,7 @@ class FailAuthenticationService implements AuthenticationServiceInterface
     /**
      * Returns true if the "current" user is logged
      */
-    public function isLogged() : bool
+    public function isLogged(): bool
     {
         throw SecurityNotImplementedException::createNoAuthenticationException();
     }

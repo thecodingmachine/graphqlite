@@ -25,7 +25,7 @@ interface RecursiveTypeMapperInterface
      *
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
      */
-    public function canMapClassToType(string $className) : bool;
+    public function canMapClassToType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
@@ -35,7 +35,7 @@ interface RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType) : MutableObjectType;
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
@@ -47,19 +47,19 @@ interface RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInterfaceOrType(string $className, ?OutputType $subType) : OutputType;
+    public function mapClassToInterfaceOrType(string $className, ?OutputType $subType): OutputType;
 
     /**
      * Finds the list of interfaces returned by $className.
      *
      * @return InterfaceType[]
      */
-    public function findInterfaces(string $className) : array;
+    public function findInterfaces(string $className): array;
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
      */
-    public function canMapClassToInputType(string $className) : bool;
+    public function canMapClassToInputType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL input type.
@@ -68,7 +68,7 @@ interface RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className) : ResolvableMutableInputInterface;
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface;
 
     /**
      * Returns an array containing all OutputTypes.
@@ -76,14 +76,14 @@ interface RecursiveTypeMapperInterface
      *
      * @return array<string, OutputType>
      */
-    public function getOutputTypes() : array;
+    public function getOutputTypes(): array;
 
     /**
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function canMapNameToType(string $typeName) : bool;
+    public function canMapNameToType(string $typeName): bool;
 
     /**
      * Returns a GraphQL type by name (can be either an input or output type)
@@ -92,10 +92,10 @@ interface RecursiveTypeMapperInterface
      *
      * @return Type&(InputType|OutputType)
      */
-    public function mapNameToType(string $typeName) : Type;
+    public function mapNameToType(string $typeName): Type;
 
     /**
      * Returns the closest parent that can be mapped, or null if nothing can be matched.
      */
-    public function findClosestMatchingParent(string $className) : ?string;
+    public function findClosestMatchingParent(string $className): ?string;
 }

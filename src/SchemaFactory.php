@@ -86,7 +86,7 @@ class SchemaFactory
     /**
      * Registers a namespace that can contain GraphQL controllers.
      */
-    public function addControllerNamespace(string $namespace) : self
+    public function addControllerNamespace(string $namespace): self
     {
         $this->controllerNamespaces[] = $namespace;
 
@@ -96,7 +96,7 @@ class SchemaFactory
     /**
      * Registers a namespace that can contain GraphQL types.
      */
-    public function addTypeNamespace(string $namespace) : self
+    public function addTypeNamespace(string $namespace): self
     {
         $this->typeNamespaces[] = $namespace;
 
@@ -106,7 +106,7 @@ class SchemaFactory
     /**
      * Registers a query provider.
      */
-    public function addQueryProvider(QueryProviderInterface $queryProvider) : self
+    public function addQueryProvider(QueryProviderInterface $queryProvider): self
     {
         $this->queryProviders[] = $queryProvider;
 
@@ -116,7 +116,7 @@ class SchemaFactory
     /**
      * Registers a root type mapper.
      */
-    public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper) : self
+    public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper): self
     {
         $this->rootTypeMappers[] = $rootTypeMapper;
 
@@ -126,14 +126,14 @@ class SchemaFactory
     /**
      * Registers a type mapper.
      */
-    public function addTypeMapper(TypeMapperInterface $typeMapper) : self
+    public function addTypeMapper(TypeMapperInterface $typeMapper): self
     {
         $this->typeMappers[] = $typeMapper;
 
         return $this;
     }
 
-    public function setDoctrineAnnotationReader(Reader $annotationReader) : self
+    public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
 
@@ -144,7 +144,7 @@ class SchemaFactory
      * Returns a cached Doctrine annotation reader.
      * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
      */
-    private function getDoctrineAnnotationReader() : Reader
+    private function getDoctrineAnnotationReader(): Reader
     {
         if ($this->doctrineAnnotationReader === null) {
             AnnotationRegistry::registerLoader('class_exists');
@@ -160,35 +160,35 @@ class SchemaFactory
         return $this->doctrineAnnotationReader;
     }
 
-    public function setHydrator(HydratorInterface $hydrator) : self
+    public function setHydrator(HydratorInterface $hydrator): self
     {
         $this->hydrator = $hydrator;
 
         return $this;
     }
 
-    public function setAuthenticationService(AuthenticationServiceInterface $authenticationService) : self
+    public function setAuthenticationService(AuthenticationServiceInterface $authenticationService): self
     {
         $this->authenticationService = $authenticationService;
 
         return $this;
     }
 
-    public function setAuthorizationService(AuthorizationServiceInterface $authorizationService) : self
+    public function setAuthorizationService(AuthorizationServiceInterface $authorizationService): self
     {
         $this->authorizationService = $authorizationService;
 
         return $this;
     }
 
-    public function setNamingStrategy(NamingStrategyInterface $namingStrategy) : self
+    public function setNamingStrategy(NamingStrategyInterface $namingStrategy): self
     {
         $this->namingStrategy = $namingStrategy;
 
         return $this;
     }
 
-    public function setSchemaConfig(SchemaConfig $schemaConfig) : self
+    public function setSchemaConfig(SchemaConfig $schemaConfig): self
     {
         $this->schemaConfig = $schemaConfig;
 
@@ -200,7 +200,7 @@ class SchemaFactory
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
      */
-    public function setGlobTtl(?int $globTtl) : self
+    public function setGlobTtl(?int $globTtl): self
     {
         $this->globTtl = $globTtl;
 
@@ -212,7 +212,7 @@ class SchemaFactory
      *
      * This is a shortcut for `$schemaFactory->setGlobTtl(null)`
      */
-    public function prodMode() : self
+    public function prodMode(): self
     {
         return $this->setGlobTtl(null);
     }
@@ -222,12 +222,12 @@ class SchemaFactory
      *
      * This is a shortcut for `$schemaFactory->setGlobTtl(2)`
      */
-    public function devMode() : self
+    public function devMode(): self
     {
         return $this->setGlobTtl(2);
     }
 
-    public function createSchema() : Schema
+    public function createSchema(): Schema
     {
         $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
         $hydrator              = $this->hydrator ?: new FactoryHydrator();

@@ -38,12 +38,12 @@ class Parameter
         $this->inputType = $values['inputType'];
     }
 
-    public function getFor() : string
+    public function getFor(): string
     {
         return $this->for;
     }
 
-    public function getInputType() : string
+    public function getInputType(): string
     {
         return $this->inputType;
     }

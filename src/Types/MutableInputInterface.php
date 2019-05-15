@@ -11,9 +11,9 @@ use GraphQL\Type\Definition\InputType;
  */
 interface MutableInputInterface extends InputType
 {
-    public function freeze() : void;
+    public function freeze(): void;
 
-    public function getStatus() : string;
+    public function getStatus(): string;
 
-    public function addFields(callable $fields) : void;
+    public function addFields(callable $fields): void;
 }

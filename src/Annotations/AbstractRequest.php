@@ -25,7 +25,7 @@ abstract class AbstractRequest
      * Returns the GraphQL return type of the request (as a string).
      * The string can represent the FQCN of the type or an entry in the container resolving to the GraphQL type.
      */
-    public function getOutputType() : ?string
+    public function getOutputType(): ?string
     {
         return $this->outputType;
     }
@@ -34,7 +34,7 @@ abstract class AbstractRequest
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
      */
-    public function getName() : ?string
+    public function getName(): ?string
     {
         return $this->name;
     }

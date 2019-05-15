@@ -72,7 +72,7 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ?string $comment) : self
+    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ?string $comment): self
     {
         if ($value === null && $type instanceof NonNull) {
             $type = $type->getWrappedType();
@@ -89,7 +89,7 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ?string $comment) : self
+    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ?string $comment): self
     {
         return new self($name, $type, $arguments, null, $targetMethodOnSource, $comment);
     }
@@ -99,7 +99,7 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function externalField(string $name, OutputType $type, array $arguments, callable $callable, ?string $comment, bool $injectSource) : self
+    public static function externalField(string $name, OutputType $type, array $arguments, callable $callable, ?string $comment, bool $injectSource): self
     {
         if ($injectSource === true) {
             array_unshift($arguments, new SourceParameter());

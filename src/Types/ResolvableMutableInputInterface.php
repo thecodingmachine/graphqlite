@@ -19,12 +19,12 @@ interface ResolvableMutableInputInterface extends MutableInputInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo) : object;
+    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object;
 
     /**
      * Decorates the call to the resolver with the $decorator.
      * The $decorator MUST receive the decorated object as first parameter and MUST return an object of a compatible type.
      * Additional parameters can be used to add fields.
      */
-    public function decorate(callable $decorator) : void;
+    public function decorate(callable $decorator): void;
 }

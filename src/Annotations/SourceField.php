@@ -70,7 +70,7 @@ class SourceField implements SourceFieldInterface
     /**
      * Returns the GraphQL right to be applied to this source field.
      */
-    public function getRight() : ?Right
+    public function getRight(): ?Right
     {
         return $this->right;
     }
@@ -79,12 +79,12 @@ class SourceField implements SourceFieldInterface
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
      */
-    public function getName() : ?string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function isLogged() : bool
+    public function isLogged(): bool
     {
         return $this->logged;
     }
@@ -93,7 +93,7 @@ class SourceField implements SourceFieldInterface
      * Returns the GraphQL return type of the request (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType() : ?string
+    public function getOutputType(): ?string
     {
         return $this->outputType;
     }
@@ -101,7 +101,7 @@ class SourceField implements SourceFieldInterface
     /**
      * If the GraphQL type is "ID", isID will return true.
      */
-    public function isId() : bool
+    public function isId(): bool
     {
         return $this->id;
     }
@@ -119,7 +119,7 @@ class SourceField implements SourceFieldInterface
     /**
      * True if a default value is available if a right is not enforced.
      */
-    public function canFailWith() : bool
+    public function canFailWith(): bool
     {
         return $this->hasFailWith;
     }

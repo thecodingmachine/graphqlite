@@ -34,7 +34,7 @@ class Decorate
         $this->inputTypeName = $values['value'] ?? $values['inputTypeName'];
     }
 
-    public function getInputTypeName() : string
+    public function getInputTypeName(): string
     {
         return $this->inputTypeName;
     }

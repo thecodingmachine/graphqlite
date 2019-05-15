@@ -68,7 +68,7 @@ class AnnotationReader
         $this->strictNamespaces = $strictNamespaces;
     }
 
-    public function getTypeAnnotation(ReflectionClass $refClass) : ?Type
+    public function getTypeAnnotation(ReflectionClass $refClass): ?Type
     {
         try {
             /** @var Type|null $type */
@@ -83,7 +83,7 @@ class AnnotationReader
         return $type;
     }
 
-    public function getExtendTypeAnnotation(ReflectionClass $refClass) : ?ExtendType
+    public function getExtendTypeAnnotation(ReflectionClass $refClass): ?ExtendType
     {
         try {
             /** @var ExtendType|null $extendType */
@@ -95,7 +95,7 @@ class AnnotationReader
         return $extendType;
     }
 
-    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName) : ?AbstractRequest
+    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName): ?AbstractRequest
     {
         /** @var AbstractRequest|null $queryAnnotation */
         $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationName);
@@ -103,7 +103,7 @@ class AnnotationReader
         return $queryAnnotation;
     }
 
-    public function getLoggedAnnotation(ReflectionMethod $refMethod) : ?Logged
+    public function getLoggedAnnotation(ReflectionMethod $refMethod): ?Logged
     {
         /** @var Logged|null $loggedAnnotation */
         $loggedAnnotation = $this->getMethodAnnotation($refMethod, Logged::class);
@@ -111,7 +111,7 @@ class AnnotationReader
         return $loggedAnnotation;
     }
 
-    public function getRightAnnotation(ReflectionMethod $refMethod) : ?Right
+    public function getRightAnnotation(ReflectionMethod $refMethod): ?Right
     {
         /** @var Right|null $rightAnnotation */
         $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
@@ -119,7 +119,7 @@ class AnnotationReader
         return $rightAnnotation;
     }
 
-    public function getFailWithAnnotation(ReflectionMethod $refMethod) : ?FailWith
+    public function getFailWithAnnotation(ReflectionMethod $refMethod): ?FailWith
     {
         /** @var FailWith|null $failWithAnnotation */
         $failWithAnnotation = $this->getMethodAnnotation($refMethod, FailWith::class);
@@ -130,7 +130,7 @@ class AnnotationReader
     /**
      * @return SourceField[]
      */
-    public function getSourceFields(ReflectionClass $refClass) : array
+    public function getSourceFields(ReflectionClass $refClass): array
     {
         /** @var SourceField[] $sourceFields */
         $sourceFields = $this->getClassAnnotations($refClass, SourceField::class);
@@ -138,7 +138,7 @@ class AnnotationReader
         return $sourceFields;
     }
 
-    public function getFactoryAnnotation(ReflectionMethod $refMethod) : ?Factory
+    public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
     {
         /** @var Factory|null $factoryAnnotation */
         $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
@@ -146,7 +146,7 @@ class AnnotationReader
         return $factoryAnnotation;
     }
 
-    public function getDecorateAnnotation(ReflectionMethod $refMethod) : ?Decorate
+    public function getDecorateAnnotation(ReflectionMethod $refMethod): ?Decorate
     {
         /** @var Decorate|null $decorateAnnotation */
         $decorateAnnotation = $this->getMethodAnnotation($refMethod, Decorate::class);
@@ -157,7 +157,7 @@ class AnnotationReader
     /**
      * @return Parameter[]
      */
-    private function getParameterAnnotations(ReflectionMethod $refMethod) : array
+    private function getParameterAnnotations(ReflectionMethod $refMethod): array
     {
         /** @var Parameter[] $useInputTypes */
         $useInputTypes = $this->getMethodAnnotations($refMethod, Parameter::class);
@@ -165,7 +165,7 @@ class AnnotationReader
         return $useInputTypes;
     }
 
-    public function getParameterAnnotation(ReflectionParameter $refParameter) : ?Parameter
+    public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
     {
         $annotations = $this->getParameterAnnotations($refParameter->getDeclaringFunction());
         foreach ($annotations as $annotation) {
@@ -180,7 +180,7 @@ class AnnotationReader
     /**
      * Returns a class annotation. Finds in the parents if not found in the main class.
      */
-    private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass) : ?object
+    private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
         do {
             $type = null;
@@ -215,7 +215,7 @@ class AnnotationReader
     /**
      * Returns a method annotation and handles correctly errors.
      */
-    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass) : ?object
+    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?object
     {
         $cacheKey = $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '_' . $annotationClass;
         if (array_key_exists($cacheKey, $this->methodAnnotationCache)) {
@@ -243,7 +243,7 @@ class AnnotationReader
     /**
      * Returns true if the annotation class name is part of the docblock comment.
      */
-    private function isErrorImportant(string $annotationClass, string $docComment, string $className) : bool
+    private function isErrorImportant(string $annotationClass, string $docComment, string $className): bool
     {
         foreach ($this->strictNamespaces as $strictNamespace) {
             if (strpos($className, $strictNamespace) === 0) {
@@ -260,13 +260,13 @@ class AnnotationReader
      *
      * @return object[]
      */
-    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass) : array
+    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass): array
     {
         $toAddAnnotations = [];
         do {
             try {
                 $allAnnotations     = $this->reader->getClassAnnotations($refClass);
-                $toAddAnnotations[] = array_filter($allAnnotations, static function ($annotation) use ($annotationClass) : bool {
+                $toAddAnnotations[] = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
             } catch (AnnotationException $e) {
@@ -298,7 +298,7 @@ class AnnotationReader
      *
      * @return array<int, object>
      */
-    public function getMethodAnnotations(ReflectionMethod $refMethod, string $annotationClass) : array
+    public function getMethodAnnotations(ReflectionMethod $refMethod, string $annotationClass): array
     {
         $cacheKey = $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '_s_' . $annotationClass;
         if (isset($this->methodAnnotationsCache[$cacheKey])) {
@@ -308,7 +308,7 @@ class AnnotationReader
         $toAddAnnotations = [];
         try {
             $allAnnotations   = $this->reader->getMethodAnnotations($refMethod);
-            $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass) : bool {
+            $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });
         } catch (AnnotationException $e) {

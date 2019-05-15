@@ -9,5 +9,5 @@ interface AuthorizationServiceInterface
     /**
      * Returns true if the "current" user has access to the right "$right"
      */
-    public function isAllowed(string $right) : bool;
+    public function isAllowed(string $right): bool;
 }

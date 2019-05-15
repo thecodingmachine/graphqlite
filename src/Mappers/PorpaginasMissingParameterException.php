@@ -9,12 +9,12 @@ use GraphQL\Error\ClientAware;
 
 class PorpaginasMissingParameterException extends Exception implements ClientAware, CannotMapTypeExceptionInterface
 {
-    public static function missingLimit() : self
+    public static function missingLimit(): self
     {
         return new self('In the items field of a result set, you cannot add a "offset" without also adding a "limit"');
     }
 
-    public static function noSubType() : self
+    public static function noSubType(): self
     {
         return new self('Result sets implementing Porpaginas need to have a subtype. Please define it using @return annotation. For instance: "@return User[]"');
     }
@@ -22,7 +22,7 @@ class PorpaginasMissingParameterException extends Exception implements ClientAwa
     /**
      * Returns true when exception message is safe to be displayed to a client.
      */
-    public function isClientSafe() : bool
+    public function isClientSafe(): bool
     {
         return true;
     }
@@ -32,7 +32,7 @@ class PorpaginasMissingParameterException extends Exception implements ClientAwa
      *
      * Value "graphql" is reserved for errors produced by query parsing or validation, do not use it.
      */
-    public function getCategory() : string
+    public function getCategory(): string
     {
         return 'pagination';
     }

@@ -41,7 +41,7 @@ class ExtendType
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
      */
-    public function getClass() : string
+    public function getClass(): string
     {
         return ltrim($this->class, '\\');
     }

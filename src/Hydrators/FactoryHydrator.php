@@ -21,7 +21,7 @@ class FactoryHydrator implements HydratorInterface
      *
      * @throws CannotHydrateException
      */
-    public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type) : object
+    public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type): object
     {
         if ($type instanceof ResolvableMutableInputInterface) {
             return $type->resolve($source, $data, $context, $resolveInfo);
@@ -34,7 +34,7 @@ class FactoryHydrator implements HydratorInterface
      *
      * @param mixed[] $data
      */
-    public function canHydrate(array $data, InputObjectType $type) : bool
+    public function canHydrate(array $data, InputObjectType $type): bool
     {
         return $type instanceof ResolvableMutableInputInterface;
     }

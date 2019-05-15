@@ -18,7 +18,7 @@ class NamingStrategy implements NamingStrategyInterface
      * Returns the name of the GraphQL interface from a name of a concrete class (when the interface is created
      * automatically to manage inheritance)
      */
-    public function getInterfaceNameFromConcreteName(string $concreteType) : string
+    public function getInterfaceNameFromConcreteName(string $concreteType): string
     {
         return $concreteType . 'Interface';
     }
@@ -26,7 +26,7 @@ class NamingStrategy implements NamingStrategyInterface
     /**
      * Returns the GraphQL output object type name based on the type className and the Type annotation.
      */
-    public function getOutputTypeName(string $typeClassName, Type $type) : string
+    public function getOutputTypeName(string $typeClassName, Type $type): string
     {
         $prevPos = strrpos($typeClassName, '\\');
         if ($prevPos) {
@@ -46,7 +46,7 @@ class NamingStrategy implements NamingStrategyInterface
         return $typeClassName;
     }
 
-    public function getInputTypeName(string $className, Factory $factory) : string
+    public function getInputTypeName(string $className, Factory $factory): string
     {
         $inputTypeName = $factory->getName();
         if ($inputTypeName !== null) {
@@ -63,7 +63,7 @@ class NamingStrategy implements NamingStrategyInterface
     /**
      * Returns the name of a GraphQL field from the name of the annotated method.
      */
-    public function getFieldNameFromMethodName(string $methodName) : string
+    public function getFieldNameFromMethodName(string $methodName): string
     {
         // Let's remove any "get" or "is".
         if (strpos($methodName, 'get') === 0 && strlen($methodName) > 3) {

@@ -12,26 +12,26 @@ interface SourceFieldInterface
     /**
      * Returns the GraphQL right to be applied to this source field.
      */
-    public function getRight() : ?Right;
+    public function getRight(): ?Right;
 
     /**
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
      */
-    public function getName() : ?string;
+    public function getName(): ?string;
 
-    public function isLogged() : bool;
+    public function isLogged(): bool;
 
     /**
      * Returns the GraphQL return type of the request (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType() : ?string;
+    public function getOutputType(): ?string;
 
     /**
      * If the GraphQL type is "ID", isID will return true.
      */
-    public function isId() : bool;
+    public function isId(): bool;
 
     /**
      * Returns the default value to use if the right is not enforced.
@@ -43,5 +43,5 @@ interface SourceFieldInterface
     /**
      * True if a default value is available if a right is not enforced.
      */
-    public function canFailWith() : bool;
+    public function canFailWith(): bool;
 }

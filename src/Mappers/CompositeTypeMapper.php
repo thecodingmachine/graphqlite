@@ -26,7 +26,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      */
     private $supportedClasses;
 
-    public function addTypeMapper(TypeMapperInterface $typeMapper) : void
+    public function addTypeMapper(TypeMapperInterface $typeMapper): void
     {
         $this->typeMappers[] = $typeMapper;
     }
@@ -34,7 +34,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      */
-    public function canMapClassToType(string $className) : bool
+    public function canMapClassToType(string $className): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
@@ -50,7 +50,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType) : MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {
@@ -65,7 +65,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @return string[]
      */
-    public function getSupportedClasses() : array
+    public function getSupportedClasses(): array
     {
         if ($this->supportedClasses === null) {
             if ($this->typeMappers === []) {
@@ -84,7 +84,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
      */
-    public function canMapClassToInputType(string $className) : bool
+    public function canMapClassToInputType(string $className): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToInputType($className)) {
@@ -102,7 +102,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInputType(string $className) : ResolvableMutableInputInterface
+    public function mapClassToInputType(string $className): ResolvableMutableInputInterface
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToInputType($className)) {
@@ -119,7 +119,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @return Type&(InputType|OutputType)
      */
-    public function mapNameToType(string $typeName) : Type
+    public function mapNameToType(string $typeName): Type
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapNameToType($typeName)) {
@@ -134,7 +134,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function canMapNameToType(string $typeName) : bool
+    public function canMapNameToType(string $typeName): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapNameToType($typeName)) {
@@ -148,7 +148,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type) : bool
+    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canExtendTypeForClass($className, $type)) {
@@ -164,7 +164,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type) : void
+    public function extendTypeForClass(string $className, MutableObjectType $type): void
     {
         foreach ($this->typeMappers as $typeMapper) {
             if (! $typeMapper->canExtendTypeForClass($className, $type)) {
@@ -178,7 +178,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type) : bool
+    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canExtendTypeForName($typeName, $type)) {
@@ -194,7 +194,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type) : void
+    public function extendTypeForName(string $typeName, MutableObjectType $type): void
     {
         foreach ($this->typeMappers as $typeMapper) {
             if (! $typeMapper->canExtendTypeForName($typeName, $type)) {
@@ -208,7 +208,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
      */
-    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : bool
+    public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canDecorateInputTypeForName($typeName, $type)) {
@@ -224,7 +224,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type) : void
+    public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
     {
         foreach ($this->typeMappers as $typeMapper) {
             if (! $typeMapper->canDecorateInputTypeForName($typeName, $type)) {

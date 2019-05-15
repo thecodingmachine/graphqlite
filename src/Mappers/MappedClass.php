@@ -51,12 +51,12 @@ class MappedClass
     /**
      * @return MappedClass[]
      */
-    public function getChildren() : array
+    public function getChildren(): array
     {
         return $this->children;
     }
 
-    public function addChild(MappedClass $child) : void
+    public function addChild(MappedClass $child): void
     {
         $this->children[] = $child;
     }
