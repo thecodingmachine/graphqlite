@@ -252,10 +252,37 @@ class FieldsBuilder
             $methodName = $refMethod->getName();
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
+            // Get parameters from the prefetchMethod method if any.
+            $prefetchMethodName = null;
+            $prefetchArgs = [];
+            if ($queryAnnotation instanceof Field) {
+                $prefetchMethodName = $queryAnnotation->getPrefetchMethod();
+                if ($prefetchMethodName !== null) {
+                    try {
+                        $prefetchRefMethod = $refClass->getMethod($prefetchMethodName);
+                    } catch (ReflectionException $e) {
+                        throw InvalidPrefetchMethodException::methodNotFound($refMethod, $refClass, $prefetchMethodName, $e);
+                    }
+
+                    $prefetchParameters = $prefetchRefMethod->getParameters();
+                    $first_prefetch_parameter = array_shift($prefetchParameters);
+
+                    $prefetchDocBlockObj = $this->cachedDocBlockFactory->getDocBlock($prefetchRefMethod);
+
+                    $prefetchArgs = $this->mapParameters($prefetchParameters, $prefetchDocBlockObj);
+                }
+            }
+
             $parameters = $refMethod->getParameters();
             if ($injectSource === true) {
-                $first_parameter = array_shift($parameters);
+                $firstParameter = array_shift($parameters);
                 // TODO: check that $first_parameter type is correct.
+            }
+            if ($prefetchMethodName !== null) {
+                $secondParameter = array_shift($parameters);
+                if ($secondParameter === null) {
+                    throw InvalidPrefetchMethodException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
+                }
             }
 
             $args = $this->mapParameters($parameters, $docBlockObj);
@@ -273,12 +300,10 @@ class FieldsBuilder
             if ($unauthorized) {
                 $failWithValue = $failWith->getValue();
                 $queryList[]   = QueryField::alwaysReturn($name, $type, $args, $failWithValue, $docBlockComment);
+            } elseif ($sourceClassName !== null) {
+                $queryList[] = QueryField::selfField($name, $type, $args, $methodName, $docBlockComment, $prefetchMethodName, $prefetchArgs);
             } else {
-                if ($sourceClassName !== null) {
-                    $queryList[] = QueryField::selfField($name, $type, $args, $methodName, $docBlockComment);
-                } else {
-                    $queryList[] = QueryField::externalField($name, $type, $args, [$controller, $methodName], $docBlockComment, $injectSource);
-                }
+                $queryList[] = QueryField::externalField($name, $type, $args, [$controller, $methodName], $docBlockComment, $injectSource, $prefetchMethodName, $prefetchArgs);
             }
         }
 
@@ -359,7 +384,7 @@ class FieldsBuilder
             }
 
             if (! $unauthorized) {
-                $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $docBlockComment);
+                $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $docBlockComment, null, []);
             } else {
                 $failWithValue = $sourceField->getFailWith();
                 $queryList[]   = QueryField::alwaysReturn($sourceField->getName(), $type, $args, $failWithValue, $docBlockComment);
