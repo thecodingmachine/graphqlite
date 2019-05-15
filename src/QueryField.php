@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Deferred;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
@@ -12,6 +13,7 @@ use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use function array_map;
 use function array_unshift;
@@ -27,7 +29,7 @@ class QueryField extends FieldDefinition
     /**
      * @param OutputType                        &Type                 $type
      * @param array<string, ParameterInterface> $arguments            Indexed by argument name.
-     * @param callable|null                     $resolve              The method to execute
+     * @param (callable&array<int,mixed>)|null  $resolve              The method to execute
      * @param string|null                       $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
      * @param array<string, ParameterInterface> $prefetchArgs         Indexed by argument name.
      * @param array<string, mixed>              $additionalConfig
@@ -43,7 +45,7 @@ class QueryField extends FieldDefinition
             $config['description'] = $comment;
         }
 
-        $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
+        $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
             $toPassArgs = array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
                 try {
                     return $parameter->resolve($source, $args, $context, $info);
@@ -62,6 +64,48 @@ class QueryField extends FieldDefinition
             }
             throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
         };
+
+        if ($prefetchMethodName === null) {
+            $config['resolve'] = $resolveFn;
+        } else {
+            $prefetchCallable = [$resolve[0], $prefetchMethodName];
+            $prefetchBuffer = new PrefetchBuffer();
+
+            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($prefetchBuffer, $arguments, $prefetchArgs, $prefetchCallable, $resolveFn) {
+                $prefetchBuffer->register($source, $args);
+
+                return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchCallable, $arguments, $resolveFn) {
+                    if (! $prefetchBuffer->hasResult($args)) {
+                        $sources = $prefetchBuffer->getObjectsByArguments($args);
+
+                        $toPassPrefetchArgs = array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $prefetchCallable) {
+                            try {
+                                return $parameter->resolve($source, $args, $context, $info);
+                            } catch (MissingArgumentException $e) {
+                                throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $prefetchCallable);
+                            }
+                        }, $prefetchArgs));
+
+                        array_unshift($toPassPrefetchArgs, $sources);
+
+                        $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
+                        $prefetchBuffer->storeResult($prefetchResult, $args);
+                    } else {
+                        $prefetchResult = $prefetchBuffer->getResult($args);
+                    }
+
+                    foreach ($arguments as $argument) {
+                        if (! ($argument instanceof PrefetchDataParameter)) {
+                            continue;
+                        }
+
+                        $argument->setPrefetchedData($prefetchResult);
+                    }
+
+                    return $resolveFn($source, $args, $context, $info);
+                });
+            };
+        }
 
         $config += $additionalConfig;
         parent::__construct($config);
@@ -93,6 +137,10 @@ class QueryField extends FieldDefinition
      */
     public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ?string $comment, ?string $prefetchMethodName, array $prefetchArgs): self
     {
+        if ($prefetchMethodName !== null) {
+            array_unshift($arguments, new PrefetchDataParameter());
+        }
+
         return new self($name, $type, $arguments, null, $targetMethodOnSource, $comment, $prefetchMethodName, $prefetchArgs);
     }
 
@@ -104,6 +152,9 @@ class QueryField extends FieldDefinition
      */
     public static function externalField(string $name, OutputType $type, array $arguments, callable $callable, ?string $comment, bool $injectSource, ?string $prefetchMethodName, array $prefetchArgs): self
     {
+        if ($prefetchMethodName !== null) {
+            array_unshift($arguments, new PrefetchDataParameter());
+        }
         if ($injectSource === true) {
             array_unshift($arguments, new SourceParameter());
         }

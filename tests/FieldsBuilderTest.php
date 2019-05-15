@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use GraphQL\Deferred;
 use GraphQL\Type\Definition\BooleanType;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\FloatType;
@@ -648,5 +649,4 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('string', $testField->args[0]->name);
         $this->assertSame('int', $testField->args[1]->name);
     }
-
 }

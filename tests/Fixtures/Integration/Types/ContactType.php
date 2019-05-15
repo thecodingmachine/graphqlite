@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
+use function array_search;
 use function strtoupper;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -25,5 +26,19 @@ class ContactType
     public function customField(Contact $contact, string $prefix): string
     {
         return $prefix.' '.strtoupper($contact->getName());
+    }
+
+    /**
+     * @Field(prefetchMethod="prefetchContacts")
+     */
+    public function repeatName(Contact $contact, $data): string
+    {
+        $index = array_search($contact, $data, true);
+        return $data[$index]->getName();
+    }
+
+    public function prefetchContacts(iterable $contacts)
+    {
+        return $contacts;
     }
 }

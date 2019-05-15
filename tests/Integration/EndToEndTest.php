@@ -215,6 +215,7 @@ class EndToEndTest extends TestCase
                 name
                 company
                 uppercaseName
+                repeatName
                 ... on User {
                     email
                 }
@@ -232,12 +233,14 @@ class EndToEndTest extends TestCase
                 [
                     'name' => 'Joe',
                     'company' => 'Joe Ltd',
-                    'uppercaseName' => 'JOE'
+                    'uppercaseName' => 'JOE',
+                    'repeatName' => 'Joe',
                 ],
                 [
                     'name' => 'Bill',
                     'company' => 'Bill Ltd',
                     'uppercaseName' => 'BILL',
+                    'repeatName' => 'Bill',
                     'email' => 'bill@example.com'
                 ]
 
@@ -255,12 +258,14 @@ class EndToEndTest extends TestCase
                 [
                     'name' => 'Joe',
                     'company' => 'Joe Ltd',
-                    'uppercaseName' => 'JOE'
+                    'uppercaseName' => 'JOE',
+                    'repeatName' => 'Joe',
                 ],
                 [
                     'name' => 'Bill',
                     'company' => 'Bill Ltd',
                     'uppercaseName' => 'BILL',
+                    'repeatName' => 'Bill',
                     'email' => 'bill@example.com'
                 ]
 
