@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\Lock\Lock;
-use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use ReflectionClass;
 use Symfony\Component\Lock\Factory as LockFactory;
+use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use function class_exists;
+use function str_replace;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -19,60 +21,39 @@ use Symfony\Component\Lock\Factory as LockFactory;
  */
 final class GlobControllerQueryProvider implements QueryProviderInterface
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $namespace;
-    /**
-     * @var CacheInterface
-     */
+    /** @var CacheInterface */
     private $cache;
-    /**
-     * @var int|null
-     */
+    /** @var int|null */
     private $cacheTtl;
-    /**
-     * @var array<string,string>|null
-     */
+    /** @var array<string,string>|null */
     private $instancesList;
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private $container;
-    /**
-     * @var AggregateControllerQueryProvider
-     */
+    /** @var AggregateControllerQueryProvider */
     private $aggregateControllerQueryProvider;
-    /**
-     * @var FieldsBuilder
-     */
+    /** @var FieldsBuilder */
     private $fieldsBuilder;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $recursive;
-    /**
-     * @var LockFactory
-     */
+    /** @var LockFactory */
     private $lockFactory;
 
     /**
-     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
-     * @param FieldsBuilder $fieldsBuilder
+     * @param string             $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
-     * @param CacheInterface $cache
-     * @param int|null $cacheTtl
-     * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
+     * @param bool               $recursive Whether subnamespaces of $namespace must be analyzed.
      */
     public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
     {
-        $this->namespace = $namespace;
-        $this->container = $container;
-        $this->cache = $cache;
-        $this->cacheTtl = $cacheTtl;
+        $this->namespace     = $namespace;
+        $this->container     = $container;
+        $this->cache         = $cache;
+        $this->cacheTtl      = $cacheTtl;
         $this->fieldsBuilder = $fieldsBuilder;
-        $this->recursive = $recursive;
-        $this->lockFactory = $lockFactory;
+        $this->recursive     = $recursive;
+        $this->lockFactory   = $lockFactory;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -80,6 +61,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         if ($this->aggregateControllerQueryProvider === null) {
             $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilder, $this->container);
         }
+
         return $this->aggregateControllerQueryProvider;
     }
 
@@ -91,20 +73,22 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function getInstancesList(): array
     {
         if ($this->instancesList === null) {
-            $key = 'globQueryProvider_'.str_replace('\\', '_', $this->namespace);
+            $key                 = 'globQueryProvider_' . str_replace('\\', '_', $this->namespace);
             $this->instancesList = $this->cache->get($key);
             if ($this->instancesList === null) {
-                $lock = $this->lockFactory->createLock('buildInstanceList_'.$this->namespace, 5);
-                if (!$lock->acquire()) {
+                $lock = $this->lockFactory->createLock('buildInstanceList_' . $this->namespace, 5);
+                if (! $lock->acquire()) {
                     // Lock is being held right now. Generation is happening.
                     // Let's wait and fetch the result from the cache.
                     $lock->acquire(true);
                     $lock->release();
+
                     return $this->getInstancesList();
                 }
                 $lock->acquire(true);
                 try {
                     $this->instancesList = $this->buildInstancesList();
+
                     return $this->instancesList;
                 } finally {
                     $lock->release();
@@ -113,6 +97,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
                 $this->cache->set($key, $this->instancesList, $this->cacheTtl);
             }
         }
+
         return $this->instancesList;
     }
 
@@ -121,21 +106,24 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function buildInstancesList(): array
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
-        $classes = $explorer->getClasses();
+        $explorer  = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
+        $classes   = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
-            if (!\class_exists($className)) {
+            if (! class_exists($className)) {
                 continue;
             }
-            $refClass = new \ReflectionClass($className);
-            if (!$refClass->isInstantiable()) {
+            $refClass = new ReflectionClass($className);
+            if (! $refClass->isInstantiable()) {
                 continue;
             }
-            if ($this->container->has($className)) {
-                $instances[] = $className;
+            if (! $this->container->has($className)) {
+                continue;
             }
+
+            $instances[] = $className;
         }
+
         return $instances;
     }
 

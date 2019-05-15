@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
@@ -17,13 +18,9 @@ use TheCodingMachine\GraphQLite\GraphQLException;
  */
 class Factory
 {
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $name;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $default;
 
     /**
@@ -33,7 +30,7 @@ class Factory
     {
         $this->name = $attributes['name'] ?? null;
         // This IS the default if no name is set and no "default" attribute is passed.
-        $this->default = $attributes['default'] ?? !isset($attributes['name']);
+        $this->default = $attributes['default'] ?? ! isset($attributes['name']);
 
         if ($this->name === null && $this->default === false) {
             throw new GraphQLException('A @Factory that has "default=false" attribute must be given a name (i.e. add a name="FooBarInput" attribute).');
@@ -43,8 +40,6 @@ class Factory
     /**
      * Returns the name of the GraphQL input type.
      * If not specified, the name of the method should be used instead.
-     *
-     * @return null|string
      */
     public function getName(): ?string
     {
@@ -53,8 +48,6 @@ class Factory
 
     /**
      * Returns true if this factory should map the return type of the factory by default.
-     *
-     * @return bool
      */
     public function isDefault(): bool
     {

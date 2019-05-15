@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use RuntimeException;
 
-class MissingAnnotationException extends \RuntimeException
+class MissingAnnotationException extends RuntimeException
 {
     public static function missingTypeExceptionToUseSourceField(): self
     {

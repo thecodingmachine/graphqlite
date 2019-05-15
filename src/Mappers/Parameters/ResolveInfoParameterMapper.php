@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
-
 
 use GraphQL\Type\Definition\ResolveInfo;
 use phpDocumentor\Reflection\DocBlock;
@@ -20,6 +20,7 @@ class ResolveInfoParameterMapper implements ParameterMapperInterface
         if ($type!== null && $type->getName() === ResolveInfo::class) {
             return new ResolveInfoParameter();
         }
+
         return null;
     }
 }

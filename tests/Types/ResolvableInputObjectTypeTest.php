@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use stdClass;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -20,7 +21,6 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myFactory',
-            $this->getArgumentResolver(),
             'my comment');
 
         $this->assertSame('InputObject', $inputType->name);
@@ -30,19 +30,19 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
 
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
-        $obj = $inputType->resolve(null, ['string' => 'foobar', 'bool' => false], null, $resolveInfo);
+        $obj = $inputType->resolve(new stdClass(), ['string' => 'foobar', 'bool' => false], null, $resolveInfo);
         $this->assertInstanceOf(TestObject::class, $obj);
         $this->assertSame('foobar', $obj->getTest());
         $this->assertSame(false, $obj->isTestBool());
 
-        $obj = $inputType->resolve(null, ['string' => 'foobar'], null, $resolveInfo);
+        $obj = $inputType->resolve(new stdClass(), ['string' => 'foobar'], null, $resolveInfo);
         $this->assertInstanceOf(TestObject::class, $obj);
         $this->assertSame('foobar', $obj->getTest());
         $this->assertSame(true, $obj->isTestBool());
 
         $this->expectException(MissingArgumentException::class);
         $this->expectExceptionMessage("Expected argument 'string' was not provided in GraphQL input type 'InputObject' used in factory 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myFactory()'");
-        $inputType->resolve(null, [], null, $resolveInfo);
+        $inputType->resolve(new stdClass(), [], null, $resolveInfo);
     }
 
     public function testDecoratorMissingArgumentException(): void
@@ -52,7 +52,6 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             $testFactory,
             'myFactory',
-            $this->getArgumentResolver(),
             'my comment');
 
         $inputType->decorate([$testFactory, 'myDecorator']);
@@ -61,7 +60,7 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
 
         $this->expectException(MissingArgumentException::class);
         $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL input type 'InputObject' used in decorator 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myDecorator()'");
-        $inputType->resolve(null, ['string' => 'foobar'], null, $resolveInfo);
+        $inputType->resolve(new stdClass(), ['string' => 'foobar'], null, $resolveInfo);
     }
 
     public function testListResolve(): void
@@ -70,10 +69,9 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myListFactory',
-            $this->getArgumentResolver(),
             null);
 
-        $obj = $inputType->resolve(null, ['date' => '2018-12-25', 'stringList' =>
+        $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
             [
                 'foo',
                 'bar'

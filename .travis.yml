@@ -2,6 +2,7 @@ language: php
 cache:
   directories:
     - $HOME/.composer/cache
+    - .php_cs
 jobs:
   include:
     - stage: test
@@ -14,6 +15,7 @@ jobs:
         - &phpunit
           "./vendor/bin/phpunit"
         - composer phpstan
+        - composer cs-check
       after_script:
         - ./vendor/bin/coveralls -v
     - stage: test
@@ -24,14 +26,7 @@ jobs:
       script:
         - *phpunit
     - stage: test
-      php: 7.1
-      env: PREFER_LOWEST=""
-      before_script:
-        - *composerupdate
-      script:
-        - *phpunit
-    - stage: test
-      php: 7.1
+      php: 7.2
       env: PREFER_LOWEST="--prefer-lowest"
       before_script:
         - *composerupdate

@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use Exception;
 use GraphQL\Error\InvariantViolation;
-use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;
+use RuntimeException;
 
 /**
  * An input object type built from the Factory annotation.
@@ -18,23 +18,20 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
 {
     // In pending state, we can still add fields.
     public const STATUS_PENDING = 'pending';
-    public const STATUS_FROZEN = 'frozen';
+    public const STATUS_FROZEN  = 'frozen';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $status;
 
-    /**
-     * @var array<callable>
-     */
+    /** @var array<callable> */
     private $fieldsCallables = [];
 
-    /**
-     * @var array<string, InputObjectField>|null
-     */
+    /** @var array<string, InputObjectField>|null */
     private $finalFields;
 
+    /**
+     * @param mixed[] $config
+     */
     public function __construct(array $config)
     {
         $this->status = self::STATUS_PENDING;
@@ -55,7 +52,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     public function addFields(callable $fields): void
     {
         if ($this->status !== self::STATUS_PENDING) {
-            throw new \RuntimeException('Tried to add fields to a frozen MutableInputObjectType.');
+            throw new RuntimeException('Tried to add fields to a frozen MutableInputObjectType.');
         }
         $this->fieldsCallables[] = $fields;
     }
@@ -63,15 +60,14 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     /**
      * @param string $name
      *
-     * @return InputObjectField
-     *
-     * @throws Exception
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
     public function getField($name): InputObjectField
     {
         if ($this->status === self::STATUS_PENDING) {
-            throw new \RuntimeException('You must freeze() a MutableInputObjectType before fetching its fields.');
+            throw new RuntimeException('You must freeze() a MutableInputObjectType before fetching its fields.');
         }
+
         return parent::getField($name);
     }
 
@@ -84,7 +80,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     {
         if ($this->finalFields === null) {
             if ($this->status === self::STATUS_PENDING) {
-                throw new \RuntimeException('You must freeze() a MutableInputObjectType before fetching its fields.');
+                throw new RuntimeException('You must freeze() a MutableInputObjectType before fetching its fields.');
             }
 
             $this->finalFields = parent::getFields();

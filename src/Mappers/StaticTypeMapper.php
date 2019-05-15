@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
-use function array_keys;
+
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQLite\Mappers\Interfaces\InterfacesResolverInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
+use function array_keys;
+use function array_reduce;
 
 /**
  * A simple implementation of the TypeMapperInterface that expects mapping to be passed in a setter.
@@ -20,9 +20,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
  */
 final class StaticTypeMapper implements TypeMapperInterface
 {
-    /**
-     * @var array<string,MutableObjectType>
-     */
+    /** @var array<string,MutableObjectType> */
     private $types = [];
 
     /**
@@ -35,24 +33,20 @@ final class StaticTypeMapper implements TypeMapperInterface
         $this->types = $types;
     }
 
-    /**
-     * @var array<string,ResolvableMutableInputInterface&InputObjectType>
-     */
+    /** @var array<string,ResolvableMutableInputInterface&InputObjectType> */
     private $inputTypes = [];
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
      *
-     * @param array<string,ResolvableMutableInputInterface&InputObjectType> $inputTypes
+     * @param array<string,ResolvableMutableInputInterface &InputObjectType> $inputTypes
      */
     public function setInputTypes(array $inputTypes): void
     {
         $this->inputTypes = $inputTypes;
     }
 
-    /**
-     * @var array<string,MutableObjectType|ResolvableMutableInputInterface>
-     */
+    /** @var array<string,MutableObjectType|ResolvableMutableInputInterface> */
     private $notMappedTypes = [];
 
     /**
@@ -63,17 +57,15 @@ final class StaticTypeMapper implements TypeMapperInterface
      */
     public function setNotMappedTypes(array $types): void
     {
-        $this->notMappedTypes = array_reduce($types, function ($result, Type $type) {
+        $this->notMappedTypes = array_reduce($types, static function ($result, Type $type) {
             $result[$type->name] = $type;
+
             return $result;
         }, []);
     }
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
-     *
-     * @param string $className
-     * @return bool
      */
     public function canMapClassToType(string $className): bool
     {
@@ -83,16 +75,13 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string $className
-     * @param OutputType|null $subType
-     * @return MutableObjectType
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
     {
         // TODO: add support for $subType
         if ($subType !== null) {
-            throw CannotMapTypeException::createForType($subType);
+            throw CannotMapTypeException::createForType($className);
         }
 
         if (isset($this->types[$className])) {
@@ -113,9 +102,6 @@ final class StaticTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
-     *
-     * @param string $className
-     * @return bool
      */
     public function canMapClassToInputType(string $className): bool
     {
@@ -125,8 +111,8 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
-     * @param string $className
      * @return ResolvableMutableInputInterface&InputObjectType
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface
@@ -141,7 +127,9 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Returns a GraphQL type by name (can be either an input or output type)
      *
      * @param string $typeName The name of the GraphQL type
+     *
      * @return Type&(InputType|OutputType)
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapNameToType(string $typeName): Type
@@ -166,7 +154,6 @@ final class StaticTypeMapper implements TypeMapperInterface
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return bool
      */
     public function canMapNameToType(string $typeName): bool
     {
@@ -180,15 +167,12 @@ final class StaticTypeMapper implements TypeMapperInterface
                 return true;
             }
         }
+
         return isset($this->notMappedTypes[$typeName]);
     }
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
-     *
-     * @param string $className
-     * @param MutableObjectType $type
-     * @return bool
      */
     public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
     {
@@ -198,8 +182,6 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
-     * @param string $className
-     * @param MutableObjectType $type
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForClass(string $className, MutableObjectType $type): void
@@ -209,10 +191,6 @@ final class StaticTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
-     *
-     * @param string $typeName
-     * @param MutableObjectType $type
-     * @return bool
      */
     public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
     {
@@ -222,8 +200,6 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
-     * @param string $typeName
-     * @param MutableObjectType $type
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForName(string $typeName, MutableObjectType $type): void
@@ -233,10 +209,6 @@ final class StaticTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
-     *
-     * @param string $typeName
-     * @param ResolvableMutableInputInterface $type
-     * @return bool
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
@@ -246,8 +218,6 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
-     * @param string $typeName
-     * @param ResolvableMutableInputInterface $type
      * @throws CannotMapTypeExceptionInterface
      */
     public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void

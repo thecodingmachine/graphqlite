@@ -1,21 +1,20 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Cache\ApcuCache;
-use function extension_loaded;
 use GraphQL\Type\SchemaConfig;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
-use function sys_get_temp_dir;
 use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
@@ -35,10 +34,11 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
-use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use function extension_loaded;
+use function function_exists;
+use function sys_get_temp_dir;
 
 /**
  * A class to help getting started with GraphQLite.
@@ -46,61 +46,40 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 class SchemaFactory
 {
+    /** @var string[] */
     private $controllerNamespaces = [];
+    /** @var string[] */
     private $typeNamespaces = [];
-    /**
-     * @var QueryProviderInterface[]
-     */
+    /** @var QueryProviderInterface[] */
     private $queryProviders = [];
-    /**
-     * @var RootTypeMapperInterface[]
-     */
+    /** @var RootTypeMapperInterface[] */
     private $rootTypeMappers = [];
-    /**
-     * @var TypeMapperInterface[]
-     */
+    /** @var TypeMapperInterface[] */
     private $typeMappers = [];
-    /**
-     * @var ParameterMapperInterface[]
-     */
+    /** @var ParameterMapperInterface[] */
     private $parameterMappers = [];
+    /** @var Reader */
     private $doctrineAnnotationReader;
-    /**
-     * @var HydratorInterface|null
-     */
+    /** @var HydratorInterface|null */
     private $hydrator;
-    /**
-     * @var AuthenticationServiceInterface|null
-     */
+    /** @var AuthenticationServiceInterface|null */
     private $authenticationService;
-    /**
-     * @var AuthorizationServiceInterface|null
-     */
+    /** @var AuthorizationServiceInterface|null */
     private $authorizationService;
-    /**
-     * @var CacheInterface
-     */
+    /** @var CacheInterface */
     private $cache;
-    /**
-     * @var NamingStrategyInterface|null
-     */
+    /** @var NamingStrategyInterface|null */
     private $namingStrategy;
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private $container;
-    /**
-     * @var SchemaConfig
-     */
+    /** @var SchemaConfig */
     private $schemaConfig;
-    /**
-     * @var int
-     */
+    /** @var int */
     private $globTtl = 2;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
-        $this->cache = $cache;
+        $this->cache     = $cache;
         $this->container = $container;
     }
 
@@ -110,6 +89,7 @@ class SchemaFactory
     public function addControllerNamespace(string $namespace): self
     {
         $this->controllerNamespaces[] = $namespace;
+
         return $this;
     }
 
@@ -119,6 +99,7 @@ class SchemaFactory
     public function addTypeNamespace(string $namespace): self
     {
         $this->typeNamespaces[] = $namespace;
+
         return $this;
     }
 
@@ -128,6 +109,7 @@ class SchemaFactory
     public function addQueryProvider(QueryProviderInterface $queryProvider): self
     {
         $this->queryProviders[] = $queryProvider;
+
         return $this;
     }
 
@@ -137,6 +119,7 @@ class SchemaFactory
     public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper): self
     {
         $this->rootTypeMappers[] = $rootTypeMapper;
+
         return $this;
     }
 
@@ -146,12 +129,14 @@ class SchemaFactory
     public function addTypeMapper(TypeMapperInterface $typeMapper): self
     {
         $this->typeMappers[] = $typeMapper;
+
         return $this;
     }
 
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
+
         return $this;
     }
 
@@ -171,36 +156,42 @@ class SchemaFactory
 
             return $doctrineAnnotationReader;
         }
+
         return $this->doctrineAnnotationReader;
     }
 
     public function setHydrator(HydratorInterface $hydrator): self
     {
         $this->hydrator = $hydrator;
+
         return $this;
     }
 
     public function setAuthenticationService(AuthenticationServiceInterface $authenticationService): self
     {
         $this->authenticationService = $authenticationService;
+
         return $this;
     }
 
     public function setAuthorizationService(AuthorizationServiceInterface $authorizationService): self
     {
         $this->authorizationService = $authorizationService;
+
         return $this;
     }
 
     public function setNamingStrategy(NamingStrategyInterface $namingStrategy): self
     {
         $this->namingStrategy = $namingStrategy;
+
         return $this;
     }
 
     public function setSchemaConfig(SchemaConfig $schemaConfig): self
     {
         $this->schemaConfig = $schemaConfig;
+
         return $this;
     }
 
@@ -212,6 +203,7 @@ class SchemaFactory
     public function setGlobTtl(?int $globTtl): self
     {
         $this->globTtl = $globTtl;
+
         return $this;
     }
 
@@ -237,14 +229,14 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
-        $hydrator = $this->hydrator ?: new FactoryHydrator();
+        $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
+        $hydrator              = $this->hydrator ?: new FactoryHydrator();
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
-        $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
-        $typeResolver = new TypeResolver();
+        $authorizationService  = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver          = new TypeResolver();
         $cachedDocBlockFactory = new CachedDocBlockFactory($this->cache);
-        $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
-        $typeRegistry = new TypeRegistry();
+        $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry          = new TypeRegistry();
 
         if (extension_loaded('sysvsem')) {
             $lockStore = new SemaphoreStore();
@@ -256,7 +248,7 @@ class SchemaFactory
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
 
-        $rootTypeMappers = $this->rootTypeMappers;
+        $rootTypeMappers   = $this->rootTypeMappers;
         $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
         $rootTypeMappers[] = new BaseTypeMapper($recursiveTypeMapper);
         // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
@@ -264,28 +256,45 @@ class SchemaFactory
 
         $argumentResolver = new ArgumentResolver($hydrator);
 
-        $parameterMappers = $this->parameterMappers;
-        $parameterMappers[] = new ResolveInfoParameterMapper();
+        $parameterMappers         = $this->parameterMappers;
+        $parameterMappers[]       = new ResolveInfoParameterMapper();
         $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
 
         $fieldsBuilder = new FieldsBuilder(
-            $annotationReader, $recursiveTypeMapper, $argumentResolver, $authenticationService,
-            $authorizationService, $typeResolver, $cachedDocBlockFactory, $namingStrategy, $compositeRootTypeMapper,
+            $annotationReader,
+            $recursiveTypeMapper,
+            $argumentResolver,
+            $authenticationService,
+            $authorizationService,
+            $typeResolver,
+            $cachedDocBlockFactory,
+            $namingStrategy,
+            $compositeRootTypeMapper,
             $compositeParameterMapper
         );
 
-
-        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
-        $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $argumentResolver, $fieldsBuilder);
+        $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
+        $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
 
         if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
             throw new GraphQLException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
         foreach ($this->typeNamespaces as $typeNamespace) {
-            $compositeTypeMapper->addTypeMapper(new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
-                $this->container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $lockFactory, $this->cache, $this->globTtl));
+            $compositeTypeMapper->addTypeMapper(new GlobTypeMapper(
+                $typeNamespace,
+                $typeGenerator,
+                $inputTypeGenerator,
+                $inputTypeUtils,
+                $this->container,
+                $annotationReader,
+                $namingStrategy,
+                $recursiveTypeMapper,
+                $lockFactory,
+                $this->cache,
+                $this->globTtl
+            ));
         }
 
         foreach ($this->typeMappers as $typeMapper) {
@@ -296,8 +305,14 @@ class SchemaFactory
 
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
-            $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilder,
-                $this->container, $lockFactory, $this->cache, $this->globTtl);
+            $queryProviders[] = new GlobControllerQueryProvider(
+                $controllerNamespace,
+                $fieldsBuilder,
+                $this->container,
+                $lockFactory,
+                $this->cache,
+                $this->globTtl
+            );
         }
 
         foreach ($this->queryProviders as $queryProvider) {

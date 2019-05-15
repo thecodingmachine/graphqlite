@@ -150,7 +150,6 @@ class EndToEndTest extends TestCase
             InputTypeGenerator::class => function(ContainerInterface $container) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
-                    $container->get(ArgumentResolver::class),
                     $container->get(FieldsBuilder::class)
                 );
             },

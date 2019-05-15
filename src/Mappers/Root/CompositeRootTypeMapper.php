@@ -1,23 +1,21 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
-
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
-use function is_array;
-use function iterator_to_array;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
+use function is_array;
+use function iterator_to_array;
 
 class CompositeRootTypeMapper implements RootTypeMapperInterface
 {
-    /**
-     * @var RootTypeMapperInterface[]
-     */
+    /** @var RootTypeMapperInterface[] */
     private $rootTypeMappers;
 
     /**
@@ -36,6 +34,7 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
                 return $mappedType;
             }
         }
+
         return null;
     }
 
@@ -47,6 +46,7 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
                 return $mappedType;
             }
         }
+
         return null;
     }
 
@@ -56,7 +56,6 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
      * also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return NamedType|null
      */
     public function mapNameToType(string $typeName): ?NamedType
     {
@@ -66,6 +65,7 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
                 return $mappedType;
             }
         }
+
         return null;
     }
 }

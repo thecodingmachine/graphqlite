@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
@@ -13,9 +14,7 @@ use function iterator_to_array;
  */
 class AggregateQueryProvider implements QueryProviderInterface
 {
-    /**
-     * @var QueryProviderInterface[]
-     */
+    /** @var QueryProviderInterface[] */
     private $queryProviders;
 
     /**
@@ -31,10 +30,13 @@ class AggregateQueryProvider implements QueryProviderInterface
      */
     public function getQueries(): array
     {
-        $queriesArray = array_map(function(QueryProviderInterface $queryProvider) { return $queryProvider->getQueries(); }, $this->queryProviders);
+        $queriesArray = array_map(static function (QueryProviderInterface $queryProvider) {
+            return $queryProvider->getQueries();
+        }, $this->queryProviders);
         if ($queriesArray === []) {
             return [];
         }
+
         return array_merge(...$queriesArray);
     }
 
@@ -43,10 +45,13 @@ class AggregateQueryProvider implements QueryProviderInterface
      */
     public function getMutations(): array
     {
-        $mutationsArray = array_map(function(QueryProviderInterface $queryProvider) { return $queryProvider->getMutations(); }, $this->queryProviders);
+        $mutationsArray = array_map(static function (QueryProviderInterface $queryProvider) {
+            return $queryProvider->getMutations();
+        }, $this->queryProviders);
         if ($mutationsArray === []) {
             return [];
         }
+
         return array_merge(...$mutationsArray);
     }
 }

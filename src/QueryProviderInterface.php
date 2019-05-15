@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
-
 
 /**
  * Returns a list of queries to be put in the GraphQL schema

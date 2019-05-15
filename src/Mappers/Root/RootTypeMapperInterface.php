@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
@@ -9,7 +10,6 @@ use GraphQL\Type\Definition\OutputType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
-
 
 /**
  * Maps a method return type or argument to a GraphQL Type.
@@ -33,7 +33,6 @@ interface RootTypeMapperInterface
      * also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return NamedType|null
      */
     public function mapNameToType(string $typeName): ?NamedType;
 }

@@ -1,27 +1,20 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
-
-use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\NamedType;
-use GraphQL\Type\Definition\OutputType;
-use function is_array;
-use function iterator_to_array;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
-use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use function is_array;
+use function iterator_to_array;
 
 class CompositeParameterMapper implements ParameterMapperInterface
 {
-    /**
-     * @var ParameterMapperInterface[]
-     */
+    /** @var ParameterMapperInterface[] */
     private $parameterMappers;
 
     /**
@@ -40,6 +33,7 @@ class CompositeParameterMapper implements ParameterMapperInterface
                 return $parameterObj;
             }
         }
+
         return null;
     }
 }

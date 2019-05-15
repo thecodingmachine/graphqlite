@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-
+use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 
-class InvalidTypesInUnionException extends \InvalidArgumentException implements CannotMapTypeExceptionInterface
+class InvalidTypesInUnionException extends InvalidArgumentException implements CannotMapTypeExceptionInterface
 {
     public static function notObjectType(): self
     {

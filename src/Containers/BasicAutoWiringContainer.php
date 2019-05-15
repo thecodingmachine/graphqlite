@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Containers;
 
-use function class_exists;
+use GraphQL\Type\Definition\ObjectType;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use GraphQL\Type\Definition\ObjectType;
+use ReflectionClass;
+use function class_exists;
 
 /**
  * The BasicAutoWiringContainer is a container wrapper that will automatically instantiate classes that have
@@ -15,13 +17,9 @@ use GraphQL\Type\Definition\ObjectType;
  */
 class BasicAutoWiringContainer implements ContainerInterface
 {
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private $container;
-    /**
-     * @var ObjectType[]
-     */
+    /** @var ObjectType[] */
     private $values = [];
 
     /**
@@ -37,10 +35,12 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @param string $id Identifier of the entry to look for.
      *
+     * @return mixed Entry.
+     *
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      * @throws ContainerExceptionInterface Error while retrieving the entry.
      *
-     * @return mixed Entry.
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
     public function get($id)
     {
@@ -53,11 +53,12 @@ class BasicAutoWiringContainer implements ContainerInterface
 
         // The container will try to instantiate the type if the class exists and has an annotation.
         if (class_exists($id)) {
-            $refTypeClass = new \ReflectionClass($id);
+            $refTypeClass = new ReflectionClass($id);
             if ($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0) {
                 throw NotFoundException::notFoundInContainer($id);
             }
             $this->values[$id] = new $id();
+
             return $this->values[$id];
         }
 
@@ -73,9 +74,9 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @param string $id Identifier of the entry to look for.
      *
-     * @return bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
      */
-    public function has($id)
+    public function has($id): bool
     {
         if (isset($this->values[$id])) {
             return true;
@@ -85,9 +86,11 @@ class BasicAutoWiringContainer implements ContainerInterface
         }
 
         if (class_exists($id)) {
-            $refTypeClass = new \ReflectionClass($id);
-            return !($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0);
+            $refTypeClass = new ReflectionClass($id);
+
+            return ! ($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0);
         }
+
         return false;
     }
 }

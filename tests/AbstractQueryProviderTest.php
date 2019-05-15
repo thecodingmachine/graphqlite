@@ -235,7 +235,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->hydrator === null) {
             $this->hydrator = new class implements HydratorInterface {
-                public function hydrate($source, array $data, $context, ResolveInfo $resolveInfo,InputObjectType $type)
+                public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo,InputObjectType $type): object
                 {
                     return new TestObject($data['test']);
                 }
@@ -338,7 +338,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->inputTypeGenerator !== null) {
             return $this->inputTypeGenerator;
         }
-        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getArgumentResolver(), $this->getFieldsBuilder());
+        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getFieldsBuilder());
         return $this->inputTypeGenerator;
     }
 

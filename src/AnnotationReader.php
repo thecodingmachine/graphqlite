@@ -1,18 +1,16 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-
-use function array_merge;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\Reader;
-use function in_array;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use function strpos;
-use function substr;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
@@ -20,22 +18,27 @@ use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use function array_filter;
+use function array_key_exists;
+use function array_merge;
+use function in_array;
+use function strpos;
+use function strrpos;
+use function substr;
 
 class AnnotationReader
 {
-    /**
-     * @var Reader
-     */
+    /** @var Reader */
     private $reader;
 
     // In this mode, no exceptions will be thrown for incorrect annotations (unless the name of the annotation we are looking for is part of the docblock)
-    const LAX_MODE = 'LAX_MODE';
+    public const LAX_MODE = 'LAX_MODE';
     // In this mode, exceptions will be thrown for any incorrect annotations.
-    const STRICT_MODE = 'STRICT_MODE';
+    public const STRICT_MODE = 'STRICT_MODE';
 
     /**
      * Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
@@ -52,18 +55,16 @@ class AnnotationReader
     private $mode;
 
     /**
-     * AnnotationReader constructor.
-     * @param Reader $reader
-     * @param string $mode One of self::LAX_MODE or self::STRICT_MODE
-     * @param array $strictNamespaces
+     * @param string   $mode             One of self::LAX_MODE or self::STRICT_MODE
+     * @param string[] $strictNamespaces
      */
     public function __construct(Reader $reader, string $mode = self::STRICT_MODE, array $strictNamespaces = [])
     {
         $this->reader = $reader;
-        if (!in_array($mode, [self::LAX_MODE, self::STRICT_MODE], true)) {
-            throw new \InvalidArgumentException('The mode passed must be one of AnnotationReader::LAX_MODE, AnnotationReader::STRICT_MODE');
+        if (! in_array($mode, [self::LAX_MODE, self::STRICT_MODE], true)) {
+            throw new InvalidArgumentException('The mode passed must be one of AnnotationReader::LAX_MODE, AnnotationReader::STRICT_MODE');
         }
-        $this->mode = $mode;
+        $this->mode             = $mode;
         $this->strictNamespaces = $strictNamespaces;
     }
 
@@ -78,6 +79,7 @@ class AnnotationReader
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapException($e, $refClass->getName());
         }
+
         return $type;
     }
 
@@ -89,6 +91,7 @@ class AnnotationReader
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapExceptionForExtendTag($e, $refClass->getName());
         }
+
         return $extendType;
     }
 
@@ -96,6 +99,7 @@ class AnnotationReader
     {
         /** @var AbstractRequest|null $queryAnnotation */
         $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationName);
+
         return $queryAnnotation;
     }
 
@@ -103,6 +107,7 @@ class AnnotationReader
     {
         /** @var Logged|null $loggedAnnotation */
         $loggedAnnotation = $this->getMethodAnnotation($refMethod, Logged::class);
+
         return $loggedAnnotation;
     }
 
@@ -110,6 +115,7 @@ class AnnotationReader
     {
         /** @var Right|null $rightAnnotation */
         $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
+
         return $rightAnnotation;
     }
 
@@ -117,6 +123,7 @@ class AnnotationReader
     {
         /** @var FailWith|null $failWithAnnotation */
         $failWithAnnotation = $this->getMethodAnnotation($refMethod, FailWith::class);
+
         return $failWithAnnotation;
     }
 
@@ -127,6 +134,7 @@ class AnnotationReader
     {
         /** @var SourceField[] $sourceFields */
         $sourceFields = $this->getClassAnnotations($refClass, SourceField::class);
+
         return $sourceFields;
     }
 
@@ -134,6 +142,7 @@ class AnnotationReader
     {
         /** @var Factory|null $factoryAnnotation */
         $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
+
         return $factoryAnnotation;
     }
 
@@ -141,6 +150,7 @@ class AnnotationReader
     {
         /** @var Decorate|null $decorateAnnotation */
         $decorateAnnotation = $this->getMethodAnnotation($refMethod, Decorate::class);
+
         return $decorateAnnotation;
     }
 
@@ -151,6 +161,7 @@ class AnnotationReader
     {
         /** @var Parameter[] $useInputTypes */
         $useInputTypes = $this->getMethodAnnotations($refMethod, Parameter::class);
+
         return $useInputTypes;
     }
 
@@ -162,15 +173,14 @@ class AnnotationReader
                 return $annotation;
             }
         }
+
         return null;
     }
 
     /**
      * Returns a class annotation. Finds in the parents if not found in the main class.
-     *
-     * @return object|null
      */
-    private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass)
+    private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
         do {
             $type = null;
@@ -187,7 +197,7 @@ class AnnotationReader
                             return null;
                         }
                     default:
-                        throw new \RuntimeException("Unexpected mode '$this->mode'."); // @codeCoverageIgnore
+                        throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
                 }
             }
             if ($type !== null) {
@@ -195,20 +205,20 @@ class AnnotationReader
             }
             $refClass = $refClass->getParentClass();
         } while ($refClass);
+
         return null;
     }
-    
+
+    /** @var array<string, (object|null)> */
     private $methodAnnotationCache = [];
 
     /**
      * Returns a method annotation and handles correctly errors.
-     *
-     * @return object|null
      */
-    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass)
+    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?object
     {
-        $cacheKey = $refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName().'_'.$annotationClass;
-        if (isset($this->methodAnnotationCache[$cacheKey])) {
+        $cacheKey = $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '_' . $annotationClass;
+        if (array_key_exists($cacheKey, $this->methodAnnotationCache)) {
             return $this->methodAnnotationCache[$cacheKey];
         }
 
@@ -225,14 +235,13 @@ class AnnotationReader
                         return null;
                     }
                 default:
-                    throw new \RuntimeException("Unexpected mode '$this->mode'."); // @codeCoverageIgnore
+                    throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
             }
         }
     }
 
     /**
      * Returns true if the annotation class name is part of the docblock comment.
-     *
      */
     private function isErrorImportant(string $annotationClass, string $docComment, string $className): bool
     {
@@ -242,7 +251,8 @@ class AnnotationReader
             }
         }
         $shortAnnotationClass = substr($annotationClass, strrpos($annotationClass, '\\') + 1);
-        return strpos($docComment, '@'.$shortAnnotationClass) !== false;
+
+        return strpos($docComment, '@' . $shortAnnotationClass) !== false;
     }
 
     /**
@@ -255,14 +265,16 @@ class AnnotationReader
         $toAddAnnotations = [];
         do {
             try {
-                $allAnnotations = $this->reader->getClassAnnotations($refClass);
-                $toAddAnnotations[] = \array_filter($allAnnotations, static function($annotation) use ($annotationClass): bool {
+                $allAnnotations     = $this->reader->getClassAnnotations($refClass);
+                $toAddAnnotations[] = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
             } catch (AnnotationException $e) {
                 if ($this->mode === self::STRICT_MODE) {
                     throw $e;
-                } elseif ($this->mode === self::LAX_MODE) {
+                }
+
+                if ($this->mode === self::LAX_MODE) {
                     if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
                         throw $e;
                     }
@@ -271,41 +283,48 @@ class AnnotationReader
             $refClass = $refClass->getParentClass();
         } while ($refClass);
 
-        if (!empty($toAddAnnotations)) {
+        if (! empty($toAddAnnotations)) {
             return array_merge(...$toAddAnnotations);
-        } else {
-            return [];
         }
+
+        return [];
     }
+
+    /** @var array<string, array<object>> */
+    private $methodAnnotationsCache = [];
 
     /**
      * Returns the method's annotations.
      *
-     * @return object[]
+     * @return array<int, object>
      */
     public function getMethodAnnotations(ReflectionMethod $refMethod, string $annotationClass): array
     {
-        $cacheKey = $refMethod->getDeclaringClass()->getName().'::'.$refMethod->getName().'_s_'.$annotationClass;
-        if (isset($this->methodAnnotationCache[$cacheKey])) {
-            return $this->methodAnnotationCache[$cacheKey];
+        $cacheKey = $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '_s_' . $annotationClass;
+        if (isset($this->methodAnnotationsCache[$cacheKey])) {
+            return $this->methodAnnotationsCache[$cacheKey];
         }
 
         $toAddAnnotations = [];
         try {
-            $allAnnotations = $this->reader->getMethodAnnotations($refMethod);
-            $toAddAnnotations = \array_filter($allAnnotations, static function($annotation) use ($annotationClass): bool {
+            $allAnnotations   = $this->reader->getMethodAnnotations($refMethod);
+            $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });
         } catch (AnnotationException $e) {
             if ($this->mode === self::STRICT_MODE) {
                 throw $e;
-            } elseif ($this->mode === self::LAX_MODE) {
+            }
+
+            if ($this->mode === self::LAX_MODE) {
                 if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
                     throw $e;
                 }
             }
         }
 
-        return $this->methodAnnotationCache[$cacheKey] = $toAddAnnotations;
+        $this->methodAnnotationsCache[$cacheKey] = $toAddAnnotations;
+
+        return $toAddAnnotations;
     }
 }

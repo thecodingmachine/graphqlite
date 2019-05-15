@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 use function lcfirst;
 use function strlen;
 use function strpos;
+use function strrpos;
 use function substr;
-use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class NamingStrategy implements NamingStrategyInterface
 {
@@ -19,7 +20,7 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getInterfaceNameFromConcreteName(string $concreteType): string
     {
-        return $concreteType.'Interface';
+        return $concreteType . 'Interface';
     }
 
     /**
@@ -27,18 +28,21 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getOutputTypeName(string $typeClassName, Type $type): string
     {
-        if ($prevPos = strrpos($typeClassName, '\\')) {
+        $prevPos = strrpos($typeClassName, '\\');
+        if ($prevPos) {
             $typeClassName = substr($typeClassName, $prevPos + 1);
         }
         // By default, if the class name ends with Type, let's take the name of the class for the type
-        if (!$type->isSelfType() && substr($typeClassName, -4) === 'Type') {
+        if (! $type->isSelfType() && substr($typeClassName, -4) === 'Type') {
             return substr($typeClassName, 0, -4);
         }
         // Else, let's take the name of the targeted class
         $typeClassName = $type->getClass();
-        if ($prevPos = strrpos($typeClassName, '\\')) {
+        $prevPos       = strrpos($typeClassName, '\\');
+        if ($prevPos) {
             $typeClassName = substr($typeClassName, $prevPos + 1);
         }
+
         return $typeClassName;
     }
 
@@ -48,10 +52,12 @@ class NamingStrategy implements NamingStrategyInterface
         if ($inputTypeName !== null) {
             return $inputTypeName;
         }
-        if ($prevPos = strrpos($className, '\\')) {
+        $prevPos = strrpos($className, '\\');
+        if ($prevPos) {
             $className = substr($className, $prevPos + 1);
         }
-        return $className.'Input';
+
+        return $className . 'Input';
     }
 
     /**
@@ -66,6 +72,7 @@ class NamingStrategy implements NamingStrategyInterface
         if (strpos($methodName, 'is') === 0 && strlen($methodName) > 2) {
             return lcfirst(substr($methodName, 2));
         }
+
         return $methodName;
     }
 }

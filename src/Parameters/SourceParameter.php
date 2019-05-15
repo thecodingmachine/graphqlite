@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Parameters;
-
 
 use GraphQL\Type\Definition\ResolveInfo;
 
@@ -12,13 +12,12 @@ use GraphQL\Type\Definition\ResolveInfo;
 class SourceParameter implements ParameterInterface
 {
     /**
-     * @param object $source
      * @param array<string, mixed> $args
-     * @param mixed $context
-     * @param ResolveInfo $info
+     * @param mixed                $context
+     *
      * @return mixed
      */
-    public function resolve($source, $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
     {
         return $source;
     }

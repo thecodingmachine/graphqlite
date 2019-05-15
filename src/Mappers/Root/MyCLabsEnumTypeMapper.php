@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
@@ -12,13 +13,13 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
+use function is_a;
 
 /**
  * Maps an class extending MyCLabs enums to a GraphQL type
  */
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
-
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
         return $this->map($type);
@@ -32,17 +33,19 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     private function map(Type $type): ?EnumType
     {
         if ($type instanceof Object_ && is_a((string) $type->getFqsen(), Enum::class, true)) {
-            $enumClass = (string) $type->getFqsen();
-            $consts = $enumClass::toArray();
+            $enumClass      = (string) $type->getFqsen();
+            $consts         = $enumClass::toArray();
             $constInstances = [];
             foreach ($consts as $key => $value) {
                 $constInstances[$value] = ['value' => $enumClass::$key()];
             }
+
             return new EnumType([
                 'name' => $type->getFqsen()->getName(),
-                'values' => $constInstances
+                'values' => $constInstances,
             ]);
         }
+
         return null;
     }
 
@@ -52,7 +55,6 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      * also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return NamedType|null
      */
     public function mapNameToType(string $typeName): ?NamedType
     {

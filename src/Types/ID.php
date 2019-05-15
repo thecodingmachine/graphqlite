@@ -1,17 +1,25 @@
 <?php
+
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Types;
 
-
 use InvalidArgumentException;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use function is_object;
+use function is_scalar;
+use function method_exists;
 
 /**
  * A class that maps to the GraphQL ID type.
  */
 class ID
 {
+    /** @var bool|float|int|string */
     private $value;
 
+    /**
+     * @param mixed $value
+     */
     public function __construct($value)
     {
         if (! is_scalar($value) && (! is_object($value) || ! method_exists($value, '__toString'))) {
@@ -28,7 +36,7 @@ class ID
         return $this->value;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->value;
     }

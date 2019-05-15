@@ -1,30 +1,27 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Hydrators;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
-use TheCodingMachine\GraphQLite\GraphQLException;
-use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 /**
  * Hydrates input types based on the Factory annotation.
  */
 class FactoryHydrator implements HydratorInterface
 {
-
     /**
      * Hydrates/returns an object based on a PHP array and a GraphQL type.
      *
      * @param mixed[] $data
-     * @param InputObjectType $type
-     * @return object
+     * @param mixed   $context
+     *
      * @throws CannotHydrateException
      */
-    public function hydrate($source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type)
+    public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo, InputObjectType $type): object
     {
         if ($type instanceof ResolvableMutableInputInterface) {
             return $type->resolve($source, $data, $context, $resolveInfo);
@@ -36,8 +33,6 @@ class FactoryHydrator implements HydratorInterface
      * Whether this hydrate can hydrate the passed data.
      *
      * @param mixed[] $data
-     * @param InputObjectType $type
-     * @return bool
      */
     public function canHydrate(array $data, InputObjectType $type): bool
     {

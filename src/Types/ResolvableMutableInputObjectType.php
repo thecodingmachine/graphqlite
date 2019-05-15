@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
@@ -9,28 +10,18 @@ use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use function count;
 
 /**
  * A GraphQL input object that can be resolved using a factory
  */
 class ResolvableMutableInputObjectType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
-    /**
-     * @var ArgumentResolver
-     */
-    private $argumentResolver;
-
-    /**
-     * @var callable&array<int, object|string>
-     */
+    /** @var callable&array<int, object|string> */
     private $resolve;
-    /**
-     * @var ParameterInterface[]
-     */
+    /** @var ParameterInterface[] */
     private $parameters;
-    /**
-     * @var FieldsBuilder
-     */
+    /** @var FieldsBuilder */
     private $fieldsBuilder;
     /**
      * The list of decorator callables to be applied.
@@ -47,21 +38,15 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     private $decoratorsParameters = [];
 
     /**
-     * @param string $name
-     * @param FieldsBuilder $fieldsBuilder
-     * @param object|string $factory
-     * @param string $methodName
-     * @param ArgumentResolver $argumentResolver
-     * @param null|string $comment
-     * @param array $additionalConfig
+     * @param object|string       $factory
+     * @param array<string,mixed> $additionalConfig
      */
-    public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ArgumentResolver $argumentResolver, ?string $comment, array $additionalConfig = [])
+    public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ?string $comment, array $additionalConfig = [])
     {
-        $this->argumentResolver = $argumentResolver;
-        $this->resolve = [ $factory, $methodName ];
+        $this->resolve       = [ $factory, $methodName ];
         $this->fieldsBuilder = $fieldsBuilder;
 
-        $fields = function() {
+        $fields = function () {
             return InputTypeUtils::getInputTypeArgs($this->getParameters());
         };
 
@@ -83,9 +68,10 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     private function getParameters(): array
     {
         if ($this->parameters === null) {
-            $method = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
+            $method           = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
             $this->parameters = $this->fieldsBuilder->getParameters($method);
         }
+
         return $this->parameters;
     }
 
@@ -94,21 +80,19 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      */
     private function getParametersForDecorator(int $key): array
     {
-        if (!isset($this->decoratorsParameters[$key])) {
-            $method = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
+        if (! isset($this->decoratorsParameters[$key])) {
+            $method                           = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
             $this->decoratorsParameters[$key] = $this->fieldsBuilder->getParametersForDecorator($method);
         }
+
         return $this->decoratorsParameters[$key];
     }
 
     /**
-     * @param object $source
      * @param array<string, mixed> $args
-     * @param mixed $context
-     * @param ResolveInfo $resolveInfo
-     * @return object
+     * @param mixed                $context
      */
-    public function resolve($source, array $args, $context, ResolveInfo $resolveInfo)
+    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
         $parameters = $this->getParameters();
 
@@ -149,7 +133,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 
         $key = count($this->decorators)-1;
 
-        $this->addFields(function() use ($key) {
+        $this->addFields(function () use ($key) {
             return InputTypeUtils::getInputTypeArgs($this->getParametersForDecorator($key));
         });
     }

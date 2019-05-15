@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
-
 
 class MappedClass
 {
@@ -16,9 +16,7 @@ class MappedClass
      */
     //private $parent;
 
-    /**
-     * @var MappedClass[]
-     */
+    /** @var MappedClass[] */
     private $children = [];
 
     /*public function __construct(string $className)
@@ -58,9 +56,6 @@ class MappedClass
         return $this->children;
     }
 
-    /**
-     * @param MappedClass $child
-     */
     public function addChild(MappedClass $child): void
     {
         $this->children[] = $child;

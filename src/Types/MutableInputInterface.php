@@ -1,7 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+declare(strict_types=1);
 
+namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\InputType;
 
