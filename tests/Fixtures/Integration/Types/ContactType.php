@@ -31,14 +31,17 @@ class ContactType
     /**
      * @Field(prefetchMethod="prefetchContacts")
      */
-    public function repeatName(Contact $contact, $data): string
+    public function repeatName(Contact $contact, $data, string $suffix): string
     {
-        $index = array_search($contact, $data, true);
-        return $data[$index]->getName();
+        $index = array_search($contact, $data['contacts'], true);
+        return $data['prefix'].$data['contacts'][$index]->getName().$suffix;
     }
 
-    public function prefetchContacts(iterable $contacts)
+    public function prefetchContacts(iterable $contacts, string $prefix)
     {
-        return $contacts;
+        return [
+            'contacts' => $contacts,
+            'prefix' => $prefix
+        ];
     }
 }
