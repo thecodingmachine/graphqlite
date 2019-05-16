@@ -27,7 +27,7 @@ use function array_values;
 class QueryField extends FieldDefinition
 {
     /**
-     * @param OutputType                        &Type                 $type
+     * @param OutputType&Type                 $type
      * @param array<string, ParameterInterface> $arguments            Indexed by argument name.
      * @param (callable&array<int,mixed>)|null  $resolve              The method to execute
      * @param string|null                       $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
@@ -110,49 +110,59 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ?string $comment): self
+    public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, $value): self
     {
+        // TODO: type should be changed ALWAYS (even if the guy is connected)
+        $type = $fieldDescriptor->getType();
         if ($value === null && $type instanceof NonNull) {
             $type = $type->getWrappedType();
+            $fieldDescriptor->setType($type);
         }
         $callable = static function () use ($value) {
             return $value;
         };
 
-        return new self($name, $type, $arguments, $callable, null, $comment, null, []);
+        $fieldDescriptor->setCallable($callable);
+
+        return self::fromDescriptor($fieldDescriptor);
     }
 
-    /**
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
-     *
-     * @return QueryField
-     */
-    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ?string $comment, ?string $prefetchMethodName, array $prefetchArgs): self
+    private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
-        if ($prefetchMethodName !== null) {
-            array_unshift($arguments, new PrefetchDataParameter());
-        }
-
-        return new self($name, $type, $arguments, null, $targetMethodOnSource, $comment, $prefetchMethodName, $prefetchArgs);
+        return new self(
+            $fieldDescriptor->getName(),
+            $fieldDescriptor->getType(),
+            $fieldDescriptor->getParameters(),
+            $fieldDescriptor->getCallable(),
+            $fieldDescriptor->getTargetMethodOnSource(),
+            $fieldDescriptor->getComment(),
+            $fieldDescriptor->getPrefetchMethodName(),
+            $fieldDescriptor->getPrefetchParameters());
     }
 
-    /**
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
-     *
-     * @return QueryField
-     */
-    public static function externalField(string $name, OutputType $type, array $arguments, callable $callable, ?string $comment, bool $injectSource, ?string $prefetchMethodName, array $prefetchArgs): self
+    public static function selfField(QueryFieldDescriptor $fieldDescriptor): self
     {
-        if ($prefetchMethodName !== null) {
+        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
+            $arguments = $fieldDescriptor->getParameters();
+            array_unshift($arguments, new PrefetchDataParameter());
+            $fieldDescriptor->setParameters($arguments);
+        }
+
+        return self::fromDescriptor($fieldDescriptor);
+    }
+
+    public static function externalField(QueryFieldDescriptor $fieldDescriptor): self
+    {
+        $arguments = $fieldDescriptor->getParameters();
+        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
             array_unshift($arguments, new PrefetchDataParameter());
         }
-        if ($injectSource === true) {
+        if ($fieldDescriptor->isInjectSource() === true) {
             array_unshift($arguments, new SourceParameter());
         }
+        $fieldDescriptor->setParameters($arguments);
 
-        return new self($name, $type, $arguments, $callable, null, $comment, $prefetchMethodName, $prefetchArgs);
+        return self::fromDescriptor($fieldDescriptor);
     }
 
     /**

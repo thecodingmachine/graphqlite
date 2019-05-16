@@ -30,6 +30,7 @@ interface SourceFieldInterface
 
     /**
      * If the GraphQL type is "ID", isID will return true.
+     * @deprecated
      */
     public function isId(): bool;
 

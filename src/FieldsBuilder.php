@@ -246,11 +246,15 @@ class FieldsBuilder
                 $unauthorized = true;
             }
 
+            $fieldDescriptor = new QueryFieldDescriptor();
+
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
 
             $methodName = $refMethod->getName();
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
+
+            $fieldDescriptor->setName($name);
 
             // Get parameters from the prefetchMethod method if any.
             $prefetchMethodName = null;
@@ -258,6 +262,7 @@ class FieldsBuilder
             if ($queryAnnotation instanceof Field) {
                 $prefetchMethodName = $queryAnnotation->getPrefetchMethod();
                 if ($prefetchMethodName !== null) {
+                    $fieldDescriptor->setPrefetchMethodName($prefetchMethodName);
                     try {
                         $prefetchRefMethod = $refClass->getMethod($prefetchMethodName);
                     } catch (ReflectionException $e) {
@@ -270,6 +275,7 @@ class FieldsBuilder
                     $prefetchDocBlockObj = $this->cachedDocBlockFactory->getDocBlock($prefetchRefMethod);
 
                     $prefetchArgs = $this->mapParameters($prefetchParameters, $prefetchDocBlockObj);
+                    $fieldDescriptor->setPrefetchParameters($prefetchArgs);
                 }
             }
 
@@ -287,6 +293,8 @@ class FieldsBuilder
 
             $args = $this->mapParameters($parameters, $docBlockObj);
 
+            $fieldDescriptor->setParameters($args);
+
             if ($queryAnnotation->getOutputType()) {
                 try {
                     $type = $this->typeResolver->mapNameToOutputType($queryAnnotation->getOutputType());
@@ -297,13 +305,19 @@ class FieldsBuilder
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
 
+            $fieldDescriptor->setType($type);
+            $fieldDescriptor->setInjectSource($injectSource);
+
             if ($unauthorized) {
                 $failWithValue = $failWith->getValue();
-                $queryList[]   = QueryField::alwaysReturn($name, $type, $args, $failWithValue, $docBlockComment);
+                $queryList[]   = QueryField::alwaysReturn($fieldDescriptor, $failWithValue);
             } elseif ($sourceClassName !== null) {
-                $queryList[] = QueryField::selfField($name, $type, $args, $methodName, $docBlockComment, $prefetchMethodName, $prefetchArgs);
+                $fieldDescriptor->setTargetMethodOnSource($methodName);
+                $queryList[] = QueryField::selfField($fieldDescriptor);
             } else {
-                $queryList[] = QueryField::externalField($name, $type, $args, [$controller, $methodName], $docBlockComment, $injectSource, $prefetchMethodName, $prefetchArgs);
+
+                $fieldDescriptor->setCallable([$controller, $methodName]);
+                $queryList[] = QueryField::externalField($fieldDescriptor);
             }
         }
 
@@ -311,7 +325,7 @@ class FieldsBuilder
     }
 
     /**
-     * @param array<int, SourceFieldInterface> $sourceFields
+     * @param SourceFieldInterface[] $sourceFields
      *
      * @return QueryField[]
      *
@@ -361,12 +375,21 @@ class FieldsBuilder
                 throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
             }
 
+            $fieldDescriptor = new QueryFieldDescriptor();
+            $fieldDescriptor->setName($sourceField->getName());
+
             $methodName = $refMethod->getName();
+
+            $fieldDescriptor->setTargetMethodOnSource($methodName);
 
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
 
+            $fieldDescriptor->setComment($docBlockComment);
+
             $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
+
+            $fieldDescriptor->setParameters($args);
 
             if ($sourceField->isId()) {
                 $type = GraphQLType::id();
@@ -383,11 +406,13 @@ class FieldsBuilder
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
 
+            $fieldDescriptor->setType($type);
+
             if (! $unauthorized) {
-                $queryList[] = QueryField::selfField($sourceField->getName(), $type, $args, $methodName, $docBlockComment, null, []);
+                $queryList[] = QueryField::selfField($fieldDescriptor);
             } else {
                 $failWithValue = $sourceField->getFailWith();
-                $queryList[]   = QueryField::alwaysReturn($sourceField->getName(), $type, $args, $failWithValue, $docBlockComment);
+                $queryList[]   = QueryField::alwaysReturn($fieldDescriptor, $failWithValue);
             }
         }
 
