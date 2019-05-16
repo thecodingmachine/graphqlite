@@ -21,4 +21,5 @@ On the other hand, if you are a power user and if you are wiring GraphQLite serv
   type mappers in it.
 - The `FieldsBuilder` now accept an extra argument: the `RootTypeMapper` that you need to instantiate accordingly. Take
   a look at the `SchemaFactory` class for an example of proper configuration.
-
+- The `HydratorInterface` and all implementations are gone. When returning an input object from a TypeMapper, the object
+  must now implement the `ResolvableMutableInputInterface` (an input object type that contains its own resolver)

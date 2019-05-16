@@ -15,8 +15,6 @@ use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
-use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
-use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
@@ -80,7 +78,7 @@ class EndToEndTest extends TestCase
                 );
             },
             ArgumentResolver::class => function(ContainerInterface $container) {
-                return new ArgumentResolver($container->get(HydratorInterface::class));
+                return new ArgumentResolver();
             },
             TypeResolver::class => function(ContainerInterface $container) {
                 return new TypeResolver();
@@ -161,12 +159,6 @@ class EndToEndTest extends TestCase
             },
             AnnotationReader::class => function(ContainerInterface $container) {
                 return new AnnotationReader(new DoctrineAnnotationReader());
-            },
-            HydratorInterface::class => function(ContainerInterface $container) {
-                return new FactoryHydrator();
-            },
-            ArgumentResolver::class => function(ContainerInterface $container) {
-                return new ArgumentResolver($container->get(HydratorInterface::class));
             },
             NamingStrategyInterface::class => function() {
                 return new NamingStrategy();

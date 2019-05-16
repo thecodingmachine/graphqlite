@@ -6,7 +6,6 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\IDType;
-use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\LeafType;
 use GraphQL\Type\Definition\ListOfType;
@@ -15,8 +14,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\Hydrators\CannotHydrateException;
-use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use function array_map;
 use function get_class;
 use function is_array;
@@ -26,14 +23,6 @@ use function is_array;
  */
 class ArgumentResolver
 {
-    /** @var HydratorInterface */
-    private $hydrator;
-
-    public function __construct(HydratorInterface $hydrator)
-    {
-        $this->hydrator = $hydrator;
-    }
-
     /**
      * Casts a value received from GraphQL into an argument passed to a method.
      *
@@ -43,7 +32,6 @@ class ArgumentResolver
      * @return mixed
      *
      * @throws Error
-     * @throws CannotHydrateException
      */
     public function resolve(?object $source, $val, $context, ResolveInfo $resolveInfo, InputType $type)
     {
@@ -66,9 +54,8 @@ class ArgumentResolver
             return $type->parseValue($val);
         }
 
-        if ($type instanceof InputObjectType) {
-            // TODO: can we get rid of HydratorInterface? Since the ResolvableInputInterface seems to be as good.
-            return $this->hydrator->hydrate($source, $val, $context, $resolveInfo, $type);
+        if ($type instanceof ResolvableMutableInputInterface) {
+            return $type->resolve($source, $val, $context, $resolveInfo);
         }
 
         throw new RuntimeException('Unexpected type: ' . get_class($type));
