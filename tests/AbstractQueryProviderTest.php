@@ -24,7 +24,6 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
@@ -52,7 +51,6 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $testObjectType2;
     private $inputTestObjectType;
     private $typeMapper;
-    private $hydrator;
     private $argumentResolver;
     private $registry;
     private $typeGenerator;
@@ -98,18 +96,12 @@ abstract class AbstractQueryProviderTest extends TestCase
                 'fields'  => [
                     'test'   => Type::string(),
                 ],
-            ]);
+            ], function($source, $args) {
+                return new TestObject($args['test']);
+            });
         }
         return $this->inputTestObjectType;
     }
-
-    /*protected function getInputTestObjectType2()
-    {
-        if ($this->inputTestObjectType2 === null) {
-            $this->inputTestObjectType2 = new ResolvableInputObjectType('TestObjectInput2', $this->getControllerQueryProviderFactory(), $this->getTypeMapper(), new TestFactory(), 'myRecursiveFactory', $this->getHydrator(), null);
-        }
-        return $this->inputTestObjectType2;
-    }*/
 
     protected function getTypeMapper()
     {
@@ -231,28 +223,10 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->typeMapper;
     }
 
-    protected function getHydrator(): HydratorInterface
-    {
-        if ($this->hydrator === null) {
-            $this->hydrator = new class implements HydratorInterface {
-                public function hydrate(?object $source, array $data, $context, ResolveInfo $resolveInfo,InputObjectType $type): object
-                {
-                    return new TestObject($data['test']);
-                }
-
-                public function canHydrate(array $data, InputObjectType $type): bool
-                {
-                    return true;
-                }
-            };
-        }
-        return $this->hydrator;
-    }
-
     protected function getArgumentResolver(): ArgumentResolver
     {
         if ($this->argumentResolver === null) {
-            $this->argumentResolver = new ArgumentResolver($this->getHydrator());
+            $this->argumentResolver = new ArgumentResolver();
         }
         return $this->argumentResolver;
     }

@@ -7,12 +7,28 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Mocks;
 use BadMethodCallException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
+use LogicException;
+use function parent;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 class MockResolvableInputObjectType extends InputObjectType implements ResolvableMutableInputInterface
 {
     /** @var callable[] */
     private $decorators = [];
+    /**
+     * @var callable|null
+     */
+    private $resolveFn;
+
+    /**
+     * @param mixed[] $config
+     */
+    public function __construct(array $config, ?callable $resolve = null)
+    {
+        parent::__construct($config);
+
+        $this->resolveFn = $resolve;
+    }
 
     public function freeze(): void
     {
@@ -37,7 +53,11 @@ class MockResolvableInputObjectType extends InputObjectType implements Resolvabl
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
-        throw new BadMethodCallException('Unauthorized call to resolve in Mock object');
+        $resolve = $this->resolveFn;
+        if ($resolve === null) {
+            throw new LogicException('Cannot call resolve on MockResolvableInputObjectType because no resolve function was passed when created.');
+        }
+        return $resolve($source, $args, $context, $resolveInfo);
     }
 
     /**

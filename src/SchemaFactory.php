@@ -15,8 +15,6 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
-use TheCodingMachine\GraphQLite\Hydrators\FactoryHydrator;
-use TheCodingMachine\GraphQLite\Hydrators\HydratorInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
@@ -60,8 +58,6 @@ class SchemaFactory
     private $parameterMappers = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
-    /** @var HydratorInterface|null */
-    private $hydrator;
     /** @var AuthenticationServiceInterface|null */
     private $authenticationService;
     /** @var AuthorizationServiceInterface|null */
@@ -160,13 +156,6 @@ class SchemaFactory
         return $this->doctrineAnnotationReader;
     }
 
-    public function setHydrator(HydratorInterface $hydrator): self
-    {
-        $this->hydrator = $hydrator;
-
-        return $this;
-    }
-
     public function setAuthenticationService(AuthenticationServiceInterface $authenticationService): self
     {
         $this->authenticationService = $authenticationService;
@@ -230,7 +219,6 @@ class SchemaFactory
     public function createSchema(): Schema
     {
         $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
-        $hydrator              = $this->hydrator ?: new FactoryHydrator();
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
         $authorizationService  = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver          = new TypeResolver();
@@ -254,7 +242,7 @@ class SchemaFactory
         // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
         $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
 
-        $argumentResolver = new ArgumentResolver($hydrator);
+        $argumentResolver = new ArgumentResolver();
 
         $parameterMappers         = $this->parameterMappers;
         $parameterMappers[]       = new ResolveInfoParameterMapper();
