@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 
+use function array_search;
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -130,5 +131,19 @@ class Contact
     public function setCompany(string $company): void
     {
         $this->company = $company;
+    }
+
+    /**
+     * @Field(prefetchMethod="prefetchTheContacts")
+     */
+    public function repeatInnerName($data): string
+    {
+        $index = array_search($this, $data, false);
+        return $data[$index]->getName();
+    }
+
+    public function prefetchTheContacts(iterable $contacts)
+    {
+        return $contacts;
     }
 }

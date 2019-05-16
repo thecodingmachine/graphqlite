@@ -46,13 +46,7 @@ class QueryField extends FieldDefinition
         }
 
         $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
-            $toPassArgs = array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
-                try {
-                    return $parameter->resolve($source, $args, $context, $info);
-                } catch (MissingArgumentException $e) {
-                    throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
-                }
-            }, $arguments));
+            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolve);
 
             if ($resolve !== null) {
                 return $resolve(...$toPassArgs);
@@ -68,23 +62,22 @@ class QueryField extends FieldDefinition
         if ($prefetchMethodName === null) {
             $config['resolve'] = $resolveFn;
         } else {
-            $prefetchCallable = [$resolve[0], $prefetchMethodName];
             $prefetchBuffer = new PrefetchBuffer();
 
-            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($prefetchBuffer, $arguments, $prefetchArgs, $prefetchCallable, $resolveFn) {
+            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($prefetchBuffer, $arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
                 $prefetchBuffer->register($source, $args);
 
-                return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchCallable, $arguments, $resolveFn) {
+                return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $resolve) {
                     if (! $prefetchBuffer->hasResult($args)) {
+                        if ($resolve) {
+                            $prefetchCallable = [$resolve[0], $prefetchMethodName];
+                        } else {
+                            $prefetchCallable = [$source, $prefetchMethodName];
+                        }
+
                         $sources = $prefetchBuffer->getObjectsByArguments($args);
 
-                        $toPassPrefetchArgs = array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $prefetchCallable) {
-                            try {
-                                return $parameter->resolve($source, $args, $context, $info);
-                            } catch (MissingArgumentException $e) {
-                                throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $prefetchCallable);
-                            }
-                        }, $prefetchArgs));
+                        $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
 
@@ -160,5 +153,25 @@ class QueryField extends FieldDefinition
         }
 
         return new self($name, $type, $arguments, $callable, null, $comment, $prefetchMethodName, $prefetchArgs);
+    }
+
+    /**
+     * Casts parameters array into an array of arguments ready to be passed to the resolver.
+     *
+     * @param ParameterInterface[] $parameters
+     * @param array<string, mixed> $args
+     * @param mixed $context
+     *
+     * @return array<int, mixed>
+     */
+    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, ?callable $resolve): array
+    {
+        return array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
+            try {
+                return $parameter->resolve($source, $args, $context, $info);
+            } catch (MissingArgumentException $e) {
+                throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
+            }
+        }, $parameters));
     }
 }
