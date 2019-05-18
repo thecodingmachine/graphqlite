@@ -386,12 +386,7 @@ class FieldsBuilder
 
             $fieldDescriptor->setParameters($args);
 
-            if ($sourceField->isId()) {
-                $type = GraphQLType::id();
-                if (! $refMethod->getReturnType()->allowsNull()) {
-                    $type = GraphQLType::nonNull($type);
-                }
-            } elseif ($sourceField->getOutputType()) {
+            if ($sourceField->getOutputType()) {
                 try {
                     $type = $this->typeResolver->mapNameToOutputType($sourceField->getOutputType());
                 } catch (CannotMapTypeExceptionInterface $e) {
