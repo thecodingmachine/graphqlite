@@ -51,15 +51,13 @@ has the `CAN_VIEW_USER_LIST` right.
 * `@Mutation` annotations
 * `@Field` annotations
 
-<div class="alert alert-info">The query/mutation/field will NOT be part of the GraphQL schema if the current user is not logged or has not the requested right.</div>
+<div class="alert alert-info">By default, if a user tries to access an unauthorized query/mutation/field, an error is raised and the query fails.</div>
 
-## Constant schemas
+## Not throwing errors
 
-By default, the schema will vary based on who is connected. This can be a problem with some GraphQL clients as the schema 
-is changing from one user to another.
+If you do not want an error to be thrown when a user attempts to query a field/query/mutation he has no access to, you can use the `@FailWith` annotation.
 
-If you want to keep a constant schema, you can use the `@FailWith` annotation that contains the value that
-will be returned for user with insufficient rights.
+The `@FailWith` annotation contains the value that will be returned for users with insufficient rights.
 
 ```php
 class UserController
@@ -80,6 +78,40 @@ class UserController
     }
 }
 ```
+
+## Hiding fields / queries / mutations
+
+By default, a user analysing the GraphQL schema can see all queries/mutations/types available.
+Some will be available to him and some won't.
+
+If you want to add an extra level of security (or if you want your schema to be kept secret to unauthorized users),
+you can use the `@HideIfUnauthorized` annotation.
+
+```php
+class UserController
+{
+    /**
+     * If a user is not logged or if the user has not the right "CAN_VIEW_USER_LIST",
+     * the schema will NOT contain the "users" query at all (so trying to call the
+     * "users" query will result in a GraphQL "query not found" error.
+     *
+     * @Query
+     * @Logged
+     * @Right("CAN_VIEW_USER_LIST")
+     * @HideIfUnauthorized()
+     * @return User[]
+     */
+    public function users(int $limit, int $offset): array
+    {
+        // ...
+    }
+}
+```
+
+While this is the most secured mode, it can have drawbacks when working with development tools
+(you need to be logged as admin to fetch the complete schema).
+
+<div class="alert alert-info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optionnal from GraphQLite 4+.</div>
 
 ## Connecting GraphQLite to your framework's security module
 

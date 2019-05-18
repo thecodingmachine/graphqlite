@@ -47,7 +47,7 @@ If you are using the Symfony bundle (or a framework with autowiring like Laravel
 is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
 declare it.</div> 
 
-In methods with a `@Field` annotaiton, the first parameter is the *resolved object* we are working on. Any additional parameters are used as arguments.
+In methods with a `@Field` annotation, the first parameter is the *resolved object* we are working on. Any additional parameters are used as arguments.
 
 ## `@SourceField` annotation
 
@@ -74,32 +74,27 @@ Internally, GraphQLite will look for methods named `name()`, `getName()` and `is
 
 ### Authentication and authorization
 
-You may also check for logged users or users with a specific right using the `logged` and `right` properties of the annotation:
+You may also check for logged users or users with a specific right using the "annotations" property.
 
 ```php
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use App\Entities\Product;
 
 /**
  * @Type(class=Product::class)
  * @SourceField(name="name")
- * @SourceField(name="price", logged=true, right=@Right(name="CAN_ACCESS_Price"))
+ * @SourceField(name="price", annotations={@Logged, @Right(name="CAN_ACCESS_Price", @FailWith(null)}))
  */
 class ProductType extends AbstractAnnotatedObjectType
 {
 }
 ```
 
-Just like the `@Logged` and `@Right` annotations for regular fields, you can define a default value to use
-in case the user has insufficient permissions:
-
-```php
-/**
- * @SourceField(name="status", logged=true, right=@Right(name="CAN_ACCESS_STATUS"), failWith=null)
- */
-```
+Any annotations described in the [Authentication and authorization page](authentication_authorization.md) can be used in the `@SourceField` "annotations" attribute.
 
 ## Declaring fields dynamically (without annotations)
 
