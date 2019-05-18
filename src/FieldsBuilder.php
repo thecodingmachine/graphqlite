@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionClass;
@@ -21,10 +22,10 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
-use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
-use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use function array_merge;
@@ -41,10 +42,6 @@ class FieldsBuilder
     private $annotationReader;
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-    /** @var AuthorizationServiceInterface */
-    private $authorizationService;
     /** @var CachedDocBlockFactory */
     private $cachedDocBlockFactory;
     /** @var TypeResolver */
@@ -55,34 +52,32 @@ class FieldsBuilder
     private $typeMapper;
     /** @var ParameterMapperInterface */
     private $parameterMapper;
+    /** @var FieldMiddlewareInterface */
+    private $fieldMiddleware;
 
     public function __construct(
         AnnotationReader $annotationReader,
         RecursiveTypeMapperInterface $typeMapper,
         ArgumentResolver $argumentResolver,
-        AuthenticationServiceInterface $authenticationService,
-        AuthorizationServiceInterface $authorizationService,
         TypeResolver $typeResolver,
         CachedDocBlockFactory $cachedDocBlockFactory,
         NamingStrategyInterface $namingStrategy,
         RootTypeMapperInterface $rootTypeMapper,
-        ParameterMapperInterface $parameterMapper
+        ParameterMapperInterface $parameterMapper,
+        FieldMiddlewareInterface $fieldMiddleware
     ) {
         $this->annotationReader      = $annotationReader;
         $this->recursiveTypeMapper   = $typeMapper;
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService  = $authorizationService;
         $this->typeResolver          = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy        = $namingStrategy;
         $this->typeMapper            = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver);
         $this->parameterMapper       = $parameterMapper;
+        $this->fieldMiddleware = $fieldMiddleware;
     }
 
-    // TODO: Add RecursiveTypeMapper in the list of parameters for getQueries and REMOVE the ControllerQueryProviderFactory.
-
     /**
-     * @return QueryField[]
+     * @return FieldDefinition[]
      *
      * @throws ReflectionException
      */
@@ -92,7 +87,7 @@ class FieldsBuilder
     }
 
     /**
-     * @return QueryField[]
+     * @return FieldDefinition[]
      *
      * @throws ReflectionException
      */
@@ -102,7 +97,7 @@ class FieldsBuilder
     }
 
     /**
-     * @return array<string, QueryField> QueryField indexed by name.
+     * @return array<string, FieldDefinition> QueryField indexed by name.
      */
     public function getFields(object $controller): array
     {
@@ -133,7 +128,7 @@ class FieldsBuilder
     /**
      * Track Field annotation in a self targeted type
      *
-     * @return array<string, QueryField> QueryField indexed by name.
+     * @return array<string, FieldDefinition> QueryField indexed by name.
      */
     public function getSelfFields(string $className): array
     {
@@ -197,7 +192,7 @@ class FieldsBuilder
     /**
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
      *
-     * @return QueryField[]
+     * @return FieldDefinition[]
      *
      * @throws CannotMapTypeException
      * @throws ReflectionException
@@ -235,15 +230,6 @@ class FieldsBuilder
 
             if ($queryAnnotation === null) {
                 continue;
-            }
-
-            $unauthorized = false;
-            if (! $this->isAuthorized($refMethod)) {
-                $failWith = $this->annotationReader->getFailWithAnnotation($refMethod);
-                if ($failWith === null) {
-                    continue;
-                }
-                $unauthorized = true;
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
@@ -304,21 +290,42 @@ class FieldsBuilder
             } else {
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
+            if ($sourceClassName !== null) {
+                $fieldDescriptor->setTargetMethodOnSource($methodName);
+            } else {
+                $fieldDescriptor->setCallable([$controller, $methodName]);
+            }
 
             $fieldDescriptor->setType($type);
             $fieldDescriptor->setInjectSource($injectSource);
 
-            if ($unauthorized) {
+            $fieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
+
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+                public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
+                {
+                    if ($fieldDescriptor->getTargetMethodOnSource() !== null) {
+                        return QueryField::selfField($fieldDescriptor);
+                    }
+
+                    return QueryField::externalField($fieldDescriptor);
+                }
+            });
+
+            if ($field !== null) {
+                $queryList[] = $field;
+            }
+
+            /*if ($unauthorized) {
                 $failWithValue = $failWith->getValue();
                 $queryList[]   = QueryField::alwaysReturn($fieldDescriptor, $failWithValue);
             } elseif ($sourceClassName !== null) {
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
                 $queryList[] = QueryField::selfField($fieldDescriptor);
             } else {
-
                 $fieldDescriptor->setCallable([$controller, $methodName]);
                 $queryList[] = QueryField::externalField($fieldDescriptor);
-            }
+            }*/
         }
 
         return $queryList;
@@ -327,7 +334,7 @@ class FieldsBuilder
     /**
      * @param SourceFieldInterface[] $sourceFields
      *
-     * @return QueryField[]
+     * @return FieldDefinition[]
      *
      * @throws CannotMapTypeException
      * @throws CannotMapTypeExceptionInterface
@@ -357,18 +364,6 @@ class FieldsBuilder
         $queryList         = [];
 
         foreach ($sourceFields as $sourceField) {
-            // Ignore the field if we must be logged.
-            $right        = $sourceField->getRight();
-            $unauthorized = false;
-            if (($sourceField->isLogged() && ! $this->authenticationService->isLogged())
-                || ($right !== null && ! $this->authorizationService->isAllowed($right->getName()))) {
-                if (! $sourceField->canFailWith()) {
-                    continue;
-                }
-
-                $unauthorized = true;
-            }
-
             try {
                 $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
             } catch (FieldNotFoundException $e) {
@@ -407,13 +402,20 @@ class FieldsBuilder
             }
 
             $fieldDescriptor->setType($type);
+            $fieldDescriptor->setMiddlewareAnnotations($sourceField->getAnnotations());
 
-            if (! $unauthorized) {
-                $queryList[] = QueryField::selfField($fieldDescriptor);
-            } else {
-                $failWithValue = $sourceField->getFailWith();
-                $queryList[]   = QueryField::alwaysReturn($fieldDescriptor, $failWithValue);
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+                public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
+                {
+                    return QueryField::selfField($fieldDescriptor);
+                }
+            });
+
+            if ($field === null) {
+                continue;
             }
+
+            $queryList[] = $field;
         }
 
         return $queryList;
@@ -435,22 +437,6 @@ class FieldsBuilder
         }
 
         return $reflectionClass->getMethod($methodName);
-    }
-
-    /**
-     * Checks the @Logged and @Right annotations.
-     */
-    private function isAuthorized(ReflectionMethod $reflectionMethod): bool
-    {
-        $loggedAnnotation = $this->annotationReader->getLoggedAnnotation($reflectionMethod);
-
-        if ($loggedAnnotation !== null && ! $this->authenticationService->isLogged()) {
-            return false;
-        }
-
-        $rightAnnotation = $this->annotationReader->getRightAnnotation($reflectionMethod);
-
-        return $rightAnnotation === null || $this->authorizationService->isAllowed($rightAnnotation->getName());
     }
 
     /**

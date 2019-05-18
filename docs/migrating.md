@@ -8,7 +8,13 @@ sidebar_label: Migrating
 
 If you are a "regular" GraphQLite user, migration to v4 should be straightforward:
 
-- Annotations are untouched so you do not need to edit your code (TODO: deprecate "id" parameter in annotations)
+- Annotations are mostly untouched. The only annotation that is changed is the `@SourceField` annotation.
+    - Check your code for every places where you use the `@SourceField` annotation:
+    - The "id" attribute has been remove (`@SourceField(id=true)`). Instead, use `@SourceField(outputType="ID")`
+    - The "logged", "right" and "failWith" attributes have been remove (`@SourceField(logged=true)`).
+      Instead, use the annotations attribute with the same annotations you use for the `@Field` annotation: 
+      `@SourceField(annotations={@Logged, @FailWith(null)})`
+- TODO: change in visibility, new @HideIfUnauthorized           
 - If you are using the Symfony bundle, the Laravel package or the Universal module, you must also upgrade those to 4.0.
   These package will take care of the wiring for you. Apart for upgrading the packages, you have nothing to do.
 - If you are relying on the `SchemaFactory` to bootstrap GraphQLite, you have nothing to do.

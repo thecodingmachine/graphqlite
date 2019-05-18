@@ -18,6 +18,8 @@ use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
@@ -175,6 +177,14 @@ class AnnotationReader
         }
 
         return null;
+    }
+
+    public function getMiddlewareAnnotations(ReflectionMethod $refMethod): MiddlewareAnnotations
+    {
+        /** @var MiddlewareAnnotationInterface[] $middlewareAnnotations */
+        $middlewareAnnotations = $this->getMethodAnnotations($refMethod, MiddlewareAnnotationInterface::class);
+
+        return new MiddlewareAnnotations($middlewareAnnotations);
     }
 
     /**

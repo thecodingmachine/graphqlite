@@ -30,6 +30,7 @@ interface SourceFieldInterface
 
     /**
      * If the GraphQL type is "ID", isID will return true.
+     *
      * @deprecated
      */
     public function isId(): bool;
@@ -45,4 +46,6 @@ interface SourceFieldInterface
      * True if a default value is available if a right is not enforced.
      */
     public function canFailWith(): bool;
+
+    public function getAnnotations(): MiddlewareAnnotations;
 }

@@ -55,6 +55,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -267,22 +268,25 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testLoggedInSourceField()
     {
+        $authenticationService = new class implements AuthenticationServiceInterface {
+            public function isLogged(): bool
+            {
+                return true;
+            }
+        };
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
-            new class implements AuthenticationServiceInterface {
-                public function isLogged(): bool
-                {
-                    return true;
-                }
-            },
-            new VoidAuthorizationService(),
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ])
+            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            new AuthorizationFieldMiddleware(
+                $authenticationService,
+                new VoidAuthorizationService()
+            )
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -294,22 +298,26 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testRightInSourceField()
     {
+        $authorizationService = new class implements AuthorizationServiceInterface {
+            public function isAllowed(string $right): bool
+            {
+                return true;
+            }
+        };
+
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
-            new VoidAuthenticationService(),
-            new class implements AuthorizationServiceInterface {
-                public function isAllowed(string $right): bool
-                {
-                    return true;
-                }
-            },
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ])
+            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            new AuthorizationFieldMiddleware(
+                new VoidAuthenticationService(),
+                $authorizationService
+            )
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -362,13 +370,15 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
-            new VoidAuthenticationService(),
-            new VoidAuthorizationService(),
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ])
+            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            new AuthorizationFieldMiddleware(
+                new VoidAuthenticationService(),
+                new VoidAuthorizationService()
+            )
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);

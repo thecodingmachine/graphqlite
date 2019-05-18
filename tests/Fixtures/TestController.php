@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use ArrayObject;
+use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -51,6 +52,7 @@ class TestController
     /**
      * @Query
      * @Logged
+     * @HideIfUnauthorized()
      */
     public function testLogged(): TestObject
     {
@@ -60,6 +62,7 @@ class TestController
     /**
      * @Query
      * @Right(name="CAN_FOO")
+     * @HideIfUnauthorized()
      */
     public function testRight(): TestObject
     {

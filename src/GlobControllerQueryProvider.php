@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\FieldDefinition;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -128,7 +129,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return QueryField[]
+     * @return FieldDefinition[]
      */
     public function getQueries(): array
     {
@@ -136,7 +137,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return QueryField[]
+     * @return FieldDefinition[]
      */
     public function getMutations(): array
     {

@@ -6,11 +6,11 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
 use GraphQL\Type\Definition\FieldDefinition;
-use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
@@ -105,21 +105,34 @@ class QueryField extends FieldDefinition
     }
 
     /**
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param mixed                             $value     A value that will always be returned by this field.
      *
      * @return QueryField
      */
     public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, $value): self
     {
-        // TODO: type should be changed ALWAYS (even if the guy is connected)
-        $type = $fieldDescriptor->getType();
-        if ($value === null && $type instanceof NonNull) {
-            $type = $type->getWrappedType();
-            $fieldDescriptor->setType($type);
-        }
         $callable = static function () use ($value) {
             return $value;
+        };
+
+        $fieldDescriptor->setCallable($callable);
+
+        return self::fromDescriptor($fieldDescriptor);
+    }
+
+    /**
+     * @param bool $isLogged True if the user is logged (and the error is a 403), false if the error is unlogged (the error is a 401)
+     *
+     * @return QueryField
+     */
+    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isLogged): self
+    {
+        $callable = static function () use ($isLogged): void {
+            if ($isLogged) {
+                throw MissingAuthorizationException::forbidden();
+            }
+
+            throw MissingAuthorizationException::unauthorized();
         };
 
         $fieldDescriptor->setCallable($callable);
@@ -137,7 +150,8 @@ class QueryField extends FieldDefinition
             $fieldDescriptor->getTargetMethodOnSource(),
             $fieldDescriptor->getComment(),
             $fieldDescriptor->getPrefetchMethodName(),
-            $fieldDescriptor->getPrefetchParameters());
+            $fieldDescriptor->getPrefetchParameters()
+        );
     }
 
     public static function selfField(QueryFieldDescriptor $fieldDescriptor): self

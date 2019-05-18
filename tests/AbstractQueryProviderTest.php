@@ -36,6 +36,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
@@ -262,8 +263,6 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
-            new VoidAuthenticationService(),
-            new VoidAuthorizationService(),
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
@@ -273,7 +272,11 @@ abstract class AbstractQueryProviderTest extends TestCase
             ]),
             new CompositeParameterMapper([
                 new ResolveInfoParameterMapper()
-            ])
+            ]),
+            new AuthorizationFieldMiddleware(
+                new VoidAuthenticationService(),
+                new VoidAuthorizationService()
+            )
         );
     }
 

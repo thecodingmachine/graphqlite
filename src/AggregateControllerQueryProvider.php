@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\FieldDefinition;
 use Psr\Container\ContainerInterface;
 use function array_merge;
 
@@ -31,7 +32,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return QueryField[]
+     * @return FieldDefinition[]
      */
     public function getQueries(): array
     {
@@ -46,7 +47,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return QueryField[]
+     * @return FieldDefinition[]
      */
     public function getMutations(): array
     {

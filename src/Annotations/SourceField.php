@@ -18,6 +18,7 @@ use function array_key_exists;
  *   @Attribute("outputType", type = "string"),
  *   @Attribute("isId", type = "bool"),
  *   @Attribute("failWith", type = "mixed"),
+ *   @Attribute("annotations", type = "TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface[]"),
  * })
  *
  * FIXME: remove idId since outputType="ID" is equivalent
@@ -49,6 +50,9 @@ class SourceField implements SourceFieldInterface
     /** @var bool */
     private $hasFailWith = false;
 
+    /** @var MiddlewareAnnotations */
+    private $annotations;
+
     /**
      * @param mixed[] $attributes
      */
@@ -59,6 +63,7 @@ class SourceField implements SourceFieldInterface
         $this->right      = $attributes['right'] ?? null;
         $this->outputType = $attributes['outputType'] ?? null;
         $this->id         = $attributes['isId'] ?? false;
+        $this->annotations = new MiddlewareAnnotations($attributes['annotations'] ?? []);
         if (! array_key_exists('failWith', $attributes)) {
             return;
         }
@@ -69,6 +74,8 @@ class SourceField implements SourceFieldInterface
 
     /**
      * Returns the GraphQL right to be applied to this source field.
+     *
+     * @deprecated
      */
     public function getRight(): ?Right
     {
@@ -84,6 +91,9 @@ class SourceField implements SourceFieldInterface
         return $this->name;
     }
 
+    /**
+     * @deprecated
+     */
     public function isLogged(): bool
     {
         return $this->logged;
@@ -100,6 +110,8 @@ class SourceField implements SourceFieldInterface
 
     /**
      * If the GraphQL type is "ID", isID will return true.
+     *
+     * @deprecated
      */
     public function isId(): bool
     {
@@ -108,6 +120,8 @@ class SourceField implements SourceFieldInterface
 
     /**
      * Returns the default value to use if the right is not enforced.
+     *
+     * @deprecated
      *
      * @return mixed
      */
@@ -118,9 +132,16 @@ class SourceField implements SourceFieldInterface
 
     /**
      * True if a default value is available if a right is not enforced.
+     *
+     * @deprecated
      */
     public function canFailWith(): bool
     {
         return $this->hasFailWith;
+    }
+
+    public function getAnnotations(): MiddlewareAnnotations
+    {
+        return $this->annotations;
     }
 }

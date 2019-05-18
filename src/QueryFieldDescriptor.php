@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 /**
@@ -14,62 +16,43 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
  */
 class QueryFieldDescriptor
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
-    /**
-     * @var OutputType&Type
-     */
+    /** @var OutputType&Type */
     private $type;
-    /**
-     * @var array<string, ParameterInterface>
-     */
+    /** @var array<string, ParameterInterface> */
     private $parameters = [];
-    /**
-     * @var array<string, ParameterInterface>
-     */
+    /** @var array<string, ParameterInterface> */
     private $prefetchParameters = [];
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $prefetchMethodName;
-    /**
-     * @var callable|null
-     */
+    /** @var callable|null */
     private $callable;
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $targetMethodOnSource;
     /**
      * Whether we should inject the source as the first parameter or not.
+     *
      * @var bool
      */
     private $injectSource;
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $comment;
+    /** @var MiddlewareAnnotations */
+    private $middlewareAnnotations;
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
     public function setName(string $name): void
     {
         $this->name = $name;
     }
 
     /**
-     * @return OutputType|Type
+     * @return OutputType&Type
      */
     public function getType()
     {
@@ -77,7 +60,7 @@ class QueryFieldDescriptor
     }
 
     /**
-     * @param OutputType|Type $type
+     * @param OutputType&Type $type
      */
     public function setType($type): void
     {
@@ -116,85 +99,65 @@ class QueryFieldDescriptor
         $this->prefetchParameters = $prefetchParameters;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPrefetchMethodName(): ?string
     {
         return $this->prefetchMethodName;
     }
 
-    /**
-     * @param string|null $prefetchMethodName
-     */
     public function setPrefetchMethodName(?string $prefetchMethodName): void
     {
         $this->prefetchMethodName = $prefetchMethodName;
     }
 
-    /**
-     * @return callable|null
-     */
     public function getCallable(): ?callable
     {
         return $this->callable;
     }
 
-    /**
-     * @param callable $callable
-     */
     public function setCallable(callable $callable): void
     {
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
     }
 
-    /**
-     * @return string|null
-     */
     public function getTargetMethodOnSource(): ?string
     {
         return $this->targetMethodOnSource;
     }
 
-    /**
-     * @param string|null $targetMethodOnSource
-     */
     public function setTargetMethodOnSource(?string $targetMethodOnSource): void
     {
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
     }
 
-    /**
-     * @return bool
-     */
     public function isInjectSource(): bool
     {
         return $this->injectSource;
     }
 
-    /**
-     * @param bool $injectSource
-     */
     public function setInjectSource(bool $injectSource): void
     {
         $this->injectSource = $injectSource;
     }
 
-    /**
-     * @return string|null
-     */
     public function getComment(): ?string
     {
         return $this->comment;
     }
 
-    /**
-     * @param string|null $comment
-     */
     public function setComment(?string $comment): void
     {
         $this->comment = $comment;
+    }
+
+    public function getMiddlewareAnnotations(): MiddlewareAnnotations
+    {
+        return $this->middlewareAnnotations;
+    }
+
+    public function setMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void
+    {
+        $this->middlewareAnnotations = $middlewareAnnotations;
     }
 }

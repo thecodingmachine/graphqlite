@@ -30,6 +30,9 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
@@ -68,13 +71,23 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
-                    $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class),
                     $container->get(TypeResolver::class),
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMapperInterface::class)
+                    $container->get(ParameterMapperInterface::class),
+                    $container->get(FieldMiddlewareInterface::class)
+                );
+            },
+            FieldMiddlewareInterface::class => function(ContainerInterface $container) {
+                $pipe = new FieldMiddlewarePipe();
+                $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
+                return $pipe;
+            },
+            AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
+                return new AuthorizationFieldMiddleware(
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
                 );
             },
             ArgumentResolver::class => function(ContainerInterface $container) {
