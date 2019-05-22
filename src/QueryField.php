@@ -6,11 +6,11 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
 use GraphQL\Type\Definition\FieldDefinition;
-use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
@@ -27,7 +27,7 @@ use function array_values;
 class QueryField extends FieldDefinition
 {
     /**
-     * @param OutputType                        &Type                 $type
+     * @param OutputType&Type                 $type
      * @param array<string, ParameterInterface> $arguments            Indexed by argument name.
      * @param (callable&array<int,mixed>)|null  $resolve              The method to execute
      * @param string|null                       $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
@@ -105,54 +105,78 @@ class QueryField extends FieldDefinition
     }
 
     /**
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param mixed                             $value     A value that will always be returned by this field.
      *
      * @return QueryField
      */
-    public static function alwaysReturn(string $name, OutputType $type, array $arguments, $value, ?string $comment): self
+    public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, $value): self
     {
-        if ($value === null && $type instanceof NonNull) {
-            $type = $type->getWrappedType();
-        }
         $callable = static function () use ($value) {
             return $value;
         };
 
-        return new self($name, $type, $arguments, $callable, null, $comment, null, []);
+        $fieldDescriptor->setCallable($callable);
+
+        return self::fromDescriptor($fieldDescriptor);
     }
 
     /**
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
+     * @param bool $isLogged True if the user is logged (and the error is a 403), false if the error is unlogged (the error is a 401)
      *
      * @return QueryField
      */
-    public static function selfField(string $name, OutputType $type, array $arguments, string $targetMethodOnSource, ?string $comment, ?string $prefetchMethodName, array $prefetchArgs): self
+    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isLogged): self
     {
-        if ($prefetchMethodName !== null) {
-            array_unshift($arguments, new PrefetchDataParameter());
-        }
+        $callable = static function () use ($isLogged): void {
+            if (! $isLogged) {
+                throw MissingAuthorizationException::forbidden();
+            }
 
-        return new self($name, $type, $arguments, null, $targetMethodOnSource, $comment, $prefetchMethodName, $prefetchArgs);
+            throw MissingAuthorizationException::unauthorized();
+        };
+
+        $fieldDescriptor->setCallable($callable);
+
+        return self::fromDescriptor($fieldDescriptor);
     }
 
-    /**
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
-     *
-     * @return QueryField
-     */
-    public static function externalField(string $name, OutputType $type, array $arguments, callable $callable, ?string $comment, bool $injectSource, ?string $prefetchMethodName, array $prefetchArgs): self
+    private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
-        if ($prefetchMethodName !== null) {
+        return new self(
+            $fieldDescriptor->getName(),
+            $fieldDescriptor->getType(),
+            $fieldDescriptor->getParameters(),
+            $fieldDescriptor->getCallable(),
+            $fieldDescriptor->getTargetMethodOnSource(),
+            $fieldDescriptor->getComment(),
+            $fieldDescriptor->getPrefetchMethodName(),
+            $fieldDescriptor->getPrefetchParameters()
+        );
+    }
+
+    public static function selfField(QueryFieldDescriptor $fieldDescriptor): self
+    {
+        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
+            $arguments = $fieldDescriptor->getParameters();
+            array_unshift($arguments, new PrefetchDataParameter());
+            $fieldDescriptor->setParameters($arguments);
+        }
+
+        return self::fromDescriptor($fieldDescriptor);
+    }
+
+    public static function externalField(QueryFieldDescriptor $fieldDescriptor): self
+    {
+        $arguments = $fieldDescriptor->getParameters();
+        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
             array_unshift($arguments, new PrefetchDataParameter());
         }
-        if ($injectSource === true) {
+        if ($fieldDescriptor->isInjectSource() === true) {
             array_unshift($arguments, new SourceParameter());
         }
+        $fieldDescriptor->setParameters($arguments);
 
-        return new self($name, $type, $arguments, $callable, null, $comment, $prefetchMethodName, $prefetchArgs);
+        return self::fromDescriptor($fieldDescriptor);
     }
 
     /**

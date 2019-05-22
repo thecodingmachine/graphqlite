@@ -8,6 +8,8 @@ use function array_search;
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
@@ -145,5 +147,25 @@ class Contact
     public function prefetchTheContacts(iterable $contacts)
     {
         return $contacts;
+    }
+
+    /**
+     * @Field()
+     * @Logged()
+     * @return string
+     */
+    public function onlyLogged(): string
+    {
+        return 'you can see this only if you are logged';
+    }
+
+    /**
+     * @Field()
+     * @Right(name="CAN_SEE_SECRET")
+     * @return string
+     */
+    public function secret(): string
+    {
+        return 'you can see this only if you have the good right';
     }
 }

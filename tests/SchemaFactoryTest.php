@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
@@ -29,6 +30,7 @@ class SchemaFactoryTest extends TestCase
         $factory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $factory->addQueryProvider(new AggregateQueryProvider([]));
+        $factory->addFieldMiddleware(new FieldMiddlewarePipe());
 
         $schema = $factory->createSchema();
 

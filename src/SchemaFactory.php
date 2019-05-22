@@ -27,6 +27,9 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -72,6 +75,8 @@ class SchemaFactory
     private $schemaConfig;
     /** @var int */
     private $globTtl = 2;
+    /** @var array<int, FieldMiddlewareInterface> */
+    private $fieldMiddlewares = [];
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -216,6 +221,16 @@ class SchemaFactory
         return $this->setGlobTtl(2);
     }
 
+    /**
+     * Registers a field middleware (used to parse custom annotations that modify the GraphQLite behaviour in Fields/Queries/Mutations.
+     */
+    public function addFieldMiddleware(FieldMiddlewareInterface $fieldMiddleware): self
+    {
+        $this->fieldMiddlewares[] = $fieldMiddleware;
+
+        return $this;
+    }
+
     public function createSchema(): Schema
     {
         $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
@@ -225,6 +240,12 @@ class SchemaFactory
         $cachedDocBlockFactory = new CachedDocBlockFactory($this->cache);
         $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry          = new TypeRegistry();
+
+        $fieldMiddlewarePipe = new FieldMiddlewarePipe();
+        foreach ($this->fieldMiddlewares as $fieldMiddleware) {
+            $fieldMiddlewarePipe->pipe($fieldMiddleware);
+        }
+        $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         if (extension_loaded('sysvsem')) {
             $lockStore = new SemaphoreStore();
@@ -252,13 +273,12 @@ class SchemaFactory
             $annotationReader,
             $recursiveTypeMapper,
             $argumentResolver,
-            $authenticationService,
-            $authorizationService,
             $typeResolver,
             $cachedDocBlockFactory,
             $namingStrategy,
             $compositeRootTypeMapper,
-            $compositeParameterMapper
+            $compositeParameterMapper,
+            $fieldMiddlewarePipe
         );
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);

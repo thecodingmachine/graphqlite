@@ -68,10 +68,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
 [outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
-logged         | *no*       | bool  | Whether the user must be logged or not to see the field.
-right          | *no*       | Right annotation  | The right the user must have to see the field.
-failWith          | *no*       | mixed  | A value to return if the user is not authorized to see the field. If not specified, the field will not be visible at all to the user.
-
+annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
 ## @Logged annotation
 
@@ -102,6 +99,15 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *default*      | *yes*       | mixed | The value to return if the user is not authorized.
 
+## @HideIfUnauthorized annotation
+
+The `@HideIfUnauthorized` annotation is used to completely hide the query / mutation / field if the user is not authorized
+to access it (according to the `@Logged` and `@Right` annotations).
+
+**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
+
+`@HideIfUnauthorized` and `@FailWith` are mutually exclusive.
+
 ## @Factory annotation
 
 The `@Factory` annotation is used to declare a factory that turns GraphQL input types into objects.
@@ -111,4 +117,25 @@ The `@Factory` annotation is used to declare a factory that turns GraphQL input 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the input type. If skipped, the name of class returned by the factory is used instead.
+default        | *no*       | bool | If `true`, this factory will be used by default for its PHP return type. If set to `false`, you must explicitly [reference this factory using the `@Parameter` annotation](http://localhost:3000/docs/input-types#declaring-several-input-types-for-the-same-php-class).
 
+## @Parameter annotation
+
+Used to override the GraphQL input type of a PHP parameter.
+
+**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field` annotation.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*       | string | The name of the PHP parameter
+*inputType*    | *no*        | string | The GraphQL input type to force for this input field
+
+## @Decorate annotation
+
+The `@Decorate` annotation is used [to extend/modify/decorate an input type declared with the `@Factory` annotation](extend_input_type.md).
+
+**Applies on**: methods from classes in the "types" namespace.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+name           | *yes*       | string | The GraphQL input type name extended by this decorator.

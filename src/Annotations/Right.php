@@ -13,7 +13,7 @@ use BadMethodCallException;
  *   @Attribute("name", type = "string"),
  * })
  */
-class Right
+class Right implements MiddlewareAnnotationInterface
 {
     /** @var string */
     private $name;

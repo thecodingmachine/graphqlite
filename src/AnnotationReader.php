@@ -16,10 +16,9 @@ use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Annotations\FailWith;
-use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
-use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use function array_filter;
@@ -103,30 +102,6 @@ class AnnotationReader
         return $queryAnnotation;
     }
 
-    public function getLoggedAnnotation(ReflectionMethod $refMethod): ?Logged
-    {
-        /** @var Logged|null $loggedAnnotation */
-        $loggedAnnotation = $this->getMethodAnnotation($refMethod, Logged::class);
-
-        return $loggedAnnotation;
-    }
-
-    public function getRightAnnotation(ReflectionMethod $refMethod): ?Right
-    {
-        /** @var Right|null $rightAnnotation */
-        $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
-
-        return $rightAnnotation;
-    }
-
-    public function getFailWithAnnotation(ReflectionMethod $refMethod): ?FailWith
-    {
-        /** @var FailWith|null $failWithAnnotation */
-        $failWithAnnotation = $this->getMethodAnnotation($refMethod, FailWith::class);
-
-        return $failWithAnnotation;
-    }
-
     /**
      * @return SourceField[]
      */
@@ -175,6 +150,14 @@ class AnnotationReader
         }
 
         return null;
+    }
+
+    public function getMiddlewareAnnotations(ReflectionMethod $refMethod): MiddlewareAnnotations
+    {
+        /** @var MiddlewareAnnotationInterface[] $middlewareAnnotations */
+        $middlewareAnnotations = $this->getMethodAnnotations($refMethod, MiddlewareAnnotationInterface::class);
+
+        return new MiddlewareAnnotations($middlewareAnnotations);
     }
 
     /**

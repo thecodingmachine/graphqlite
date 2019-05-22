@@ -9,9 +9,13 @@ use function array_key_exists;
 
 /**
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"METHOD", "ANNOTATION"})
+ * @Attributes({
+ *   @Attribute("value", type = "string"),
+ *   @Attribute("mode", type = "string")
+ * })
  */
-class FailWith
+class FailWith implements MiddlewareAnnotationInterface
 {
     /**
      * The default value to use if the right is not enforced.

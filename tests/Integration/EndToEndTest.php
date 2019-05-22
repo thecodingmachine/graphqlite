@@ -30,6 +30,9 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
@@ -45,6 +48,7 @@ use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use function var_dump;
 
 class EndToEndTest extends TestCase
 {
@@ -68,13 +72,23 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
-                    $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class),
                     $container->get(TypeResolver::class),
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMapperInterface::class)
+                    $container->get(ParameterMapperInterface::class),
+                    $container->get(FieldMiddlewareInterface::class)
+                );
+            },
+            FieldMiddlewareInterface::class => function(ContainerInterface $container) {
+                $pipe = new FieldMiddlewarePipe();
+                $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
+                return $pipe;
+            },
+            AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
+                return new AuthorizationFieldMiddleware(
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
                 );
             },
             ArgumentResolver::class => function(ContainerInterface $container) {
@@ -552,5 +566,45 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'echoResolveInfo' => 'echoResolveInfo'
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndRightIssues()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                onlyLogged
+                secret
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('You need to be logged to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                secret
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 }

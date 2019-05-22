@@ -6,8 +6,8 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 /**
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"METHOD", "ANNOTATION"})
  */
-class Logged
+class Logged implements MiddlewareAnnotationInterface
 {
 }

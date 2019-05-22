@@ -8,7 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @Type(class=TestObject::class)
- * @SourceField(name="test", isId=true)
+ * @SourceField(name="test", outputType="ID!")
  */
 class TestTypeId
 {
