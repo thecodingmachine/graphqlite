@@ -82,7 +82,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
             return null;
         }
 
-        return QueryField::unauthorizedError($queryFieldDescriptor, $this->authenticationService->isLogged());
+        return QueryField::unauthorizedError($queryFieldDescriptor, $loggedAnnotation !== null && !$this->authenticationService->isLogged());
     }
 
     /**

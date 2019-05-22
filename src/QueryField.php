@@ -128,7 +128,7 @@ class QueryField extends FieldDefinition
     public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isLogged): self
     {
         $callable = static function () use ($isLogged): void {
-            if ($isLogged) {
+            if (!$isLogged) {
                 throw MissingAuthorizationException::forbidden();
             }
 

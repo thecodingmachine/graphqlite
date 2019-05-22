@@ -240,6 +240,7 @@ class FieldsBuilder
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
             $fieldDescriptor->setName($name);
+            $fieldDescriptor->setComment($docBlockComment);
 
             // Get parameters from the prefetchMethod method if any.
             $prefetchMethodName = null;
