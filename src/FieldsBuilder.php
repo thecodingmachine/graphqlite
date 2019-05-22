@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
-use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionClass;
 use ReflectionException;
