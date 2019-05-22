@@ -128,10 +128,8 @@ class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
 
 The final thing we have to do is to register the middleware.
 
-Assuming you are using the `SchemaFactory` to initialize GraphQLite, you can register the field middleware using:
-
-```php
-$schemaFactory->addFieldMiddleware(new OnlyDebugFieldMiddleware());
-```
-
-<!-- TODO: special tag for Symfony. -->
+- Assuming you are using the `SchemaFactory` to initialize GraphQLite, you can register the field middleware using:
+  ```php
+  $schemaFactory->addFieldMiddleware(new OnlyDebugFieldMiddleware());
+  ```
+- If you are using the Symfony bundle, you can register your field middleware services by tagging them with the `graphql.field_middleware` tag.
