@@ -105,30 +105,6 @@ class AnnotationReader
         return $queryAnnotation;
     }
 
-    public function getLoggedAnnotation(ReflectionMethod $refMethod): ?Logged
-    {
-        /** @var Logged|null $loggedAnnotation */
-        $loggedAnnotation = $this->getMethodAnnotation($refMethod, Logged::class);
-
-        return $loggedAnnotation;
-    }
-
-    public function getRightAnnotation(ReflectionMethod $refMethod): ?Right
-    {
-        /** @var Right|null $rightAnnotation */
-        $rightAnnotation = $this->getMethodAnnotation($refMethod, Right::class);
-
-        return $rightAnnotation;
-    }
-
-    public function getFailWithAnnotation(ReflectionMethod $refMethod): ?FailWith
-    {
-        /** @var FailWith|null $failWithAnnotation */
-        $failWithAnnotation = $this->getMethodAnnotation($refMethod, FailWith::class);
-
-        return $failWithAnnotation;
-    }
-
     /**
      * @return SourceField[]
      */
