@@ -49,7 +49,8 @@
     "scripts": {
         "phpstan": "phpstan analyse src -c phpstan.neon --level=4 --no-progress -vvv",
         "cs-check": "phpcs",
-        "cs-fix": "phpcbf"
+        "cs-fix": "phpcbf",
+        "test": ["@cs-check", "@phpstan", "phpunit"]
     },
     "extra": {
         "branch-alias": {
