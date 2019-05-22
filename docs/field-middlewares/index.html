@@ -164,10 +164,12 @@ is to be used by middlewares.</p>
 }
 </code></pre>
 <p>The final thing we have to do is to register the middleware.</p>
-<p>Assuming you are using the <code>SchemaFactory</code> to initialize GraphQLite, you can register the field middleware using:</p>
+<ul>
+<li>Assuming you are using the <code>SchemaFactory</code> to initialize GraphQLite, you can register the field middleware using:
 <pre><code class="hljs css language-php">$schemaFactory-&gt;addFieldMiddleware(<span class="hljs-keyword">new</span> OnlyDebugFieldMiddleware());
-</code></pre>
-<!-- TODO: special tag for Symfony. -->
+</code></pre></li>
+<li>If you are using the Symfony bundle, you can register your field middleware services by tagging them with the <code>graphql.field_middleware</code> tag.</li>
+</ul>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/custom-types"><span class="arrow-prev">← </span><span>Custom types</span></a><a class="docs-next button" href="/docs/extend_input_type"><span>Extending an input type</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#field-middlewares">Field middlewares</a></li><li><a href="#annotations-parsing">Annotations parsing</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
