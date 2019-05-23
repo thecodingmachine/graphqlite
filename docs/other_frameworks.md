@@ -57,6 +57,9 @@ $factory->setAuthorizationService(new VoidAuthorizationService());
 $factory->setNamingStrategy(new NamingStrategy());
 // Add a custom type mapper.
 $factory->addTypeMapper($typeMapper);
+// Add a custom type mapper using a factory to create it.
+// Type mapper factories are useful if you need to inject the "recursive type mapper" into your type mapper constructor.
+$factory->addTypeMapperFactory($typeMapperFactory);
 // Add custom options to the Webonyx underlying Schema.
 $factory->setSchemaConfig($schemaConfig);
 // Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.

@@ -10,7 +10,11 @@ use Symfony\Component\Cache\Simple\PhpFilesCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
+use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
@@ -51,6 +55,12 @@ class SchemaFactoryTest extends TestCase
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper())
+                ->addTypeMapperFactory(new class implements TypeMapperFactoryInterface {
+                    public function create(RecursiveTypeMapperInterface $recursiveTypeMapper): TypeMapperInterface
+                    {
+                        return new CompositeTypeMapper();
+                    }
+                })
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
                 ->setSchemaConfig(new SchemaConfig())
                 ->devMode()

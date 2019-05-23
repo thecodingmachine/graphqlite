@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
@@ -57,6 +58,8 @@ class SchemaFactory
     private $rootTypeMappers = [];
     /** @var TypeMapperInterface[] */
     private $typeMappers = [];
+    /** @var TypeMapperFactoryInterface[] */
+    private $typeMapperFactories = [];
     /** @var ParameterMapperInterface[] */
     private $parameterMappers = [];
     /** @var Reader */
@@ -130,6 +133,16 @@ class SchemaFactory
     public function addTypeMapper(TypeMapperInterface $typeMapper): self
     {
         $this->typeMappers[] = $typeMapper;
+
+        return $this;
+    }
+
+    /**
+     * Registers a type mapper factory.
+     */
+    public function addTypeMapperFactory(TypeMapperFactoryInterface $typeMapperFactory): self
+    {
+        $this->typeMapperFactories[] = $typeMapperFactory;
 
         return $this;
     }
@@ -285,7 +298,7 @@ class SchemaFactory
         $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
 
-        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
+        if (empty($this->typeNamespaces) && empty($this->typeMappers) && empty($this->typeMapperFactories)) {
             throw new GraphQLException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
@@ -309,6 +322,10 @@ class SchemaFactory
             $compositeTypeMapper->addTypeMapper($typeMapper);
         }
 
+        foreach ($this->typeMapperFactories as $typeMapperFactory) {
+            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($recursiveTypeMapper));
+        }
+
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
 
         $queryProviders = [];
@@ -330,8 +347,6 @@ class SchemaFactory
         if ($queryProviders === []) {
             throw new GraphQLException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
         }
-
-        // TODO: configure ttl for cache?
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
