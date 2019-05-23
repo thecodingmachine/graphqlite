@@ -102,6 +102,9 @@ $factory-&gt;setAuthorizationService(<span class="hljs-keyword">new</span> VoidA
 $factory-&gt;setNamingStrategy(<span class="hljs-keyword">new</span> NamingStrategy());
 <span class="hljs-comment">// Add a custom type mapper.</span>
 $factory-&gt;addTypeMapper($typeMapper);
+<span class="hljs-comment">// Add a custom type mapper using a factory to create it.</span>
+<span class="hljs-comment">// Type mapper factories are useful if you need to inject the "recursive type mapper" into your type mapper constructor.</span>
+$factory-&gt;addTypeMapperFactory($typeMapperFactory);
 <span class="hljs-comment">// Add custom options to the Webonyx underlying Schema.</span>
 $factory-&gt;setSchemaConfig($schemaConfig);
 <span class="hljs-comment">// Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.</span>
