@@ -11,7 +11,7 @@ use function array_key_exists;
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
  * @Attributes({
- *   @Attribute("value", type = "string"),
+ *   @Attribute("value", type = "mixed"),
  *   @Attribute("mode", type = "string")
  * })
  */
