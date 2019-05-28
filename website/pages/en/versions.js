@@ -34,10 +34,10 @@ function Versions(props) {
               <tr>
                 <th>{latestVersion}</th>
                 <td>
-                  <a href="">Documentation</a>
+                  <a href="docs/features.html">Documentation</a>
                 </td>
                 <td>
-                  <a href="">Release Notes</a>
+                  <a href="docs/next/migrating.html">Release Notes</a>
                 </td>
               </tr>
             </tbody>
