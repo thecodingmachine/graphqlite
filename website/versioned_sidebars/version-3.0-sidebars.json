@@ -1,0 +1,33 @@
+{
+  "version-3.0-docs": {
+    "Introduction": [
+      "version-3.0-features"
+    ],
+    "Installation": [
+      "version-3.0-getting-started",
+      "version-3.0-symfony-bundle",
+      "version-3.0-laravel-package",
+      "version-3.0-universal_service_providers",
+      "version-3.0-other-frameworks"
+    ],
+    "Usage": [
+      "version-3.0-queries",
+      "version-3.0-mutations",
+      "version-3.0-type_mapping",
+      "version-3.0-extend_type",
+      "version-3.0-authentication_authorization",
+      "version-3.0-external_type_declaration",
+      "version-3.0-input-types",
+      "version-3.0-inheritance"
+    ],
+    "Advanced": [
+      "version-3.0-file-uploads",
+      "version-3.0-pagination",
+      "version-3.0-custom-output-types",
+      "version-3.0-troubleshooting"
+    ],
+    "Reference": [
+      "version-3.0-annotations_reference"
+    ]
+  }
+}
