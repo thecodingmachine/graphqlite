@@ -37,7 +37,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             $consts         = $enumClass::toArray();
             $constInstances = [];
             foreach ($consts as $key => $value) {
-                $constInstances[$value] = ['value' => $enumClass::$key()];
+                $constInstances[$key] = ['value' => $enumClass::$key()];
             }
 
             return new EnumType([
