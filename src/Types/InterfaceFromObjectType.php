@@ -17,7 +17,7 @@ class InterfaceFromObjectType extends InterfaceType
     /**
      * @param string $name The name of the interface
      */
-    public function __construct(string $name, ObjectType $type, ?ObjectType $subType, RecursiveTypeMapperInterface $typeMapper)
+    public function __construct(string $name, ObjectType $type, ?MutableObjectType $subType, RecursiveTypeMapperInterface $typeMapper)
     {
         parent::__construct([
             'name' => $name,
