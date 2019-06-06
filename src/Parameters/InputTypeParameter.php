@@ -26,11 +26,8 @@ class InputTypeParameter implements ParameterInterface
     private $argumentResolver;
 
     /**
-     * @param string $name
      * @param InputType&Type $type
-     * @param bool $hasDefaultValue
      * @param mixed $defaultValue
-     * @param ArgumentResolver $argumentResolver
      */
     public function __construct(string $name, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
     {

@@ -7,9 +7,9 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
-use GraphQL\Type\Definition\Type as GraphQLType;
 use ReflectionMethod;
 
 /**
@@ -25,21 +25,16 @@ use ReflectionMethod;
 interface RootTypeMapperInterface
 {
     /**
-     * @param Type $type
      * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod $refMethod
-     * @param DocBlock $docBlockObj
-     * @return OutputType|null (OutputType&GraphQLType)|null
+     *
+     * @return (OutputType&GraphQLType)|null
      */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType;
 
     /**
-     * @param Type $type
      * @param (InputType&GraphQLType)|null $subType
-     * @param string $argumentName
-     * @param ReflectionMethod $refMethod
-     * @param DocBlock $docBlockObj
-     * @return InputType|null
+     *
+     * @return (InputType&GraphQLType)|null
      */
     public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType;
 
