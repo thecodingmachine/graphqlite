@@ -27,11 +27,11 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
 use function get_parent_class;
 use function ucfirst;
-use Webmozart\Assert\Assert;
 
 /**
  * A class in charge if returning list of fields for queries / mutations / entities / input types

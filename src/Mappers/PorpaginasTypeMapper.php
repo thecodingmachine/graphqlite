@@ -6,10 +6,9 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use GraphQL\Type\Definition\NullableType;
 use Porpaginas\Result;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -63,7 +62,6 @@ class PorpaginasTypeMapper implements TypeMapperInterface
 
     /**
      * @param OutputType&Type $subType
-     * @return MutableObjectType
      */
     private function getObjectType(OutputType $subType): MutableObjectType
     {

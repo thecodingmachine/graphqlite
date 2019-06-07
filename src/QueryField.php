@@ -15,10 +15,10 @@ use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function array_unshift;
 use function array_values;
-use Webmozart\Assert\Assert;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -55,6 +55,7 @@ class QueryField extends FieldDefinition
             if ($targetMethodOnSource !== null) {
                 $method = [$source, $targetMethodOnSource];
                 Assert::isCallable($method);
+
                 return $method(...$toPassArgs);
             }
             throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');

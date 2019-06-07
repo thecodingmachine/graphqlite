@@ -26,11 +26,11 @@ use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use Webmozart\Assert\Assert;
 use function array_keys;
 use function class_exists;
 use function filemtime;
 use function str_replace;
-use Webmozart\Assert\Assert;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).

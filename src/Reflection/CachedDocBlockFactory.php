@@ -10,9 +10,9 @@ use phpDocumentor\Reflection\Types\Context;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionMethod;
+use Webmozart\Assert\Assert;
 use function filemtime;
 use function md5;
-use Webmozart\Assert\Assert;
 
 /**
  * Creates DocBlocks and puts these in cache.
