@@ -221,6 +221,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
      * @param ResolvableMutableInputInterface&InputObjectType $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void

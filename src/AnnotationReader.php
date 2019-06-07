@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
@@ -28,7 +29,6 @@ use function in_array;
 use function strpos;
 use function strrpos;
 use function substr;
-use Webmozart\Assert\Assert;
 
 class AnnotationReader
 {

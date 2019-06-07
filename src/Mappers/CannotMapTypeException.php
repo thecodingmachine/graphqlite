@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use function array_filter;
-use function array_map;
 use Exception;
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use function implode;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
-use function sprintf;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use function array_filter;
+use function array_map;
+use function implode;
+use function sprintf;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
@@ -45,14 +43,19 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     /**
      * @param Type[] $unionTypes
+     *
      * @return CannotMapTypeException
      */
     public static function createForBadTypeInUnion(array $unionTypes): self
     {
-        $disallowedTypes = array_filter($unionTypes, function(Type $type) { return $type instanceof NamedType; });
-        $disallowedTypeNames = array_map(function(NamedType $type) { return $type->name; }, $disallowedTypes);
+        $disallowedTypes = array_filter($unionTypes, static function (Type $type) {
+            return $type instanceof NamedType;
+        });
+        $disallowedTypeNames = array_map(static function (NamedType $type) {
+            return $type->name;
+        }, $disallowedTypes);
 
-        return new self('In GraphQL, you can only use union types between objects. These types cannot be used in union types: '.implode(', ', $disallowedTypeNames));
+        return new self('In GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
     }
 
     public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, ReflectionParameter $parameter): self

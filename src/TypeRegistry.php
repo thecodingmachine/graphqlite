@@ -10,8 +10,8 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
-use function get_class;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use function get_class;
 
 /**
  * A cache used to store already FULLY COMPUTED types.

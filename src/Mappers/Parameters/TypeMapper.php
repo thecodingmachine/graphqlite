@@ -27,7 +27,6 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
-use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -39,10 +38,10 @@ use TheCodingMachine\GraphQLite\TypeMappingException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function count;
 use function iterator_to_array;
-use Webmozart\Assert\Assert;
 
 class TypeMapper implements ParameterMapperInterface
 {
@@ -226,9 +225,11 @@ class TypeMapper implements ParameterMapperInterface
         } else {
             $badTypes = [];
             foreach ($unionTypes as $unionType) {
-                if (!$unionType instanceof ObjectType) {
-                    $badTypes[] = $unionType;
+                if ($unionType instanceof ObjectType) {
+                    continue;
                 }
+
+                $badTypes[] = $unionType;
             }
             if ($badTypes !== []) {
                 throw CannotMapTypeException::createForBadTypeInUnion($unionTypes);
