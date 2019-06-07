@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
@@ -20,6 +21,9 @@ use function is_a;
  */
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
+    /**
+     * @return (GraphQLType&OutputType)|null
+     */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
         return $this->map($type);

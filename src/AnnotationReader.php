@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
@@ -142,7 +143,9 @@ class AnnotationReader
 
     public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
     {
-        $annotations = $this->getParameterAnnotations($refParameter->getDeclaringFunction());
+        $declaringFunction = $refParameter->getDeclaringFunction();
+        Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter passed must be part of a method. Functions are not supported.');
+        $annotations = $this->getParameterAnnotations($declaringFunction);
         foreach ($annotations as $annotation) {
             if ($annotation->getFor() === $refParameter->getName()) {
                 return $annotation;
@@ -174,7 +177,7 @@ class AnnotationReader
                     case self::STRICT_MODE:
                         throw $e;
                     case self::LAX_MODE:
-                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                             throw $e;
                         } else {
                             return null;
@@ -212,7 +215,7 @@ class AnnotationReader
                 case self::STRICT_MODE:
                     throw $e;
                 case self::LAX_MODE:
-                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                         throw $e;
                     } else {
                         return null;
@@ -258,7 +261,7 @@ class AnnotationReader
                 }
 
                 if ($this->mode === self::LAX_MODE) {
-                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
                     }
                 }
@@ -300,7 +303,7 @@ class AnnotationReader
             }
 
             if ($this->mode === self::LAX_MODE) {
-                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                     throw $e;
                 }
             }

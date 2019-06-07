@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function get_class;
 use function is_array;
@@ -28,6 +29,7 @@ class ArgumentResolver
      *
      * @param mixed $val
      * @param mixed $context
+     * @param InputType&Type $type
      *
      * @return mixed
      *
@@ -42,7 +44,10 @@ class ArgumentResolver
             }
 
             return array_map(function ($item) use ($type, $source, $context, $resolveInfo) {
-                return $this->resolve($source, $item, $context, $resolveInfo, $type->getWrappedType());
+                $wrappedType = $type->getWrappedType();
+                Assert::isInstanceOf($wrappedType, InputType::class);
+
+                return $this->resolve($source, $item, $context, $resolveInfo, $wrappedType);
             }, $val);
         }
 

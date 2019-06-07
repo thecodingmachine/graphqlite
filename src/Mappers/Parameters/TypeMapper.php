@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use Iterator;
@@ -36,6 +38,7 @@ use TheCodingMachine\GraphQLite\TypeMappingException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function count;
 use function iterator_to_array;
@@ -131,7 +134,9 @@ class TypeMapper implements ParameterMapperInterface
             }
 
             try {
-                $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $parameter->getDeclaringFunction(), $docBlock, $parameter->getName());
+                $declaringFunction = $parameter->getDeclaringFunction();
+                Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
+                $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $declaringFunction, $docBlock, $parameter->getName());
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
             } catch (CannotMapTypeExceptionInterface $e) {
@@ -218,6 +223,18 @@ class TypeMapper implements ParameterMapperInterface
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
         } else {
+            $badTypes = [];
+            foreach ($unionTypes as $unionType) {
+                if ($unionType instanceof ObjectType) {
+                    continue;
+                }
+
+                $badTypes[] = $unionType;
+            }
+            if ($badTypes !== []) {
+                throw CannotMapTypeException::createForBadTypeInUnion($unionTypes);
+            }
+
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
         }
 
@@ -305,8 +322,10 @@ class TypeMapper implements ParameterMapperInterface
     private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         if ($mapToInputType === true) {
+            Assert::nullOrIsInstanceOf($subType, InputType::class);
             $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         } else {
+            Assert::nullOrIsInstanceOf($subType, OutputType::class);
             $mappedType = $this->rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
         if ($mappedType === null) {

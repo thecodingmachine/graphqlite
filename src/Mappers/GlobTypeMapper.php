@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use Webmozart\Assert\Assert;
 use function array_keys;
 use function class_exists;
 use function filemtime;
@@ -331,7 +332,9 @@ final class GlobTypeMapper implements TypeMapperInterface
                     }*/
                     throw DuplicateMappingException::createForType($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
                 }
-                $this->storeTypeInCache($className, $type, $refClass->getFileName());
+                $fileName = $refClass->getFileName();
+                Assert::string($fileName);
+                $this->storeTypeInCache($className, $type, $fileName);
             }
 
             $isAbstract = $refClass->isAbstract();
@@ -353,7 +356,9 @@ final class GlobTypeMapper implements TypeMapperInterface
                         // If this is not the default factory, let's not map the class name to the factory.
                         $className = null;
                     }
-                    $this->storeInputTypeInCache($method, $inputName, $className, $refClass->getFileName());
+                    $fileName = $refClass->getFileName();
+                    Assert::string($fileName);
+                    $this->storeInputTypeInCache($method, $inputName, $className, $fileName);
                 }
 
                 $decorator = $this->annotationReader->getDecorateAnnotation($method);
@@ -380,7 +385,9 @@ final class GlobTypeMapper implements TypeMapperInterface
                     continue;
                 }
 
-                $this->storeExtendTypeMapperByClassInCache($className, $extendType, $refClass->getFileName());
+                $fileName = $refClass->getFileName();
+                Assert::string($fileName);
+                $this->storeExtendTypeMapperByClassInCache($className, $extendType, $fileName);
             }
         } finally {
             $lock->release();
@@ -398,7 +405,9 @@ final class GlobTypeMapper implements TypeMapperInterface
                 continue;
             }
 
-            $this->storeExtendTypeMapperByNameInCache($className, $extendType, $refClass->getFileName());
+            $fileName = $refClass->getFileName();
+            Assert::string($fileName);
+            $this->storeExtendTypeMapperByNameInCache($className, $extendType, $fileName);
         }
     }
 
@@ -482,6 +491,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         $typeName                                   = $decorate->getInputTypeName();
         $typeFileName                               = $reflectionMethod->getFileName();
+        Assert::string($typeFileName);
         $this->mapInputNameToDecorator[$typeName][] = [$reflectionMethod->getDeclaringClass()->getName(), $reflectionMethod->getName()];
         $this->cache->set('globDecoratorMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $typeName), [
             'filemtime' => filemtime($typeFileName),

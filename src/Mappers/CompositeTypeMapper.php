@@ -222,7 +222,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
-     * @throws CannotMapTypeExceptionInterface
+     * @param ResolvableMutableInputInterface&InputObjectType $type
      */
     public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
     {

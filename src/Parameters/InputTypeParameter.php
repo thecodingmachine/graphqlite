@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 /**
@@ -15,7 +16,7 @@ class InputTypeParameter implements ParameterInterface
 {
     /** @var string */
     private $name;
-    /** @var InputType */
+    /** @var InputType&Type */
     private $type;
     /** @var bool */
     private $doesHaveDefaultValue;
@@ -25,6 +26,7 @@ class InputTypeParameter implements ParameterInterface
     private $argumentResolver;
 
     /**
+     * @param InputType&Type $type
      * @param mixed $defaultValue
      */
     public function __construct(string $name, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)

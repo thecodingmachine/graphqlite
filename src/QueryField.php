@@ -15,6 +15,7 @@ use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function array_unshift;
 use function array_values;
@@ -46,17 +47,18 @@ class QueryField extends FieldDefinition
         }
 
         $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
-            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolve);
-
             if ($resolve !== null) {
-                return $resolve(...$toPassArgs);
-            }
-            if ($targetMethodOnSource !== null) {
+                $method = $resolve;
+            } elseif ($targetMethodOnSource !== null) {
                 $method = [$source, $targetMethodOnSource];
-
-                return $method(...$toPassArgs);
+                Assert::isCallable($method);
+            } else {
+                throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
             }
-            throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
+
+            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $method);
+
+            return $method(...$toPassArgs);
         };
 
         if ($prefetchMethodName === null) {
@@ -80,7 +82,7 @@ class QueryField extends FieldDefinition
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
-
+                        Assert::isCallable($prefetchCallable);
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
                         $prefetchBuffer->storeResult($prefetchResult, $args);
                     } else {
@@ -188,7 +190,7 @@ class QueryField extends FieldDefinition
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, ?callable $resolve): array
+    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
     {
         return array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
             try {

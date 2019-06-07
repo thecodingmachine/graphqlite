@@ -27,6 +27,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
 use function get_parent_class;
@@ -293,7 +294,9 @@ class FieldsBuilder
             if ($sourceClassName !== null) {
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
-                $fieldDescriptor->setCallable([$controller, $methodName]);
+                $callable = [$controller, $methodName];
+                Assert::isCallable($callable);
+                $fieldDescriptor->setCallable($callable);
             }
 
             $fieldDescriptor->setType($type);
