@@ -436,7 +436,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 }
                 $type->freeze();
             }
-            if ($type instanceof ResolvableMutableInputInterface) {
+            if ($type instanceof ResolvableMutableInputInterface && $type instanceof InputObjectType) {
                 if ($this->typeMapper->canDecorateInputTypeForName($typeName, $type)) {
                     $this->typeMapper->decorateInputTypeForName($typeName, $type);
                 }
