@@ -57,8 +57,8 @@ class QueryField extends FieldDefinition
             }
 
             $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $method);
-            return $method(...$toPassArgs);
 
+            return $method(...$toPassArgs);
         };
 
         if ($prefetchMethodName === null) {
