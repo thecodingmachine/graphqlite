@@ -12,6 +12,7 @@ use Psr\SimpleCache\CacheInterface;
 use ReflectionMethod;
 use function filemtime;
 use function md5;
+use Webmozart\Assert\Assert;
 
 /**
  * Creates DocBlocks and puts these in cache.
@@ -49,6 +50,9 @@ class CachedDocBlockFactory
             return $this->docBlockArrayCache[$key];
         }
 
+        $fileName = $refMethod->getFileName();
+        Assert::string($fileName);
+
         $cacheItem = $this->cache->get($key);
         if ($cacheItem !== null) {
             [
@@ -56,7 +60,7 @@ class CachedDocBlockFactory
                 'docblock' => $docBlock,
             ] = $cacheItem;
 
-            if (filemtime($refMethod->getFileName()) === $time) {
+            if (filemtime($fileName) === $time) {
                 $this->docBlockArrayCache[$key] = $docBlock;
 
                 return $docBlock;
@@ -66,7 +70,7 @@ class CachedDocBlockFactory
         $docBlock = $this->doGetDocBlock($refMethod);
 
         $this->cache->set($key, [
-            'time' => filemtime($refMethod->getFileName()),
+            'time' => filemtime($fileName),
             'docblock' => $docBlock,
         ]);
         $this->docBlockArrayCache[$key] = $docBlock;

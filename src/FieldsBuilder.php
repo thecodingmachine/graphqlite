@@ -31,6 +31,7 @@ use function array_merge;
 use function array_shift;
 use function get_parent_class;
 use function ucfirst;
+use Webmozart\Assert\Assert;
 
 /**
  * A class in charge if returning list of fields for queries / mutations / entities / input types
@@ -293,7 +294,9 @@ class FieldsBuilder
             if ($sourceClassName !== null) {
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
-                $fieldDescriptor->setCallable([$controller, $methodName]);
+                $callable = [$controller, $methodName];
+                Assert::isCallable($callable);
+                $fieldDescriptor->setCallable($callable);
             }
 
             $fieldDescriptor->setType($type);

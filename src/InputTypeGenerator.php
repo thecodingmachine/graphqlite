@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ObjectType;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
+use Webmozart\Assert\Assert;
 
 /**
  * This class is in charge of creating Webonyx InputTypes from Factory annotations.
@@ -63,6 +65,8 @@ class InputTypeGenerator
             $object = $container->get($className);
         }
 
-        $inputType->decorate([$object, $methodName]);
+        $callable = [$object, $methodName];
+        Assert::isCallable($callable);
+        $inputType->decorate($callable);
     }
 }

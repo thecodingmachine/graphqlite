@@ -6,8 +6,10 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\NullableType;
 use Porpaginas\Result;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -43,7 +45,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param string          $className The exact class name to look for (this function does not look into parent classes).
-     * @param OutputType|null $subType   An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param (OutputType&Type)|null $subType   An optional sub-type if the main class is an iterator that needs to be typed.
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -59,6 +61,10 @@ class PorpaginasTypeMapper implements TypeMapperInterface
         return $this->getObjectType($subType);
     }
 
+    /**
+     * @param OutputType&Type $subType
+     * @return MutableObjectType
+     */
     private function getObjectType(OutputType $subType): MutableObjectType
     {
         if (! isset($subType->name)) {
@@ -69,13 +75,17 @@ class PorpaginasTypeMapper implements TypeMapperInterface
 
         $typeName = 'PorpaginasResult_' . $name;
 
+        if ($subType instanceof NullableType) {
+            $subType = Type::nonNull($subType);
+        }
+
         if (! isset($this->cache[$typeName])) {
             $this->cache[$typeName] = new MutableObjectType([
                 'name' => $typeName,
                 'fields' => static function () use ($subType) {
                     return [
                         'items' => [
-                            'type' => Type::nonNull(Type::listOf(Type::nonNull($subType))),
+                            'type' => Type::nonNull(Type::listOf($subType)),
                             'args' => [
                                 'limit' => Type::int(),
                                 'offset' => Type::int(),

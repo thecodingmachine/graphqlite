@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use function array_map;
 use function array_unshift;
 use function array_values;
+use Webmozart\Assert\Assert;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -53,7 +54,7 @@ class QueryField extends FieldDefinition
             }
             if ($targetMethodOnSource !== null) {
                 $method = [$source, $targetMethodOnSource];
-
+                Assert::isCallable($method);
                 return $method(...$toPassArgs);
             }
             throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
@@ -80,7 +81,7 @@ class QueryField extends FieldDefinition
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
-
+                        Assert::isCallable($prefetchCallable);
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
                         $prefetchBuffer->storeResult($prefetchResult, $args);
                     } else {

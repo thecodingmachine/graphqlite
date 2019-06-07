@@ -177,7 +177,7 @@ class AnnotationReader
                     case self::STRICT_MODE:
                         throw $e;
                     case self::LAX_MODE:
-                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                             throw $e;
                         } else {
                             return null;
@@ -215,7 +215,7 @@ class AnnotationReader
                 case self::STRICT_MODE:
                     throw $e;
                 case self::LAX_MODE:
-                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                         throw $e;
                     } else {
                         return null;
@@ -261,7 +261,7 @@ class AnnotationReader
                 }
 
                 if ($this->mode === self::LAX_MODE) {
-                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
                     }
                 }
@@ -303,7 +303,7 @@ class AnnotationReader
             }
 
             if ($this->mode === self::LAX_MODE) {
-                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                     throw $e;
                 }
             }
