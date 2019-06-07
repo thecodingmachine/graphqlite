@@ -28,6 +28,7 @@ use function in_array;
 use function strpos;
 use function strrpos;
 use function substr;
+use Webmozart\Assert\Assert;
 
 class AnnotationReader
 {
@@ -142,7 +143,9 @@ class AnnotationReader
 
     public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
     {
-        $annotations = $this->getParameterAnnotations($refParameter->getDeclaringFunction());
+        $declaringFunction = $refParameter->getDeclaringFunction();
+        Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter passed must be part of a method. Functions are not supported.');
+        $annotations = $this->getParameterAnnotations($declaringFunction);
         foreach ($annotations as $annotation) {
             if ($annotation->getFor() === $refParameter->getName()) {
                 return $annotation;

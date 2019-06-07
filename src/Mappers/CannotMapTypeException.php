@@ -18,6 +18,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use function sprintf;
+use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\GraphQLException;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
@@ -79,7 +80,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self($message, 0, $previous);
     }
 
-    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceField $sourceField): self
+    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceFieldInterface $sourceField): self
     {
         $message = sprintf(
             'For @SourceField "%s" declared in "%s", %s',

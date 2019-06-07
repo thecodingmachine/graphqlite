@@ -321,8 +321,10 @@ class TypeMapper implements ParameterMapperInterface
     private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         if ($mapToInputType === true) {
+            Assert::nullOrIsInstanceOf($subType, InputType::class);
             $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         } else {
+            Assert::nullOrIsInstanceOf($subType, OutputType::class);
             $mappedType = $this->rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
         if ($mappedType === null) {
