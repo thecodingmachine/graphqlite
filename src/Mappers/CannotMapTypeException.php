@@ -14,6 +14,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function implode;
@@ -60,10 +61,13 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, ReflectionParameter $parameter): self
     {
+        $declaringClass = $parameter->getDeclaringClass();
+        Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
+
         $message = sprintf(
             'For parameter $%s, in %s::%s, %s',
             $parameter->getName(),
-            $parameter->getDeclaringClass()->getName(),
+            $declaringClass->getName(),
             $parameter->getDeclaringFunction()->getName(),
             $previous->getMessage()
         );

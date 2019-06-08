@@ -34,7 +34,8 @@
         "myclabs/php-enum": "^1.6.6",
         "doctrine/coding-standard": "^6.0",
         "phpstan/phpstan-webmozart-assert": "^0.11.2",
-        "phpstan/extension-installer": "^1.0"
+        "phpstan/extension-installer": "^1.0",
+        "thecodingmachine/phpstan-strict-rules": "^0.11.2"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
@@ -50,7 +51,7 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=6 --no-progress -vvv",
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=7 --no-progress -vvv",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": ["@cs-check", "@phpstan", "phpunit"]

@@ -11,9 +11,8 @@ interface SourceFieldInterface
 {
     /**
      * Returns the name of the GraphQL query/mutation/field.
-     * If not specified, the name of the method should be used instead.
      */
-    public function getName(): ?string;
+    public function getName(): string;
 
     /**
      * Returns the GraphQL return type of the request (as a string).

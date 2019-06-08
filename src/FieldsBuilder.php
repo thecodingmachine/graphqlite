@@ -282,9 +282,10 @@ class FieldsBuilder
 
             $fieldDescriptor->setParameters($args);
 
-            if ($queryAnnotation->getOutputType()) {
+            $outputType = $queryAnnotation->getOutputType();
+            if ($outputType) {
                 try {
-                    $type = $this->typeResolver->mapNameToOutputType($queryAnnotation->getOutputType());
+                    $type = $this->typeResolver->mapNameToOutputType($outputType);
                 } catch (CannotMapTypeExceptionInterface $e) {
                     throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
                 }
@@ -389,9 +390,10 @@ class FieldsBuilder
 
             $fieldDescriptor->setParameters($args);
 
-            if ($sourceField->getOutputType()) {
+            $outputType = $sourceField->getOutputType();
+            if ($outputType) {
                 try {
-                    $type = $this->typeResolver->mapNameToOutputType($sourceField->getOutputType());
+                    $type = $this->typeResolver->mapNameToOutputType($outputType);
                 } catch (CannotMapTypeExceptionInterface $e) {
                     throw CannotMapTypeException::wrapWithSourceField($e, $refClass, $sourceField);
                 }

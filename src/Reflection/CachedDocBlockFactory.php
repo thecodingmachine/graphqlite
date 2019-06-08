@@ -21,7 +21,7 @@ class CachedDocBlockFactory
 {
     /** @var CacheInterface */
     private $cache;
-    /** @var DocBlockFactory|null */
+    /** @var DocBlockFactory */
     private $docBlockFactory;
     /** @var array<string, DocBlock> */
     private $docBlockArrayCache = [];
