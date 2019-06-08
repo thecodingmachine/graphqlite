@@ -79,6 +79,7 @@ class QueryField extends FieldDefinition
 
                         $sources = $prefetchBuffer->getObjectsByArguments($args);
 
+                        Assert::isCallable($prefetchCallable);
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
