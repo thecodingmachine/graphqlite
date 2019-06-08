@@ -50,7 +50,7 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=6 --no-progress -vvv",
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=7 --no-progress -vvv",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": ["@cs-check", "@phpstan", "phpunit"]

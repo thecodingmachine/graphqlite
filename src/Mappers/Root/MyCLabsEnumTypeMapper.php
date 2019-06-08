@@ -36,21 +36,28 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 
     private function map(Type $type): ?EnumType
     {
-        if ($type instanceof Object_ && is_a((string) $type->getFqsen(), Enum::class, true)) {
-            $enumClass      = (string) $type->getFqsen();
-            $consts         = $enumClass::toArray();
-            $constInstances = [];
-            foreach ($consts as $key => $value) {
-                $constInstances[$key] = ['value' => $enumClass::$key()];
-            }
-
-            return new EnumType([
-                'name' => $type->getFqsen()->getName(),
-                'values' => $constInstances,
-            ]);
+        if (! $type instanceof Object_) {
+            return null;
+        }
+        $fqsen = $type->getFqsen();
+        if ($fqsen === null) {
+            return null;
+        }
+        if (! is_a((string) $type->getFqsen(), Enum::class, true)) {
+            return null;
         }
 
-        return null;
+        $enumClass      = (string) $type->getFqsen();
+        $consts         = $enumClass::toArray();
+        $constInstances = [];
+        foreach ($consts as $key => $value) {
+            $constInstances[$key] = ['value' => $enumClass::$key()];
+        }
+
+        return new EnumType([
+            'name' => $fqsen->getName(),
+            'values' => $constInstances,
+        ]);
     }
 
     /**

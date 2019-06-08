@@ -18,6 +18,7 @@ use function array_filter;
 use function array_map;
 use function implode;
 use function sprintf;
+use Webmozart\Assert\Assert;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
@@ -60,10 +61,13 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, ReflectionParameter $parameter): self
     {
+        $declaringClass = $parameter->getDeclaringClass();
+        Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
+
         $message = sprintf(
             'For parameter $%s, in %s::%s, %s',
             $parameter->getName(),
-            $parameter->getDeclaringClass()->getName(),
+            $declaringClass->getName(),
             $parameter->getDeclaringFunction()->getName(),
             $previous->getMessage()
         );

@@ -26,6 +26,7 @@ use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionType;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
@@ -76,8 +77,7 @@ class TypeMapper implements ParameterMapperInterface
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {
-            $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $returnType);
-            $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
+            $phpdocType = $this->reflectionTypeToPhpDocType($returnType, $refMethod->getDeclaringClass());
         } else {
             $phpdocType = new Mixed_();
         }
@@ -111,7 +111,7 @@ class TypeMapper implements ParameterMapperInterface
         return $docBlockReturnType;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ParameterInterface
     {
         if ($parameterAnnotation && $parameterAnnotation->getInputType() !== null) {
             try {
@@ -123,14 +123,14 @@ class TypeMapper implements ParameterMapperInterface
             $parameterType = $parameter->getType();
             $allowsNull    = $parameterType === null ? true : $parameterType->allowsNull();
 
-            $type = (string) $parameterType;
-            if ($type === '') {
+            if ($parameterType === null) {
                 $phpdocType = new Mixed_();
                 $allowsNull = false;
                 //throw MissingTypeHintException::missingTypeHint($parameter);
             } else {
-                $phpdocType = $this->phpDocumentorTypeResolver->resolve($type);
-                $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
+                $declaringClass = $parameter->getDeclaringClass();
+                Assert::notNull($declaringClass);
+                $phpdocType = $this->reflectionTypeToPhpDocType($parameterType, $declaringClass);
             }
 
             try {
@@ -323,6 +323,7 @@ class TypeMapper implements ParameterMapperInterface
     {
         if ($mapToInputType === true) {
             Assert::nullOrIsInstanceOf($subType, InputType::class);
+            Assert::notNull($argumentName);
             $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         } else {
             Assert::nullOrIsInstanceOf($subType, OutputType::class);
@@ -405,5 +406,12 @@ class TypeMapper implements ParameterMapperInterface
         }
 
         return $type;
+    }
+
+    private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
+    {
+        $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $type);
+        Assert::notNull($phpdocType);
+       return $this->resolveSelf($phpdocType, $reflectionClass);
     }
 }

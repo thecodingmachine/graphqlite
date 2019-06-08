@@ -38,9 +38,6 @@ class Type
     {
         if (isset($attributes['class'])) {
             $this->setClass($attributes['class']);
-            if (! class_exists($this->class)) {
-                throw ClassNotFoundException::couldNotFindClass($this->class);
-            }
         } else {
             $this->selfType = true;
         }
@@ -61,6 +58,9 @@ class Type
     public function setClass(string $class): void
     {
         $this->class = ltrim($class, '\\');
+        if (! class_exists($this->class)) {
+            throw ClassNotFoundException::couldNotFindClass($this->class);
+        }
     }
 
     public function isSelfType(): bool
