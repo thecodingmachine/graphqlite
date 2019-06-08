@@ -15,10 +15,10 @@ use ReflectionMethod;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function ltrim;
-use Webmozart\Assert\Assert;
 
 class InputTypeUtils
 {
@@ -75,6 +75,7 @@ class InputTypeUtils
 
         $fqsen = $phpdocType->getFqsen();
         Assert::notNull($fqsen);
+
         return $fqsen;
     }
 

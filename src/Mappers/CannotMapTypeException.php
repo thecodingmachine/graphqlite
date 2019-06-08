@@ -14,11 +14,11 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function implode;
 use function sprintf;
-use Webmozart\Assert\Assert;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {

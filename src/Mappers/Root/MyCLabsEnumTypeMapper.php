@@ -40,10 +40,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             return null;
         }
         $fqsen = $type->getFqsen();
-        if ($fqsen === null) {
-            return null;
-        }
-        if (! is_a((string) $type->getFqsen(), Enum::class, true)) {
+        if ($fqsen === null || ! is_a((string) $type->getFqsen(), Enum::class, true)) {
             return null;
         }
 

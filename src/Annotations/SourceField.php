@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
-use function array_key_exists;
 use BadMethodCallException;
+use function array_key_exists;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.

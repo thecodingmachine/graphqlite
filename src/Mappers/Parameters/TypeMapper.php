@@ -412,6 +412,7 @@ class TypeMapper implements ParameterMapperInterface
     {
         $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $type);
         Assert::notNull($phpdocType);
-       return $this->resolveSelf($phpdocType, $reflectionClass);
+
+        return $this->resolveSelf($phpdocType, $reflectionClass);
     }
 }
