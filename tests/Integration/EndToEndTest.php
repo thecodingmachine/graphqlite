@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Integration;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
+use GraphQL\Type\Definition\NonNull;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -443,6 +444,35 @@ class EndToEndTest extends TestCase
                         'email' => 'bill@example.com'
                     ]
                 ],
+                'count' => 2
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndPorpaginasOnScalarType()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contactsNamesIterator {
+                items(limit: 1, offset: 1)
+                count
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'contactsNamesIterator' => [
+                'items' => ['Bill'],
                 'count' => 2
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);

@@ -26,7 +26,7 @@ class TypeRegistry
      * IMPORTANT: the type MUST be fully computed (so ExtendType annotations must have ALREADY been applied to the tag)
      * ONLY THE RecursiveTypeMapper IS ALLOWED TO CALL THIS METHOD.
      *
-     * @param NamedType&Type&(ObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface)) $type
+     * @param NamedType&Type&(MutableObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface)) $type
      */
     public function registerType(NamedType $type): void
     {

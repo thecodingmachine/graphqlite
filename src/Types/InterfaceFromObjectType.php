@@ -6,6 +6,8 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use function get_class;
@@ -16,8 +18,9 @@ class InterfaceFromObjectType extends InterfaceType
 {
     /**
      * @param string $name The name of the interface
+     * @param (OutputType&Type)|null $subType
      */
-    public function __construct(string $name, ObjectType $type, ?MutableObjectType $subType, RecursiveTypeMapperInterface $typeMapper)
+    public function __construct(string $name, ObjectType $type, ?OutputType $subType, RecursiveTypeMapperInterface $typeMapper)
     {
         parent::__construct([
             'name' => $name,

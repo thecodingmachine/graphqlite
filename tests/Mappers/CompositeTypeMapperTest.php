@@ -78,7 +78,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * Returns a GraphQL type by name (can be either an input or output type)
              *
              * @param string $typeName The name of the GraphQL type
-             * @return Type&(InputType|OutputType)
+             * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
              */
             public function mapNameToType(string $typeName): Type
             {

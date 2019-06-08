@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
@@ -788,7 +787,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return \GraphQL\Type\Definition\Type&(InputType|OutputType)
+     * @return \GraphQL\Type\Definition\Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
      *
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException

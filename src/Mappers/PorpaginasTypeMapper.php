@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
@@ -129,7 +128,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return Type&(InputType|OutputType)
+     * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
      *
      * @throws CannotMapTypeExceptionInterface
      */
