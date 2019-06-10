@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
-use GraphQL\Type\Definition\ResolveInfo;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use Psr\Container\ContainerInterface;
@@ -12,29 +11,21 @@ use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Parameters\ContainerParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\Parameters\ResolveInfoParameter;
 
 /**
  * Tries to map parameters with FQCN type hints to a container entry with the FQCN or the parameter name.
  */
 class ContainerParameterMapper implements ParameterMapperInterface
 {
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private $container;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $mapFullyQualifiedClassName;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $mapParameterName;
 
     public function __construct(ContainerInterface $container, bool $mapFullyQualifiedClassName, bool $mapParameterName)
     {
-
         $this->container = $container;
         $this->mapFullyQualifiedClassName = $mapFullyQualifiedClassName;
         $this->mapParameterName = $mapParameterName;

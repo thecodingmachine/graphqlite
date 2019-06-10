@@ -12,13 +12,9 @@ use Psr\Container\ContainerInterface;
  */
 class ContainerParameter implements ParameterInterface
 {
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private $container;
-    /**
-     * @var string
-     */
+    /** @var string */
     private $identifier;
 
     public function __construct(ContainerInterface $container, string $identifier)

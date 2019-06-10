@@ -81,13 +81,9 @@ class SchemaFactory
     private $globTtl = 2;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $autowireServiceOnClassName = true;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $autowireServiceOnParameterName = false;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
@@ -255,8 +251,6 @@ class SchemaFactory
 
     /**
      * Whether we should autowire services from the container in the function parameters based on the fully-qualified class name.
-     *
-     * @param bool $autowireServiceOnClassName
      */
     public function setAutowireServiceOnClassName(bool $autowireServiceOnClassName): void
     {
@@ -265,8 +259,6 @@ class SchemaFactory
 
     /**
      * Whether we should autowire services from the container in the function parameters based on the parameter name.
-     *
-     * @param bool $autowireServiceOnParameterName
      */
     public function setAutowireServiceOnParameterName(bool $autowireServiceOnParameterName): void
     {
