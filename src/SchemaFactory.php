@@ -18,6 +18,7 @@ use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
@@ -80,6 +81,14 @@ class SchemaFactory
     private $globTtl = 2;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
+    /**
+     * @var bool
+     */
+    private $autowireServiceOnClassName = true;
+    /**
+     * @var bool
+     */
+    private $autowireServiceOnParameterName = false;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -244,6 +253,26 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * Whether we should autowire services from the container in the function parameters based on the fully-qualified class name.
+     *
+     * @param bool $autowireServiceOnClassName
+     */
+    public function setAutowireServiceOnClassName(bool $autowireServiceOnClassName): void
+    {
+        $this->autowireServiceOnClassName = $autowireServiceOnClassName;
+    }
+
+    /**
+     * Whether we should autowire services from the container in the function parameters based on the parameter name.
+     *
+     * @param bool $autowireServiceOnParameterName
+     */
+    public function setAutowireServiceOnParameterName(bool $autowireServiceOnParameterName): void
+    {
+        $this->autowireServiceOnParameterName = $autowireServiceOnParameterName;
+    }
+
     public function createSchema(): Schema
     {
         $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
@@ -280,6 +309,9 @@ class SchemaFactory
 
         $parameterMappers         = $this->parameterMappers;
         $parameterMappers[]       = new ResolveInfoParameterMapper();
+        if ($this->autowireServiceOnClassName === true || $this->autowireServiceOnParameterName === true) {
+            $parameterMappers[]       = new ContainerParameterMapper($this->container, $this->autowireServiceOnClassName, $this->autowireServiceOnParameterName);
+        }
         $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
 
         $fieldsBuilder = new FieldsBuilder(

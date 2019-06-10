@@ -228,4 +228,4 @@ GraphQL supports "custom" scalar types. GraphQLite supports adding more GraphQL 
 If you need more types, you can check the [GraphQLite Misc. Types library](https://github.com/thecodingmachine/graphqlite-misc-types).
 It adds support for more scalar types out of the box in GraphQLite.
 
-Or if you have some special needs, [you can develop your own scalar types](custom-types.md#registering-a-custom-scalar-type-advanced).
+Or if you have some special needs, [you can develop your own scalar types](custom-types#registering-a-custom-scalar-type-advanced).
