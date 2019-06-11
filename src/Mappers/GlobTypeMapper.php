@@ -14,6 +14,10 @@ use ReflectionException;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
+use TheCodingMachine\CacheUtils\ClassBoundCache;
+use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
+use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\CacheUtils\MemoryAdapter;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
@@ -49,18 +53,53 @@ final class GlobTypeMapper implements TypeMapperInterface
     private $globTtl;
     /** @var array<string,string> Maps a domain class to the GraphQL type annotated class */
     private $mapClassToTypeArray = [];
+    /**
+     * Maps a domain class to the GraphQL type annotated class
+     * @var ClassBoundCacheInterface
+     */
+    private $mapClassToTypeCache;
     /** @var array<string,array<string,string>> Maps a domain class to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN */
     private $mapClassToExtendTypeArray = [];
+    /**
+     * Maps a domain class to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN (array<string,string>)
+     * @var ClassBoundCacheInterface
+     */
+    private $mapClassToExtendTypeCache;
     /** @var array<string,string> Maps a GraphQL type name to the GraphQL type annotated class */
     private $mapNameToType = [];
+    /**
+     * Maps a GraphQL type name to the GraphQL type annotated class
+     * @var ClassBoundCacheInterface
+     */
+    private $mapNameToTypeCache;
     /** @var array<string,array<string,string>> Maps a GraphQL type name to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN */
     private $mapNameToExtendType = [];
+    /**
+     * Maps a GraphQL type name to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN (array<string,string>)
+     * @var ClassBoundCacheInterface
+     */
+    private $mapNameToExtendTypeCache;
     /** @var array<string,string[]> Maps a domain class to the factory method that creates the input type in the form [classname, methodname] */
     private $mapClassToFactory = [];
+    /**
+     * Maps a domain class to the factory method that creates the input type in the form [classname, methodname]
+     * @var ClassBoundCacheInterface
+     */
+    private $mapClassToFactoryCache;
     /** @var array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname] */
     private $mapInputNameToFactory = [];
+    /**
+     * Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname]
+     * @var ClassBoundCacheInterface
+     */
+    private $mapInputNameToFactoryCache;
     /** @var array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private $mapInputNameToDecorator = [];
+    /**
+     * Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) array<int, callable&array>
+     * @var ClassBoundCacheInterface
+     */
+    private $mapInputNameToDecoratorCache;
     /** @var ContainerInterface */
     private $container;
     /** @var TypeGenerator */
@@ -105,13 +144,21 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->annotationReader    = $annotationReader;
         $this->namingStrategy      = $namingStrategy;
         $this->cache               = $cache;
-        $this->cacheContract       = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $this->globTtl ?? 0);
+        $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace);
+        $this->cacheContract       = new Psr16Adapter($this->cache, $cachePrefix, $this->globTtl ?? 0);
         $this->globTtl             = $globTtl;
         $this->mapTtl              = $mapTtl;
         $this->inputTypeGenerator  = $inputTypeGenerator;
         $this->inputTypeUtils      = $inputTypeUtils;
         $this->recursive           = $recursive;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->mapClassToTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globTypeMapperByClass_'.$cachePrefix)));
+        $this->mapNameToTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globTypeMapperByName_'.$cachePrefix)));
+        $this->mapNameToExtendTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globExtendTypeMapperByName_'.$cachePrefix)));
+        $this->mapClassToFactoryCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globInputTypeMapperByClass_'.$cachePrefix)));
+        $this->mapInputNameToFactoryCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globInputTypeMapperByName_'.$cachePrefix)));
+        $this->mapInputNameToDecoratorCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globDecoratorMapperByName_'.$cachePrefix)));
+        $this->mapClassToExtendTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globExtendTypeMapperByClass_'.$cachePrefix)));
     }
 
     /**
@@ -278,7 +325,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 }
                 $fileName = $refClass->getFileName();
                 Assert::string($fileName);
-                $this->storeTypeInCache($className, $type, $fileName);
+                $this->storeTypeInCache($className, $type, $fileName, $refClass);
             }
 
             $isAbstract = $refClass->isAbstract();
@@ -302,7 +349,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                     }
                     $fileName = $refClass->getFileName();
                     Assert::string($fileName);
-                    $this->storeInputTypeInCache($method, $inputName, $className, $fileName);
+                    $this->storeInputTypeInCache($method, $inputName, $className, $fileName, $refClass);
                 }
 
                 $decorator = $this->annotationReader->getDecorateAnnotation($method);
@@ -329,7 +376,7 @@ final class GlobTypeMapper implements TypeMapperInterface
 
             $fileName = $refClass->getFileName();
             Assert::string($fileName);
-            $this->storeExtendTypeMapperByClassInCache($className, $extendType, $fileName);
+            $this->storeExtendTypeMapperByClassInCache($className, $extendType, $fileName, $refClass);
         }
     }
 
@@ -346,81 +393,59 @@ final class GlobTypeMapper implements TypeMapperInterface
 
             $fileName = $refClass->getFileName();
             Assert::string($fileName);
-            $this->storeExtendTypeMapperByNameInCache($className, $extendType, $fileName);
+            $this->storeExtendTypeMapperByNameInCache($className, $extendType, $fileName, $refClass);
         }
     }
 
     /**
      * Stores in cache the mapping TypeClass <=> Object class <=> GraphQL type name.
      */
-    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName): void
+    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName, ReflectionClass $reflectionClass): void
     {
         $objectClassName                             = $type->getClass();
         $this->mapClassToTypeArray[$objectClassName] = $typeClassName;
-        $this->cache->set('globTypeMapperByClass_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace) . '_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $objectClassName), [
-            'filemtime' => filemtime($typeFileName),
-            'fileName' => $typeFileName,
-            'typeClass' => $typeClassName,
-        ], $this->mapTtl);
+        $this->mapClassToTypeCache->set($objectClassName, $typeClassName, $reflectionClass, $this->mapTtl);
+
         $typeName                       = $this->namingStrategy->getOutputTypeName($typeClassName, $type);
         $this->mapNameToType[$typeName] = $typeClassName;
-        $this->cache->set('globTypeMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $typeName), [
-            'filemtime' => filemtime($typeFileName),
-            'fileName' => $typeFileName,
-            'typeClass' => $typeClassName,
-        ], $this->mapTtl);
+        $this->mapNameToTypeCache->set($typeName, $typeClassName, $reflectionClass, $this->mapTtl);
     }
 
     /**
      * Stores in cache the mapping between InputType name <=> Object class
      */
-    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, string $fileName): void
+    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, string $fileName, ReflectionClass $refClass): void
     {
         $refArray = [$refMethod->getDeclaringClass()->getName(), $refMethod->getName()];
         if ($className !== null) {
             $this->mapClassToFactory[$className] = $refArray;
-            $this->cache->set('globInputTypeMapperByClass_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace) . '_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $className), [
-                'filemtime' => filemtime($fileName),
-                'fileName' => $fileName,
-                'factory' => $refArray,
-            ], $this->mapTtl);
+            $this->mapClassToFactoryCache->set($className, $refArray, $refClass, $this->mapTtl);
         }
         $this->mapInputNameToFactory[$inputName] = $refArray;
-        $this->cache->set('globInputTypeMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $inputName), [
-            'filemtime' => filemtime($fileName),
-            'fileName' => $fileName,
-            'factory' => $refArray,
-        ], $this->mapTtl);
+        $this->mapInputNameToFactoryCache->set($inputName, $refArray, $refClass, $this->mapTtl);
     }
 
     /**
      * Stores in cache the mapping ExtendTypeClass <=> Object class.
      */
-    private function storeExtendTypeMapperByClassInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName): void
+    private function storeExtendTypeMapperByClassInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName, ReflectionClass $refClass): void
     {
         $objectClassName                                                         = $extendType->getClass();
         $this->mapClassToExtendTypeArray[$objectClassName][$extendTypeClassName] = $extendTypeClassName;
-        $this->cache->set('globExtendTypeMapperByClass_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace) . '_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $objectClassName), [
-            'filemtime' => filemtime($typeFileName),
-            'fileName' => $typeFileName,
-            'extendTypeClasses' => $this->mapClassToExtendTypeArray[$objectClassName],
-        ], $this->mapTtl);
+        $this->mapClassToExtendTypeCache->set($objectClassName, $this->mapClassToExtendTypeArray[$objectClassName], $refClass, $this->mapTtl);
     }
 
     /**
      * Stores in cache the mapping ExtendTypeClass <=> name class.
      */
-    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName): void
+    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName, ReflectionClass $refClass): void
     {
         $targetType = $this->recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
         $typeName   = $targetType->name;
 
         $this->mapNameToExtendType[$typeName][$extendTypeClassName] = $extendTypeClassName;
-        $this->cache->set('globExtendTypeMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $typeName), [
-            'filemtime' => filemtime($typeFileName),
-            'fileName' => $typeFileName,
-            'extendTypeClasses' => $this->mapNameToExtendType[$typeName],
-        ], $this->mapTtl);
+
+        $this->mapNameToExtendTypeCache->set($typeName, $this->mapNameToExtendType[$typeName], $refClass, $this->mapTtl);
     }
 
     /**
@@ -432,11 +457,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         $typeFileName                               = $reflectionMethod->getFileName();
         Assert::string($typeFileName);
         $this->mapInputNameToDecorator[$typeName][] = [$reflectionMethod->getDeclaringClass()->getName(), $reflectionMethod->getName()];
-        $this->cache->set('globDecoratorMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $typeName), [
-            'filemtime' => filemtime($typeFileName),
-            'fileName' => $typeFileName,
-            'decorators' => $this->mapInputNameToDecorator[$typeName],
-        ], $this->mapTtl);
+        $this->mapInputNameToDecoratorCache->set($typeName, $this->mapInputNameToDecorator[$typeName], $reflectionMethod->getDeclaringClass(), $this->mapTtl);
     }
 
     private function getTypeFromCacheByObjectClass(string $className): ?string
@@ -445,24 +466,24 @@ final class GlobTypeMapper implements TypeMapperInterface
             return $this->mapClassToTypeArray[$className];
         }
 
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: we need a memory adapter for ClassBoundCache
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+        // TODO: + buildMap must RETURN the full map (instead of storing it)
+
         // Let's try from the cache
-        $item = $this->cache->get('globTypeMapperByClass_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace) . '_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $className));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'typeClass' => $typeClassName,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapClassToTypeArray[$className] = $typeClassName;
-
-                return $typeClassName;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapClassToTypeArray[$className] = $this->mapClassToTypeCache->get($className);
     }
 
     private function getTypeFromCacheByGraphQLTypeName(string $graphqlTypeName): ?string
@@ -472,23 +493,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globTypeMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $graphqlTypeName));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'typeClass' => $typeClassName,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapNameToType[$graphqlTypeName] = $typeClassName;
-
-                return $typeClassName;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapNameToType[$graphqlTypeName] = $this->mapNameToTypeCache->get($graphqlTypeName);
     }
 
     /**
@@ -501,23 +506,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globInputTypeMapperByClass_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace) . '_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $className));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'factory' => $factory,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapClassToFactory[$className] = $factory;
-
-                return $factory;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapClassToFactory[$className] = $this->mapClassToFactoryCache->get($className);
     }
 
     /**
@@ -530,23 +519,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globExtendTypeMapperByClass_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace) . '_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $className));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'extendTypeClasses' => $extendTypeClassNames,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapClassToExtendTypeArray[$className] = $extendTypeClassNames;
-
-                return $extendTypeClassNames;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapClassToExtendTypeArray[$className] = $this->mapClassToExtendTypeCache->get($className);
     }
 
     /**
@@ -559,23 +532,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globExtendTypeMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $graphqlTypeName));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'extendTypeClasses' => $extendTypeClassNames,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapNameToExtendType[$graphqlTypeName] = $extendTypeClassNames;
-
-                return $extendTypeClassNames;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapNameToExtendType[$graphqlTypeName] = $this->mapNameToExtendTypeCache->get($graphqlTypeName);
     }
 
     /**
@@ -588,23 +545,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globInputTypeMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $graphqlTypeName));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'factory' => $factory,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapInputNameToFactory[$graphqlTypeName] = $factory;
-
-                return $factory;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapInputNameToFactory[$graphqlTypeName] = $this->mapInputNameToFactoryCache->get($graphqlTypeName);
     }
 
     /**
@@ -617,23 +558,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         // Let's try from the cache
-        $item = $this->cache->get('globDecoratorMapperByName_' . str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $this->namespace . '_' . $graphqlTypeName));
-        if ($item !== null) {
-            [
-                'filemtime' => $filemtime,
-                'fileName' => $typeFileName,
-                'decorators' => $decorators,
-            ] = $item;
-
-            if ($filemtime === @filemtime($typeFileName)) {
-                $this->mapInputNameToDecorator[$graphqlTypeName] = $decorators;
-
-                return $decorators;
-            }
-        }
-
-        // cache miss
-        return null;
+        return $this->mapInputNameToDecorator[$graphqlTypeName] = $this->mapInputNameToDecoratorCache->get($graphqlTypeName);
     }
 
     /**
