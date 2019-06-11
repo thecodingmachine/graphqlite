@@ -66,7 +66,7 @@ class EndToEndTest extends TestCase
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
-                    $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
+                    $container->get(BasicAutoWiringContainer::class), new ArrayCache());
             },
             FieldsBuilder::class => function(ContainerInterface $container) {
                 return new FieldsBuilder(
@@ -127,7 +127,6 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(LockFactory::class),
                     new ArrayCache()
                     );
             },
@@ -140,7 +139,6 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(LockFactory::class),
                     new ArrayCache()
                 );
             },
@@ -180,14 +178,6 @@ class EndToEndTest extends TestCase
             },
             CachedDocBlockFactory::class => function() {
                 return new CachedDocBlockFactory(new ArrayCache());
-            },
-            LockFactory::class => function() {
-                if (extension_loaded('sysvsem')) {
-                    $lockStore = new SemaphoreStore();
-                } else {
-                    $lockStore = new FlockStore(sys_get_temp_dir());
-                }
-                return new LockFactory($lockStore);
             },
             RootTypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeRootTypeMapper([

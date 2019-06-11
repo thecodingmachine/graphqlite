@@ -343,17 +343,4 @@ abstract class AbstractQueryProviderTest extends TestCase
         }
         return $this->typeRegistry;
     }
-
-    protected function getLockFactory(): LockFactory
-    {
-        if ($this->lockFactory === null) {
-            if (extension_loaded('sysvsem')) {
-                $lockStore = new SemaphoreStore();
-            } else {
-                $lockStore = new FlockStore(sys_get_temp_dir());
-            }
-            $this->lockFactory = new LockFactory($lockStore);
-        }
-        return $this->lockFactory;
-    }
 }

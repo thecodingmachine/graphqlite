@@ -12,9 +12,6 @@ use Doctrine\Common\Cache\ApcuCache;
 use GraphQL\Type\SchemaConfig;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
@@ -38,9 +35,7 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use function extension_loaded;
 use function function_exists;
-use function sys_get_temp_dir;
 
 /**
  * A class to help getting started with GraphQLite.
@@ -260,13 +255,6 @@ class SchemaFactory
         }
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
-        if (extension_loaded('sysvsem')) {
-            $lockStore = new SemaphoreStore();
-        } else {
-            $lockStore = new FlockStore(sys_get_temp_dir());
-        }
-        $lockFactory = new LockFactory($lockStore);
-
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
 
@@ -312,7 +300,6 @@ class SchemaFactory
                 $annotationReader,
                 $namingStrategy,
                 $recursiveTypeMapper,
-                $lockFactory,
                 $this->cache,
                 $this->globTtl
             ));
@@ -334,7 +321,6 @@ class SchemaFactory
                 $controllerNamespace,
                 $fieldsBuilder,
                 $this->container,
-                $lockFactory,
                 $this->cache,
                 $this->globTtl
             );

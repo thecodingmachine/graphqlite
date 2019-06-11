@@ -9,7 +9,8 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
-use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
+use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use function class_exists;
 use function str_replace;
@@ -38,23 +39,23 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private $fieldsBuilder;
     /** @var bool */
     private $recursive;
-    /** @var LockFactory */
-    private $lockFactory;
+    /** @var CacheContractInterface */
+    private $cacheContract;
 
     /**
      * @param string             $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
      * @param bool               $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
     {
         $this->namespace     = $namespace;
         $this->container     = $container;
         $this->cache         = $cache;
+        $this->cacheContract = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
         $this->cacheTtl      = $cacheTtl;
         $this->fieldsBuilder = $fieldsBuilder;
         $this->recursive     = $recursive;
-        $this->lockFactory   = $lockFactory;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -74,29 +75,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function getInstancesList(): array
     {
         if ($this->instancesList === null) {
-            $key                 = 'globQueryProvider_' . str_replace('\\', '_', $this->namespace);
-            $this->instancesList = $this->cache->get($key);
-            if ($this->instancesList === null) {
-                $lock = $this->lockFactory->createLock('buildInstanceList_' . $this->namespace, 5);
-                if (! $lock->acquire()) {
-                    // Lock is being held right now. Generation is happening.
-                    // Let's wait and fetch the result from the cache.
-                    $lock->acquire(true);
-                    $lock->release();
-
-                    return $this->getInstancesList();
-                }
-                $lock->acquire(true);
-                try {
-                    $this->instancesList = $this->buildInstancesList();
-
-                    return $this->instancesList;
-                } finally {
-                    $lock->release();
-                }
-
-                $this->cache->set($key, $this->instancesList, $this->cacheTtl);
-            }
+            $this->instancesList = $this->cacheContract->get('globQueryProvider', function () {
+                return $this->buildInstancesList();
+            });
         }
 
         return $this->instancesList;
