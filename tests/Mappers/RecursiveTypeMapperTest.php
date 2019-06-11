@@ -121,7 +121,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
             $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry(), $this->typeMapper, $this->getFieldsBuilder());
 
-            $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, $this->typeMapper, $this->getLockFactory(), new NullCache());
+            $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, $this->typeMapper, new NullCache());
             $compositeMapper->addTypeMapper($mapper);
         }
         return $this->typeMapper;
@@ -210,7 +210,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
         $cache = new ArrayCache();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), $cache);
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
         $recursiveTypeMapper = new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
 
