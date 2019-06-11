@@ -323,9 +323,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                     }*/
                     throw DuplicateMappingException::createForType($type->getClass(), $this->mapClassToTypeArray[$type->getClass()], $className);
                 }
-                $fileName = $refClass->getFileName();
-                Assert::string($fileName);
-                $this->storeTypeInCache($className, $type, $fileName, $refClass);
+                $this->storeTypeInCache($className, $type, $refClass);
             }
 
             $isAbstract = $refClass->isAbstract();
@@ -347,9 +345,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                         // If this is not the default factory, let's not map the class name to the factory.
                         $className = null;
                     }
-                    $fileName = $refClass->getFileName();
-                    Assert::string($fileName);
-                    $this->storeInputTypeInCache($method, $inputName, $className, $fileName, $refClass);
+                    $this->storeInputTypeInCache($method, $inputName, $className, $refClass);
                 }
 
                 $decorator = $this->annotationReader->getDecorateAnnotation($method);
@@ -374,9 +370,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 continue;
             }
 
-            $fileName = $refClass->getFileName();
-            Assert::string($fileName);
-            $this->storeExtendTypeMapperByClassInCache($className, $extendType, $fileName, $refClass);
+            $this->storeExtendTypeMapperByClassInCache($className, $extendType, $refClass);
         }
     }
 
@@ -391,16 +385,14 @@ final class GlobTypeMapper implements TypeMapperInterface
                 continue;
             }
 
-            $fileName = $refClass->getFileName();
-            Assert::string($fileName);
-            $this->storeExtendTypeMapperByNameInCache($className, $extendType, $fileName, $refClass);
+            $this->storeExtendTypeMapperByNameInCache($className, $extendType, $refClass);
         }
     }
 
     /**
      * Stores in cache the mapping TypeClass <=> Object class <=> GraphQL type name.
      */
-    private function storeTypeInCache(string $typeClassName, Type $type, string $typeFileName, ReflectionClass $reflectionClass): void
+    private function storeTypeInCache(string $typeClassName, Type $type, ReflectionClass $reflectionClass): void
     {
         $objectClassName                             = $type->getClass();
         $this->mapClassToTypeArray[$objectClassName] = $typeClassName;
@@ -414,7 +406,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping between InputType name <=> Object class
      */
-    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, string $fileName, ReflectionClass $refClass): void
+    private function storeInputTypeInCache(ReflectionMethod $refMethod, string $inputName, ?string $className, ReflectionClass $refClass): void
     {
         $refArray = [$refMethod->getDeclaringClass()->getName(), $refMethod->getName()];
         if ($className !== null) {
@@ -428,7 +420,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping ExtendTypeClass <=> Object class.
      */
-    private function storeExtendTypeMapperByClassInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName, ReflectionClass $refClass): void
+    private function storeExtendTypeMapperByClassInCache(string $extendTypeClassName, ExtendType $extendType, ReflectionClass $refClass): void
     {
         $objectClassName                                                         = $extendType->getClass();
         $this->mapClassToExtendTypeArray[$objectClassName][$extendTypeClassName] = $extendTypeClassName;
@@ -438,7 +430,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Stores in cache the mapping ExtendTypeClass <=> name class.
      */
-    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, string $typeFileName, ReflectionClass $refClass): void
+    private function storeExtendTypeMapperByNameInCache(string $extendTypeClassName, ExtendType $extendType, ReflectionClass $refClass): void
     {
         $targetType = $this->recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
         $typeName   = $targetType->name;
@@ -454,8 +446,6 @@ final class GlobTypeMapper implements TypeMapperInterface
     private function storeDecoratorMapperByNameInCache(ReflectionMethod $reflectionMethod, Decorate $decorate): void
     {
         $typeName                                   = $decorate->getInputTypeName();
-        $typeFileName                               = $reflectionMethod->getFileName();
-        Assert::string($typeFileName);
         $this->mapInputNameToDecorator[$typeName][] = [$reflectionMethod->getDeclaringClass()->getName(), $reflectionMethod->getName()];
         $this->mapInputNameToDecoratorCache->set($typeName, $this->mapInputNameToDecorator[$typeName], $reflectionMethod->getDeclaringClass(), $this->mapTtl);
     }
