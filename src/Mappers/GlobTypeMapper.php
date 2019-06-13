@@ -16,8 +16,8 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\CacheUtils\ClassBoundCache;
 use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
+use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
-use TheCodingMachine\CacheUtils\MemoryAdapter;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
@@ -152,13 +152,13 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->inputTypeUtils      = $inputTypeUtils;
         $this->recursive           = $recursive;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
-        $this->mapClassToTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globTypeMapperByClass_'.$cachePrefix)));
-        $this->mapNameToTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globTypeMapperByName_'.$cachePrefix)));
-        $this->mapNameToExtendTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globExtendTypeMapperByName_'.$cachePrefix)));
-        $this->mapClassToFactoryCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globInputTypeMapperByClass_'.$cachePrefix)));
-        $this->mapInputNameToFactoryCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globInputTypeMapperByName_'.$cachePrefix)));
-        $this->mapInputNameToDecoratorCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globDecoratorMapperByName_'.$cachePrefix)));
-        $this->mapClassToExtendTypeCache = new ClassBoundCache(new MemoryAdapter(new FileBoundCache($this->cache, 'globExtendTypeMapperByClass_'.$cachePrefix)));
+        $this->mapClassToTypeCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globTypeMapperByClass_' . $cachePrefix)));
+        $this->mapNameToTypeCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globTypeMapperByName_' . $cachePrefix)));
+        $this->mapNameToExtendTypeCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globExtendTypeMapperByName_' . $cachePrefix)));
+        $this->mapClassToFactoryCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globInputTypeMapperByClass_' . $cachePrefix)));
+        $this->mapInputNameToFactoryCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globInputTypeMapperByName_' . $cachePrefix)));
+        $this->mapInputNameToDecoratorCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globDecoratorMapperByName_' . $cachePrefix)));
+        $this->mapClassToExtendTypeCache = new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'globExtendTypeMapperByClass_' . $cachePrefix)));
     }
 
     /**
