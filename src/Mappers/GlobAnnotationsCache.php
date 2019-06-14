@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
@@ -10,34 +11,22 @@ namespace TheCodingMachine\GraphQLite\Mappers;
  */
 class GlobAnnotationsCache
 {
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $typeClassName;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $typeName;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $extendTypeClassName;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $extendTypeName;
 
-    /**
-     * @var array<string, array<int, string|bool>> An array mapping a factory method name to an input name / class name / default flag / declaring class
-     */
+    /** @var array<string, array<int, string|bool>> An array mapping a factory method name to an input name / class name / default flag / declaring class */
     private $factories = [];
 
-    /**
-     * @var array<string, array<int, string>> An array mapping a decorator method name to an input name / declaring class
-     */
+    /** @var array<string, array<int, string>> An array mapping a decorator method name to an input name / declaring class */
     private $decorators = [];
 
     public function setType(string $className, string $typeName): void
@@ -46,17 +35,11 @@ class GlobAnnotationsCache
         $this->typeName = $typeName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getTypeClassName(): ?string
     {
         return $this->typeClassName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getTypeName(): ?string
     {
         return $this->typeName;
@@ -68,22 +51,15 @@ class GlobAnnotationsCache
         $this->extendTypeName = $typeName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getExtendTypeClassName(): ?string
     {
         return $this->extendTypeClassName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getExtendTypeName(): ?string
     {
         return $this->extendTypeName;
     }
-
 
     public function registerFactory(string $methodName, string $inputName, ?string $className, bool $isDefault, string $declaringClass): void
     {

@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
@@ -10,14 +11,10 @@ namespace TheCodingMachine\GraphQLite\Mappers;
  */
 class GlobExtendAnnotationsCache
 {
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $extendTypeClassName;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $extendTypeName;
 
     public function setExtendType(string $className, string $typeName): void
@@ -26,17 +23,11 @@ class GlobExtendAnnotationsCache
         $this->extendTypeName = $typeName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getExtendTypeClassName(): ?string
     {
         return $this->extendTypeClassName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getExtendTypeName(): ?string
     {
         return $this->extendTypeName;

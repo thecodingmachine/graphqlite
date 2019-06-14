@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use function array_keys;
 use ReflectionClass;
-use TheCodingMachine\GraphQLite\Annotations\Type;
+use function array_keys;
 
 /**
  * The cached results of a GlobTypeMapper
@@ -25,9 +25,6 @@ class GlobTypeMapperCache
 
     /**
      * Merges annotations of a given class in the global cache.
-     *
-     * @param ReflectionClass $refClass
-     * @param GlobAnnotationsCache $globAnnotationsCache
      */
     public function registerAnnotations(ReflectionClass $refClass, GlobAnnotationsCache $globAnnotationsCache): void
     {

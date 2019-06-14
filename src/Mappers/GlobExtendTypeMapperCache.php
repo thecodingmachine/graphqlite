@@ -1,11 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use function array_keys;
 use ReflectionClass;
-use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * The cached results of a GlobTypeMapper
@@ -19,21 +18,20 @@ class GlobExtendTypeMapperCache
 
     /**
      * Merges annotations of a given class in the global cache.
-     *
-     * @param ReflectionClass $refClass
-     * @param GlobAnnotationsCache $globExtendAnnotationsCache
      */
     public function registerAnnotations(ReflectionClass $refClass, GlobExtendAnnotationsCache $globExtendAnnotationsCache): void
     {
         $className = $refClass->getName();
 
         $typeClassName = $globExtendAnnotationsCache->getExtendTypeClassName();
-        if ($typeClassName !== null) {
-            $this->mapClassToExtendTypeArray[$typeClassName][$className] = $className;
-
-            $typeName = $globExtendAnnotationsCache->getExtendTypeName();
-            $this->mapNameToExtendType[$typeName][$className] = $className;
+        if ($typeClassName === null) {
+            return;
         }
+
+        $this->mapClassToExtendTypeArray[$typeClassName][$className] = $className;
+
+        $typeName = $globExtendAnnotationsCache->getExtendTypeName();
+        $this->mapNameToExtendType[$typeName][$className] = $className;
     }
 
     /**

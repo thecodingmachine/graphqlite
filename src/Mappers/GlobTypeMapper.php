@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -16,21 +17,16 @@ use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\CacheUtils\ClassBoundCache;
 use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
 use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
 use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
-use TheCodingMachine\GraphQLite\Annotations\Decorate;
-use TheCodingMachine\GraphQLite\Annotations\ExtendType;
-use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use function array_keys;
 use function class_exists;
 use function str_replace;
 
@@ -90,13 +86,9 @@ final class GlobTypeMapper implements TypeMapperInterface
     private $recursiveTypeMapper;
     /** @var CacheContractInterface */
     private $cacheContract;
-    /**
-     * @var GlobTypeMapperCache
-     */
+    /** @var GlobTypeMapperCache */
     private $globTypeMapperCache;
-    /**
-     * @var GlobExtendTypeMapperCache
-     */
+    /** @var GlobExtendTypeMapperCache */
     private $globExtendTypeMapperCache;
 
     /**
@@ -124,8 +116,6 @@ final class GlobTypeMapper implements TypeMapperInterface
 
     /**
      * Returns an object mapping all types.
-     *
-     * @return GlobTypeMapperCache
      */
     private function getMaps(): GlobTypeMapperCache
     {
@@ -183,7 +173,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         /** @var ReflectionClass[] $classes */
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
-            $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function() use ($refClass, $className) {
+            $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
                 $annotationsCache = new GlobAnnotationsCache();
 
                 $containsAnnotations = false;
@@ -212,21 +202,26 @@ final class GlobTypeMapper implements TypeMapperInterface
 
                     $decorator = $this->annotationReader->getDecorateAnnotation($method);
 
-                    if ($decorator !== null) {
-                        $annotationsCache->registerDecorator($method->getName(), $decorator->getInputTypeName(), $method->getDeclaringClass()->getName());
-                        $containsAnnotations = true;
+                    if ($decorator === null) {
+                        continue;
                     }
+
+                    $annotationsCache->registerDecorator($method->getName(), $decorator->getInputTypeName(), $method->getDeclaringClass()->getName());
+                    $containsAnnotations = true;
                 }
 
-                if (!$containsAnnotations) {
+                if (! $containsAnnotations) {
                     return 'nothing';
                 }
+
                 return $annotationsCache;
             });
 
-            if ($annotationsCache !== 'nothing') {
-                $globTypeMapperCache->registerAnnotations($refClass, $annotationsCache);
+            if ($annotationsCache === 'nothing') {
+                continue;
             }
+
+            $globTypeMapperCache->registerAnnotations($refClass, $annotationsCache);
         }
 
         return $globTypeMapperCache;
@@ -239,7 +234,7 @@ final class GlobTypeMapper implements TypeMapperInterface
         /** @var ReflectionClass[] $classes */
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
-            $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function() use ($refClass) {
+            $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function () use ($refClass) {
                 $extendAnnotationsCache = new GlobExtendAnnotationsCache();
 
                 $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
@@ -256,9 +251,11 @@ final class GlobTypeMapper implements TypeMapperInterface
                 return 'nothing';
             });
 
-            if ($annotationsCache !== 'nothing') {
-                $globExtendTypeMapperCache->registerAnnotations($refClass, $annotationsCache);
+            if ($annotationsCache === 'nothing') {
+                continue;
             }
+
+            $globExtendTypeMapperCache->registerAnnotations($refClass, $annotationsCache);
         }
 
         return $globExtendTypeMapperCache;
@@ -332,12 +329,12 @@ final class GlobTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return \GraphQL\Type\Definition\Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
+     * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
      *
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
      */
-    public function mapNameToType(string $typeName): \GraphQL\Type\Definition\Type
+    public function mapNameToType(string $typeName): Type
     {
         $typeClassName = $this->getMaps()->getTypeByGraphQLTypeName($typeName);
 
@@ -367,11 +364,8 @@ final class GlobTypeMapper implements TypeMapperInterface
         }
 
         $factory = $this->getMaps()->getFactoryByGraphQLInputTypeName($typeName);
-        if ($factory !== null) {
-            return true;
-        }
 
-        return false;
+        return $factory !== null;
     }
 
     /**
@@ -432,7 +426,7 @@ final class GlobTypeMapper implements TypeMapperInterface
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
-        return !empty($this->getMaps()->getDecorateByGraphQLInputTypeName($typeName));
+        return ! empty($this->getMaps()->getDecorateByGraphQLInputTypeName($typeName));
     }
 
     /**
