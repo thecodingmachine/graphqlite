@@ -70,6 +70,9 @@ class GlobTypeMapperCache
         return $this->mapClassToTypeArray[$className] ?? null;
     }
 
+    /**
+     * @return string[]
+     */
     public function getSupportedClasses(): array
     {
         return array_keys($this->mapClassToTypeArray);
@@ -80,6 +83,9 @@ class GlobTypeMapperCache
         return $this->mapNameToType[$graphqlTypeName] ?? null;
     }
 
+    /**
+     * @return string[] Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname]
+     */
     public function getFactoryByGraphQLInputTypeName(string $graphqlTypeName): ?array
     {
         return $this->mapInputNameToFactory[$graphqlTypeName] ?? null;

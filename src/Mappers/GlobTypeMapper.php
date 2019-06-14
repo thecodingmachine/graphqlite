@@ -215,7 +215,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 }
 
                 return $annotationsCache;
-            });
+            }, '', $this->mapTtl);
 
             if ($annotationsCache === 'nothing') {
                 continue;
@@ -249,7 +249,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 }
 
                 return 'nothing';
-            });
+            }, '', $this->mapTtl);
 
             if ($annotationsCache === 'nothing') {
                 continue;
