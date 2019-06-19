@@ -21,7 +21,8 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myFactory',
-            'my comment');
+            'my comment',
+            false);
 
         $this->assertSame('InputObject', $inputType->name);
         $inputType->freeze();
@@ -52,7 +53,8 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             $testFactory,
             'myFactory',
-            'my comment');
+            'my comment',
+            false);
 
         $inputType->decorate([$testFactory, 'myDecorator']);
 
@@ -69,7 +71,8 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myListFactory',
-            null);
+            null,
+            false);
 
         $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
             [

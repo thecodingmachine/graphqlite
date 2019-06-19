@@ -37,6 +37,7 @@ use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
@@ -166,7 +167,10 @@ class TypeMapper implements ParameterMapperInterface
         } else {
             try {
                 $graphQlType = $this->toGraphQlType($type, null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
-                if (! $isNullable) {
+                // The type is non nullable if the PHP argument is non nullable
+                // There is an exception: if the PHP argument is non nullable but points to a factory that can called without passing any argument,
+                // then, the input type is nullable (and we can still create an empty object).
+                if (! $isNullable && (! $graphQlType instanceof ResolvableMutableInputObjectType || $graphQlType->isInstantiableWithoutParameters() === false)) {
                     $graphQlType = GraphQLType::nonNull($graphQlType);
                 }
             } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
