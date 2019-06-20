@@ -45,7 +45,7 @@ class InputTypeGenerator
 
         if (! isset($this->cache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableMutableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, null);
+            $this->cache[$inputName] = new ResolvableMutableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, null, $method->getNumberOfRequiredParameters() === 0);
         }
 
         return $this->cache[$inputName];

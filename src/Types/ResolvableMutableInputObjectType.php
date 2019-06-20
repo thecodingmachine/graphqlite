@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use function count;
+use function is_array;
 
 /**
  * A GraphQL input object that can be resolved using a factory
@@ -36,12 +37,14 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      * @var array<int, ParameterInterface[]>
      */
     private $decoratorsParameters = [];
+    /** @var bool */
+    private $canBeInstantiatedWithoutParameters;
 
     /**
      * @param object|string       $factory
      * @param array<string,mixed> $additionalConfig
      */
-    public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ?string $comment, array $additionalConfig = [])
+    public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ?string $comment, bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
         $this->resolve       = [ $factory, $methodName ];
         $this->fieldsBuilder = $fieldsBuilder;
@@ -60,6 +63,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 
         $config += $additionalConfig;
         parent::__construct($config);
+        $this->canBeInstantiatedWithoutParameters = $canBeInstantiatedWithoutParameters;
     }
 
     /**
@@ -136,5 +140,21 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         $this->addFields(function () use ($key) {
             return InputTypeUtils::getInputTypeArgs($this->getParametersForDecorator($key));
         });
+
+        if (! $this->canBeInstantiatedWithoutParameters || ! is_array($decorator)) {
+            return;
+        }
+
+        $decoratorReflectionMethod = new ReflectionMethod($decorator[0], $decorator[1]);
+        if ($decoratorReflectionMethod->getNumberOfRequiredParameters() <= 1) {
+            return;
+        }
+
+        $this->canBeInstantiatedWithoutParameters = false;
+    }
+
+    public function isInstantiableWithoutParameters(): bool
+    {
+        return $this->canBeInstantiatedWithoutParameters;
     }
 }

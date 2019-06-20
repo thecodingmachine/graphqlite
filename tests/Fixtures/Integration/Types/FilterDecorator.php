@@ -17,7 +17,7 @@ class FilterDecorator
      * @param int[] $moreValues
      * @return Filter
      */
-    public function decorate(Filter $filter, array $moreValues): Filter
+    public function decorate(Filter $filter, array $moreValues = []): Filter
     {
         $filter->mergeValues($moreValues);
         return $filter;
@@ -29,7 +29,7 @@ class FilterDecorator
      * @param int[] $evenMoreValues
      * @return Filter
      */
-    public static function staticDecorate(Filter $filter, array $evenMoreValues): Filter
+    public static function staticDecorate(Filter $filter, array $evenMoreValues = []): Filter
     {
         $filter->mergeValues($evenMoreValues);
         return $filter;
