@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\NonNull;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use stdClass;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
@@ -21,6 +22,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
@@ -186,9 +188,20 @@ class EndToEndTest extends TestCase
                     new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
                 ]);
             },
+            ContainerParameterMapper::class => function(ContainerInterface $container) {
+                return new ContainerParameterMapper($container, true, true);
+            },
+            'testService' => function() {
+                return 'foo';
+            },
+            stdClass::class => function() {
+                // Empty test service for autowiring
+                return new stdClass();
+            },
             ParameterMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeParameterMapper([
-                    new ResolveInfoParameterMapper()
+                    new ResolveInfoParameterMapper(),
+                    $container->get(ContainerParameterMapper::class)
                 ]);
             }
         ]);
@@ -673,5 +686,38 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testAutowireService()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contacts {
+                injectService
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'contacts' => [
+                [
+                    'injectService' => 'OK',
+                ],
+                [
+                    'injectService' => 'OK',
+                ]
+
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 }

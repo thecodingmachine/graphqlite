@@ -7,10 +7,15 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 use function array_search;
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use stdClass;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
+use TheCodingMachine\GraphQLite\TypeRegistry;
 
 /**
  * @Type()
@@ -167,5 +172,20 @@ class Contact
     public function secret(): string
     {
         return 'you can see this only if you have the good right';
+    }
+
+    /**
+     * @Field()
+     * @return string
+     */
+    public function injectService(string $testService, stdClass $otherTestService = null): string
+    {
+        if ($testService !== 'foo') {
+            return 'KO';
+        }
+        if (!$otherTestService instanceof stdClass) {
+            return 'KO';
+        }
+        return 'OK';
     }
 }
