@@ -66,6 +66,20 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         $inputType->resolve(new stdClass(), ['string' => 'foobar'], null, $resolveInfo);
     }
 
+    public function testDecoratorDoesNotModifyInstantiableWithoutParameters(): void
+    {
+        $testFactory = new TestFactory();
+        $inputType = new ResolvableMutableInputObjectType('InputObject',
+            $this->getFieldsBuilder(),
+            $testFactory,
+            'myFactory',
+            'my comment',
+            false);
+
+        $inputType->decorate([$testFactory, 'myDecorator']);
+        $this->assertFalse($inputType->isInstantiableWithoutParameters());
+    }
+
     public function testListResolve(): void
     {
         $inputType = new ResolvableMutableInputObjectType('InputObject2',
