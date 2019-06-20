@@ -12,7 +12,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 
-class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
+class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 {
 
     public function testResolve(): void
@@ -54,9 +54,10 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $testFactory,
             'myFactory',
             'my comment',
-            false);
+            true);
 
         $inputType->decorate([$testFactory, 'myDecorator']);
+        $this->assertFalse($inputType->isInstantiableWithoutParameters());
 
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
