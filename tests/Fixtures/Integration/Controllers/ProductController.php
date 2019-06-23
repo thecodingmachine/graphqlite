@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 
+use DateTimeImmutable;
 use Porpaginas\Arrays\ArrayResult;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -32,5 +33,13 @@ class ProductController
     public function echoProductType(ProductTypeEnum $productType): ProductTypeEnum
     {
         return $productType;
+    }
+
+    /**
+     * @Query()
+     */
+    public function echoDate(DateTimeImmutable $date): DateTimeImmutable
+    {
+        return $date;
     }
 }

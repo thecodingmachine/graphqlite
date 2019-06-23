@@ -743,4 +743,27 @@ class EndToEndTest extends TestCase
             'echoProductType' => 'NON_FOOD'
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
+
+    public function testEndToEndDateTime(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            echoDate(date: "2019-05-05T01:02:03+00:00")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoDate' => '2019-05-05T01:02:03+00:00'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
 }

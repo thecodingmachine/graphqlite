@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\Error;
+use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\LeafType;
@@ -53,6 +54,12 @@ class ArgumentResolver
 
         if ($type instanceof IDType) {
             return new ID($val);
+        }
+
+        // For some reason, the enum type behaves differently as the LeafType.
+        // If seems to be already resolved.
+        if ($type instanceof EnumType) {
+            return $val;
         }
 
         if ($type instanceof LeafType) {
