@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
@@ -146,7 +147,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         }
 
         $decoratorReflectionMethod = new ReflectionMethod($decorator[0], $decorator[1]);
-        if ($decoratorReflectionMethod->getNumberOfRequiredParameters() <= 1) {
+        if (InputTypeGenerator::canBeInstantiatedWithoutParameter($decoratorReflectionMethod, true)) {
             return;
         }
 
