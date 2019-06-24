@@ -15,6 +15,6 @@ class MissingAutowireTypeException extends Exception
         $declaringClass = $refParameter->getDeclaringClass();
         Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
 
-        return new self('For parameter $' . $refParameter->getName() . ' in ' . $declaringClass . '::' . $refParameter->getDeclaringFunction() . ', annotated with annotation @Autowire, you must either provide a type-hint or specify the container identifier with @Autowire(identifier="my_service")');
+        return new self('For parameter $' . $refParameter->getName() . ' in ' . $declaringClass->getName() . '::' . $refParameter->getDeclaringFunction()->getName() . ', annotated with annotation @Autowire, you must either provide a type-hint or specify the container identifier with @Autowire(identifier="my_service")');
     }
 }
