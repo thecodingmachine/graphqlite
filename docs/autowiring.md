@@ -20,8 +20,11 @@ on the language of the user).
 ```php
 namespace App\Entities;
 
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+
 use Symfony\Component\Translation\TranslatorInterface;
 
 /**
@@ -33,6 +36,7 @@ class Product
 
     /**
      * @Field()
+     * @Parameter(for="$translator", annotations={@Autowire})
      */
     public function getName(TranslatorInterface $translator): string
     {
@@ -47,22 +51,32 @@ When GraphQLite queries the name, it will automatically fetch the translator ser
 in the container is the fully qualified class name of the type-hint. So in the example above, GraphQLite will 
 look for a service whose name is <code>Symfony\Component\Translation\TranslatorInterface</code>.</div>
 
-Note: you can configure this lookup behaviour. Optionally, GraphQLite can look for services based on the parameter name
-(and not the parameter type). In the example above, that means GraphQLite would search for a service whose name is "translator".
+## A quick look at the @Parameter annotation
 
-The way you configure autowiring in GraphQLite depends on the framework you are using.
+PHP annotations are provided to GraphQLite by the Doctrine Annotations library. This library allows us to put annotations
+on classes, methods, but not directly on parameters.
 
-### Configuring autowiring using the SchemaFactory.
-
-If you are bootstrapping GraphQLite using the `SchemaFactory`, you can use the `SchemaFactory::setAutowireServiceOnClassName()`
-and `SchemaFactory::setAutowireServiceOnParameterName()` methods.
+So unfortunately, we cannot write something like:
 
 ```php
-// Look-up services based on the type-hint (enabled by default)
-$schemaFactory::setAutowireServiceOnClassName(true);
-// Look-up services based on the parameter name (disabled by default)
-$schemaFactory::setAutowireServiceOnParameterName(true);
+// This cannot be detected by PHP.
+public function getName(/* @Autowire */ TranslatorInterface $translator): string
 ```
+
+As a workaround, we created a `@Parameter` annotation that lives in the method's docblock and that targets a specific
+parameter.
+
+So you can write:
+
+```php
+/**
+ * @Parameter(for="$translator", annotations={
+ *    @Autowire
+ * })
+ */
+```
+
+GraphQLite will understand that the "@Autowire" annotation is targeted at the "$translator" parameter.
 
 ## Best practices
 
@@ -99,6 +113,21 @@ Do this instead:
 </div>
 
 By type-hinting against an interface, your code remains testable and is decoupled from the service implementation.
+
+## Fetching a service by name (discouraged!)
+
+Optionally, you can specify the identifier of the service you want to fetch from the controller:
+
+```php
+/**
+ * @Parameter(for="$translator", annotations={@Autowire(identifier="translator")})
+ */
+```
+
+<div class="alert alert-warning">While GraphQLite offers the possibility to specify the name of the service to be
+autowired, we would like to emphasize that this is <strong>highly discouraged</strong>. Hard-coding a container
+identifier in the code of your class is akin to using the "service locator" pattern, which is known to be an
+anti-pattern. Please refrain from doing this as much as possible.</div>
 
 ## Alternative solution
 

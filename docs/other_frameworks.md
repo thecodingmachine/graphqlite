@@ -70,10 +70,6 @@ $factory->prodMode();
 // Enables dev-mode (this is the default mode: cache settings optimized for best developer experience).
 // This is a shortcut for `$schemaFactory->setGlobTtl(2)`
 $factory->devMode();
-// Autowiring parameter: Look-up services based on the type-hint (enabled by default)
-$schemaFactory::setAutowireServiceOnClassName(true);
-// Autowiring parameter: Look-up services based on the parameter name (disabled by default)
-$schemaFactory::setAutowireServiceOnParameterName(true);
 ```
 
 ## Minimal example
