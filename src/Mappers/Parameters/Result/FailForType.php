@@ -1,9 +1,10 @@
 <?php
 
-declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Mappers\Parameters\Result;
 
+
+use function get_class;
 use Iterator;
 use IteratorAggregate;
 use phpDocumentor\Reflection\Type;
@@ -14,15 +15,25 @@ use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\Result\Fail;
-use Webmozart\Assert\Assert;
-use function get_class;
 use function sprintf;
+use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\TypeMappingException;
+use Webmozart\Assert\Assert;
 
-class TypeMappingException extends GraphQLException
+class FailForType implements Fail
 {
+    /**
+     * @var string
+     */
+    private $message;
+
     /** @var Type */
     private $type;
+
+    public function __construct(string $message)
+    {
+        $this->message = $message;
+    }
 
     public static function createFromType(Type $type): self
     {
@@ -32,21 +43,29 @@ class TypeMappingException extends GraphQLException
         return $e;
     }
 
-    public static function createFromFail(Fail $fail, Type $type): self
+    /**
+     * @return string
+     */
+    public function getMessage(): string
     {
-        $e       = new self($fail->getMessage());
-        $e->type = $type;
-
-        return $e;
+        return $this->message;
     }
 
-    public static function wrapWithParamInfo(TypeMappingException $previous, ReflectionParameter $parameter): TypeMappingException
+    /**
+     * @return Type
+     */
+    public function getType(): Type
+    {
+        return $this->type;
+    }
+
+    public function addParamInfo(self $err, ReflectionParameter $parameter): void
     {
         $declaringClass = $parameter->getDeclaringClass();
         Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
-        if ($previous->type instanceof Array_ || $previous->type instanceof Iterable_) {
-            $typeStr = $previous->type instanceof Array_ ? 'array' : 'iterable';
-            $message = sprintf(
+        if ($err->type instanceof Array_ || $err->type instanceof Iterable_) {
+            $typeStr = $err->type instanceof Array_ ? 'array' : 'iterable';
+            $this->message = sprintf(
                 'Parameter $%s in %s::%s is type-hinted to %s. Please provide an additional @param in the PHPDoc block to further specify the type of the %s. For instance: @param string[] $%s.',
                 $parameter->getName(),
                 $declaringClass->getName(),
@@ -55,8 +74,8 @@ class TypeMappingException extends GraphQLException
                 $typeStr,
                 $parameter->getName()
             );
-        } elseif ($previous->type instanceof Mixed_) {
-            $message = sprintf(
+        } elseif ($err->type instanceof Mixed_) {
+            $this->message = sprintf(
                 'Parameter $%s in %s::%s is missing a type-hint (or type-hinted to "mixed"). Please provide a better type-hint. For instance: "string $%s".',
                 $parameter->getName(),
                 $declaringClass->getName(),
@@ -64,18 +83,17 @@ class TypeMappingException extends GraphQLException
                 $parameter->getName()
             );
         } else {
-            if (! ($previous->type instanceof Object_)) {
-                throw new GraphQLException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
+            if (! ($err->type instanceof Object_)) {
+                throw new GraphQLException("Unexpected type in error. Got '" . get_class($err->type) . '"');
             }
 
-            $fqcn     = (string) $previous->type->getFqsen();
+            $fqcn     = (string) $err->type->getFqsen();
             $refClass = new ReflectionClass($fqcn);
-            // Note : $refClass->isIterable() is only accessible in PHP 7.2
-            if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
+            if (! $refClass->isIterable()) {
                 throw new GraphQLException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
             }
 
-            $message = sprintf(
+            $this->message = sprintf(
                 'Parameter $%s in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param %s|User[] $%s.',
                 $parameter->getName(),
                 $declaringClass->getName(),
@@ -85,42 +103,37 @@ class TypeMappingException extends GraphQLException
                 $parameter->getName()
             );
         }
-
-        $e       = new self($message, 0, $previous);
-        $e->type = $previous->type;
-
-        return $e;
     }
 
-    public static function wrapWithReturnInfo(TypeMappingException $previous, ReflectionMethod $method): TypeMappingException
+    public function addReturnInfo(self $err, ReflectionMethod $method): void
     {
-        if ($previous->type instanceof Array_ || $previous->type instanceof Iterable_) {
-            $typeStr = $previous->type instanceof Array_ ? 'array' : 'iterable';
-            $message = sprintf(
+        if ($err->type instanceof Array_ || $err->type instanceof Iterable_) {
+            $typeStr = $err->type instanceof Array_ ? 'array' : 'iterable';
+            $this->message = sprintf(
                 'Return type in %s::%s is type-hinted to %s. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]',
                 $method->getDeclaringClass()->getName(),
                 $method->getName(),
                 $typeStr
             );
-        } elseif ($previous->type instanceof Mixed_) {
-            $message = sprintf(
+        } elseif ($err->type instanceof Mixed_) {
+            $this->message = sprintf(
                 'Return type in %s::%s is missing a type-hint (or type-hinted to "mixed"). Please provide a better type-hint.',
                 $method->getDeclaringClass()->getName(),
                 $method->getName()
             );
         } else {
-            if (! ($previous->type instanceof Object_)) {
-                throw new GraphQLException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
+            if (! ($err->type instanceof Object_)) {
+                throw new GraphQLException("Unexpected type in TypeMappingException. Got '" . get_class($err->type) . '"');
             }
 
-            $fqcn     = (string) $previous->type->getFqsen();
+            $fqcn     = (string) $err->type->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2
             if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
                 throw new GraphQLException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
             }
 
-            $message = sprintf(
+            $this->message = sprintf(
                 'Return type in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return %s|User[]',
                 $method->getDeclaringClass()->getName(),
                 $method->getName(),
@@ -128,10 +141,13 @@ class TypeMappingException extends GraphQLException
                 $fqcn
             );
         }
+    }
 
-        $e       = new self($message, 0, $previous);
-        $e->type = $previous->type;
-
-        return $e;
+    /**
+     * If the result is an error, an exception is thrown
+     */
+    public function throwIfError(): void
+    {
+        throw TypeMappingException::createFromFail($this, $this->type);
     }
 }
