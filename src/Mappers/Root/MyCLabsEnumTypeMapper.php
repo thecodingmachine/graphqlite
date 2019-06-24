@@ -15,12 +15,18 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
 use function is_a;
+use function str_replace;
+use function strpos;
+use function substr;
 
 /**
  * Maps an class extending MyCLabs enums to a GraphQL type
  */
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
+    /** @var array<string, EnumType> */
+    private $cache = [];
+
     /**
      * @return (GraphQLType&OutputType)|null
      */
@@ -40,19 +46,31 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             return null;
         }
         $fqsen = $type->getFqsen();
-        if ($fqsen === null || ! is_a((string) $type->getFqsen(), Enum::class, true)) {
+        if ($fqsen === null) {
             return null;
         }
+        $enumClass = (string) $fqsen;
 
-        $enumClass      = (string) $type->getFqsen();
+        return $this->mapByClassName($enumClass);
+    }
+
+    private function mapByClassName(string $enumClass): ?EnumType
+    {
+        if (! is_a($enumClass, Enum::class, true)) {
+            return null;
+        }
+        if (isset($this->cache[$enumClass])) {
+            return $this->cache[$enumClass];
+        }
+
         $consts         = $enumClass::toArray();
         $constInstances = [];
         foreach ($consts as $key => $value) {
             $constInstances[$key] = ['value' => $enumClass::$key()];
         }
 
-        return new EnumType([
-            'name' => $fqsen->getName(),
+        return $this->cache[$enumClass] = new EnumType([
+            'name' => 'MyCLabsEnum_' . str_replace('\\', '__', $enumClass),
             'values' => $constInstances,
         ]);
     }
@@ -66,7 +84,12 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      */
     public function mapNameToType(string $typeName): ?NamedType
     {
-        // We cannot map back by name. Hopefully, this is not an issue.
+        if (strpos($typeName, 'MyCLabsEnum_') === 0) {
+            $className = str_replace('__', '\\', substr($typeName, 12));
+
+            return $this->mapByClassName($className);
+        }
+
         return null;
     }
 }

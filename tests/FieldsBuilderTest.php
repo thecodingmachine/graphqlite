@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
+use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
@@ -107,7 +108,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             'dateTimeImmutable' => '2017-01-01 01:01:01',
             'dateTime' => '2017-01-01 01:01:01',
             'id' => 42,
-            'enum' => 'ON'
+            'enum' => TestEnum::ON()
         ];
 
         $resolve = $usersQuery->resolveFn;
