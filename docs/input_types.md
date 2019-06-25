@@ -133,14 +133,14 @@ to you, so there is no real reason to customize it.
 
 ### Forcing an input type
 
-You can use the `@Parameter` annotation to force an input type of a parameter.
+You can use the `@UseInputType` annotation to force an input type of a parameter.
 
 Let's say you want to force a parameter to be of type "ID", you can use this:
 
 ```
 /**
  * @Factory()
- * @Parameter(for="$id", inputType="ID!")
+ * @UseInputType(for="$id", inputType="ID!")
  */
 public function getProductById(string $id): Product
 {
@@ -154,7 +154,7 @@ public function getProductById(string $id): Product
 There are situations where a given PHP class might use one factory or another depending on the context.
 
 This is often the case when your objects map database entities.
-In these cases, you can use combine the use of `@Parameter` and `@Factory` annotation to achieve your goal.
+In these cases, you can use combine the use of `@UseInputType` and `@Factory` annotation to achieve your goal.
 
 Here is an annotated sample:
 
@@ -192,7 +192,7 @@ class ProductController
      * The "createProduct" factory will be used for this mutation.
      * 
      * @Mutation
-     * @Parameter(for="$product", inputType="CreateProductInput!")
+     * @UseInputType(for="$product", inputType="CreateProductInput!")
      */
     public function saveProduct(Product $product): Product
     {

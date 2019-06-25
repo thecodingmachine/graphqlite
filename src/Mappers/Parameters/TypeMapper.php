@@ -27,7 +27,8 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionType;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -112,11 +113,13 @@ class TypeMapper implements ParameterMapperInterface
         return $docBlockReturnType;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
     {
-        if ($parameterAnnotation && $parameterAnnotation->getInputType() !== null) {
+        /** @var UseInputType|null $useInputType */
+        $useInputType = $parameterAnnotations->getAnnotationByType(UseInputType::class);
+        if ($useInputType !== null) {
             try {
-                $type = $this->typeResolver->mapNameToInputType($parameterAnnotation->getInputType());
+                $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());
             } catch (CannotMapTypeExceptionInterface $e) {
                 throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
             }

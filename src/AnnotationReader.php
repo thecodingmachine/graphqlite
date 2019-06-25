@@ -18,13 +18,15 @@ use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
+use function array_values;
 use function in_array;
 use function strpos;
 use function strrpos;
@@ -130,29 +132,19 @@ class AnnotationReader
         return $decorateAnnotation;
     }
 
-    /**
-     * @return Parameter[]
-     */
-    private function getParameterAnnotations(ReflectionMethod $refMethod): array
+    public function getParameterAnnotations(ReflectionParameter $refParameter): ParameterAnnotations
     {
-        /** @var Parameter[] $useInputTypes */
-        $useInputTypes = $this->getMethodAnnotations($refMethod, Parameter::class);
+        $method = $refParameter->getDeclaringFunction();
+        Assert::isInstanceOf($method, ReflectionMethod::class);
+        /** @var ParameterAnnotationInterface[] $parameterAnnotations */
+        $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
+        $name = $refParameter->getName();
 
-        return $useInputTypes;
-    }
+        $filteredAnnotations = array_values(array_filter($parameterAnnotations, static function (ParameterAnnotationInterface $parameterAnnotation) use ($name) {
+            return $parameterAnnotation->getTarget() === $name;
+        }));
 
-    public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
-    {
-        $declaringFunction = $refParameter->getDeclaringFunction();
-        Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter passed must be part of a method. Functions are not supported.');
-        $annotations = $this->getParameterAnnotations($declaringFunction);
-        foreach ($annotations as $annotation) {
-            if ($annotation->getFor() === $refParameter->getName()) {
-                return $annotation;
-            }
-        }
-
-        return null;
+        return new ParameterAnnotations($filteredAnnotations);
     }
 
     public function getMiddlewareAnnotations(ReflectionMethod $refMethod): MiddlewareAnnotations

@@ -9,7 +9,7 @@ use phpDocumentor\Reflection\Type;
 use Psr\Container\ContainerInterface;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ContainerParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -26,16 +26,12 @@ class ContainerParameterMapper implements ParameterMapperInterface
         $this->container = $container;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ?ParameterInterface
     {
-        if ($parameterAnnotation === null) {
-            return null;
-        }
-
         /**
          * @var Autowire|null $autowire
          */
-        $autowire = $parameterAnnotation->getAnnotationByType(Autowire::class);
+        $autowire = $parameterAnnotations->getAnnotationByType(Autowire::class);
 
         if ($autowire === null) {
             return null;

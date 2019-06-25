@@ -22,7 +22,6 @@ namespace App\Entities;
 
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 use Symfony\Component\Translation\TranslatorInterface;
@@ -36,7 +35,7 @@ class Product
 
     /**
      * @Field()
-     * @Parameter(for="$translator", annotations={@Autowire})
+     * @Autowire(for="$translator")
      */
     public function getName(TranslatorInterface $translator): string
     {
@@ -50,33 +49,6 @@ When GraphQLite queries the name, it will automatically fetch the translator ser
 <div class="alert alert-warning">As with most autowiring solutions, GraphQLite assumes that the service identifier
 in the container is the fully qualified class name of the type-hint. So in the example above, GraphQLite will 
 look for a service whose name is <code>Symfony\Component\Translation\TranslatorInterface</code>.</div>
-
-## A quick look at the @Parameter annotation
-
-PHP annotations are provided to GraphQLite by the Doctrine Annotations library. This library allows us to put annotations
-on classes, methods, but not directly on parameters.
-
-So unfortunately, we cannot write something like:
-
-```php
-// This cannot be detected by PHP.
-public function getName(/* @Autowire */ TranslatorInterface $translator): string
-```
-
-As a workaround, we created a `@Parameter` annotation that lives in the method's docblock and that targets a specific
-parameter.
-
-So you can write:
-
-```php
-/**
- * @Parameter(for="$translator", annotations={
- *    @Autowire
- * })
- */
-```
-
-GraphQLite will understand that the "@Autowire" annotation is targeted at the "$translator" parameter.
 
 ## Best practices
 
@@ -120,11 +92,11 @@ Optionally, you can specify the identifier of the service you want to fetch from
 
 ```php
 /**
- * @Parameter(for="$translator", annotations={@Autowire(identifier="translator")})
+ * @Autowire(for="$translator", identifier="translator")
  */
 ```
 
-<div class="alert alert-warning">While GraphQLite offers the possibility to specify the name of the service to be
+<div class="alert alert-error">While GraphQLite offers the possibility to specify the name of the service to be
 autowired, we would like to emphasize that this is <strong>highly discouraged</strong>. Hard-coding a container
 identifier in the code of your class is akin to using the "service locator" pattern, which is known to be an
 anti-pattern. Please refrain from doing this as much as possible.</div>

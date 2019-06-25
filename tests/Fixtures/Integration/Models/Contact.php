@@ -178,8 +178,8 @@ class Contact
 
     /**
      * @Field()
-     * @Parameter(for="testService", annotations={@Autowire(identifier="testService")})
-     * @Parameter(for="$otherTestService", annotations={@Autowire})
+     * @Autowire(for="testService", identifier="testService")
+     * @Autowire(for="$otherTestService")
      * @return string
      */
     public function injectService(string $testService, stdClass $otherTestService = null): string

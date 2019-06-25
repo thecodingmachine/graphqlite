@@ -460,12 +460,12 @@ class FieldsBuilder
         }
 
         foreach ($refParameters as $parameter) {
-            $parameterAnnotation = $this->annotationReader->getParameterAnnotation($parameter);
+            $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
 
-            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotation);
+            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
 
             if ($parameterObj === null) {
-                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotation);
+                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
             }
             $args[$parameter->getName()] = $parameterObj;
         }
