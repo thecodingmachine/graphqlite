@@ -22,11 +22,11 @@ class ContainerParameterMapperTest extends AbstractQueryProviderTest
         $this->expectException(MissingAutowireTypeException::class);
         $this->expectExceptionMessage('For parameter $foo in TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapperTest::dummy, annotated with annotation @Autowire, you must either provide a type-hint or specify the container identifier with @Autowire(identifier="my_service")');
         $mapper->mapParameter($parameter,
-            new DocBlock(), null, $this->getAnnotationReader()->getParameterAnnotation($parameter));
+            new DocBlock(), null, $this->getAnnotationReader()->getParameterAnnotations($parameter));
     }
 
     /**
-     * @Parameter(for="foo", annotations={@Autowire})
+     * @Autowire(for="foo")
      */
     private function dummy($foo) {
 

@@ -119,7 +119,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *no*       | string | The name of the input type. If skipped, the name of class returned by the factory is used instead.
 default        | *no*       | bool | If `true`, this factory will be used by default for its PHP return type. If set to `false`, you must explicitly [reference this factory using the `@Parameter` annotation](http://localhost:3000/docs/input-types#declaring-several-input-types-for-the-same-php-class).
 
-## @Parameter annotation
+## @UseInputType annotation
 
 Used to override the GraphQL input type of a PHP parameter.
 
@@ -127,8 +127,8 @@ Used to override the GraphQL input type of a PHP parameter.
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-*for*          | *yes*       | string | The name of the PHP parameter
-*inputType*    | *no*        | string | The GraphQL input type to force for this input field
+*for*          | *yes*      | string | The name of the PHP parameter
+*inputType*    | *yes*      | string | The GraphQL input type to force for this input field
 
 ## @Decorate annotation
 
@@ -138,4 +138,17 @@ The `@Decorate` annotation is used [to extend/modify/decorate an input type decl
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-name           | *yes*       | string | The GraphQL input type name extended by this decorator.
+name           | *yes*      | string | The GraphQL input type name extended by this decorator.
+
+## @Autowire annotation
+
+Resolves a PHP parameter from the container.
+
+Useful to inject services directly into `@Field` method arguments.
+
+**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field` annotation.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*      | string | The name of the PHP parameter
+*identifier*   | *no*       | string | The identifier of the service to fetch. This is optional. Please avoid using this attribute as this leads to a "service locator" anti-pattern.
