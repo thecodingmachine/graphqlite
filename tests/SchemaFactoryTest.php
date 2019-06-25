@@ -35,8 +35,6 @@ class SchemaFactoryTest extends TestCase
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $factory->addQueryProvider(new AggregateQueryProvider([]));
         $factory->addFieldMiddleware(new FieldMiddlewarePipe());
-        $factory->setAutowireServiceOnClassName(true);
-        $factory->setAutowireServiceOnParameterName(true);
 
         $schema = $factory->createSchema();
 

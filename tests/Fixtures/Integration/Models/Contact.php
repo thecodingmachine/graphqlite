@@ -10,12 +10,14 @@ use Psr\Http\Message\UploadedFileInterface;
 use stdClass;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
 /**
  * @Type()
@@ -176,6 +178,8 @@ class Contact
 
     /**
      * @Field()
+     * @Parameter(for="testService", annotations={@Autowire(identifier="testService")})
+     * @Parameter(for="$otherTestService", annotations={@Autowire})
      * @return string
      */
     public function injectService(string $testService, stdClass $otherTestService = null): string
