@@ -17,12 +17,6 @@ class GlobAnnotationsCache
     /** @var string|null */
     private $typeName;
 
-    /** @var string|null */
-    private $extendTypeClassName;
-
-    /** @var string|null */
-    private $extendTypeName;
-
     /** @var array<string, array<int, string|bool>> An array mapping a factory method name to an input name / class name / default flag / declaring class */
     private $factories = [];
 
@@ -43,22 +37,6 @@ class GlobAnnotationsCache
     public function getTypeName(): ?string
     {
         return $this->typeName;
-    }
-
-    public function setExtendType(string $className, string $typeName): void
-    {
-        $this->extendTypeClassName = $className;
-        $this->extendTypeName = $typeName;
-    }
-
-    public function getExtendTypeClassName(): ?string
-    {
-        return $this->extendTypeClassName;
-    }
-
-    public function getExtendTypeName(): ?string
-    {
-        return $this->extendTypeName;
     }
 
     public function registerFactory(string $methodName, string $inputName, ?string $className, bool $isDefault, string $declaringClass): void
