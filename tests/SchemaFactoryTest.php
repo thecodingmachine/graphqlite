@@ -10,6 +10,8 @@ use Symfony\Component\Cache\Simple\PhpFilesCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
@@ -62,6 +64,7 @@ class SchemaFactoryTest extends TestCase
                     }
                 })
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
+                ->addParameterMapper(new CompositeParameterMapper([]))
                 ->setSchemaConfig(new SchemaConfig())
                 ->devMode()
                 ->prodMode();

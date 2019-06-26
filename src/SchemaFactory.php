@@ -143,6 +143,16 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * Registers a parameter mapper.
+     */
+    public function addParameterMapper(ParameterMapperInterface $parameterMapper): self
+    {
+        $this->parameterMappers[] = $parameterMapper;
+
+        return $this;
+    }
+
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
