@@ -27,6 +27,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionType;
+use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
@@ -34,6 +35,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingException;
@@ -115,6 +117,15 @@ class TypeMapper implements ParameterMapperInterface
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
     {
+        $hideParameter = $parameterAnnotations->getAnnotationByType(HideParameter::class);
+        if ($hideParameter) {
+            if ($parameter->isDefaultValueAvailable() === false) {
+                throw CannotHideParameterException::needDefaultValue($parameter);
+            }
+
+            return new DefaultValueParameter($parameter->getDefaultValue());
+        }
+
         /** @var UseInputType|null $useInputType */
         $useInputType = $parameterAnnotations->getAnnotationByType(UseInputType::class);
         if ($useInputType !== null) {
