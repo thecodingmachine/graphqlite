@@ -142,7 +142,7 @@ name           | *yes*      | string | The GraphQL input type name extended by t
 
 ## @Autowire annotation
 
-Resolves a PHP parameter from the container.
+[Resolves a PHP parameter from the container](autowiring.md).
 
 Useful to inject services directly into `@Field` method arguments.
 
@@ -152,3 +152,11 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *for*          | *yes*      | string | The name of the PHP parameter
 *identifier*   | *no*       | string | The identifier of the service to fetch. This is optional. Please avoid using this attribute as this leads to a "service locator" anti-pattern.
+
+## @HideParameter annotation
+
+Removes [an argument from the GraphQL schema](input_types.md#ignoring_some_parameters).
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*      | string | The name of the PHP parameter to hide

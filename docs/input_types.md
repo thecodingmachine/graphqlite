@@ -137,7 +137,7 @@ You can use the `@UseInputType` annotation to force an input type of a parameter
 
 Let's say you want to force a parameter to be of type "ID", you can use this:
 
-```
+```php
 /**
  * @Factory()
  * @UseInputType(for="$id", inputType="ID!")
@@ -211,3 +211,28 @@ class ProductController
     }
 }
 ```
+
+### Ignoring some parameters
+<small>Available in GraphQLite 4.0+</small>
+
+GraphQLite will automatically map all your parameters to an input type.
+But sometimes, you might want to avoid exposing some of those parameters.
+
+Image your `getProductById` has an additional `lazyLoad` parameter. This parameter is interesting when you call
+directly the function in PHP because you can have some level of optimisation on your code. But it is not something that 
+you want to expose in the GraphQL API. Let's hide it! 
+
+```php
+/**
+ * @Factory()
+ * @HideParameter(for="$lazyLoad")
+ */
+public function getProductById(string $id, bool $lazyLoad = true): Product
+{
+    return $this->productRepository->findById($id, $lazyLoad);
+}
+```
+
+With the `@HideParameter` annotation, you can choose to remove from the GraphQL schema any argument.
+
+To be able to hide an argument, the argument must have a default value.
