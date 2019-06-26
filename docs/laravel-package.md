@@ -57,10 +57,12 @@ which is used internally by GraphQLite.
 
 GraphQLite does not include additional GraphQL tooling, such as the GraphiQL editor.
 To integrate a web UI to query your GraphQL endpoint with your Laravel installation, 
-we recommend installing GraphQL Playground
+we recommend installing [GraphQL Playground](https://github.com/mll-lab/laravel-graphql-playground)
 
 ```console
 $ composer require mll-lab/laravel-graphql-playground
 ```
+
+By default, the playground will be available at `/graphql-playground`.
 
 You can also use any external client with GraphQLite, make sure to point it to the URL defined in the config (`'/graphql'` by default).
