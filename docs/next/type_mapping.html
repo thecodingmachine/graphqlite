@@ -219,7 +219,9 @@ native support for it.</p>
  */</span>
 <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">users</span><span class="hljs-params">(StatusEnum $status)</span>: <span class="hljs-title">array</span>
 </span>{
-    <span class="hljs-keyword">if</span> ($status === StatusEum::ON()) {
+    <span class="hljs-keyword">if</span> ($status == StatusEum::ON()) {
+        <span class="hljs-comment">// Note that the "magic" ON() method returns an instance of the StatusEnum class.</span>
+        <span class="hljs-comment">// Also, note that we are comparing this instance using "==" (using "===" would fail as we have 2 different instances here)</span>
         <span class="hljs-comment">// ...</span>
     }
     <span class="hljs-comment">// ...</span>

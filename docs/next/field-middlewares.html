@@ -139,7 +139,7 @@ is to be used by middlewares.</p>
 <span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">QueryFieldDescriptor</span>;
 
 <span class="hljs-comment">/**
- * Middleware in charge of managing "Logged" and "Right" annotations.
+ * Middleware in charge of hiding a field if it is annotated with <span class="hljs-doctag">@OnlyDebug</span> and the DEBUG constant is not set
  */</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OnlyDebugFieldMiddleware</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FieldMiddlewareInterface</span>
 </span>{
@@ -152,7 +152,7 @@ is to be used by middlewares.</p>
          */</span>
         $onlyDebug = $annotations-&gt;getAnnotationByType(OnlyDebug::class);
 
-        <span class="hljs-keyword">if</span> ($onlyDebug !== <span class="hljs-keyword">null</span>) {
+        <span class="hljs-keyword">if</span> ($onlyDebug !== <span class="hljs-keyword">null</span> &amp;&amp; !DEBUG) {
             <span class="hljs-comment">// If the onlyDebug annotation is present, returns null.</span>
             <span class="hljs-comment">// Returning null will hide the field.</span>
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
