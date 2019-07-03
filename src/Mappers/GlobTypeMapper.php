@@ -103,8 +103,8 @@ final class GlobTypeMapper implements TypeMapperInterface
         $this->namingStrategy      = $namingStrategy;
         $this->cache               = $cache;
         $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace);
-        $this->cacheContract       = new Psr16Adapter($this->cache, $cachePrefix, $this->globTtl ?? 0);
         $this->globTtl             = $globTtl;
+        $this->cacheContract       = new Psr16Adapter($this->cache, $cachePrefix, $this->globTtl ?? 0);
         $this->mapTtl              = $mapTtl;
         $this->inputTypeGenerator  = $inputTypeGenerator;
         $this->inputTypeUtils      = $inputTypeUtils;
