@@ -207,7 +207,9 @@ class StatusEnum extends Enum
  */
 public function users(StatusEnum $status): array
 {
-    if ($status === StatusEum::ON()) {
+    if ($status == StatusEum::ON()) {
+        // Note that the "magic" ON() method returns an instance of the StatusEnum class.
+        // Also, note that we are comparing this instance using "==" (using "===" would fail as we have 2 different instances here)
         // ...
     }
     // ...
