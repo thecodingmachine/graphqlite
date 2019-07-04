@@ -9,6 +9,7 @@ use Symfony\Component\Cache\Simple\NullCache;
 use Test;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes\ChildTestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\FilterDecorator;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
@@ -87,6 +88,24 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(DuplicateMappingException::class);
         $this->expectExceptionMessage('The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'');
         $mapper->canMapClassToInputType(TestObject::class);
+    }
+
+    public function testGlobTypeMapperInheritedInputTypesException()
+    {
+        $container = new Picotainer([
+            ChildTestFactory::class => function() {
+                return new ChildTestFactory();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), new NullCache());
+
+        //$this->expectException(DuplicateMappingException::class);
+        //$this->expectExceptionMessage('The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'');
+        $this->assertTrue($mapper->canMapClassToInputType(TestObject::class));
+        $mapper->mapClassToInputType(TestObject::class);
     }
 
     public function testGlobTypeMapperClassNotFoundException()
