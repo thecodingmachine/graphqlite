@@ -48,10 +48,10 @@ class ResolveUtils
             return;
         }
 
+        // TODO: it would be great to check if this is the actual object type we were expecting
         if (! is_object($result)) {
             throw TypeMismatchException::expectedObject($result);
         }
-        // TODO: it would be great to check if this is the actual object type we were expecting
     }
 
     private static function removeNonNull(Type $type): Type
