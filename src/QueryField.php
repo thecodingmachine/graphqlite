@@ -6,6 +6,8 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\ListOfType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -19,6 +21,8 @@ use Webmozart\Assert\Assert;
 use function array_map;
 use function array_unshift;
 use function array_values;
+use function get_class;
+use function is_object;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -58,7 +62,21 @@ class QueryField extends FieldDefinition
 
             $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $method);
 
-            return $method(...$toPassArgs);
+            $result = $method(...$toPassArgs);
+
+            try {
+                $this->assertReturnType($result);
+            } catch (TypeMismatchException $e) {
+                $class = $method[0];
+                if (is_object($class)) {
+                    $class = get_class($class);
+                }
+
+                $e->addInfo($this->name, $class, $method[1]);
+                throw $e;
+            }
+
+            return $result;
         };
 
         if ($prefetchMethodName === null) {
@@ -105,6 +123,32 @@ class QueryField extends FieldDefinition
 
         $config += $additionalConfig;
         parent::__construct($config);
+    }
+
+    /**
+     * This method checks the returned value of the resolver to be sure it matches the documented return type.
+     * We are sure the returned value is of the correct type... except if the return type is type-hinted as an array.
+     * In this case, PHP does nothing for us and we should check the user returned what he documented.
+     *
+     * @param mixed $result
+     */
+    private function assertReturnType($result): void
+    {
+        $type = $this->removeNonNull($this->getType());
+        if (! $type instanceof ListOfType) {
+            return;
+        }
+
+        ResolveUtils::assertInnerReturnType($result, $type);
+    }
+
+    private function removeNonNull(Type $type): Type
+    {
+        if ($type instanceof NonNull) {
+            return $type->getWrappedType();
+        }
+
+        return $type;
     }
 
     /**

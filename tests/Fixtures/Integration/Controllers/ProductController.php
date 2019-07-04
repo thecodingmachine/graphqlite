@@ -28,6 +28,23 @@ class ProductController
     }
 
     /**
+     * This is supposed to return an array of products... but it returns an array of array of Products.
+     * Useful to test error messages.
+     *
+     * @Query()
+     * @return Product[]
+     */
+    public function getProductsBadType(): array
+    {
+        return [
+            [
+                new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
+                new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
+            ]
+        ];
+    }
+
+    /**
      * @Query()
      */
     public function echoProductType(ProductTypeEnum $productType): ProductTypeEnum
