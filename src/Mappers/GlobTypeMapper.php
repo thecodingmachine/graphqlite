@@ -196,7 +196,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                     if ($factory !== null) {
                         [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
-                        $annotationsCache->registerFactory($method->getName(), $inputName, $className, $factory->isDefault(), $method->getDeclaringClass()->getName());
+                        $annotationsCache->registerFactory($method->getName(), $inputName, $className, $factory->isDefault(), $refClass->getName());
                         $containsAnnotations = true;
                     }
 
@@ -206,7 +206,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                         continue;
                     }
 
-                    $annotationsCache->registerDecorator($method->getName(), $decorator->getInputTypeName(), $method->getDeclaringClass()->getName());
+                    $annotationsCache->registerDecorator($method->getName(), $decorator->getInputTypeName(), $refClass->getName());
                     $containsAnnotations = true;
                 }
 
