@@ -792,4 +792,31 @@ class EndToEndTest extends TestCase
         $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
         $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
+
+    public function testEndToEndNonDefaultOutputType(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            otherContact {
+                fullName
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'otherContact' => [
+                'fullName' => 'JOE'
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
 }

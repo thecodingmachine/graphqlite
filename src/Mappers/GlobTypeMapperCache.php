@@ -16,9 +16,9 @@ class GlobTypeMapperCache
     private $mapClassToTypeArray = [];
     /** @var array<string,string> Maps a GraphQL type name to the GraphQL type annotated class */
     private $mapNameToType = [];
-    /** @var array<string,string[]> Maps a domain class to the factory method that creates the input type in the form [classname, methodname] */
+    /** @var array<string,string[]> Maps a domain class to the factory method that creates the input type in the form [classname, methodName] */
     private $mapClassToFactory = [];
-    /** @var array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname] */
+    /** @var array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodName] */
     private $mapInputNameToFactory = [];
     /** @var array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private $mapInputNameToDecorator = [];
@@ -32,12 +32,14 @@ class GlobTypeMapperCache
 
         $typeClassName = $globAnnotationsCache->getTypeClassName();
         if ($typeClassName !== null) {
-            if (isset($this->mapClassToTypeArray[$typeClassName])) {
+            if (isset($this->mapClassToTypeArray[$typeClassName]) && $globAnnotationsCache->isDefault()) {
                 throw DuplicateMappingException::createForType($typeClassName, $this->mapClassToTypeArray[$typeClassName], $className);
             }
 
-            $objectClassName                             = $typeClassName;
-            $this->mapClassToTypeArray[$objectClassName] = $className;
+            if ($globAnnotationsCache->isDefault()) {
+                $objectClassName                             = $typeClassName;
+                $this->mapClassToTypeArray[$objectClassName] = $className;
+            }
 
             $typeName = $globAnnotationsCache->getTypeName();
             $this->mapNameToType[$typeName] = $className;
