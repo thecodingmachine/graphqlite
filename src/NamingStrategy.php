@@ -28,6 +28,11 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getOutputTypeName(string $typeClassName, Type $type): string
     {
+        $name = $type->getName();
+        if ($name !== null) {
+            return $name;
+        }
+
         $prevPos = strrpos($typeClassName, '\\');
         if ($prevPos) {
             $typeClassName = substr($typeClassName, $prevPos + 1);
