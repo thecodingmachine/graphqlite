@@ -58,4 +58,12 @@ class ContactController
             'Bill',
         ]);
     }
+
+    /**
+     * @Query(outputType="ContactOther")
+     */
+    public function getOtherContact(): Contact
+    {
+        return new Contact('Joe');
+    }
 }

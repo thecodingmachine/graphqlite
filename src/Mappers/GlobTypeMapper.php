@@ -181,7 +181,7 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $type = $this->annotationReader->getTypeAnnotation($refClass);
                 if ($type !== null) {
                     $typeName = $this->namingStrategy->getOutputTypeName($className, $type);
-                    $annotationsCache->setType($type->getClass(), $typeName);
+                    $annotationsCache->setType($type->getClass(), $typeName, $type->isDefault());
                     $containsAnnotations = true;
                 }
 

@@ -6,6 +6,7 @@ use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\PhpFilesCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
@@ -27,7 +28,7 @@ class SchemaFactoryTest extends TestCase
     public function testCreateSchema(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new PhpFilesCache();
+        $cache = new ArrayCache();
 
         $factory = new SchemaFactory($cache, $container);
         $factory->setAuthenticationService(new VoidAuthenticationService());
@@ -46,7 +47,7 @@ class SchemaFactoryTest extends TestCase
     public function testSetters(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new PhpFilesCache();
+        $cache = new ArrayCache();
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -77,7 +78,7 @@ class SchemaFactoryTest extends TestCase
     public function testException(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new PhpFilesCache();
+        $cache = new ArrayCache();
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -88,7 +89,7 @@ class SchemaFactoryTest extends TestCase
     public function testException2(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new PhpFilesCache();
+        $cache = new ArrayCache();
 
         $factory = new SchemaFactory($cache, $container);
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');

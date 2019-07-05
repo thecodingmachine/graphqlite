@@ -18,6 +18,7 @@ use function ltrim;
  * @Attributes({
  *   @Attribute("class", type = "string"),
  *   @Attribute("name", type = "string"),
+ *   @Attribute("default", type = "bool")
  * })
  */
 class Type
@@ -27,6 +28,9 @@ class Type
 
     /** @var string|null */
     private $name;
+
+    /** @var bool */
+    private $default;
 
     /**
      * Is the class having the annotation a GraphQL type itself?
@@ -45,7 +49,11 @@ class Type
         } else {
             $this->selfType = true;
         }
+
         $this->name = $attributes['name'] ?? null;
+
+        // If no value is passed for default, "default" = true
+        $this->default = $attributes['default'] ?? true;
     }
 
     /**
@@ -79,5 +87,13 @@ class Type
     public function getName(): ?string
     {
         return $this->name;
+    }
+
+    /**
+     * Returns true if this type should map the targeted class by default.
+     */
+    public function isDefault(): bool
+    {
+        return $this->default;
     }
 }

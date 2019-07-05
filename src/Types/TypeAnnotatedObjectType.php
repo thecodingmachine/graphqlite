@@ -26,7 +26,7 @@ class TypeAnnotatedObjectType extends MutableObjectType
         parent::__construct($config);
     }
 
-    public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper): self
+    public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper, bool $doNotMapInterfaces): self
     {
         return new self($className, [
             'name' => $typeName,
@@ -55,7 +55,11 @@ class TypeAnnotatedObjectType extends MutableObjectType
 
                 return $fields;
             },
-            'interfaces' => static function () use ($className, $recursiveTypeMapper) {
+            'interfaces' => static function () use ($className, $recursiveTypeMapper, $doNotMapInterfaces) {
+                if ($doNotMapInterfaces === true) {
+                    return [];
+                }
+
                 return $recursiveTypeMapper->findInterfaces($className);
             },
         ]);
