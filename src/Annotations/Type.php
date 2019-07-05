@@ -17,12 +17,16 @@ use function ltrim;
  * @Target({"CLASS"})
  * @Attributes({
  *   @Attribute("class", type = "string"),
+ *   @Attribute("name", type = "string"),
  * })
  */
 class Type
 {
     /** @var string|null */
     private $class;
+
+    /** @var string|null */
+    private $name;
 
     /**
      * Is the class having the annotation a GraphQL type itself?
@@ -41,6 +45,7 @@ class Type
         } else {
             $this->selfType = true;
         }
+        $this->name = $attributes['name'] ?? null;
     }
 
     /**
@@ -66,5 +71,13 @@ class Type
     public function isSelfType(): bool
     {
         return $this->selfType;
+    }
+
+    /**
+     * Returns the GraphQL output name for this type.
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }
