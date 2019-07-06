@@ -360,8 +360,10 @@ class FieldsBuilder
             $objectClass = $extendTypeField->getClass();
             if ($objectClass === null) {
                 // We need to be able to fetch the mapped PHP class from the object type!
-                $targetedType = $this->recursiveTypeMapper->mapNameToType($extendTypeField->getName());
-                if (!$targetedType instanceof TypeAnnotatedObjectType) {
+                $typeName = $extendTypeField->getName();
+                Assert::notNull($typeName);
+                $targetedType = $this->recursiveTypeMapper->mapNameToType($typeName);
+                if (! $targetedType instanceof TypeAnnotatedObjectType) {
                     return [];
                 }
                 $objectClass = $targetedType->getMappedClassName();

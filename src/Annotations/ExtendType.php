@@ -50,12 +50,10 @@ class ExtendType
         if ($this->class === null) {
             return null;
         }
+
         return ltrim($this->class, '\\');
     }
 
-    /**
-     * @return string|null
-     */
     public function getName(): ?string
     {
         return $this->name;

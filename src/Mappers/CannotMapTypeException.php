@@ -127,6 +127,6 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     public static function extendTypeWithInvalidName(ExtendType $extendType, string $className): self
     {
-        return new self('For @ExtendType(name="'.$extendType->getName().'") annotation declared in class "'.$className.'", the "'.$extendType->getName().'" GraphQL type cannot be extended. You can only target types created with the @Type annotation.');
+        return new self('For @ExtendType(name="' . $extendType->getName() . '") annotation declared in class "' . $className . '", the "' . $extendType->getName() . '" GraphQL type cannot be extended. You can only target types created with the @Type annotation.');
     }
 }
