@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
@@ -266,4 +267,35 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertFalse($mapper->canDecorateInputTypeForName('{}()/\\@:', new MockResolvableInputObjectType(['name' => 'foo'])));
         $this->assertFalse($mapper->canMapNameToType('{}()/\\@:'));
     }
+
+    public function testGlobTypeMapperExtendBadName()
+    {
+        $container = new Picotainer([
+            FooType::class => function () {
+                return new FooType();
+            },
+            FooExtendType::class => function () {
+                return new FooExtendType();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\BadExtendType', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
+
+        $testObjectType = new MutableObjectType([
+            'name'    => 'TestObject',
+            'fields'  => [
+                'test'   => Type::string(),
+            ],
+        ]);
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For @ExtendType(name="TestObject") annotation declared in class "TheCodingMachine\GraphQLite\Fixtures\BadExtendType\BadExtendType", the "TestObject" GraphQL type cannot be extended. You can only target types created with the @Type annotation.');
+        $mapper->extendTypeForName('TestObject', $testObjectType);
+    }
+
 }

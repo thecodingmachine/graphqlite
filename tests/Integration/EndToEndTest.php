@@ -804,6 +804,7 @@ class EndToEndTest extends TestCase
         query {
             otherContact {
                 fullName
+                phone
             }
         }
         ';
@@ -815,7 +816,8 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'otherContact' => [
-                'fullName' => 'JOE'
+                'fullName' => 'JOE',
+                'phone' => '0123456789'
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }

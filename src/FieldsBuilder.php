@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 use function array_merge;
@@ -357,6 +358,14 @@ class FieldsBuilder
             $objectClass = $typeField->getClass();
         } elseif ($extendTypeField !== null) {
             $objectClass = $extendTypeField->getClass();
+            if ($objectClass === null) {
+                // We need to be able to fetch the mapped PHP class from the object type!
+                $targetedType = $this->recursiveTypeMapper->mapNameToType($extendTypeField->getName());
+                if (!$targetedType instanceof TypeAnnotatedObjectType) {
+                    return [];
+                }
+                $objectClass = $targetedType->getMappedClassName();
+            }
         } else {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
         }

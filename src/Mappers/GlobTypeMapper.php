@@ -21,6 +21,7 @@ use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -29,6 +30,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use function class_exists;
 use function str_replace;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -240,10 +242,19 @@ final class GlobTypeMapper implements TypeMapperInterface
                 $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
                 if ($extendType !== null) {
-                    $targetType = $this->recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
+                    $extendClassName = $extendType->getClass();
+                    if ($extendClassName !== null) {
+                        $targetType = $this->recursiveTypeMapper->mapClassToType($extendType->getClass(), null);
+                    } else {
+                        $targetType = $this->recursiveTypeMapper->mapNameToType($extendType->getName());
+                        if (!$targetType instanceof TypeAnnotatedObjectType) {
+                            throw CannotMapTypeException::extendTypeWithInvalidName($extendType, $refClass->getName());
+                        }
+                        $extendClassName = $targetType->getMappedClassName();
+                    }
                     $typeName   = $targetType->name;
 
-                    $extendAnnotationsCache->setExtendType($extendType->getClass(), $typeName);
+                    $extendAnnotationsCache->setExtendType($extendClassName, $typeName);
 
                     return $extendAnnotationsCache;
                 }

@@ -101,3 +101,26 @@ Notice how the "outputType" attribute is used in the `@Field` annotation to forc
 Is a result, when the end user calls the `product` query, we will have the possibility to fetch the `name` and `price` fields,
 but if he calls the `products` query, each product in the list will have a `name` field but no `price` field. We managed
 to successfully expose a different set of fields based on the query context.
+
+## Extending a non-default type
+
+If you want to extend a type using the `@ExtendType` annotation and if this type is declared as non-default,
+you need to target the type by name instead of by class.
+
+So instead of writing:
+
+```php
+/**
+ * @ExtendType(class=Product::class)
+ */
+```
+
+you will write:
+
+```php
+/**
+ * @ExtendType(name="LimitedProduct")
+ */
+```
+
+Notice how we use the "name" attribute instead of the "class" attribute in the `@ExtendType` annotation.
