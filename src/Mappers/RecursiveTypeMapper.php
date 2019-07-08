@@ -161,7 +161,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             }
 
             $className = get_parent_class($className);
-        } while ($className !== false && !$this->typeMapper->canMapClassToType($className));
+        } while ($className !== false && ! $this->typeMapper->canMapClassToType($className));
 
         // Let's apply extenders from the most basic type.
         $classes = array_reverse($classes);
