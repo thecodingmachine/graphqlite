@@ -27,7 +27,6 @@ use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 use Webmozart\Assert\Assert;
 use function class_exists;
 use function str_replace;
@@ -250,12 +249,13 @@ final class GlobTypeMapper implements TypeMapperInterface
                         $typeName = $extendType->getName();
                         Assert::notNull($typeName);
                         $targetType = $this->recursiveTypeMapper->mapNameToType($typeName);
-                        if (! $targetType instanceof TypeAnnotatedObjectType) {
-                            throw CannotMapTypeException::extendTypeWithInvalidName($extendType, $refClass->getName());
+                        if (! $targetType instanceof MutableObjectType) {
+                            throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendType);
                         }
                         $extendClassName = $targetType->getMappedClassName();
                     }
 
+                    // FIXME: $extendClassName === NULL!!!!!!
                     $extendAnnotationsCache->setExtendType($extendClassName, $typeName);
 
                     return $extendAnnotationsCache;

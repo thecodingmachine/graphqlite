@@ -27,15 +27,18 @@ class MutableObjectType extends ObjectType
 
     /** @var FieldDefinition[]|null */
     private $finalFields;
+    /** @var string|null */
+    private $className;
 
     /**
      * @param mixed[] $config
      */
-    public function __construct(array $config)
+    public function __construct(array $config, ?string $className = null)
     {
         $this->status = self::STATUS_PENDING;
 
         parent::__construct($config);
+        $this->className = $className;
     }
 
     public function freeze(): void
@@ -108,5 +111,13 @@ class MutableObjectType extends ObjectType
         }
 
         return $this->finalFields;
+    }
+
+    /**
+     * Returns the PHP class mapping this GraphQL type (if any)
+     */
+    public function getMappedClassName(): ?string
+    {
+        return $this->className;
     }
 }

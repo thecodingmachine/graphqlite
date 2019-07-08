@@ -13,17 +13,12 @@ use function get_parent_class;
  */
 class TypeAnnotatedObjectType extends MutableObjectType
 {
-    /** @var string */
-    private $className;
-
     /**
      * @param mixed[] $config
      */
     public function __construct(string $className, array $config)
     {
-        $this->className = $className;
-
-        parent::__construct($config);
+        parent::__construct($config, $className);
     }
 
     public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper, bool $doNotMapInterfaces): self
@@ -63,10 +58,5 @@ class TypeAnnotatedObjectType extends MutableObjectType
                 return $recursiveTypeMapper->findInterfaces($className);
             },
         ]);
-    }
-
-    public function getMappedClassName(): string
-    {
-        return $this->className;
     }
 }

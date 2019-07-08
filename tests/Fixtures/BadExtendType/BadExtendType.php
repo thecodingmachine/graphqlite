@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\BadExtendType;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 
 /**
- * @ExtendType(name="TestObject")
+ * @ExtendType(name="TestObjectInput")
  */
 class BadExtendType
 {

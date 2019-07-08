@@ -24,11 +24,9 @@ class GlobExtendTypeMapperCache
         $className = $refClass->getName();
 
         $typeClassName = $globExtendAnnotationsCache->getExtendTypeClassName();
-        if ($typeClassName === null) {
-            return;
+        if ($typeClassName !== null) {
+            $this->mapClassToExtendTypeArray[$typeClassName][$className] = $className;
         }
-
-        $this->mapClassToExtendTypeArray[$typeClassName][$className] = $className;
 
         $typeName = $globExtendAnnotationsCache->getExtendTypeName();
         $this->mapNameToExtendType[$typeName][$className] = $className;

@@ -125,8 +125,18 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('cannot decorate GraphQL input type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
     }
 
-    public static function extendTypeWithInvalidName(ExtendType $extendType, string $className): self
+    public static function extendTypeWithBadTargetedClass(string $className, ExtendType $extendType): self
     {
-        return new self('For @ExtendType(name="' . $extendType->getName() . '") annotation declared in class "' . $className . '", the "' . $extendType->getName() . '" GraphQL type cannot be extended. You can only target types created with the @Type annotation.');
+        return new self('For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $className . '", the pointed at GraphQL type cannot be extended. You can only target types extending the MutableObjectType (like types created with the @Type annotation).');
+    }
+
+    private static function extendTypeToString(ExtendType $extendType): string
+    {
+        $attribute = 'class="' . $extendType->getClass() . '"';
+        if ($extendType->getName() !== null) {
+            $attribute = 'name="' . $extendType->getName() . '"';
+        }
+
+        return '@ExtendType(' . $attribute . ')';
     }
 }
