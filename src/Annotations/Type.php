@@ -63,9 +63,11 @@ class Type
 
         $this->disableInheritance = $attributes['disableInheritance'] ?? false;
 
-        if ($external !== null) {
-            $this->selfType = !$external;
+        if ($external === null) {
+            return;
         }
+
+        $this->selfType = ! $external;
     }
 
     /**
@@ -111,8 +113,6 @@ class Type
 
     /**
      * Returns true if the parent type fields should be ignored.
-     *
-     * @return bool
      */
     public function isInheritanceDisabled(): bool
     {
