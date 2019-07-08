@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\Type;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use Webmozart\Assert\Assert;
 use function array_filter;
@@ -122,5 +123,20 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     public static function createForDecorateName(string $name, InputObjectType $type): self
     {
         return new self('cannot decorate GraphQL input type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
+    }
+
+    public static function extendTypeWithBadTargetedClass(string $className, ExtendType $extendType): self
+    {
+        return new self('For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $className . '", the pointed at GraphQL type cannot be extended. You can only target types extending the MutableObjectType (like types created with the @Type annotation).');
+    }
+
+    private static function extendTypeToString(ExtendType $extendType): string
+    {
+        $attribute = 'class="' . $extendType->getClass() . '"';
+        if ($extendType->getName() !== null) {
+            $attribute = 'name="' . $extendType->getName() . '"';
+        }
+
+        return '@ExtendType(' . $attribute . ')';
     }
 }

@@ -14,10 +14,10 @@ class GlobExtendAnnotationsCache
     /** @var string|null */
     private $extendTypeClassName;
 
-    /** @var string|null */
+    /** @var string */
     private $extendTypeName;
 
-    public function setExtendType(string $className, string $typeName): void
+    public function setExtendType(?string $className, string $typeName): void
     {
         $this->extendTypeClassName = $className;
         $this->extendTypeName = $typeName;
@@ -28,7 +28,7 @@ class GlobExtendAnnotationsCache
         return $this->extendTypeClassName;
     }
 
-    public function getExtendTypeName(): ?string
+    public function getExtendTypeName(): string
     {
         return $this->extendTypeName;
     }

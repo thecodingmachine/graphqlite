@@ -11,7 +11,7 @@ class ExtendTypeTest extends TestCase
     public function testException()
     {
         $this->expectException(BadMethodCallException::class);
-        $this->expectExceptionMessage('In annotation @ExtendType, missing compulsory parameter "class".');
+        $this->expectExceptionMessage('In annotation @ExtendType, missing one of the compulsory parameter "class" or "name".');
         new ExtendType([]);
     }
 }

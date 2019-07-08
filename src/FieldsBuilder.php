@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 use function array_merge;
@@ -357,6 +358,19 @@ class FieldsBuilder
             $objectClass = $typeField->getClass();
         } elseif ($extendTypeField !== null) {
             $objectClass = $extendTypeField->getClass();
+            if ($objectClass === null) {
+                // We need to be able to fetch the mapped PHP class from the object type!
+                $typeName = $extendTypeField->getName();
+                Assert::notNull($typeName);
+                $targetedType = $this->recursiveTypeMapper->mapNameToType($typeName);
+                if (! $targetedType instanceof MutableObjectType) {
+                    throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendTypeField);
+                }
+                $objectClass = $targetedType->getMappedClassName();
+                if ($objectClass === null) {
+                    throw new CannotMapTypeException('@ExtendType(name="' . $extendTypeField->getName() . '") points to a GraphQL type that does not map a PHP class. Therefore, you cannot use the @SourceField annotation in conjunction with this @ExtendType.');
+                }
+            }
         } else {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
         }

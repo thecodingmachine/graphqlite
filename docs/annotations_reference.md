@@ -35,6 +35,8 @@ The `@Type` annotation is used to declare a GraphQL object type.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 class          | *no*       | string | The targeted class. If no class is passed, the type applies to the current class. The current class is assumed to be an entity. If the "class" attribute is passed, [the class annotated with `@Type` is a service](external_type_declaration.md).
+name           | *no*       | string | The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with "Type", the "Type" suffix is removed
+default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
 
 
 ## @ExtendType annotation
@@ -45,7 +47,10 @@ The `@ExtendType` annotation is used to add fields to an existing GraphQL object
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-class          | *yes*       | string | The targeted class. [The class annotated with `@ExtendType` is a service](extend_type.md).
+class          | see below  | string | The targeted class. [The class annotated with `@ExtendType` is a service](extend_type.md).
+name           | see below  | string | The targeted GraphQL output type.
+
+One and only one of "class" and "name" parameter can be passed at the same time.
 
 ## @Field annotation
 
