@@ -148,6 +148,9 @@ class Contact
     public function repeatInnerName($data): string
     {
         $index = array_search($this, $data, false);
+        if ($index === false) {
+            throw new \RuntimeException('Index not found');
+        }
         return $data[$index]->getName();
     }
 

@@ -124,7 +124,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         $this->typeRegistry->registerType($type);
         $this->classToTypeCache[$cacheKey] = $type;
 
-        $this->extendType($className, $type);
+        $this->extendType($closestClassName, $type);
 
         $type->freeze();
 
@@ -154,15 +154,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     private function extendType(string $className, MutableObjectType $type): void
     {
         $classes = [];
+        // Let's find all the extended types, but only up to a valid type (since inheritance will then be used to bundle the extendtype)
         do {
-            if (! $this->typeMapper->canExtendTypeForClass($className, $type)) {
-                $className = get_parent_class($className);
-                continue;
+            if ($this->typeMapper->canExtendTypeForClass($className, $type)) {
+                $classes[] = $className;
             }
 
-            $classes[] = $className;
             $className = get_parent_class($className);
-        } while ($className !== false);
+        } while ($className !== false && ! $this->typeMapper->canMapClassToType($className));
 
         // Let's apply extenders from the most basic type.
         $classes = array_reverse($classes);
