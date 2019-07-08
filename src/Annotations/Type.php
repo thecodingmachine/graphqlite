@@ -18,7 +18,9 @@ use function ltrim;
  * @Attributes({
  *   @Attribute("class", type = "string"),
  *   @Attribute("name", type = "string"),
- *   @Attribute("default", type = "bool")
+ *   @Attribute("default", type = "bool"),
+ *   @Attribute("external", type = "bool"),
+ *   @Attribute("disableInheritance", type = "bool")
  * })
  */
 class Type
@@ -32,6 +34,9 @@ class Type
     /** @var bool */
     private $default;
 
+    /** @var bool */
+    private $disableInheritance;
+
     /**
      * Is the class having the annotation a GraphQL type itself?
      *
@@ -44,6 +49,7 @@ class Type
      */
     public function __construct(array $attributes = [])
     {
+        $external = $attributes['external'] ?? null;
         if (isset($attributes['class'])) {
             $this->setClass($attributes['class']);
         } else {
@@ -54,6 +60,14 @@ class Type
 
         // If no value is passed for default, "default" = true
         $this->default = $attributes['default'] ?? true;
+
+        $this->disableInheritance = $attributes['disableInheritance'] ?? false;
+
+        if ($external === null) {
+            return;
+        }
+
+        $this->selfType = ! $external;
     }
 
     /**
@@ -95,5 +109,13 @@ class Type
     public function isDefault(): bool
     {
         return $this->default;
+    }
+
+    /**
+     * Returns true if the parent type fields should be ignored.
+     */
+    public function isInheritanceDisabled(): bool
+    {
+        return $this->disableInheritance;
     }
 }

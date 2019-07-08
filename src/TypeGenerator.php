@@ -73,7 +73,7 @@ class TypeGenerator
             $annotatedObject = null;
         }
 
-        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault());
+        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
 
         /*return new ObjectType([
             'name' => $typeName,
