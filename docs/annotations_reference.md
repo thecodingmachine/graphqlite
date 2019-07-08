@@ -38,6 +38,7 @@ class          | *no*       | string | The targeted class. If no class is passed
 name           | *no*       | string | The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with "Type", the "Type" suffix is removed
 default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
 external       | *no*       | bool   | Whether this is an [external type declaration](external_type_declaration.md) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
+disableInheritance       | *no*       | bool   | Out of the box, it a PHP class who is a type extends another PHP class who is a type, GraphQL inheritance is put in place. Use this attribute to remove the default behaviour. The type will not map any fields from the parent class AND will not implement the interface.
 
 ## @ExtendType annotation
 
