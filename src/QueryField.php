@@ -86,6 +86,9 @@ class QueryField extends FieldDefinition
             $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
                 // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is ResolveInfo that lives as long as the request.
                 // Let's highjack this object and put prefetch buffers in it.
+
+                // FIXME! this is not working! The ResolveInfo class seems to be new for each call!
+                // We need to get the execution context instead!!! But how???
                 if (! isset($info->_graphqlitePrefetchBuffers)) {
                     $info->_graphqlitePrefetchBuffers = new SplObjectStorage();
                 }
