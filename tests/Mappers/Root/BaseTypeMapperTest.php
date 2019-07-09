@@ -15,7 +15,7 @@ use TheCodingMachine\GraphQLite\GraphQLException;
 class BaseTypeMapperTest extends AbstractQueryProviderTest
 {
 
-    public function testNullableToGraphQLInputType()
+    public function testNullableToGraphQLInputType(): void
     {
         $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
 
@@ -23,7 +23,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
         $this->assertNull($mappedType);
     }
 
-    public function testToGraphQLOutputTypeException()
+    public function testToGraphQLOutputTypeException(): void
     {
         $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
 
@@ -32,7 +32,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
         $baseTypeMapper->toGraphQLInputType(new Object_(new Fqsen('\\DateTime')), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
-    public function testUnmappableArray()
+    public function testUnmappableArray(): void
     {
         $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
 

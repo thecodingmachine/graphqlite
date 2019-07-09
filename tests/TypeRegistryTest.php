@@ -9,7 +9,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 class TypeRegistryTest extends TestCase
 {
 
-    public function testRegisterTypeException()
+    public function testRegisterTypeException(): void
     {
         $type = new ObjectType([
             'name' => 'Foo',
@@ -23,7 +23,7 @@ class TypeRegistryTest extends TestCase
         $registry->registerType($type);
     }
 
-    public function testGetType()
+    public function testGetType(): void
     {
         $type = new ObjectType([
             'name' => 'Foo',
@@ -39,7 +39,7 @@ class TypeRegistryTest extends TestCase
         $registry->getType('Bar');
     }
 
-    public function testHasType()
+    public function testHasType(): void
     {
         $type = new ObjectType([
             'name' => 'Foo',
@@ -54,7 +54,7 @@ class TypeRegistryTest extends TestCase
 
     }
 
-    public function testGetMutableObjectType()
+    public function testGetMutableObjectType(): void
     {
         $type = new MutableObjectType([
             'name' => 'Foo',

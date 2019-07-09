@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class SourceFieldTest extends TestCase
 {
 
-    public function testExceptionInConstruct()
+    public function testExceptionInConstruct(): void
     {
         $this->expectException(BadMethodCallException::class);
         new SourceField([]);

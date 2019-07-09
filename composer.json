@@ -27,7 +27,7 @@
         "ocramius/package-versions": "^1.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.5.9 || ^8.0.0",
+        "phpunit/phpunit": "^8.2.4",
         "satooshi/php-coveralls": "^1.0",
         "mouf/picotainer": "^1.1",
         "phpstan/phpstan": "^0.11",

@@ -8,7 +8,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
 class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
 {
-    public function testGlob()
+    public function testGlob(): void
     {
         $controller = new TestController();
 

@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class FailAuthorizationServiceTest extends TestCase
 {
 
-    public function testIsAllowed()
+    public function testIsAllowed(): void
     {
         $service = new FailAuthorizationService();
         $this->expectException(SecurityNotImplementedException::class);

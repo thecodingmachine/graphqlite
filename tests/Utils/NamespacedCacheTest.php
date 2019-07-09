@@ -7,7 +7,7 @@ use Symfony\Component\Cache\Simple\ArrayCache;
 
 class NamespacedCacheTest extends TestCase
 {
-    public function testCache()
+    public function testCache(): void
     {
         $cache = new NamespacedCache(new ArrayCache());
 

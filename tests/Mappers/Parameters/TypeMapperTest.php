@@ -17,7 +17,7 @@ use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 class TypeMapperTest extends AbstractQueryProviderTest
 {
 
-    public function testMapScalarUnionException()
+    public function testMapScalarUnionException(): void
     {
         $typeMapper = new TypeMapper($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
@@ -34,7 +34,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
-    public function testHideParameter()
+    public function testHideParameter(): void
     {
         $typeMapper = new TypeMapper($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
@@ -56,7 +56,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame(24, $param->resolve(null, [], null, $resolveInfo));
     }
 
-    public function testHideParameterException()
+    public function testHideParameterException(): void
     {
         $typeMapper = new TypeMapper($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
