@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
+use SplObjectStorage;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -82,9 +83,19 @@ class QueryField extends FieldDefinition
         if ($prefetchMethodName === null) {
             $config['resolve'] = $resolveFn;
         } else {
-            $prefetchBuffer = new PrefetchBuffer();
+            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
+                // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is ResolveInfo that lives as long as the request.
+                // Let's highjack this object and put prefetch buffers in it.
+                if (! isset($info->_graphqlitePrefetchBuffers)) {
+                    $info->_graphqlitePrefetchBuffers = new SplObjectStorage();
+                }
+                if ($info->_graphqlitePrefetchBuffers->offsetExists($this)) {
+                    $prefetchBuffer = $info->_graphqlitePrefetchBuffers->offsetGet($this);
+                } else {
+                    $prefetchBuffer = new PrefetchBuffer();
+                    $info->_graphqlitePrefetchBuffers->offsetSet($this, $prefetchBuffer);
+                }
 
-            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($prefetchBuffer, $arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
                 $prefetchBuffer->register($source, $args);
 
                 return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $resolve) {
