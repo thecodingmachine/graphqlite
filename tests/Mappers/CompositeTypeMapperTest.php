@@ -23,7 +23,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
      */
     protected $composite;
 
-    public function setUp()
+    public function setUp(): void
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
             public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType

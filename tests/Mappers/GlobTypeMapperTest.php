@@ -28,7 +28,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {
-    public function testGlobTypeMapper()
+    public function testGlobTypeMapper(): void
     {
         $container = new Picotainer([
             FooType::class => function () {
@@ -59,7 +59,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToType(\stdClass::class, null, $this->getTypeMapper());
     }
 
-    public function testGlobTypeMapperDuplicateTypesException()
+    public function testGlobTypeMapperDuplicateTypesException(): void
     {
         $container = new Picotainer([
             TestType::class => function () {
@@ -75,7 +75,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->canMapClassToType(TestType::class);
     }
 
-    public function testGlobTypeMapperDuplicateInputTypesException()
+    public function testGlobTypeMapperDuplicateInputTypesException(): void
     {
         $container = new Picotainer([
             /*TestType::class => function() {
@@ -92,7 +92,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->canMapClassToInputType(TestObject::class);
     }
 
-    public function testGlobTypeMapperInheritedInputTypesException()
+    public function testGlobTypeMapperInheritedInputTypesException(): void
     {
         $container = new Picotainer([
             ChildTestFactory::class => function() {
@@ -110,7 +110,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToInputType(TestObject::class);
     }
 
-    public function testGlobTypeMapperClassNotFoundException()
+    public function testGlobTypeMapperClassNotFoundException(): void
     {
         $container = new Picotainer([
             TestType::class => function () {
@@ -127,7 +127,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->canMapClassToType(TestType::class);
     }
 
-    public function testGlobTypeMapperNameNotFoundException()
+    public function testGlobTypeMapperNameNotFoundException(): void
     {
         $container = new Picotainer([
             FooType::class => function () {
@@ -143,7 +143,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapNameToType('NotExists', $this->getTypeMapper());
     }
 
-    public function testGlobTypeMapperInputType()
+    public function testGlobTypeMapperInputType(): void
     {
         $container = new Picotainer([
             FooType::class => function () {
@@ -177,7 +177,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToInputType(TestType::class, $this->getTypeMapper());
     }
 
-    public function testGlobTypeMapperExtend()
+    public function testGlobTypeMapperExtend(): void
     {
         $container = new Picotainer([
             FooType::class => function () {
@@ -212,7 +212,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->extendTypeForClass(\stdClass::class, $type);
     }
 
-    public function testEmptyGlobTypeMapper()
+    public function testEmptyGlobTypeMapper(): void
     {
         $container = new Picotainer([]);
 
@@ -226,7 +226,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame([], $mapper->getSupportedClasses());
     }
 
-    public function testGlobTypeMapperDecorate()
+    public function testGlobTypeMapperDecorate(): void
     {
         $container = new Picotainer([
             FilterDecorator::class => function () {
@@ -252,7 +252,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->decorateInputTypeForName('NotExists', $inputType);
     }
 
-    public function testInvalidName()
+    public function testInvalidName(): void
     {
         $container = new Picotainer([
             FooType::class => function () {
@@ -269,7 +269,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertFalse($mapper->canMapNameToType('{}()/\\@:'));
     }
 
-    public function testGlobTypeMapperExtendBadName()
+    public function testGlobTypeMapperExtendBadName(): void
     {
         $container = new Picotainer([
             FooType::class => function () {

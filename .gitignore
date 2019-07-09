@@ -21,3 +21,5 @@ website/i18n/*
 /tests/dependencies/graphqlite-bundle/
 /tests/dependencies/graphqlite-laravel/
 /tests/dependencies/graphqlite-universal-service-provider/
+
+.phpunit.result.cache

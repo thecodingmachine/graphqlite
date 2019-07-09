@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class ParameterAnnotationsTest extends TestCase
 {
 
-    public function testGetAnnotationByTypeException()
+    public function testGetAnnotationByTypeException(): void
     {
         $annotations = new ParameterAnnotations([
             new Autowire(['for'=>'foo']),

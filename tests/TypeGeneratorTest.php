@@ -11,7 +11,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
 {
     private $container;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->container = new Picotainer([
             TypeFoo::class => function() { return new TypeFoo(); },
@@ -19,7 +19,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         ]);
     }
 
-    public function testNameAndFields()
+    public function testNameAndFields(): void
     {
         $typeGenerator = $this->getTypeGenerator();
 
@@ -30,7 +30,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         $this->assertCount(1, $type->getFields());
     }
 
-    public function testMapAnnotatedObjectException()
+    public function testMapAnnotatedObjectException(): void
     {
         $typeGenerator = $this->getTypeGenerator();
 
@@ -38,7 +38,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
         $typeGenerator->mapAnnotatedObject(stdClass::class, $this->getTypeMapper(), $this->container);
     }
 
-    public function testextendAnnotatedObjectException()
+    public function testextendAnnotatedObjectException(): void
     {
         $typeGenerator = $this->getTypeGenerator();
 

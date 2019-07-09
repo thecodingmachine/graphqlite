@@ -13,7 +13,7 @@ class ClassWithInvalidClassAnnotation
     /**
      * @foo
      */
-    public function testMethod()
+    public function testMethod(): void
     {
 
     }

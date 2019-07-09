@@ -12,7 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 class ContainerParameterMapperTest extends AbstractQueryProviderTest
 {
 
-    public function testMapParameter()
+    public function testMapParameter(): void
     {
         $mapper = new ContainerParameterMapper($this->getRegistry());
 

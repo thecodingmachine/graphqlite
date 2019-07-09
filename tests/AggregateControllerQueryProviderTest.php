@@ -13,7 +13,7 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
 class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
 {
-    public function testAggregate()
+    public function testAggregate(): void
     {
         $controller = new TestController();
 

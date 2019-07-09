@@ -62,7 +62,7 @@ class EndToEndTest extends TestCase
      */
     private $mainContainer;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
@@ -212,7 +212,7 @@ class EndToEndTest extends TestCase
         $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(PorpaginasTypeMapper::class));
     }
 
-    public function testEndToEnd()
+    public function testEndToEnd(): void
     {
         /**
          * @var Schema $schema
@@ -290,7 +290,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndInputType()
+    public function testEndToEndInputType(): void
     {
         /**
          * @var Schema $schema
@@ -336,7 +336,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndPorpaginas()
+    public function testEndToEndPorpaginas(): void
     {
         /**
          * @var Schema $schema
@@ -454,7 +454,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndPorpaginasOnScalarType()
+    public function testEndToEndPorpaginasOnScalarType(): void
     {
         /**
          * @var Schema $schema
@@ -486,7 +486,7 @@ class EndToEndTest extends TestCase
     /**
      * This tests is used to be sure that the PorpaginasIterator types are not mixed up when cached (because it has a subtype)
      */
-    public function testEndToEnd2Iterators()
+    public function testEndToEnd2Iterators(): void
     {
         /**
          * @var Schema $schema
@@ -547,7 +547,7 @@ class EndToEndTest extends TestCase
 
     }
 
-    public function testEndToEndStaticFactories()
+    public function testEndToEndStaticFactories(): void
     {
         /**
          * @var Schema $schema
@@ -580,7 +580,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testNonNullableTypesWithOptionnalFactoryArguments()
+    public function testNonNullableTypesWithOptionnalFactoryArguments(): void
     {
         /**
          * @var Schema $schema
@@ -603,7 +603,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testNullableTypesWithOptionnalFactoryArguments()
+    public function testNullableTypesWithOptionnalFactoryArguments(): void
     {
         /**
          * @var Schema $schema
@@ -626,7 +626,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndResolveInfo()
+    public function testEndToEndResolveInfo(): void
     {
         /**
          * @var Schema $schema
@@ -649,7 +649,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndRightIssues()
+    public function testEndToEndRightIssues(): void
     {
         /**
          * @var Schema $schema
@@ -689,7 +689,7 @@ class EndToEndTest extends TestCase
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
-    public function testAutowireService()
+    public function testAutowireService(): void
     {
         /**
          * @var Schema $schema

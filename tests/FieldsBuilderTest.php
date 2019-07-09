@@ -69,7 +69,7 @@ use function var_dump;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
 {
-    public function testQueryProvider()
+    public function testQueryProvider(): void
     {
         $controller = new TestController();
 
@@ -124,7 +124,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('424212true4.22017010101010120170101010101default42on', $result->getTest());
     }
 
-    public function testMutations()
+    public function testMutations(): void
     {
         $controller = new TestController();
 
@@ -143,7 +143,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertEquals('42', $result->getTest());
     }
 
-    public function testErrors()
+    public function testErrors(): void
     {
         $controller = new class
         {
@@ -163,7 +163,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testTypeInDocBlock()
+    public function testTypeInDocBlock(): void
     {
         $controller = new class
         {
@@ -190,7 +190,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(StringType::class, $query->getType()->getWrappedType());
     }
 
-    public function testQueryProviderWithFixedReturnType()
+    public function testQueryProviderWithFixedReturnType(): void
     {
         $controller = new TestController();
 
@@ -204,7 +204,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(IDType::class, $fixedQuery->getType());
     }
 
-    public function testQueryProviderWithComplexFixedReturnType()
+    public function testQueryProviderWithComplexFixedReturnType(): void
     {
         $controller = new TestController();
 
@@ -221,7 +221,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(IDType::class, $fixedQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
     }
 
-    public function testNameFromAnnotation()
+    public function testNameFromAnnotation(): void
     {
         $controller = new TestController();
 
@@ -234,7 +234,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('nameFromAnnotation', $query->name);
     }
 
-    public function testSourceField()
+    public function testSourceField(): void
     {
         $controller = new TestType();
 
@@ -253,7 +253,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
     }
 
-    public function testSourceFieldOnSelfType()
+    public function testSourceFieldOnSelfType(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -267,7 +267,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertEquals('foo', $resolve($obj, [], null, $this->createMock(ResolveInfo::class)));
     }
 
-    public function testLoggedInSourceField()
+    public function testLoggedInSourceField(): void
     {
         $authenticationService = new class implements AuthenticationServiceInterface {
             public function isLogged(): bool
@@ -297,7 +297,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     }
 
-    public function testRightInSourceField()
+    public function testRightInSourceField(): void
     {
         $authorizationService = new class implements AuthorizationServiceInterface {
             public function isAllowed(string $right): bool
@@ -328,7 +328,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     }
 
-    public function testMissingTypeAnnotation()
+    public function testMissingTypeAnnotation(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -336,7 +336,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestTypeMissingAnnotation(), true);
     }
 
-    public function testSourceFieldDoesNotExists()
+    public function testSourceFieldDoesNotExists(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -345,7 +345,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestTypeMissingField(), true);
     }
 
-    public function testSourceFieldHasMissingReturnType()
+    public function testSourceFieldHasMissingReturnType(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -354,7 +354,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestTypeMissingReturnType(), true);
     }
 
-    public function testSourceFieldIsId()
+    public function testSourceFieldIsId(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $fields = $queryProvider->getFields(new TestTypeId(), true);
@@ -365,7 +365,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(IDType::class, $fields['test']->getType()->getWrappedType());
     }
 
-    public function testFromSourceFieldsInterface()
+    public function testFromSourceFieldsInterface(): void
     {
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
@@ -388,7 +388,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     }
 
-    public function testQueryProviderWithIterableClass()
+    public function testQueryProviderWithIterableClass(): void
     {
         $controller = new TestController();
 
@@ -406,7 +406,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
     }
 
-    public function testQueryProviderWithIterable()
+    public function testQueryProviderWithIterable(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -422,14 +422,14 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
     }
 
-    public function testNoReturnTypeError()
+    public function testNoReturnTypeError(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(TypeMappingException::class);
         $queryProvider->getQueries(new TestControllerNoReturnType());
     }
 
-    public function testQueryProviderWithUnion()
+    public function testQueryProviderWithUnion(): void
     {
         $controller = new TestController();
 
@@ -448,7 +448,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('TestObject2', $unionQuery->getType()->getWrappedType()->getTypes()[1]->name);
     }
 
-    public function testQueryProviderWithInvalidInputType()
+    public function testQueryProviderWithInvalidInputType(): void
     {
         $controller = new TestControllerWithInvalidInputType();
 
@@ -459,7 +459,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithInvalidReturnType()
+    public function testQueryProviderWithInvalidReturnType(): void
     {
         $controller = new TestControllerWithInvalidReturnType();
 
@@ -470,7 +470,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithIterableReturnType()
+    public function testQueryProviderWithIterableReturnType(): void
     {
         $controller = new TestControllerWithIterableReturnType();
 
@@ -481,7 +481,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithArrayReturnType()
+    public function testQueryProviderWithArrayReturnType(): void
     {
         $controller = new TestControllerWithArrayReturnType();
 
@@ -492,7 +492,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithArrayParams()
+    public function testQueryProviderWithArrayParams(): void
     {
         $controller = new TestControllerWithArrayParam();
 
@@ -503,7 +503,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithIterableParams()
+    public function testQueryProviderWithIterableParams(): void
     {
         $controller = new TestControllerWithIterableParam();
 
@@ -514,7 +514,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testFailWith()
+    public function testFailWith(): void
     {
         $controller = new TestControllerWithFailWith();
 
@@ -534,7 +534,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $query->getType());
     }
 
-    public function testSourceFieldWithFailWith()
+    public function testSourceFieldWithFailWith(): void
     {
         $controller = new TestTypeWithFailWith();
 
@@ -556,7 +556,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(StringType::class, $fields['test']->getType());
     }
 
-    public function testSourceFieldBadOutputTypeException()
+    public function testSourceFieldBadOutputTypeException(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
@@ -564,7 +564,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestSourceFieldBadOutputType(), true);
     }
 
-    public function testSourceFieldBadOutputType2Exception()
+    public function testSourceFieldBadOutputType2Exception(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
@@ -572,7 +572,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestSourceFieldBadOutputType2(), true);
     }
 
-    public function testBadOutputTypeException()
+    public function testBadOutputTypeException(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
@@ -580,7 +580,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestFieldBadOutputType(), true);
     }
 
-    public function testBadInputTypeException()
+    public function testBadInputTypeException(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
@@ -588,7 +588,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestFieldBadInputType(), true);
     }
 
-    public function testDoubleReturnException()
+    public function testDoubleReturnException(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(InvalidDocBlockException::class);
@@ -596,7 +596,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields(new TestDoubleReturnTag(), true);
     }
 
-    public function testMissingArgument()
+    public function testMissingArgument(): void
     {
         $controller = new TestController();
 
@@ -623,7 +623,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame([], $queryProvider->getParametersForDecorator(new ReflectionMethod(SchemaFactory::class, 'devMode')));
     }
 
-    public function testInvalidPrefetchMethod()
+    public function testInvalidPrefetchMethod(): void
     {
         $controller = new TestTypeWithInvalidPrefetchMethod();
 
@@ -634,7 +634,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields($controller);
     }
 
-    public function testInvalidPrefetchParameter()
+    public function testInvalidPrefetchParameter(): void
     {
         $controller = new TestTypeWithInvalidPrefetchParameter();
 
@@ -645,7 +645,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getFields($controller);
     }
 
-    public function testPrefetchMethod()
+    public function testPrefetchMethod(): void
     {
         $controller = new TestTypeWithPrefetchMethod();
 

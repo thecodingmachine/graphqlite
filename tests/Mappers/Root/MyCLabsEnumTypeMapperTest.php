@@ -10,7 +10,7 @@ use ReflectionMethod;
 class MyCLabsEnumTypeMapperTest extends TestCase
 {
 
-    public function testObjectTypeHint()
+    public function testObjectTypeHint(): void
     {
         $mapper = new MyCLabsEnumTypeMapper();
 
