@@ -17,7 +17,7 @@ jobs:
         - composer phpstan
         - composer cs-check
       after_script:
-        - ./vendor/bin/coveralls -v
+        - travis_retry php vendor/bin/php-coveralls -v
     - stage: test
       php: 7.2
       env: PREFER_LOWEST=""
