@@ -9,7 +9,9 @@ use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
+use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
@@ -36,7 +38,12 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
+use function crc32;
 use function function_exists;
+use function md5;
+use function substr;
+use function sys_get_temp_dir;
 
 /**
  * A class to help getting started with GraphQLite.
@@ -79,7 +86,7 @@ class SchemaFactory
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
-        $this->cache     = $cache;
+        $this->cache     = new NamespacedCache($cache);
         $this->container = $container;
     }
 
@@ -170,9 +177,12 @@ class SchemaFactory
             AnnotationRegistry::registerLoader('class_exists');
             $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            if (function_exists('apcu_fetch')) {
-                $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, new ApcuCache(), true);
-            }
+            $cache = function_exists('apcu_fetch') ? new ApcuCache() : new PhpFileCache(sys_get_temp_dir() . '/graphqlite.' . crc32(__DIR__));
+
+            $namespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
+            $cache->setNamespace($namespace);
+
+            $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, $cache, true);
 
             return $doctrineAnnotationReader;
         }

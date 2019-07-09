@@ -23,7 +23,8 @@
         "ecodev/graphql-upload": "^4.0",
         "webmozart/assert": "^1.4",
         "symfony/cache": "^4.3",
-        "thecodingmachine/cache-utils": "^1"
+        "thecodingmachine/cache-utils": "^1",
+        "ocramius/package-versions": "^1.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.5.9",
