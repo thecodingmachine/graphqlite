@@ -64,6 +64,11 @@ $factory->addTypeMapperFactory($typeMapperFactory);
 $factory->addRootTypeMapper($rootTypeMapper);
 // Add a parameter mapper.
 $factory->addParameterMapper($parameterMapper);
+// Add a query provider. These are used to find queries and mutations in the application.
+$factory->addQueryProvider($queryProvider);
+// Add a query provider using a factory to create it.
+// Query provider factories are useful if you need to inject the "fields builder" into your query provider constructor.
+$factory->addQueryProviderFactory($queryProviderFactory);
 // Add custom options to the Webonyx underlying Schema.
 $factory->setSchemaConfig($schemaConfig);
 // Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.
