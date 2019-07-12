@@ -109,6 +109,11 @@ $factory-&gt;addTypeMapperFactory($typeMapperFactory);
 $factory-&gt;addRootTypeMapper($rootTypeMapper);
 <span class="hljs-comment">// Add a parameter mapper.</span>
 $factory-&gt;addParameterMapper($parameterMapper);
+<span class="hljs-comment">// Add a query provider. These are used to find queries and mutations in the application.</span>
+$factory-&gt;addQueryProvider($queryProvider);
+<span class="hljs-comment">// Add a query provider using a factory to create it.</span>
+<span class="hljs-comment">// Query provider factories are useful if you need to inject the "fields builder" into your query provider constructor.</span>
+$factory-&gt;addQueryProviderFactory($queryProviderFactory);
 <span class="hljs-comment">// Add custom options to the Webonyx underlying Schema.</span>
 $factory-&gt;setSchemaConfig($schemaConfig);
 <span class="hljs-comment">// Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.</span>
