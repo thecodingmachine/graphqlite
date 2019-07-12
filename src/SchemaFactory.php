@@ -57,6 +57,8 @@ class SchemaFactory
     private $typeNamespaces = [];
     /** @var QueryProviderInterface[] */
     private $queryProviders = [];
+    /** @var QueryProviderFactoryInterface[] */
+    private $queryProviderFactories = [];
     /** @var RootTypeMapperInterface[] */
     private $rootTypeMappers = [];
     /** @var TypeMapperInterface[] */
@@ -116,6 +118,16 @@ class SchemaFactory
     public function addQueryProvider(QueryProviderInterface $queryProvider): self
     {
         $this->queryProviders[] = $queryProvider;
+
+        return $this;
+    }
+
+    /**
+     * Registers a query provider factory.
+     */
+    public function addQueryProviderFactory(QueryProviderFactoryInterface $queryProviderFactory): self
+    {
+        $this->queryProviderFactories[] = $queryProviderFactory;
 
         return $this;
     }
@@ -350,6 +362,10 @@ class SchemaFactory
 
         foreach ($this->queryProviders as $queryProvider) {
             $queryProviders[] = $queryProvider;
+        }
+
+        foreach ($this->queryProviderFactories as $queryProviderFactory) {
+            $queryProviders[] = $queryProviderFactory->create($fieldsBuilder);
         }
 
         if ($queryProviders === []) {

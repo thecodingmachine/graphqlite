@@ -66,6 +66,7 @@ class SchemaFactoryTest extends TestCase
                 })
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
                 ->addParameterMapper(new CompositeParameterMapper([]))
+                ->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([], $container))
                 ->setSchemaConfig(new SchemaConfig())
                 ->devMode()
                 ->prodMode();
