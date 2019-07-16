@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use function array_merge;
 use function get_class;
+use function get_declared_interfaces;
 use InvalidArgumentException;
 use function is_object;
+use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use function get_parent_class;
+use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
 
 /**
  * An object type built from the Type annotation
@@ -30,24 +34,20 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
             'name' => $typeName,
             'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder, $disableInheritance) {
 
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // TODO: get fields from parent interfaces
-                // QUESTION: DO WE NEED ANOTHER SET OF FUNCTIONS IN THE TYPEMAPPER OR DO WE USE THE CURRENT getByClassName...
-                // QUESTION: DO WE NEED ANOTHER SET OF FUNCTIONS IN THE TYPEMAPPER OR DO WE USE THE CURRENT getByClassName...
-                // QUESTION: DO WE NEED ANOTHER SET OF FUNCTIONS IN THE TYPEMAPPER OR DO WE USE THE CURRENT getByClassName... ???
+                $interfaces = ReflectionInterfaceUtils::getDirectlyImplementedInterfaces(new ReflectionClass($className));
 
-                /*$parentClass = get_parent_class($className);
-                $parentType  = null;
-                if ($parentClass !== false && $disableInheritance === false) {
-                    if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
-                        $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
+                $fieldsArray = [];
+                foreach ($interfaces as $interfaceName => $interface) {
+                    if ($recursiveTypeMapper->canMapClassToType($interfaceName)) {
+                        $interfaceType = $recursiveTypeMapper->mapClassToType($interfaceName, null);
+                        $fieldsArray[] = $interfaceType->getFields();
                     }
+                }
+
+                if (!empty($fieldsArray)) {
+                    $interfaceFields = array_merge(...$fieldsArray);
+                } else {
+                    $interfaceFields = [];
                 }
 
                 if ($annotatedObject !== null) {
@@ -55,14 +55,8 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                 } else {
                     $fields = $fieldsBuilder->getSelfFields($className);
                 }
-                if ($parentType !== null) {
-                    $finalFields = $parentType->getFields();
-                    foreach ($fields as $name => $field) {
-                        $finalFields[$name] = $field;
-                    }
 
-                    return $finalFields;
-                }*/
+                $fields += $interfaceFields;
 
                 return $fields;
             },

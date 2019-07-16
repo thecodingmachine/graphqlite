@@ -3,6 +3,9 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Error\InvariantViolation;
+use GraphQL\Type\Definition\FieldDefinition;
+
 /**
  * GraphQL objects or interfaces that can be muted.
  */
@@ -17,4 +20,11 @@ interface MutableInterface
     public function getStatus(): string;
 
     public function addFields(callable $fields): void;
+
+    /**
+     * @return FieldDefinition[]
+     *
+     * @throws InvariantViolation
+     */
+    public function getFields();
 }
