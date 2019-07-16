@@ -16,13 +16,13 @@ use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
+use Webmozart\Assert\Assert;
 use function array_flip;
 use function array_reverse;
 use function get_parent_class;
-use Webmozart\Assert\Assert;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.
@@ -93,7 +93,9 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type)
      * @param (OutputType&Type)|null $subType
+     *
      * @return MutableInterface&(MutableObjectType|MutableInterfaceType)
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
@@ -153,9 +155,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Extends a type using available type extenders.
      *
-     *
-     * @param string $className
      * @param MutableObjectType|MutableInterfaceType $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     private function extendType(string $className, MutableInterface $type): void

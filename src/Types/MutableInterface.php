@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
@@ -26,5 +27,5 @@ interface MutableInterface
      *
      * @throws InvariantViolation
      */
-    public function getFields();
+    public function getFields(): array;
 }

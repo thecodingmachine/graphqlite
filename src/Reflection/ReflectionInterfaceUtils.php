@@ -1,20 +1,18 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Reflection;
 
-
-use function array_diff_key;
 use ReflectionClass;
+use function array_diff_key;
 
 class ReflectionInterfaceUtils
 {
-
     /**
      * Returns a list of all interfaces directly implemented by this class/interface.
      * "Super" interfaces are not returned.
      *
-     * @param ReflectionClass $reflectionClass
      * @return array<string, ReflectionClass> Interfaces indexed by FQCN
      */
     public static function getDirectlyImplementedInterfaces(ReflectionClass $reflectionClass): array

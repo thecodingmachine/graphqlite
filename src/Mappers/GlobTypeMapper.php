@@ -26,8 +26,8 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
-use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use Webmozart\Assert\Assert;
 use function class_exists;
@@ -295,7 +295,6 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @param string $className The exact class name to look for (this function does not look into parent classes).
      * @param OutputType|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      *
-     * @return MutableInterface
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
@@ -391,9 +390,8 @@ final class GlobTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
-     * @param string $className
+     *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
-     * @return bool
      */
     public function canExtendTypeForClass(string $className, MutableInterface $type): bool
     {
@@ -403,8 +401,8 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
-     * @param string $className
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForClass(string $className, MutableInterface $type): void
@@ -422,9 +420,8 @@ final class GlobTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
-     * @param string $typeName
+     *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
-     * @return bool
      */
     public function canExtendTypeForName(string $typeName, MutableInterface $type): bool
     {
@@ -436,8 +433,8 @@ final class GlobTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
-     * @param string $typeName
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForName(string $typeName, MutableInterface $type): void

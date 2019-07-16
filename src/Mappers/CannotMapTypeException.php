@@ -68,8 +68,8 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     }
 
     /**
-     * @param string $className
      * @param NamedType&(ObjectType|InterfaceType) $type
+     *
      * @return CannotMapTypeException
      */
     public static function createForExtendType(string $className, NamedType $type): self
@@ -78,8 +78,8 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     }
 
     /**
-     * @param string $name
      * @param NamedType&(ObjectType|InterfaceType) $type
+     *
      * @return CannotMapTypeException
      */
     public static function createForExtendName(string $name, NamedType $type): self

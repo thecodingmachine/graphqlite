@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
-
 
 use Exception;
 use GraphQL\Error\InvariantViolation;
@@ -101,5 +101,4 @@ trait MutableTrait
     {
         return $this->className;
     }
-
 }

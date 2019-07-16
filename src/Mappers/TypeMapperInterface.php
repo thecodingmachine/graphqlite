@@ -31,6 +31,7 @@ interface TypeMapperInterface
      * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      *
      * @return MutableObjectType|MutableInterfaceType
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface;
@@ -72,34 +73,32 @@ interface TypeMapperInterface
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
-     * @param string $className
+     *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
-     * @return bool
      */
     public function canExtendTypeForClass(string $className, MutableInterface $type): bool;
 
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
-     * @param string $className
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForClass(string $className, MutableInterface $type): void;
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
-     * @param string $typeName
+     *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
-     * @return bool
      */
     public function canExtendTypeForName(string $typeName, MutableInterface $type): bool;
 
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
-     * @param string $typeName
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function extendTypeForName(string $typeName, MutableInterface $type): void;

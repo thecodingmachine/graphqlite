@@ -11,9 +11,9 @@ use GraphQL\Type\Definition\Type;
 use Porpaginas\Result;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use function get_class;
 use function is_a;
 use function strpos;
@@ -48,6 +48,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      *
      * @return MutableObjectType|MutableInterfaceType
+     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
@@ -64,6 +65,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
 
     /**
      * @param OutputType&Type $subType
+     *
      * @return MutableObjectType|MutableInterfaceType
      */
     private function getObjectType(OutputType $subType): MutableInterface
@@ -186,11 +188,10 @@ class PorpaginasTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
-     * @param string $className
+     *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
-     * @return bool
      */
-    public function canExtendTypeForClass(string $className, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): bool
+    public function canExtendTypeForClass(string $className, MutableInterface $type): bool
     {
         return false;
     }
@@ -198,22 +199,21 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
-     * @param string $className
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): void
+    public function extendTypeForClass(string $className, MutableInterface $type): void
     {
         throw CannotMapTypeException::createForExtendType($className, $type);
     }
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
-     * @param string $typeName
+     *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
-     * @return bool
      */
-    public function canExtendTypeForName(string $typeName, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): bool
+    public function canExtendTypeForName(string $typeName, MutableInterface $type): bool
     {
         return false;
     }
@@ -221,11 +221,11 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
-     * @param string $typeName
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): void
+    public function extendTypeForName(string $typeName, MutableInterface $type): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
     }

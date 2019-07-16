@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use Exception;
-use GraphQL\Error\InvariantViolation;
-use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ObjectType;
-use RuntimeException;
 
 /**
  * An object type built from the Type annotation

@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use function array_merge;
-use function get_class;
-use function get_declared_interfaces;
 use InvalidArgumentException;
-use function is_object;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use function get_parent_class;
 use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
+use function array_merge;
+use function get_class;
+use function gettype;
+use function is_object;
 
 /**
  * An object type built from the Type annotation
@@ -32,19 +31,20 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder, $disableInheritance) {
-
+            'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder) {
                 $interfaces = ReflectionInterfaceUtils::getDirectlyImplementedInterfaces(new ReflectionClass($className));
 
                 $fieldsArray = [];
                 foreach ($interfaces as $interfaceName => $interface) {
-                    if ($recursiveTypeMapper->canMapClassToType($interfaceName)) {
-                        $interfaceType = $recursiveTypeMapper->mapClassToType($interfaceName, null);
-                        $fieldsArray[] = $interfaceType->getFields();
+                    if (! $recursiveTypeMapper->canMapClassToType($interfaceName)) {
+                        continue;
                     }
+
+                    $interfaceType = $recursiveTypeMapper->mapClassToType($interfaceName, null);
+                    $fieldsArray[] = $interfaceType->getFields();
                 }
 
-                if (!empty($fieldsArray)) {
+                if (! empty($fieldsArray)) {
                     $interfaceFields = array_merge(...$fieldsArray);
                 } else {
                     $interfaceFields = [];
