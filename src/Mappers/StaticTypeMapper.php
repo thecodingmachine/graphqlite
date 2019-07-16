@@ -7,8 +7,10 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use function array_keys;
 use function array_reduce;
 
@@ -19,13 +21,13 @@ use function array_reduce;
  */
 final class StaticTypeMapper implements TypeMapperInterface
 {
-    /** @var array<string,MutableObjectType> */
+    /** @var array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> */
     private $types = [];
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
      *
-     * @param array<string,MutableObjectType> $types
+     * @param array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> $types
      */
     public function setTypes(array $types): void
     {
@@ -45,7 +47,7 @@ final class StaticTypeMapper implements TypeMapperInterface
         $this->inputTypes = $inputTypes;
     }
 
-    /** @var array<string,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)> */
+    /** @var array<string,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> */
     private $notMappedTypes = [];
 
     /**
@@ -74,9 +76,12 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
+     * @param string $className
+     * @param OutputType|null $subType
+     * @return \TheCodingMachine\GraphQLite\Types\MutableInterface
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): \TheCodingMachine\GraphQLite\Types\MutableInterface
     {
         // TODO: add support for $subType
         if ($subType !== null) {
@@ -127,7 +132,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
+     * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -172,8 +177,11 @@ final class StaticTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
+     * @param string $className
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @return bool
      */
-    public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
+    public function canExtendTypeForClass(string $className, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): bool
     {
         return false;
     }
@@ -181,17 +189,22 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
+     * @param string $className
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForClass(string $className, MutableObjectType $type): void
+    public function extendTypeForClass(string $className, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): void
     {
         throw CannotMapTypeException::createForExtendType($className, $type);
     }
 
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     * @param string $typeName
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @return bool
      */
-    public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
+    public function canExtendTypeForName(string $typeName, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): bool
     {
         return false;
     }
@@ -199,9 +212,11 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
+     * @param string $typeName
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      * @throws CannotMapTypeExceptionInterface
      */
-    public function extendTypeForName(string $typeName, MutableObjectType $type): void
+    public function extendTypeForName(string $typeName, \TheCodingMachine\GraphQLite\Types\MutableInterface $type): void
     {
         throw CannotMapTypeException::createForExtendName($typeName, $type);
     }

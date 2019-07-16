@@ -8,8 +8,10 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 
 /**
  * This class is in charge of creating Webonyx GraphQL types from annotated objects that do not extend the
@@ -101,8 +103,10 @@ class TypeGenerator
 
     /**
      * @param object $annotatedObject An object with a ExtendType annotation.
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @throws ReflectionException
      */
-    public function extendAnnotatedObject(object $annotatedObject, MutableObjectType $type): void
+    public function extendAnnotatedObject(object $annotatedObject, MutableInterface $type): void
     {
         $refTypeClass = new ReflectionClass($annotatedObject);
 

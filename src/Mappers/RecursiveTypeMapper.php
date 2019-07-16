@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\SimpleCache\CacheInterface;
@@ -14,11 +15,14 @@ use RuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use function array_flip;
 use function array_reverse;
 use function get_parent_class;
+use Webmozart\Assert\Assert;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.
@@ -44,7 +48,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     private $interfaces = [];
 
-    /** @var array<string,MutableObjectType> Key: FQCN */
+    /** @var array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> Key: FQCN */
     private $classToTypeCache = [];
 
     /** @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN */
@@ -87,12 +91,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string      $className                                          The class name to look for (this function looks into parent classes if the class does not match a type)
-     * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
-     *
+     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type)
+     * @param (OutputType&Type)|null $subType
+     * @return MutableInterface&(MutableObjectType|MutableInterfaceType)
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
+    public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
     {
         $cacheKey = $className;
         if ($subType !== null) {
@@ -149,9 +153,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Extends a type using available type extenders.
      *
+     *
+     * @param string $className
+     * @param MutableObjectType|MutableInterfaceType $type
      * @throws CannotMapTypeExceptionInterface
      */
-    private function extendType(string $className, MutableObjectType $type): void
+    private function extendType(string $className, MutableInterface $type): void
     {
         $classes = [];
         // Let's find all the extended types, but only up to a valid type (since inheritance will then be used to bundle the extendtype)
@@ -195,11 +202,12 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $objectType = $this->mapClassToType($className, $subType);
 
             $supportedClasses = $this->getClassTree();
-            if (isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())) {
+            if ($objectType instanceof MutableObjectType && isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())) {
                 // Cast as an interface
                 $this->interfaces[$cacheKey] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
                 $this->typeRegistry->registerType($this->interfaces[$cacheKey]);
             } else {
+                Assert::isInstanceOf($objectType, ObjectType::class);
                 $this->interfaces[$cacheKey] = $objectType;
             }
         }
