@@ -23,6 +23,8 @@ use function sprintf;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
+    private $locationInfoAdded = false;
+
     public static function createForType(string $className): self
     {
         return new self('cannot map class "' . $className . '" to a known GraphQL type. Check your TypeMapper configuration.');
@@ -60,44 +62,55 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('In GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
     }
 
-    public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, ReflectionParameter $parameter): self
+    public function addParamInfo(ReflectionParameter $parameter): void
     {
         $declaringClass = $parameter->getDeclaringClass();
         Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
 
-        $message = sprintf(
-            'For parameter $%s, in %s::%s, %s',
-            $parameter->getName(),
-            $declaringClass->getName(),
-            $parameter->getDeclaringFunction()->getName(),
-            $previous->getMessage()
-        );
-
-        return new self($message, 0, $previous);
+        if ($this->locationInfoAdded === false) {
+            $this->locationInfoAdded = true;
+            $this->message = sprintf(
+                'For parameter $%s, in %s::%s, %s',
+                $parameter->getName(),
+                $declaringClass->getName(),
+                $parameter->getDeclaringFunction()->getName(),
+                $this->message
+            );
+        }
     }
 
-    public static function wrapWithReturnInfo(CannotMapTypeExceptionInterface $previous, ReflectionMethod $method): self
+    public function addReturnInfo(ReflectionMethod $method): void
     {
-        $message = sprintf(
-            'For return type of %s::%s, %s',
-            $method->getDeclaringClass()->getName(),
-            $method->getName(),
-            $previous->getMessage()
-        );
-
-        return new self($message, 0, $previous);
+        if ($this->locationInfoAdded === false) {
+            $this->locationInfoAdded = true;
+            $this->message = sprintf(
+                'For return type of %s::%s, %s',
+                $method->getDeclaringClass()->getName(),
+                $method->getName(),
+                $this->message
+            );
+        }
     }
 
-    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceFieldInterface $sourceField): self
+    public function addSourceFieldInfo(ReflectionClass $class, SourceFieldInterface $sourceField): void
     {
-        $message = sprintf(
-            'For @SourceField "%s" declared in "%s", %s',
-            $sourceField->getName(),
-            $class->getName(),
-            $previous->getMessage()
-        );
+        if ($this->locationInfoAdded === false) {
+            $this->locationInfoAdded = true;
+            $this->message = sprintf(
+                'For @SourceField "%s" declared in "%s", %s',
+                $sourceField->getName(),
+                $class->getName(),
+                $this->message
+            );
+        }
+    }
 
-        return new self($message, 0, $previous);
+    public function addExtendTypeInfo(ReflectionClass $class, ExtendType $extendType): void
+    {
+        if ($this->locationInfoAdded === false) {
+            $this->locationInfoAdded = true;
+            $this->message = 'For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $class->getName() . '", '.$this->message;
+        }
     }
 
     public static function mustBeOutputType(string $subTypeName): self

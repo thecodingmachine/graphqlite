@@ -243,7 +243,12 @@ final class GlobTypeMapper implements TypeMapperInterface
                 if ($extendType !== null) {
                     $extendClassName = $extendType->getClass();
                     if ($extendClassName !== null) {
-                        $targetType = $this->recursiveTypeMapper->mapClassToType($extendClassName, null);
+                        try {
+                            $targetType = $this->recursiveTypeMapper->mapClassToType($extendClassName, null);
+                        } catch (CannotMapTypeException $e) {
+                            $e->addExtendTypeInfo($refClass, $extendType);
+                            throw $e;
+                        }
                         $typeName   = $targetType->name;
                     } else {
                         $typeName = $extendType->getName();
