@@ -288,7 +288,8 @@ class FieldsBuilder
                 try {
                     $type = $this->typeResolver->mapNameToOutputType($outputType);
                 } catch (CannotMapTypeExceptionInterface $e) {
-                    throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
+                    $e->addReturnInfo($refMethod);
+                    throw $e;
                 }
             } else {
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
@@ -409,7 +410,8 @@ class FieldsBuilder
                 try {
                     $type = $this->typeResolver->mapNameToOutputType($outputType);
                 } catch (CannotMapTypeExceptionInterface $e) {
-                    throw CannotMapTypeException::wrapWithSourceField($e, $refClass, $sourceField);
+                    $e->addSourceFieldInfo($refClass, $sourceField);
+                    throw $e;
                 }
             } else {
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);

@@ -9,6 +9,8 @@ use GraphQL\Error\ClientAware;
 
 class PorpaginasMissingParameterException extends Exception implements ClientAware, CannotMapTypeExceptionInterface
 {
+    use CannotMapTypeTrait;
+
     public static function missingLimit(): self
     {
         return new self('In the items field of a result set, you cannot add a "offset" without also adding a "limit"');

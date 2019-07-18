@@ -11,6 +11,7 @@ use Test;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType\BadExtendType;
+use TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2;
 use TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes\ChildTestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\FilterDecorator;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
@@ -302,4 +303,36 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper->extendTypeForName('TestObject', $testObjectType);
     }
 
+    public function testGlobTypeMapperExtendBadClass(): void
+    {
+        $container = new Picotainer([
+            FooType::class => function () {
+                return new FooType();
+            },
+            FooExtendType::class => function () {
+                return new FooExtendType();
+            },
+            BadExtendType2::class => function () {
+                return new BadExtendType2();
+            },
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\BadExtendType2', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
+
+        $testObjectType = new MutableObjectType([
+            'name'    => 'TestObject',
+            'fields'  => [
+                'test'   => Type::string(),
+            ],
+        ]);
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For @ExtendType(class="Exception") annotation declared in class "TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2", cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
+        $mapper->extendTypeForName('TestObject', $testObjectType);
+    }
 }

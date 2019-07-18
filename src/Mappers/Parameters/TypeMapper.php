@@ -94,7 +94,8 @@ class TypeMapper implements ParameterMapperInterface
         } catch (TypeMappingException $e) {
             throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
         } catch (CannotMapTypeExceptionInterface $e) {
-            throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
+            $e->addReturnInfo($refMethod);
+            throw $e;
         }
 
         return $type;
@@ -132,7 +133,8 @@ class TypeMapper implements ParameterMapperInterface
             try {
                 $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());
             } catch (CannotMapTypeExceptionInterface $e) {
-                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+                $e->addParamInfo($parameter);
+                throw $e;
             }
         } else {
             $parameterType = $parameter->getType();
@@ -155,7 +157,8 @@ class TypeMapper implements ParameterMapperInterface
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
             } catch (CannotMapTypeExceptionInterface $e) {
-                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+                $e->addParamInfo($parameter);
+                throw $e;
             }
         }
 
