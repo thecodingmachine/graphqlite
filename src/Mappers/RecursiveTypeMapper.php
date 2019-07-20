@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use function class_implements;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -11,8 +12,10 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\SimpleCache\CacheInterface;
+use ReflectionClass;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
@@ -208,7 +211,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 $this->interfaces[$cacheKey] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
                 $this->typeRegistry->registerType($this->interfaces[$cacheKey]);
             } else {
-                Assert::isInstanceOf($objectType, ObjectType::class);
+                //Assert::isInstanceOf($objectType, ObjectType::class);
                 $this->interfaces[$cacheKey] = $objectType;
             }
         }
@@ -268,6 +271,25 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     public function findInterfaces(string $className): array
     {
         $interfaces = [];
+
+        foreach (class_implements($className) as $interface) {
+            if ($this->typeMapper->canMapClassToType($interface)) {
+                $interfaceType = $this->typeMapper->mapClassToType($interface, null);
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+                // It might be a great idea
+                // We therefore need a ObjectFromInterface class to cast an interface returned by a TypeMapper into an object!
+                Assert::isInstanceOf($interfaceType, MutableInterfaceType::class);
+                $interfaces[] = $interfaceType;
+            }
+        }
+
         while ($className = $this->findClosestMatchingParent($className)) {
             $type = $this->mapClassToInterfaceOrType($className, null);
             if ($type instanceof InterfaceType) {
@@ -299,14 +321,22 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     }
 
     /**
-     * @param array<string,int> $supportedClasses
+     * @param array<string,int> $supportedClasses A list of classes or interfaces that will map to a type
      */
     private function getMappedClass(string $className, array $supportedClasses): MappedClass
     {
         if (! isset($this->mappedClasses[$className])) {
-            $mappedClass                     = new MappedClass(/*$className*/);
+            $mappedClass = new MappedClass(/*$className*/);
             $this->mappedClasses[$className] = $mappedClass;
-            $parentClassName                 = $className;
+            $parentClassName = $className;
+            foreach (class_implements($className) as $interfaceName) {
+                if (isset($supportedClasses[$interfaceName])) {
+                    if (!isset($this->mappedClasses[$interfaceName])) {
+                        $this->mappedClasses[$interfaceName] = new MappedClass();
+                    }
+                    $this->mappedClasses[$interfaceName]->addChild($mappedClass);
+                }
+            }
             while ($parentClassName = get_parent_class($parentClassName)) {
                 if (isset($supportedClasses[$parentClassName])) {
                     $parentMappedClass = $this->getMappedClass($parentClassName, $supportedClasses);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
+use function interface_exists;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use function class_exists;
 use function ltrim;
@@ -36,7 +37,7 @@ class ExtendType
         }
         $this->class = $attributes['class'] ?? null;
         $this->name = $attributes['name'] ?? null;
-        if ($this->class !== null && ! class_exists($this->class)) {
+        if ($this->class !== null && ! class_exists($this->class) && ! interface_exists($this->class)) {
             throw ClassNotFoundException::couldNotFindClass($this->class);
         }
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use function interface_exists;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -11,6 +12,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedInterfaceType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
 
 /**
@@ -50,10 +52,11 @@ class TypeGenerator
 
     /**
      * @param string $annotatedObjectClassName The FQCN of an object with a Type annotation.
+     * @return MutableInterface&(TypeAnnotatedInterfaceType|TypeAnnotatedObjectType)
      *
      * @throws ReflectionException
      */
-    public function mapAnnotatedObject(string $annotatedObjectClassName): MutableObjectType
+    public function mapAnnotatedObject(string $annotatedObjectClassName): MutableInterface
     {
         $refTypeClass = new ReflectionClass($annotatedObjectClassName);
 
@@ -66,16 +69,22 @@ class TypeGenerator
         $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
 
         if ($this->typeRegistry->hasType($typeName)) {
-            return $this->typeRegistry->getMutableObjectType($typeName);
+            return $this->typeRegistry->getMutableInterface($typeName);
         }
 
         if (! $typeField->isSelfType()) {
             $annotatedObject = $this->container->get($annotatedObjectClassName);
+            $isInterface = interface_exists($typeField->getClass());
         } else {
             $annotatedObject = null;
+            $isInterface = $refTypeClass->isInterface();
         }
 
-        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
+        if ($isInterface) {
+            return TypeAnnotatedInterfaceType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
+        } else {
+            return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
+        }
 
         /*return new ObjectType([
             'name' => $typeName,

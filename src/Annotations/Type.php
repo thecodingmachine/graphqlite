@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use function interface_exists;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use function class_exists;
@@ -85,7 +86,7 @@ class Type
     public function setClass(string $class): void
     {
         $this->class = ltrim($class, '\\');
-        if (! class_exists($this->class)) {
+        if (! class_exists($this->class) && ! interface_exists($this->class)) {
             throw ClassNotFoundException::couldNotFindClass($this->class);
         }
     }

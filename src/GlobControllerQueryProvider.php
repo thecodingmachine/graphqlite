@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
+use function interface_exists;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -92,7 +93,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $classes   = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
-            if (! class_exists($className)) {
+            if (! class_exists($className) && ! interface_exists($className)) {
                 continue;
             }
             $refClass = new ReflectionClass($className);

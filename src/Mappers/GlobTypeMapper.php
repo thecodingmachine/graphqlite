@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use function interface_exists;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -155,11 +156,11 @@ final class GlobTypeMapper implements TypeMapperInterface
             $explorer      = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
             $classes       = $explorer->getClasses();
             foreach ($classes as $className) {
-                if (! class_exists($className)) {
+                if (! class_exists($className) && ! interface_exists($className)) {
                     continue;
                 }
                 $refClass = new ReflectionClass($className);
-                if (! $refClass->isInstantiable()) {
+                if (! $refClass->isInstantiable() && ! $refClass->isInterface()) {
                     continue;
                 }
                 $this->classes[$className] = $refClass;
