@@ -49,7 +49,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     private $interfaces = [];
 
-    /** @var array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> Key: FQCN */
+    /** @var array<string,MutableObjectType> Key: FQCN */
     private $classToTypeCache = [];
 
     /** @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN */
@@ -95,8 +95,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type)
      * @param (OutputType&Type)|null $subType
      *
-     * @return MutableObjectType
-     *
      * @throws CannotMapTypeExceptionInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
@@ -117,7 +115,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
         // In the event this type was already part of cache, let's not extend it.
         if ($this->typeRegistry->hasType($type->name)) {
-            $cachedType = $this->typeRegistry->getType($type->name);
+            $cachedType = $this->typeRegistry->getMutableObjectType($type->name);
             if ($cachedType !== $type) {
                 throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
             }
@@ -129,14 +127,19 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         }
 
         $this->typeRegistry->registerType($type);
-        $this->classToTypeCache[$cacheKey] = $type;
+        if ($type instanceof MutableObjectType) {
+            $this->classToTypeCache[$cacheKey] = $type;
+        } elseif ($type instanceof MutableInterfaceType) {
+            $this->interfaces[$cacheKey] = $type;
+        } else {
+            throw new RuntimeException('Unexpected type');
+        }
 
         $this->extendType($closestClassName, $type);
 
         $type->freeze();
 
         if ($type instanceof MutableInterfaceType /*&& isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())*/) {
-            $this->interfaces[$cacheKey] = $type;
             // Let's fix the classToType...
             // Cast as an object
             $type = $this->classToTypeCache[$cacheKey] = $this->getGeneratedObjectTypeFromInterfaceType($type);
@@ -154,6 +157,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         $type = new ObjectFromInterfaceType($typeName, $type);
         $type->freeze();
         $this->typeRegistry->registerType($type);
+
         return $type;
     }
 

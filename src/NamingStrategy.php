@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use function str_replace;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use function lcfirst;
+use function str_replace;
 use function strlen;
 use function strpos;
 use function strrpos;
@@ -30,7 +30,7 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getConcreteNameFromInterfaceName(string $name): string
     {
-        return str_replace('Interface', '', $name).'Impl';
+        return str_replace('Interface', '', $name) . 'Impl';
     }
 
     /**

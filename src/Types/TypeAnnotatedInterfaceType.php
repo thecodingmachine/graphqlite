@@ -21,9 +21,7 @@ use function is_object;
  */
 class TypeAnnotatedInterfaceType extends MutableInterfaceType
 {
-    /**
-     * @var RecursiveTypeMapperInterface
-     */
+    /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
 
     /**
@@ -67,43 +65,27 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                 $fields += $interfaceFields;
 
                 return $fields;
-            },
-            'resolveType' => function ($value) use ($recursiveTypeMapper) {
-                if (! is_object($value)) {
-                    throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
-                }
-
-                $className = get_class($value);
-
-                if ($recursiveTypeMapper->canMapClassToType($className, null)) {
-                    return $recursiveTypeMapper->mapClassToType($className, null);
-                } else {
-                    return $recursiveTypeMapper->getGeneratedObjectTypeFromInterfaceType($this);
-                }
-            },
+            }
         ], $recursiveTypeMapper);
     }
 
     /**
      * Resolves concrete ObjectType for given object value
      *
-     * @param object  $objectValue
      * @param mixed[] $context
-     *
-     * @return Type|null
      */
     public function resolveType($objectValue, $context, ResolveInfo $info)
     {
         if (! is_object($objectValue)) {
-            throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
+            throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($objectValue) . '"');
         }
 
         $className = get_class($objectValue);
 
-        if ($this->recursiveTypeMapper->canMapClassToType($className, null)) {
+        if ($this->recursiveTypeMapper->canMapClassToType($className)) {
             return $this->recursiveTypeMapper->mapClassToType($className, null);
-        } else {
-            return $this->recursiveTypeMapper->getGeneratedObjectTypeFromInterfaceType($this);
         }
+
+        return $this->recursiveTypeMapper->getGeneratedObjectTypeFromInterfaceType($this);
     }
 }
