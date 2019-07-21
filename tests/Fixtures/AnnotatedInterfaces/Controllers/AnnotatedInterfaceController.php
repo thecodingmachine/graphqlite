@@ -9,6 +9,9 @@ use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\BazInterface;
 use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\ClassA;
 use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\ClassD;
 use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface;
+use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\NotAnnotatedQux;
+use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\QuxInterface;
+use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\WizzInterface;
 
 class AnnotatedInterfaceController
 {
@@ -39,8 +42,16 @@ class AnnotatedInterfaceController
     /**
      * @Query()
      */
-    public function getClassD(): ClassD
+    public function getClassDAsWizInterface(): WizzInterface
     {
         return new ClassD();
+    }
+
+    /**
+     * @Query()
+     */
+    public function getQux(): QuxInterface
+    {
+        return new NotAnnotatedQux();
     }
 }

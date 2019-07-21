@@ -9,13 +9,10 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 /**
  * @Type()
  */
-class ClassD extends ClassC
+interface QuxInterface
 {
     /**
      * @Field()
      */
-    public function getClassD(): string
-    {
-        return 'classD';
-    }
+    public function getQux(): string;
 }

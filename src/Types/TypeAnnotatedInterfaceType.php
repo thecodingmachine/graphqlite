@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
@@ -20,10 +22,16 @@ use function is_object;
 class TypeAnnotatedInterfaceType extends MutableInterfaceType
 {
     /**
+     * @var RecursiveTypeMapperInterface
+     */
+    private $recursiveTypeMapper;
+
+    /**
      * @param mixed[] $config
      */
-    public function __construct(string $className, array $config)
+    public function __construct(string $className, array $config, RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
+        $this->recursiveTypeMapper = $recursiveTypeMapper;
         parent::__construct($config, $className);
     }
 
@@ -60,15 +68,42 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
 
                 return $fields;
             },
-            'resolve' => static function ($value) use ($recursiveTypeMapper) {
+            'resolveType' => function ($value) use ($recursiveTypeMapper) {
                 if (! is_object($value)) {
                     throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
                 }
 
                 $className = get_class($value);
 
-                return $recursiveTypeMapper->mapClassToType($className, null);
+                if ($recursiveTypeMapper->canMapClassToType($className, null)) {
+                    return $recursiveTypeMapper->mapClassToType($className, null);
+                } else {
+                    return $recursiveTypeMapper->getGeneratedObjectTypeFromInterfaceType($this);
+                }
             },
-        ]);
+        ], $recursiveTypeMapper);
+    }
+
+    /**
+     * Resolves concrete ObjectType for given object value
+     *
+     * @param object  $objectValue
+     * @param mixed[] $context
+     *
+     * @return Type|null
+     */
+    public function resolveType($objectValue, $context, ResolveInfo $info)
+    {
+        if (! is_object($objectValue)) {
+            throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
+        }
+
+        $className = get_class($objectValue);
+
+        if ($this->recursiveTypeMapper->canMapClassToType($className, null)) {
+            return $this->recursiveTypeMapper->mapClassToType($className, null);
+        } else {
+            return $this->recursiveTypeMapper->getGeneratedObjectTypeFromInterfaceType($this);
+        }
     }
 }

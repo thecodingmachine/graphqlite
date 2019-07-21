@@ -101,4 +101,59 @@ class AnnotatedInterfaceTest extends TestCase
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
+
+    public function testAnnotatedInterfaceWithNotAnnotatedClass(): void
+    {
+        $queryString = '
+        query {
+            qux {
+                qux
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $this->schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'qux' => [
+                'qux' => 'qux',
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
+    }
+
+    public function testAnnotatedInterfaceWithAnnotatedClass(): void
+    {
+        $queryString = '
+        query {
+            classDAsWizInterface {
+                wizz
+                ... on ClassD {
+                    foo
+                    bar
+                    parentValue
+                    classD
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $this->schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'classDAsWizInterface' => [
+                'wizz' => 'wizz',
+                'foo' => 'foo',
+                'bar' => 'bar',
+                'parentValue' => 'parent',
+                'classD' => 'classD',
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
+    }
+
 }
