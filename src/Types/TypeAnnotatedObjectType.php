@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use function class_implements;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use function class_implements;
 use function get_parent_class;
 
 /**
@@ -57,15 +57,19 @@ class TypeAnnotatedObjectType extends MutableObjectType
                 if ($disableInheritance === false) {
                     $interfaces = class_implements($className);
                     foreach ($interfaces as $interface) {
-                        if ($recursiveTypeMapper->canMapClassToType($interface)) {
-                            $interfaceType = $recursiveTypeMapper->mapClassToType($interface, null);
+                        if (! $recursiveTypeMapper->canMapClassToType($interface)) {
+                            continue;
+                        }
 
-                            $interfaceFields = $interfaceType->getFields();
-                            foreach ($interfaceFields as $name => $field) {
-                                if (!isset($fields[$name])) {
-                                    $fields[$name] = $field;
-                                }
+                        $interfaceType = $recursiveTypeMapper->mapClassToType($interface, null);
+
+                        $interfaceFields = $interfaceType->getFields();
+                        foreach ($interfaceFields as $name => $field) {
+                            if (isset($fields[$name])) {
+                                continue;
                             }
+
+                            $fields[$name] = $field;
                         }
                     }
                 }

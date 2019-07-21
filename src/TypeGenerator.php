@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use function interface_exists;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -14,6 +13,7 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedInterfaceType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
+use function interface_exists;
 
 /**
  * This class is in charge of creating Webonyx GraphQL types from annotated objects that do not extend the
@@ -52,6 +52,7 @@ class TypeGenerator
 
     /**
      * @param string $annotatedObjectClassName The FQCN of an object with a Type annotation.
+     *
      * @return MutableInterface&(TypeAnnotatedInterfaceType|TypeAnnotatedObjectType)
      *
      * @throws ReflectionException
@@ -82,9 +83,9 @@ class TypeGenerator
 
         if ($isInterface) {
             return TypeAnnotatedInterfaceType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
-        } else {
-            return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
         }
+
+        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
 
         /*return new ObjectType([
             'name' => $typeName,

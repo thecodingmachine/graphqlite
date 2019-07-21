@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use function class_implements;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\SimpleCache\CacheInterface;
-use ReflectionClass;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
-use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
@@ -25,6 +21,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use Webmozart\Assert\Assert;
 use function array_flip;
 use function array_reverse;
+use function class_implements;
 use function get_parent_class;
 
 /**
@@ -273,21 +270,24 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         $interfaces = [];
 
         foreach (class_implements($className) as $interface) {
-            if ($this->typeMapper->canMapClassToType($interface)) {
-                $interfaceType = $this->typeMapper->mapClassToType($interface, null);
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
-                // It might be a great idea
-                // We therefore need a ObjectFromInterface class to cast an interface returned by a TypeMapper into an object!
-                Assert::isInstanceOf($interfaceType, MutableInterfaceType::class);
-                $interfaces[] = $interfaceType;
+            if (! $this->typeMapper->canMapClassToType($interface)) {
+                continue;
             }
+
+            $interfaceType = $this->typeMapper->mapClassToType($interface, null);
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // FIXME: Should a PHP interface be mapped to a GraphQL interface AND a GraphQL implementation directly??????
+            // It might be a great idea
+            // We therefore need a ObjectFromInterface class to cast an interface returned by a TypeMapper into an object!
+            // Note: mapClassToType in the RECURSIVE type mapper should probably ALWAYS return an ObjectType
+            Assert::isInstanceOf($interfaceType, MutableInterfaceType::class);
+            $interfaces[] = $interfaceType;
         }
 
         while ($className = $this->findClosestMatchingParent($className)) {
@@ -330,12 +330,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $this->mappedClasses[$className] = $mappedClass;
             $parentClassName = $className;
             foreach (class_implements($className) as $interfaceName) {
-                if (isset($supportedClasses[$interfaceName])) {
-                    if (!isset($this->mappedClasses[$interfaceName])) {
-                        $this->mappedClasses[$interfaceName] = new MappedClass();
-                    }
-                    $this->mappedClasses[$interfaceName]->addChild($mappedClass);
+                if (! isset($supportedClasses[$interfaceName])) {
+                    continue;
                 }
+
+                if (! isset($this->mappedClasses[$interfaceName])) {
+                    $this->mappedClasses[$interfaceName] = new MappedClass();
+                }
+                $this->mappedClasses[$interfaceName]->addChild($mappedClass);
             }
             while ($parentClassName = get_parent_class($parentClassName)) {
                 if (isset($supportedClasses[$parentClassName])) {

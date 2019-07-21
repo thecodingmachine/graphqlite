@@ -10,9 +10,9 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use function get_class;
 
 /**
@@ -66,7 +66,6 @@ class TypeRegistry
     }
 
     /**
-     * @param string $typeName
      * @return MutableInterface&(MutableObjectType|MutableInterfaceType)
      */
     public function getMutableInterface(string $typeName): MutableInterface

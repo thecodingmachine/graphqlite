@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
-use function interface_exists;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use function class_exists;
+use function interface_exists;
 use function ltrim;
 
 /**

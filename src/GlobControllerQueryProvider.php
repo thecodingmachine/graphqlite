@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
-use function interface_exists;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -14,6 +13,7 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use function class_exists;
+use function interface_exists;
 use function str_replace;
 
 /**
