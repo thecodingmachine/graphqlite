@@ -82,7 +82,7 @@ class TypeGenerator
         }
 
         if ($isInterface) {
-            return TypeAnnotatedInterfaceType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
+            return TypeAnnotatedInterfaceType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper);
         }
 
         return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());

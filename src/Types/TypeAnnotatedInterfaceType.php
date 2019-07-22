@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
 use function array_merge;
@@ -33,12 +34,15 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
         parent::__construct($config, $className);
     }
 
-    public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper, bool $doNotMapInterfaces, bool $disableInheritance): self
+    public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper): self
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder) {
-                $interfaces = ReflectionInterfaceUtils::getDirectlyImplementedInterfaces(new ReflectionClass($className));
+            'fields' => static function () use ($annotatedObject, $className, $fieldsBuilder) {
+                // There is no need for an interface that extends another interface to get all its fields.
+                // Indeed, if the interface is used, the extended interfaces will be used too. Therefore, fetching the fields
+                // and putting them in the child interface is a waste of resources.
+                /*$interfaces = ReflectionInterfaceUtils::getDirectlyImplementedInterfaces(new ReflectionClass($className));
 
                 $fieldsArray = [];
                 foreach ($interfaces as $interfaceName => $interface) {
@@ -54,7 +58,7 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                     $interfaceFields = array_merge(...$fieldsArray);
                 } else {
                     $interfaceFields = [];
-                }
+                }*/
 
                 if ($annotatedObject !== null) {
                     $fields = $fieldsBuilder->getFields($annotatedObject);
@@ -62,7 +66,7 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                     $fields = $fieldsBuilder->getSelfFields($className);
                 }
 
-                $fields += $interfaceFields;
+                //$fields += $interfaceFields;
 
                 return $fields;
             }

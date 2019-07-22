@@ -9,6 +9,7 @@ use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use function class_exists;
 use function interface_exists;
 use function ltrim;
+use TheCodingMachine\GraphQLite\GraphQLException;
 
 /**
  * The Type annotation must be put in a GraphQL type class docblock and is used to map to the underlying PHP class
@@ -86,8 +87,18 @@ class Type
     public function setClass(string $class): void
     {
         $this->class = ltrim($class, '\\');
-        if (! class_exists($this->class) && ! interface_exists($this->class)) {
+        $isInterface = interface_exists($this->class);
+        if (! class_exists($this->class) && ! $isInterface) {
             throw ClassNotFoundException::couldNotFindClass($this->class);
+        }
+
+        if ($isInterface) {
+            if ($this->default === false) {
+                throw new GraphQLException('Problem in annotation @Type for interface "'.$class.'": you cannot use the default="false" attribute on interfaces');
+            }
+            if ($this->disableInheritance === true) {
+                throw new GraphQLException('Problem in annotation @Type for interface "'.$class.'": you cannot use the disableInheritance="true" attribute on interfaces');
+            }
         }
     }
 
