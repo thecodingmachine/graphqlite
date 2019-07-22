@@ -25,4 +25,14 @@ class ClassA implements FooInterface, BarInterface, BazInterface
     {
         return 'parent';
     }
+
+    public function grandFather(): string
+    {
+        return 'grandFather';
+    }
+
+    public function grandMother(): string
+    {
+        return 'grandMother';
+    }
 }

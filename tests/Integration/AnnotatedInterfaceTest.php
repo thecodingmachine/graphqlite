@@ -84,6 +84,8 @@ class AnnotatedInterfaceTest extends TestCase
                 foo
                 bar
                 parentValue
+                grandFather
+                grandMother
             }
         }
         ';
@@ -98,6 +100,8 @@ class AnnotatedInterfaceTest extends TestCase
                 'foo' => 'foo',
                 'bar' => 'bar',
                 'parentValue' => 'parent',
+                'grandFather' => 'grandFather',
+                'grandMother' => 'grandMother',
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }

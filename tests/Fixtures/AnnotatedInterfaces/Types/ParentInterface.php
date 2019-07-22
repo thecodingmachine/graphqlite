@@ -3,7 +3,7 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types;
 
-interface ParentInterface
+interface ParentInterface extends ParentParentInterface
 {
     public function getParentValue(): string;
 }
