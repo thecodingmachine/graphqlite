@@ -9,6 +9,8 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use function get_class;
@@ -58,6 +60,19 @@ class TypeRegistry
         $type = $this->getType($typeName);
         if (! $type instanceof MutableObjectType) {
             throw new GraphQLException('Expected GraphQL type "' . $typeName . '" to be an MutableObjectType. Got a ' . get_class($type));
+        }
+
+        return $type;
+    }
+
+    /**
+     * @return MutableInterface&(MutableObjectType|MutableInterfaceType)
+     */
+    public function getMutableInterface(string $typeName): MutableInterface
+    {
+        $type = $this->getType($typeName);
+        if (! $type instanceof MutableInterface || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)) {
+            throw new GraphQLException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
         }
 
         return $type;

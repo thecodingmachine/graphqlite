@@ -13,6 +13,7 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use function class_exists;
+use function interface_exists;
 use function str_replace;
 
 /**
@@ -92,7 +93,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $classes   = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
-            if (! class_exists($className)) {
+            if (! class_exists($className) && ! interface_exists($className)) {
                 continue;
             }
             $refClass = new ReflectionClass($className);

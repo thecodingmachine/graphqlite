@@ -6,7 +6,9 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\GraphQLException;
 use function class_exists;
+use function interface_exists;
 use function ltrim;
 
 /**
@@ -85,8 +87,20 @@ class Type
     public function setClass(string $class): void
     {
         $this->class = ltrim($class, '\\');
-        if (! class_exists($this->class)) {
+        $isInterface = interface_exists($this->class);
+        if (! class_exists($this->class) && ! $isInterface) {
             throw ClassNotFoundException::couldNotFindClass($this->class);
+        }
+
+        if (! $isInterface) {
+            return;
+        }
+
+        if ($this->default === false) {
+            throw new GraphQLException('Problem in annotation @Type for interface "' . $class . '": you cannot use the default="false" attribute on interfaces');
+        }
+        if ($this->disableInheritance === true) {
+            throw new GraphQLException('Problem in annotation @Type for interface "' . $class . '": you cannot use the disableInheritance="true" attribute on interfaces');
         }
     }
 

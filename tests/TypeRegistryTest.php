@@ -75,4 +75,24 @@ class TypeRegistryTest extends TestCase
         $this->assertSame($type, $registry->getMutableObjectType('FooBar'));
     }
 
+    public function testGetMutableInterface(): void
+    {
+        $type = new MutableObjectType([
+            'name' => 'Foo',
+            'fields' => function() {return [];}
+        ]);
+        $type2 = new ObjectType([
+            'name' => 'FooBar',
+            'fields' => function() {return [];}
+        ]);
+
+        $registry = new TypeRegistry();
+        $registry->registerType($type);
+        $registry->registerType($type2);
+
+        $this->assertSame($type, $registry->getMutableInterface('Foo'));
+
+        $this->expectException(GraphQLException::class);
+        $this->assertSame($type, $registry->getMutableInterface('FooBar'));
+    }
 }

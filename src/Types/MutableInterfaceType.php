@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\InterfaceType;
 
 /**
  * An object type built from the Type annotation
  */
-class MutableObjectType extends ObjectType implements MutableInterface
+class MutableInterfaceType extends InterfaceType implements MutableInterface
 {
     use MutableTrait;
 

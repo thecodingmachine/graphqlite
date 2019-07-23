@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use function lcfirst;
+use function str_replace;
 use function strlen;
 use function strpos;
 use function strrpos;
@@ -21,6 +22,15 @@ class NamingStrategy implements NamingStrategyInterface
     public function getInterfaceNameFromConcreteName(string $concreteType): string
     {
         return $concreteType . 'Interface';
+    }
+
+    /**
+     * Returns the name of the GraphQL object from a name of GraphQL interface type (when the object is created
+     * automatically from a "Type" annotated interface)
+     */
+    public function getConcreteNameFromInterfaceName(string $name): string
+    {
+        return str_replace('Interface', '', $name) . 'Impl';
     }
 
     /**

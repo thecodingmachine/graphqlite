@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use Exception;
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -66,12 +67,22 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('type "' . $subTypeName . '" must be an input type.');
     }
 
-    public static function createForExtendType(string $className, ObjectType $type): self
+    /**
+     * @param NamedType&(ObjectType|InterfaceType) $type
+     *
+     * @return CannotMapTypeException
+     */
+    public static function createForExtendType(string $className, NamedType $type): self
     {
         return new self('cannot extend GraphQL type "' . $type->name . '" mapped by class "' . $className . '". Check your TypeMapper configuration.');
     }
 
-    public static function createForExtendName(string $name, ObjectType $type): self
+    /**
+     * @param NamedType&(ObjectType|InterfaceType) $type
+     *
+     * @return CannotMapTypeException
+     */
+    public static function createForExtendName(string $name, NamedType $type): self
     {
         return new self('cannot extend GraphQL type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
     }

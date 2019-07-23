@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\TypeMappingException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
@@ -26,7 +27,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function setUp(): void
     {
         $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
+            public function mapClassToType(string $className, ?OutputType $subType): \TheCodingMachine\GraphQLite\Types\MutableInterface
             {
                 if ($className === TestObject::class) {
                     return new MutableObjectType([
@@ -106,22 +107,22 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                 return $typeName === 'TestObject';
             }
 
-            public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
+            public function canExtendTypeForClass(string $className, MutableInterface $type): bool
             {
                 return false;
             }
 
-            public function extendTypeForClass(string $className, MutableObjectType $type): void
+            public function extendTypeForClass(string $className, MutableInterface $type): void
             {
                 throw CannotMapTypeException::createForExtendType($className, $type);
             }
 
-            public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
+            public function canExtendTypeForName(string $typeName, MutableInterface $type): bool
             {
                 return true;
             }
 
-            public function extendTypeForName(string $typeName, MutableObjectType $type): void
+            public function extendTypeForName(string $typeName, MutableInterface $type): void
             {
                 $type->addFields(function() {
                     return [
