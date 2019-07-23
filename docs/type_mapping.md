@@ -82,6 +82,9 @@ Hopefully, you can force the name of the GraphQL output type using the "name" at
 class Product { /* ... */ }
 ```
 
+<div class="alert alert-info">You can also put a <a href="inheritance-interfaces#mapping-interfaces"><code>@Type</code> annotation on a PHP interface
+to map your code to a GraphQL interface</a>.</div>
+
 ## Array mapping
 
 You can type-hint against arrays (or iterators) as long as you add a detailed `@return` statement in the PHPDoc.

@@ -1,5 +1,5 @@
 ---
-id: inheritance
+id: inheritance-interfaces
 title: Inheritance and interfaces
 sidebar_label: Inheritance and interfaces
 ---
@@ -102,7 +102,38 @@ interface UserInterface {
 }
 ```
 
-Note: You don't have to explicitly put a @Type annotation on the class implementing the interface (though this
+### Implementing interfaces
+
+You don't have to do anything special to implement an interface in your GraphQL types.
+Simply "implement" the interface in PHP and you are done!
+
+```php
+/**
+ * @Type
+ */
+class User implements UserInterface
+{
+    public function getUserName(): string;
+}
+```
+
+This will translate in GraphQL schema as:
+
+```graphql
+interface UserInterface {
+    userName: String!
+}
+
+type User implements UserInterface {
+    userName: String!
+}
+```
+
+Please note that you do not need to put the `@Field` annotation again in the implementing class.
+
+### Interfaces without an explicit implementing type
+
+You don't have to explicitly put a `@Type` annotation on the class implementing the interface (though this
 is usually a good idea).
 
 ```php
@@ -111,9 +142,6 @@ is usually a good idea).
  */
 class User implements UserInterface
 {
-    /**
-     * ... and getUserName has no @Field annotation
-     */
     public function getUserName(): string;
 }
 ```
@@ -146,4 +174,3 @@ type UserImpl implements UserInterface {
     userName: String!
 }
 ```
-
