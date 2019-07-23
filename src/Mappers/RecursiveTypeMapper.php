@@ -132,7 +132,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         } elseif ($type instanceof MutableInterfaceType) {
             $this->interfaces[$cacheKey] = $type;
         } else {
-            throw new RuntimeException('Unexpected type');
+            throw new RuntimeException('Unexpected type'); // @codeCoverageIgnore
         }
 
         $this->extendType($closestClassName, $type);
