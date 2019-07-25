@@ -6,9 +6,10 @@ sidebar_label: Symfony specific features
 
 The Symfony bundle comes with a number of features to ease the integration of GraphQLite in Symfony.
 
-## Login and logout mutations
+## Login and logout
 
-Out of the box, the GraphQLite bundle will expose a "login" and a "logout" mutation.
+Out of the box, the GraphQLite bundle will expose a "login" and a "logout" mutation as well
+as a "me" query (that returns the current user).
 
 If you need to customize this behaviour, you can edit the "graphqlite.security" configuration key.
 
@@ -16,9 +17,10 @@ If you need to customize this behaviour, you can edit the "graphqlite.security" 
 graphqlite:
   security:
     enable_login: auto # Default setting
+    enable_me: auto # Default setting
 ```
 
-By default, GraphQLite will enable login and logout mutations if the following conditions are met:
+By default, GraphQLite will enable "login" and "logout" mutations and the "me" query if the following conditions are met:
 
 - the "security" bundle is installed and configured (with a security provider and encoder)
 - the "session" support is enabled (via the "framework.session.enabled" key).
@@ -50,6 +52,81 @@ graphqlite:
 By default, GraphQLite assumes that your firewall name is "main". This is the default value used in the
 Symfony security bundle so it is likely the value you are using. If for some reason you want to use
 another firewall, configure the name with `graphqlite.security.firewall_name`.
+
+### Login using the "login" mutation
+
+The mutation below will log-in a user:
+
+```graphql
+mutation login {
+  login(userName:"foo", password:"bar") {
+    userName
+    roles
+  }
+}
+```
+
+### Get the current user with the "me" query
+
+Retrieving the current user is easy with the "me" query:
+
+```graphql
+{
+  me {
+    userName
+    roles
+  }
+}
+```
+
+In Symfony, user objects implement `Symfony\Component\Security\Core\User\UserInterface`.
+This interface is automatically mapped to a type with 2 fields:
+
+- `userName: String!`
+- `roles: [String!]!`
+
+If you want to get more fields, just add the `@Type` annotation to your user class:
+
+```php
+/**
+ * @Type
+ */
+class User implements UserInterface
+{
+    /**
+     * @Field
+     */
+    public function getEmail() : string
+    {
+        // ...
+    }
+
+}
+```
+
+You can now query this field using an [inline fragment](https://graphql.org/learn/queries/#inline-fragments):
+
+```graphql
+{
+  me {
+    userName
+    roles
+    ... on User {
+      email
+    }
+  }
+}
+```
+
+### Logout using the "logout" mutation
+
+Use the "logout" mutation to log a user out
+
+```graphql
+mutation logout {
+  logout
+}
+```
 
 ## Injecting the Request
 
