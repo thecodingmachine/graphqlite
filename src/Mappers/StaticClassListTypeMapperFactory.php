@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\FactoryContext;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 
@@ -15,8 +14,6 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
 {
     /** @var array<int, string> The list of classes to be scanned. */
     private $classList;
-    /** @var CacheInterface */
-    private $cache;
     /** @var int|null */
     private $globTtl;
     /** @var int|null */
