@@ -343,7 +343,7 @@ class SchemaFactory
             $compositeTypeMapper->addTypeMapper($typeMapper);
         }
 
-        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviders)) {
+        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
             $context = new FactoryContext(
                 $annotationReader,
                 $typeResolver,
