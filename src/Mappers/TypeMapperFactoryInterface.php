@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use TheCodingMachine\GraphQLite\TypeRegistry;
+use TheCodingMachine\GraphQLite\FactoryContext;
 
 /**
  * Class in charge of creating a type mapper.
@@ -13,5 +13,5 @@ use TheCodingMachine\GraphQLite\TypeRegistry;
  */
 interface TypeMapperFactoryInterface
 {
-    public function create(RecursiveTypeMapperInterface $recursiveTypeMapper, TypeRegistry $typeRegistry): TypeMapperInterface;
+    public function create(FactoryContext $context): TypeMapperInterface;
 }

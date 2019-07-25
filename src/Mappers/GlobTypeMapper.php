@@ -4,32 +4,16 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\OutputType;
-use GraphQL\Type\Definition\Type;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
-use ReflectionException;
-use Symfony\Component\Cache\Adapter\Psr16Adapter;
-use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
-use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
-use TheCodingMachine\GraphQLite\Types\MutableInterface;
-use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
-use TheCodingMachine\GraphQLite\Types\MutableObjectType;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use Webmozart\Assert\Assert;
 use function class_exists;
 use function interface_exists;
 use function str_replace;
@@ -65,7 +49,7 @@ final class GlobTypeMapper extends AbstractTypeMapper
         $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace);
         parent::__construct($cachePrefix, $typeGenerator, $inputTypeGenerator, $inputTypeUtils, $container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $cache, $globTtl, $mapTtl);
     }
-    
+
     /**
      * Returns the array of globbed classes.
      * Only instantiable classes are returned.
@@ -92,5 +76,4 @@ final class GlobTypeMapper extends AbstractTypeMapper
 
         return $this->classes;
     }
-
 }

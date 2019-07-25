@@ -26,8 +26,8 @@ class AggregateControllerQueryProviderFactory implements QueryProviderFactoryInt
         $this->controllersContainer = $controllersContainer;
     }
 
-    public function create(FieldsBuilder $fieldsBuilder): QueryProviderInterface
+    public function create(FactoryContext $context): QueryProviderInterface
     {
-        return new AggregateControllerQueryProvider($this->controllers, $fieldsBuilder, $this->controllersContainer);
+        return new AggregateControllerQueryProvider($this->controllers, $context->getFieldsBuilder(), $this->controllersContainer);
     }
 }

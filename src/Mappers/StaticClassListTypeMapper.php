@@ -4,35 +4,17 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\OutputType;
-use GraphQL\Type\Definition\Type;
-use function implode;
-use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
-use ReflectionException;
-use Symfony\Component\Cache\Adapter\Psr16Adapter;
-use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
-use TheCodingMachine\CacheUtils\FileBoundCache;
-use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
-use TheCodingMachine\GraphQLite\Types\MutableInterface;
-use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
-use TheCodingMachine\GraphQLite\Types\MutableObjectType;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use Webmozart\Assert\Assert;
 use function class_exists;
+use function implode;
 use function interface_exists;
 use function str_replace;
 
@@ -41,9 +23,7 @@ use function str_replace;
  */
 final class StaticClassListTypeMapper extends AbstractTypeMapper
 {
-    /**
-     * @var array<int, string> The list of classes to be scanned.
-     */
+    /** @var array<int, string> The list of classes to be scanned. */
     private $classList;
     /**
      * The array of classes.
@@ -54,7 +34,7 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
     private $classes;
 
     /**
-     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
+     * @param array<int, string> $classList The list of classes to analyze.
      */
     public function __construct(array $classList, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
     {
@@ -75,11 +55,11 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
             $this->classes = [];
             foreach ($this->classList as $className) {
                 if (! class_exists($className) && ! interface_exists($className)) {
-                    throw new GraphQLException('Could not find class "'.$className.'"');
+                    throw new GraphQLException('Could not find class "' . $className . '"');
                 }
                 $refClass = new ReflectionClass($className);
                 if (! $refClass->isInstantiable() && ! $refClass->isInterface()) {
-                    throw new GraphQLException('Class "'.$className.'" must be instantiable or be an interface.');
+                    throw new GraphQLException('Class "' . $className . '" must be instantiable or be an interface.');
                 }
                 $this->classes[$className] = $refClass;
             }

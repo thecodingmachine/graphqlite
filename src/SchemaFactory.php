@@ -343,8 +343,23 @@ class SchemaFactory
             $compositeTypeMapper->addTypeMapper($typeMapper);
         }
 
+        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviders)) {
+            $context = new FactoryContext(
+                $annotationReader,
+                $typeResolver,
+                $namingStrategy,
+                $typeRegistry,
+                $fieldsBuilder,
+                $typeGenerator,
+                $inputTypeGenerator,
+                $recursiveTypeMapper,
+                $this->container,
+                $this->cache
+            );
+        }
+
         foreach ($this->typeMapperFactories as $typeMapperFactory) {
-            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($recursiveTypeMapper, $typeRegistry));
+            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($context));
         }
 
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
@@ -365,7 +380,7 @@ class SchemaFactory
         }
 
         foreach ($this->queryProviderFactories as $queryProviderFactory) {
-            $queryProviders[] = $queryProviderFactory->create($fieldsBuilder);
+            $queryProviders[] = $queryProviderFactory->create($context);
         }
 
         if ($queryProviders === []) {

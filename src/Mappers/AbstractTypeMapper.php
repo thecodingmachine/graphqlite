@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
@@ -19,7 +18,6 @@ use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
 use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
 use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
-use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
@@ -30,9 +28,6 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use Webmozart\Assert\Assert;
-use function class_exists;
-use function interface_exists;
-use function str_replace;
 
 /**
  * Analyzes classes and uses the @Type annotation to find the types automatically.
@@ -82,9 +77,6 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /** @var GlobExtendTypeMapperCache */
     private $globExtendTypeMapperCache;
 
-    /**
-     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
-     */
     public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
     {
         $this->typeGenerator       = $typeGenerator;
