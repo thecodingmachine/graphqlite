@@ -16,11 +16,13 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 
 class SchemaFactoryTest extends TestCase
 {
@@ -58,12 +60,7 @@ class SchemaFactoryTest extends TestCase
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper())
-                ->addTypeMapperFactory(new class implements TypeMapperFactoryInterface {
-                    public function create(RecursiveTypeMapperInterface $recursiveTypeMapper): TypeMapperInterface
-                    {
-                        return new CompositeTypeMapper();
-                    }
-                })
+                ->addTypeMapperFactory(new StaticClassListTypeMapperFactory([TestSelfType::class]))
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
                 ->addParameterMapper(new CompositeParameterMapper([]))
                 ->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([], $container))

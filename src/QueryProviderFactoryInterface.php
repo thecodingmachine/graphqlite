@@ -11,5 +11,5 @@ namespace TheCodingMachine\GraphQLite;
  */
 interface QueryProviderFactoryInterface
 {
-    public function create(FieldsBuilder $fieldsBuilder): QueryProviderInterface;
+    public function create(FactoryContext $context): QueryProviderInterface;
 }
