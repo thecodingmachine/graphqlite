@@ -59,7 +59,7 @@ class SchemaFactoryTest extends TestCase
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper())
                 ->addTypeMapperFactory(new class implements TypeMapperFactoryInterface {
-                    public function create(RecursiveTypeMapperInterface $recursiveTypeMapper): TypeMapperInterface
+                    public function create(RecursiveTypeMapperInterface $recursiveTypeMapper, TypeRegistry $typeRegistry): TypeMapperInterface
                     {
                         return new CompositeTypeMapper();
                     }

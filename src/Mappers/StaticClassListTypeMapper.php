@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use function implode;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -21,6 +22,7 @@ use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -35,37 +37,32 @@ use function interface_exists;
 use function str_replace;
 
 /**
- * Scans all the classes in a given namespace of the main project (not the vendor directory).
- * Analyzes all classes and uses the @Type annotation to find the types automatically.
- *
- * Assumes that the container contains a class whose identifier is the same as the class name.
+ * A type mapper that is passed the list of classes that it must scan (unlike the GlobTypeMapper that find those automatically).
  */
-final class GlobTypeMapper extends AbstractTypeMapper
+final class StaticClassListTypeMapper extends AbstractTypeMapper
 {
-    /** @var string */
-    private $namespace;
     /**
-     * The array of globbed classes.
-     * Only instantiable classes are returned.
+     * @var array<int, string> The list of classes to be scanned.
+     */
+    private $classList;
+    /**
+     * The array of classes.
      * Key: fully qualified class name
      *
      * @var array<string,ReflectionClass>
      */
     private $classes;
-    /** @var bool */
-    private $recursive;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
+    public function __construct(array $classList, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
     {
-        $this->namespace           = $namespace;
-        $this->recursive           = $recursive;
-        $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace);
+        $this->classList = $classList;
+        $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', implode('_', $classList));
         parent::__construct($cachePrefix, $typeGenerator, $inputTypeGenerator, $inputTypeUtils, $container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $cache, $globTtl, $mapTtl);
     }
-    
+
     /**
      * Returns the array of globbed classes.
      * Only instantiable classes are returned.
@@ -76,15 +73,13 @@ final class GlobTypeMapper extends AbstractTypeMapper
     {
         if ($this->classes === null) {
             $this->classes = [];
-            $explorer      = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
-            $classes       = $explorer->getClasses();
-            foreach ($classes as $className) {
+            foreach ($this->classList as $className) {
                 if (! class_exists($className) && ! interface_exists($className)) {
-                    continue;
+                    throw new GraphQLException('Could not find class "'.$className.'"');
                 }
                 $refClass = new ReflectionClass($className);
                 if (! $refClass->isInstantiable() && ! $refClass->isInterface()) {
-                    continue;
+                    throw new GraphQLException('Class "'.$className.'" must be instantiable or be an interface.');
                 }
                 $this->classes[$className] = $refClass;
             }
@@ -92,5 +87,4 @@ final class GlobTypeMapper extends AbstractTypeMapper
 
         return $this->classes;
     }
-
 }

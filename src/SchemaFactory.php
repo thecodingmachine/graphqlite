@@ -344,7 +344,7 @@ class SchemaFactory
         }
 
         foreach ($this->typeMapperFactories as $typeMapperFactory) {
-            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($recursiveTypeMapper));
+            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($recursiveTypeMapper, $typeRegistry));
         }
 
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
