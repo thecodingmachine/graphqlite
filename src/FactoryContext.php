@@ -36,6 +36,10 @@ class FactoryContext
     private $container;
     /** @var CacheInterface */
     private $cache;
+    /** @var int|null */
+    private $globTtl;
+    /** @var int|null */
+    private $mapTtl;
 
     public function __construct(
         AnnotationReader $annotationReader,
@@ -47,7 +51,9 @@ class FactoryContext
         InputTypeGenerator $inputTypeGenerator,
         RecursiveTypeMapperInterface $recursiveTypeMapper,
         ContainerInterface $container,
-        CacheInterface $cache
+        CacheInterface $cache,
+        ?int $globTtl = 2,
+        ?int $mapTtl = null
     ) {
         $this->annotationReader = $annotationReader;
         $this->typeResolver = $typeResolver;
@@ -59,6 +65,8 @@ class FactoryContext
         $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->container = $container;
         $this->cache = $cache;
+        $this->globTtl = $globTtl;
+        $this->mapTtl = $mapTtl;
     }
 
     public function getAnnotationReader(): AnnotationReader
@@ -109,5 +117,15 @@ class FactoryContext
     public function getCache(): CacheInterface
     {
         return $this->cache;
+    }
+
+    public function getGlobTtl(): ?int
+    {
+        return $this->globTtl;
+    }
+
+    public function getMapTtl(): ?int
+    {
+        return $this->mapTtl;
     }
 }

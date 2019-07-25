@@ -14,10 +14,6 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
 {
     /** @var array<int, string> The list of classes to be scanned. */
     private $classList;
-    /** @var int|null */
-    private $globTtl;
-    /** @var int|null */
-    private $mapTtl;
 
     /**
      * StaticClassListTypeMapperFactory constructor.
@@ -25,13 +21,9 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
      * @param array<int, string> $classList
      */
     public function __construct(
-        array $classList,
-        ?int $globTtl = 2,
-        ?int $mapTtl = null
+        array $classList
     ) {
         $this->classList           = $classList;
-        $this->globTtl             = $globTtl;
-        $this->mapTtl              = $mapTtl;
     }
 
     public function create(FactoryContext $context): TypeMapperInterface
@@ -48,8 +40,8 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
             $context->getNamingStrategy(),
             $context->getRecursiveTypeMapper(),
             $context->getCache(),
-            $this->globTtl,
-            $this->mapTtl
+            $context->getGlobTtl(),
+            $context->getMapTtl()
         );
     }
 }

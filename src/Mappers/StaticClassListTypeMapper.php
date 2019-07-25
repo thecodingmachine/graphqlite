@@ -57,11 +57,7 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
                 if (! class_exists($className) && ! interface_exists($className)) {
                     throw new GraphQLException('Could not find class "' . $className . '"');
                 }
-                $refClass = new ReflectionClass($className);
-                if (! $refClass->isInstantiable() && ! $refClass->isInterface()) {
-                    throw new GraphQLException('Class "' . $className . '" must be instantiable or be an interface.');
-                }
-                $this->classes[$className] = $refClass;
+                $this->classes[$className] = new ReflectionClass($className);
             }
         }
 
