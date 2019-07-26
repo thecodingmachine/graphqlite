@@ -63,14 +63,16 @@
               }
             });
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/symfony-bundle-advanced.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Symfony bundle: advanced usage</h1></header><article><div><span><p>The Symfony bundle comes with a number of features to ease the integration of GraphQLite in Symfony.</p>
-<h2><a class="anchor" aria-hidden="true" id="login-and-logout-mutations"></a><a href="#login-and-logout-mutations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Login and logout mutations</h2>
-<p>Out of the box, the GraphQLite bundle will expose a &quot;login&quot; and a &quot;logout&quot; mutation.</p>
+<h2><a class="anchor" aria-hidden="true" id="login-and-logout"></a><a href="#login-and-logout" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Login and logout</h2>
+<p>Out of the box, the GraphQLite bundle will expose a &quot;login&quot; and a &quot;logout&quot; mutation as well
+as a &quot;me&quot; query (that returns the current user).</p>
 <p>If you need to customize this behaviour, you can edit the &quot;graphqlite.security&quot; configuration key.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">graphqlite:</span>
 <span class="hljs-attr">  security:</span>
 <span class="hljs-attr">    enable_login:</span> <span class="hljs-string">auto</span> <span class="hljs-comment"># Default setting</span>
+<span class="hljs-attr">    enable_me:</span> <span class="hljs-string">auto</span> <span class="hljs-comment"># Default setting</span>
 </code></pre>
-<p>By default, GraphQLite will enable login and logout mutations if the following conditions are met:</p>
+<p>By default, GraphQLite will enable &quot;login&quot; and &quot;logout&quot; mutations and the &quot;me&quot; query if the following conditions are met:</p>
 <ul>
 <li>the &quot;security&quot; bundle is installed and configured (with a security provider and encoder)</li>
 <li>the &quot;session&quot; support is enabled (via the &quot;framework.session.enabled&quot; key).</li>
@@ -94,6 +96,63 @@ are silently discarded).</p>
 <p>By default, GraphQLite assumes that your firewall name is &quot;main&quot;. This is the default value used in the
 Symfony security bundle so it is likely the value you are using. If for some reason you want to use
 another firewall, configure the name with <code>graphqlite.security.firewall_name</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="login-using-the-login-mutation"></a><a href="#login-using-the-login-mutation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Login using the &quot;login&quot; mutation</h3>
+<p>The mutation below will log-in a user:</p>
+<pre><code class="hljs css language-graphql"><span class="hljs-selector-tag">mutation</span> <span class="hljs-selector-tag">login</span> {
+  <span class="hljs-selector-tag">login</span>(<span class="hljs-attribute">userName</span>:<span class="hljs-string">"foo"</span>, <span class="hljs-attribute">password</span>:<span class="hljs-string">"bar"</span>) {
+    <span class="hljs-selector-tag">userName</span>
+    <span class="hljs-selector-tag">roles</span>
+  }
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="get-the-current-user-with-the-me-query"></a><a href="#get-the-current-user-with-the-me-query" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get the current user with the &quot;me&quot; query</h3>
+<p>Retrieving the current user is easy with the &quot;me&quot; query:</p>
+<pre><code class="hljs css language-graphql">{
+  me {
+    userName
+    roles
+  }
+}
+</code></pre>
+<p>In Symfony, user objects implement <code>Symfony\Component\Security\Core\User\UserInterface</code>.
+This interface is automatically mapped to a type with 2 fields:</p>
+<ul>
+<li><code>userName: String!</code></li>
+<li><code>roles: [String!]!</code></li>
+</ul>
+<p>If you want to get more fields, just add the <code>@Type</code> annotation to your user class:</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Type</span>
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserInterface</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Field</span>
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getEmail</span><span class="hljs-params">()</span> : <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+}
+</code></pre>
+<p>You can now query this field using an <a href="https://graphql.org/learn/queries/#inline-fragments">inline fragment</a>:</p>
+<pre><code class="hljs css language-graphql">{
+  me {
+    userName
+    roles
+    <span class="hljs-built_in">..</span>. on<span class="hljs-built_in"> User </span>{
+      email
+    }
+  }
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="logout-using-the-logout-mutation"></a><a href="#logout-using-the-logout-mutation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logout using the &quot;logout&quot; mutation</h3>
+<p>Use the &quot;logout&quot; mutation to log a user out</p>
+<pre><code class="hljs css language-graphql">mutation <span class="hljs-built_in">logout</span> {
+  <span class="hljs-built_in">logout</span>
+}
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="injecting-the-request"></a><a href="#injecting-the-request" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Injecting the Request</h2>
 <p>You can inject the Symfony Request object in any query/mutation/field.</p>
 <p>Most of the time, getting the request object is irrelevant. Indeed, it is GraphQLite's job to parse this request and
@@ -109,7 +168,7 @@ in any parameter of your query/mutation/field.</p>
     <span class="hljs-comment">// The $request object contains the Symfony Request.</span>
 }
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/multiple_output_types"><span class="arrow-prev">← </span><span>Class with multiple output types</span></a><a class="docs-next button" href="/docs/next/internals"><span>Internals</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#login-and-logout-mutations">Login and logout mutations</a></li><li><a href="#injecting-the-request">Injecting the Request</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/multiple_output_types"><span class="arrow-prev">← </span><span>Class with multiple output types</span></a><a class="docs-next button" href="/docs/next/internals"><span>Internals</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#login-and-logout">Login and logout</a><ul class="toc-headings"><li><a href="#login-using-the-login-mutation">Login using the &quot;login&quot; mutation</a></li><li><a href="#get-the-current-user-with-the-me-query">Get the current user with the &quot;me&quot; query</a></li><li><a href="#logout-using-the-logout-mutation">Logout using the &quot;logout&quot; mutation</a></li></ul></li><li><a href="#injecting-the-request">Injecting the Request</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
