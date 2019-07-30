@@ -67,9 +67,6 @@ final class GlobTypeMapper extends AbstractTypeMapper
                     continue;
                 }
                 $refClass = new ReflectionClass($className);
-                if (! $refClass->isInstantiable() && ! $refClass->isInterface()) {
-                    continue;
-                }
                 $this->classes[$className] = $refClass;
             }
         }
