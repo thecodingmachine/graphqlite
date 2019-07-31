@@ -21,11 +21,13 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactoryNoType;
+use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
+use function array_keys;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -46,7 +48,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->assertSame([TestObject::class], $mapper->getSupportedClasses());
         $this->assertTrue($mapper->canMapClassToType(TestObject::class));
-        $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, null, $this->getTypeMapper()));
+        $this->assertInstanceOf(ObjectType::class, $mapper->mapClassToType(TestObject::class, null));
         $this->assertInstanceOf(ObjectType::class, $mapper->mapNameToType('Foo', $this->getTypeMapper()));
         $this->assertTrue($mapper->canMapNameToType('Foo'));
         $this->assertFalse($mapper->canMapNameToType('NotExists'));
@@ -57,7 +59,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($anotherMapperSameCache->canMapNameToType('Foo'));
 
         $this->expectException(CannotMapTypeException::class);
-        $mapper->mapClassToType(\stdClass::class, null, $this->getTypeMapper());
+        $mapper->mapClassToType(\stdClass::class, null);
     }
 
     public function testGlobTypeMapperDuplicateTypesException(): void
@@ -334,5 +336,25 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For @ExtendType(class="Exception") annotation declared in class "TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2", cannot map class "Exception" to a known GraphQL type. Check your TypeMapper configuration.');
         $mapper->extendTypeForName('TestObject', $testObjectType);
+    }
+
+    public function testNonInstantiableType(): void
+    {
+        $container = new Picotainer([
+            FooType::class => function () {
+                return new FooType();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new ArrayCache();
+
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\NonInstantiableType', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
+
+        $this->expectException(GraphQLException::class);
+        $this->expectExceptionMessage('Class "TheCodingMachine\GraphQLite\Fixtures\NonInstantiableType\AbstractFooType" annotated with @Type(class="TheCodingMachine\GraphQLite\Fixtures\TestObject") must be instantiable.');
+        $mapper->mapClassToType(TestObject::class, null);
     }
 }

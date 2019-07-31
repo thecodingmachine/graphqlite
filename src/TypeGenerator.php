@@ -74,6 +74,9 @@ class TypeGenerator
         }
 
         if (! $typeField->isSelfType()) {
+            if (! $refTypeClass->isInstantiable()) {
+                throw new GraphQLException('Class "' . $annotatedObjectClassName . '" annotated with @Type(class="' . $typeField->getClass() . '") must be instantiable.');
+            }
             $annotatedObject = $this->container->get($annotatedObjectClassName);
             $isInterface = interface_exists($typeField->getClass());
         } else {

@@ -156,35 +156,29 @@ class AnnotationReader
     }
 
     /**
-     * Returns a class annotation. Finds in the parents if not found in the main class.
+     * Returns a class annotation. Does not look in the parent class.
      */
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
-        do {
-            $type = null;
-            try {
-                $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
-            } catch (AnnotationException $e) {
-                switch ($this->mode) {
-                    case self::STRICT_MODE:
+        $type = null;
+        try {
+            $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
+        } catch (AnnotationException $e) {
+            switch ($this->mode) {
+                case self::STRICT_MODE:
+                    throw $e;
+                case self::LAX_MODE:
+                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
-                    case self::LAX_MODE:
-                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
-                            throw $e;
-                        } else {
-                            return null;
-                        }
-                    default:
-                        throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
-                }
+                    } else {
+                        return null;
+                    }
+                default:
+                    throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
             }
-            if ($type !== null) {
-                return $type;
-            }
-            $refClass = $refClass->getParentClass();
-        } while ($refClass);
+        }
 
-        return null;
+        return $type;
     }
 
     /** @var array<string, (object|null)> */
