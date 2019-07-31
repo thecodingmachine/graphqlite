@@ -13,9 +13,9 @@ class MissingAnnotationException extends RuntimeException
         return new self('You cannot use the @SourceField annotation without also adding a @Type annotation or a @ExtendType annotation.');
     }
 
-    public static function missingTypeException(): self
+    public static function missingTypeException(string $className): self
     {
-        return new self('GraphQL type classes must provide a @Type annotation.');
+        return new self('GraphQL type class "' . $className . '" must provide a @Type annotation.');
     }
 
     public static function missingExtendTypeException(): self

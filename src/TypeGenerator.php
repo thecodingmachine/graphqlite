@@ -64,7 +64,7 @@ class TypeGenerator
         $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
-            throw MissingAnnotationException::missingTypeException();
+            throw MissingAnnotationException::missingTypeException($annotatedObjectClassName);
         }
 
         $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
@@ -74,6 +74,9 @@ class TypeGenerator
         }
 
         if (! $typeField->isSelfType()) {
+            if (! $refTypeClass->isInstantiable()) {
+                throw new GraphQLException('Class "' . $annotatedObjectClassName . '" annotated with @Type(class="' . $typeField->getClass() . '") must be instantiable.');
+            }
             $annotatedObject = $this->container->get($annotatedObjectClassName);
             $isInterface = interface_exists($typeField->getClass());
         } else {
