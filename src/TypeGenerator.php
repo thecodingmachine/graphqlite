@@ -64,7 +64,7 @@ class TypeGenerator
         $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
-            throw MissingAnnotationException::missingTypeException();
+            throw MissingAnnotationException::missingTypeException($annotatedObjectClassName);
         }
 
         $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
