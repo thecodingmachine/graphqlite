@@ -34,11 +34,17 @@ class DateTimeType extends ScalarType
 
     /**
      * @param mixed $value
+     * @return DateTimeImmutable|null
+     * @throws Exception
      */
     public function parseValue($value): ?DateTimeImmutable
     {
         if ($value === null) {
             return null;
+        }
+
+        if($value instanceof DateTimeImmutable) {
+            return $value;
         }
 
         return new DateTimeImmutable($value);
