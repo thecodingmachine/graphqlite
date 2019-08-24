@@ -5,7 +5,6 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 
 use Porpaginas\Arrays\ArrayResult;
-use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
@@ -32,6 +31,18 @@ class ContactController
      */
     public function saveContact(Contact $contact): Contact
     {
+        return $contact;
+    }
+
+    /**
+     * @Mutation()
+     * @param \DateTimeInterface $birthDate
+     * @return Contact
+     */
+    public function saveBirthDate(\DateTimeInterface $birthDate): Contact {
+        $contact = new Contact('Bill');
+        $contact->setBirthDate($birthDate);
+
         return $contact;
     }
 
