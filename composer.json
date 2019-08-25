@@ -1,5 +1,5 @@
 {
-    "name": "thecodingmachine/graphqlite",
+    "name": "spartaksun/graphqlite",
     "description": "Write your GraphQL queries in simple to write controllers (using webonyx/graphql-php).",
     "license": "MIT",
     "type": "library",
