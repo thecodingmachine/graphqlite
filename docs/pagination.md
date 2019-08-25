@@ -27,7 +27,7 @@ class MyController
         // Some code that returns a list of products
 
         // If you are using Doctrine, something like:
-        return new Porpaginas\ORMQueryResult($doctrineQuery);
+        return new Porpaginas\Doctrine\ORM\ORMQueryResult($doctrineQuery);
     }
 }
 ```

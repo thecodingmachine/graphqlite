@@ -8,7 +8,7 @@ use TheCodingMachine\GraphQLite\GraphQLException;
 class FactoryTest extends TestCase
 {
 
-    public function testExceptionInConstruct()
+    public function testExceptionInConstruct(): void
     {
         $this->expectException(GraphQLException::class);
         new Factory(['default'=>false]);

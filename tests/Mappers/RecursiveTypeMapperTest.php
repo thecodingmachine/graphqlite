@@ -25,7 +25,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 {
 
-    public function testMapClassToType()
+    public function testMapClassToType(): void
     {
         $objectType = new MutableObjectType([
             'name' => 'Foobar'
@@ -47,7 +47,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $recursiveTypeMapper->mapClassToType(ClassA::class, null);
     }
 
-    public function testMapNameToType()
+    public function testMapNameToType(): void
     {
         $objectType = new MutableObjectType([
             'name' => 'Foobar'
@@ -64,7 +64,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame($objectType, $recursiveTypeMapper->mapNameToType('Foobar'));
     }
 
-    public function testMapNameToType2()
+    public function testMapNameToType2(): void
     {
         $recursiveMapper = $this->getTypeMapper();
 
@@ -80,7 +80,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
     }
 
 
-    public function testMapClassToInputType()
+    public function testMapClassToInputType(): void
     {
         $inputObjectType = new InputObjectType([
             'name' => 'Foobar'
@@ -121,13 +121,13 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
             $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry(), $this->typeMapper, $this->getFieldsBuilder());
 
-            $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, $this->typeMapper, $this->getLockFactory(), new NullCache());
+            $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, $this->typeMapper, new NullCache());
             $compositeMapper->addTypeMapper($mapper);
         }
         return $this->typeMapper;
     }
 
-    public function testMapClassToInterfaceOrType()
+    public function testMapClassToInterfaceOrType(): void
     {
         $recursiveMapper = $this->getTypeMapper();
 
@@ -155,7 +155,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $recursiveMapper->mapClassToInterfaceOrType('Not exists', null);
     }
 
-    public function testGetOutputTypes()
+    public function testGetOutputTypes(): void
     {
         $recursiveMapper = $this->getTypeMapper();
 
@@ -165,7 +165,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertArrayNotHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassC', $outputTypes);
     }
 
-    public function testDuplicateDetection()
+    public function testDuplicateDetection(): void
     {
         $objectType = new MutableObjectType([
             'name' => 'Foobar'
@@ -195,7 +195,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
     /**
      * Tests that the RecursiveTypeMapper behaves correctly if there are no types to map.
      */
-    public function testMapNoTypes()
+    public function testMapNoTypes(): void
     {
         $recursiveTypeMapper = new RecursiveTypeMapper(new CompositeTypeMapper(), new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
 
@@ -203,14 +203,14 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $recursiveTypeMapper->mapNameToType('Foo');
     }
 
-    public function testMapNameToTypeDecorators()
+    public function testMapNameToTypeDecorators(): void
     {
         $typeGenerator = $this->getTypeGenerator();
         $inputTypeGenerator = $this->getInputTypeGenerator();
 
         $cache = new ArrayCache();
 
-        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $this->getLockFactory(), $cache);
+        $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
         $recursiveTypeMapper = new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
 

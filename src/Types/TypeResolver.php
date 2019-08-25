@@ -54,6 +54,9 @@ class TypeResolver
         return $type;
     }
 
+    /**
+     * @return OutputType&Type
+     */
     public function mapNameToOutputType(string $typeName): OutputType
     {
         $type = $this->mapNameToType($typeName);
@@ -64,6 +67,9 @@ class TypeResolver
         return $type;
     }
 
+    /**
+     * @return InputType&Type
+     */
     public function mapNameToInputType(string $typeName): InputType
     {
         $type = $this->mapNameToType($typeName);

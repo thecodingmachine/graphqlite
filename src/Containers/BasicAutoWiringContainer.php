@@ -88,7 +88,7 @@ class BasicAutoWiringContainer implements ContainerInterface
         if (class_exists($id)) {
             $refTypeClass = new ReflectionClass($id);
 
-            return ! ($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0);
+            return $refTypeClass->isInstantiable() && ! ($refTypeClass->hasMethod('__construct') && $refTypeClass->getMethod('__construct')->getNumberOfRequiredParameters() > 0);
         }
 
         return false;

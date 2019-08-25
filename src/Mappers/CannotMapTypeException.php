@@ -7,15 +7,19 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use Exception;
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionParameter;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
-use function sprintf;
+use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use function array_filter;
+use function array_map;
+use function implode;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
+    use CannotMapTypeTrait;
+
     public static function createForType(string $className): self
     {
         return new self('cannot map class "' . $className . '" to a known GraphQL type. Check your TypeMapper configuration.');
@@ -36,41 +40,21 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self($error->getMessage(), $error->getCode(), $error);
     }
 
-    public static function wrapWithParamInfo(CannotMapTypeExceptionInterface $previous, ReflectionParameter $parameter): self
+    /**
+     * @param Type[] $unionTypes
+     *
+     * @return CannotMapTypeException
+     */
+    public static function createForBadTypeInUnion(array $unionTypes): self
     {
-        $message = sprintf(
-            'For parameter $%s, in %s::%s, %s',
-            $parameter->getName(),
-            $parameter->getDeclaringClass()->getName(),
-            $parameter->getDeclaringFunction()->getName(),
-            $previous->getMessage()
-        );
+        $disallowedTypes = array_filter($unionTypes, static function (Type $type) {
+            return $type instanceof NamedType;
+        });
+        $disallowedTypeNames = array_map(static function (NamedType $type) {
+            return $type->name;
+        }, $disallowedTypes);
 
-        return new self($message, 0, $previous);
-    }
-
-    public static function wrapWithReturnInfo(CannotMapTypeExceptionInterface $previous, ReflectionMethod $method): self
-    {
-        $message = sprintf(
-            'For return type of %s::%s, %s',
-            $method->getDeclaringClass()->getName(),
-            $method->getName(),
-            $previous->getMessage()
-        );
-
-        return new self($message, 0, $previous);
-    }
-
-    public static function wrapWithSourceField(CannotMapTypeExceptionInterface $previous, ReflectionClass $class, SourceField $sourceField): self
-    {
-        $message = sprintf(
-            'For @SourceField "%s" declared in "%s", %s',
-            $sourceField->getName(),
-            $class->getName(),
-            $previous->getMessage()
-        );
-
-        return new self($message, 0, $previous);
+        return new self('In GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
     }
 
     public static function mustBeOutputType(string $subTypeName): self
@@ -83,12 +67,22 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('type "' . $subTypeName . '" must be an input type.');
     }
 
-    public static function createForExtendType(string $className, ObjectType $type): self
+    /**
+     * @param NamedType&(ObjectType|InterfaceType) $type
+     *
+     * @return CannotMapTypeException
+     */
+    public static function createForExtendType(string $className, NamedType $type): self
     {
         return new self('cannot extend GraphQL type "' . $type->name . '" mapped by class "' . $className . '". Check your TypeMapper configuration.');
     }
 
-    public static function createForExtendName(string $name, ObjectType $type): self
+    /**
+     * @param NamedType&(ObjectType|InterfaceType) $type
+     *
+     * @return CannotMapTypeException
+     */
+    public static function createForExtendName(string $name, NamedType $type): self
     {
         return new self('cannot extend GraphQL type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
     }
@@ -96,5 +90,10 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     public static function createForDecorateName(string $name, InputObjectType $type): self
     {
         return new self('cannot decorate GraphQL input type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
+    }
+
+    public static function extendTypeWithBadTargetedClass(string $className, ExtendType $extendType): self
+    {
+        return new self('For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $className . '", the pointed at GraphQL type cannot be extended. You can only target types extending the MutableObjectType (like types created with the @Type annotation).');
     }
 }

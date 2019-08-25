@@ -9,15 +9,15 @@ use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
+use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
@@ -38,8 +38,11 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use function extension_loaded;
+use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
+use function crc32;
 use function function_exists;
+use function md5;
+use function substr;
 use function sys_get_temp_dir;
 
 /**
@@ -54,6 +57,8 @@ class SchemaFactory
     private $typeNamespaces = [];
     /** @var QueryProviderInterface[] */
     private $queryProviders = [];
+    /** @var QueryProviderFactoryInterface[] */
+    private $queryProviderFactories = [];
     /** @var RootTypeMapperInterface[] */
     private $rootTypeMappers = [];
     /** @var TypeMapperInterface[] */
@@ -83,7 +88,7 @@ class SchemaFactory
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
-        $this->cache     = $cache;
+        $this->cache     = new NamespacedCache($cache);
         $this->container = $container;
     }
 
@@ -118,6 +123,16 @@ class SchemaFactory
     }
 
     /**
+     * Registers a query provider factory.
+     */
+    public function addQueryProviderFactory(QueryProviderFactoryInterface $queryProviderFactory): self
+    {
+        $this->queryProviderFactories[] = $queryProviderFactory;
+
+        return $this;
+    }
+
+    /**
      * Registers a root type mapper.
      */
     public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper): self
@@ -147,6 +162,16 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * Registers a parameter mapper.
+     */
+    public function addParameterMapper(ParameterMapperInterface $parameterMapper): self
+    {
+        $this->parameterMappers[] = $parameterMapper;
+
+        return $this;
+    }
+
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
@@ -164,9 +189,12 @@ class SchemaFactory
             AnnotationRegistry::registerLoader('class_exists');
             $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            if (function_exists('apcu_fetch')) {
-                $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, new ApcuCache(), true);
-            }
+            $cache = function_exists('apcu_fetch') ? new ApcuCache() : new PhpFileCache(sys_get_temp_dir() . '/graphqlite.' . crc32(__DIR__));
+
+            $namespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
+            $cache->setNamespace($namespace);
+
+            $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, $cache, true);
 
             return $doctrineAnnotationReader;
         }
@@ -260,13 +288,6 @@ class SchemaFactory
         }
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
-        if (extension_loaded('sysvsem')) {
-            $lockStore = new SemaphoreStore();
-        } else {
-            $lockStore = new FlockStore(sys_get_temp_dir());
-        }
-        $lockFactory = new LockFactory($lockStore);
-
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
 
@@ -280,6 +301,7 @@ class SchemaFactory
 
         $parameterMappers         = $this->parameterMappers;
         $parameterMappers[]       = new ResolveInfoParameterMapper();
+        $parameterMappers[]       = new ContainerParameterMapper($this->container);
         $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
 
         $fieldsBuilder = new FieldsBuilder(
@@ -312,7 +334,6 @@ class SchemaFactory
                 $annotationReader,
                 $namingStrategy,
                 $recursiveTypeMapper,
-                $lockFactory,
                 $this->cache,
                 $this->globTtl
             ));
@@ -322,8 +343,23 @@ class SchemaFactory
             $compositeTypeMapper->addTypeMapper($typeMapper);
         }
 
+        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
+            $context = new FactoryContext(
+                $annotationReader,
+                $typeResolver,
+                $namingStrategy,
+                $typeRegistry,
+                $fieldsBuilder,
+                $typeGenerator,
+                $inputTypeGenerator,
+                $recursiveTypeMapper,
+                $this->container,
+                $this->cache
+            );
+        }
+
         foreach ($this->typeMapperFactories as $typeMapperFactory) {
-            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($recursiveTypeMapper));
+            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($context));
         }
 
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
@@ -334,7 +370,6 @@ class SchemaFactory
                 $controllerNamespace,
                 $fieldsBuilder,
                 $this->container,
-                $lockFactory,
                 $this->cache,
                 $this->globTtl
             );
@@ -342,6 +377,10 @@ class SchemaFactory
 
         foreach ($this->queryProviders as $queryProvider) {
             $queryProviders[] = $queryProvider;
+        }
+
+        foreach ($this->queryProviderFactories as $queryProviderFactory) {
+            $queryProviders[] = $queryProviderFactory->create($context);
         }
 
         if ($queryProviders === []) {

@@ -8,7 +8,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
 class MissingArgumentExceptionTest extends TestCase
 {
 
-    public function testWrapWithFactoryContext()
+    public function testWrapWithFactoryContext(): void
     {
         $e = MissingArgumentException::create('foo');
         $e2 = MissingArgumentException::wrapWithFactoryContext($e, 'Input', [Filter::class, 'create']);

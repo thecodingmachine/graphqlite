@@ -7,9 +7,9 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
@@ -30,8 +30,7 @@ interface RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string      $className                                          The class name to look for (this function looks into parent classes if the class does not match a type).
-     * @param (OutputType &MutableObjectType)|(OutputType&InterfaceType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -41,7 +40,7 @@ interface RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
      *
      * @param string      $className                                   The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType &ObjectType)|(OutputType&InterfaceType)|null $subType A subtype (if the main className is an iterator)
+     * @param (OutputType&Type)|null $subType A subtype (if the main className is an iterator)
      *
      * @return OutputType&Type
      *
@@ -98,4 +97,9 @@ interface RecursiveTypeMapperInterface
      * Returns the closest parent that can be mapped, or null if nothing can be matched.
      */
     public function findClosestMatchingParent(string $className): ?string;
+
+    /**
+     * Generates an object type from an interface type (in case no object type maps this interface)
+     */
+    public function getGeneratedObjectTypeFromInterfaceType(MutableInterfaceType $type): MutableObjectType;
 }

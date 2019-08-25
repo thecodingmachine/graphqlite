@@ -11,7 +11,7 @@ Use the `@ExtendType` annotation to add additional fields to a type that is alre
 <div class="alert alert-info">
     Extending a type has nothing to do with type inheritance. 
     If you are looking for a way to expose a class and its children classes, have a look at 
-    the <a href="inheritance">Inheritance</a> section</a>
+    the <a href="inheritance-interfaces">Inheritance</a> section</a>
 </div>
 
 Let's assume you have a `Product` class. In order to get the name of a product, there is no `getName()` method in 

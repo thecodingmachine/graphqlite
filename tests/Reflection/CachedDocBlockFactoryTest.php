@@ -9,7 +9,7 @@ use Symfony\Component\Cache\Simple\ArrayCache;
 class CachedDocBlockFactoryTest extends TestCase
 {
 
-    public function testGetDocBlock()
+    public function testGetDocBlock(): void
     {
         $arrayCache = new ArrayCache();
         $cachedDocBlockFactory = new CachedDocBlockFactory($arrayCache);

@@ -7,7 +7,7 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class EmptyContainerTest extends TestCase
 {
-    public function testContainer()
+    public function testContainer(): void
     {
         $container = new EmptyContainer();
         $this->assertFalse($container->has('foo'));

@@ -17,13 +17,13 @@ use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidTypeAnnotat
 
 class AnnotationReaderTest extends TestCase
 {
-    public function testBadConstructor()
+    public function testBadConstructor(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new AnnotationReader(new DoctrineAnnotationReader(), 'foo');
     }
 
-    public function testStrictMode()
+    public function testStrictMode(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
@@ -31,7 +31,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getTypeAnnotation(new ReflectionClass(ClassWithInvalidClassAnnotation::class));
     }
 
-    public function testLaxModeWithBadAnnotation()
+    public function testLaxModeWithBadAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -39,7 +39,7 @@ class AnnotationReaderTest extends TestCase
         $this->assertNull($type);
     }
 
-    public function testLaxModeWithSmellyAnnotation()
+    public function testLaxModeWithSmellyAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -47,7 +47,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getTypeAnnotation(new ReflectionClass(ClassWithInvalidTypeAnnotation::class));
     }
 
-    public function testLaxModeWithBadAnnotationAndStrictNamespace()
+    public function testLaxModeWithBadAnnotationAndStrictNamespace(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQLite\\Fixtures']);
 
@@ -55,7 +55,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getTypeAnnotation(new ReflectionClass(ClassWithInvalidClassAnnotation::class));
     }
 
-    public function testGetAnnotationsStrictMode()
+    public function testGetAnnotationsStrictMode(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
@@ -63,7 +63,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getClassAnnotations(new ReflectionClass(ClassWithInvalidClassAnnotation::class), Type::class);
     }
 
-    public function testGetAnnotationsLaxModeWithBadAnnotation()
+    public function testGetAnnotationsLaxModeWithBadAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -71,7 +71,7 @@ class AnnotationReaderTest extends TestCase
         $this->assertSame([], $types);
     }
 
-    public function testGetAnnotationsLaxModeWithSmellyAnnotation()
+    public function testGetAnnotationsLaxModeWithSmellyAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -79,7 +79,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getClassAnnotations(new ReflectionClass(ClassWithInvalidTypeAnnotation::class), Type::class);
     }
 
-    public function testGetAnnotationsLaxModeWithBadAnnotationAndStrictNamespace()
+    public function testGetAnnotationsLaxModeWithBadAnnotationAndStrictNamespace(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQLite\\Fixtures']);
 
@@ -87,7 +87,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getClassAnnotations(new ReflectionClass(ClassWithInvalidClassAnnotation::class), Type::class);
     }
 
-    public function testMethodStrictMode()
+    public function testMethodStrictMode(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
@@ -95,7 +95,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
     }
 
-    public function testMethodLaxModeWithBadAnnotation()
+    public function testMethodLaxModeWithBadAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -103,7 +103,7 @@ class AnnotationReaderTest extends TestCase
         $this->assertNull($type);
     }
 
-    public function testMethodLaxModeWithSmellyAnnotation()
+    public function testMethodLaxModeWithSmellyAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -111,7 +111,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidTypeAnnotation::class, 'testMethod'), Field::class);
     }
 
-    public function testExtendAnnotationException()
+    public function testExtendAnnotationException(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
@@ -120,7 +120,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getExtendTypeAnnotation(new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class));
     }
 
-    public function testMethodsStrictMode()
+    public function testMethodsStrictMode(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::STRICT_MODE, []);
 
@@ -128,7 +128,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader->getMethodAnnotations(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
     }
 
-    public function testMethodsLaxModeWithBadAnnotation()
+    public function testMethodsLaxModeWithBadAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, []);
 
@@ -136,7 +136,7 @@ class AnnotationReaderTest extends TestCase
         $this->assertSame([], $type);
     }
 
-    public function testGetMethodsAnnotationsLaxModeWithBadAnnotationAndStrictNamespace()
+    public function testGetMethodsAnnotationsLaxModeWithBadAnnotationAndStrictNamespace(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader(), AnnotationReader::LAX_MODE, ['TheCodingMachine\\GraphQLite\\Fixtures']);
 

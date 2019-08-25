@@ -87,7 +87,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->typeMapper->mapNameToType('notExists');
     }
 
-    public function testException4()
+    public function testException4(): void
     {
         $type = new MutableObjectType(['name'=>'foo']);
 
@@ -95,7 +95,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->typeMapper->extendTypeForClass('foo', $type);
     }
 
-    public function testException5()
+    public function testException5(): void
     {
         $type = new MutableObjectType(['name'=>'foo']);
 
@@ -103,7 +103,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->typeMapper->extendTypeForName('foo', $type);
     }
 
-    public function testException6()
+    public function testException6(): void
     {
         $type = new MockResolvableInputObjectType(['name'=>'foo']);
 

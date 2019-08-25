@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NamedType;
+use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -25,6 +26,7 @@ use phpDocumentor\Reflection\Types\String_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
@@ -45,6 +47,13 @@ class BaseTypeMapper implements RootTypeMapperInterface
         $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
+    /**
+     * @param (OutputType&GraphQLType)|null $subType
+     *
+     * @return (OutputType&GraphQLType)|null
+     *
+     * @throws CannotMapTypeExceptionInterface
+     */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
         $mappedType = $this->mapBaseType($type);
@@ -52,7 +61,14 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $mappedType;
         }
         if ($type instanceof Array_) {
-            return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj)));
+            $innerType = $this->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj);
+            if ($innerType === null) {
+                return null;
+            }if ($innerType instanceof NullableType) {
+                $innerType = GraphQLType::nonNull($innerType);
+            }
+
+            return GraphQLType::listOf($innerType);
         }
         if ($type instanceof Object_) {
             $className = ltrim((string) $type->getFqsen(), '\\');
@@ -63,6 +79,11 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return null;
     }
 
+    /**
+     * @param (InputType&GraphQLType)|null $subType
+     *
+     * @return (InputType&GraphQLType)|null
+     */
     public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
     {
         $mappedType = $this->mapBaseType($type);
@@ -70,7 +91,14 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $mappedType;
         }
         if ($type instanceof Array_) {
-            return GraphQLType::listOf(GraphQLType::nonNull($this->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj)));
+            $innerType = $this->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj);
+            if ($innerType === null) {
+                return null;
+            }if ($innerType instanceof NullableType) {
+                $innerType = GraphQLType::nonNull($innerType);
+            }
+
+            return GraphQLType::listOf($innerType);
         }
         if ($type instanceof Object_) {
             $className = ltrim((string) $type->getFqsen(), '\\');

@@ -26,7 +26,7 @@ class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
         };
     }
 
-    public function testFromContainer()
+    public function testFromContainer(): void
     {
         $container = $this->buildAutoWiringContainer($this->getContainer());
 
@@ -36,7 +36,7 @@ class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
         $this->assertSame('foo', $container->get('foo'));
     }
 
-    public function testInstantiate()
+    public function testInstantiate(): void
     {
         $container = $this->buildAutoWiringContainer($this->getContainer());
 
@@ -47,7 +47,7 @@ class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
         $this->assertTrue($container->has(TestType::class));
     }
 
-    public function testNotFound()
+    public function testNotFound(): void
     {
         $container = $this->buildAutoWiringContainer($this->getContainer());
         $this->expectException(NotFoundException::class);

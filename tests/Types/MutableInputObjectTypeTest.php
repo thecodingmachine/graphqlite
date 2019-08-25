@@ -13,7 +13,7 @@ class MutableInputObjectTypeTest extends TestCase
      */
     private $type;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->type = new MutableInputObjectType([
             'name'    => 'TestObject',
@@ -23,14 +23,14 @@ class MutableInputObjectTypeTest extends TestCase
         ]);
     }
 
-    public function testGetStatus()
+    public function testGetStatus(): void
     {
         $this->assertSame(MutableInputObjectType::STATUS_PENDING, $this->type->getStatus());
         $this->type->freeze();
         $this->assertSame(MutableInputObjectType::STATUS_FROZEN, $this->type->getStatus());
     }
 
-    public function testAddFields()
+    public function testAddFields(): void
     {
         $this->type->addFields(function() {
             return [
@@ -50,32 +50,32 @@ class MutableInputObjectTypeTest extends TestCase
         $this->assertSame(Type::int(), $fields['test']->getType());
     }
 
-    public function testGetField()
+    public function testGetField(): void
     {
         $this->type->freeze();
         $this->assertSame(Type::string(), $this->type->getField('test')->getType());
     }
 
-    public function testGetFieldError()
+    public function testGetFieldError(): void
     {
         $this->expectException(RuntimeException::class);
         $this->type->getField('test');
     }
 
-    public function testGetFieldsError()
+    public function testGetFieldsError(): void
     {
         $this->expectException(RuntimeException::class);
         $this->type->getFields();
     }
 
-    public function testAddFieldsError()
+    public function testAddFieldsError(): void
     {
         $this->type->freeze();
         $this->expectException(RuntimeException::class);
         $this->type->addFields(function() {});
     }
 
-    public function testNoFieldsType()
+    public function testNoFieldsType(): void
     {
         $type = new MutableInputObjectType([
             'name'    => 'TestObject',

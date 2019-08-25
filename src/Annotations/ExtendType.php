@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 use BadMethodCallException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use function class_exists;
+use function interface_exists;
 use function ltrim;
 
 /**
@@ -16,23 +17,27 @@ use function ltrim;
  * @Target({"CLASS"})
  * @Attributes({
  *   @Attribute("class", type = "string"),
+ *   @Attribute("name", type = "string"),
  * })
  */
 class ExtendType
 {
-    /** @var string */
+    /** @var string|null */
     private $class;
+    /** @var string|null */
+    private $name;
 
     /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
     {
-        if (! isset($attributes['class'])) {
-            throw new BadMethodCallException('In annotation @ExtendType, missing compulsory parameter "class".');
+        if (! isset($attributes['class']) && ! isset($attributes['name'])) {
+            throw new BadMethodCallException('In annotation @ExtendType, missing one of the compulsory parameter "class" or "name".');
         }
-        $this->class = $attributes['class'];
-        if (! class_exists($this->class)) {
+        $this->class = $attributes['class'] ?? null;
+        $this->name = $attributes['name'] ?? null;
+        if ($this->class !== null && ! class_exists($this->class) && ! interface_exists($this->class)) {
             throw ClassNotFoundException::couldNotFindClass($this->class);
         }
     }
@@ -41,8 +46,17 @@ class ExtendType
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
      */
-    public function getClass(): string
+    public function getClass(): ?string
     {
+        if ($this->class === null) {
+            return null;
+        }
+
         return ltrim($this->class, '\\');
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }

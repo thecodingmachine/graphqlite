@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
+use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use Iterator;
@@ -24,18 +26,24 @@ use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use ReflectionType;
+use TheCodingMachine\GraphQLite\Annotations\HideParameter;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function count;
 use function iterator_to_array;
@@ -73,8 +81,7 @@ class TypeMapper implements ParameterMapperInterface
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {
-            $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $returnType);
-            $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
+            $phpdocType = $this->reflectionTypeToPhpDocType($returnType, $refMethod->getDeclaringClass());
         } else {
             $phpdocType = new Mixed_();
         }
@@ -87,7 +94,8 @@ class TypeMapper implements ParameterMapperInterface
         } catch (TypeMappingException $e) {
             throw TypeMappingException::wrapWithReturnInfo($e, $refMethod);
         } catch (CannotMapTypeExceptionInterface $e) {
-            throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
+            $e->addReturnInfo($refMethod);
+            throw $e;
         }
 
         return $type;
@@ -108,34 +116,49 @@ class TypeMapper implements ParameterMapperInterface
         return $docBlockReturnType;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ?Parameter $parameterAnnotation): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
     {
-        if ($parameterAnnotation && $parameterAnnotation->getInputType() !== null) {
+        $hideParameter = $parameterAnnotations->getAnnotationByType(HideParameter::class);
+        if ($hideParameter) {
+            if ($parameter->isDefaultValueAvailable() === false) {
+                throw CannotHideParameterException::needDefaultValue($parameter);
+            }
+
+            return new DefaultValueParameter($parameter->getDefaultValue());
+        }
+
+        /** @var UseInputType|null $useInputType */
+        $useInputType = $parameterAnnotations->getAnnotationByType(UseInputType::class);
+        if ($useInputType !== null) {
             try {
-                $type = $this->typeResolver->mapNameToInputType($parameterAnnotation->getInputType());
+                $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());
             } catch (CannotMapTypeExceptionInterface $e) {
-                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+                $e->addParamInfo($parameter);
+                throw $e;
             }
         } else {
             $parameterType = $parameter->getType();
             $allowsNull    = $parameterType === null ? true : $parameterType->allowsNull();
 
-            $type = (string) $parameterType;
-            if ($type === '') {
+            if ($parameterType === null) {
                 $phpdocType = new Mixed_();
                 $allowsNull = false;
                 //throw MissingTypeHintException::missingTypeHint($parameter);
             } else {
-                $phpdocType = $this->phpDocumentorTypeResolver->resolve($type);
-                $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
+                $declaringClass = $parameter->getDeclaringClass();
+                Assert::notNull($declaringClass);
+                $phpdocType = $this->reflectionTypeToPhpDocType($parameterType, $declaringClass);
             }
 
             try {
-                $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $parameter->getDeclaringFunction(), $docBlock, $parameter->getName());
+                $declaringFunction = $parameter->getDeclaringFunction();
+                Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
+                $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $declaringFunction, $docBlock, $parameter->getName());
             } catch (TypeMappingException $e) {
                 throw TypeMappingException::wrapWithParamInfo($e, $parameter);
             } catch (CannotMapTypeExceptionInterface $e) {
-                throw CannotMapTypeException::wrapWithParamInfo($e, $parameter);
+                $e->addParamInfo($parameter);
+                throw $e;
             }
         }
 
@@ -161,7 +184,10 @@ class TypeMapper implements ParameterMapperInterface
         } else {
             try {
                 $graphQlType = $this->toGraphQlType($type, null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
-                if (! $isNullable) {
+                // The type is non nullable if the PHP argument is non nullable
+                // There is an exception: if the PHP argument is non nullable but points to a factory that can called without passing any argument,
+                // then, the input type is nullable (and we can still create an empty object).
+                if (! $isNullable && (! $graphQlType instanceof ResolvableMutableInputObjectType || $graphQlType->isInstantiableWithoutParameters() === false)) {
                     $graphQlType = GraphQLType::nonNull($graphQlType);
                 }
             } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
@@ -218,6 +244,18 @@ class TypeMapper implements ParameterMapperInterface
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
         } else {
+            $badTypes = [];
+            foreach ($unionTypes as $unionType) {
+                if ($unionType instanceof ObjectType) {
+                    continue;
+                }
+
+                $badTypes[] = $unionType;
+            }
+            if ($badTypes !== []) {
+                throw CannotMapTypeException::createForBadTypeInUnion($unionTypes);
+            }
+
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
         }
 
@@ -305,8 +343,11 @@ class TypeMapper implements ParameterMapperInterface
     private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         if ($mapToInputType === true) {
+            Assert::nullOrIsInstanceOf($subType, InputType::class);
+            Assert::notNull($argumentName);
             $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         } else {
+            Assert::nullOrIsInstanceOf($subType, OutputType::class);
             $mappedType = $this->rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
         if ($mappedType === null) {
@@ -386,5 +427,13 @@ class TypeMapper implements ParameterMapperInterface
         }
 
         return $type;
+    }
+
+    private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
+    {
+        $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $type);
+        Assert::notNull($phpdocType);
+
+        return $this->resolveSelf($phpdocType, $reflectionClass);
     }
 }
