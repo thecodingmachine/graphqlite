@@ -17,7 +17,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         return new PorpaginasTypeMapper($this->getTypeMapper());
     }
     
-    public function testException()
+    public function testException(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
@@ -25,7 +25,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToType("\stdClass", null, $this->getTypeMapper());
     }
 
-    public function testException2()
+    public function testException2(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
@@ -33,7 +33,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToType(ArrayResult::class, new ListOfType(new StringType()), $this->getTypeMapper());
     }
 
-    public function testException3()
+    public function testException3(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
@@ -41,7 +41,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapNameToType('foo', $this->getTypeMapper());
     }
 
-    public function testException4()
+    public function testException4(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
@@ -49,7 +49,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapNameToType('PorpaginasResult_TestObjectInput', $this->getTypeMapper());
     }
 
-    public function testException5()
+    public function testException5(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
@@ -57,7 +57,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->mapClassToInputType('foo', $this->getTypeMapper());
     }
 
-    public function testException6()
+    public function testException6(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
         $type = new MutableObjectType(['name'=>'foo']);
@@ -66,7 +66,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->extendTypeForClass('foo', $type, $this->getTypeMapper());
     }
 
-    public function testException7()
+    public function testException7(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
         $type = new MutableObjectType(['name'=>'foo']);
@@ -75,7 +75,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
         $mapper->extendTypeForName('foo', $type, $this->getTypeMapper());
     }
 
-    public function testException8()
+    public function testException8(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
         $type = new MockResolvableInputObjectType(['name'=>'foo']);
@@ -85,14 +85,14 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
     }
 
 
-    public function testCanMapClassToInputType()
+    public function testCanMapClassToInputType(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
         $this->assertFalse($mapper->canMapClassToInputType('foo'));
     }
 
-    public function testMapNameToType()
+    public function testMapNameToType(): void
     {
         $mapper = $this->getPorpaginasTypeMapper();
 

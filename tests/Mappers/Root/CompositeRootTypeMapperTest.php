@@ -33,13 +33,13 @@ class CompositeRootTypeMapperTest extends TestCase
         };
     }
 
-    public function testToGraphQLInputType()
+    public function testToGraphQLInputType(): void
     {
         $typeMapper = new CompositeRootTypeMapper([$this->getNullTypeMapper()]);
         $this->assertNull($typeMapper->toGraphQLOutputType(new Integer(), null, new ReflectionMethod(CompositeRootTypeMapper::class, '__construct'), new DocBlock()));
     }
 
-    public function testToGraphQLOutputType()
+    public function testToGraphQLOutputType(): void
     {
         $typeMapper = new CompositeRootTypeMapper([$this->getNullTypeMapper()]);
         $this->assertNull($typeMapper->toGraphQLInputType(new Integer(), null, 'foo', new ReflectionMethod(CompositeRootTypeMapper::class, '__construct'), new DocBlock()));

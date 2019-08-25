@@ -5,9 +5,11 @@ namespace TheCodingMachine\GraphQLite\Integration;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
+use GraphQL\Type\Definition\NonNull;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use stdClass;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
@@ -20,6 +22,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
@@ -45,10 +48,12 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\TypeGenerator;
+use TheCodingMachine\GraphQLite\TypeMismatchException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use function var_dump;
+use function var_export;
 
 class EndToEndTest extends TestCase
 {
@@ -57,7 +62,7 @@ class EndToEndTest extends TestCase
      */
     private $mainContainer;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->mainContainer = new Picotainer([
             Schema::class => function(ContainerInterface $container) {
@@ -65,7 +70,7 @@ class EndToEndTest extends TestCase
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
-                    $container->get(BasicAutoWiringContainer::class), $container->get(LockFactory::class), new ArrayCache());
+                    $container->get(BasicAutoWiringContainer::class), new ArrayCache());
             },
             FieldsBuilder::class => function(ContainerInterface $container) {
                 return new FieldsBuilder(
@@ -126,7 +131,6 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(LockFactory::class),
                     new ArrayCache()
                     );
             },
@@ -139,7 +143,6 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(LockFactory::class),
                     new ArrayCache()
                 );
             },
@@ -180,23 +183,26 @@ class EndToEndTest extends TestCase
             CachedDocBlockFactory::class => function() {
                 return new CachedDocBlockFactory(new ArrayCache());
             },
-            LockFactory::class => function() {
-                if (extension_loaded('sysvsem')) {
-                    $lockStore = new SemaphoreStore();
-                } else {
-                    $lockStore = new FlockStore(sys_get_temp_dir());
-                }
-                return new LockFactory($lockStore);
-            },
             RootTypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeRootTypeMapper([
                     new MyCLabsEnumTypeMapper(),
                     new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
                 ]);
             },
+            ContainerParameterMapper::class => function(ContainerInterface $container) {
+                return new ContainerParameterMapper($container, true, true);
+            },
+            'testService' => function() {
+                return 'foo';
+            },
+            stdClass::class => function() {
+                // Empty test service for autowiring
+                return new stdClass();
+            },
             ParameterMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeParameterMapper([
-                    new ResolveInfoParameterMapper()
+                    new ResolveInfoParameterMapper(),
+                    $container->get(ContainerParameterMapper::class)
                 ]);
             }
         ]);
@@ -206,7 +212,7 @@ class EndToEndTest extends TestCase
         $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(PorpaginasTypeMapper::class));
     }
 
-    public function testEndToEnd()
+    public function testEndToEnd(): void
     {
         /**
          * @var Schema $schema
@@ -391,7 +397,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndPorpaginas()
+    public function testEndToEndPorpaginas(): void
     {
         /**
          * @var Schema $schema
@@ -509,10 +515,39 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
+    public function testEndToEndPorpaginasOnScalarType(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contactsNamesIterator {
+                items(limit: 1, offset: 1)
+                count
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'contactsNamesIterator' => [
+                'items' => ['Bill'],
+                'count' => 2
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
     /**
      * This tests is used to be sure that the PorpaginasIterator types are not mixed up when cached (because it has a subtype)
      */
-    public function testEndToEnd2Iterators()
+    public function testEndToEnd2Iterators(): void
     {
         /**
          * @var Schema $schema
@@ -573,7 +608,7 @@ class EndToEndTest extends TestCase
 
     }
 
-    public function testEndToEndStaticFactories()
+    public function testEndToEndStaticFactories(): void
     {
         /**
          * @var Schema $schema
@@ -606,7 +641,53 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndResolveInfo()
+    public function testNonNullableTypesWithOptionnalFactoryArguments(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            echoFilters
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoFilters' => []
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testNullableTypesWithOptionnalFactoryArguments(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            echoNullableFilters
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoNullableFilters' => null
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndResolveInfo(): void
     {
         /**
          * @var Schema $schema
@@ -629,7 +710,7 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndRightIssues()
+    public function testEndToEndRightIssues(): void
     {
         /**
          * @var Schema $schema
@@ -667,5 +748,140 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testAutowireService(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contacts {
+                injectService
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'contacts' => [
+                [
+                    'injectService' => 'OK',
+                ],
+                [
+                    'injectService' => 'OK',
+                ]
+
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndEnums(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            echoProductType(productType: NON_FOOD)
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoProductType' => 'NON_FOOD'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndDateTime(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            echoDate(date: "2019-05-05T01:02:03+00:00")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'echoDate' => '2019-05-05T01:02:03+00:00'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndErrorHandlingOfInconstentTypesInArrays(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            productsBadType {
+                name
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(TypeMismatchException::class);
+        $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    public function testEndToEndNonDefaultOutputType(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            otherContact {
+                name
+                fullName
+                phone
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'otherContact' => [
+                'name' => 'Joe',
+                'fullName' => 'JOE',
+                'phone' => '0123456789'
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 }

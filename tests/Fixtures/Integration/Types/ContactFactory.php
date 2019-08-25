@@ -8,13 +8,14 @@ use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 class ContactFactory
 {
     /**
      * @Factory()
-     * @Parameter(for="$relations", inputType="[ContactRefInput!]!")
+     * @UseInputType(for="$relations", inputType="[ContactRefInput!]!")
      * @param string $name
      * @param Contact|null $manager
      * @param Contact[] $relations

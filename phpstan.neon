@@ -3,5 +3,13 @@ parameters:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
         - "#Property TheCodingMachine\\\\GraphQLite\\\\Types\\\\ResolvableInputObjectType::$resolve \\(array<int, object|string>&callable\\) does not accept array<int,object|string>#"
         - "#Variable \\$prefetchRefMethod might not be defined.#"
+        - "#Parameter \\#2 $type of class TheCodingMachine\\\\GraphQLite\\\\Parameters\\\\InputTypeParameter constructor expects GraphQL\\\\Type\\\\Definition\\\\InputType&GraphQL\\\\Type\\\\Definition\\\\Type, GraphQL\\\\Type\\\\Definition\\\\InputType|GraphQL\\\\Type\\\\Definition\\\\Type given.#"
+        - "#Parameter \\#1 \\$types of class TheCodingMachine\\\\GraphQLite\\\\Types\\\\UnionType constructor expects array<GraphQL\\\\Type\\\\Definition\\\\ObjectType>, array<int, GraphQL\\\\Type\\\\Definition\\\\Type> given.#"
+        - "#Access to an undefined property GraphQL\\\\Type\\\\Definition\\\\NamedType::\\$name.#"
+        - "#Parameter .* of class ReflectionMethod constructor expects string, object|string given.#"
+        - "#Method TheCodingMachine\\\\GraphQLite\\\\Types\\\\MutableObjectType::getFields() should return array<GraphQL\\\\Type\\\\Definition\\\\FieldDefinition> but returns array|float|int.#"
+        - "#Parameter \\#2 \\$inputTypeNode of static method GraphQL\\\\Utils\\\\AST::typeFromAST() expects GraphQL\\\\Language\\\\AST\\\\ListTypeNode|GraphQL\\\\Language\\\\AST\\\\NamedTypeNode|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode, GraphQL\\\\Language\\\\AST\\\\ListTypeNode|GraphQL\\\\Language\\\\AST\\\\NameNode|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode given.#"
+        - "#PHPDoc tag @throws with type Psr\\\\SimpleCache\\\\InvalidArgumentException is not subtype of Throwable#"
+        - '#Variable \$context might not be defined.#'
 #includes:
 #    - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon

@@ -13,7 +13,7 @@ class ClassWithInvalidTypeAnnotation
     /**
      * @Field
      */
-    public function testMethod()
+    public function testMethod(): void
     {
 
     }

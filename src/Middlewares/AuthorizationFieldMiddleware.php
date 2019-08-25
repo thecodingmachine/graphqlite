@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\OutputType;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
@@ -15,6 +16,7 @@ use TheCodingMachine\GraphQLite\QueryField;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use Webmozart\Assert\Assert;
 
 /**
  * Middleware in charge of managing "Logged" and "Right" annotations.
@@ -56,6 +58,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         $type = $queryFieldDescriptor->getType();
         if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
             $type = $type->getWrappedType();
+            Assert::isInstanceOf($type, OutputType::class);
             $queryFieldDescriptor->setType($type);
         }
 

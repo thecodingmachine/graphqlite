@@ -101,7 +101,7 @@ use GraphQL\Type\Definition\FieldDefinition;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 /**
- * Middleware in charge of managing "Logged" and "Right" annotations.
+ * Middleware in charge of hiding a field if it is annotated with @OnlyDebug and the DEBUG constant is not set
  */
 class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
 {
@@ -114,7 +114,7 @@ class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
          */
         $onlyDebug = $annotations->getAnnotationByType(OnlyDebug::class);
 
-        if ($onlyDebug !== null) {
+        if ($onlyDebug !== null && !DEBUG) {
             // If the onlyDebug annotation is present, returns null.
             // Returning null will hide the field.
             return null;

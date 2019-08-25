@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=7.2",
-        "webonyx/graphql-php": "^0.13",
+        "webonyx/graphql-php": "^0.13.4",
         "psr/container": "^1",
         "doctrine/annotations": "^1.2",
         "doctrine/cache": "^1.8",
@@ -21,17 +21,22 @@
         "phpdocumentor/type-resolver": "^0.4",
         "psr/http-message": "^1",
         "ecodev/graphql-upload": "^4.0",
-        "symfony/lock": "^3 || ^4"
+        "webmozart/assert": "^1.4",
+        "symfony/cache": "^4.3",
+        "thecodingmachine/cache-utils": "^1",
+        "ocramius/package-versions": "^1.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.5.9",
-        "satooshi/php-coveralls": "^1.0",
-        "symfony/cache": "^4.1.4",
+        "phpunit/phpunit": "^8.2.4",
+        "php-coveralls/php-coveralls": "^2.1",
         "mouf/picotainer": "^1.1",
         "phpstan/phpstan": "^0.11",
         "beberlei/porpaginas": "^1.2",
         "myclabs/php-enum": "^1.6.6",
-        "doctrine/coding-standard": "^6.0"
+        "doctrine/coding-standard": "^6.0",
+        "phpstan/phpstan-webmozart-assert": "^0.11.2",
+        "phpstan/extension-installer": "^1.0",
+        "thecodingmachine/phpstan-strict-rules": "^0.11.2"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
@@ -47,7 +52,7 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=4 --no-progress -vvv",
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=7 --no-progress -vvv",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": ["@cs-check", "@phpstan", "phpunit"]

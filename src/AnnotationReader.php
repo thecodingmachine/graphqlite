@@ -18,12 +18,15 @@ use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
-use TheCodingMachine\GraphQLite\Annotations\Parameter;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
+use function array_values;
 use function in_array;
 use function strpos;
 use function strrpos;
@@ -129,27 +132,19 @@ class AnnotationReader
         return $decorateAnnotation;
     }
 
-    /**
-     * @return Parameter[]
-     */
-    private function getParameterAnnotations(ReflectionMethod $refMethod): array
+    public function getParameterAnnotations(ReflectionParameter $refParameter): ParameterAnnotations
     {
-        /** @var Parameter[] $useInputTypes */
-        $useInputTypes = $this->getMethodAnnotations($refMethod, Parameter::class);
+        $method = $refParameter->getDeclaringFunction();
+        Assert::isInstanceOf($method, ReflectionMethod::class);
+        /** @var ParameterAnnotationInterface[] $parameterAnnotations */
+        $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
+        $name = $refParameter->getName();
 
-        return $useInputTypes;
-    }
+        $filteredAnnotations = array_values(array_filter($parameterAnnotations, static function (ParameterAnnotationInterface $parameterAnnotation) use ($name) {
+            return $parameterAnnotation->getTarget() === $name;
+        }));
 
-    public function getParameterAnnotation(ReflectionParameter $refParameter): ?Parameter
-    {
-        $annotations = $this->getParameterAnnotations($refParameter->getDeclaringFunction());
-        foreach ($annotations as $annotation) {
-            if ($annotation->getFor() === $refParameter->getName()) {
-                return $annotation;
-            }
-        }
-
-        return null;
+        return new ParameterAnnotations($filteredAnnotations);
     }
 
     public function getMiddlewareAnnotations(ReflectionMethod $refMethod): MiddlewareAnnotations
@@ -161,35 +156,29 @@ class AnnotationReader
     }
 
     /**
-     * Returns a class annotation. Finds in the parents if not found in the main class.
+     * Returns a class annotation. Does not look in the parent class.
      */
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
-        do {
-            $type = null;
-            try {
-                $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
-            } catch (AnnotationException $e) {
-                switch ($this->mode) {
-                    case self::STRICT_MODE:
+        $type = null;
+        try {
+            $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
+        } catch (AnnotationException $e) {
+            switch ($this->mode) {
+                case self::STRICT_MODE:
+                    throw $e;
+                case self::LAX_MODE:
+                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
-                    case self::LAX_MODE:
-                        if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
-                            throw $e;
-                        } else {
-                            return null;
-                        }
-                    default:
-                        throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
-                }
+                    } else {
+                        return null;
+                    }
+                default:
+                    throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
             }
-            if ($type !== null) {
-                return $type;
-            }
-            $refClass = $refClass->getParentClass();
-        } while ($refClass);
+        }
 
-        return null;
+        return $type;
     }
 
     /** @var array<string, (object|null)> */
@@ -212,7 +201,7 @@ class AnnotationReader
                 case self::STRICT_MODE:
                     throw $e;
                 case self::LAX_MODE:
-                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                         throw $e;
                     } else {
                         return null;
@@ -258,7 +247,7 @@ class AnnotationReader
                 }
 
                 if ($this->mode === self::LAX_MODE) {
-                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment(), $refClass->getName())) {
+                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
                     }
                 }
@@ -300,7 +289,7 @@ class AnnotationReader
             }
 
             if ($this->mode === self::LAX_MODE) {
-                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment(), $refMethod->getDeclaringClass()->getName())) {
+                if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                     throw $e;
                 }
             }

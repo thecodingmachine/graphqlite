@@ -6,6 +6,8 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\ListOfType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -15,9 +17,12 @@ use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function array_unshift;
 use function array_values;
+use function get_class;
+use function is_object;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -46,17 +51,32 @@ class QueryField extends FieldDefinition
         }
 
         $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
-            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolve);
-
             if ($resolve !== null) {
-                return $resolve(...$toPassArgs);
-            }
-            if ($targetMethodOnSource !== null) {
+                $method = $resolve;
+            } elseif ($targetMethodOnSource !== null) {
                 $method = [$source, $targetMethodOnSource];
-
-                return $method(...$toPassArgs);
+                Assert::isCallable($method);
+            } else {
+                throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
             }
-            throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
+
+            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $method);
+
+            $result = $method(...$toPassArgs);
+
+            try {
+                $this->assertReturnType($result);
+            } catch (TypeMismatchException $e) {
+                $class = $method[0];
+                if (is_object($class)) {
+                    $class = get_class($class);
+                }
+
+                $e->addInfo($this->name, $class, $method[1]);
+                throw $e;
+            }
+
+            return $result;
         };
 
         if ($prefetchMethodName === null) {
@@ -77,10 +97,11 @@ class QueryField extends FieldDefinition
 
                         $sources = $prefetchBuffer->getObjectsByArguments($args);
 
+                        Assert::isCallable($prefetchCallable);
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
-
+                        Assert::isCallable($prefetchCallable);
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
                         $prefetchBuffer->storeResult($prefetchResult, $args);
                     } else {
@@ -102,6 +123,32 @@ class QueryField extends FieldDefinition
 
         $config += $additionalConfig;
         parent::__construct($config);
+    }
+
+    /**
+     * This method checks the returned value of the resolver to be sure it matches the documented return type.
+     * We are sure the returned value is of the correct type... except if the return type is type-hinted as an array.
+     * In this case, PHP does nothing for us and we should check the user returned what he documented.
+     *
+     * @param mixed $result
+     */
+    private function assertReturnType($result): void
+    {
+        $type = $this->removeNonNull($this->getType());
+        if (! $type instanceof ListOfType) {
+            return;
+        }
+
+        ResolveUtils::assertInnerReturnType($result, $type);
+    }
+
+    private function removeNonNull(Type $type): Type
+    {
+        if ($type instanceof NonNull) {
+            return $type->getWrappedType();
+        }
+
+        return $type;
     }
 
     /**
@@ -188,7 +235,7 @@ class QueryField extends FieldDefinition
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, ?callable $resolve): array
+    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
     {
         return array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
             try {

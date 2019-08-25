@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class SchemaTest extends AbstractQueryProviderTest
 {
 
-    public function testEmptyQuery()
+    public function testEmptyQuery(): void
     {
         $queryProvider = new class implements QueryProviderInterface {
             public function getQueries(): array

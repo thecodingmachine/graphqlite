@@ -17,7 +17,7 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
 {
 
-    public function testException()
+    public function testException(): void
     {
         $middleware = new AuthorizationFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
 

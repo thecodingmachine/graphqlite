@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 class FieldMiddlewarePipeTest extends TestCase
 {
 
-    public function testHandle()
+    public function testHandle(): void
     {
         $finalHandler = new class implements FieldHandlerInterface {
             public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition

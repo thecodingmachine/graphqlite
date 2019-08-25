@@ -73,3 +73,6 @@ graphqlite:
 
 The debug parameters are detailed in the [documentation of the Webonyx GraphQL library](https://webonyx.github.io/graphql-php/error-handling/)
 which is used internally by GraphQLite.
+
+The Symfony bundle come with a set of advanced features that are not described in this install documentation (like providing a login/logout mutation out of the box).
+Jump to the ["Symfony specific features"](symfony-bundle-advanced.md) documentation of GraphQLite if you want to learn more.

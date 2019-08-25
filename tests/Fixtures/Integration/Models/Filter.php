@@ -40,7 +40,7 @@ class Filter
      * @Factory()
      * @param string[] $values
      */
-    public static function create(array $values): self
+    public static function create(array $values = []): self
     {
         return new self($values);
     }

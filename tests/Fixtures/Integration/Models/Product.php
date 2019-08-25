@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Right;
@@ -24,16 +25,21 @@ class Product
      * @var float
      */
     private $price;
+    /**
+     * @var ProductTypeEnum
+     */
+    private $type;
 
     /**
      * Product constructor.
      * @param string $name
      * @param float $price
      */
-    public function __construct(string $name, float $price)
+    public function __construct(string $name, float $price, ProductTypeEnum $type = null)
     {
         $this->name = $name;
         $this->price = $price;
+        $this->type = $type;
     }
 
     /**
@@ -63,5 +69,22 @@ class Product
     public function getUnauthorized(): string
     {
         return 'You are not allowed to see this';
+    }
+
+    /**
+     * @return ProductTypeEnum
+     */
+    public function getType(): ProductTypeEnum
+    {
+        return $this->type;
+    }
+
+    /**
+     * @Factory()
+     * @return Product
+     */
+    public static function create(string $name, float $price, ProductTypeEnum $type = null): self
+    {
+        return new self($name, $price, $type);
     }
 }

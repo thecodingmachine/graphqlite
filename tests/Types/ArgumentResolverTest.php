@@ -12,7 +12,7 @@ use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 class ArgumentResolverTest extends AbstractQueryProviderTest
 {
 
-    public function testResolveArrayException()
+    public function testResolveArrayException(): void
     {
         $argumentResolver = $this->getArgumentResolver();
 
@@ -21,7 +21,7 @@ class ArgumentResolverTest extends AbstractQueryProviderTest
         $argumentResolver->resolve(null, 42, null, $this->createMock(ResolveInfo::class), Type::listOf(Type::string()));
     }
 
-    public function testResolveUnexpectedInputType()
+    public function testResolveUnexpectedInputType(): void
     {
         $argumentResolver = $this->getArgumentResolver();
 

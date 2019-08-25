@@ -11,7 +11,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 
 class UnionTypeTest extends AbstractQueryProviderTest
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper());
         $resolveInfo = $this->getMockBuilder(ResolveInfo::class)->disableOriginalConstructor()->getMock();
@@ -21,7 +21,7 @@ class UnionTypeTest extends AbstractQueryProviderTest
         $this->assertSame($this->getTestObjectType2(), $type);
     }
 
-    public function testException()
+    public function testException(): void
     {
         $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper());
         $this->expectException(\InvalidArgumentException::class);
@@ -29,7 +29,7 @@ class UnionTypeTest extends AbstractQueryProviderTest
         $unionType->resolveType('foo', null, $resolveInfo);
     }
 
-    public function testException2()
+    public function testException2(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         new UnionType([new StringType()], $this->getTypeMapper());

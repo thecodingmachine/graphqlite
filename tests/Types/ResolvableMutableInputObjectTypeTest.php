@@ -12,7 +12,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\GraphQLException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 
-class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
+class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 {
 
     public function testResolve(): void
@@ -21,7 +21,8 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myFactory',
-            'my comment');
+            'my comment',
+            false);
 
         $this->assertSame('InputObject', $inputType->name);
         $inputType->freeze();
@@ -52,9 +53,11 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
             $this->getFieldsBuilder(),
             $testFactory,
             'myFactory',
-            'my comment');
+            'my comment',
+            true);
 
         $inputType->decorate([$testFactory, 'myDecorator']);
+        $this->assertFalse($inputType->isInstantiableWithoutParameters());
 
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
@@ -63,13 +66,28 @@ class ResolvableInputObjectTypeTest extends AbstractQueryProviderTest
         $inputType->resolve(new stdClass(), ['string' => 'foobar'], null, $resolveInfo);
     }
 
+    public function testDecoratorDoesNotModifyInstantiableWithoutParameters(): void
+    {
+        $testFactory = new TestFactory();
+        $inputType = new ResolvableMutableInputObjectType('InputObject',
+            $this->getFieldsBuilder(),
+            $testFactory,
+            'myFactory',
+            'my comment',
+            false);
+
+        $inputType->decorate([$testFactory, 'myDecorator']);
+        $this->assertFalse($inputType->isInstantiableWithoutParameters());
+    }
+
     public function testListResolve(): void
     {
         $inputType = new ResolvableMutableInputObjectType('InputObject2',
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myListFactory',
-            null);
+            null,
+            false);
 
         $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
             [

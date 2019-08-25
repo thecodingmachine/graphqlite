@@ -4,6 +4,8 @@ namespace TheCodingMachine\GraphQLite;
 
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 class NamingStrategyTest extends TestCase
 {
@@ -28,5 +30,15 @@ class NamingStrategyTest extends TestCase
         $this->assertSame('name', $namingStrategy->getFieldNameFromMethodName('isName'));
         $this->assertSame('is', $namingStrategy->getFieldNameFromMethodName('is'));
         $this->assertSame('foo', $namingStrategy->getFieldNameFromMethodName('foo'));
+    }
+
+    public function testGetFieldNameFromTypeAnnotation(): void
+    {
+        $namingStrategy = new NamingStrategy();
+
+        $type = new Type(['name' => 'foo']);
+
+        $name = $namingStrategy->getOutputTypeName(TestObject::class, $type);
+        $this->assertSame('foo', $name);
     }
 }

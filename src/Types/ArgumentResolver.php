@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\Error;
+use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\LeafType;
@@ -14,6 +15,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function get_class;
 use function is_array;
@@ -28,6 +30,7 @@ class ArgumentResolver
      *
      * @param mixed $val
      * @param mixed $context
+     * @param InputType&Type $type
      *
      * @return mixed
      *
@@ -42,12 +45,21 @@ class ArgumentResolver
             }
 
             return array_map(function ($item) use ($type, $source, $context, $resolveInfo) {
-                return $this->resolve($source, $item, $context, $resolveInfo, $type->getWrappedType());
+                $wrappedType = $type->getWrappedType();
+                Assert::isInstanceOf($wrappedType, InputType::class);
+
+                return $this->resolve($source, $item, $context, $resolveInfo, $wrappedType);
             }, $val);
         }
 
         if ($type instanceof IDType) {
             return new ID($val);
+        }
+
+        // For some reason, the enum type behaves differently as the LeafType.
+        // If seems to be already resolved.
+        if ($type instanceof EnumType) {
+            return $val;
         }
 
         if ($type instanceof LeafType) {

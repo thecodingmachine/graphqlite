@@ -8,8 +8,12 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedInterfaceType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
+use function interface_exists;
 
 /**
  * This class is in charge of creating Webonyx GraphQL types from annotated objects that do not extend the
@@ -49,31 +53,42 @@ class TypeGenerator
     /**
      * @param string $annotatedObjectClassName The FQCN of an object with a Type annotation.
      *
+     * @return MutableInterface&(MutableInterfaceType|MutableObjectType)
+     *
      * @throws ReflectionException
      */
-    public function mapAnnotatedObject(string $annotatedObjectClassName): MutableObjectType
+    public function mapAnnotatedObject(string $annotatedObjectClassName): MutableInterface
     {
         $refTypeClass = new ReflectionClass($annotatedObjectClassName);
 
         $typeField = $this->annotationReader->getTypeAnnotation($refTypeClass);
 
         if ($typeField === null) {
-            throw MissingAnnotationException::missingTypeException();
+            throw MissingAnnotationException::missingTypeException($annotatedObjectClassName);
         }
 
         $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
 
         if ($this->typeRegistry->hasType($typeName)) {
-            return $this->typeRegistry->getMutableObjectType($typeName);
+            return $this->typeRegistry->getMutableInterface($typeName);
         }
 
         if (! $typeField->isSelfType()) {
+            if (! $refTypeClass->isInstantiable()) {
+                throw new GraphQLException('Class "' . $annotatedObjectClassName . '" annotated with @Type(class="' . $typeField->getClass() . '") must be instantiable.');
+            }
             $annotatedObject = $this->container->get($annotatedObjectClassName);
+            $isInterface = interface_exists($typeField->getClass());
         } else {
             $annotatedObject = null;
+            $isInterface = $refTypeClass->isInterface();
         }
 
-        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper);
+        if ($isInterface) {
+            return TypeAnnotatedInterfaceType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper);
+        }
+
+        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault(), $typeField->isInheritanceDisabled());
 
         /*return new ObjectType([
             'name' => $typeName,
@@ -101,8 +116,11 @@ class TypeGenerator
 
     /**
      * @param object $annotatedObject An object with a ExtendType annotation.
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     *
+     * @throws ReflectionException
      */
-    public function extendAnnotatedObject(object $annotatedObject, MutableObjectType $type): void
+    public function extendAnnotatedObject(object $annotatedObject, MutableInterface $type): void
     {
         $refTypeClass = new ReflectionClass($annotatedObject);
 

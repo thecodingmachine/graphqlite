@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use BadMethodCallException;
 use function array_key_exists;
 
 /**
@@ -25,7 +26,7 @@ use function array_key_exists;
  */
 class SourceField implements SourceFieldInterface
 {
-    /** @var string|null */
+    /** @var string */
     private $name;
 
     /** @var string|null */
@@ -39,7 +40,10 @@ class SourceField implements SourceFieldInterface
      */
     public function __construct(array $attributes = [])
     {
-        $this->name       = $attributes['name'] ?? null;
+        if (! isset($attributes['name'])) {
+            throw new BadMethodCallException('The @SourceField annotation must be passed a name. For instance: "@SourceField(name=\'phone\')"');
+        }
+        $this->name       = $attributes['name'];
         $this->outputType = $attributes['outputType'] ?? null;
         $this->annotations = new MiddlewareAnnotations($attributes['annotations'] ?? []);
         if (! array_key_exists('failWith', $attributes)) {
@@ -49,9 +53,8 @@ class SourceField implements SourceFieldInterface
 
     /**
      * Returns the name of the GraphQL query/mutation/field.
-     * If not specified, the name of the method should be used instead.
      */
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
