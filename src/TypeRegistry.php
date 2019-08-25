@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use function get_class;
 
 /**
@@ -16,7 +20,7 @@ use function get_class;
  */
 class TypeRegistry
 {
-    /** @var array<string,NamedType&Type&(MutableObjectType|InterfaceType)> */
+    /** @var array<string,NamedType&Type&(MutableObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface))> */
     private $outputTypes = [];
 
     /**
@@ -24,7 +28,7 @@ class TypeRegistry
      * IMPORTANT: the type MUST be fully computed (so ExtendType annotations must have ALREADY been applied to the tag)
      * ONLY THE RecursiveTypeMapper IS ALLOWED TO CALL THIS METHOD.
      *
-     * @param NamedType &Type&(ObjectType|InterfaceType) $type
+     * @param NamedType&Type&(MutableObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface)) $type
      */
     public function registerType(NamedType $type): void
     {
@@ -40,7 +44,7 @@ class TypeRegistry
     }
 
     /**
-     * @return NamedType&Type&(ObjectType|InterfaceType)
+     * @return NamedType&Type&(ObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface))
      */
     public function getType(string $typeName): NamedType
     {
@@ -56,6 +60,19 @@ class TypeRegistry
         $type = $this->getType($typeName);
         if (! $type instanceof MutableObjectType) {
             throw new GraphQLException('Expected GraphQL type "' . $typeName . '" to be an MutableObjectType. Got a ' . get_class($type));
+        }
+
+        return $type;
+    }
+
+    /**
+     * @return MutableInterface&(MutableObjectType|MutableInterfaceType)
+     */
+    public function getMutableInterface(string $typeName): MutableInterface
+    {
+        $type = $this->getType($typeName);
+        if (! $type instanceof MutableInterface || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)) {
+            throw new GraphQLException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
         }
 
         return $type;

@@ -57,4 +57,24 @@ class ContactController
             new User('Bill', 'bill@example.com'),
         ]);
     }
+
+    /**
+     * @Query()
+     * @return string[]|ArrayResult
+     */
+    public function getContactsNamesIterator(): ArrayResult
+    {
+        return new ArrayResult([
+            'Joe',
+            'Bill',
+        ]);
+    }
+
+    /**
+     * @Query(outputType="ContactOther")
+     */
+    public function getOtherContact(): Contact
+    {
+        return new Contact('Joe');
+    }
 }

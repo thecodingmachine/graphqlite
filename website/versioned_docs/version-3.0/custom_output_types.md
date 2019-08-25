@@ -40,9 +40,9 @@ You can help GraphQLite by manually specifying the output type to use:
 
 ```php
     /**
-     * @Field(name="id", outputType="ID")
+     * @Field(name="id", outputType="ID!")
      */
-``` 
+```
 
 ## Usage
 

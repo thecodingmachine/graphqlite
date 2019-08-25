@@ -13,14 +13,14 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class TypeResolverTest extends TestCase
 {
-    public function testException()
+    public function testException(): void
     {
         $typeResolver = new TypeResolver();
         $this->expectException(RuntimeException::class);
         $typeResolver->mapNameToType('ID');
     }
 
-    public function testMapNameToType()
+    public function testMapNameToType(): void
     {
         $typeResolver = new TypeResolver();
         $schema = new Schema([]);
@@ -60,7 +60,7 @@ class TypeResolverTest extends TestCase
         ]);
     }
 
-    public function testMapNameToOuputTypeException()
+    public function testMapNameToOuputTypeException(): void
     {
         $typeResolver = new TypeResolver();
         $schema = $this->getTestSchema();
@@ -70,7 +70,7 @@ class TypeResolverTest extends TestCase
         $typeResolver->mapNameToOutputType('MyInput');
     }
 
-    public function testMapNameToInputTypeException()
+    public function testMapNameToInputTypeException(): void
     {
         $typeResolver = new TypeResolver();
         $schema = $this->getTestSchema();

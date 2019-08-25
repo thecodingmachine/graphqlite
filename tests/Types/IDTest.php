@@ -8,13 +8,13 @@ use stdClass;
 
 class IDTest extends TestCase
 {
-    public function testConstructException()
+    public function testConstructException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new ID(new stdClass());
     }
 
-    public function testVal()
+    public function testVal(): void
     {
         $id = new ID(42);
         $this->assertSame(42, $id->val());

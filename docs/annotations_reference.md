@@ -35,7 +35,10 @@ The `@Type` annotation is used to declare a GraphQL object type.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 class          | *no*       | string | The targeted class. If no class is passed, the type applies to the current class. The current class is assumed to be an entity. If the "class" attribute is passed, [the class annotated with `@Type` is a service](external_type_declaration.md).
-
+name           | *no*       | string | The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with "Type", the "Type" suffix is removed
+default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
+external       | *no*       | bool   | Whether this is an [external type declaration](external_type_declaration.md) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
+disableInheritance       | *no*       | bool   | Out of the box, it a PHP class who is a type extends another PHP class who is a type, GraphQL inheritance is put in place. Use this attribute to remove the default behaviour. The type will not map any fields from the parent class AND will not implement the interface.
 
 ## @ExtendType annotation
 
@@ -45,7 +48,10 @@ The `@ExtendType` annotation is used to add fields to an existing GraphQL object
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-class          | *yes*       | string | The targeted class. [The class annotated with `@ExtendType` is a service](extend_type.md).
+class          | see below  | string | The targeted class. [The class annotated with `@ExtendType` is a service](extend_type.md).
+name           | see below  | string | The targeted GraphQL output type.
+
+One and only one of "class" and "name" parameter can be passed at the same time.
 
 ## @Field annotation
 
@@ -119,7 +125,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *no*       | string | The name of the input type. If skipped, the name of class returned by the factory is used instead.
 default        | *no*       | bool | If `true`, this factory will be used by default for its PHP return type. If set to `false`, you must explicitly [reference this factory using the `@Parameter` annotation](http://localhost:3000/docs/input-types#declaring-several-input-types-for-the-same-php-class).
 
-## @Parameter annotation
+## @UseInputType annotation
 
 Used to override the GraphQL input type of a PHP parameter.
 
@@ -127,8 +133,8 @@ Used to override the GraphQL input type of a PHP parameter.
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-*for*          | *yes*       | string | The name of the PHP parameter
-*inputType*    | *no*        | string | The GraphQL input type to force for this input field
+*for*          | *yes*      | string | The name of the PHP parameter
+*inputType*    | *yes*      | string | The GraphQL input type to force for this input field
 
 ## @Decorate annotation
 
@@ -138,4 +144,25 @@ The `@Decorate` annotation is used [to extend/modify/decorate an input type decl
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-name           | *yes*       | string | The GraphQL input type name extended by this decorator.
+name           | *yes*      | string | The GraphQL input type name extended by this decorator.
+
+## @Autowire annotation
+
+[Resolves a PHP parameter from the container](autowiring.md).
+
+Useful to inject services directly into `@Field` method arguments.
+
+**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field` annotation.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*      | string | The name of the PHP parameter
+*identifier*   | *no*       | string | The identifier of the service to fetch. This is optional. Please avoid using this attribute as this leads to a "service locator" anti-pattern.
+
+## @HideParameter annotation
+
+Removes [an argument from the GraphQL schema](input_types.md#ignoring_some_parameters).
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*      | string | The name of the PHP parameter to hide

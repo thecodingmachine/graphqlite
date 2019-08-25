@@ -24,7 +24,7 @@ class AggregateQueryProviderTest extends TestCase
         };
     }
 
-    public function testGetMutations()
+    public function testGetMutations(): void
     {
         $aggregateQueryProvider = new AggregateQueryProvider([$this->getMockQueryProvider(), $this->getMockQueryProvider()]);
         $this->assertCount(2, $aggregateQueryProvider->getMutations());
@@ -33,7 +33,7 @@ class AggregateQueryProviderTest extends TestCase
         $this->assertCount(0, $aggregateQueryProvider->getMutations());
     }
 
-    public function testGetQueries()
+    public function testGetQueries(): void
     {
         $aggregateQueryProvider = new AggregateQueryProvider([$this->getMockQueryProvider(), $this->getMockQueryProvider()]);
         $this->assertCount(2, $aggregateQueryProvider->getQueries());

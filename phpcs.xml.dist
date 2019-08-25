@@ -14,11 +14,14 @@
     <!-- <file>tests</file> -->
 
     <exclude-pattern>tests/dependencies/*</exclude-pattern>
+    <exclude-pattern>src/Utils/NamespacedCache.php</exclude-pattern>
+    <exclude-pattern>src/Types/TypeAnnotatedInterfaceType.php</exclude-pattern>
 
     <!-- Include full Doctrine Coding Standard -->
     <rule ref="Doctrine">
         <exclude name="SlevomatCodingStandard.Classes.SuperfluousInterfaceNaming.SuperfluousSuffix"/>
         <exclude name="SlevomatCodingStandard.Classes.SuperfluousExceptionNaming.SuperfluousSuffix"/>
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousTraitNaming.SuperfluousSuffix"/>
         <exclude name="SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming.SuperfluousPrefix"/>
         <exclude name="Squiz.Commenting.FunctionComment.InvalidNoReturn" />
         <exclude name="Generic.Formatting.MultipleStatementAlignment" />

@@ -14,6 +14,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use Webmozart\Assert\Assert;
 use function get_class;
 use function sprintf;
 
@@ -32,12 +33,14 @@ class TypeMappingException extends GraphQLException
 
     public static function wrapWithParamInfo(TypeMappingException $previous, ReflectionParameter $parameter): TypeMappingException
     {
+        $declaringClass = $parameter->getDeclaringClass();
+        Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
         if ($previous->type instanceof Array_ || $previous->type instanceof Iterable_) {
             $typeStr = $previous->type instanceof Array_ ? 'array' : 'iterable';
             $message = sprintf(
                 'Parameter $%s in %s::%s is type-hinted to %s. Please provide an additional @param in the PHPDoc block to further specify the type of the %s. For instance: @param string[] $%s.',
                 $parameter->getName(),
-                $parameter->getDeclaringClass()->getName(),
+                $declaringClass->getName(),
                 $parameter->getDeclaringFunction()->getName(),
                 $typeStr,
                 $typeStr,
@@ -47,7 +50,7 @@ class TypeMappingException extends GraphQLException
             $message = sprintf(
                 'Parameter $%s in %s::%s is missing a type-hint (or type-hinted to "mixed"). Please provide a better type-hint. For instance: "string $%s".',
                 $parameter->getName(),
-                $parameter->getDeclaringClass()->getName(),
+                $declaringClass->getName(),
                 $parameter->getDeclaringFunction()->getName(),
                 $parameter->getName()
             );
@@ -66,7 +69,7 @@ class TypeMappingException extends GraphQLException
             $message = sprintf(
                 'Parameter $%s in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param %s|User[] $%s.',
                 $parameter->getName(),
-                $parameter->getDeclaringClass()->getName(),
+                $declaringClass->getName(),
                 $parameter->getDeclaringFunction()->getName(),
                 $fqcn,
                 $fqcn,

@@ -15,6 +15,7 @@ use ReflectionMethod;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function ltrim;
@@ -66,12 +67,16 @@ class InputTypeUtils
         $typeResolver = new TypeResolver();
 
         $phpdocType = $typeResolver->resolve($type);
+        Assert::notNull($phpdocType);
         $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         if (! $phpdocType instanceof Object_) {
             throw MissingTypeHintException::invalidReturnType($refMethod);
         }
 
-        return $phpdocType->getFqsen();
+        $fqsen = $phpdocType->getFqsen();
+        Assert::notNull($fqsen);
+
+        return $fqsen;
     }
 
     /**

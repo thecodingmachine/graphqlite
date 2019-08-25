@@ -26,7 +26,9 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
 use function get_parent_class;
@@ -281,11 +283,13 @@ class FieldsBuilder
 
             $fieldDescriptor->setParameters($args);
 
-            if ($queryAnnotation->getOutputType()) {
+            $outputType = $queryAnnotation->getOutputType();
+            if ($outputType) {
                 try {
-                    $type = $this->typeResolver->mapNameToOutputType($queryAnnotation->getOutputType());
+                    $type = $this->typeResolver->mapNameToOutputType($outputType);
                 } catch (CannotMapTypeExceptionInterface $e) {
-                    throw CannotMapTypeException::wrapWithReturnInfo($e, $refMethod);
+                    $e->addReturnInfo($refMethod);
+                    throw $e;
                 }
             } else {
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
@@ -293,7 +297,9 @@ class FieldsBuilder
             if ($sourceClassName !== null) {
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
-                $fieldDescriptor->setCallable([$controller, $methodName]);
+                $callable = [$controller, $methodName];
+                Assert::isCallable($callable);
+                $fieldDescriptor->setCallable($callable);
             }
 
             $fieldDescriptor->setType($type);
@@ -353,6 +359,19 @@ class FieldsBuilder
             $objectClass = $typeField->getClass();
         } elseif ($extendTypeField !== null) {
             $objectClass = $extendTypeField->getClass();
+            if ($objectClass === null) {
+                // We need to be able to fetch the mapped PHP class from the object type!
+                $typeName = $extendTypeField->getName();
+                Assert::notNull($typeName);
+                $targetedType = $this->recursiveTypeMapper->mapNameToType($typeName);
+                if (! $targetedType instanceof MutableObjectType) {
+                    throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendTypeField);
+                }
+                $objectClass = $targetedType->getMappedClassName();
+                if ($objectClass === null) {
+                    throw new CannotMapTypeException('@ExtendType(name="' . $extendTypeField->getName() . '") points to a GraphQL type that does not map a PHP class. Therefore, you cannot use the @SourceField annotation in conjunction with this @ExtendType.');
+                }
+            }
         } else {
             throw MissingAnnotationException::missingTypeExceptionToUseSourceField();
         }
@@ -386,11 +405,13 @@ class FieldsBuilder
 
             $fieldDescriptor->setParameters($args);
 
-            if ($sourceField->getOutputType()) {
+            $outputType = $sourceField->getOutputType();
+            if ($outputType) {
                 try {
-                    $type = $this->typeResolver->mapNameToOutputType($sourceField->getOutputType());
+                    $type = $this->typeResolver->mapNameToOutputType($outputType);
                 } catch (CannotMapTypeExceptionInterface $e) {
-                    throw CannotMapTypeException::wrapWithSourceField($e, $refClass, $sourceField);
+                    $e->addSourceFieldInfo($refClass, $sourceField);
+                    throw $e;
                 }
             } else {
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
@@ -455,12 +476,12 @@ class FieldsBuilder
         }
 
         foreach ($refParameters as $parameter) {
-            $parameterAnnotation = $this->annotationReader->getParameterAnnotation($parameter);
+            $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
 
-            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotation);
+            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
 
             if ($parameterObj === null) {
-                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotation);
+                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
             }
             $args[$parameter->getName()] = $parameterObj;
         }

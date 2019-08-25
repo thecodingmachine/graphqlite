@@ -6,16 +6,15 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
-/**
- * Typically the first parameter of "external" fields that will be filled with the Source object.
- */
 class InputTypeParameter implements ParameterInterface
 {
     /** @var string */
     private $name;
-    /** @var InputType */
+    /** @var InputType&Type */
     private $type;
     /** @var bool */
     private $doesHaveDefaultValue;
@@ -25,6 +24,7 @@ class InputTypeParameter implements ParameterInterface
     private $argumentResolver;
 
     /**
+     * @param InputType&Type $type
      * @param mixed $defaultValue
      */
     public function __construct(string $name, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
@@ -50,6 +50,12 @@ class InputTypeParameter implements ParameterInterface
 
         if ($this->doesHaveDefaultValue) {
             return $this->defaultValue;
+        }
+
+        // Special case: if an argument is not provided for a factory BUT the factory can be instantiated without
+        // passing any argument. Let's resolve that.
+        if ($this->type instanceof ResolvableMutableInputObjectType && $this->type->isInstantiableWithoutParameters()) {
+            return $this->argumentResolver->resolve($source, [], $context, $info, $this->type);
         }
 
         throw MissingArgumentException::create($this->name);

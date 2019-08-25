@@ -10,7 +10,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 /**
- * @Type(class=TheCodingMachine\GraphQLite\Fixtures\TestObject::class)
  * @SourceField(name="test")
  * @SourceField(name="testBool", logged=true)
  * @SourceField(name="testRight", right=@Right(name="FOOBAR"))

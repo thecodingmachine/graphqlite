@@ -14,10 +14,10 @@ use function ltrim;
  * @Target({"METHOD"})
  * @Attributes({
  *   @Attribute("for", type = "string"),
- *   @Attribute("inputType", type = "string")
+ *   @Attribute("inputType", type = "string"),
  * })
  */
-class Parameter
+class UseInputType implements ParameterAnnotationInterface
 {
     /** @var string */
     private $for;
@@ -32,13 +32,13 @@ class Parameter
     public function __construct(array $values)
     {
         if (! isset($values['for'], $values['inputType'])) {
-            throw new BadMethodCallException('The @Parameter annotation must be passed a target and an input type. For instance: "@Parameter(for="$input", inputType="MyInputType")"');
+            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")"');
         }
-        $this->for       = ltrim($values['for'], '$');
+        $this->for = ltrim($values['for'], '$');
         $this->inputType = $values['inputType'];
     }
 
-    public function getFor(): string
+    public function getTarget(): string
     {
         return $this->for;
     }

@@ -41,6 +41,7 @@ use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
@@ -133,7 +134,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
-                public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
+                public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
@@ -189,22 +190,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return $typeName === 'TestObject' || $typeName === 'TestObject2' || $typeName === 'TestObjectInput';
                 }
 
-                public function canExtendTypeForClass(string $className, MutableObjectType $type): bool
+                public function canExtendTypeForClass(string $className, MutableInterface $type): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForClass(string $className, MutableObjectType $type): void
+                public function extendTypeForClass(string $className, MutableInterface $type): void
                 {
                     throw CannotMapTypeException::createForExtendType($className, $type);
                 }
 
-                public function canExtendTypeForName(string $typeName, MutableObjectType $type): bool
+                public function canExtendTypeForName(string $typeName, MutableInterface $type): bool
                 {
                     return false;
                 }
 
-                public function extendTypeForName(string $typeName, MutableObjectType $type): void
+                public function extendTypeForName(string $typeName, MutableInterface $type): void
                 {
                     throw CannotMapTypeException::createForExtendName($typeName, $type);
                 }
@@ -342,18 +343,5 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeRegistry = new TypeRegistry();
         }
         return $this->typeRegistry;
-    }
-
-    protected function getLockFactory(): LockFactory
-    {
-        if ($this->lockFactory === null) {
-            if (extension_loaded('sysvsem')) {
-                $lockStore = new SemaphoreStore();
-            } else {
-                $lockStore = new FlockStore(sys_get_temp_dir());
-            }
-            $this->lockFactory = new LockFactory($lockStore);
-        }
-        return $this->lockFactory;
     }
 }
