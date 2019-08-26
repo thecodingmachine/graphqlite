@@ -290,7 +290,68 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
-    public function testEndToEndInputType(): void
+    public function testEndToEndInputTypeDate()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+          saveBirthDate(birthDate: "1942-12-24 00:00:00")  {
+            name
+            birthDate
+          }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'saveBirthDate' => [
+                'name' => 'Bill',
+                'birthDate' => '1942-12-24T00:00:00+00:00',
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndInputTypeDateAsParam()
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation($birthDate: DateTime!) {
+          saveBirthDate(birthDate: $birthDate) {
+            name
+            birthDate
+          }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            null,
+            [
+                "birthDate" => "1942-12-24 00:00:00"
+            ]
+        );
+
+        $this->assertSame([
+            'saveBirthDate' => [
+                'name' => 'Bill',
+                'birthDate' => '1942-12-24T00:00:00+00:00',
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndInputType()
     {
         /**
          * @var Schema $schema

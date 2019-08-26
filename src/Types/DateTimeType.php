@@ -42,6 +42,10 @@ class DateTimeType extends ScalarType
             return null;
         }
 
+        if ($value instanceof DateTimeImmutable) {
+            return $value;
+        }
+
         return new DateTimeImmutable($value);
     }
 
