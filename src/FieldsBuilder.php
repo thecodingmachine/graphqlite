@@ -233,7 +233,7 @@ class FieldsBuilder
             }
         }
 
-        foreach ($refClass->getMethods() as $refMethod) {
+        foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $refMethod->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
                 // We will merge the fields anyway.

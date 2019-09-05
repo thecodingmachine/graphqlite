@@ -329,8 +329,8 @@ final class GlobTypeMapper implements TypeMapperInterface
 
             $isAbstract = $refClass->isAbstract();
 
-            foreach ($refClass->getMethods() as $method) {
-                if (!$method->isPublic() || ($isAbstract && !$method->isStatic())) {
+            foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                if ($isAbstract && !$method->isStatic()) {
                     continue;
                 }
                 $factory = $this->annotationReader->getFactoryAnnotation($method);
