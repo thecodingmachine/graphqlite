@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\CacheUtils\ClassBoundCache;
@@ -148,8 +149,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
                 $isAbstract = $refClass->isAbstract();
 
-                foreach ($refClass->getMethods() as $method) {
-                    if (! $method->isPublic() || ($isAbstract && ! $method->isStatic())) {
+                foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                    if ($isAbstract && ! $method->isStatic()) {
                         continue;
                     }
                     $factory = $this->annotationReader->getFactoryAnnotation($method);
