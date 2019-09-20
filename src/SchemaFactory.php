@@ -14,6 +14,8 @@ use GraphQL\Type\SchemaConfig;
 use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
@@ -31,6 +33,7 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -85,6 +88,8 @@ class SchemaFactory
     private $globTtl = 2;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
+    /** @var ExpressionLanguage|null */
+    private $expressionLanguage;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -272,6 +277,17 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * Sets a custom expression language to use.
+     * ExpressionLanguage is used to evaluate expressions in the "Security" tag.
+     */
+    public function setExpressionLanguage(ExpressionLanguage $expressionLanguage): self
+    {
+        $this->expressionLanguage = $expressionLanguage;
+
+        return $this;
+    }
+
     public function createSchema(): Schema
     {
         $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
@@ -282,10 +298,15 @@ class SchemaFactory
         $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry          = new TypeRegistry();
 
+        $psr6Cache = new Psr16Adapter($this->cache);
+        $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($psr6Cache);
+
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         foreach ($this->fieldMiddlewares as $fieldMiddleware) {
             $fieldMiddlewarePipe->pipe($fieldMiddleware);
         }
+        // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
+        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         $compositeTypeMapper = new CompositeTypeMapper();

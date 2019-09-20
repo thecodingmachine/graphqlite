@@ -9,8 +9,11 @@ use GraphQL\Type\Definition\NonNull;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\SimpleCache\CacheInterface;
 use stdClass;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
@@ -36,6 +39,8 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
@@ -88,12 +93,19 @@ class EndToEndTest extends TestCase
             FieldMiddlewareInterface::class => function(ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
+                $pipe->pipe($container->get(SecurityFieldMiddleware::class));
                 return $pipe;
             },
             AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
                 return new AuthorizationFieldMiddleware(
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class)
+                );
+            },
+            SecurityFieldMiddleware::class => function(ContainerInterface $container) {
+                return new SecurityFieldMiddleware(
+                    new ExpressionLanguage(new Psr16Adapter(new ArrayCache())),
+                    $container->get(AuthenticationServiceInterface::class)
                 );
             },
             ArgumentResolver::class => function(ContainerInterface $container) {
@@ -882,6 +894,84 @@ class EndToEndTest extends TestCase
                 'fullName' => 'JOE',
                 'phone' => '0123456789'
             ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndSecurityAnnotation(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            secretPhrase(secret: "foo")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'secretPhrase' => 'you can see this secret only if passed parameter is "foo"'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        $queryString = '
+        query {
+            secretPhrase(secret: "bar")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Wrong secret passed');
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    public function testEndToEndSecurityFailWithAnnotation(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            nullableSecretPhrase(secret: "bar")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'nullableSecretPhrase' => null
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Test with @FailWith annotation
+        $queryString = '
+        query {
+            nullableSecretPhrase2(secret: "bar")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'nullableSecretPhrase2' => null
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 }

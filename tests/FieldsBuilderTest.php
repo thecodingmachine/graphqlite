@@ -274,6 +274,11 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             {
                 return true;
             }
+
+            public function getUser(): ?object
+            {
+                return new stdClass();
+            }
         };
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
