@@ -39,9 +39,9 @@ class Security implements MiddlewareAnnotationInterface
     public function __construct(array $values)
     {
         if (! isset($values['value']) && ! isset($values['expression'])) {
-            throw new BadMethodCallException('The @Security annotation must be passed an expression. For instance: "@Security("hasRight(\'CAN_EDIT_STUFF\')")"');
+            throw new BadMethodCallException('The @Security annotation must be passed an expression. For instance: "@Security("is_granted(\'CAN_EDIT_STUFF\')")"');
         }
-        $this->expression = $values['value'] ?? $values['name'];
+        $this->expression = $values['value'] ?? $values['expression'];
         if (array_key_exists('failWith', $values)) {
             $this->failWith = $values['failWith'];
             $this->failWithIsSet = true;
@@ -49,7 +49,7 @@ class Security implements MiddlewareAnnotationInterface
         $this->message = $values['message'] ?? 'Access denied.';
         $this->statusCode = $values['statusCode'] ?? 403;
         if ($this->failWithIsSet === true && (isset($values['message']) || isset($values['statusCode']))) {
-            throw new GraphQLException('A @Security annotation that has "failWith" attribute set cannot have a message or a statusCode attribute.');
+            throw new BadMethodCallException('A @Security annotation that has "failWith" attribute set cannot have a message or a statusCode attribute.');
         }
     }
 

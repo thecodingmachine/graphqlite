@@ -6,8 +6,10 @@ use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\PhpFilesCache;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
@@ -65,6 +67,7 @@ class SchemaFactoryTest extends TestCase
                 ->addParameterMapper(new CompositeParameterMapper([]))
                 ->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([], $container))
                 ->setSchemaConfig(new SchemaConfig())
+                ->setExpressionLanguage(new ExpressionLanguage(new Psr16Adapter(new ArrayCache())))
                 ->devMode()
                 ->prodMode();
 
