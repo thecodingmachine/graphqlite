@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
+use Closure;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use Psr\Log\LoggerInterface;
 use ReflectionFunction;
-use stdClass;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -19,14 +19,10 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use Webmozart\Assert\Assert;
 use function array_combine;
-use function array_intersect;
 use function array_keys;
 use function array_merge;
-use function count;
-use function implode;
 use function is_array;
 use function is_object;
-use function sprintf;
 
 /**
  * A field middleware that reads "Security" Symfony annotations.
@@ -39,9 +35,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
     private $authenticationService;
     /** @var LoggerInterface|null */
     private $logger;
-    /**
-     * @var AuthorizationServiceInterface
-     */
+    /** @var AuthorizationServiceInterface */
     private $authorizationService;
 
     public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService, ?LoggerInterface $logger = null)
@@ -161,7 +155,12 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         if (is_array($callable) && is_object($callable[0])) {
             return $callable[0];
         }
-        $reflectionFunction = new ReflectionFunction($callable);
-        return $reflectionFunction->getClosureThis();
+        if ($callable instanceof Closure) {
+            $reflectionFunction = new ReflectionFunction($callable);
+
+            return $reflectionFunction->getClosureThis();
+        }
+
+        return null;
     }
 }

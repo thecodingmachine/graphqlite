@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Security;
-
 
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
@@ -16,7 +16,7 @@ class SecurityExpressionLanguageProvider implements ExpressionFunctionProviderIn
     /**
      * @return ExpressionFunction[] An array of Function instances
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new ExpressionFunction('is_granted', static function (string $rightName, $object = 'null'): string {

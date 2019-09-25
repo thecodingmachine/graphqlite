@@ -15,5 +15,9 @@ class SecurityFieldMiddlewareTest extends TestCase
         $object = SecurityFieldMiddleware::getThisFromCallable($callable);
 
         $this->assertSame($this, $object);
+
+        $object = SecurityFieldMiddleware::getThisFromCallable('strpos');
+
+        $this->assertNull($object);
     }
 }
