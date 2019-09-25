@@ -305,7 +305,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     public function testRightInSourceField(): void
     {
         $authorizationService = new class implements AuthorizationServiceInterface {
-            public function isAllowed(string $right): bool
+            public function isAllowed(string $right, $subject = null): bool
             {
                 return true;
             }

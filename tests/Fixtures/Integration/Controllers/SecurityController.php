@@ -41,4 +41,36 @@ class SecurityController
     {
         return 'you can see this secret only if passed parameter is "foo"';
     }
+
+    /**
+     * @Query()
+     * @Security("user && user.bar == 42")
+     */
+    public function getSecretUsingUser(): string
+    {
+        return 'you can see this secret only if user.bar is set to 42';
+    }
+
+    /**
+     * @Query()
+     * @Security("is_granted('CAN_EDIT', user) && is_logged()")
+     */
+    public function getSecretUsingIsGranted(): string
+    {
+        return 'you can see this secret only if user has right "CAN_EDIT"';
+    }
+
+    /**
+     * @Query()
+     * @Security("this.isAllowed(secret)")
+     */
+    public function getSecretUsingThis(string $secret): string
+    {
+        return 'you can see this secret only if isAllowed() returns true';
+    }
+
+    public function isAllowed(string $secret): bool
+    {
+        return $secret === '42';
+    }
 }

@@ -50,6 +50,7 @@ use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\TypeGenerator;
@@ -69,7 +70,15 @@ class EndToEndTest extends TestCase
 
     public function setUp(): void
     {
-        $this->mainContainer = new Picotainer([
+        $this->mainContainer = $this->createContainer();
+    }
+
+    /**
+     * @param array<string, callable> $overloadedServices
+     */
+    public function createContainer(array $overloadedServices = []): ContainerInterface
+    {
+        $services = [
             Schema::class => function(ContainerInterface $container) {
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), null, $container->get(RootTypeMapperInterface::class));
             },
@@ -104,8 +113,9 @@ class EndToEndTest extends TestCase
             },
             SecurityFieldMiddleware::class => function(ContainerInterface $container) {
                 return new SecurityFieldMiddleware(
-                    new ExpressionLanguage(new Psr16Adapter(new ArrayCache())),
-                    $container->get(AuthenticationServiceInterface::class)
+                    new ExpressionLanguage(new Psr16Adapter(new ArrayCache()), [new SecurityExpressionLanguageProvider()]),
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
                 );
             },
             ArgumentResolver::class => function(ContainerInterface $container) {
@@ -144,7 +154,7 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     new ArrayCache()
-                    );
+                );
             },
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
@@ -217,11 +227,13 @@ class EndToEndTest extends TestCase
                     $container->get(ContainerParameterMapper::class)
                 ]);
             }
-        ]);
-        $this->mainContainer->get(TypeResolver::class)->registerSchema($this->mainContainer->get(Schema::class));
-        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class));
-        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class.'2'));
-        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(PorpaginasTypeMapper::class));
+        ];
+        $container = new Picotainer($overloadedServices + $services);
+        $container->get(TypeResolver::class)->registerSchema($container->get(Schema::class));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'2'));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
+        return $container;
     }
 
     public function testEndToEnd(): void
@@ -974,4 +986,129 @@ class EndToEndTest extends TestCase
             'nullableSecretPhrase2' => null
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
+
+    public function testEndToEndSecurityWithUser(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            secretUsingUser
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testEndToEndSecurityWithUserConnected(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_EDIT' && $subject->bar == 42) {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+
+
+        ]);
+
+        /**
+         * @var Schema $schema
+         */
+        $schema = $container->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            secretUsingUser
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('you can see this secret only if user.bar is set to 42', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingUser']);
+
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            secretUsingIsGranted
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGranted']);
+    }
+
+    public function testEndToEndSecurityWithThis(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            secretUsingThis(secret:"41")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            secretUsingThis(secret:"42")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingThis']);
+    }
+
 }

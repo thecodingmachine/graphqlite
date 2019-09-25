@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
+use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
@@ -300,13 +301,14 @@ class SchemaFactory
 
         $psr6Cache = new Psr16Adapter($this->cache);
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($psr6Cache);
+        $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
 
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         foreach ($this->fieldMiddlewares as $fieldMiddleware) {
             $fieldMiddlewarePipe->pipe($fieldMiddleware);
         }
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
-        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService));
+        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         $compositeTypeMapper = new CompositeTypeMapper();
