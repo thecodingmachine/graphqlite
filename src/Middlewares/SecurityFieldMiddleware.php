@@ -34,16 +34,16 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
     /** @var AuthenticationServiceInterface */
     private $authenticationService;
     /** @var LoggerInterface|null */
-    private $logger;
+    /*private $logger;*/
     /** @var AuthorizationServiceInterface */
     private $authorizationService;
 
-    public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService, ?LoggerInterface $logger = null)
+    public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
     {
         $this->language = $language;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
-        $this->logger = $logger;
+        /*$this->logger = $logger;*/
     }
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
