@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
-use TheCodingMachine\GraphQLite\GraphQLException;
 use function array_key_exists;
 
 /**
