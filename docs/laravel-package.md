@@ -45,12 +45,15 @@ return [
     'controllers' => 'App\\Http\\Controllers',
     'types' => 'App\\',
     'debug' => Debug::RETHROW_UNSAFE_EXCEPTIONS,
-    'uri' => '/graphql'
+    'uri' => env('GRAPHQLITE_URI', '/graphql'),
+    'middleware' => ['web'],
 ];
 ```
 
 The debug parameters are detailed in the [documentation of the Webonyx GraphQL library](https://webonyx.github.io/graphql-php/error-handling/)
 which is used internally by GraphQLite.
+
+<div class="alert alert-warning">By default `/graphql` route is placed under `web` middleware group which requires a CSRF token. If you need to add your own middleware you can edit them in the config file above, or add `graphql` to `$except` in `app/Http/Middleware/VerifyCsrfToken.php`.</div>
 
 
 ## Adding GraphQL DevTools
