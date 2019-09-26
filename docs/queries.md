@@ -56,7 +56,7 @@ The easiest way to test a GraphQL endpoint is to use [GraphiQL](https://github.c
 
 Here a query using our simple *Hello World* example:
 
-![](../img/query1.png)
+![](/img/query1.png)
 
 ## Query with a type
 
