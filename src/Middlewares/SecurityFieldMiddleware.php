@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use Throwable;
 use Webmozart\Assert\Assert;
 use function array_combine;
 use function array_keys;
@@ -88,11 +89,17 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
         $parameters = $queryFieldDescriptor->getParameters();
 
-        $queryFieldDescriptor->setCallable(function (...$args) use ($securityAnnotations, $callable, $failWith, $parameters) {
+        $queryFieldDescriptor->setCallable(function (...$args) use ($securityAnnotations, $callable, $failWith, $parameters, $queryFieldDescriptor) {
             $variables = $this->getVariables($args, $parameters, $callable);
 
             foreach ($securityAnnotations as $annotation) {
-                if (! $this->language->evaluate($annotation->getExpression(), $variables)) {
+                try {
+                    $authorized = $this->language->evaluate($annotation->getExpression(), $variables);
+                } catch (Throwable $e) {
+                    throw BadExpressionInSecurityException::wrapException($e, $queryFieldDescriptor);
+                }
+
+                if (! $authorized) {
                     if ($annotation->isFailWithSet()) {
                         return $annotation->getFailWith();
                     }

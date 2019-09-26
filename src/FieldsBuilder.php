@@ -234,6 +234,7 @@ class FieldsBuilder
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
+            $fieldDescriptor->setRefMethod($refMethod);
 
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
@@ -390,6 +391,7 @@ class FieldsBuilder
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
+            $fieldDescriptor->setRefMethod($refMethod);
             $fieldDescriptor->setName($sourceField->getName());
 
             $methodName = $refMethod->getName();

@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -40,6 +41,8 @@ class QueryFieldDescriptor
     private $comment;
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
+    /** @var ReflectionMethod */
+    private $refMethod;
 
     public function getName(): string
     {
@@ -159,5 +162,15 @@ class QueryFieldDescriptor
     public function setMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void
     {
         $this->middlewareAnnotations = $middlewareAnnotations;
+    }
+
+    public function getRefMethod(): ReflectionMethod
+    {
+        return $this->refMethod;
+    }
+
+    public function setRefMethod(ReflectionMethod $refMethod): void
+    {
+        $this->refMethod = $refMethod;
     }
 }

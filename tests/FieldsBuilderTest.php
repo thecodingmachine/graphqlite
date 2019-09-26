@@ -23,6 +23,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
@@ -57,6 +58,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -664,5 +666,24 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(2, $testField->args);
         $this->assertSame('string', $testField->args[0]->name);
         $this->assertSame('int', $testField->args[1]->name);
+    }
+
+    public function testSecurityBadQuery(): void
+    {
+        $controller = new TestControllerWithBadSecurity();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(1, $queries);
+        $query = $queries[0];
+        $this->assertSame('testBadSecurity', $query->name);
+
+        $resolve = $query->resolveFn;
+
+        $this->expectException(BadExpressionInSecurityException::class);
+        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
+        $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
     }
 }
