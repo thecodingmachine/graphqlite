@@ -107,6 +107,27 @@ Note: since a single GraphQL call contain many errors, 2 errors might have confl
 The resulting status code is up to the GraphQL middleware you use. Most of the time, the status code with the 
 higher error code will be returned.
 
+## Setting a default value
+
+If you do not want an error to be thrown when the security condition is not met, you can use the `failWith` attribute
+to set a default value.
+
+```php
+/**
+ * @Field
+ * @Security("is_granted('CAN_SEE_MARGIN', this)", failWith=null)
+ */
+public function getMargin(): float
+{
+    // ...
+}
+```
+
+The `failWith` attribute behaves just like the [`@FailWith` annotation](authentication_authorization.md#not-throwing-errors)
+but for a given `@Security` annotation.
+
+You cannot use the `failWith` attribute along `statusCode` or `message` attributes.
+
 ## Accessing the user
 
 You can use the `user` variable to access the currently logged user.
