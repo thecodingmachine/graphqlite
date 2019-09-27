@@ -16,4 +16,13 @@ class FailAuthenticationService implements AuthenticationServiceInterface
     {
         throw SecurityNotImplementedException::createNoAuthenticationException();
     }
+
+    /**
+     * Returns an object representing the current logged user.
+     * Can return null if the user is not logged.
+     */
+    public function getUser(): ?object
+    {
+        throw SecurityNotImplementedException::createNoAuthenticationException();
+    }
 }

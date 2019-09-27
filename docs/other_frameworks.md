@@ -281,4 +281,4 @@ return new Picotainer([
 
 And we are done! You can now test your query using your favorite GraphQL client.
 
-![](../img/query1.png)
+![](assets/query1.png)

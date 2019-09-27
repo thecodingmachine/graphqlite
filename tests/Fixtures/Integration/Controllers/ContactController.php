@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 use Porpaginas\Arrays\ArrayResult;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
 

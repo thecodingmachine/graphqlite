@@ -15,7 +15,9 @@ use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
@@ -37,7 +39,10 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
@@ -260,6 +265,14 @@ abstract class AbstractQueryProviderTest extends TestCase
 
     protected function buildFieldsBuilder(): FieldsBuilder
     {
+        $fieldMiddlewarePipe = new FieldMiddlewarePipe();
+        $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware(
+            new VoidAuthenticationService(),
+            new VoidAuthorizationService()
+        ));
+        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new ArrayCache()), [new SecurityExpressionLanguageProvider()]);
+        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, new VoidAuthenticationService(), new VoidAuthorizationService()));
+
         return new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
@@ -274,10 +287,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             new CompositeParameterMapper([
                 new ResolveInfoParameterMapper()
             ]),
-            new AuthorizationFieldMiddleware(
-                new VoidAuthenticationService(),
-                new VoidAuthorizationService()
-            )
+            $fieldMiddlewarePipe
         );
     }
 

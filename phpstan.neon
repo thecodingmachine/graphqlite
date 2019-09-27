@@ -11,5 +11,8 @@ parameters:
         - "#Parameter \\#2 \\$inputTypeNode of static method GraphQL\\\\Utils\\\\AST::typeFromAST() expects GraphQL\\\\Language\\\\AST\\\\ListTypeNode|GraphQL\\\\Language\\\\AST\\\\NamedTypeNode|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode, GraphQL\\\\Language\\\\AST\\\\ListTypeNode|GraphQL\\\\Language\\\\AST\\\\NameNode|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode given.#"
         - "#PHPDoc tag @throws with type Psr\\\\SimpleCache\\\\InvalidArgumentException is not subtype of Throwable#"
         - '#Variable \$context might not be defined.#'
+        #-
+        #  message: '#If condition is always true#'
+        #  path: src/Middlewares/SecurityFieldMiddleware.php
 #includes:
 #    - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
