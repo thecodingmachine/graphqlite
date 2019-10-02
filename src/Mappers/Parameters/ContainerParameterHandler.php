@@ -16,7 +16,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 /**
  * Maps parameters with the \@Autowire annotation to container entry based on the FQCN or the passed identifier.
  */
-class ContainerParameterMapper implements ParameterMapperInterface
+class ContainerParameterHandler implements ParameterMiddlewareInterface
 {
     /** @var ContainerInterface */
     private $container;
@@ -26,7 +26,7 @@ class ContainerParameterMapper implements ParameterMapperInterface
         $this->container = $container;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
     {
         /**
          * @var Autowire|null $autowire
@@ -34,7 +34,7 @@ class ContainerParameterMapper implements ParameterMapperInterface
         $autowire = $parameterAnnotations->getAnnotationByType(Autowire::class);
 
         if ($autowire === null) {
-            return null;
+            return $next->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
         }
 
         $id = $autowire->getIdentifier();

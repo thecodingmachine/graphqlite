@@ -24,10 +24,9 @@ use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -40,6 +39,7 @@ use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -95,7 +95,7 @@ class EndToEndTest extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMapperInterface::class),
+                    $container->get(ParameterMiddlewareInterface::class),
                     $container->get(FieldMiddlewareInterface::class)
                 );
             },
@@ -211,8 +211,8 @@ class EndToEndTest extends TestCase
                     new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
                 ]);
             },
-            ContainerParameterMapper::class => function(ContainerInterface $container) {
-                return new ContainerParameterMapper($container, true, true);
+            ContainerParameterHandler::class => function(ContainerInterface $container) {
+                return new ContainerParameterHandler($container, true, true);
             },
             'testService' => function() {
                 return 'foo';
@@ -221,11 +221,12 @@ class EndToEndTest extends TestCase
                 // Empty test service for autowiring
                 return new stdClass();
             },
-            ParameterMapperInterface::class => function(ContainerInterface $container) {
-                return new CompositeParameterMapper([
-                    new ResolveInfoParameterMapper(),
-                    $container->get(ContainerParameterMapper::class)
-                ]);
+            ParameterMiddlewareInterface::class => function(ContainerInterface $container) {
+                $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
+                $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+                $parameterMiddlewarePipe->pipe($container->get(ContainerParameterHandler::class));
+
+                return $parameterMiddlewarePipe;
             }
         ];
         $container = new Picotainer($overloadedServices + $services);

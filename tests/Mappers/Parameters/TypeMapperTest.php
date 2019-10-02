@@ -19,7 +19,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testMapScalarUnionException(): void
     {
-        $typeMapper = new TypeMapper($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
+        $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
             new BaseTypeMapper($this->getTypeMapper())
         ]), $this->getTypeResolver());
@@ -36,7 +36,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testHideParameter(): void
     {
-        $typeMapper = new TypeMapper($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
+        $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
             new BaseTypeMapper($this->getTypeMapper())
         ]), $this->getTypeResolver());
@@ -58,7 +58,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testHideParameterException(): void
     {
-        $typeMapper = new TypeMapper($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
+        $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
             new BaseTypeMapper($this->getTypeMapper())
         ]), $this->getTypeResolver());

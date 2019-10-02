@@ -17,8 +17,8 @@ use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
@@ -49,9 +49,9 @@ class FieldsBuilder
     private $typeResolver;
     /** @var NamingStrategyInterface */
     private $namingStrategy;
-    /** @var TypeMapper */
+    /** @var TypeHandler */
     private $typeMapper;
-    /** @var ParameterMapperInterface */
+    /** @var ParameterMiddlewareInterface */
     private $parameterMapper;
     /** @var FieldMiddlewareInterface */
     private $fieldMiddleware;
@@ -64,7 +64,7 @@ class FieldsBuilder
         CachedDocBlockFactory $cachedDocBlockFactory,
         NamingStrategyInterface $namingStrategy,
         RootTypeMapperInterface $rootTypeMapper,
-        ParameterMapperInterface $parameterMapper,
+        ParameterMiddlewareInterface $parameterMapper,
         FieldMiddlewareInterface $fieldMiddleware
     ) {
         $this->annotationReader      = $annotationReader;
@@ -72,7 +72,7 @@ class FieldsBuilder
         $this->typeResolver          = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy        = $namingStrategy;
-        $this->typeMapper            = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver);
+        $this->typeMapper            = new TypeHandler($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver);
         $this->parameterMapper       = $parameterMapper;
         $this->fieldMiddleware = $fieldMiddleware;
     }
@@ -480,11 +480,8 @@ class FieldsBuilder
         foreach ($refParameters as $parameter) {
             $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
 
-            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
+            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations, $this->typeMapper);
 
-            if ($parameterObj === null) {
-                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
-            }
             $args[$parameter->getName()] = $parameterObj;
         }
 

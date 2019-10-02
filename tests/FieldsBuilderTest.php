@@ -53,8 +53,7 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -290,7 +289,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 $authenticationService,
                 new VoidAuthorizationService()
@@ -321,7 +320,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 $authorizationService
@@ -382,7 +381,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService()
