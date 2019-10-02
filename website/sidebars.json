@@ -5,7 +5,7 @@
     "Usage": ["queries", "mutations", "type_mapping", "autowiring", "extend_type", "external_type_declaration", "input-types", "inheritance-interfaces"],
     "Security": ["authentication_authorization", "fine-grained-security", "implementing-security"],
     "Performance": ["query-plan", "prefetch-method"],
-    "Advanced": ["file-uploads", "pagination", "custom-types", "field-middlewares", "extend_input_type", "multiple_output_types", "symfony-bundle-advanced", "internals", "troubleshooting", "migrating"],
+    "Advanced": ["file-uploads", "pagination", "custom-types", "field-middlewares", "extend_input_type", "multiple_output_types", "symfony-bundle-advanced", "laravel-package-advanced", "internals", "troubleshooting", "migrating"],
     "Reference": ["annotations_reference"]
   }
 }

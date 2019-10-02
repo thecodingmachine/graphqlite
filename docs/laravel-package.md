@@ -56,7 +56,7 @@ which is used internally by GraphQLite.
 
 ## Configuring CSRF protection
 
-<div class="alert alert-warning">By default, the `/graphql` route is placed under `web` middleware group which requires a 
+<div class="alert alert-warning">By default, the <code>/graphql</code> route is placed under <code>web</code> middleware group which requires a 
 <a href="https://laravel.com/docs/6.x/csrf">CSRF token</a>.</div>
 
 You have 3 options:
