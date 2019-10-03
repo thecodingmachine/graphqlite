@@ -10,7 +10,7 @@ use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
-class InputTypeParameter implements ParameterInterface
+class InputTypeParameter implements InputTypeParameterInterface
 {
     /** @var string */
     private $name;
