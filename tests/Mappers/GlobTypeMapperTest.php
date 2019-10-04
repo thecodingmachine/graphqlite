@@ -21,7 +21,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactoryNoType;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use GraphQL\Type\Definition\ObjectType;
@@ -363,7 +363,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\NonInstantiableType', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('Class "TheCodingMachine\GraphQLite\Fixtures\NonInstantiableType\AbstractFooType" annotated with @Type(class="TheCodingMachine\GraphQLite\Fixtures\TestObject") must be instantiable.');
         $mapper->mapClassToType(TestObject::class, null);
     }

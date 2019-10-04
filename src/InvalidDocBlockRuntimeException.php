@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use ReflectionMethod;
 
-class InvalidDocBlockException extends GraphQLException
+class InvalidDocBlockRuntimeException extends GraphQLRuntimeException
 {
     public static function tooManyReturnTags(ReflectionMethod $refMethod): self
     {

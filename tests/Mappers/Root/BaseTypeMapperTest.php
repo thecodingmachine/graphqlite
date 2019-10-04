@@ -10,7 +10,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Resource_;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class BaseTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -27,7 +27,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     {
         $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
         $baseTypeMapper->toGraphQLInputType(new Object_(new Fqsen('\\DateTime')), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }

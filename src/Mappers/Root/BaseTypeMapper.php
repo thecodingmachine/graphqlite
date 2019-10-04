@@ -25,7 +25,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
@@ -142,7 +142,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
                 case '\\DateTime':
-                    throw new GraphQLException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+                    throw new GraphQLRuntimeException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
                 case '\\' . ID::class:
                     return GraphQLType::id();
                 default:

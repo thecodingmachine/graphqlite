@@ -9,7 +9,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 
 class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest

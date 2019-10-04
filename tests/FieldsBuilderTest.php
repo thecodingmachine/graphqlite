@@ -160,7 +160,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $queryProvider->getQueries($controller);
     }
 
@@ -355,7 +355,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     {
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQLite\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
         $queryProvider->getFields(new TestTypeMissingReturnType(), true);
     }
@@ -431,7 +431,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     public function testNoReturnTypeError(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $queryProvider->getQueries(new TestControllerNoReturnType());
     }
 
@@ -482,7 +482,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
         $queryProvider->getQueries($controller);
     }
@@ -493,7 +493,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType::test is type-hinted to array. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]');
         $queryProvider->getQueries($controller);
     }
@@ -504,7 +504,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam::test is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
         $queryProvider->getQueries($controller);
     }
@@ -515,7 +515,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
         $queryProvider->getQueries($controller);
     }
@@ -597,7 +597,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     public function testDoubleReturnException(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
-        $this->expectException(InvalidDocBlockException::class);
+        $this->expectException(InvalidDocBlockRuntimeException::class);
         $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Fixtures\\TestDoubleReturnTag::test has several @return annotations.');
         $queryProvider->getFields(new TestDoubleReturnTag(), true);
     }
@@ -635,7 +635,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(InvalidPrefetchMethodException::class);
+        $this->expectException(InvalidPrefetchMethodRuntimeException::class);
         $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a "prefetch method" that could not be found. Unable to find method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists.');
         $queryProvider->getFields($controller);
     }
@@ -646,7 +646,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(InvalidPrefetchMethodException::class);
+        $this->expectException(InvalidPrefetchMethodRuntimeException::class);
         $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter::prefetch specifies a "prefetch method" but the data from the prefetch method is not gathered. The "prefetch" method should accept a second parameter that will contain data returned by the prefetch method.');
         $queryProvider->getFields($controller);
     }

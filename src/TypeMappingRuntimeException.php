@@ -18,7 +18,7 @@ use Webmozart\Assert\Assert;
 use function get_class;
 use function sprintf;
 
-class TypeMappingException extends GraphQLException
+class TypeMappingRuntimeException extends GraphQLRuntimeException
 {
     /** @var Type */
     private $type;
@@ -31,7 +31,7 @@ class TypeMappingException extends GraphQLException
         return $e;
     }
 
-    public static function wrapWithParamInfo(TypeMappingException $previous, ReflectionParameter $parameter): TypeMappingException
+    public static function wrapWithParamInfo(TypeMappingRuntimeException $previous, ReflectionParameter $parameter): TypeMappingRuntimeException
     {
         $declaringClass = $parameter->getDeclaringClass();
         Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
@@ -56,14 +56,14 @@ class TypeMappingException extends GraphQLException
             );
         } else {
             if (! ($previous->type instanceof Object_)) {
-                throw new GraphQLException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
+                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
             }
 
             $fqcn     = (string) $previous->type->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2
             if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                throw new GraphQLException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
+                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
             }
 
             $message = sprintf(
@@ -83,7 +83,7 @@ class TypeMappingException extends GraphQLException
         return $e;
     }
 
-    public static function wrapWithReturnInfo(TypeMappingException $previous, ReflectionMethod $method): TypeMappingException
+    public static function wrapWithReturnInfo(TypeMappingRuntimeException $previous, ReflectionMethod $method): TypeMappingRuntimeException
     {
         if ($previous->type instanceof Array_ || $previous->type instanceof Iterable_) {
             $typeStr = $previous->type instanceof Array_ ? 'array' : 'iterable';
@@ -101,14 +101,14 @@ class TypeMappingException extends GraphQLException
             );
         } else {
             if (! ($previous->type instanceof Object_)) {
-                throw new GraphQLException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
+                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
             }
 
             $fqcn     = (string) $previous->type->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2
             if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                throw new GraphQLException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
+                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
             }
 
             $message = sprintf(

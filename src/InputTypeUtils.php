@@ -55,11 +55,11 @@ class InputTypeUtils
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType === null) {
-            throw MissingTypeHintException::missingReturnType($refMethod);
+            throw MissingTypeHintRuntimeException::missingReturnType($refMethod);
         }
 
         if ($returnType->allowsNull()) {
-            throw MissingTypeHintException::nullableReturnType($refMethod);
+            throw MissingTypeHintRuntimeException::nullableReturnType($refMethod);
         }
 
         $type = (string) $returnType;
@@ -70,7 +70,7 @@ class InputTypeUtils
         Assert::notNull($phpdocType);
         $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         if (! $phpdocType instanceof Object_) {
-            throw MissingTypeHintException::invalidReturnType($refMethod);
+            throw MissingTypeHintRuntimeException::invalidReturnType($refMethod);
         }
 
         $fqsen = $phpdocType->getFqsen();

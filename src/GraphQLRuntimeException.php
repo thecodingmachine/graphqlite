@@ -6,6 +6,6 @@ namespace TheCodingMachine\GraphQLite;
 
 use RuntimeException;
 
-class GraphQLException extends RuntimeException
+class GraphQLRuntimeException extends RuntimeException
 {
 }

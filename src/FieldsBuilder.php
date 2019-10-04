@@ -255,7 +255,7 @@ class FieldsBuilder
                     try {
                         $prefetchRefMethod = $refClass->getMethod($prefetchMethodName);
                     } catch (ReflectionException $e) {
-                        throw InvalidPrefetchMethodException::methodNotFound($refMethod, $refClass, $prefetchMethodName, $e);
+                        throw InvalidPrefetchMethodRuntimeException::methodNotFound($refMethod, $refClass, $prefetchMethodName, $e);
                     }
 
                     $prefetchParameters = $prefetchRefMethod->getParameters();
@@ -276,7 +276,7 @@ class FieldsBuilder
             if ($prefetchMethodName !== null) {
                 $secondParameter = array_shift($parameters);
                 if ($secondParameter === null) {
-                    throw InvalidPrefetchMethodException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
+                    throw InvalidPrefetchMethodRuntimeException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
                 }
             }
 
@@ -462,7 +462,7 @@ class FieldsBuilder
      *
      * @return array<string, ParameterInterface>
      *
-     * @throws MissingTypeHintException
+     * @throws MissingTypeHintRuntimeException
      */
     private function mapParameters(array $refParameters, DocBlock $docBlock): array
     {

@@ -70,7 +70,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
         $annotations = $this->getAnnotationReader()->getParameterAnnotations($refParameter);
 
-        $this->expectException(CannotHideParameterException::class);
+        $this->expectException(CannotHideParameterRuntimeException::class);
         $this->expectExceptionMessage('For parameter $foo of method TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::withoutDefaultValue(), cannot use the @HideParameter annotation. The parameter needs to provide a default value.');
 
         $typeMapper->mapParameter($refParameter, $docBlockObj, null, $annotations);

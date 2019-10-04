@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\TypeMappingException;
+use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
@@ -37,7 +37,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                         ],
                     ]);
                 } else {
-                    throw TypeMappingException::createFromType(TestObject::class);
+                    throw TypeMappingRuntimeException::createFromType(TestObject::class);
                 }
             }
 
@@ -51,7 +51,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                         ],
                     ]);
                 } else {
-                    throw TypeMappingException::createFromType(TestObject::class);
+                    throw TypeMappingRuntimeException::createFromType(TestObject::class);
                 }
             }
 
