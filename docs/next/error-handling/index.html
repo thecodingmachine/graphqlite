@@ -173,10 +173,10 @@ throw.</p>
     $exceptions = <span class="hljs-keyword">new</span> GraphQLAggregateException();
 
     <span class="hljs-keyword">if</span> ($name === <span class="hljs-string">''</span>) {
-        $exceptions-&gt;add(<span class="hljs-keyword">new</span> GraphQLException(<span class="hljs-string">'Name cannot be empty'</span>, <span class="hljs-number">400</span>, <span class="hljs-keyword">null</span>, <span class="hljs-string">'VALIDATION));
+        $exceptions-&gt;add(<span class="hljs-keyword">new</span> GraphQLException(<span class="hljs-string">'Name cannot be empty'</span>, <span class="hljs-number">400</span>, <span class="hljs-keyword">null</span>, <span class="hljs-string">'VALIDATION'</span>));
     }
-    if ($price &lt;= 0) {
-        $exceptions-&gt;add(new GraphQLException('</span>Price must be positive<span class="hljs-string">', 400, null, '</span>VALIDATION));
+    <span class="hljs-keyword">if</span> ($price &lt;= <span class="hljs-number">0</span>) {
+        $exceptions-&gt;add(<span class="hljs-keyword">new</span> GraphQLException(<span class="hljs-string">'Price must be positive'</span>, <span class="hljs-number">400</span>, <span class="hljs-keyword">null</span>, <span class="hljs-string">'VALIDATION'</span>));
     }
 
     <span class="hljs-keyword">if</span> ($exceptions-&gt;hasExceptions()) {
