@@ -101,9 +101,9 @@ Imagine that class "B" extends class "A" and class "A" maps to GraphQL type "ATy
 
 Since "B" *is a* "A", the "recursive type mapper" role is to make sure that "B" will also map to GraphQL type "AType". 
 
-## Parameter mappers
+## Parameter mapper middlewares
 
-"Parameter mappers" are used to decide what argument should be injected into a parameter.
+"Parameter middlewares" are used to decide what argument should be injected into a parameter.
 
 Let's have a look at a simple query:
 
@@ -116,11 +116,11 @@ public function products(ResolveInfo $info): array
 ```
 
 As you may know, [the `ResolveInfo` object injected in this query comes from Webonyx/GraphQL-PHP library](query_plan.md).
-GraphQLite knows that is must inject a `ResolveInfo` instance because it comes with a `ResolveInfoParameterMapper` class
-that implements the [`ParameterMapperInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ParameterMapperInterface.php)).
+GraphQLite knows that is must inject a `ResolveInfo` instance because it comes with a [`ResolveInfoParameterHandler`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ResolveInfoParameterHandler.php) class
+that implements the [`ParameterMiddlewareInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ParameterMiddlewareInterface.php)).
 
-You can register your own parameter mappers using the `SchemaFactory::addParameterMapper()` method, or by tagging the
-service as "graphql.parameter_mapper" if you are using the Symfony bundle.
+You can register your own parameter middlewares using the `SchemaFactory::addParameterMiddleware()` method, or by tagging the
+service as "graphql.parameter_middleware" if you are using the Symfony bundle.
 
-<div class="alert alert-info">Use a parameter mapper if you want to inject an argument in a method and if this argument
-is not a GraphQL input type</div>
+<div class="alert alert-info">Use a parameter middleware if you want to inject an argument in a method and if this argument
+is not a GraphQL input type or if you want to alter the way input types are imported (for instance if you want to add a validation step)</div>

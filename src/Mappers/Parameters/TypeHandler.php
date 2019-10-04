@@ -48,7 +48,7 @@ use function array_filter;
 use function count;
 use function iterator_to_array;
 
-class TypeMapper implements ParameterMapperInterface
+class TypeHandler implements ParameterHandlerInterface
 {
     /** @var PhpDocumentorTypeResolver */
     private $phpDocumentorTypeResolver;

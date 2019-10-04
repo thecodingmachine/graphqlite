@@ -18,18 +18,13 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -40,6 +35,7 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
@@ -68,6 +64,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeResolver;
     private $typeRegistry;
     private $lockFactory;
+    private $parameterMiddlewarePipe;
 
     protected function getTestObjectType(): MutableObjectType
     {
@@ -263,6 +260,15 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->annotationReader;
     }
 
+    protected function getParameterMiddlewarePipe(): ParameterMiddlewarePipe
+    {
+        if ($this->parameterMiddlewarePipe === null) {
+            $this->parameterMiddlewarePipe = new ParameterMiddlewarePipe();
+            $this->parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+        }
+        return $this->parameterMiddlewarePipe;
+    }
+
     protected function buildFieldsBuilder(): FieldsBuilder
     {
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
@@ -272,6 +278,9 @@ abstract class AbstractQueryProviderTest extends TestCase
         ));
         $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new ArrayCache()), [new SecurityExpressionLanguageProvider()]);
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, new VoidAuthenticationService(), new VoidAuthorizationService()));
+
+        $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
+        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
 
         return new FieldsBuilder(
             $this->getAnnotationReader(),
@@ -284,9 +293,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 new MyCLabsEnumTypeMapper(),
                 new BaseTypeMapper($this->getTypeMapper())
             ]),
-            new CompositeParameterMapper([
-                new ResolveInfoParameterMapper()
-            ]),
+            $this->getParameterMiddlewarePipe(),
             $fieldMiddlewarePipe
         );
     }
@@ -294,20 +301,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getFieldsBuilder(): FieldsBuilder
     {
         if ($this->fieldsBuilder === null) {
-            $this->fieldsBuilder = $this->buildFieldsBuilder(
-                $this->getAnnotationReader(),
-                $this->getTypeMapper(),
-                $this->getArgumentResolver(),
-                new VoidAuthenticationService(),
-                new VoidAuthorizationService(),
-                $this->getTypeResolver(),
-                new CachedDocBlockFactory(new ArrayCache()),
-                new NamingStrategy(),
-                new CompositeRootTypeMapper([
-                    new MyCLabsEnumTypeMapper(),
-                    new BaseTypeMapper($this->getTypeMapper())
-                ])
-            );
+            $this->fieldsBuilder = $this->buildFieldsBuilder();
         }
         return $this->fieldsBuilder;
     }

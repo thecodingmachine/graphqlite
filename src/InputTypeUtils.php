@@ -13,7 +13,7 @@ use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use Webmozart\Assert\Assert;
 use function array_filter;
@@ -101,10 +101,10 @@ class InputTypeUtils
     public static function getInputTypeArgs(array $args): array
     {
         $inputTypeArgs = array_filter($args, static function (ParameterInterface $parameter) {
-            return $parameter instanceof InputTypeParameter;
+            return $parameter instanceof InputTypeParameterInterface;
         });
 
-        return array_map(static function (InputTypeParameter $parameter) {
+        return array_map(static function (InputTypeParameterInterface $parameter) {
             $desc = [
                 'type' => $parameter->getType(),
             ];

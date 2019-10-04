@@ -18,10 +18,10 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -69,8 +69,8 @@ class SchemaFactory
     private $typeMappers = [];
     /** @var TypeMapperFactoryInterface[] */
     private $typeMapperFactories = [];
-    /** @var ParameterMapperInterface[] */
-    private $parameterMappers = [];
+    /** @var ParameterMiddlewareInterface[] */
+    private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
     /** @var AuthenticationServiceInterface|null */
@@ -169,11 +169,11 @@ class SchemaFactory
     }
 
     /**
-     * Registers a parameter mapper.
+     * Registers a parameter middleware.
      */
-    public function addParameterMapper(ParameterMapperInterface $parameterMapper): self
+    public function addParameterMiddleware(ParameterMiddlewareInterface $parameterMiddleware): self
     {
-        $this->parameterMappers[] = $parameterMapper;
+        $this->parameterMiddlewares[] = $parameterMiddleware;
 
         return $this;
     }
@@ -322,10 +322,12 @@ class SchemaFactory
 
         $argumentResolver = new ArgumentResolver();
 
-        $parameterMappers         = $this->parameterMappers;
-        $parameterMappers[]       = new ResolveInfoParameterMapper();
-        $parameterMappers[]       = new ContainerParameterMapper($this->container);
-        $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
+        $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
+        foreach ($this->parameterMiddlewares as $parameterMapper) {
+            $parameterMiddlewarePipe->pipe($parameterMapper);
+        }
+        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+        $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
 
         $fieldsBuilder = new FieldsBuilder(
             $annotationReader,
@@ -335,7 +337,7 @@ class SchemaFactory
             $cachedDocBlockFactory,
             $namingStrategy,
             $compositeRootTypeMapper,
-            $compositeParameterMapper,
+            $parameterMiddlewarePipe,
             $fieldMiddlewarePipe
         );
 

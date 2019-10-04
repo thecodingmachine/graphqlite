@@ -12,15 +12,15 @@ use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ResolveInfoParameter;
 
-class ResolveInfoParameterMapper implements ParameterMapperInterface
+class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
 {
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ?ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
     {
         $type = $parameter->getType();
         if ($type!== null && $type->getName() === ResolveInfo::class) {
             return new ResolveInfoParameter();
         }
 
-        return null;
+        return $parameterMapper->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
     }
 }
