@@ -54,7 +54,7 @@ use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\TypeGenerator;
-use TheCodingMachine\GraphQLite\TypeMismatchException;
+use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -874,7 +874,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->expectException(TypeMismatchException::class);
+        $this->expectException(TypeMismatchRuntimeException::class);
         $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
         $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }

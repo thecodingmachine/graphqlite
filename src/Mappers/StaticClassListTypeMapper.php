@@ -8,7 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\AnnotationReader;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -55,7 +55,7 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
             $this->classes = [];
             foreach ($this->classList as $className) {
                 if (! class_exists($className) && ! interface_exists($className)) {
-                    throw new GraphQLException('Could not find class "' . $className . '"');
+                    throw new GraphQLRuntimeException('Could not find class "' . $className . '"');
                 }
                 $this->classes[$className] = new ReflectionClass($className);
             }

@@ -346,7 +346,7 @@ class SchemaFactory
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
 
         if (empty($this->typeNamespaces) && empty($this->typeMappers) && empty($this->typeMapperFactories)) {
-            throw new GraphQLException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
         foreach ($this->typeNamespaces as $typeNamespace) {
@@ -409,7 +409,7 @@ class SchemaFactory
         }
 
         if ($queryProviders === []) {
-            throw new GraphQLException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
         }
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);

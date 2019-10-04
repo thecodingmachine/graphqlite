@@ -83,7 +83,7 @@ class SchemaFactoryTest extends TestCase
 
         $factory = new SchemaFactory($cache, $container);
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $factory->createSchema();
     }
 
@@ -95,7 +95,7 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory($cache, $container);
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $factory->createSchema();
     }
 

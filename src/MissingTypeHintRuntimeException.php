@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite;
 use ReflectionMethod;
 use function sprintf;
 
-class MissingTypeHintException extends GraphQLException
+class MissingTypeHintRuntimeException extends GraphQLRuntimeException
 {
     public static function missingReturnType(ReflectionMethod $method): self
     {

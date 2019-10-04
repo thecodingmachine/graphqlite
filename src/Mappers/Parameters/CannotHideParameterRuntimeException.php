@@ -6,10 +6,10 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use Webmozart\Assert\Assert;
 
-class CannotHideParameterException extends GraphQLException
+class CannotHideParameterRuntimeException extends GraphQLRuntimeException
 {
     public static function needDefaultValue(ReflectionParameter $parameter): self
     {

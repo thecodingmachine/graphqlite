@@ -9,7 +9,7 @@ use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
 use function array_merge;

@@ -66,7 +66,7 @@ class QueryField extends FieldDefinition
 
             try {
                 $this->assertReturnType($result);
-            } catch (TypeMismatchException $e) {
+            } catch (TypeMismatchRuntimeException $e) {
                 $class = $method[0];
                 if (is_object($class)) {
                     $class = get_class($class);
