@@ -8,6 +8,9 @@ sidebar_label: Custom annotations
 Just like the `@Logged` or `@Right` annotation, you can develop your own annotation that extends/modifies the behaviour
 of a field/query/mutation.
 
+<div class="alert alert-warning">If you want to create an annotation that targets a single argument (like <code>@AutoWire(for="$service")</code>),
+you should rather check the documentation about <a href="argument-resolving">custom argument resolving</a></div>
+
 ## Field middlewares
 
 GraphQLite is based on the Webonyx/Graphql-PHP library. In Webonyx, fields are represented by the `FieldDefinition` class.

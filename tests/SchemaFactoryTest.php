@@ -64,7 +64,7 @@ class SchemaFactoryTest extends TestCase
                 ->addTypeMapper(new CompositeTypeMapper())
                 ->addTypeMapperFactory(new StaticClassListTypeMapperFactory([TestSelfType::class]))
                 ->addRootTypeMapper(new CompositeRootTypeMapper([]))
-                ->addParameterMapper(new ParameterMiddlewarePipe())
+                ->addParameterMiddleware(new ParameterMiddlewarePipe())
                 ->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([], $container))
                 ->setSchemaConfig(new SchemaConfig())
                 ->setExpressionLanguage(new ExpressionLanguage(new Psr16Adapter(new ArrayCache())))

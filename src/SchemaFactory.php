@@ -70,7 +70,7 @@ class SchemaFactory
     /** @var TypeMapperFactoryInterface[] */
     private $typeMapperFactories = [];
     /** @var ParameterMiddlewareInterface[] */
-    private $parameterMappers = [];
+    private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
     /** @var AuthenticationServiceInterface|null */
@@ -169,11 +169,11 @@ class SchemaFactory
     }
 
     /**
-     * Registers a parameter mapper.
+     * Registers a parameter middleware.
      */
-    public function addParameterMapper(ParameterMiddlewareInterface $parameterMapper): self
+    public function addParameterMiddleware(ParameterMiddlewareInterface $parameterMiddleware): self
     {
-        $this->parameterMappers[] = $parameterMapper;
+        $this->parameterMiddlewares[] = $parameterMiddleware;
 
         return $this;
     }
@@ -323,7 +323,7 @@ class SchemaFactory
         $argumentResolver = new ArgumentResolver();
 
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
-        foreach ($this->parameterMappers as $parameterMapper) {
+        foreach ($this->parameterMiddlewares as $parameterMapper) {
             $parameterMiddlewarePipe->pipe($parameterMapper);
         }
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
