@@ -150,10 +150,10 @@ public function createProduct(string $name, float $price): Product
     $exceptions = new GraphQLAggregateException();
 
     if ($name === '') {
-        $exceptions->add(new GraphQLException('Name cannot be empty', 400, null, 'VALIDATION));
+        $exceptions->add(new GraphQLException('Name cannot be empty', 400, null, 'VALIDATION'));
     }
     if ($price <= 0) {
-        $exceptions->add(new GraphQLException('Price must be positive', 400, null, 'VALIDATION));
+        $exceptions->add(new GraphQLException('Price must be positive', 400, null, 'VALIDATION'));
     }
 
     if ($exceptions->hasExceptions()) {
