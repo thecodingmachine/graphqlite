@@ -8,7 +8,9 @@ use Exception;
 use GraphQL\Error\ClientAware;
 use Throwable;
 use function array_map;
+use function count;
 use function max;
+use function reset;
 
 class GraphQLAggregateException extends Exception implements GraphQLAggregateExceptionInterface
 {
@@ -62,5 +64,24 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
             return $t->getCode();
         }, $this->exceptions);
         $this->code = max($codes);
+    }
+
+    /**
+     * Throw the exceptions passed in parameter.
+     * If only one exception is passed, it is thrown.
+     * If many exceptions are passed, they are bundled in the GraphQLAggregateException
+     *
+     * @param (ClientAware&Throwable)[] $exceptions
+     */
+    public static function throwExceptions(array $exceptions): void
+    {
+        $count = count($exceptions);
+        if ($count === 0) {
+            return;
+        }
+        if ($count === 1) {
+            throw reset($exceptions);
+        }
+        throw new self($exceptions);
     }
 }

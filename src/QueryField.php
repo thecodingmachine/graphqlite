@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
+use GraphQL\Error\ClientAware;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
@@ -12,6 +13,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
@@ -237,12 +239,19 @@ class QueryField extends FieldDefinition
      */
     private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
     {
-        return array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
+        $toPassArgs = [];
+        $exceptions = [];
+        foreach ($parameters as $parameter) {
             try {
-                return $parameter->resolve($source, $args, $context, $info);
+                $toPassArgs[] = $parameter->resolve($source, $args, $context, $info);
             } catch (MissingArgumentException $e) {
                 throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
+            } catch (ClientAware $e) {
+                $exceptions[] = $e;
             }
-        }, $parameters));
+        }
+        GraphQLAggregateException::throwExceptions($exceptions);
+
+        return $toPassArgs;
     }
 }
