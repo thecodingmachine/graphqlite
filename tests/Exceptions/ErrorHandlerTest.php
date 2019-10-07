@@ -26,24 +26,16 @@ class ErrorHandlerTest extends TestCase
     public function testErrorHandler()
     {
         $exception = new GraphQLException('foo', 0, null, 'MyCategory', ['field' => 'foo']);
-        $error = new Error('foo', null, null, null, null, $exception);
+        $error = new Error('bar', null, null, null, null, $exception);
         $aggregateException = new GraphQLAggregateException();
         $aggregateException->add($exception);
         $aggregateException->add($exception);
-        $aggregateError = new Error('foo', null, null, null, null, $aggregateException);
+        $aggregateError = new Error('bar', null, null, null, null, $aggregateException);
         $formattedError = WebonyxErrorHandler::errorHandler([$error, $aggregateError], [WebonyxErrorHandler::class, 'errorFormatter']);
-
-        $expectedError = [
-            'message' => 'foo',
-            'extensions' => [
-                'category' => 'MyCategory',
-                'field' => 'foo'
-            ]
-        ];
 
         $this->assertSame([
             [
-                'message' => 'foo',
+                'message' => 'bar',
                 'extensions' => [
                     'category' => 'MyCategory',
                     'field' => 'foo'

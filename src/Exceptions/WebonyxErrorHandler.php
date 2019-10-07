@@ -46,7 +46,7 @@ final class WebonyxErrorHandler
                     // Let's build a new error at the same spot than the aggregated one, but for the wrapped exception.
                     $extensions = $clientAware instanceof GraphQLExceptionInterface ? $clientAware->getExtensions() : [];
 
-                    return new Error($error->getMessage(), $error->getNodes(), $error->getSource(), $error->getPositions(), $error->getPath(), $clientAware, $extensions);
+                    return new Error($clientAware->getMessage(), $error->getNodes(), $error->getSource(), $error->getPositions(), $error->getPath(), $clientAware, $extensions);
                 }, $exceptions);
 
                 $formattedInnerErrors = self::errorHandler($innerErrors, $formatter);
