@@ -56,10 +56,6 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
      */
     private function updateCode(): void
     {
-        if (empty($this->exceptions)) {
-            return;
-        }
-
         $codes = array_map(static function (Throwable $t) {
             return $t->getCode();
         }, $this->exceptions);
