@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Parameters;
 
 use BadMethodCallException;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
 use function get_class;
 use function is_array;
 use function is_string;
 use function sprintf;
 
-class MissingArgumentException extends BadMethodCallException
+class MissingArgumentException extends BadMethodCallException implements GraphQLExceptionInterface
 {
     public static function create(string $argumentName): self
     {
@@ -65,5 +66,33 @@ class MissingArgumentException extends BadMethodCallException
         }
 
         return $factoryName . '::' . $callable[1] . '()';
+    }
+
+    /**
+     * Returns true when exception message is safe to be displayed to a client.
+     */
+    public function isClientSafe(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Returns string describing a category of the error.
+     *
+     * Value "graphql" is reserved for errors produced by query parsing or validation, do not use it.
+     */
+    public function getCategory(): string
+    {
+        return 'graphql';
+    }
+
+    /**
+     * Returns the "extensions" object attached to the GraphQL error.
+     *
+     * @return array<string, mixed>
+     */
+    public function getExtensions(): array
+    {
+        return [];
     }
 }

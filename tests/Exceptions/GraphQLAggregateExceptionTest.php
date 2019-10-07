@@ -10,11 +10,13 @@ class GraphQLAggregateExceptionTest extends TestCase
 
     public function testAggregateException()
     {
-        $error = new Error('foo');
+        $error = new GraphQLException('foo', 12);
+        $error2 = new GraphQLException('bar', 42);
         $exceptions = new GraphQLAggregateException([$error]);
-        $exceptions->add($error);
+        $exceptions->add($error2);
 
-        $this->assertSame([$error, $error], $exceptions->getExceptions());
+        $this->assertSame([$error, $error2], $exceptions->getExceptions());
+        $this->assertSame(42, $exceptions->getCode());
         $this->assertTrue($exceptions->hasExceptions());
     }
 }

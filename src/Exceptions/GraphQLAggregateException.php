@@ -7,6 +7,8 @@ namespace TheCodingMachine\GraphQLite\Exceptions;
 use Exception;
 use GraphQL\Error\ClientAware;
 use Throwable;
+use function array_map;
+use function max;
 
 class GraphQLAggregateException extends Exception implements GraphQLAggregateExceptionInterface
 {
@@ -31,6 +33,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     {
         $this->exceptions[] = $exception;
         $this->message .= "\n" . $exception->getMessage();
+        $this->updateCode();
     }
 
     /**
@@ -44,5 +47,20 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     public function hasExceptions(): bool
     {
         return ! empty($this->exceptions);
+    }
+
+    /**
+     * By convention, the aggregated code is the highest code of all exceptions
+     */
+    private function updateCode(): void
+    {
+        if (empty($this->exceptions)) {
+            return;
+        }
+
+        $codes = array_map(static function (Throwable $t) {
+            return $t->getCode();
+        }, $this->exceptions);
+        $this->code = max($codes);
     }
 }
