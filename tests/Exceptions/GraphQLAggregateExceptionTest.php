@@ -19,4 +19,14 @@ class GraphQLAggregateExceptionTest extends TestCase
         $this->assertSame(42, $exceptions->getCode());
         $this->assertTrue($exceptions->hasExceptions());
     }
+
+    public function testOnlyOneAggregateExceptionThrowsTheSameException()
+    {
+        $error = new GraphQLException('foo', 12);
+
+        $this->expectException(GraphQLException::class);
+        GraphQLAggregateException::throwExceptions([$error]);
+
+    }
+
 }

@@ -76,7 +76,9 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
             return;
         }
         if ($count === 1) {
-            throw reset($exceptions);
+            /** @var Throwable $exception */
+            $exception = reset($exceptions);
+            throw $exception;
         }
         throw new self($exceptions);
     }

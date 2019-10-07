@@ -20,9 +20,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use Webmozart\Assert\Assert;
-use function array_map;
 use function array_unshift;
-use function array_values;
 use function get_class;
 use function is_object;
 
