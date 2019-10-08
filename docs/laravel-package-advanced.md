@@ -8,7 +8,52 @@ The Laravel package comes with a number of features to ease the integration of G
 
 ## Support for Laravel validation rules
 
-*Coming soon*
+The GraphQLite Laravel package comes with a special `@Validate` annotation to use Laravel validation rules in your 
+input types.
+
+```php
+use TheCodingMachine\GraphQLite\Laravel\Annotations\Validate;
+
+class MyController
+{
+    /**
+     * @Mutation
+     * @Validate(for="$email", rule="email|unique:users")
+     * @Validate(for="$password", rule="gte:8")
+     */
+    public function createUser(string $email, string $password): User
+    {
+        // ...
+    }
+}
+```
+
+You can use the `@Validate` annotation in any query / mutation / field / factory / decorator.
+
+If a validation fails to pass, the message will be printed in the "errors" section and you will get a HTTP 400 status code:
+
+```json
+{
+    "errors": [
+        {
+            "message": "The email must be a valid email address.",
+            "extensions": {
+                "argument": "email",
+                "category": "Validate"
+            }
+        },
+        {
+            "message": "The password must be greater than or equal 8 characters.",
+            "extensions": {
+                "argument": "password",
+                "category": "Validate"
+            }
+        }
+    ]
+}
+```
+
+You can use any validation rule described in [the Laravel documentation](https://laravel.com/docs/6.x/validation#available-validation-rules)
 
 ## Support for pagination
 
