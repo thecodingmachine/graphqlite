@@ -11,6 +11,7 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
+use Mouf\Composer\ClassNameMapper;
 use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -83,6 +84,8 @@ class SchemaFactory
     private $namingStrategy;
     /** @var ContainerInterface */
     private $container;
+    /** @var ClassNameMapper */
+    private $classNameMapper;
     /** @var SchemaConfig */
     private $schemaConfig;
     /** @var int */
@@ -236,6 +239,13 @@ class SchemaFactory
         return $this;
     }
 
+    public function setClassNameMapper(ClassNameMapper $classNameMapper): self
+    {
+        $this->classNameMapper = $classNameMapper;
+
+        return $this;
+    }
+
     /**
      * Sets the time to live time of the cache for annotations in files.
      * By default this is set to 2 seconds which is ok for development environments.
@@ -360,6 +370,7 @@ class SchemaFactory
                 $namingStrategy,
                 $recursiveTypeMapper,
                 $this->cache,
+                $this->classNameMapper,
                 $this->globTtl
             ));
         }
@@ -396,6 +407,7 @@ class SchemaFactory
                 $fieldsBuilder,
                 $this->container,
                 $this->cache,
+                $this->classNameMapper,
                 $this->globTtl
             );
         }
