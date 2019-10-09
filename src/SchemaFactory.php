@@ -91,11 +91,8 @@ class SchemaFactory
     private $fieldMiddlewares = [];
     /** @var ExpressionLanguage|null */
     private $expressionLanguage;
-
-    /**
-     * @var GlobControllerQueryProviderFactoryInterface|null
-     */
-    private $globControllerQueryProviderFactoryInterface;
+    /** @var GlobControllerQueryProviderFactoryInterface */
+    private $globControllerQueryProviderFactory;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -243,14 +240,14 @@ class SchemaFactory
 
     public function setGlobControllerQueryProviderFactory(GlobControllerQueryProviderFactoryInterface $instance): self
     {
-        $this->globControllerQueryProviderFactoryInterface = $instance;
+        $this->globControllerQueryProviderFactory = $instance;
 
         return $this;
     }
 
     public function getGlobControllerQueryProviderFactory(): GlobControllerQueryProviderFactoryInterface
     {
-        return $this->globControllerQueryProviderFactoryInterface ?? new GlobControllerQueryProviderFactory();
+        return $this->globControllerQueryProviderFactory ?? new GlobControllerQueryProviderFactory();
     }
 
     /**
