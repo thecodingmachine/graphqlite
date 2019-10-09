@@ -10,6 +10,7 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Cache\ApcuCache;
 use function extension_loaded;
 use GraphQL\Type\SchemaConfig;
+use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Lock\Factory as LockFactory;
@@ -74,6 +75,10 @@ class SchemaFactory
      * @var ContainerInterface
      */
     private $container;
+    /**
+     * @var ClassNameMapper
+     */
+    private $classNameMapper;
     /**
      * @var SchemaConfig
      */
@@ -180,6 +185,12 @@ class SchemaFactory
         return $this;
     }
 
+    public function setClassNameMapper(ClassNameMapper $classNameMapper): self
+    {
+        $this->classNameMapper = $classNameMapper;
+        return $this;
+    }
+
     public function createSchema(): Schema
     {
         $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
@@ -210,7 +221,7 @@ class SchemaFactory
 
         foreach ($this->typeNamespaces as $typeNamespace) {
             $typeMappers[] = new GlobTypeMapper($typeNamespace, $typeGenerator, $inputTypeGenerator, $inputTypeUtils,
-                $this->container, $annotationReader, $namingStrategy, $lockFactory, $this->cache);
+                $this->container, $annotationReader, $namingStrategy, $lockFactory, $this->cache, $this->classNameMapper);
         }
 
         foreach ($this->typeMappers as $typeMapper) {
@@ -229,7 +240,7 @@ class SchemaFactory
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
             $queryProviders[] = new GlobControllerQueryProvider($controllerNamespace, $fieldsBuilderFactory, $recursiveTypeMapper,
-                $this->container, $lockFactory, $this->cache);
+                $this->container, $lockFactory, $this->cache, $this->classNameMapper);
         }
 
         foreach ($this->queryProviders as $queryProvider) {

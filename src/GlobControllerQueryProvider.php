@@ -40,6 +40,10 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private $container;
     /**
+     * @var ClassNameMapper
+     */
+    private $classNameMapper;
+    /**
      * @var AggregateControllerQueryProvider
      */
     private $aggregateControllerQueryProvider;
@@ -69,10 +73,11 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @param int|null $cacheTtl
      * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilderFactory $fieldsBuilderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, FieldsBuilderFactory $fieldsBuilderFactory, RecursiveTypeMapperInterface $recursiveTypeMapper, ContainerInterface $container, LockFactory $lockFactory, CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $cacheTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->container = $container;
+        $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
         $this->cache = $cache;
         $this->cacheTtl = $cacheTtl;
         $this->fieldsBuilderFactory = $fieldsBuilderFactory;
@@ -126,7 +131,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function buildInstancesList(): array
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
+        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, $this->classNameMapper, $this->recursive);
         $classes = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
