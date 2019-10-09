@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
+use Mouf\Composer\ClassNameMapper;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
@@ -12,6 +13,7 @@ use Symfony\Component\Cache\Simple\PhpFilesCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
@@ -74,6 +76,43 @@ class SchemaFactoryTest extends TestCase
         $schema = $factory->createSchema();
 
         $this->doTestSchema($schema);
+    }
+
+    public function testClassNameMapperInjectionWithValidMapper(): void
+    {
+        $factory = new SchemaFactory(
+            new ArrayCache(),
+            new BasicAutoWiringContainer(
+                new EmptyContainer()
+            )
+        );
+        $factory->setAuthenticationService(new VoidAuthenticationService())
+                ->setAuthorizationService(new VoidAuthorizationService())
+                ->setClassNameMapper(ClassNameMapper::createFromComposerFile(null, null, true))
+                ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
+                ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+
+        $schema = $factory->createSchema();
+
+        $this->doTestSchema($schema);
+    }
+
+    public function testClassNameMapperInjectionWithInvalidMapper(): void
+    {
+        $factory = new SchemaFactory(
+            new ArrayCache(),
+            new BasicAutoWiringContainer(
+                new EmptyContainer()
+            )
+        );
+        $factory->setAuthenticationService(new VoidAuthenticationService())
+                ->setAuthorizationService(new VoidAuthorizationService())
+                ->setClassNameMapper(new ClassNameMapper())
+                ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
+                ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->doTestSchema($factory->createSchema());
     }
 
     public function testException(): void

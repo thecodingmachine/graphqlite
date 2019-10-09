@@ -34,6 +34,8 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private $instancesList;
     /** @var ContainerInterface */
     private $container;
+    /** @var ClassNameMapper */
+    private $classNameMapper;
     /** @var AggregateControllerQueryProvider */
     private $aggregateControllerQueryProvider;
     /** @var FieldsBuilder */
@@ -48,15 +50,16 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @param ContainerInterface $container The container we will fetch controllers from.
      * @param bool               $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, CacheInterface $cache, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $cacheTtl = null, bool $recursive = true)
     {
-        $this->namespace     = $namespace;
-        $this->container     = $container;
-        $this->cache         = $cache;
-        $this->cacheContract = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
-        $this->cacheTtl      = $cacheTtl;
-        $this->fieldsBuilder = $fieldsBuilder;
-        $this->recursive     = $recursive;
+        $this->namespace       = $namespace;
+        $this->container       = $container;
+        $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
+        $this->cache           = $cache;
+        $this->cacheContract   = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
+        $this->cacheTtl        = $cacheTtl;
+        $this->fieldsBuilder   = $fieldsBuilder;
+        $this->recursive       = $recursive;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -89,7 +92,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function buildInstancesList(): array
     {
-        $explorer  = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
+        $explorer  = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, $this->classNameMapper, $this->recursive);
         $classes   = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
