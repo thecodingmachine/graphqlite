@@ -92,6 +92,11 @@ class SchemaFactory
     /** @var ExpressionLanguage|null */
     private $expressionLanguage;
 
+    /**
+     * @var GlobControllerQueryProviderFactoryInterface|null
+     */
+    private $globControllerQueryProviderFactoryInterface;
+
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
         $this->cache     = new NamespacedCache($cache);
@@ -234,6 +239,18 @@ class SchemaFactory
         $this->schemaConfig = $schemaConfig;
 
         return $this;
+    }
+
+    public function setGlobControllerQueryProviderFactory(GlobControllerQueryProviderFactoryInterface $instance): self
+    {
+        $this->globControllerQueryProviderFactoryInterface = $instance;
+
+        return $this;
+    }
+
+    public function getGlobControllerQueryProviderFactory(): GlobControllerQueryProviderFactoryInterface
+    {
+        return $this->globControllerQueryProviderFactoryInterface ?? new GlobControllerQueryProviderFactory();
     }
 
     /**
@@ -391,7 +408,7 @@ class SchemaFactory
 
         $queryProviders = [];
         foreach ($this->controllerNamespaces as $controllerNamespace) {
-            $queryProviders[] = new GlobControllerQueryProvider(
+            $queryProviders[] = $this->getGlobControllerQueryProviderFactory()->create(
                 $controllerNamespace,
                 $fieldsBuilder,
                 $this->container,
