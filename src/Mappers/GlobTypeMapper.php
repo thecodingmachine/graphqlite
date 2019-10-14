@@ -126,15 +126,20 @@ final class GlobTypeMapper implements TypeMapperInterface
      * @var LockFactory
      */
     private $lockFactory;
+    /**
+     * @var ClassNameMapper
+     */
+    private $classNameMapper;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, LockFactory $lockFactory, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, LockFactory $lockFactory, CacheInterface $cache, ClassNameMapper $classNameMapper = null, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
     {
         $this->namespace = $namespace;
         $this->typeGenerator = $typeGenerator;
         $this->container = $container;
+        $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
         $this->annotationReader = $annotationReader;
         $this->namingStrategy = $namingStrategy;
         $this->cache = $cache;
@@ -288,7 +293,7 @@ final class GlobTypeMapper implements TypeMapperInterface
     {
         if ($this->classes === null) {
             $this->classes = [];
-            $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
+            $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, $this->classNameMapper, $this->recursive);
             $classes = $explorer->getClasses();
             foreach ($classes as $className) {
                 if (!\class_exists($className)) {
