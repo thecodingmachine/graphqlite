@@ -431,7 +431,7 @@ class TypeHandler implements ParameterHandlerInterface
 
     private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
-        $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $type);
+        $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
         Assert::notNull($phpdocType);
 
         return $this->resolveSelf($phpdocType, $reflectionClass);
