@@ -62,7 +62,7 @@ class InputTypeUtils
             throw MissingTypeHintRuntimeException::nullableReturnType($refMethod);
         }
 
-        $type = (string) $returnType;
+        $type = $returnType->getName();
 
         $typeResolver = new TypeResolver();
 

@@ -19,6 +19,13 @@ jobs:
       after_script:
         - travis_retry php vendor/bin/php-coveralls -v
     - stage: test
+      php: 7.4snapshot
+      env: PREFER_LOWEST=""
+      before_script:
+        - *composerupdate
+      script:
+        - *phpunit
+    - stage: test
       php: 7.2
       env: PREFER_LOWEST=""
       before_script:
