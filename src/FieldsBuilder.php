@@ -308,7 +308,9 @@ class FieldsBuilder
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {
             $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
-            $phpdocType = $typeResolver->resolve((string) $returnType);
+            $phpdocType = $typeResolver->resolve(
+                $returnType->getName()
+            );
             $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         } else {
             $phpdocType = new Mixed_();
@@ -490,10 +492,11 @@ class FieldsBuilder
             $parameterType = $parameter->getType();
             $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
 
-            $type = (string) $parameterType;
-            if ($type === '') {
+            if ($parameterType === null) {
                 throw MissingTypeHintException::missingTypeHint($parameter);
             }
+
+            $type = $parameterType->getName();
             $phpdocType = $typeResolver->resolve($type);
             $phpdocType = $this->resolveSelf($phpdocType, $parameter->getDeclaringClass());
 

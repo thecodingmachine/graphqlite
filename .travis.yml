@@ -17,6 +17,13 @@ jobs:
       after_script:
         - ./vendor/bin/coveralls -v
     - stage: test
+      php: 7.4snapshot
+      env: PREFER_LOWEST=""
+      before_script:
+        - *composerupdate
+      script:
+        - *phpunit
+    - stage: test
       php: 7.2
       env: PREFER_LOWEST=""
       before_script:

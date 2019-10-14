@@ -8,13 +8,13 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
-         syntaxCheck="false"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/Bootstrap.php"
 >
     <testsuites>
         <testsuite name="GraphQLite Test Suite">
             <directory>./tests/</directory>
             <exclude>./tests/dependencies/</exclude>
+            <exclude>./tests/Bootstrap.php</exclude>
         </testsuite>
     </testsuites>
 
@@ -24,7 +24,7 @@
         </whitelist>
 	</filter>
     <logging>
-        <log type="coverage-html" target="build/coverage" charset="UTF-8" yui="true" highlight="true"/>
+        <log type="coverage-html" target="build/coverage"/>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
     </logging>
 </phpunit>
