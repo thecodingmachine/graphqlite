@@ -8,12 +8,13 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/Bootstrap.php"
 >
     <testsuites>
         <testsuite name="GraphQLite Test Suite">
             <directory>./tests/</directory>
             <exclude>./tests/dependencies/</exclude>
+            <exclude>./tests/Bootstrap.php</exclude>
         </testsuite>
     </testsuites>
 
