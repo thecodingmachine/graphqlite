@@ -101,4 +101,3 @@ jobs:
 matrix:
   allow_failures:
     - stage: test_dependencies
-    - php: 7.4snapshot
