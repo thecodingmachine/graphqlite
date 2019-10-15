@@ -53,7 +53,7 @@ final class WebonyxErrorHandler
 
                 $formattedErrors = array_merge($formattedErrors, $formattedInnerErrors);
             } else {
-                $formattedErrors[] = self::errorFormatter($error);
+                $formattedErrors[] = $formatter($error);
             }
         }
 
