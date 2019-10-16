@@ -166,3 +166,37 @@ Removes [an argument from the GraphQL schema](input_types.md#ignoring_some_param
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *for*          | *yes*      | string | The name of the PHP parameter to hide
+
+
+## @Validate annotation
+
+<div class="alert alert-info">This annotation is only available in the GraphQLite Laravel package</div>
+
+[Validates a user input in Laravel](laravel-package-advanced.md).
+
+**Applies on**: methods annotated with `@Query`, `@Mutation`, `@Field`, `@Factory` or `@Decorator` annotation.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*      | string | The name of the PHP parameter
+*rule*         | *yes       | string | Laravel validation rules
+
+Sample:
+
+```
+@Validate(for="$email", rule="email|unique:users")
+```
+
+## @Assertion annotation
+
+[Validates a user input](validation.md).
+
+The `@Assertion` annotation  is available in the *thecodingmachine/graphqlite-symfony-validator-bridge* third party package.
+It is available out of the box if you use the Symfony bundle.
+
+**Applies on**: methods annotated with `@Query`, `@Mutation`, `@Field`, `@Factory` or `@Decorator` annotation.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+*for*          | *yes*      | string | The name of the PHP parameter
+*constraint*   | *yes       | annotation | One (or many) Symfony validation annotations.

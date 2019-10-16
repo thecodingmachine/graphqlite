@@ -124,4 +124,26 @@ If the data entered by the user is **not** mapped to an object, you can directly
 on your domain objects. Only use this technique if you want to validate user input and user input will not be stored
 in a domain object.</div>
 
-TODO: Continue here
+Use the `@Assertion` annotation to validate directly the user input.
+
+```php
+use Symfony\Component\Validator\Constraints as Assert;
+use TheCodingMachine\Graphqlite\Validator\Annotations\Assertion;
+
+/**
+ * @Query
+ * @Assertion(for="email", constraint=@Assert\Email())
+ */
+public function findByMail(string $email): User
+{
+    // ...
+}
+```
+
+Notice that the "constraint" parameter contains an annotation (it is an annotation wrapped in an annotation).
+
+You can also pass an array to the `constraint` parameter:
+
+```php
+@Assertion(for="email", constraint={@Assert\NotBlank(), @Assert\Email()})
+```
