@@ -25,7 +25,11 @@
         "symfony/cache": "^4.3",
         "thecodingmachine/cache-utils": "^1",
         "ocramius/package-versions": "^1.4",
-        "symfony/expression-language": "^4"
+        "symfony/expression-language": "^4",
+        "ext-json": "*",
+        "psr/http-server-handler": "^1",
+        "psr/http-server-middleware": "^1",
+        "psr/http-factory": "^1"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.2.4",
@@ -37,7 +41,8 @@
         "doctrine/coding-standard": "^6.0",
         "phpstan/phpstan-webmozart-assert": "^0.11.2",
         "phpstan/extension-installer": "^1.0",
-        "thecodingmachine/phpstan-strict-rules": "^0.11.2"
+        "thecodingmachine/phpstan-strict-rules": "^0.11.2",
+        "zendframework/zend-diactoros": "^2"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
