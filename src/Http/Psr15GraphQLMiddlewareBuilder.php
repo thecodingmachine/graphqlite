@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Http;
 
@@ -20,28 +21,18 @@ use function class_exists;
  */
 class Psr15GraphQLMiddlewareBuilder
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $url = '/graphql';
-    /**
-     * @var ServerConfig
-     */
+    /** @var ServerConfig */
     private $config;
 
-    /**
-     * @var ResponseFactoryInterface|null
-     */
+    /** @var ResponseFactoryInterface|null */
     private $responseFactory;
 
-    /**
-     * @var StreamFactoryInterface|null
-     */
+    /** @var StreamFactoryInterface|null */
     private $streamFactory;
 
-    /**
-     * @var HttpCodeDeciderInterface|null
-     */
+    /** @var HttpCodeDeciderInterface */
     private $httpCodeDecider;
 
     public function __construct(Schema $schema)
@@ -57,6 +48,7 @@ class Psr15GraphQLMiddlewareBuilder
     public function setUrl(string $url): self
     {
         $this->url = $url;
+
         return $this;
     }
 
@@ -68,38 +60,42 @@ class Psr15GraphQLMiddlewareBuilder
     public function setConfig(ServerConfig $config): self
     {
         $this->config = $config;
+
         return $this;
     }
 
     public function setResponseFactory(ResponseFactoryInterface $responseFactory): self
     {
         $this->responseFactory = $responseFactory;
+
         return $this;
     }
 
     public function setStreamFactory(StreamFactoryInterface $streamFactory): self
     {
         $this->streamFactory = $streamFactory;
+
         return $this;
     }
 
     public function setHttpCodeDecider(HttpCodeDeciderInterface $httpCodeDecider): self
     {
         $this->httpCodeDecider = $httpCodeDecider;
+
         return $this;
     }
 
     public function createMiddleware(): MiddlewareInterface
     {
-        if ($this->responseFactory === null && !class_exists(ResponseFactory::class)) {
+        if ($this->responseFactory === null && ! class_exists(ResponseFactory::class)) {
             throw new GraphQLRuntimeException('You need to set a ResponseFactory to use the Psr15GraphQLMiddlewareBuilder. Call Psr15GraphQLMiddlewareBuilder::setResponseFactory or try installing zend-diactoros: composer require zendframework/zend-diactoros'); // @codeCoverageIgnore
         }
         $this->responseFactory = $this->responseFactory ?: new ResponseFactory();
 
-        if ($this->streamFactory === null && !class_exists(StreamFactory::class)) {
+        if ($this->streamFactory === null && ! class_exists(StreamFactory::class)) {
             throw new GraphQLRuntimeException('You need to set a StreamFactory to use the Psr15GraphQLMiddlewareBuilder. Call Psr15GraphQLMiddlewareBuilder::setStreamFactory or try installing zend-diactoros: composer require zendframework/zend-diactoros'); // @codeCoverageIgnore
         }
-        $this->responseFactory = $this->responseFactory ?: new ResponseFactory();
+        $this->streamFactory = $this->streamFactory ?: new StreamFactory();
 
         return new WebonyxGraphqlMiddleware($this->config, $this->responseFactory, $this->streamFactory, $this->httpCodeDecider, $this->url);
     }
