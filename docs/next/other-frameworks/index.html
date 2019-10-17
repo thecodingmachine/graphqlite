@@ -75,7 +75,7 @@
 </ul>
 <p>Additionally, you will have to route the HTTP requests to the underlying GraphQL library.</p>
 <p>GraphQLite relies on the <a href="http://webonyx.github.io/graphql-php/">webonyx/graphql-php</a> library internally.
-This library plays well with PSR-7 requests and there is a <a href="https://github.com/phps-cans/psr7-middleware-graphql">PSR-15 middleware available</a>.</p>
+This library plays well with PSR-7 requests and we also provide a <a href="https://github.com/phps-cans/psr7-middleware-graphql">PSR-15 middleware</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="integration"></a><a href="#integration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Integration</h2>
 <p>Webonyx/graphql-php library requires a <a href="https://webonyx.github.io/graphql-php/type-system/schema/">Schema</a> in order to resolve
 GraphQL queries. We provide a <code>SchemaFactory</code> class to create such a schema:</p>
@@ -149,13 +149,33 @@ $output = $result-&gt;toArray();
 header(<span class="hljs-string">'Content-Type: application/json'</span>);
 <span class="hljs-keyword">echo</span> json_encode($output);
 </code></pre>
-<h2><a class="anchor" aria-hidden="true" id="advanced-example"></a><a href="#advanced-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Advanced example</h2>
-<p>When using a framework, you will need a way to route your HTTP requests to the <code>webonyx/graphql-php</code> library.
-By chance, it plays well with PSR-7 requests and there is a PSR-15 middleware available.</p>
+<h2><a class="anchor" aria-hidden="true" id="psr-15-middleware"></a><a href="#psr-15-middleware" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PSR-15 Middleware</h2>
+<p>When using a framework, you will need a way to route your HTTP requests to the <code>webonyx/graphql-php</code> library.</p>
+<p>If the framework you are using is compatible with PSR-15 (like Slim PHP or Zend-Expressive / Laminas), GraphQLite
+comes with a PSR-15 middleware out of the box.</p>
+<p>In order to get an instance of this middleware, you can use the <code>Psr15GraphQLMiddlewareBuilder</code> builder class:</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">// $schema is an instance of the GraphQL schema returned by SchemaFactory::createSchema (see previous chapter)</span>
+$builder = <span class="hljs-keyword">new</span> Psr15GraphQLMiddlewareBuilder($schema);
+
+$middleware = $builder-&gt;createMiddleware();
+
+<span class="hljs-comment">// You can now inject your middleware in your favorite PSR-15 compatible framework.</span>
+<span class="hljs-comment">// For instance:</span>
+$zendMiddlewarePipe-&gt;pipe($middleware);
+</code></pre>
+<p>The builder offers a number of setters to modify its behaviour:</p>
+<pre><code class="hljs css language-php">$builder-&gt;setUrl(<span class="hljs-string">"/graphql"</span>); <span class="hljs-comment">// Modify the URL endpoint (defaults to /graphql)</span>
+$config = $builder-&gt;getConfig(); <span class="hljs-comment">// Returns a Webonyx ServerConfig object. Use this object to configure Webonyx in details.</span>
+$builder-&gt;setConfig($config);
+
+$builder-&gt;setResponseFactory(<span class="hljs-keyword">new</span> ResponseFactory()); <span class="hljs-comment">// Set a PSR-18 ResponseFactory (not needed if you are using zend-framework/zend-diactoros ^2</span>
+$builder-&gt;setStreamFactory(<span class="hljs-keyword">new</span> StreamFactory()); <span class="hljs-comment">// Set a PSR-18 StreamFactory (not needed if you are using zend-framework/zend-diactoros ^2</span>
+$builder-&gt;setHttpCodeDecider(<span class="hljs-keyword">new</span> HttpCodeDecider()); <span class="hljs-comment">// Set a class in charge of deciding the HTTP status code based on the response.</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h3>
 <p>In this example, we will focus on getting a working version of GraphQLite using:</p>
 <ul>
-<li><a href="https://docs.zendframework.com/zend-stratigility/">Zend Stratigility</a> as a PSR-7 server</li>
-<li><code>phps-cans/psr7-middleware-graphql</code> to route PSR-7 requests to the GraphQL engine</li>
+<li><a href="https://docs.zendframework.com/zend-stratigility/">Zend Stratigility</a> as a PSR-15 server</li>
 <li><code>mouf/picotainer</code> (a micro-container) for the PSR-11 container</li>
 <li><code>symfony/cache</code> for the PSR-16 cache</li>
 </ul>
@@ -168,9 +188,7 @@ By chance, it plays well with PSR-7 requests and there is a PSR-15 middleware av
     }
   },
   <span class="hljs-attr">"require"</span>: {
-    <span class="hljs-attr">"thecodingmachine/graphqlite"</span>: <span class="hljs-string">"^3"</span>,
-    <span class="hljs-attr">"phps-cans/psr7-middleware-graphql"</span>: <span class="hljs-string">"^0.2"</span>,
-    <span class="hljs-attr">"middlewares/payload"</span>: <span class="hljs-string">"^2.1"</span>,
+    <span class="hljs-attr">"thecodingmachine/graphqlite"</span>: <span class="hljs-string">"^4"</span>,
     <span class="hljs-attr">"zendframework/zend-diactoros"</span>: <span class="hljs-string">"^2"</span>,
     <span class="hljs-attr">"zendframework/zend-stratigility"</span>: <span class="hljs-string">"^3"</span>,
     <span class="hljs-attr">"zendframework/zend-httphandlerrunner"</span>: <span class="hljs-string">"^1.0"</span>,
@@ -217,40 +235,27 @@ This <code>MiddlewarePipe</code> comes from the container declared in the <code>
 <p><strong>config/container.php</strong></p>
 <pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">Server</span>\<span class="hljs-title">StandardServer</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">Schema</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Mouf</span>\<span class="hljs-title">Picotainer</span>\<span class="hljs-title">Picotainer</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">PsCs</span>\<span class="hljs-title">Middleware</span>\<span class="hljs-title">Graphql</span>\<span class="hljs-title">WebonyxGraphqlMiddleware</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Container</span>\<span class="hljs-title">ContainerInterface</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">SimpleCache</span>\<span class="hljs-title">CacheInterface</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Simple</span>\<span class="hljs-title">ApcuCache</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Psr15GraphQLMiddlewareBuilder</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">SchemaFactory</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ResponseFactory</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">StreamFactory</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">MiddlewarePipe</span>;
 
 <span class="hljs-comment">// Picotainer is a minimalist PSR-11 container.</span>
 <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Picotainer([
     MiddlewarePipe::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerInterface $container)</span> </span>{
         $pipe = <span class="hljs-keyword">new</span> MiddlewarePipe();
-        <span class="hljs-comment">// JsonPayload converts JSON body into a parser PHP array.</span>
-        $pipe-&gt;pipe(<span class="hljs-keyword">new</span> JsonPayload());
         $pipe-&gt;pipe($container-&gt;get(WebonyxGraphqlMiddleware::class));
         <span class="hljs-keyword">return</span> $pipe;
     },
     <span class="hljs-comment">// The WebonyxGraphqlMiddleware is a PSR-15 compatible</span>
     <span class="hljs-comment">// middleware that exposes Webonyx schemas. </span>
     WebonyxGraphqlMiddleware::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerInterface $container)</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> WebonyxGraphqlMiddleware(
-            $container-&gt;get(StandardServer::class),
-            <span class="hljs-keyword">new</span> ResponseFactory(),
-            <span class="hljs-keyword">new</span> StreamFactory()
-        );
-    },
-    StandardServer::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerInterface $container)</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> StandardServer([
-            <span class="hljs-string">'schema'</span> =&gt; $container-&gt;get(Schema::class)
-        ]);
+        $builder = <span class="hljs-keyword">new</span> Psr15GraphQLMiddlewareBuilder($container-&gt;get(Schema::class));
+        <span class="hljs-keyword">return</span> $builder-&gt;createMiddleware();
     },
     CacheInterface::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ApcuCache();
@@ -297,7 +302,7 @@ The application will look into the <code>App\Controllers</code> namespace for Gr
 </code></pre>
 <p>And we are done! You can now test your query using your favorite GraphQL client.</p>
 <p><img src="/docs/assets/query1.png" alt=""></p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/universal_service_providers"><span class="arrow-prev">← </span><span>Universal service providers</span></a><a class="docs-next button" href="/docs/next/queries"><span>Queries</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#integration">Integration</a></li><li><a href="#minimal-example">Minimal example</a></li><li><a href="#advanced-example">Advanced example</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/universal_service_providers"><span class="arrow-prev">← </span><span>Universal service providers</span></a><a class="docs-next button" href="/docs/next/queries"><span>Queries</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#integration">Integration</a></li><li><a href="#minimal-example">Minimal example</a></li><li><a href="#psr-15-middleware">PSR-15 Middleware</a><ul class="toc-headings"><li><a href="#example">Example</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
