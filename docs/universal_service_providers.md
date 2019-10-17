@@ -27,7 +27,7 @@ In order to bootstrap GraphQLite, you will need:
 Additionally, you will have to route the HTTP requests to the underlying GraphQL library.
 
 GraphQLite relies on the [webonyx/graphql-php](http://webonyx.github.io/graphql-php/) library internally.
-This library plays well with PSR-7 requests and there is a [PSR-15 middleware available](https://github.com/phps-cans/psr7-middleware-graphql).
+This library plays well with PSR-7 requests and we provide a [PSR-15 middleware](other_frameworks.md).
 
 ## Integration
 
@@ -53,7 +53,9 @@ GraphQL queries. The service provider provides this `Schema` class.
 
 **index.php**
 ```php
+<?php
 use Simplex\Container;
+use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\SymfonyCacheServiceProvider;
 use TheCodingMachine\DoctrineAnnotationsServiceProvider;
@@ -67,4 +69,8 @@ $container->set('graphqlite.namespace.types', ['App\\Types']);
 $container->set('graphqlite.namespace.controllers', ['App\\Controllers']);
 
 $schema = $container->get(Schema::class);
+
+// or if you want the PSR-15 middleware:
+
+$middleware = $container->get(Psr15GraphQLMiddlewareBuilder::class);
 ```
