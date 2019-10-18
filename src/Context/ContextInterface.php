@@ -1,7 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Context;
+declare(strict_types=1);
 
+namespace TheCodingMachine\GraphQLite\Context;
 
 use TheCodingMachine\GraphQLite\PrefetchBuffer;
 use TheCodingMachine\GraphQLite\QueryField;

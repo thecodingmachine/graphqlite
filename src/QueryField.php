@@ -13,7 +13,6 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
-use SplObjectStorage;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
@@ -88,7 +87,7 @@ class QueryField extends FieldDefinition
                 // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is $context
                 // $context MUST be a ContextInterface
 
-                if (!$context instanceof ContextInterface) {
+                if (! $context instanceof ContextInterface) {
                     throw new GraphQLRuntimeException('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \TheCodingMachine\GraphQLite\Context\Context');
                 }
 

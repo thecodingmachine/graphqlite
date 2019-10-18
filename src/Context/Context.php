@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Context;
 
@@ -12,9 +13,7 @@ use TheCodingMachine\GraphQLite\QueryField;
  */
 class Context implements ContextInterface, ResetableContextInterface
 {
-    /**
-     * @var SplObjectStorage<QueryField, PrefetchBuffer>
-     */
+    /** @var SplObjectStorage */
     private $prefetchBuffers;
 
     public function __construct()
