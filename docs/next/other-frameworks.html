@@ -123,12 +123,22 @@ $factory-&gt;prodMode();
 <span class="hljs-comment">// This is a shortcut for `$schemaFactory-&gt;setGlobTtl(2)`</span>
 $factory-&gt;devMode();
 </code></pre>
+<h3><a class="anchor" aria-hidden="true" id="graphqlite-context"></a><a href="#graphqlite-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>GraphQLite context</h3>
+<p>Webonyx allows you pass a &quot;context&quot; object when running a query.
+For some GraphQLite features to work (namely: the prefetch feature), GraphQLite needs you to initialize the Webonyx context
+with an instance of the <code>TheCodingMachine\GraphQLite\Context\Context</code> class.</p>
+<p>For instance:</p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">Context</span>;
+
+$result = GraphQL::executeQuery($schema, $query, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">new</span> Context(), $variableValues);
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="minimal-example"></a><a href="#minimal-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Minimal example</h2>
 <p>The smallest working example using no framework is:</p>
 <pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
 <span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">GraphQL</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">Schema</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">SchemaFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">Context</span>;
 
 <span class="hljs-comment">// $cache is a PSR-16 compatible cache.</span>
 <span class="hljs-comment">// $container is a PSR-11 compatible container.</span>
@@ -143,7 +153,7 @@ $input = json_decode($rawInput, <span class="hljs-keyword">true</span>);
 $query = $input[<span class="hljs-string">'query'</span>];
 $variableValues = <span class="hljs-keyword">isset</span>($input[<span class="hljs-string">'variables'</span>]) ? $input[<span class="hljs-string">'variables'</span>] : <span class="hljs-keyword">null</span>;
 
-$result = GraphQL::executeQuery($schema, $query, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span>, $variableValues);
+$result = GraphQL::executeQuery($schema, $query, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">new</span> Context(), $variableValues);
 $output = $result-&gt;toArray();
 
 header(<span class="hljs-string">'Content-Type: application/json'</span>);
@@ -302,7 +312,7 @@ The application will look into the <code>App\Controllers</code> namespace for Gr
 </code></pre>
 <p>And we are done! You can now test your query using your favorite GraphQL client.</p>
 <p><img src="/docs/assets/query1.png" alt=""></p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/universal_service_providers"><span class="arrow-prev">← </span><span>Universal service providers</span></a><a class="docs-next button" href="/docs/next/queries"><span>Queries</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#integration">Integration</a></li><li><a href="#minimal-example">Minimal example</a></li><li><a href="#psr-15-middleware">PSR-15 Middleware</a><ul class="toc-headings"><li><a href="#example">Example</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/universal_service_providers"><span class="arrow-prev">← </span><span>Universal service providers</span></a><a class="docs-next button" href="/docs/next/queries"><span>Queries</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#integration">Integration</a><ul class="toc-headings"><li><a href="#graphqlite-context">GraphQLite context</a></li></ul></li><li><a href="#minimal-example">Minimal example</a></li><li><a href="#psr-15-middleware">PSR-15 Middleware</a><ul class="toc-headings"><li><a href="#example">Example</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
