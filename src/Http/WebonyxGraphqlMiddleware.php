@@ -16,6 +16,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
+use TheCodingMachine\GraphQLite\Context\ResetableContextInterface;
 use const JSON_ERROR_NONE;
 use function array_map;
 use function explode;
@@ -79,7 +80,6 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
             $content = $request->getBody()->getContents();
             $data = json_decode($content, true);
 
-            // FIXME: DO WE NEED THIS????
             if ($data === false || json_last_error() !== JSON_ERROR_NONE) {
                 throw new InvalidArgumentException(json_last_error_msg() . ' in body: "' . $content . '"'); // @codeCoverageIgnore
             }
@@ -87,6 +87,10 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
             $request = $request->withParsedBody($data);
         }
 
+        $context = $this->config->getContext();
+        if ($context instanceof ResetableContextInterface) {
+            $context->reset();
+        }
         $result = $this->standardServer->executePsrRequest($request);
         //return $this->standardServer->processPsrRequest($request, $this->responseFactory->createResponse(), $this->streamFactory->createStream());
 

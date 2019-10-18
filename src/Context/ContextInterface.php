@@ -1,7 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Context;
 
+
+use TheCodingMachine\GraphQLite\PrefetchBuffer;
+use TheCodingMachine\GraphQLite\QueryField;
 
 /**
  * A context class that should be passed to the Webonyx executor.

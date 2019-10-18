@@ -5,21 +5,18 @@ namespace TheCodingMachine\GraphQLite\Integration;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\NonNull;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\SimpleCache\CacheInterface;
 use stdClass;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
@@ -263,7 +260,9 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
+            null,
+            new Context()
         );
 
         $this->assertSame([
@@ -290,7 +289,9 @@ class EndToEndTest extends TestCase
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
+            null,
+            new Context()
         );
 
         $this->assertSame([
@@ -313,6 +314,40 @@ class EndToEndTest extends TestCase
 
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testPrefetchException(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                company
+                uppercaseName
+                repeatName(prefix:"foo", suffix:"bar")
+                repeatInnerName
+                ... on User {
+                    email
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(GraphQLRuntimeException::class);
+        $this->expectExceptionMessage('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
     public function testEndToEndInputTypeDate()

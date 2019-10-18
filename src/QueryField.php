@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use SplObjectStorage;
+use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -88,20 +89,10 @@ class QueryField extends FieldDefinition
                 // $context MUST be a ContextInterface
 
                 if (!$context instanceof ContextInterface) {
-                    // TODO
+                    throw new GraphQLRuntimeException('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \TheCodingMachine\GraphQLite\Context\Context');
                 }
 
-                // FIXME! this is not working! The ResolveInfo class seems to be new for each call!
-                // We need to get the execution context instead!!! But how???
-                if (! isset($info->_graphqlitePrefetchBuffers)) {
-                    $info->_graphqlitePrefetchBuffers = new SplObjectStorage();
-                }
-                if ($info->_graphqlitePrefetchBuffers->offsetExists($this)) {
-                    $prefetchBuffer = $info->_graphqlitePrefetchBuffers->offsetGet($this);
-                } else {
-                    $prefetchBuffer = new PrefetchBuffer();
-                    $info->_graphqlitePrefetchBuffers->offsetSet($this, $prefetchBuffer);
-                }
+                $prefetchBuffer = $context->getPrefetchBuffer($this);
 
                 $prefetchBuffer->register($source, $args);
 

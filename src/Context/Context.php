@@ -1,14 +1,16 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Context;
 
 use SplObjectStorage;
+use TheCodingMachine\GraphQLite\PrefetchBuffer;
+use TheCodingMachine\GraphQLite\QueryField;
 
 /**
  * A context class that should be passed to the Webonyx executor.
  */
-class Context implements ContextInterface
+class Context implements ContextInterface, ResetableContextInterface
 {
     /**
      * @var SplObjectStorage<QueryField, PrefetchBuffer>
@@ -34,5 +36,10 @@ class Context implements ContextInterface
         }
 
         return $prefetchBuffer;
+    }
+
+    public function reset(): void
+    {
+        $this->prefetchBuffers = new SplObjectStorage();
     }
 }

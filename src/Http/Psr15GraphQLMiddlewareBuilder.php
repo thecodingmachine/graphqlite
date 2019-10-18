@@ -10,6 +10,7 @@ use GraphQL\Type\Schema;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use Zend\Diactoros\ResponseFactory;
@@ -42,6 +43,7 @@ class Psr15GraphQLMiddlewareBuilder
         $this->config->setDebug(Debug::RETHROW_UNSAFE_EXCEPTIONS);
         $this->config->setErrorFormatter([WebonyxErrorHandler::class, 'errorFormatter']);
         $this->config->setErrorsHandler([WebonyxErrorHandler::class, 'errorHandler']);
+        $this->config->setContext(new Context());
         $this->httpCodeDecider = new HttpCodeDecider();
     }
 
