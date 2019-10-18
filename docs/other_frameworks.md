@@ -81,6 +81,20 @@ $factory->prodMode();
 $factory->devMode();
 ```
 
+### GraphQLite context
+
+Webonyx allows you pass a "context" object when running a query.
+For some GraphQLite features to work (namely: the prefetch feature), GraphQLite needs you to initialize the Webonyx context
+with an instance of the `TheCodingMachine\GraphQLite\Context\Context` class.
+
+For instance:
+
+```php
+use TheCodingMachine\GraphQLite\Context\Context;
+
+$result = GraphQL::executeQuery($schema, $query, null, new Context(), $variableValues);
+```
+
 ## Minimal example
 
 The smallest working example using no framework is:
@@ -90,6 +104,7 @@ The smallest working example using no framework is:
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
+use TheCodingMachine\GraphQLite\Context\Context;
 
 // $cache is a PSR-16 compatible cache.
 // $container is a PSR-11 compatible container.
@@ -104,7 +119,7 @@ $input = json_decode($rawInput, true);
 $query = $input['query'];
 $variableValues = isset($input['variables']) ? $input['variables'] : null;
 
-$result = GraphQL::executeQuery($schema, $query, null, null, $variableValues);
+$result = GraphQL::executeQuery($schema, $query, null, new Context(), $variableValues);
 $output = $result->toArray();
 
 header('Content-Type: application/json');
