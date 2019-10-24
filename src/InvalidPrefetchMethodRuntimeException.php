@@ -8,7 +8,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
-class InvalidPrefetchMethodException extends GraphQLException
+class InvalidPrefetchMethodRuntimeException extends GraphQLRuntimeException
 {
     public static function methodNotFound(ReflectionMethod $annotationMethod, ReflectionClass $reflectionClass, string $methodName, ReflectionException $previous): self
     {

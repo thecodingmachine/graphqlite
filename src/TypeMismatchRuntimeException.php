@@ -9,7 +9,7 @@ use function gettype;
 /**
  * An exception thrown when a resolver returns a value that is not compatible with the GraphQL type.
  */
-class TypeMismatchException extends GraphQLException
+class TypeMismatchRuntimeException extends GraphQLRuntimeException
 {
     public static function unexpectedNullValue(): self
     {

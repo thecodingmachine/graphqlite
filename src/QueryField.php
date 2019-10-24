@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
+use GraphQL\Error\ClientAware;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
@@ -12,15 +13,15 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
+use TheCodingMachine\GraphQLite\Context\ContextInterface;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use Webmozart\Assert\Assert;
-use function array_map;
 use function array_unshift;
-use function array_values;
 use function get_class;
 use function is_object;
 
@@ -66,7 +67,7 @@ class QueryField extends FieldDefinition
 
             try {
                 $this->assertReturnType($result);
-            } catch (TypeMismatchException $e) {
+            } catch (TypeMismatchRuntimeException $e) {
                 $class = $method[0];
                 if (is_object($class)) {
                     $class = get_class($class);
@@ -82,9 +83,16 @@ class QueryField extends FieldDefinition
         if ($prefetchMethodName === null) {
             $config['resolve'] = $resolveFn;
         } else {
-            $prefetchBuffer = new PrefetchBuffer();
+            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
+                // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is $context
+                // $context MUST be a ContextInterface
 
-            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($prefetchBuffer, $arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
+                if (! $context instanceof ContextInterface) {
+                    throw new GraphQLRuntimeException('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \TheCodingMachine\GraphQLite\Context\Context');
+                }
+
+                $prefetchBuffer = $context->getPrefetchBuffer($this);
+
                 $prefetchBuffer->register($source, $args);
 
                 return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $resolve) {
@@ -237,12 +245,19 @@ class QueryField extends FieldDefinition
      */
     private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
     {
-        return array_values(array_map(function (ParameterInterface $parameter) use ($source, $args, $context, $info, $resolve) {
+        $toPassArgs = [];
+        $exceptions = [];
+        foreach ($parameters as $parameter) {
             try {
-                return $parameter->resolve($source, $args, $context, $info);
+                $toPassArgs[] = $parameter->resolve($source, $args, $context, $info);
             } catch (MissingArgumentException $e) {
                 throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
+            } catch (ClientAware $e) {
+                $exceptions[] = $e;
             }
-        }, $parameters));
+        }
+        GraphQLAggregateException::throwExceptions($exceptions);
+
+        return $toPassArgs;
     }
 }

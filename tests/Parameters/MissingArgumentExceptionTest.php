@@ -18,5 +18,9 @@ class MissingArgumentExceptionTest extends TestCase
         $e3 = MissingArgumentException::wrapWithFactoryContext($e, 'Input', function() {});
 
         $this->assertEquals('Expected argument \'foo\' was not provided in GraphQL input type \'Input\' used in factory \'\'', $e3->getMessage());
+
+        $this->assertTrue($e->isClientSafe());
+        $this->assertSame([], $e->getExtensions());
+        $this->assertSame('graphql', $e->getCategory());
     }
 }

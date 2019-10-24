@@ -8,7 +8,6 @@ use BadMethodCallException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use LogicException;
-use function parent;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 class MockResolvableInputObjectType extends InputObjectType implements ResolvableMutableInputInterface

@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class TypeTest extends TestCase
 {
@@ -26,7 +26,7 @@ class TypeTest extends TestCase
     public function testException2()
     {
         $type = new Type(['default'=>false]);
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('Problem in annotation @Type for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
         $type->setClass(FooInterface::class);
     }
@@ -34,7 +34,7 @@ class TypeTest extends TestCase
     public function testException3()
     {
         $type = new Type(['disableInheritance'=>true]);
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('Problem in annotation @Type for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the disableInheritance="true" attribute on interfaces');
         $type->setClass(FooInterface::class);
     }

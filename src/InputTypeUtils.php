@@ -13,7 +13,7 @@ use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use Webmozart\Assert\Assert;
 use function array_filter;
@@ -55,14 +55,14 @@ class InputTypeUtils
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType === null) {
-            throw MissingTypeHintException::missingReturnType($refMethod);
+            throw MissingTypeHintRuntimeException::missingReturnType($refMethod);
         }
 
         if ($returnType->allowsNull()) {
-            throw MissingTypeHintException::nullableReturnType($refMethod);
+            throw MissingTypeHintRuntimeException::nullableReturnType($refMethod);
         }
 
-        $type = (string) $returnType;
+        $type = $returnType->getName();
 
         $typeResolver = new TypeResolver();
 
@@ -70,7 +70,7 @@ class InputTypeUtils
         Assert::notNull($phpdocType);
         $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         if (! $phpdocType instanceof Object_) {
-            throw MissingTypeHintException::invalidReturnType($refMethod);
+            throw MissingTypeHintRuntimeException::invalidReturnType($refMethod);
         }
 
         $fqsen = $phpdocType->getFqsen();
@@ -101,10 +101,10 @@ class InputTypeUtils
     public static function getInputTypeArgs(array $args): array
     {
         $inputTypeArgs = array_filter($args, static function (ParameterInterface $parameter) {
-            return $parameter instanceof InputTypeParameter;
+            return $parameter instanceof InputTypeParameterInterface;
         });
 
-        return array_map(static function (InputTypeParameter $parameter) {
+        return array_map(static function (InputTypeParameterInterface $parameter) {
             $desc = [
                 'type' => $parameter->getType(),
             ];

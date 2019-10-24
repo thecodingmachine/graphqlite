@@ -5,26 +5,25 @@ namespace TheCodingMachine\GraphQLite\Integration;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\NonNull;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\ArrayCache;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\Store\SemaphoreStore;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -36,6 +35,9 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
@@ -45,10 +47,11 @@ use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\TypeGenerator;
-use TheCodingMachine\GraphQLite\TypeMismatchException;
+use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -64,7 +67,15 @@ class EndToEndTest extends TestCase
 
     public function setUp(): void
     {
-        $this->mainContainer = new Picotainer([
+        $this->mainContainer = $this->createContainer();
+    }
+
+    /**
+     * @param array<string, callable> $overloadedServices
+     */
+    public function createContainer(array $overloadedServices = []): ContainerInterface
+    {
+        $services = [
             Schema::class => function(ContainerInterface $container) {
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), null, $container->get(RootTypeMapperInterface::class));
             },
@@ -81,17 +92,25 @@ class EndToEndTest extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMapperInterface::class),
+                    $container->get(ParameterMiddlewareInterface::class),
                     $container->get(FieldMiddlewareInterface::class)
                 );
             },
             FieldMiddlewareInterface::class => function(ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
+                $pipe->pipe($container->get(SecurityFieldMiddleware::class));
                 return $pipe;
             },
             AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
                 return new AuthorizationFieldMiddleware(
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
+                );
+            },
+            SecurityFieldMiddleware::class => function(ContainerInterface $container) {
+                return new SecurityFieldMiddleware(
+                    new ExpressionLanguage(new Psr16Adapter(new ArrayCache()), [new SecurityExpressionLanguageProvider()]),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class)
                 );
@@ -132,7 +151,7 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     new ArrayCache()
-                    );
+                );
             },
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
                 return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
@@ -189,8 +208,8 @@ class EndToEndTest extends TestCase
                     new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class))
                 ]);
             },
-            ContainerParameterMapper::class => function(ContainerInterface $container) {
-                return new ContainerParameterMapper($container, true, true);
+            ContainerParameterHandler::class => function(ContainerInterface $container) {
+                return new ContainerParameterHandler($container, true, true);
             },
             'testService' => function() {
                 return 'foo';
@@ -199,17 +218,20 @@ class EndToEndTest extends TestCase
                 // Empty test service for autowiring
                 return new stdClass();
             },
-            ParameterMapperInterface::class => function(ContainerInterface $container) {
-                return new CompositeParameterMapper([
-                    new ResolveInfoParameterMapper(),
-                    $container->get(ContainerParameterMapper::class)
-                ]);
+            ParameterMiddlewareInterface::class => function(ContainerInterface $container) {
+                $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
+                $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+                $parameterMiddlewarePipe->pipe($container->get(ContainerParameterHandler::class));
+
+                return $parameterMiddlewarePipe;
             }
-        ]);
-        $this->mainContainer->get(TypeResolver::class)->registerSchema($this->mainContainer->get(Schema::class));
-        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class));
-        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(GlobTypeMapper::class.'2'));
-        $this->mainContainer->get(TypeMapperInterface::class)->addTypeMapper($this->mainContainer->get(PorpaginasTypeMapper::class));
+        ];
+        $container = new Picotainer($overloadedServices + $services);
+        $container->get(TypeResolver::class)->registerSchema($container->get(Schema::class));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'2'));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
+        return $container;
     }
 
     public function testEndToEnd(): void
@@ -238,7 +260,9 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
+            null,
+            new Context()
         );
 
         $this->assertSame([
@@ -265,7 +289,9 @@ class EndToEndTest extends TestCase
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
+            null,
+            new Context()
         );
 
         $this->assertSame([
@@ -288,6 +314,40 @@ class EndToEndTest extends TestCase
 
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testPrefetchException(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                company
+                uppercaseName
+                repeatName(prefix:"foo", suffix:"bar")
+                repeatInnerName
+                ... on User {
+                    email
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(GraphQLRuntimeException::class);
+        $this->expectExceptionMessage('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
     public function testEndToEndInputTypeDate()
@@ -849,7 +909,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->expectException(TypeMismatchException::class);
+        $this->expectException(TypeMismatchRuntimeException::class);
         $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
         $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
@@ -884,4 +944,207 @@ class EndToEndTest extends TestCase
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
+
+    public function testEndToEndSecurityAnnotation(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            secretPhrase(secret: "foo")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'secretPhrase' => 'you can see this secret only if passed parameter is "foo"'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        $queryString = '
+        query {
+            secretPhrase(secret: "bar")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Wrong secret passed');
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    public function testEndToEndSecurityFailWithAnnotation(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            nullableSecretPhrase(secret: "bar")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'nullableSecretPhrase' => null
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Test with @FailWith annotation
+        $queryString = '
+        query {
+            nullableSecretPhrase2(secret: "bar")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'nullableSecretPhrase2' => null
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndSecurityWithUser(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            secretUsingUser
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testEndToEndSecurityWithUserConnected(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_EDIT' && $subject->bar == 42) {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+
+
+        ]);
+
+        /**
+         * @var Schema $schema
+         */
+        $schema = $container->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            secretUsingUser
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('you can see this secret only if user.bar is set to 42', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingUser']);
+
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            secretUsingIsGranted
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGranted']);
+    }
+
+    public function testEndToEndSecurityWithThis(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            secretUsingThis(secret:"41")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            secretUsingThis(secret:"42")
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingThis']);
+    }
+
 }

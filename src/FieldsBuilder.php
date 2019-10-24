@@ -17,8 +17,8 @@ use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
@@ -49,9 +49,9 @@ class FieldsBuilder
     private $typeResolver;
     /** @var NamingStrategyInterface */
     private $namingStrategy;
-    /** @var TypeMapper */
+    /** @var TypeHandler */
     private $typeMapper;
-    /** @var ParameterMapperInterface */
+    /** @var ParameterMiddlewareInterface */
     private $parameterMapper;
     /** @var FieldMiddlewareInterface */
     private $fieldMiddleware;
@@ -64,7 +64,7 @@ class FieldsBuilder
         CachedDocBlockFactory $cachedDocBlockFactory,
         NamingStrategyInterface $namingStrategy,
         RootTypeMapperInterface $rootTypeMapper,
-        ParameterMapperInterface $parameterMapper,
+        ParameterMiddlewareInterface $parameterMapper,
         FieldMiddlewareInterface $fieldMiddleware
     ) {
         $this->annotationReader      = $annotationReader;
@@ -72,7 +72,7 @@ class FieldsBuilder
         $this->typeResolver          = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy        = $namingStrategy;
-        $this->typeMapper            = new TypeMapper($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver);
+        $this->typeMapper            = new TypeHandler($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver);
         $this->parameterMapper       = $parameterMapper;
         $this->fieldMiddleware = $fieldMiddleware;
     }
@@ -219,7 +219,7 @@ class FieldsBuilder
             }
         }
 
-        foreach ($refClass->getMethods() as $refMethod) {
+        foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $refMethod->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
                 // We will merge the fields anyway.
@@ -234,6 +234,7 @@ class FieldsBuilder
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
+            $fieldDescriptor->setRefMethod($refMethod);
 
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
@@ -254,7 +255,7 @@ class FieldsBuilder
                     try {
                         $prefetchRefMethod = $refClass->getMethod($prefetchMethodName);
                     } catch (ReflectionException $e) {
-                        throw InvalidPrefetchMethodException::methodNotFound($refMethod, $refClass, $prefetchMethodName, $e);
+                        throw InvalidPrefetchMethodRuntimeException::methodNotFound($refMethod, $refClass, $prefetchMethodName, $e);
                     }
 
                     $prefetchParameters = $prefetchRefMethod->getParameters();
@@ -275,7 +276,7 @@ class FieldsBuilder
             if ($prefetchMethodName !== null) {
                 $secondParameter = array_shift($parameters);
                 if ($secondParameter === null) {
-                    throw InvalidPrefetchMethodException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
+                    throw InvalidPrefetchMethodRuntimeException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
                 }
             }
 
@@ -390,6 +391,7 @@ class FieldsBuilder
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
+            $fieldDescriptor->setRefMethod($refMethod);
             $fieldDescriptor->setName($sourceField->getName());
 
             $methodName = $refMethod->getName();
@@ -460,7 +462,7 @@ class FieldsBuilder
      *
      * @return array<string, ParameterInterface>
      *
-     * @throws MissingTypeHintException
+     * @throws MissingTypeHintRuntimeException
      */
     private function mapParameters(array $refParameters, DocBlock $docBlock): array
     {
@@ -478,11 +480,8 @@ class FieldsBuilder
         foreach ($refParameters as $parameter) {
             $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
 
-            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
+            $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations, $this->typeMapper);
 
-            if ($parameterObj === null) {
-                $parameterObj = $this->typeMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations);
-            }
             $args[$parameter->getName()] = $parameterObj;
         }
 

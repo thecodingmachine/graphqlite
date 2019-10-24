@@ -2,15 +2,21 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use DateTimeImmutable;
+use GraphQL\Error\Error;
 use GraphQL\Type\Definition\ResolveInfo;
 use stdClass;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\HardCodedParameter;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 {
@@ -100,4 +106,89 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(TestObject2::class, $obj);
         $this->assertSame('2018-12-25-foo-bar-1', $obj->getTest2());
     }
+
+    public function testExceptions(): void
+    {
+        $fieldsBuilder = $this->createMock(FieldsBuilder::class);
+
+        $fieldsBuilder->method('getParameters')->willReturn([
+            new class implements ParameterInterface {
+                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                {
+                    throw new Error('boum');
+                }
+            },
+            new class implements ParameterInterface {
+                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                {
+                    throw new Error('boum');
+                }
+            }
+        ]);
+
+        $inputType = new ResolvableMutableInputObjectType('InputObject2',
+            $fieldsBuilder,
+            new TestFactory(),
+            'myListFactory',
+            null,
+            false);
+
+        $this->expectException(GraphQLAggregateException::class);
+        $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
+            [
+                'foo',
+                'bar'
+            ],
+            'dateList' => [
+                '2018-12-25'
+            ]], null, $this->createMock(ResolveInfo::class));
+    }
+
+    public function testExceptionsInDecorator(): void
+    {
+        $fieldsBuilder = $this->createMock(FieldsBuilder::class);
+
+        $fieldsBuilder->method('getParameters')->willReturn([
+            new HardCodedParameter(new DateTimeImmutable('now')),
+            new HardCodedParameter([]),
+            new HardCodedParameter([]),
+            ]);
+
+
+        $fieldsBuilder->method('getParametersForDecorator')->willReturn([
+            new class implements ParameterInterface {
+                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                {
+                    throw new Error('boum');
+                }
+            },
+            new class implements ParameterInterface {
+                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                {
+                    throw new Error('boum');
+                }
+            }
+        ]);
+
+        $testFactory = new TestFactory();
+        $inputType = new ResolvableMutableInputObjectType('InputObject2',
+            $fieldsBuilder,
+            $testFactory,
+            'myListFactory',
+            null,
+            false);
+
+        $inputType->decorate([$testFactory, 'myDecorator']);
+
+        $this->expectException(GraphQLAggregateException::class);
+        $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
+            [
+                'foo',
+                'bar'
+            ],
+            'dateList' => [
+                '2018-12-25'
+            ]], null, $this->createMock(ResolveInfo::class));
+    }
+
 }

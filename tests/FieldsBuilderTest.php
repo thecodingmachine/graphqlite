@@ -23,6 +23,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
@@ -52,11 +53,11 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -159,7 +160,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $queryProvider->getQueries($controller);
     }
 
@@ -274,6 +275,11 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             {
                 return true;
             }
+
+            public function getUser(): ?object
+            {
+                return new stdClass();
+            }
         };
         $queryProvider = new FieldsBuilder(
             $this->getAnnotationReader(),
@@ -283,7 +289,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 $authenticationService,
                 new VoidAuthorizationService()
@@ -300,7 +306,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     public function testRightInSourceField(): void
     {
         $authorizationService = new class implements AuthorizationServiceInterface {
-            public function isAllowed(string $right): bool
+            public function isAllowed(string $right, $subject = null): bool
             {
                 return true;
             }
@@ -314,7 +320,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 $authorizationService
@@ -349,7 +355,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     {
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage("Return type in TheCodingMachine\\GraphQLite\\Fixtures\\TestObjectMissingReturnType::getTest is missing a type-hint (or type-hinted to \"mixed\"). Please provide a better type-hint.");
         $queryProvider->getFields(new TestTypeMissingReturnType(), true);
     }
@@ -375,7 +381,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
             new BaseTypeMapper($this->getTypeMapper()),
-            new CompositeParameterMapper([ new ResolveInfoParameterMapper() ]),
+            $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService()
@@ -425,7 +431,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     public function testNoReturnTypeError(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $queryProvider->getQueries(new TestControllerNoReturnType());
     }
 
@@ -476,7 +482,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
         $queryProvider->getQueries($controller);
     }
@@ -487,7 +493,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType::test is type-hinted to array. Please provide an additional @return in the PHPDoc block to further specify the type of the array. For instance: @return string[]');
         $queryProvider->getQueries($controller);
     }
@@ -498,7 +504,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam::test is type-hinted to array. Please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
         $queryProvider->getQueries($controller);
     }
@@ -509,7 +515,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingException::class);
+        $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
         $queryProvider->getQueries($controller);
     }
@@ -591,7 +597,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     public function testDoubleReturnException(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
-        $this->expectException(InvalidDocBlockException::class);
+        $this->expectException(InvalidDocBlockRuntimeException::class);
         $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Fixtures\\TestDoubleReturnTag::test has several @return annotations.');
         $queryProvider->getFields(new TestDoubleReturnTag(), true);
     }
@@ -629,7 +635,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(InvalidPrefetchMethodException::class);
+        $this->expectException(InvalidPrefetchMethodRuntimeException::class);
         $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a "prefetch method" that could not be found. Unable to find method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists.');
         $queryProvider->getFields($controller);
     }
@@ -640,7 +646,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(InvalidPrefetchMethodException::class);
+        $this->expectException(InvalidPrefetchMethodRuntimeException::class);
         $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter::prefetch specifies a "prefetch method" but the data from the prefetch method is not gathered. The "prefetch" method should accept a second parameter that will contain data returned by the prefetch method.');
         $queryProvider->getFields($controller);
     }
@@ -659,5 +665,24 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(2, $testField->args);
         $this->assertSame('string', $testField->args[0]->name);
         $this->assertSame('int', $testField->args[1]->name);
+    }
+
+    public function testSecurityBadQuery(): void
+    {
+        $controller = new TestControllerWithBadSecurity();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(1, $queries);
+        $query = $queries[0];
+        $this->assertSame('testBadSecurity', $query->name);
+
+        $resolve = $query->resolveFn;
+
+        $this->expectException(BadExpressionInSecurityException::class);
+        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
+        $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
     }
 }

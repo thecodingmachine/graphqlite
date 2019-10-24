@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Error\ClientAware;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
@@ -102,13 +104,17 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         $parameters = $this->getParameters();
 
         $toPassArgs = [];
+        $exceptions = [];
         foreach ($parameters as $parameter) {
             try {
                 $toPassArgs[] = $parameter->resolve($source, $args, $context, $resolveInfo);
             } catch (MissingArgumentException $e) {
                 throw MissingArgumentException::wrapWithFactoryContext($e, $this->name, $this->resolve);
+            } catch (ClientAware $e) {
+                $exceptions[] = $e;
             }
         }
+        GraphQLAggregateException::throwExceptions($exceptions);
 
         $resolve = $this->resolve;
 
@@ -123,8 +129,11 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
                     $toPassArgs[] = $parameter->resolve($source, $args, $context, $resolveInfo);
                 } catch (MissingArgumentException $e) {
                     throw MissingArgumentException::wrapWithDecoratorContext($e, $this->name, $decorator);
+                } catch (ClientAware $e) {
+                    $exceptions[] = $e;
                 }
             }
+            GraphQLAggregateException::throwExceptions($exceptions);
 
             $object = $decorator(...$toPassArgs);
         }

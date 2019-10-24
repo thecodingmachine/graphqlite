@@ -33,7 +33,7 @@ class ContactType
      */
     public function repeatName(Contact $contact, $data, string $suffix): string
     {
-        $index = array_search($contact, $data['contacts'], false);
+        $index = array_search($contact, $data['contacts'], true);
         if ($index === false) {
             throw new \RuntimeException('Index not found');
         }

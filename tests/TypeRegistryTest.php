@@ -19,7 +19,7 @@ class TypeRegistryTest extends TestCase
         $registry = new TypeRegistry();
         $registry->registerType($type);
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $registry->registerType($type);
     }
 
@@ -35,7 +35,7 @@ class TypeRegistryTest extends TestCase
 
         $this->assertSame($type, $registry->getType('Foo'));
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $registry->getType('Bar');
     }
 
@@ -71,7 +71,7 @@ class TypeRegistryTest extends TestCase
 
         $this->assertSame($type, $registry->getMutableObjectType('Foo'));
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $this->assertSame($type, $registry->getMutableObjectType('FooBar'));
     }
 
@@ -92,7 +92,7 @@ class TypeRegistryTest extends TestCase
 
         $this->assertSame($type, $registry->getMutableInterface('Foo'));
 
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         $this->assertSame($type, $registry->getMutableInterface('FooBar'));
     }
 }

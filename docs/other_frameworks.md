@@ -24,7 +24,7 @@ In order to bootstrap GraphQLite, you will need:
 Additionally, you will have to route the HTTP requests to the underlying GraphQL library.
 
 GraphQLite relies on the [webonyx/graphql-php](http://webonyx.github.io/graphql-php/) library internally.
-This library plays well with PSR-7 requests and there is a [PSR-15 middleware available](https://github.com/phps-cans/psr7-middleware-graphql).
+This library plays well with PSR-7 requests and we also provide a [PSR-15 middleware](https://github.com/phps-cans/psr7-middleware-graphql).
 
 ## Integration
 
@@ -81,6 +81,20 @@ $factory->prodMode();
 $factory->devMode();
 ```
 
+### GraphQLite context
+
+Webonyx allows you pass a "context" object when running a query.
+For some GraphQLite features to work (namely: the prefetch feature), GraphQLite needs you to initialize the Webonyx context
+with an instance of the `TheCodingMachine\GraphQLite\Context\Context` class.
+
+For instance:
+
+```php
+use TheCodingMachine\GraphQLite\Context\Context;
+
+$result = GraphQL::executeQuery($schema, $query, null, new Context(), $variableValues);
+```
+
 ## Minimal example
 
 The smallest working example using no framework is:
@@ -90,6 +104,7 @@ The smallest working example using no framework is:
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
+use TheCodingMachine\GraphQLite\Context\Context;
 
 // $cache is a PSR-16 compatible cache.
 // $container is a PSR-11 compatible container.
@@ -104,22 +119,50 @@ $input = json_decode($rawInput, true);
 $query = $input['query'];
 $variableValues = isset($input['variables']) ? $input['variables'] : null;
 
-$result = GraphQL::executeQuery($schema, $query, null, null, $variableValues);
+$result = GraphQL::executeQuery($schema, $query, null, new Context(), $variableValues);
 $output = $result->toArray();
 
 header('Content-Type: application/json');
 echo json_encode($output);
 ```
 
-## Advanced example
+## PSR-15 Middleware
 
-When using a framework, you will need a way to route your HTTP requests to the `webonyx/graphql-php` library. 
-By chance, it plays well with PSR-7 requests and there is a PSR-15 middleware available.
+When using a framework, you will need a way to route your HTTP requests to the `webonyx/graphql-php` library.
+
+If the framework you are using is compatible with PSR-15 (like Slim PHP or Zend-Expressive / Laminas), GraphQLite
+comes with a PSR-15 middleware out of the box.
+
+In order to get an instance of this middleware, you can use the `Psr15GraphQLMiddlewareBuilder` builder class:
+
+```php
+// $schema is an instance of the GraphQL schema returned by SchemaFactory::createSchema (see previous chapter)
+$builder = new Psr15GraphQLMiddlewareBuilder($schema);
+
+$middleware = $builder->createMiddleware();
+
+// You can now inject your middleware in your favorite PSR-15 compatible framework.
+// For instance:
+$zendMiddlewarePipe->pipe($middleware);
+```
+
+The builder offers a number of setters to modify its behaviour:
+
+```php
+$builder->setUrl("/graphql"); // Modify the URL endpoint (defaults to /graphql)
+$config = $builder->getConfig(); // Returns a Webonyx ServerConfig object. Use this object to configure Webonyx in details.
+$builder->setConfig($config);
+
+$builder->setResponseFactory(new ResponseFactory()); // Set a PSR-18 ResponseFactory (not needed if you are using zend-framework/zend-diactoros ^2
+$builder->setStreamFactory(new StreamFactory()); // Set a PSR-18 StreamFactory (not needed if you are using zend-framework/zend-diactoros ^2
+$builder->setHttpCodeDecider(new HttpCodeDecider()); // Set a class in charge of deciding the HTTP status code based on the response.
+```
+
+### Example
 
 In this example, we will focus on getting a working version of GraphQLite using:
 
-- [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) as a PSR-7 server
-- `phps-cans/psr7-middleware-graphql` to route PSR-7 requests to the GraphQL engine
+- [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) as a PSR-15 server
 - `mouf/picotainer` (a micro-container) for the PSR-11 container
 - `symfony/cache ` for the PSR-16 cache
 
@@ -135,9 +178,7 @@ The choice of the libraries is really up to you. You can adapt it based on your 
     }
   },
   "require": {
-    "thecodingmachine/graphqlite": "^3",
-    "phps-cans/psr7-middleware-graphql": "^0.2",
-    "middlewares/payload": "^2.1",
+    "thecodingmachine/graphqlite": "^4",
     "zendframework/zend-diactoros": "^2",
     "zendframework/zend-stratigility": "^3",
     "zendframework/zend-httphandlerrunner": "^1.0",
@@ -191,40 +232,27 @@ This `MiddlewarePipe` comes from the container declared in the `config/container
 ```php
 <?php
 
-use GraphQL\Server\StandardServer;
 use GraphQL\Type\Schema;
 use Mouf\Picotainer\Picotainer;
-use PsCs\Middleware\Graphql\WebonyxGraphqlMiddleware;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Simple\ApcuCache;
+use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\SchemaFactory;
-use Zend\Diactoros\ResponseFactory;
-use Zend\Diactoros\StreamFactory;
 use Zend\Stratigility\MiddlewarePipe;
 
 // Picotainer is a minimalist PSR-11 container.
 return new Picotainer([
     MiddlewarePipe::class => function(ContainerInterface $container) {
         $pipe = new MiddlewarePipe();
-        // JsonPayload converts JSON body into a parser PHP array.
-        $pipe->pipe(new JsonPayload());
         $pipe->pipe($container->get(WebonyxGraphqlMiddleware::class));
         return $pipe;
     },
     // The WebonyxGraphqlMiddleware is a PSR-15 compatible
     // middleware that exposes Webonyx schemas. 
     WebonyxGraphqlMiddleware::class => function(ContainerInterface $container) {
-        return new WebonyxGraphqlMiddleware(
-            $container->get(StandardServer::class),
-            new ResponseFactory(),
-            new StreamFactory()
-        );
-    },
-    StandardServer::class => function(ContainerInterface $container) {
-        return new StandardServer([
-            'schema' => $container->get(Schema::class)
-        ]);
+        $builder = new Psr15GraphQLMiddlewareBuilder($container->get(Schema::class));
+        return $builder->createMiddleware();
     },
     CacheInterface::class => function() {
         return new ApcuCache();
@@ -281,4 +309,4 @@ return new Picotainer([
 
 And we are done! You can now test your query using your favorite GraphQL client.
 
-![](../img/query1.png)
+![](assets/query1.png)

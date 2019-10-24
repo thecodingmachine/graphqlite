@@ -33,7 +33,7 @@ class TypeRegistry
     public function registerType(NamedType $type): void
     {
         if (isset($this->outputTypes[$type->name])) {
-            throw new GraphQLException('Type "' . $type->name . '" is already registered');
+            throw new GraphQLRuntimeException('Type "' . $type->name . '" is already registered');
         }
         $this->outputTypes[$type->name] = $type;
     }
@@ -49,7 +49,7 @@ class TypeRegistry
     public function getType(string $typeName): NamedType
     {
         if (! isset($this->outputTypes[$typeName])) {
-            throw new GraphQLException('Could not find type "' . $typeName . '" in registry');
+            throw new GraphQLRuntimeException('Could not find type "' . $typeName . '" in registry');
         }
 
         return $this->outputTypes[$typeName];
@@ -59,7 +59,7 @@ class TypeRegistry
     {
         $type = $this->getType($typeName);
         if (! $type instanceof MutableObjectType) {
-            throw new GraphQLException('Expected GraphQL type "' . $typeName . '" to be an MutableObjectType. Got a ' . get_class($type));
+            throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be an MutableObjectType. Got a ' . get_class($type));
         }
 
         return $type;
@@ -72,7 +72,7 @@ class TypeRegistry
     {
         $type = $this->getType($typeName);
         if (! $type instanceof MutableInterface || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)) {
-            throw new GraphQLException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
+            throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
         }
 
         return $type;

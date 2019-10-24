@@ -38,14 +38,17 @@ final class GlobTypeMapper extends AbstractTypeMapper
     private $classes;
     /** @var bool */
     private $recursive;
+    /** @var ClassNameMapper */
+    private $classNameMapper;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $globTtl = 2, ?int $mapTtl = null, bool $recursive = true)
     {
         $this->namespace           = $namespace;
         $this->recursive           = $recursive;
+        $this->classNameMapper     = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
         $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace);
         parent::__construct($cachePrefix, $typeGenerator, $inputTypeGenerator, $inputTypeUtils, $container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $cache, $globTtl, $mapTtl);
     }
@@ -60,7 +63,7 @@ final class GlobTypeMapper extends AbstractTypeMapper
     {
         if ($this->classes === null) {
             $this->classes = [];
-            $explorer      = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, ClassNameMapper::createFromComposerFile(null, null, true), $this->recursive);
+            $explorer      = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, $this->classNameMapper, $this->recursive);
             $classes       = $explorer->getClasses();
             foreach ($classes as $className) {
                 if (! class_exists($className) && ! interface_exists($className)) {

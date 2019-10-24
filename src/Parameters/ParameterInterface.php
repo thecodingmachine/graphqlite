@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * Instances of ParameterInterface represent a single PHP parameter in a Query/Mutation/Field.
+ * Instances of ParameterInterface represent a single PHP parameter in a Query/Mutation/Field/Factory.
  */
 interface ParameterInterface
 {

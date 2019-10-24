@@ -25,7 +25,7 @@ class ResolveUtils
     public static function assertInnerReturnType($result, Type $type): void
     {
         if ($type instanceof NonNull && $result === null) {
-            throw TypeMismatchException::unexpectedNullValue();
+            throw TypeMismatchRuntimeException::unexpectedNullValue();
         }
         if ($result === null) {
             return;
@@ -33,7 +33,7 @@ class ResolveUtils
         $type = self::removeNonNull($type);
         if ($type instanceof ListOfType) {
             if (! is_iterable($result)) {
-                throw TypeMismatchException::expectedIterable($result);
+                throw TypeMismatchRuntimeException::expectedIterable($result);
             }
             // If this is an array, we can scan it and check the types.
             if (is_array($result)) {
@@ -49,7 +49,7 @@ class ResolveUtils
         }
 
         if (! is_object($result)) {
-            throw TypeMismatchException::expectedObject($result);
+            throw TypeMismatchRuntimeException::expectedObject($result);
         }
         // TODO: it would be great to check if this is the actual object type we were expecting
     }

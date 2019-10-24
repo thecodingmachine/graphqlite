@@ -11,15 +11,18 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
+use Mouf\Composer\ClassNameMapper;
 use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Adapter\Psr16Adapter;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\CompositeParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterMapper;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -31,11 +34,13 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
+use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
@@ -65,8 +70,8 @@ class SchemaFactory
     private $typeMappers = [];
     /** @var TypeMapperFactoryInterface[] */
     private $typeMapperFactories = [];
-    /** @var ParameterMapperInterface[] */
-    private $parameterMappers = [];
+    /** @var ParameterMiddlewareInterface[] */
+    private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
     /** @var AuthenticationServiceInterface|null */
@@ -79,12 +84,16 @@ class SchemaFactory
     private $namingStrategy;
     /** @var ContainerInterface */
     private $container;
+    /** @var ClassNameMapper */
+    private $classNameMapper;
     /** @var SchemaConfig */
     private $schemaConfig;
     /** @var int */
     private $globTtl = 2;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
+    /** @var ExpressionLanguage|null */
+    private $expressionLanguage;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -163,11 +172,11 @@ class SchemaFactory
     }
 
     /**
-     * Registers a parameter mapper.
+     * Registers a parameter middleware.
      */
-    public function addParameterMapper(ParameterMapperInterface $parameterMapper): self
+    public function addParameterMiddleware(ParameterMiddlewareInterface $parameterMiddleware): self
     {
-        $this->parameterMappers[] = $parameterMapper;
+        $this->parameterMiddlewares[] = $parameterMiddleware;
 
         return $this;
     }
@@ -230,6 +239,13 @@ class SchemaFactory
         return $this;
     }
 
+    public function setClassNameMapper(ClassNameMapper $classNameMapper): self
+    {
+        $this->classNameMapper = $classNameMapper;
+
+        return $this;
+    }
+
     /**
      * Sets the time to live time of the cache for annotations in files.
      * By default this is set to 2 seconds which is ok for development environments.
@@ -272,6 +288,17 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * Sets a custom expression language to use.
+     * ExpressionLanguage is used to evaluate expressions in the "Security" tag.
+     */
+    public function setExpressionLanguage(ExpressionLanguage $expressionLanguage): self
+    {
+        $this->expressionLanguage = $expressionLanguage;
+
+        return $this;
+    }
+
     public function createSchema(): Schema
     {
         $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
@@ -282,10 +309,16 @@ class SchemaFactory
         $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry          = new TypeRegistry();
 
+        $psr6Cache = new Psr16Adapter($this->cache);
+        $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($psr6Cache);
+        $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
+
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         foreach ($this->fieldMiddlewares as $fieldMiddleware) {
             $fieldMiddlewarePipe->pipe($fieldMiddleware);
         }
+        // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
+        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         $compositeTypeMapper = new CompositeTypeMapper();
@@ -299,10 +332,12 @@ class SchemaFactory
 
         $argumentResolver = new ArgumentResolver();
 
-        $parameterMappers         = $this->parameterMappers;
-        $parameterMappers[]       = new ResolveInfoParameterMapper();
-        $parameterMappers[]       = new ContainerParameterMapper($this->container);
-        $compositeParameterMapper = new CompositeParameterMapper($parameterMappers);
+        $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
+        foreach ($this->parameterMiddlewares as $parameterMapper) {
+            $parameterMiddlewarePipe->pipe($parameterMapper);
+        }
+        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+        $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
 
         $fieldsBuilder = new FieldsBuilder(
             $annotationReader,
@@ -312,7 +347,7 @@ class SchemaFactory
             $cachedDocBlockFactory,
             $namingStrategy,
             $compositeRootTypeMapper,
-            $compositeParameterMapper,
+            $parameterMiddlewarePipe,
             $fieldMiddlewarePipe
         );
 
@@ -321,7 +356,7 @@ class SchemaFactory
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
 
         if (empty($this->typeNamespaces) && empty($this->typeMappers) && empty($this->typeMapperFactories)) {
-            throw new GraphQLException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
         foreach ($this->typeNamespaces as $typeNamespace) {
@@ -335,6 +370,7 @@ class SchemaFactory
                 $namingStrategy,
                 $recursiveTypeMapper,
                 $this->cache,
+                $this->classNameMapper,
                 $this->globTtl
             ));
         }
@@ -371,6 +407,7 @@ class SchemaFactory
                 $fieldsBuilder,
                 $this->container,
                 $this->cache,
+                $this->classNameMapper,
                 $this->globTtl
             );
         }
@@ -384,7 +421,7 @@ class SchemaFactory
         }
 
         if ($queryProviders === []) {
-            throw new GraphQLException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
         }
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);

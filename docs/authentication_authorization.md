@@ -7,13 +7,16 @@ sidebar_label: Authentication and authorization
 You might not want to expose your GraphQL API to anyone. Or you might want to keep some queries/mutations or fields
 reserved to some users.
 
-GraphQLite offers some control over what a user can do with your API based on authentication (whether the user
-is logged or not) or authorization (what rights the user have).
+GraphQLite offers some control over what a user can do with your API. You can restrict access to resources:
+ 
+- based on authentication using the [`@Logged` annotation](#logged-and-right-annotations) (restrict access to logged users)
+- based on authorization using the [`@Right` annotation](#logged-and-right-annotations) (restrict access to logged users with certain rights).
+- based on fine-grained authorization using the [`@Security` annotation](fine-grained-security.md) (restrict access for some given resources to some users).
 
 <div class="alert alert-info">
 GraphQLite does not have its own security mechanism.
-Unless you're using our Symfony Bundle, it is up to you to connect this feature to your framework's security mechanism.<br>
-See <a href="#connecting-graphqlite-to-your-framework-s-security-module">Connecting GraphQLite to your framework's security module</a>.
+Unless you're using our Symfony Bundle or our Laravel package, it is up to you to connect this feature to your framework's security mechanism.<br>
+See <a href="implementing-security.md">Connecting GraphQLite to your framework's security module</a>.
 </div>
 
 ## `@Logged` and `@Right` annotations
@@ -112,44 +115,3 @@ While this is the most secured mode, it can have drawbacks when working with dev
 (you need to be logged as admin to fetch the complete schema).
 
 <div class="alert alert-info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optionnal from GraphQLite 4+.</div>
-
-## Connecting GraphQLite to your framework's security module
-
-<div class="alert alert-info">
-    This step is NOT necessary for user using GraphQLite through the Symfony Bundle
-</div>
-
-GraphQLite needs to know if a user is logged or not, and what rights it has.
-But this is specific of the framework you use.
-
-To plug GraphQLite to your framework's security mechanism, you will have to provide two classes implementing: 
-
-* `TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface`
-* `TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface`
-
-Those two interfaces act as adapters between GraphQLite and your framework:
-
-```php
-interface AuthenticationServiceInterface
-{
-    /**
-     * Returns true if the "current" user is logged.
-     *
-     * @return bool
-     */
-    public function isLogged(): bool;
-}
-``` 
-
-```php
-interface AuthorizationServiceInterface
-{
-    /**
-     * Returns true if the "current" user has access to the right "$right".
-     *
-     * @param string $right
-     * @return bool
-     */
-    public function isAllowed(string $right): bool;
-}
-```

@@ -3,14 +3,14 @@
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class FactoryTest extends TestCase
 {
 
     public function testExceptionInConstruct(): void
     {
-        $this->expectException(GraphQLException::class);
+        $this->expectException(GraphQLRuntimeException::class);
         new Factory(['default'=>false]);
     }
 }

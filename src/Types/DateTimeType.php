@@ -11,7 +11,7 @@ use GraphQL\Error\InvariantViolation;
 use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Utils\Utils;
-use TheCodingMachine\GraphQLite\GraphQLException;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class DateTimeType extends ScalarType
 {
@@ -69,6 +69,6 @@ class DateTimeType extends ScalarType
         }
 
         // Intentionally without message, as all information already in wrapped Exception
-        throw new GraphQLException();
+        throw new GraphQLRuntimeException();
     }
 }
