@@ -22,6 +22,7 @@ use Webmozart\Assert\Assert;
 use function array_combine;
 use function array_keys;
 use function array_merge;
+use function array_pop;
 use function is_array;
 use function is_object;
 
@@ -130,9 +131,8 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             'user' => $this->authenticationService->getUser(),
             'authorizationService' => $this->authorizationService, // Used by the is_granted expression language function.
             'authenticationService' => $this->authenticationService, // Used by the is_logged expression language function.
-            'this' => self::getThisFromCallable($callable),
+            'this' => array_pop($args),
         ];
-
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
         Assert::isArray($argsByName);
