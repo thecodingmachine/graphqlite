@@ -256,6 +256,7 @@ class QueryField extends FieldDefinition
                 $exceptions[] = $e;
             }
         }
+        $toPassArgs[] = $source;
         GraphQLAggregateException::throwExceptions($exceptions);
 
         return $toPassArgs;
