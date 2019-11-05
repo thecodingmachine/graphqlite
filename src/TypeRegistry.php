@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TheCodingMachine\GraphQLite\Types\UnionType;
 use function get_class;
 
 /**
@@ -20,7 +21,7 @@ use function get_class;
  */
 class TypeRegistry
 {
-    /** @var array<string,NamedType&Type&(MutableObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface))> */
+    /** @var array<string,NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))> */
     private $outputTypes = [];
 
     /**
@@ -28,7 +29,7 @@ class TypeRegistry
      * IMPORTANT: the type MUST be fully computed (so ExtendType annotations must have ALREADY been applied to the tag)
      * ONLY THE RecursiveTypeMapper IS ALLOWED TO CALL THIS METHOD.
      *
-     * @param NamedType&Type&(MutableObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface)) $type
+     * @param NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface)) $type
      */
     public function registerType(NamedType $type): void
     {
@@ -44,7 +45,7 @@ class TypeRegistry
     }
 
     /**
-     * @return NamedType&Type&(ObjectType|InterfaceType|(InputObjectType&ResolvableMutableInputInterface))
+     * @return NamedType&Type&(ObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))
      */
     public function getType(string $typeName): NamedType
     {

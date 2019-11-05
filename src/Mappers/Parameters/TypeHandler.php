@@ -61,7 +61,7 @@ class TypeHandler implements ParameterHandlerInterface
     private $rootTypeMapper;
     /** @var TypeResolver */
     private $typeResolver;
-    /** @var \TheCodingMachine\GraphQLite\TypeRegistry */
+    /** @var TypeRegistry */
     private $typeRegistry;
 
     public function __construct(
@@ -263,7 +263,6 @@ class TypeHandler implements ParameterHandlerInterface
 
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
             $this->typeRegistry->registerType($graphQlType);
-
         }
 
         /* elseif (count($filteredDocBlockTypes) === 1) {
