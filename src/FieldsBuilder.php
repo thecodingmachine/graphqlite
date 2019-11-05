@@ -312,11 +312,7 @@ class FieldsBuilder
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
                 {
-                    if ($fieldDescriptor->getTargetMethodOnSource() !== null) {
-                        return QueryField::selfField($fieldDescriptor);
-                    }
-
-                    return QueryField::externalField($fieldDescriptor);
+                    return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
             });
 
@@ -421,12 +417,13 @@ class FieldsBuilder
             }
 
             $fieldDescriptor->setType($type);
+            $fieldDescriptor->setInjectSource(false);
             $fieldDescriptor->setMiddlewareAnnotations($sourceField->getAnnotations());
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
                 {
-                    return QueryField::selfField($fieldDescriptor);
+                    return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
             });
 

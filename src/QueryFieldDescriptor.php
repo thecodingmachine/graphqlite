@@ -121,16 +121,10 @@ class QueryFieldDescriptor
     }
 
     /**
-     * Returns the callable targeting the resolver function if the resolver function is part of a service.
-     * Note: getCallable returns "null" in the case of a resolver defined in a "source" field.
+     * Sets the callable targeting the resolver function if the resolver function is part of a service.
+     * This should not be used in the context of a field middleware.
      * Use getResolver/setResolver if you want to wrap the resolver in another method.
-     */
-    public function getCallable(): ?callable
-    {
-        return $this->callable;
-    }
-
-    /**
+     *
      * @param callable&array{0:object, 1:string}  $callable
      */
     public function setCallable(callable $callable): void
@@ -140,11 +134,6 @@ class QueryFieldDescriptor
         }
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
-    }
-
-    public function getTargetMethodOnSource(): ?string
-    {
-        return $this->targetMethodOnSource;
     }
 
     public function setTargetMethodOnSource(?string $targetMethodOnSource): void
@@ -210,7 +199,7 @@ class QueryFieldDescriptor
         } elseif ($this->targetMethodOnSource !== null) {
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } else {
-            throw new InvalidArgumentException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
+            throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
         }
 
         return $this->originalResolver;

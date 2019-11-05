@@ -214,18 +214,7 @@ class QueryField extends FieldDefinition
         );
     }
 
-    public static function selfField(QueryFieldDescriptor $fieldDescriptor): self
-    {
-        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
-            $arguments = $fieldDescriptor->getParameters();
-            array_unshift($arguments, new PrefetchDataParameter());
-            $fieldDescriptor->setParameters($arguments);
-        }
-
-        return self::fromDescriptor($fieldDescriptor);
-    }
-
-    public static function externalField(QueryFieldDescriptor $fieldDescriptor): self
+    public static function fromFieldDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
         $arguments = $fieldDescriptor->getParameters();
         if ($fieldDescriptor->getPrefetchMethodName() !== null) {
