@@ -30,7 +30,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('In GraphQL, you can only use union types between objects. These types cannot be used in union types: Int, String');
+        $this->expectExceptionMessage('in GraphQL, you can only use union types between objects. These types cannot be used in union types: Int, String');
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 

@@ -47,14 +47,14 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
      */
     public static function createForBadTypeInUnion(array $unionTypes): self
     {
-        $disallowedTypes = array_filter($unionTypes, static function (Type $type) {
-            return $type instanceof NamedType;
-        });
-        $disallowedTypeNames = array_map(static function (NamedType $type) {
-            return $type->name;
-        }, $disallowedTypes);
+        $disallowedTypeNames = array_map(static function (Type $type) {
+            if ($type instanceof NamedType) {
+                return $type->name;
+            }
+            return (string) $type;
+        }, $unionTypes);
 
-        return new self('In GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
+        return new self('in GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
     }
 
     public static function mustBeOutputType(string $subTypeName): self
