@@ -22,7 +22,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
             new BaseTypeMapper($this->getTypeMapper())
-        ]), $this->getTypeResolver());
+        ]), $this->getTypeResolver(), $this->getTypeRegistry());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
 
@@ -39,7 +39,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
             new BaseTypeMapper($this->getTypeMapper())
-        ]), $this->getTypeResolver());
+        ]), $this->getTypeResolver(), $this->getTypeRegistry());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
 
@@ -61,7 +61,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
             new MyCLabsEnumTypeMapper(),
             new BaseTypeMapper($this->getTypeMapper())
-        ]), $this->getTypeResolver());
+        ]), $this->getTypeResolver(), $this->getTypeRegistry());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
 

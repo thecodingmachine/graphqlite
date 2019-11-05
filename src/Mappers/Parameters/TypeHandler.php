@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
+use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -60,18 +61,22 @@ class TypeHandler implements ParameterHandlerInterface
     private $rootTypeMapper;
     /** @var TypeResolver */
     private $typeResolver;
+    /** @var \TheCodingMachine\GraphQLite\TypeRegistry */
+    private $typeRegistry;
 
     public function __construct(
         RecursiveTypeMapperInterface $typeMapper,
         ArgumentResolver $argumentResolver,
         RootTypeMapperInterface $rootTypeMapper,
-        TypeResolver $typeResolver
+        TypeResolver $typeResolver,
+        TypeRegistry $typeRegistry
     ) {
         $this->recursiveTypeMapper       = $typeMapper;
         $this->argumentResolver          = $argumentResolver;
         $this->rootTypeMapper            = $rootTypeMapper;
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
         $this->typeResolver              = $typeResolver;
+        $this->typeRegistry = $typeRegistry;
     }
 
     /**
@@ -257,6 +262,8 @@ class TypeHandler implements ParameterHandlerInterface
             }
 
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
+            $this->typeRegistry->registerType($graphQlType);
+
         }
 
         /* elseif (count($filteredDocBlockTypes) === 1) {
@@ -323,6 +330,7 @@ class TypeHandler implements ParameterHandlerInterface
             $graphQlType = $unionTypes[0];
         } else {
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
+            $this->typeRegistry->registerType($graphQlType);
         }
 
         if (! $isNullable) {

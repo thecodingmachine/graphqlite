@@ -93,7 +93,8 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(ParameterMiddlewareInterface::class),
-                    $container->get(FieldMiddlewareInterface::class)
+                    $container->get(FieldMiddlewareInterface::class),
+                    $container->get(TypeRegistry::class)
                 );
             },
             FieldMiddlewareInterface::class => function(ContainerInterface $container) {
@@ -1171,4 +1172,34 @@ class EndToEndTest extends TestCase
 
         $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
+
+    public function testEndToEndUnions(){
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            getProduct{
+                __typename
+                ... on SpecialProduct{
+                    name
+                    special
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+        $resultArray = $result->toArray();
+
+        $this->assertEquals('SpecialProduct', $resultArray['data']['getProduct']['__typename']);
+        $this->assertEquals('Special box', $resultArray['data']['getProduct']['name']);
+        $this->assertEquals('unicorn', $resultArray['data']['getProduct']['special']);
+    }
+
 }

@@ -6,13 +6,11 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 use DateTimeImmutable;
 use Porpaginas\Arrays\ArrayResult;
-use Psr\Http\Message\UploadedFileInterface;
-use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\ProductTypeEnum;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct;
 
 class ProductController
 {
@@ -40,7 +38,7 @@ class ProductController
             [
                 new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
                 new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
-            ]
+            ],
         ];
     }
 
@@ -58,5 +56,14 @@ class ProductController
     public function echoDate(DateTimeImmutable $date): DateTimeImmutable
     {
         return $date;
+    }
+
+    /**
+     * @Query(name="getProduct")
+     * @return \TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product|\TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct
+     */
+    public function getProduct()
+    {
+        return new SpecialProduct('Special box', 10.99);
     }
 }
