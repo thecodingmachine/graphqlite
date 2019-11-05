@@ -10,6 +10,7 @@ use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
@@ -86,5 +87,19 @@ class Product
     public static function create(string $name, float $price, ProductTypeEnum $type = null): self
     {
         return new self($name, $price, $type);
+    }
+
+    /**
+     * @Field()
+     * @Security("this.isAllowed(secret)")
+     */
+    public function getMargin(string $secret): float
+    {
+        return 12.0;
+    }
+
+    public function isAllowed(string $secret): bool
+    {
+        return $secret === '42';
     }
 }

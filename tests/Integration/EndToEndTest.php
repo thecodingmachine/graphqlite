@@ -1147,4 +1147,28 @@ class EndToEndTest extends TestCase
         $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingThis']);
     }
 
+    public function testEndToEndSecurityInField(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            products {
+                items {
+                    margin(secret: "12")
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
 }

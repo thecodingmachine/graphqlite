@@ -46,9 +46,7 @@ class QueryFieldDescriptor
     public function setPrefetchParameters(array $prefetchParameters): void  { /* ... */ }
     public function getPrefetchMethodName(): ?string { /* ... */ }
     public function setPrefetchMethodName(?string $prefetchMethodName): void { /* ... */ }
-    public function getCallable(): ?callable { /* ... */ }
     public function setCallable(callable $callable): void { /* ... */ }
-    public function getTargetMethodOnSource(): ?string { /* ... */ }
     public function setTargetMethodOnSource(?string $targetMethodOnSource): void { /* ... */ }
     public function isInjectSource(): bool { /* ... */ }
     public function setInjectSource(bool $injectSource): void { /* ... */ }
@@ -56,6 +54,9 @@ class QueryFieldDescriptor
     public function setComment(?string $comment): void { /* ... */ }
     public function getMiddlewareAnnotations(): MiddlewareAnnotations { /* ... */ }
     public function setMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void { /* ... */ }
+    public function getOriginalResolver(): ResolverInterface { /* ... */ }
+    public function getResolver(): callable { /* ... */ }
+    public function setResolver(callable $resolver): void { /* ... */ }
 }
 ```
 

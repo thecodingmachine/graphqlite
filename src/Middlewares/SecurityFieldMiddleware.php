@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use Closure;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use Psr\Log\LoggerInterface;
-use ReflectionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -22,8 +20,6 @@ use Webmozart\Assert\Assert;
 use function array_combine;
 use function array_keys;
 use function array_merge;
-use function is_array;
-use function is_object;
 
 /**
  * A field middleware that reads "Security" Symfony annotations.
@@ -84,13 +80,13 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             }
         }
 
-        $callable = $queryFieldDescriptor->getCallable();
-        Assert::notNull($callable);
+        $resolver = $queryFieldDescriptor->getResolver();
+        $originalResolver = $queryFieldDescriptor->getOriginalResolver();
 
         $parameters = $queryFieldDescriptor->getParameters();
 
-        $queryFieldDescriptor->setCallable(function (...$args) use ($securityAnnotations, $callable, $failWith, $parameters, $queryFieldDescriptor) {
-            $variables = $this->getVariables($args, $parameters, $callable);
+        $queryFieldDescriptor->setResolver(function (...$args) use ($securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor, $originalResolver) {
+            $variables = $this->getVariables($args, $parameters, $originalResolver);
 
             foreach ($securityAnnotations as $annotation) {
                 try {
@@ -111,7 +107,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
                 }
             }
 
-            return $callable(...$args);
+            return $resolver(...$args);
         });
 
         return $fieldHandler->handle($queryFieldDescriptor);
@@ -123,14 +119,14 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, callable $callable): array
+    private function getVariables(array $args, array $parameters, ResolverInterface $callable): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier
             'user' => $this->authenticationService->getUser(),
             'authorizationService' => $this->authorizationService, // Used by the is_granted expression language function.
             'authenticationService' => $this->authenticationService, // Used by the is_logged expression language function.
-            'this' => self::getThisFromCallable($callable),
+            'this' => $callable->getObject(),
         ];
 
         $argsName = array_keys($parameters);
@@ -155,19 +151,5 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         }*/
 
         return array_merge($argsByName, $variables);
-    }
-
-    public static function getThisFromCallable(callable $callable): ?object
-    {
-        if (is_array($callable) && is_object($callable[0])) {
-            return $callable[0];
-        }
-        if ($callable instanceof Closure) {
-            $reflectionFunction = new ReflectionFunction($callable);
-
-            return $reflectionFunction->getClosureThis();
-        }
-
-        return null;
     }
 }

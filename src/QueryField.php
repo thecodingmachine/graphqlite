@@ -12,10 +12,11 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
+use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
@@ -33,14 +34,14 @@ use function is_object;
 class QueryField extends FieldDefinition
 {
     /**
-     * @param OutputType&Type                 $type
-     * @param array<string, ParameterInterface> $arguments            Indexed by argument name.
-     * @param (callable&array<int,mixed>)|null  $resolve              The method to execute
-     * @param string|null                       $targetMethodOnSource The name of the method to execute on the source object. Mutually exclusive with $resolve parameter.
-     * @param array<string, ParameterInterface> $prefetchArgs         Indexed by argument name.
-     * @param array<string, mixed>              $additionalConfig
+     * @param OutputType&Type $type
+     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
+     * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
+     * @param callable $resolver The resolver actually called
+     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
+     * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, OutputType $type, array $arguments, ?callable $resolve, ?string $targetMethodOnSource, ?string $comment, ?string $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
+    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?string $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
@@ -51,29 +52,32 @@ class QueryField extends FieldDefinition
             $config['description'] = $comment;
         }
 
-        $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($resolve, $targetMethodOnSource, $arguments) {
-            if ($resolve !== null) {
+        $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+            if ($originalResolver instanceof SourceResolver) {
+                $originalResolver->setObject($source);
+            }
+            /*if ($resolve !== null) {
                 $method = $resolve;
             } elseif ($targetMethodOnSource !== null) {
                 $method = [$source, $targetMethodOnSource];
                 Assert::isCallable($method);
             } else {
                 throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
-            }
+            }*/
 
-            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $method);
+            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
 
-            $result = $method(...$toPassArgs);
+            $result = $resolver(...$toPassArgs);
 
             try {
                 $this->assertReturnType($result);
             } catch (TypeMismatchRuntimeException $e) {
-                $class = $method[0];
+                $class = $originalResolver->getObject();
                 if (is_object($class)) {
                     $class = get_class($class);
                 }
 
-                $e->addInfo($this->name, $class, $method[1]);
+                $e->addInfo($this->name, $class, $originalResolver->getMethodName());
                 throw $e;
             }
 
@@ -83,7 +87,7 @@ class QueryField extends FieldDefinition
         if ($prefetchMethodName === null) {
             $config['resolve'] = $resolveFn;
         } else {
-            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $prefetchArgs, $prefetchMethodName, $resolve, $resolveFn) {
+            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $prefetchArgs, $prefetchMethodName, $resolveFn, $originalResolver) {
                 // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is $context
                 // $context MUST be a ContextInterface
 
@@ -95,13 +99,14 @@ class QueryField extends FieldDefinition
 
                 $prefetchBuffer->register($source, $args);
 
-                return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $resolve) {
+                return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $originalResolver) {
                     if (! $prefetchBuffer->hasResult($args)) {
-                        if ($resolve) {
-                            $prefetchCallable = [$resolve[0], $prefetchMethodName];
-                        } else {
-                            $prefetchCallable = [$source, $prefetchMethodName];
+                        if ($originalResolver instanceof SourceResolver) {
+                            $originalResolver->setObject($source);
                         }
+
+                        // TODO: originalPrefetchResolver and prefetchResolver needed!!!
+                        $prefetchCallable = [$originalResolver->getObject(), $prefetchMethodName];
 
                         $sources = $prefetchBuffer->getObjectsByArguments($args);
 
@@ -160,7 +165,7 @@ class QueryField extends FieldDefinition
     }
 
     /**
-     * @param mixed                             $value     A value that will always be returned by this field.
+     * @param mixed $value A value that will always be returned by this field.
      *
      * @return QueryField
      */
@@ -170,7 +175,7 @@ class QueryField extends FieldDefinition
             return $value;
         };
 
-        $fieldDescriptor->setCallable($callable);
+        $fieldDescriptor->setResolver($callable);
 
         return self::fromDescriptor($fieldDescriptor);
     }
@@ -190,7 +195,7 @@ class QueryField extends FieldDefinition
             throw MissingAuthorizationException::unauthorized();
         };
 
-        $fieldDescriptor->setCallable($callable);
+        $fieldDescriptor->setResolver($callable);
 
         return self::fromDescriptor($fieldDescriptor);
     }
@@ -201,26 +206,15 @@ class QueryField extends FieldDefinition
             $fieldDescriptor->getName(),
             $fieldDescriptor->getType(),
             $fieldDescriptor->getParameters(),
-            $fieldDescriptor->getCallable(),
-            $fieldDescriptor->getTargetMethodOnSource(),
+            $fieldDescriptor->getOriginalResolver(),
+            $fieldDescriptor->getResolver(),
             $fieldDescriptor->getComment(),
             $fieldDescriptor->getPrefetchMethodName(),
             $fieldDescriptor->getPrefetchParameters()
         );
     }
 
-    public static function selfField(QueryFieldDescriptor $fieldDescriptor): self
-    {
-        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
-            $arguments = $fieldDescriptor->getParameters();
-            array_unshift($arguments, new PrefetchDataParameter());
-            $fieldDescriptor->setParameters($arguments);
-        }
-
-        return self::fromDescriptor($fieldDescriptor);
-    }
-
-    public static function externalField(QueryFieldDescriptor $fieldDescriptor): self
+    public static function fromFieldDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
         $arguments = $fieldDescriptor->getParameters();
         if ($fieldDescriptor->getPrefetchMethodName() !== null) {

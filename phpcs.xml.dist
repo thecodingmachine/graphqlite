@@ -17,6 +17,11 @@
     <exclude-pattern>src/Utils/NamespacedCache.php</exclude-pattern>
     <exclude-pattern>src/Types/TypeAnnotatedInterfaceType.php</exclude-pattern>
 
+    <!-- Excluding ServiceResolver.php and QueryFieldDescriptor.php because Slevomat 5.0 does not support array shaped. -->
+    <!-- Support is added in 5.1 so we can remove these excludes when Slevomat 5.1 is out -->
+    <exclude-pattern>src/Middlewares/ServiceResolver.php</exclude-pattern>
+    <exclude-pattern>src/QueryFieldDescriptor.php</exclude-pattern>
+
     <!-- Include full Doctrine Coding Standard -->
     <rule ref="Doctrine">
         <exclude name="SlevomatCodingStandard.Classes.SuperfluousInterfaceNaming.SuperfluousSuffix"/>
