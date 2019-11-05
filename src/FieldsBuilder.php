@@ -298,6 +298,7 @@ class FieldsBuilder
             if ($sourceClassName !== null) {
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
+                Assert::notNull($controller);
                 $callable = [$controller, $methodName];
                 Assert::isCallable($callable);
                 $fieldDescriptor->setCallable($callable);

@@ -6,8 +6,12 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use InvalidArgumentException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
+use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 /**
@@ -27,7 +31,7 @@ class QueryFieldDescriptor
     private $prefetchParameters = [];
     /** @var string|null */
     private $prefetchMethodName;
-    /** @var callable|null */
+    /** @var (callable&array{0:object, 1:string})|null */
     private $callable;
     /** @var string|null */
     private $targetMethodOnSource;
@@ -43,6 +47,10 @@ class QueryFieldDescriptor
     private $middlewareAnnotations;
     /** @var ReflectionMethod */
     private $refMethod;
+    /** @var ResolverInterface */
+    private $originalResolver;
+    /** @var callable */
+    private $resolver;
 
     public function getName(): string
     {
@@ -112,13 +120,24 @@ class QueryFieldDescriptor
         $this->prefetchMethodName = $prefetchMethodName;
     }
 
+    /**
+     * Returns the callable targeting the resolver function if the resolver function is part of a service.
+     * Note: getCallable returns "null" in the case of a resolver defined in a "source" field.
+     * Use getResolver/setResolver if you want to wrap the resolver in another method.
+     */
     public function getCallable(): ?callable
     {
         return $this->callable;
     }
 
+    /**
+     * @param callable&array{0:object, 1:string}  $callable
+     */
     public function setCallable(callable $callable): void
     {
+        if ($this->originalResolver !== null) {
+            throw new GraphQLRuntimeException('You cannot modify the callable via setCallable because it was already used. You can still wrap the callable using getResolver/setResolver');
+        }
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
     }
@@ -130,6 +149,9 @@ class QueryFieldDescriptor
 
     public function setTargetMethodOnSource(?string $targetMethodOnSource): void
     {
+        if ($this->originalResolver !== null) {
+            throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
+        }
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
     }
@@ -172,5 +194,43 @@ class QueryFieldDescriptor
     public function setRefMethod(ReflectionMethod $refMethod): void
     {
         $this->refMethod = $refMethod;
+    }
+
+    /**
+     * Returns the original callable that will be used to resolve the field.
+     */
+    public function getOriginalResolver(): ResolverInterface
+    {
+        if (isset($this->originalResolver)) {
+            return $this->originalResolver;
+        }
+
+        if ($this->callable !== null) {
+            $this->originalResolver = new ServiceResolver($this->callable);
+        } elseif ($this->targetMethodOnSource !== null) {
+            $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
+        } else {
+            throw new InvalidArgumentException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
+        }
+
+        return $this->originalResolver;
+    }
+
+    /**
+     * Returns the callable that will be used to evaluate the field. This callable might have been modified to wrap
+     * the original callable.
+     */
+    public function getResolver(): callable
+    {
+        if ($this->resolver === null) {
+            $this->resolver = $this->getOriginalResolver();
+        }
+
+        return $this->resolver;
+    }
+
+    public function setResolver(callable $resolver): void
+    {
+        $this->resolver = $resolver;
     }
 }

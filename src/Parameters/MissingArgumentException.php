@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 
 use BadMethodCallException;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use function get_class;
 use function is_array;
 use function is_string;
@@ -56,6 +57,13 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
 
     private static function toMethod(callable $callable): string
     {
+        // TODO: is $callable not only a ResolverInterface ???
+        // TODO: is $callable not only a ResolverInterface ???
+        // TODO: is $callable not only a ResolverInterface ???
+        // TODO: CHECK CODE COVERAGE!
+        if ($callable instanceof ResolverInterface) {
+            return get_class($callable->getObject()) . '::' . $callable->getMethodName() . '()';
+        }
         if (! is_array($callable)) {
             return '';
         }
