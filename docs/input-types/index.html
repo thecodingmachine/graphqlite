@@ -121,17 +121,17 @@
 }
 </code></pre>
 <p>and now, you can run query like this:</p>
-<pre><code class="hljs"><span class="hljs-selector-tag">mutation</span> {
-  <span class="hljs-selector-tag">getCities</span>(<span class="hljs-attribute">location</span>: {
-              <span class="hljs-attribute">latitude</span>: <span class="hljs-number">45.0</span>,
-              <span class="hljs-attribute">longitude</span>: <span class="hljs-number">0.0</span>,
-            },
-            <span class="hljs-attribute">radius</span>: <span class="hljs-number">42</span>)
-  {
-    id,
-    name
-  }
-}
+<pre><code class="hljs"><span class="hljs-string">mutation</span> <span class="hljs-string">{</span>
+  <span class="hljs-string">getCities(location:</span> <span class="hljs-string">{</span>
+              <span class="hljs-attr">latitude:</span> <span class="hljs-number">45.0</span><span class="hljs-string">,</span>
+              <span class="hljs-attr">longitude:</span> <span class="hljs-number">0.0</span><span class="hljs-string">,</span>
+            <span class="hljs-string">},</span>
+            <span class="hljs-attr">radius:</span> <span class="hljs-number">42</span><span class="hljs-string">)</span>
+  <span class="hljs-string">{</span>
+    <span class="hljs-string">id,</span>
+    <span class="hljs-string">name</span>
+  <span class="hljs-string">}</span>
+<span class="hljs-string">}</span>
 </code></pre>
 <ul>
 <li>Factories must be declared with the <strong>@Factory</strong> annotation.</li>

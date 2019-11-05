@@ -89,30 +89,30 @@
 <p><strong>config/routes.yaml</strong></p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment"># Add these 2 lines to config/routes.yaml</span>
 <span class="hljs-attr">graphqlite_bundle:</span>
-<span class="hljs-attr">  resource:</span> <span class="hljs-string">'@GraphqliteBundle/Resources/config/routes.xml'</span>
+  <span class="hljs-attr">resource:</span> <span class="hljs-string">'@GraphqliteBundle/Resources/config/routes.xml'</span>
 </code></pre>
 <p>Last but not least, create the configuration file at <code>config/packages/graphqlite.yaml</code>:</p>
 <p><strong>config/packages/graphqlite.yaml</strong></p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">graphqlite:</span>
-<span class="hljs-attr">    namespace:</span>
+    <span class="hljs-attr">namespace:</span>
       <span class="hljs-comment"># The namespace(s) that will store your GraphQLite controllers.</span>
       <span class="hljs-comment"># It accept either a string or a list of strings.</span>
-<span class="hljs-attr">      controllers:</span> <span class="hljs-string">App\Controller\</span>
+      <span class="hljs-attr">controllers:</span> <span class="hljs-string">App\Controller\</span>
       <span class="hljs-comment"># The namespace(s) that will store your GraphQL types and factories.</span>
       <span class="hljs-comment"># It accept either a string or a list of strings.</span>
-<span class="hljs-attr">      types:</span> 
-<span class="hljs-bullet">      -</span> <span class="hljs-string">App\Types\</span>
-<span class="hljs-bullet">      -</span> <span class="hljs-string">App\Entity\</span>
-<span class="hljs-attr">    debug:</span>
+      <span class="hljs-attr">types:</span> 
+      <span class="hljs-bullet">-</span> <span class="hljs-string">App\Types\</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">App\Entity\</span>
+    <span class="hljs-attr">debug:</span>
       <span class="hljs-comment"># Include exception messages in output when an error arises.</span>
-<span class="hljs-attr">      INCLUDE_DEBUG_MESSAGE:</span> <span class="hljs-literal">false</span>
+      <span class="hljs-attr">INCLUDE_DEBUG_MESSAGE:</span> <span class="hljs-literal">false</span>
       <span class="hljs-comment"># Include stacktrace in output when an error arises.</span>
-<span class="hljs-attr">      INCLUDE_TRACE:</span> <span class="hljs-literal">false</span>
+      <span class="hljs-attr">INCLUDE_TRACE:</span> <span class="hljs-literal">false</span>
       <span class="hljs-comment"># Exceptions are not caught by the engine and propagated to Symfony.</span>
-<span class="hljs-attr">      RETHROW_INTERNAL_EXCEPTIONS:</span> <span class="hljs-literal">false</span>
+      <span class="hljs-attr">RETHROW_INTERNAL_EXCEPTIONS:</span> <span class="hljs-literal">false</span>
       <span class="hljs-comment"># Exceptions that do not implement ClientAware interface are </span>
       <span class="hljs-comment"># not caught by the engine and propagated to Symfony.</span>
-<span class="hljs-attr">      RETHROW_UNSAFE_EXCEPTIONS:</span> <span class="hljs-literal">true</span>
+      <span class="hljs-attr">RETHROW_UNSAFE_EXCEPTIONS:</span> <span class="hljs-literal">true</span>
 </code></pre>
 <p>The debug parameters are detailed in the <a href="https://webonyx.github.io/graphql-php/error-handling/">documentation of the Webonyx GraphQL library</a>
 which is used internally by GraphQLite.</p>
