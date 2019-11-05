@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 
+use ArrayIterator;
 use DateTimeImmutable;
 use Porpaginas\Arrays\ArrayResult;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -65,5 +66,14 @@ class ProductController
     public function getProduct()
     {
         return new SpecialProduct('Special box', 10.99);
+    }
+
+    /**
+     * @Query(name="getProduct")
+     * @return (\TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product|\TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct)[]
+     */
+    public function getProducts2(): ArrayIterator
+    {
+        return new ArrayIterator([new SpecialProduct('Special box', 10.99), new SpecialProduct('Special box', 10.99)]);
     }
 }

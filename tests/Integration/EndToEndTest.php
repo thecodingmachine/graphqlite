@@ -1202,4 +1202,33 @@ class EndToEndTest extends TestCase
         $this->assertEquals('unicorn', $resultArray['data']['getProduct']['special']);
     }
 
+    public function testEndToEndUnionsInIterables(){
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            getProducts2{
+                __typename
+                ... on SpecialProduct{
+                    name
+                    special
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+        $resultArray = $result->toArray();
+
+        $this->assertEquals('SpecialProduct', $resultArray['data']['getProduct']['__typename'][0]);
+        $this->assertEquals('Special box', $resultArray['data']['getProduct']['name'][0]);
+        $this->assertEquals('unicorn', $resultArray['data']['getProduct']['special'][0]);
+    }
+
 }
