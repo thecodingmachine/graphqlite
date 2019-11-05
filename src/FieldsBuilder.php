@@ -65,14 +65,15 @@ class FieldsBuilder
         NamingStrategyInterface $namingStrategy,
         RootTypeMapperInterface $rootTypeMapper,
         ParameterMiddlewareInterface $parameterMapper,
-        FieldMiddlewareInterface $fieldMiddleware
+        FieldMiddlewareInterface $fieldMiddleware,
+        TypeRegistry $typeRegistry
     ) {
         $this->annotationReader      = $annotationReader;
         $this->recursiveTypeMapper   = $typeMapper;
         $this->typeResolver          = $typeResolver;
         $this->cachedDocBlockFactory = $cachedDocBlockFactory;
         $this->namingStrategy        = $namingStrategy;
-        $this->typeMapper            = new TypeHandler($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver);
+        $this->typeMapper            = new TypeHandler($typeMapper, $argumentResolver, $rootTypeMapper, $typeResolver, $typeRegistry);
         $this->parameterMapper       = $parameterMapper;
         $this->fieldMiddleware = $fieldMiddleware;
     }

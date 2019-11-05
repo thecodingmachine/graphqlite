@@ -348,7 +348,8 @@ class SchemaFactory
             $namingStrategy,
             $compositeRootTypeMapper,
             $parameterMiddlewarePipe,
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $typeRegistry
         );
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);

@@ -294,7 +294,8 @@ abstract class AbstractQueryProviderTest extends TestCase
                 new BaseTypeMapper($this->getTypeMapper())
             ]),
             $this->getParameterMiddlewarePipe(),
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $this->getTypeRegistry()
         );
     }
 
