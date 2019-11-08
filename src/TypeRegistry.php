@@ -44,8 +44,8 @@ class TypeRegistry
      * - Registers the type passed in parameter.
      * - If the type is already present, does not fail. Instead, return the old type already available.
      *
-     * @param NamedType&Type $type
-     * @return NamedType&Type
+     * @param NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface)) $type
+     * @return NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))
      */
     public function getOrRegisterType(NamedType $type): NamedType
     {

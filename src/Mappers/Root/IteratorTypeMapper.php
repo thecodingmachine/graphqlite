@@ -104,6 +104,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
 
                     // By convention, we trim the NonNull part of the "$subGraphQlType"
                     if ($subGraphQlType instanceof NonNull) {
+                        /** @var OutputType&GraphQLType $subGraphQlType */
                         $subGraphQlType = $subGraphQlType->getWrappedType();
                     }
                 } else {
@@ -146,6 +147,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         } else {
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
             $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
+            Assert::isInstanceOf($graphQlType, OutputType::class);
         }
 
         return $graphQlType;
@@ -192,8 +194,12 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             try {
                 $singleDocBlockType = $this->getTypeInArray($singleDocBlockType);
                 if ($singleDocBlockType !== null) {
-                    $subGraphQlType = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $refMethod, $docBlockObj);
-                    //$subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
+                    $subGraphQlType = $this->topRootTypeMapper->toGraphQLInputType($singleDocBlockType, null, $argumentName, $refMethod, $docBlockObj);
+                    // By convention, we trim the NonNull part of the "$subGraphQlType"
+                    if ($subGraphQlType instanceof NonNull) {
+                        /** @var InputType&GraphQLType $subGraphQlType */
+                        $subGraphQlType = $subGraphQlType->getWrappedType();
+                    }
                 } else {
                     $subGraphQlType = null;
                 }

@@ -493,7 +493,7 @@ class TypeHandler implements ParameterHandlerInterface
         }
         if ($docBlockTypeHint instanceof Compound) {
             foreach ($docBlockTypeHint as $type) {
-                if ($type instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
+                if ($type instanceof Null_ || $type instanceof Nullable) {
                     return true;
                 }
             }

@@ -73,7 +73,10 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             $unionTypes[] = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $refMethod, $docBlockObj);
         }
 
-        return $this->getTypeFromUnion($unionTypes);
+        /** @var OutputType&GraphQLType $return */
+        $return = $this->getTypeFromUnion($unionTypes);
+
+        return $return;
     }
 
     /**
@@ -98,7 +101,10 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             $unionTypes[] = $this->topRootTypeMapper->toGraphQLInputType($singleDocBlockType, null, $argumentName, $refMethod, $docBlockObj);
         }
 
-        return $this->getTypeFromUnion($unionTypes);
+        /** @var InputType&GraphQLType $return */
+        $return = $this->getTypeFromUnion($unionTypes);
+
+        return $return;
     }
 
     /*
@@ -106,7 +112,12 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      * @param array<T> $unionTypes
      * @return T
      */
-    private function getTypeFromUnion(array $unionTypes)
+    /**
+     * @param array<(InputType&GraphQLType)|(OutputType&GraphQLType)> $unionTypes
+     * @return GraphQLType
+     * @throws CannotMapTypeException
+     */
+    private function getTypeFromUnion(array $unionTypes): GraphQLType
     {
         // Remove null values
         $unionTypes = array_values(array_filter($unionTypes));
@@ -141,6 +152,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             }
 
             $graphQlType = new UnionType($nonNullableUnionTypes, $this->recursiveTypeMapper);
+            /** @var UnionType $graphQlType */
             $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
 
             if (!$isNullable) {
