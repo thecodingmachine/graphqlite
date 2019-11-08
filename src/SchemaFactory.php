@@ -27,7 +27,10 @@ use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
@@ -324,11 +327,16 @@ class SchemaFactory
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
 
-        $rootTypeMappers   = $this->rootTypeMappers;
-        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
-        $rootTypeMappers[] = new BaseTypeMapper($recursiveTypeMapper);
-        // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
-        $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
+        $compositeRootTypeMapper = new CompositeRootTypeMapper();
+        $topRootTypeMapper = new NullableTypeMapperAdapter($compositeRootTypeMapper);
+
+        $compositeRootTypeMapper->addRootTypeMapper(new IteratorTypeMapper($topRootTypeMapper, $typeRegistry, $recursiveTypeMapper));
+        $compositeRootTypeMapper->addRootTypeMapper(new CompoundTypeMapper($topRootTypeMapper, $typeRegistry, $recursiveTypeMapper));
+        foreach ($this->rootTypeMappers as $rootTypeMapper) {
+            $compositeRootTypeMapper->addRootTypeMapper($rootTypeMapper);
+        }
+        $compositeRootTypeMapper->addRootTypeMapper(new MyCLabsEnumTypeMapper());
+        $compositeRootTypeMapper->addRootTypeMapper(new BaseTypeMapper($recursiveTypeMapper, $topRootTypeMapper));
 
         $argumentResolver = new ArgumentResolver();
 
@@ -346,7 +354,7 @@ class SchemaFactory
             $typeResolver,
             $cachedDocBlockFactory,
             $namingStrategy,
-            $compositeRootTypeMapper,
+            $topRootTypeMapper,
             $parameterMiddlewarePipe,
             $fieldMiddlewarePipe,
             $typeRegistry
@@ -427,6 +435,6 @@ class SchemaFactory
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
-        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig, $compositeRootTypeMapper);
+        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $compositeRootTypeMapper, $this->schemaConfig);
     }
 }

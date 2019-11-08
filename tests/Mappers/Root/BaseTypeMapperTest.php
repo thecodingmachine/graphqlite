@@ -11,13 +11,14 @@ use phpDocumentor\Reflection\Types\Resource_;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 
 class BaseTypeMapperTest extends AbstractQueryProviderTest
 {
 
     public function testNullableToGraphQLInputType(): void
     {
-        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
+        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper(), $this->getRootTypeMapper());
 
         $mappedType = $baseTypeMapper->toGraphQLInputType(new Nullable(new Object_(new Fqsen('\\Exception'))), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
         $this->assertNull($mappedType);
@@ -25,16 +26,17 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
 
     public function testToGraphQLOutputTypeException(): void
     {
-        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
+        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper(), $this->getRootTypeMapper());
 
         $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        //$this->expectExceptionMessage('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $this->expectExceptionMessage('Don\'t know how to handle type \DateTime');
         $baseTypeMapper->toGraphQLInputType(new Object_(new Fqsen('\\DateTime')), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
     public function testUnmappableArray(): void
     {
-        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper());
+        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper(), $this->getRootTypeMapper());
 
         $mappedType = $baseTypeMapper->toGraphQLOutputType(new Array_(new Resource_()), null, new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
         $this->assertNull($mappedType);

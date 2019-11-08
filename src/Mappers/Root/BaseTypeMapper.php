@@ -28,6 +28,7 @@ use ReflectionMethod;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
 use function ltrim;
@@ -41,10 +42,15 @@ class BaseTypeMapper implements RootTypeMapperInterface
 {
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
+    /**
+     * @var RootTypeMapperInterface
+     */
+    private $topRootTypeMapper;
 
-    public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper, RootTypeMapperInterface $topRootTypeMapper)
     {
         $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->topRootTypeMapper = $topRootTypeMapper;
     }
 
     /**
@@ -61,7 +67,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $mappedType;
         }
         if ($type instanceof Array_) {
-            $innerType = $this->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj);
+            $innerType = $this->topRootTypeMapper->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj);
             if ($innerType === null) {
                 return null;
             }if ($innerType instanceof NullableType) {
@@ -75,6 +81,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
             return $this->recursiveTypeMapper->mapClassToInterfaceOrType($className, $subType);
         }
+        // FIXME: we need to add a $type instanceof Compound here... this will hurt because we need to send back the process to the rootTypeMapper for each inner types...
 
         return null;
     }
@@ -91,7 +98,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $mappedType;
         }
         if ($type instanceof Array_) {
-            $innerType = $this->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj);
+            $innerType = $this->topRootTypeMapper->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj);
             if ($innerType === null) {
                 return null;
             }if ($innerType instanceof NullableType) {
@@ -142,7 +149,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
                 case '\\DateTime':
-                    throw new GraphQLRuntimeException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+                    throw TypeMappingRuntimeException::createFromType($type);
                 case '\\' . ID::class:
                     return GraphQLType::id();
                 default:

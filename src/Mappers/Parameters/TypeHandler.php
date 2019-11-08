@@ -46,8 +46,11 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
 use function array_filter;
+use function array_merge;
+use function array_unique;
 use function count;
 use function iterator_to_array;
+use const SORT_REGULAR;
 
 class TypeHandler implements ParameterHandlerInterface
 {
@@ -183,10 +186,43 @@ class TypeHandler implements ParameterHandlerInterface
     private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         $graphQlType = null;
+        if ($isNullable && !$type instanceof Nullable) {
+            // In case a parameter has a default value, let's wrap the main type in a nullable
+            $type = new Nullable($type);
+        }
+        $innerType = $type instanceof Nullable ? $type->getActualType() : $type;
 
-        if ($type instanceof Array_ || $type instanceof Iterable_ || $type instanceof Mixed_) {
-            $graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
+        if ($innerType instanceof Array_ || $innerType instanceof Iterable_ || $innerType instanceof Mixed_) {
+            // We need to use the docBlockType
+            if ($docBlockType === null) {
+                throw TypeMappingRuntimeException::createFromType($type);
+            }
+            if ($mapToInputType === true) {
+                Assert::notNull($argumentName);
+                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($docBlockType, null, $argumentName, $refMethod, $docBlockObj);
+            } else {
+                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($docBlockType, null, $refMethod, $docBlockObj);
+            }
+
+            if ($graphQlType === null) {
+                throw TypeMappingRuntimeException::createFromType($docBlockType);
+            }
+
+
+            //$graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
         } else {
+            $completeType = $this->appendTypes($type, $docBlockType);
+            if ($mapToInputType === true) {
+                Assert::notNull($argumentName);
+                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($completeType, null, $argumentName, $refMethod, $docBlockObj);
+            } else {
+                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($completeType, null, $refMethod, $docBlockObj);
+            }
+            if ($graphQlType === null) {
+                throw TypeMappingRuntimeException::createFromType($completeType);
+            }
+
+            /*
             try {
                 $graphQlType = $this->toGraphQlType($type, null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
                 // The type is non nullable if the PHP argument is non nullable
@@ -210,10 +246,51 @@ class TypeHandler implements ParameterHandlerInterface
                 }
 
                 $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable, $refMethod, $docBlockObj, $argumentName);
-            }
+            }*/
         }
 
         return $graphQlType;
+    }
+
+    /**
+     * Appends types together, eventually creating a Compound type and removing duplicates if any.
+     */
+    private function appendTypes(Type $type, ?Type $docBlockType): Type
+    {
+        if ($docBlockType === null) {
+            return $type;
+        }
+
+        if ($type == $docBlockType) {
+            return $type;
+        }
+
+        $types = [ $type ];
+        if ($docBlockType instanceof Compound) {
+            $docBlockTypes = iterator_to_array($docBlockType);
+            $types = array_merge($types, $docBlockTypes);
+        } else {
+            $types[] = $docBlockType;
+        }
+
+        // Normalize types by changing ?string into string|null
+        $newTypes = [];
+        foreach ($types as $currentType) {
+            if ($currentType instanceof Nullable) {
+                $newTypes[] = $currentType->getActualType();
+                $newTypes[] = new Null_();
+            } else {
+                $newTypes[] = $currentType;
+            }
+        }
+
+        $types = array_unique($newTypes, SORT_REGULAR);
+
+        if (count($types) === 1) {
+            return $types[0];
+        }
+
+        return new Compound($types);
     }
 
     private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
@@ -262,7 +339,7 @@ class TypeHandler implements ParameterHandlerInterface
             }
 
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
-            $this->typeRegistry->registerType($graphQlType);
+            $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
         }
 
         /* elseif (count($filteredDocBlockTypes) === 1) {
@@ -304,7 +381,8 @@ class TypeHandler implements ParameterHandlerInterface
             try {
                 $singleDocBlockType = $this->getTypeInArray($singleDocBlockType);
                 if ($singleDocBlockType !== null) {
-                    $subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
+                    $subGraphQlType = $this->mapDocBlockType(new Mixed_(), $singleDocBlockType, $isNullable, false, $refMethod, $docBlockObj, $argumentName);
+                    //$subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
                 } else {
                     $subGraphQlType = null;
                 }
@@ -329,7 +407,7 @@ class TypeHandler implements ParameterHandlerInterface
             $graphQlType = $unionTypes[0];
         } else {
             $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
-            $this->typeRegistry->registerType($graphQlType);
+            $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
         }
 
         if (! $isNullable) {
@@ -410,12 +488,12 @@ class TypeHandler implements ParameterHandlerInterface
 
     private function isNullable(Type $docBlockTypeHint): bool
     {
-        if ($docBlockTypeHint instanceof Null_) {
+        if ($docBlockTypeHint instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
             return true;
         }
         if ($docBlockTypeHint instanceof Compound) {
             foreach ($docBlockTypeHint as $type) {
-                if ($type instanceof Null_) {
+                if ($type instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
                     return true;
                 }
             }
@@ -441,6 +519,19 @@ class TypeHandler implements ParameterHandlerInterface
         $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
         Assert::notNull($phpdocType);
 
-        return $this->resolveSelf($phpdocType, $reflectionClass);
+        $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
+
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        // FIXME: this is wreaking havoc in all the code.
+        if ($type->allowsNull()) {
+            $phpdocType = new Nullable($phpdocType);
+        }
+        return $phpdocType;
     }
 }

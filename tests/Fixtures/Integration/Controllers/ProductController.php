@@ -69,7 +69,7 @@ class ProductController
     }
 
     /**
-     * @Query(name="getProduct")
+     * @Query(name="getProducts2")
      * @return (\TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product|\TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct)[]
      */
     public function getProducts2(): ArrayIterator

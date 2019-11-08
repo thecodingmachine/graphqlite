@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use Webmozart\Assert\Assert;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -19,16 +20,18 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, ?SchemaConfig $config = null, ?RootTypeMapperInterface $rootTypeMapper = null)
+    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, RootTypeMapperInterface $rootTypeMapper, ?SchemaConfig $config = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();
         }
 
-        if ($rootTypeMapper === null) {
+        // TODO: change parameter order, drop compatibility with 3.0
+        Assert::notNull($rootTypeMapper);
+        /*if ($rootTypeMapper === null) {
             // For compatibility reasons with 3.0, the $rootTypeMapper parameter is optional.
             $rootTypeMapper = new BaseTypeMapper($recursiveTypeMapper);
-        }
+        }*/
 
         $query    = new ObjectType([
             'name' => 'Query',

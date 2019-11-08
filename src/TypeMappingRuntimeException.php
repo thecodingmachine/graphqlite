@@ -60,21 +60,31 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
             }
 
             $fqcn     = (string) $previous->type->getFqsen();
-            $refClass = new ReflectionClass($fqcn);
-            // Note : $refClass->isIterable() is only accessible in PHP 7.2
-            if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
-            }
 
-            $message = sprintf(
-                'Parameter $%s in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param %s|User[] $%s.',
-                $parameter->getName(),
-                $declaringClass->getName(),
-                $parameter->getDeclaringFunction()->getName(),
-                $fqcn,
-                $fqcn,
-                $parameter->getName()
-            );
+            if ($fqcn === '\\DateTime') {
+                $message = sprintf(
+                    'Parameter $%s in %s::%s is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.',
+                    $parameter->getName(),
+                    $declaringClass->getName(),
+                    $parameter->getDeclaringFunction()->getName()
+                );
+            } else {
+                $refClass = new ReflectionClass($fqcn);
+                // Note : $refClass->isIterable() is only accessible in PHP 7.2
+                if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
+                    throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
+                }
+
+                $message = sprintf(
+                    'Parameter $%s in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param %s|User[] $%s.',
+                    $parameter->getName(),
+                    $declaringClass->getName(),
+                    $parameter->getDeclaringFunction()->getName(),
+                    $fqcn,
+                    $fqcn,
+                    $parameter->getName()
+                );
+            }
         }
 
         $e       = new self($message, 0, $previous);
@@ -105,19 +115,27 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
             }
 
             $fqcn     = (string) $previous->type->getFqsen();
-            $refClass = new ReflectionClass($fqcn);
-            // Note : $refClass->isIterable() is only accessible in PHP 7.2
-            if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
-            }
+            if ($fqcn === '\\DateTime') {
+                $message = sprintf(
+                    'Return type in %s::%s is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.',
+                    $method->getDeclaringClass()->getName(),
+                    $method->getName()
+                );
+            } else {
+                $refClass = new ReflectionClass($fqcn);
+                // Note : $refClass->isIterable() is only accessible in PHP 7.2
+                if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
+                    throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
+                }
 
-            $message = sprintf(
-                'Return type in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return %s|User[]',
-                $method->getDeclaringClass()->getName(),
-                $method->getName(),
-                $fqcn,
-                $fqcn
-            );
+                $message = sprintf(
+                    'Return type in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return %s|User[]',
+                    $method->getDeclaringClass()->getName(),
+                    $method->getName(),
+                    $fqcn,
+                    $fqcn
+                );
+            }
         }
 
         $e       = new self($message, 0, $previous);

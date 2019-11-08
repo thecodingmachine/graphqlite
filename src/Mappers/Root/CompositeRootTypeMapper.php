@@ -21,10 +21,16 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
     /**
      * @param RootTypeMapperInterface[] $rootTypeMappers
      */
-    public function __construct(iterable $rootTypeMappers)
+    public function __construct(iterable $rootTypeMappers = [])
     {
         $this->rootTypeMappers = is_array($rootTypeMappers) ? $rootTypeMappers : iterator_to_array($rootTypeMappers);
     }
+
+    public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper): void
+    {
+        $this->rootTypeMappers[] = $rootTypeMapper;
+    }
+
 
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {

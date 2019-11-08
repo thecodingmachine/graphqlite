@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
@@ -70,6 +71,9 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      */
     private function getObjectType(OutputType $subType): MutableInterface
     {
+        if ($subType instanceof NonNull) {
+            $subType = $subType->getWrappedType(true);
+        }
         if (! isset($subType->name)) {
             throw new RuntimeException('Cannot get name property from sub type ' . get_class($subType));
         }
