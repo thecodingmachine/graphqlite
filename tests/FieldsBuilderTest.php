@@ -705,8 +705,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
         $this->assertInstanceOf(ListOfType::class, $usersQuery->args[0]->getType()->getWrappedType());
         $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType()->getWrappedType());
-        $this->assertInstanceOf(NonNull::class, $usersQuery->type->getType());
-        $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getType()->getWrappedType());
-        $this->assertInstanceOf(IntType::class, $usersQuery->type->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->type);
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->type->getWrappedType()->getWrappedType());
     }
 }

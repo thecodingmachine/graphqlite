@@ -67,8 +67,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
             $innerType = $this->topRootTypeMapper->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj);
             if ($innerType === null) {
                 return null;
-            }if ($innerType instanceof NullableType) {
-                $innerType = GraphQLType::nonNull($innerType);
             }
 
             return GraphQLType::listOf($innerType);
@@ -98,8 +96,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
             $innerType = $this->topRootTypeMapper->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj);
             if ($innerType === null) {
                 return null;
-            }if ($innerType instanceof NullableType) {
-                $innerType = GraphQLType::nonNull($innerType);
             }
 
             return GraphQLType::listOf($innerType);
