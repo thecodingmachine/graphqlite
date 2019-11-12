@@ -24,10 +24,13 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamIterator;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
@@ -409,6 +412,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(7, $queries);
         $iterableQuery = $queries[3];
 
+        $this->assertSame('arrayObject', $iterableQuery->name);
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
         $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
@@ -425,6 +429,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(7, $queries);
         $iterableQuery = $queries[4];
 
+        $this->assertSame('iterable', $iterableQuery->name);
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
         $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
@@ -480,6 +485,10 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
     /*public function testQueryProviderWithIterableReturnType(): void
     {
         $controller = new TestControllerWithIterableReturnType();
@@ -513,6 +522,10 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
     /*public function testQueryProviderWithIterableParams(): void
     {
         $controller = new TestControllerWithIterableParam();
@@ -708,5 +721,27 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $usersQuery->type);
         $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getWrappedType());
         $this->assertInstanceOf(IntType::class, $usersQuery->type->getWrappedType()->getWrappedType());
+    }
+
+    public function testQueryProviderWithParamDateTime(): void
+    {
+        $controller = new TestControllerWithParamDateTime();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage('Parameter $dateTime in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $queries = $queryProvider->getQueries($controller);
+    }
+
+    public function testQueryProviderWithReturnDateTime(): void
+    {
+        $controller = new TestControllerWithReturnDateTime();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $queries = $queryProvider->getQueries($controller);
     }
 }

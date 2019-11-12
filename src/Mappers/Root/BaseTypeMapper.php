@@ -76,7 +76,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
             return $this->recursiveTypeMapper->mapClassToInterfaceOrType($className, $subType);
         }
-        // FIXME: we need to add a $type instanceof Compound here... this will hurt because we need to send back the process to the rootTypeMapper for each inner types...
 
         return null;
     }

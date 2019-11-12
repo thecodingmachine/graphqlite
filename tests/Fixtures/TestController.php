@@ -95,7 +95,7 @@ class TestController
     }
 
     /**
-     * @Query(name="arrayObject")
+     * @Query(name="iterable")
      * @return iterable|TestObject[]
      */
     public function testIterable(): iterable
