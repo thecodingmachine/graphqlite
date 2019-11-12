@@ -12,7 +12,6 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
-use function array_filter;
 use function array_map;
 use function implode;
 
@@ -51,6 +50,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
             if ($type instanceof NamedType) {
                 return $type->name;
             }
+
             return (string) $type;
         }, $unionTypes);
 

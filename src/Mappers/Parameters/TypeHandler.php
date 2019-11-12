@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
-use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use Iterator;
-use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\Fqsen;
@@ -31,7 +27,6 @@ use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockRuntimeException;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
@@ -41,16 +36,13 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
-use function array_filter;
+use const SORT_REGULAR;
 use function array_merge;
 use function array_unique;
 use function count;
 use function iterator_to_array;
-use const SORT_REGULAR;
 
 class TypeHandler implements ParameterHandlerInterface
 {
@@ -186,7 +178,7 @@ class TypeHandler implements ParameterHandlerInterface
     private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         $graphQlType = null;
-        if ($isNullable && !$type instanceof Nullable) {
+        if ($isNullable && ! $type instanceof Nullable) {
             // In case a parameter has a default value, let's wrap the main type in a nullable
             $type = new Nullable($type);
         }
@@ -232,7 +224,7 @@ class TypeHandler implements ParameterHandlerInterface
             return $type;
         }
 
-        if ($type == $docBlockType) {
+        if ($type === $docBlockType) {
             return $type;
         }
 
@@ -274,6 +266,7 @@ class TypeHandler implements ParameterHandlerInterface
         if ($type->allowsNull()) {
             $phpdocType = new Nullable($phpdocType);
         }
+
         return $phpdocType;
     }
 

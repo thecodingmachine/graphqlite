@@ -25,7 +25,6 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
@@ -42,9 +41,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
 {
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
-    /**
-     * @var RootTypeMapperInterface
-     */
+    /** @var RootTypeMapperInterface */
     private $topRootTypeMapper;
 
     public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper, RootTypeMapperInterface $topRootTypeMapper)

@@ -31,7 +31,6 @@ class CompositeRootTypeMapper implements RootTypeMapperInterface
         $this->rootTypeMappers[] = $rootTypeMapper;
     }
 
-
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
         foreach ($this->rootTypeMappers as $rootTypeMapper) {

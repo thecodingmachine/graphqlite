@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
@@ -11,18 +12,16 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
-use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Compound;
-use phpDocumentor\Reflection\Types\Null_;
-use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 use function array_filter;
+use function array_values;
+use function count;
 use function iterator_to_array;
 
 /**
@@ -31,17 +30,11 @@ use function iterator_to_array;
  */
 class CompoundTypeMapper implements RootTypeMapperInterface
 {
-    /**
-     * @var RootTypeMapperInterface
-     */
+    /** @var RootTypeMapperInterface */
     private $topRootTypeMapper;
-    /**
-     * @var TypeRegistry
-     */
+    /** @var TypeRegistry */
     private $typeRegistry;
-    /**
-     * @var RecursiveTypeMapperInterface
-     */
+    /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
 
     public function __construct(RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
@@ -58,7 +51,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
-        if (!$type instanceof Compound) {
+        if (! $type instanceof Compound) {
             return null;
         }
 
@@ -86,7 +79,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      */
     public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
     {
-        if (!$type instanceof Compound) {
+        if (! $type instanceof Compound) {
             return null;
         }
 
@@ -112,9 +105,10 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      * @param array<T> $unionTypes
      * @return T
      */
+
     /**
      * @param array<(InputType&GraphQLType)|(OutputType&GraphQLType)> $unionTypes
-     * @return GraphQLType
+     *
      * @throws CannotMapTypeException
      */
     private function getTypeFromUnion(array $unionTypes): GraphQLType
@@ -130,7 +124,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             $badTypes = [];
             $nonNullableUnionTypes = [];
             foreach ($unionTypes as $unionType) {
-                if (!$unionType instanceof NonNull) {
+                if (! $unionType instanceof NonNull) {
                     $isNullable = true;
                 } else {
                     $unionType = $unionType->getWrappedType();
@@ -155,7 +149,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             /** @var UnionType $graphQlType */
             $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
 
-            if (!$isNullable) {
+            if (! $isNullable) {
                 $graphQlType = new NonNull($graphQlType);
             }
         }

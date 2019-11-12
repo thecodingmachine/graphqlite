@@ -45,6 +45,7 @@ class TypeRegistry
      * - If the type is already present, does not fail. Instead, return the old type already available.
      *
      * @param NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface)) $type
+     *
      * @return NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))
      */
     public function getOrRegisterType(NamedType $type): NamedType
@@ -53,6 +54,7 @@ class TypeRegistry
             return $this->outputTypes[$type->name];
         }
         $this->outputTypes[$type->name] = $type;
+
         return $type;
     }
 

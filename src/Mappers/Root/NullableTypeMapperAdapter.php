@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\NullableType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
@@ -15,14 +15,11 @@ use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
-use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
-use TheCodingMachine\GraphQLite\Types\UnionType;
 use function array_filter;
 use function array_map;
+use function count;
 use function iterator_to_array;
 
 /**
@@ -31,9 +28,7 @@ use function iterator_to_array;
  */
 class NullableTypeMapperAdapter implements RootTypeMapperInterface
 {
-    /**
-     * @var RootTypeMapperInterface
-     */
+    /** @var RootTypeMapperInterface */
     private $rootTypeMapper;
 
     public function __construct(RootTypeMapperInterface $rootTypeMapper)
@@ -98,7 +93,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         // There is an exception: if the PHP argument is non nullable but points to a factory that can called without passing any argument,
         // then, the input type is nullable (and we can still create an empty object).
         if (! $isNullable && $graphQlType instanceof NullableType) {
-            if (!($graphQlType instanceof ResolvableMutableInputObjectType) || $graphQlType->isInstantiableWithoutParameters() !== true) {
+            if (! ($graphQlType instanceof ResolvableMutableInputObjectType) || $graphQlType->isInstantiableWithoutParameters() !== true) {
                 $graphQlType = GraphQLType::nonNull($graphQlType);
             }
         }
@@ -149,6 +144,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
             if (count($types) > 1) {
                 return new Compound($types);
             }
+
             return $types[0] ?? null;
         }
 
