@@ -27,6 +27,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
@@ -687,5 +688,25 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(BadExpressionInSecurityException::class);
         $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
+    }
+
+    public function testQueryProviderWithNullableArray(): void
+    {
+        $controller = new TestControllerWithNullableArray();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(1, $queries);
+        $usersQuery = $queries[0];
+        $this->assertSame('test', $usersQuery->name);
+
+        $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->args[0]->getType()->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->type->getType());
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getType()->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->type->getType()->getWrappedType()->getWrappedType());
     }
 }
