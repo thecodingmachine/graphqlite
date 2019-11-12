@@ -207,9 +207,6 @@ class TypeHandler implements ParameterHandlerInterface
             if ($graphQlType === null) {
                 throw TypeMappingRuntimeException::createFromType($docBlockType);
             }
-
-
-            //$graphQlType = $this->mapDocBlockType($type, $docBlockType, $isNullable, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
         } else {
             $completeType = $this->appendTypes($type, $docBlockType);
             if ($mapToInputType === true) {
@@ -221,32 +218,6 @@ class TypeHandler implements ParameterHandlerInterface
             if ($graphQlType === null) {
                 throw TypeMappingRuntimeException::createFromType($completeType);
             }
-
-            /*
-            try {
-                $graphQlType = $this->toGraphQlType($type, null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
-                // The type is non nullable if the PHP argument is non nullable
-                // There is an exception: if the PHP argument is non nullable but points to a factory that can called without passing any argument,
-                // then, the input type is nullable (and we can still create an empty object).
-                if (! $isNullable && (! $graphQlType instanceof ResolvableMutableInputObjectType || $graphQlType->isInstantiableWithoutParameters() === false)) {
-                    $graphQlType = GraphQLType::nonNull($graphQlType);
-                }
-            } catch (TypeMappingRuntimeException | CannotMapTypeExceptionInterface $e) {
-                // Is the type iterable? If yes, let's analyze the docblock
-                // TODO: it would be better not to go through an exception for this.
-                if (! ($type instanceof Object_)) {
-                    throw $e;
-                }
-
-                $fqcn     = (string) $type->getFqsen();
-                $refClass = new ReflectionClass($fqcn);
-                // Note : $refClass->isIterable() is only accessible in PHP 7.2
-                if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                    throw $e;
-                }
-
-                $graphQlType = $this->mapIteratorDocBlockType($type, $docBlockType, $isNullable, $refMethod, $docBlockObj, $argumentName);
-            }*/
         }
 
         return $graphQlType;
@@ -293,213 +264,17 @@ class TypeHandler implements ParameterHandlerInterface
         return new Compound($types);
     }
 
-    private function mapDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
+    private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
-        if ($docBlockType === null) {
-            throw TypeMappingRuntimeException::createFromType($type);
+        $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
+        Assert::notNull($phpdocType);
+
+        $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
+
+        if ($type->allowsNull()) {
+            $phpdocType = new Nullable($phpdocType);
         }
-        if (! $isNullable) {
-            // Let's check a "null" value in the docblock
-            $isNullable = $this->isNullable($docBlockType);
-        }
-
-        $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockType);
-        if (empty($filteredDocBlockTypes)) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
-
-        $unionTypes    = [];
-        $lastException = null;
-        foreach ($filteredDocBlockTypes as $singleDocBlockType) {
-            try {
-                $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), null, $mapToInputType, $refMethod, $docBlockObj, $argumentName);
-            } catch (TypeMappingRuntimeException | CannotMapTypeExceptionInterface $e) {
-                // We have several types. It is ok not to be able to match one.
-                $lastException = $e;
-            }
-        }
-
-        if (empty($unionTypes) && $lastException !== null) {
-            throw $lastException;
-        }
-
-        if (count($unionTypes) === 1) {
-            $graphQlType = $unionTypes[0];
-        } else {
-            $badTypes = [];
-            foreach ($unionTypes as $unionType) {
-                if ($unionType instanceof ObjectType) {
-                    continue;
-                }
-
-                $badTypes[] = $unionType;
-            }
-            if ($badTypes !== []) {
-                throw CannotMapTypeException::createForBadTypeInUnion($unionTypes);
-            }
-
-            $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
-            $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
-        }
-
-        /* elseif (count($filteredDocBlockTypes) === 1) {
-            $graphQlType = $this->toGraphQlType($filteredDocBlockTypes[0], $mapToInputType);
-        } else {
-            throw new GraphQLException('Union types are not supported (yet)');
-            //$graphQlTypes = array_map([$this, 'toGraphQlType'], $filteredDocBlockTypes);
-            //$$graphQlType = new UnionType($graphQlTypes);
-        }*/
-
-        if (! $isNullable) {
-            $graphQlType = GraphQLType::nonNull($graphQlType);
-        }
-
-        return $graphQlType;
-    }
-
-    /**
-     * Maps a type where the main PHP type is an iterator
-     */
-    private function mapIteratorDocBlockType(Type $type, ?Type $docBlockType, bool $isNullable, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
-    {
-        if ($docBlockType === null) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
-        if (! $isNullable) {
-            // Let's check a "null" value in the docblock
-            $isNullable = $this->isNullable($docBlockType);
-        }
-
-        $filteredDocBlockTypes = $this->typesWithoutNullable($docBlockType);
-        if (empty($filteredDocBlockTypes)) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
-
-        $unionTypes    = [];
-        $lastException = null;
-        foreach ($filteredDocBlockTypes as $singleDocBlockType) {
-            try {
-                $singleDocBlockType = $this->getTypeInArray($singleDocBlockType);
-                if ($singleDocBlockType !== null) {
-                    $subGraphQlType = $this->mapDocBlockType(new Mixed_(), $singleDocBlockType, $isNullable, false, $refMethod, $docBlockObj, $argumentName);
-                    //$subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
-                } else {
-                    $subGraphQlType = null;
-                }
-
-                $unionTypes[] = $this->toGraphQlType($type, $subGraphQlType, false, $refMethod, $docBlockObj);
-
-                // TODO: add here a scan of the $type variable and do stuff if it is iterable.
-                // TODO: remove the iterator type if specified in the docblock (@return Iterator|User[])
-                // TODO: check there is at least one array (User[])
-            } catch (TypeMappingRuntimeException | CannotMapTypeExceptionInterface $e) {
-                // We have several types. It is ok not to be able to match one.
-                $lastException = $e;
-            }
-        }
-
-        if (empty($unionTypes) && $lastException !== null) {
-            // We have an issue, let's try without the subType
-            return $this->mapDocBlockType($type, $docBlockType, $isNullable, false, $refMethod, $docBlockObj);
-        }
-
-        if (count($unionTypes) === 1) {
-            $graphQlType = $unionTypes[0];
-        } else {
-            $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
-            $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
-        }
-
-        if (! $isNullable) {
-            $graphQlType = GraphQLType::nonNull($graphQlType);
-        }
-
-        return $graphQlType;
-    }
-
-    /**
-     * Casts a Type to a GraphQL type.
-     * Does not deal with nullable.
-     *
-     * @return GraphQLType (InputType&GraphQLType)|(OutputType&GraphQLType)
-     *
-     * @throws CannotMapTypeExceptionInterface
-     */
-    private function toGraphQlType(Type $type, ?GraphQLType $subType, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
-    {
-        if ($mapToInputType === true) {
-            Assert::nullOrIsInstanceOf($subType, InputType::class);
-            Assert::notNull($argumentName);
-            $mappedType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
-        } else {
-            Assert::nullOrIsInstanceOf($subType, OutputType::class);
-            $mappedType = $this->rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
-        }
-        if ($mappedType === null) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
-
-        return $mappedType;
-    }
-
-    /**
-     * Removes "null" from the type (if it is compound). Return an array of types (not a Compound type).
-     *
-     * @return Type[]
-     */
-    private function typesWithoutNullable(Type $docBlockTypeHint): array
-    {
-        if ($docBlockTypeHint instanceof Compound) {
-            $docBlockTypeHints = iterator_to_array($docBlockTypeHint);
-        } else {
-            $docBlockTypeHints = [$docBlockTypeHint];
-        }
-
-        return array_filter($docBlockTypeHints, static function ($item) {
-            return ! $item instanceof Null_;
-        });
-    }
-
-    /**
-     * Drops "Nullable" types and return the core type.
-     */
-    private function dropNullableType(Type $typeHint): Type
-    {
-        if ($typeHint instanceof Nullable) {
-            return $typeHint->getActualType();
-        }
-
-        return $typeHint;
-    }
-
-    /**
-     * Resolves a list type.
-     */
-    private function getTypeInArray(Type $typeHint): ?Type
-    {
-        $typeHint = $this->dropNullableType($typeHint);
-
-        if (! $typeHint instanceof Array_) {
-            return null;
-        }
-
-        return $this->dropNullableType($typeHint->getValueType());
-    }
-
-    private function isNullable(Type $docBlockTypeHint): bool
-    {
-        if ($docBlockTypeHint instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
-            return true;
-        }
-        if ($docBlockTypeHint instanceof Compound) {
-            foreach ($docBlockTypeHint as $type) {
-                if ($type instanceof Null_ || $type instanceof Nullable) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return $phpdocType;
     }
 
     /**
@@ -512,26 +287,5 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         return $type;
-    }
-
-    private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
-    {
-        $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
-        Assert::notNull($phpdocType);
-
-        $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
-
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        // FIXME: this is wreaking havoc in all the code.
-        if ($type->allowsNull()) {
-            $phpdocType = new Nullable($phpdocType);
-        }
-        return $phpdocType;
     }
 }
