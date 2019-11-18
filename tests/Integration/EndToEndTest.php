@@ -30,6 +30,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
@@ -96,8 +97,7 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(ParameterMiddlewareInterface::class),
-                    $container->get(FieldMiddlewareInterface::class),
-                    $container->get(TypeRegistry::class)
+                    $container->get(FieldMiddlewareInterface::class)
                 );
             },
             FieldMiddlewareInterface::class => function(ContainerInterface $container) {
@@ -207,10 +207,15 @@ class EndToEndTest extends TestCase
                 return new CachedDocBlockFactory(new ArrayCache());
             },
             RootTypeMapperInterface::class => function(ContainerInterface $container) {
-                return new NullableTypeMapperAdapter($container->get(CompositeRootTypeMapper::class));
+                return new NullableTypeMapperAdapter();
             },
-            CompositeRootTypeMapper::class => function(ContainerInterface $container) {
-                return new CompositeRootTypeMapper();
+            'rootTypeMapper' => function(ContainerInterface $container) {
+                $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
+                $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
+                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
+                $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
+                $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
+                return $rootTypeMapper;
             },
             ContainerParameterHandler::class => function(ContainerInterface $container) {
                 return new ContainerParameterHandler($container, true, true);
@@ -236,13 +241,13 @@ class EndToEndTest extends TestCase
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'2'));
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
 
-        $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
-        $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new CompoundTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
+        $container->get(RootTypeMapperInterface::class)->setNext($container->get('rootTypeMapper'));
+        /*$container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new CompoundTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new MyCLabsEnumTypeMapper());
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new BaseTypeMapper($container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class)));
-
+*/
         return $container;
     }
 

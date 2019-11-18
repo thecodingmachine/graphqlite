@@ -29,19 +29,19 @@ use function iterator_to_array;
 class NullableTypeMapperAdapter implements RootTypeMapperInterface
 {
     /** @var RootTypeMapperInterface */
-    private $rootTypeMapper;
+    private $next;
 
-    public function __construct(RootTypeMapperInterface $rootTypeMapper)
+    public function setNext(RootTypeMapperInterface $next): void
     {
-        $this->rootTypeMapper = $rootTypeMapper;
+        $this->next = $next;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
      *
-     * @return (OutputType&GraphQLType)|null
+     * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
@@ -54,10 +54,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
             $type = $nonNullableType;
         }
 
-        $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
-        if ($graphQlType === null) {
-            return null;
-        }
+        $graphQlType = $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
 
         if (! $isNullable && $graphQlType instanceof NullableType) {
             $graphQlType = GraphQLType::nonNull($graphQlType);
@@ -69,9 +66,9 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
     /**
      * @param (InputType&GraphQLType)|null $subType
      *
-     * @return (InputType&GraphQLType)|null
+     * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
@@ -84,10 +81,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
             $type = $nonNullableType;
         }
 
-        $graphQlType = $this->rootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
-        if ($graphQlType === null) {
-            return null;
-        }
+        $graphQlType = $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
 
         // The type is non nullable if the PHP argument is non nullable
         // There is an exception: if the PHP argument is non nullable but points to a factory that can called without passing any argument,
@@ -108,9 +102,9 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName): NamedType
     {
-        return $this->rootTypeMapper->mapNameToType($typeName);
+        return $this->next->mapNameToType($typeName);
     }
 
     private function isNullable(Type $docBlockTypeHint): bool

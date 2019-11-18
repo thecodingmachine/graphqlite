@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\SimpleCache\CacheInterface;
@@ -45,7 +46,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * An array of interfaces OR object types if no interface matching.
      *
-     * @var array<string,OutputType&Type>
+     * @var array<string,OutputType&Type&NamedType>
      */
     private $interfaces = [];
 
@@ -209,7 +210,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * @param string      $className                                   The exact class name to look for (this function does not look into parent classes).
      * @param (OutputType&Type)|null $subType A subtype (if the main className is an iterator)
      *
-     * @return OutputType&Type
+     * @return OutputType&Type&NamedType
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -462,7 +463,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return Type&(InputType|OutputType)
+     * @return NamedType&Type&(InputType|OutputType)
      */
     public function mapNameToType(string $typeName): Type
     {

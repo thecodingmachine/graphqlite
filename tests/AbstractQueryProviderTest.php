@@ -30,9 +30,11 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
@@ -51,6 +53,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use function array_reverse;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
@@ -296,8 +299,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
-            $fieldMiddlewarePipe,
-            $this->getTypeRegistry()
+            $fieldMiddlewarePipe
         );
     }
 
@@ -311,13 +313,15 @@ abstract class AbstractQueryProviderTest extends TestCase
 
     protected function buildRootTypeMapper(): RootTypeMapperInterface
     {
-        $compositeRootTypeMapper = new CompositeRootTypeMapper();
-        $topRootTypeMapper = new NullableTypeMapperAdapter($compositeRootTypeMapper);
+        $topRootTypeMapper = new NullableTypeMapperAdapter();
 
-        $compositeRootTypeMapper->addRootTypeMapper(new IteratorTypeMapper($topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper()));
-        $compositeRootTypeMapper->addRootTypeMapper(new CompoundTypeMapper($topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper()));
-        $compositeRootTypeMapper->addRootTypeMapper(new MyCLabsEnumTypeMapper());
-        $compositeRootTypeMapper->addRootTypeMapper(new BaseTypeMapper($this->getTypeMapper(), $topRootTypeMapper));
+        $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
+        $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
+        $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
+        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
+
+        $topRootTypeMapper->setNext($rootTypeMapper);
         return $topRootTypeMapper;
     }
 

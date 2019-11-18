@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
@@ -79,7 +80,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * Returns a GraphQL type by name (can be either an input or output type)
              *
              * @param string $typeName The name of the GraphQL type
-             * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
+             * @return NamedType&Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
              */
             public function mapNameToType(string $typeName): Type
             {

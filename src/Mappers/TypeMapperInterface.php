@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
@@ -48,7 +49,7 @@ interface TypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)
+     * @return NamedType&Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)
      */
     public function mapNameToType(string $typeName): Type;
 

@@ -297,8 +297,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 $authenticationService,
                 new VoidAuthorizationService()
-            ),
-            $this->getTypeRegistry()
+            )
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -329,8 +328,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 $authorizationService
-            ),
-            $this->getTypeRegistry()
+            )
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -391,8 +389,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService()
-            ),
-            $this->getTypeRegistry()
+            )
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);

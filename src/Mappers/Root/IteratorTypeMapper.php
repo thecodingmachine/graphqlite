@@ -42,29 +42,36 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     private $typeRegistry;
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
+    /** @var RootTypeMapperInterface */
+    private $next;
 
-    public function __construct(RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(RootTypeMapperInterface $next, RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
         $this->topRootTypeMapper = $topRootTypeMapper;
         $this->typeRegistry = $typeRegistry;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->next = $next;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
      *
-     * @return (OutputType&GraphQLType)|null
+     * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
-            return null;
+            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
 
         $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($refMethod, $docBlockObj) {
             return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }, true);
-        Assert::nullOrIsInstanceOf($result, OutputType::class);
+
+        if ($result === null) {
+            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+        }
+        Assert::isInstanceOf($result, OutputType::class);
 
         return $result;
     }
@@ -72,18 +79,21 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     /**
      * @param (InputType&GraphQLType)|null $subType
      *
-     * @return (InputType&GraphQLType)|null
+     * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
     {
         if (! $type instanceof Compound) {
-            return null;
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         }
 
         $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($refMethod, $docBlockObj, $argumentName) {
             return $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
-        }, true);
-        Assert::nullOrIsInstanceOf($result, InputType::class);
+        }, false);
+        if ($result === null) {
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+        }
+        Assert::isInstanceOf($result, InputType::class);
 
         return $result;
     }
@@ -95,10 +105,10 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName): NamedType
     {
         // TODO: how to handle this? Do we need?
-        return null;
+        return $this->next->mapNameToType($typeName);
     }
 
     /**

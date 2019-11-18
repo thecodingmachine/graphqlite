@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
+use Closure;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ObjectType;
@@ -13,12 +15,14 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\Iterable_;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\UnionType;
+use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_values;
 use function count;
@@ -36,53 +40,61 @@ class CompoundTypeMapper implements RootTypeMapperInterface
     private $typeRegistry;
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
+    /** @var RootTypeMapperInterface */
+    private $next;
 
-    public function __construct(RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(RootTypeMapperInterface $next, RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
         $this->topRootTypeMapper = $topRootTypeMapper;
         $this->typeRegistry = $typeRegistry;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->next = $next;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
      *
-     * @return (OutputType&GraphQLType)|null
+     * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
-            return null;
+            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
 
-        $filteredDocBlockTypes = iterator_to_array($type);
-        if (empty($filteredDocBlockTypes)) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
+        $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($refMethod, $docBlockObj) {
+            return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+        }, true);
 
-        $unionTypes    = [];
-        $lastException = null;
-        foreach ($filteredDocBlockTypes as $singleDocBlockType) {
-            $unionTypes[] = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $refMethod, $docBlockObj);
-        }
+        Assert::isInstanceOf($result, OutputType::class);
 
-        /** @var OutputType&GraphQLType $return */
-        $return = $this->getTypeFromUnion($unionTypes);
-
-        return $return;
+        return $result;
     }
 
     /**
      * @param (InputType&GraphQLType)|null $subType
      *
-     * @return (InputType&GraphQLType)|null
+     * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
     {
         if (! $type instanceof Compound) {
-            return null;
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
         }
 
+        $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($refMethod, $docBlockObj, $argumentName) {
+            return $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+        }, false);
+        Assert::isInstanceOf($result, InputType::class);
+
+        return $result;
+    }
+
+    /**
+     * @return (OutputType&GraphQLType)|(InputType&GraphQLType)
+     */
+    private function toGraphQLType(Compound $type, Closure $topToGraphQLType, bool $isOutputType): GraphQLType
+    {
         $filteredDocBlockTypes = iterator_to_array($type);
         if (empty($filteredDocBlockTypes)) {
             throw TypeMappingRuntimeException::createFromType($type);
@@ -90,14 +102,43 @@ class CompoundTypeMapper implements RootTypeMapperInterface
 
         $unionTypes    = [];
         $lastException = null;
+        $mustBeIterable = false;
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
-            $unionTypes[] = $this->topRootTypeMapper->toGraphQLInputType($singleDocBlockType, null, $argumentName, $refMethod, $docBlockObj);
+            if ($singleDocBlockType instanceof Iterable_) {
+                $mustBeIterable = true;
+                continue;
+            }
+            $unionTypes[] = $topToGraphQLType($singleDocBlockType, null);
         }
 
-        /** @var InputType&GraphQLType $return */
+        if ($mustBeIterable && empty($unionTypes)) {
+            throw TypeMappingRuntimeException::createFromType(new Iterable_());
+        }
+
+        /** @var OutputType&GraphQLType $return */
         $return = $this->getTypeFromUnion($unionTypes);
 
+        if ($mustBeIterable && ! $this->isWrappedListOfType($return)) {
+            // The compound type is iterable and the other type is not iterable. Both types are incompatible
+            // For instance: @return iterable|User
+            // FIXME: better error message!
+            throw TypeMappingRuntimeException::createFromType(new Iterable_());
+        }
+
+        if (! $isOutputType && ($return instanceof UnionType || ($return instanceof NonNull && $return->getWrappedType() instanceof UnionType))) {
+            throw CannotMapTypeException::createForUnionInInputType($return);
+        }
+
         return $return;
+    }
+
+    private function isWrappedListOfType(GraphQLType $type): bool
+    {
+        if ($type instanceof ListOfType) {
+            return true;
+        }
+
+        return $type instanceof NonNull && $type->getWrappedType() instanceof ListOfType;
     }
 
     /*
@@ -164,9 +205,8 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName): NamedType
     {
-        // TODO: maybe we should map "Union" types here?
-        return null;
+        return $this->next->mapNameToType($typeName);
     }
 }

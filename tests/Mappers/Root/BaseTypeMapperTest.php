@@ -18,15 +18,16 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
 
     public function testNullableToGraphQLInputType(): void
     {
-        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper(), $this->getRootTypeMapper());
+        $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
-        $mappedType = $baseTypeMapper->toGraphQLInputType(new Nullable(new Object_(new Fqsen('\\Exception'))), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
-        $this->assertNull($mappedType);
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage("Don't know how to handle type ?\Exception");
+        $baseTypeMapper->toGraphQLInputType(new Nullable(new Object_(new Fqsen('\\Exception'))), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
     public function testToGraphQLOutputTypeException(): void
     {
-        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper(), $this->getRootTypeMapper());
+        $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
         $this->expectException(GraphQLRuntimeException::class);
         //$this->expectExceptionMessage('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
@@ -34,15 +35,21 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
         $baseTypeMapper->toGraphQLInputType(new Object_(new Fqsen('\\DateTime')), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
-    public function testUnmappableArray(): void
+    public function testUnmappableOutputArray(): void
     {
-        $baseTypeMapper = new BaseTypeMapper($this->getTypeMapper(), $this->getRootTypeMapper());
+        $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage("Don't know how to handle type resource");
         $mappedType = $baseTypeMapper->toGraphQLOutputType(new Array_(new Resource_()), null, new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
-        $this->assertNull($mappedType);
-
-        $mappedType = $baseTypeMapper->toGraphQLInputType(new Array_(new Resource_()), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
-        $this->assertNull($mappedType);
     }
 
+    public function testUnmappableInputArray(): void
+    {
+        $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage("Don't know how to handle type resource");
+        $mappedType = $baseTypeMapper->toGraphQLInputType(new Array_(new Resource_()), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
+    }
 }

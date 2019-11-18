@@ -19,6 +19,8 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
@@ -65,7 +67,7 @@ class SchemaFactoryTest extends TestCase
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper())
                 ->addTypeMapperFactory(new StaticClassListTypeMapperFactory([TestSelfType::class]))
-                ->addRootTypeMapper(new CompositeRootTypeMapper())
+                ->addRootTypeMapperFactory(new VoidRootTypeMapperFactory())
                 ->addParameterMiddleware(new ParameterMiddlewarePipe())
                 ->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([], $container))
                 ->setSchemaConfig(new SchemaConfig())

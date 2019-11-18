@@ -2,19 +2,21 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 /**
  * A context class containing a number of classes created on the fly by SchemaFactory.
- * Those classes are made available to factories implementing QueryProviderFactoryInterface
- * or TypeMapperFactoryInterface
+ * Those classes are made available to factories implementing RootTypeMapperFactoryInterface
  */
-final class FactoryContext
+final class RootTypeMapperFactoryContext
 {
     /** @var AnnotationReader */
     private $annotationReader;
@@ -24,12 +26,6 @@ final class FactoryContext
     private $namingStrategy;
     /** @var TypeRegistry */
     private $typeRegistry;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
-    /** @var TypeGenerator */
-    private $typeGenerator;
-    /** @var InputTypeGenerator */
-    private $inputTypeGenerator;
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
     /** @var ContainerInterface */
@@ -46,9 +42,6 @@ final class FactoryContext
         TypeResolver $typeResolver,
         NamingStrategyInterface $namingStrategy,
         TypeRegistry $typeRegistry,
-        FieldsBuilder $fieldsBuilder,
-        TypeGenerator $typeGenerator,
-        InputTypeGenerator $inputTypeGenerator,
         RecursiveTypeMapperInterface $recursiveTypeMapper,
         ContainerInterface $container,
         CacheInterface $cache,
@@ -59,9 +52,6 @@ final class FactoryContext
         $this->typeResolver = $typeResolver;
         $this->namingStrategy = $namingStrategy;
         $this->typeRegistry = $typeRegistry;
-        $this->fieldsBuilder = $fieldsBuilder;
-        $this->typeGenerator = $typeGenerator;
-        $this->inputTypeGenerator = $inputTypeGenerator;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->container = $container;
         $this->cache = $cache;
@@ -87,21 +77,6 @@ final class FactoryContext
     public function getTypeRegistry(): TypeRegistry
     {
         return $this->typeRegistry;
-    }
-
-    public function getFieldsBuilder(): FieldsBuilder
-    {
-        return $this->fieldsBuilder;
-    }
-
-    public function getTypeGenerator(): TypeGenerator
-    {
-        return $this->typeGenerator;
-    }
-
-    public function getInputTypeGenerator(): InputTypeGenerator
-    {
-        return $this->inputTypeGenerator;
     }
 
     public function getRecursiveTypeMapper(): RecursiveTypeMapperInterface

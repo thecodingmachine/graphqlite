@@ -28,13 +28,11 @@ use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
-use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
@@ -48,30 +46,22 @@ class TypeHandler implements ParameterHandlerInterface
 {
     /** @var PhpDocumentorTypeResolver */
     private $phpDocumentorTypeResolver;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
     /** @var ArgumentResolver */
     private $argumentResolver;
     /** @var RootTypeMapperInterface */
     private $rootTypeMapper;
     /** @var TypeResolver */
     private $typeResolver;
-    /** @var TypeRegistry */
-    private $typeRegistry;
 
     public function __construct(
-        RecursiveTypeMapperInterface $typeMapper,
         ArgumentResolver $argumentResolver,
         RootTypeMapperInterface $rootTypeMapper,
-        TypeResolver $typeResolver,
-        TypeRegistry $typeRegistry
+        TypeResolver $typeResolver
     ) {
-        $this->recursiveTypeMapper       = $typeMapper;
         $this->argumentResolver          = $argumentResolver;
         $this->rootTypeMapper            = $rootTypeMapper;
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
         $this->typeResolver              = $typeResolver;
-        $this->typeRegistry = $typeRegistry;
     }
 
     /**
@@ -195,10 +185,6 @@ class TypeHandler implements ParameterHandlerInterface
             } else {
                 $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($docBlockType, null, $refMethod, $docBlockObj);
             }
-
-            if ($graphQlType === null) {
-                throw TypeMappingRuntimeException::createFromType($docBlockType);
-            }
         } else {
             $completeType = $this->appendTypes($type, $docBlockType);
             if ($mapToInputType === true) {
@@ -206,9 +192,6 @@ class TypeHandler implements ParameterHandlerInterface
                 $graphQlType = $this->rootTypeMapper->toGraphQLInputType($completeType, null, $argumentName, $refMethod, $docBlockObj);
             } else {
                 $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($completeType, null, $refMethod, $docBlockObj);
-            }
-            if ($graphQlType === null) {
-                throw TypeMappingRuntimeException::createFromType($completeType);
             }
         }
 
