@@ -17,15 +17,12 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Compound;
-use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
-use TheCodingMachine\GraphQLite\TypeRegistry;
-use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
 use function count;
 use function iterator_to_array;
@@ -38,18 +35,12 @@ class IteratorTypeMapper implements RootTypeMapperInterface
 {
     /** @var RootTypeMapperInterface */
     private $topRootTypeMapper;
-    /** @var TypeRegistry */
-    private $typeRegistry;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
     /** @var RootTypeMapperInterface */
     private $next;
 
-    public function __construct(RootTypeMapperInterface $next, RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(RootTypeMapperInterface $next, RootTypeMapperInterface $topRootTypeMapper)
     {
         $this->topRootTypeMapper = $topRootTypeMapper;
-        $this->typeRegistry = $typeRegistry;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->next = $next;
     }
 
@@ -61,7 +52,19 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
-            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+            try {
+                return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+            } catch (CannotMapTypeException $e) {
+                if ($type instanceof Object_) {
+                    $fqcn = (string) $type->getFqsen();
+                    $refClass = new ReflectionClass($fqcn);
+                    // Note : $refClass->isIterable() is only accessible in PHP 7.2
+                    if ($refClass->isIterable()) {
+                        throw CannotMapTypeException::createForMissingIteratorValue($fqcn, $e);
+                    }
+                }
+                throw $e;
+            }
         }
 
         $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($refMethod, $docBlockObj) {
@@ -84,7 +87,12 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
     {
         if (! $type instanceof Compound) {
-            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            //try {
+                return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+
+            /*} catch (CannotMapTypeException $e) {
+                $this->throwIterableMissingTypeHintException($e, $type);
+            }*/
         }
 
         $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($refMethod, $docBlockObj, $argumentName) {
@@ -120,19 +128,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             return null;
         }
 
-        return $this->dropNullableType($typeHint->getValueType());
-    }
-
-    /**
-     * Drops "Nullable" types and return the core type.
-     */
-    private function dropNullableType(Type $typeHint): Type
-    {
-        if ($typeHint instanceof Nullable) {
-            return $typeHint->getActualType();
-        }
-
-        return $typeHint;
+        return $typeHint->getValueType();
     }
 
     /**
@@ -170,7 +166,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 // We have several types. It is ok not to be able to match one.
                 $lastException = $e;
 
-                if ($singleDocBlockType !== null) {
+                if ($singleDocBlockType !== null && $isOutputType) {
                     // The type is an array (like User[]). Let's use that.
                     $valueType = $topToGraphQLType($singleDocBlockType, null);
                     if ($valueType !== null) {
@@ -196,10 +192,11 @@ class IteratorTypeMapper implements RootTypeMapperInterface
 
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
-        } elseif ($isOutputType) {
-            $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
-            $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
-            Assert::isInstanceOf($graphQlType, OutputType::class);
+            /*} elseif ($isOutputType) {
+                // This clearly cannot work. We are only gathering types from arrays and we cannot join arrays (I think)
+                $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
+                $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
+                Assert::isInstanceOf($graphQlType, OutputType::class);*/
         } else {
             // There are no union input types. Something went wrong.
             $graphQlType = null;

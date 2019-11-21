@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use function array_filter;
 use function array_map;
+use function array_values;
 use function count;
 use function iterator_to_array;
 
@@ -134,7 +135,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         if ($type instanceof Compound) {
             $types = array_map([$this, 'getNonNullable'], iterator_to_array($type));
             // Remove null values
-            $types = array_filter($types);
+            $types = array_values(array_filter($types));
             if (count($types) > 1) {
                 return new Compound($types);
             }

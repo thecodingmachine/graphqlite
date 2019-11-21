@@ -353,7 +353,7 @@ class SchemaFactory
         }
 
         $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $typeRegistry, $recursiveTypeMapper);
-        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper, $typeRegistry, $recursiveTypeMapper);
+        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
         $topRootTypeMapper->setNext($rootTypeMapper);
 

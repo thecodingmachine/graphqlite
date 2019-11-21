@@ -31,6 +31,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamIterator;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
@@ -482,20 +483,16 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    /*public function testQueryProviderWithIterableReturnType(): void
+    public function testQueryProviderWithIterableReturnType(): void
     {
         $controller = new TestControllerWithIterableReturnType();
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test, "\ArrayObject" is iterable. Please provide a more specific type. For instance: \ArrayObject|User[].');
         $queryProvider->getQueries($controller);
-    }*/
+    }
 
     public function testQueryProviderWithArrayReturnType(): void
     {
@@ -519,18 +516,15 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
-    // FIXME: enable this again when root type mappers are called in a chain (middleware style!)
+    // Test disabled because we cannot assume that by providing a more specific type, we will be able to handle the iterable.
     /*public function testQueryProviderWithIterableParams(): void
     {
         $controller = new TestControllerWithIterableParam();
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For parameter $params, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test, "\ArrayObject" is iterable. Please provide a more specific type. For instance: \ArrayObject|User[].');
         $queryProvider->getQueries($controller);
     }*/
 
@@ -739,6 +733,17 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $queries = $queryProvider->getQueries($controller);
+    }
+
+    public function testQueryProviderWithUnionInputParam(): void
+    {
+        $controller = new TestControllerWithUnionInputParam();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage('Parameter $testObject in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam::test is type-hinted to "\TheCodingMachine\GraphQLite\Fixtures\TestObject|\TheCodingMachine\GraphQLite\Fixtures\TestObject2". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.');
         $queries = $queryProvider->getQueries($controller);
     }
 }

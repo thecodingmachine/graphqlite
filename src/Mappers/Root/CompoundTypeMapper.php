@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
-use Closure;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NamedType;
@@ -62,39 +61,6 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
 
-        $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($refMethod, $docBlockObj) {
-            return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
-        }, true);
-
-        Assert::isInstanceOf($result, OutputType::class);
-
-        return $result;
-    }
-
-    /**
-     * @param (InputType&GraphQLType)|null $subType
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
-    {
-        if (! $type instanceof Compound) {
-            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
-        }
-
-        $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($refMethod, $docBlockObj, $argumentName) {
-            return $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
-        }, false);
-        Assert::isInstanceOf($result, InputType::class);
-
-        return $result;
-    }
-
-    /**
-     * @return (OutputType&GraphQLType)|(InputType&GraphQLType)
-     */
-    private function toGraphQLType(Compound $type, Closure $topToGraphQLType, bool $isOutputType): GraphQLType
-    {
         $filteredDocBlockTypes = iterator_to_array($type);
         if (empty($filteredDocBlockTypes)) {
             throw TypeMappingRuntimeException::createFromType($type);
@@ -108,28 +74,40 @@ class CompoundTypeMapper implements RootTypeMapperInterface
                 $mustBeIterable = true;
                 continue;
             }
-            $unionTypes[] = $topToGraphQLType($singleDocBlockType, null);
+            $unionTypes[] = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $refMethod, $docBlockObj);
         }
 
         if ($mustBeIterable && empty($unionTypes)) {
             throw TypeMappingRuntimeException::createFromType(new Iterable_());
         }
 
-        /** @var OutputType&GraphQLType $return */
+        /** @var OutputType&NonNull $return */
         $return = $this->getTypeFromUnion($unionTypes);
 
         if ($mustBeIterable && ! $this->isWrappedListOfType($return)) {
             // The compound type is iterable and the other type is not iterable. Both types are incompatible
             // For instance: @return iterable|User
-            // FIXME: better error message!
-            throw TypeMappingRuntimeException::createFromType(new Iterable_());
-        }
-
-        if (! $isOutputType && ($return instanceof UnionType || ($return instanceof NonNull && $return->getWrappedType() instanceof UnionType))) {
-            throw CannotMapTypeException::createForUnionInInputType($return);
+            throw CannotMapTypeException::createForBadTypeInUnionWithIterable($return);
         }
 
         return $return;
+    }
+
+    /**
+     * @param (InputType&GraphQLType)|null $subType
+     *
+     * @return InputType&GraphQLType
+     */
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
+    {
+        if (! $type instanceof Compound) {
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+        }
+
+        // At this point, the |null has been removed and the |iterable has been removed too.
+        // So there should only be compound input types, which is forbidden by the GraphQL spec.
+        // Let's kill this right away
+        throw TypeMappingRuntimeException::createFromType($type);
     }
 
     private function isWrappedListOfType(GraphQLType $type): bool
@@ -157,19 +135,16 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         // Remove null values
         $unionTypes = array_values(array_filter($unionTypes));
 
-        $isNullable = false;
-
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
+            Assert::isInstanceOf($graphQlType, NonNull::class);
         } else {
             $badTypes = [];
             $nonNullableUnionTypes = [];
             foreach ($unionTypes as $unionType) {
-                if (! $unionType instanceof NonNull) {
-                    $isNullable = true;
-                } else {
-                    $unionType = $unionType->getWrappedType();
-                }
+                // We are sure that each $unionType is not nullable (because nullable types have been filtered in the NullableTypeMapperAdapter already)
+                Assert::isInstanceOf($unionType, NonNull::class);
+                $unionType = $unionType->getWrappedType();
                 if ($unionType instanceof ObjectType) {
                     $nonNullableUnionTypes[] = $unionType;
                     continue;
@@ -178,21 +153,12 @@ class CompoundTypeMapper implements RootTypeMapperInterface
                 $badTypes[] = $unionType;
             }
             if ($badTypes !== []) {
-                // TODO!
-                // TODO!
-                // TODO!
-                // TODO!
-                // We need a middleware to handle this case...
                 throw CannotMapTypeException::createForBadTypeInUnion($unionTypes);
             }
 
             $graphQlType = new UnionType($nonNullableUnionTypes, $this->recursiveTypeMapper);
             /** @var UnionType $graphQlType */
             $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
-
-            if (! $isNullable) {
-                $graphQlType = new NonNull($graphQlType);
-            }
         }
 
         return $graphQlType;

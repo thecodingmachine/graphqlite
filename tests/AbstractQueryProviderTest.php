@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
+use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -319,7 +320,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
         $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
         $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
-        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
+        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
         $topRootTypeMapper->setNext($rootTypeMapper);
         return $topRootTypeMapper;
@@ -374,5 +375,11 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeRegistry = new TypeRegistry();
         }
         return $this->typeRegistry;
+    }
+
+    protected function resolveType(string $type): \phpDocumentor\Reflection\Type
+    {
+        $phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
+        return $phpDocumentorTypeResolver->resolve($type);
     }
 }

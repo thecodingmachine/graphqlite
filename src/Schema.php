@@ -78,7 +78,7 @@ class Schema extends \GraphQL\Type\Schema
             return $recursiveTypeMapper->getOutputTypes();
         });
 
-        $config->setTypeLoader(static function (string $name) use ($recursiveTypeMapper, $query, $mutation, $rootTypeMapper) {
+        $config->setTypeLoader(static function (string $name) use ($query, $mutation, $rootTypeMapper) {
             // We need to find a type FROM a GraphQL type name
             if ($name === 'Query') {
                 return $query;
@@ -87,12 +87,7 @@ class Schema extends \GraphQL\Type\Schema
                 return $mutation;
             }
 
-            $type = $rootTypeMapper->mapNameToType($name);
-            if ($type !== null) {
-                return $type;
-            }
-
-            return $recursiveTypeMapper->mapNameToType($name);
+            return $rootTypeMapper->mapNameToType($name);
         });
 
         $typeResolver->registerSchema($this);

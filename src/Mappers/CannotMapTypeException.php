@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use function array_map;
 use function implode;
+use function sprintf;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
@@ -39,6 +40,17 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self($error->getMessage(), $error->getCode(), $error);
     }
 
+    public static function createForMissingIteratorValue(string $className, self $e): self
+    {
+        $message = sprintf(
+            '"%s" is iterable. Please provide a more specific type. For instance: %s|User[].',
+            $className,
+            $className
+        );
+
+        return new self($message, 0, $e);
+    }
+
     /**
      * @param Type[] $unionTypes
      *
@@ -53,9 +65,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('in GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
     }
 
-    public static function createForUnionInInputType(Type $type): self
+    public static function createForBadTypeInUnionWithIterable(Type $type): self
     {
-        return new self('in GraphQL, you can only use union types in output types, not in input types. You cannot use this type: ' . $type);
+        return new self('the value must be iterable, but its computed GraphQL type (' . $type . ') is not a list.');
     }
 
     public static function mustBeOutputType(string $subTypeName): self

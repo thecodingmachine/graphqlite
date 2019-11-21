@@ -18,9 +18,6 @@ parameters:
         -
            message: '#Parameter \#2 \$subType of method .* expects#'
            path: src/Mappers/Root/IteratorTypeMapper.php
-        -
-           message: '#Parameter \#2 \$subType of method .* expects#'
-           path: src/Mappers/Root/CompoundTypeMapper.php
         - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage()#'
         #-
         #  message: '#If condition is always true#'
