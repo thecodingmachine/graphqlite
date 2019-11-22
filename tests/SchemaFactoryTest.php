@@ -179,4 +179,22 @@ class SchemaFactoryTest extends TestCase
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
+
+    public function testDuplicateQueryException(): void
+    {
+        $factory = new SchemaFactory(
+            new ArrayCache(),
+            new BasicAutoWiringContainer(
+                new EmptyContainer()
+            )
+        );
+        $factory->setAuthenticationService(new VoidAuthenticationService())
+                ->setAuthorizationService(new VoidAuthorizationService())
+                ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueries')
+                ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+
+        $this->expectException(GraphQLRuntimeException::class);
+        $schema = $factory->createSchema();
+    }
+
 }
