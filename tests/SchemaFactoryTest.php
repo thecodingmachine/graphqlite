@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -31,6 +32,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
+
 
 class SchemaFactoryTest extends TestCase
 {
@@ -193,8 +195,17 @@ class SchemaFactoryTest extends TestCase
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueries')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
-        $this->expectException(GraphQLRuntimeException::class);
+        $this->expectException(DuplicateMappingException::class);
         $schema = $factory->createSchema();
+        $queryString = '
+        query {
+            duplicateQuery
+        }
+        ';
+        GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
     }
 
 }
