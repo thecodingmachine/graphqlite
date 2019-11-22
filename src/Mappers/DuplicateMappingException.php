@@ -23,4 +23,9 @@ class DuplicateMappingException extends RuntimeException
     {
         throw new self(sprintf("The type '%s' is created by 2 different classes: '%s' and '%s'", $type, $sourceClass1, $sourceClass2));
     }
+
+    public static function createForQuery(string $sourceClass, string $queryName): self
+    {
+        throw new self(sprintf("The query '%s' is duplicate in class '%s'", $queryName, $sourceClass));
+    }
 }
