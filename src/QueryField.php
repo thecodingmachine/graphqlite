@@ -181,18 +181,17 @@ class QueryField extends FieldDefinition
     }
 
     /**
-     * @param bool $isLogged True if the user is logged (and the error is a 403), false if the error is unlogged (the error is a 401)
+     * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
      *
      * @return QueryField
      */
-    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isLogged): self
+    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
     {
-        $callable = static function () use ($isLogged): void {
-            if (! $isLogged) {
-                throw MissingAuthorizationException::forbidden();
+        $callable = static function () use ($isNotLogged): void {
+            if ($isNotLogged) {
+                throw MissingAuthorizationException::unauthorized();
             }
-
-            throw MissingAuthorizationException::unauthorized();
+            throw MissingAuthorizationException::forbidden();
         };
 
         $fieldDescriptor->setResolver($callable);
