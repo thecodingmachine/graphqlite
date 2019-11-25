@@ -62,7 +62,7 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/autowiring.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Autowiring services</h1></header><article><div><span><p>GraphQLite can automatically inject services in your fields/queries/mutations signatures.</p>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/autowiring.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Autowiring services</h1></header><article><div><span><p>GraphQLite can automatically inject services in your fields/queries/mutations signatures.</p>
 <p>Some of your fields may be computed. In order to compute these fields, you might need to call a service.</p>
 <p>Most of the time, your <code>@Type</code> annotation will be put on a model. And models do not have access to services.
 Hopefully, if you add a type-hinted service in your field's declaration, GraphQLite will automatically fill it with
