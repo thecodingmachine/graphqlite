@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use Iterator;
-use IteratorAggregate;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Object_;
-use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use Webmozart\Assert\Assert;
@@ -55,26 +53,29 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
                 $parameter->getName()
             );
         } else {
-            if (! ($previous->type instanceof Object_)) {
+            if ($previous->type instanceof Compound) {
+                $message = sprintf(
+                    'Parameter $%s in %s::%s is type-hinted to "' . $previous->type . '". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.',
+                    $parameter->getName(),
+                    $declaringClass->getName(),
+                    $parameter->getDeclaringFunction()->getName()
+                );
+            } elseif (! ($previous->type instanceof Object_)) {
                 throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
-            }
+            } else {
+                $fqcn     = (string) $previous->type->getFqsen();
 
-            $fqcn     = (string) $previous->type->getFqsen();
-            $refClass = new ReflectionClass($fqcn);
-            // Note : $refClass->isIterable() is only accessible in PHP 7.2
-            if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
-            }
+                if ($fqcn !== '\\DateTime') {
+                    throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a '" . $fqcn . '"');
+                }
 
-            $message = sprintf(
-                'Parameter $%s in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param %s|User[] $%s.',
-                $parameter->getName(),
-                $declaringClass->getName(),
-                $parameter->getDeclaringFunction()->getName(),
-                $fqcn,
-                $fqcn,
-                $parameter->getName()
-            );
+                $message = sprintf(
+                    'Parameter $%s in %s::%s is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.',
+                    $parameter->getName(),
+                    $declaringClass->getName(),
+                    $parameter->getDeclaringFunction()->getName()
+                );
+            }
         }
 
         $e       = new self($message, 0, $previous);
@@ -105,18 +106,14 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
             }
 
             $fqcn     = (string) $previous->type->getFqsen();
-            $refClass = new ReflectionClass($fqcn);
-            // Note : $refClass->isIterable() is only accessible in PHP 7.2
-            if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
-                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a non iterable '" . $fqcn . '"');
+            if ($fqcn !== '\\DateTime') {
+                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a '" . $fqcn . '"');
             }
 
             $message = sprintf(
-                'Return type in %s::%s is type-hinted to "%s", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return %s|User[]',
+                'Return type in %s::%s is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.',
                 $method->getDeclaringClass()->getName(),
-                $method->getName(),
-                $fqcn,
-                $fqcn
+                $method->getName()
             );
         }
 

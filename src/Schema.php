@@ -8,9 +8,9 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\SchemaConfig;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use Webmozart\Assert\Assert;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -19,16 +19,18 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, ?SchemaConfig $config = null, ?RootTypeMapperInterface $rootTypeMapper = null)
+    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, RootTypeMapperInterface $rootTypeMapper, ?SchemaConfig $config = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();
         }
 
-        if ($rootTypeMapper === null) {
+        // TODO: change parameter order, drop compatibility with 3.0
+        Assert::notNull($rootTypeMapper);
+        /*if ($rootTypeMapper === null) {
             // For compatibility reasons with 3.0, the $rootTypeMapper parameter is optional.
             $rootTypeMapper = new BaseTypeMapper($recursiveTypeMapper);
-        }
+        }*/
 
         $query    = new ObjectType([
             'name' => 'Query',
@@ -76,7 +78,7 @@ class Schema extends \GraphQL\Type\Schema
             return $recursiveTypeMapper->getOutputTypes();
         });
 
-        $config->setTypeLoader(static function (string $name) use ($recursiveTypeMapper, $query, $mutation, $rootTypeMapper) {
+        $config->setTypeLoader(static function (string $name) use ($query, $mutation, $rootTypeMapper) {
             // We need to find a type FROM a GraphQL type name
             if ($name === 'Query') {
                 return $query;
@@ -85,12 +87,7 @@ class Schema extends \GraphQL\Type\Schema
                 return $mutation;
             }
 
-            $type = $rootTypeMapper->mapNameToType($name);
-            if ($type !== null) {
-                return $type;
-            }
-
-            return $recursiveTypeMapper->mapNameToType($name);
+            return $rootTypeMapper->mapNameToType($name);
         });
 
         $typeResolver->registerSchema($this);

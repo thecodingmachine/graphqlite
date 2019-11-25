@@ -39,6 +39,25 @@ class TypeRegistry
         $this->outputTypes[$type->name] = $type;
     }
 
+    /**
+     * A failsafe variant of registerType:
+     * - Registers the type passed in parameter.
+     * - If the type is already present, does not fail. Instead, return the old type already available.
+     *
+     * @param NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface)) $type
+     *
+     * @return NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))
+     */
+    public function getOrRegisterType(NamedType $type): NamedType
+    {
+        if (isset($this->outputTypes[$type->name])) {
+            return $this->outputTypes[$type->name];
+        }
+        $this->outputTypes[$type->name] = $type;
+
+        return $type;
+    }
+
     public function hasType(string $typeName): bool
     {
         return isset($this->outputTypes[$typeName]);

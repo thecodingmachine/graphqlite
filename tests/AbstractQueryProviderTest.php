@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
+use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -29,7 +30,13 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
@@ -47,6 +54,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use function array_reverse;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
@@ -65,6 +73,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $typeRegistry;
     private $lockFactory;
     private $parameterMiddlewarePipe;
+    private $rootTypeMapper;
 
     protected function getTestObjectType(): MutableObjectType
     {
@@ -289,14 +298,32 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new CompositeRootTypeMapper([
-                new MyCLabsEnumTypeMapper(),
-                new BaseTypeMapper($this->getTypeMapper())
-            ]),
+            $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
-            $fieldMiddlewarePipe,
-            $this->getTypeRegistry()
+            $fieldMiddlewarePipe
         );
+    }
+
+    protected function getRootTypeMapper(): RootTypeMapperInterface
+    {
+        if ($this->rootTypeMapper === null) {
+            $this->rootTypeMapper = $this->buildRootTypeMapper();
+        }
+        return $this->rootTypeMapper;
+    }
+
+    protected function buildRootTypeMapper(): RootTypeMapperInterface
+    {
+        $topRootTypeMapper = new NullableTypeMapperAdapter();
+
+        $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
+        $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
+        $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
+        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
+
+        $topRootTypeMapper->setNext($rootTypeMapper);
+        return $topRootTypeMapper;
     }
 
     protected function getFieldsBuilder(): FieldsBuilder
@@ -348,5 +375,11 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeRegistry = new TypeRegistry();
         }
         return $this->typeRegistry;
+    }
+
+    protected function resolveType(string $type): \phpDocumentor\Reflection\Type
+    {
+        $phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
+        return $phpDocumentorTypeResolver->resolve($type);
     }
 }

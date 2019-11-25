@@ -12,9 +12,9 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
-use function array_filter;
 use function array_map;
 use function implode;
+use function sprintf;
 
 class CannotMapTypeException extends Exception implements CannotMapTypeExceptionInterface
 {
@@ -40,6 +40,17 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self($error->getMessage(), $error->getCode(), $error);
     }
 
+    public static function createForMissingIteratorValue(string $className, self $e): self
+    {
+        $message = sprintf(
+            '"%s" is iterable. Please provide a more specific type. For instance: %s|User[].',
+            $className,
+            $className
+        );
+
+        return new self($message, 0, $e);
+    }
+
     /**
      * @param Type[] $unionTypes
      *
@@ -47,14 +58,16 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
      */
     public static function createForBadTypeInUnion(array $unionTypes): self
     {
-        $disallowedTypes = array_filter($unionTypes, static function (Type $type) {
-            return $type instanceof NamedType;
-        });
-        $disallowedTypeNames = array_map(static function (NamedType $type) {
-            return $type->name;
-        }, $disallowedTypes);
+        $disallowedTypeNames = array_map(static function (Type $type) {
+            return (string) $type;
+        }, $unionTypes);
 
-        return new self('In GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
+        return new self('in GraphQL, you can only use union types between objects. These types cannot be used in union types: ' . implode(', ', $disallowedTypeNames));
+    }
+
+    public static function createForBadTypeInUnionWithIterable(Type $type): self
+    {
+        return new self('the value must be iterable, but its computed GraphQL type (' . $type . ') is not a list.');
     }
 
     public static function mustBeOutputType(string $subTypeName): self

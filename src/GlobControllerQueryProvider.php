@@ -12,6 +12,7 @@ use ReflectionClass;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use Webmozart\Assert\Assert;
 use function class_exists;
 use function interface_exists;
 use function str_replace;
@@ -82,6 +83,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             $this->instancesList = $this->cacheContract->get('globQueryProvider', function () {
                 return $this->buildInstancesList();
             });
+            Assert::isArray($this->instancesList, 'The instance list returned is not an array. There might be an issue with your PSR-16 cache implementation.');
         }
 
         return $this->instancesList;

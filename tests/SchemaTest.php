@@ -21,7 +21,7 @@ class SchemaTest extends AbstractQueryProviderTest
             }
         };
 
-        $schema = new Schema($queryProvider, $this->getTypeMapper(), $this->getTypeResolver());
+        $schema = new Schema($queryProvider, $this->getTypeMapper(), $this->getTypeResolver(), $this->getRootTypeMapper());
 
         $fields = $schema->getQueryType()->getFields();
         $this->assertArrayHasKey('dummyQuery', $fields);

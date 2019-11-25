@@ -26,9 +26,13 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -44,6 +48,7 @@ use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
+use function array_reverse;
 use function crc32;
 use function function_exists;
 use function md5;
@@ -64,8 +69,8 @@ class SchemaFactory
     private $queryProviders = [];
     /** @var QueryProviderFactoryInterface[] */
     private $queryProviderFactories = [];
-    /** @var RootTypeMapperInterface[] */
-    private $rootTypeMappers = [];
+    /** @var RootTypeMapperFactoryInterface[] */
+    private $rootTypeMapperFactories = [];
     /** @var TypeMapperInterface[] */
     private $typeMappers = [];
     /** @var TypeMapperFactoryInterface[] */
@@ -142,11 +147,11 @@ class SchemaFactory
     }
 
     /**
-     * Registers a root type mapper.
+     * Registers a root type mapper factory.
      */
-    public function addRootTypeMapper(RootTypeMapperInterface $rootTypeMapper): self
+    public function addRootTypeMapperFactory(RootTypeMapperFactoryInterface $rootTypeMapperFactory): self
     {
-        $this->rootTypeMappers[] = $rootTypeMapper;
+        $this->rootTypeMapperFactories[] = $rootTypeMapperFactory;
 
         return $this;
     }
@@ -324,11 +329,33 @@ class SchemaFactory
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
 
-        $rootTypeMappers   = $this->rootTypeMappers;
-        $rootTypeMappers[] = new MyCLabsEnumTypeMapper();
-        $rootTypeMappers[] = new BaseTypeMapper($recursiveTypeMapper);
-        // Let's put all the root type mappers except the BaseTypeMapper (that needs a recursive type mapper and that will be built later)
-        $compositeRootTypeMapper = new CompositeRootTypeMapper($rootTypeMappers);
+        $topRootTypeMapper = new NullableTypeMapperAdapter();
+
+        $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
+        $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
+
+        if (! empty($this->rootTypeMapperFactories)) {
+            $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
+                $annotationReader,
+                $typeResolver,
+                $namingStrategy,
+                $typeRegistry,
+                $recursiveTypeMapper,
+                $this->container,
+                $this->cache
+            );
+
+            $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
+            foreach ($reversedRootTypeMapperFactories as $rootTypeMapperFactory) {
+                $rootTypeMapper = $rootTypeMapperFactory->create($rootTypeMapper, $rootSchemaFactoryContext);
+            }
+        }
+
+        $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $typeRegistry, $recursiveTypeMapper);
+        $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
+
+        $topRootTypeMapper->setNext($rootTypeMapper);
 
         $argumentResolver = new ArgumentResolver();
 
@@ -346,17 +373,16 @@ class SchemaFactory
             $typeResolver,
             $cachedDocBlockFactory,
             $namingStrategy,
-            $compositeRootTypeMapper,
+            $topRootTypeMapper,
             $parameterMiddlewarePipe,
-            $fieldMiddlewarePipe,
-            $typeRegistry
+            $fieldMiddlewarePipe
         );
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
         $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
 
-        if (empty($this->typeNamespaces) && empty($this->typeMappers) && empty($this->typeMapperFactories)) {
+        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
             throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
@@ -427,6 +453,6 @@ class SchemaFactory
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
-        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $this->schemaConfig, $compositeRootTypeMapper);
+        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $topRootTypeMapper, $this->schemaConfig);
     }
 }

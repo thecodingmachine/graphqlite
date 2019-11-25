@@ -24,9 +24,14 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamIterator;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
@@ -288,13 +293,12 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new BaseTypeMapper($this->getTypeMapper()),
+            $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 $authenticationService,
                 new VoidAuthorizationService()
-            ),
-            $this->getTypeRegistry()
+            )
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -320,13 +324,12 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new BaseTypeMapper($this->getTypeMapper()),
+            $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 $authorizationService
-            ),
-            $this->getTypeRegistry()
+            )
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -382,13 +385,12 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeResolver(),
             new CachedDocBlockFactory(new ArrayCache()),
             new NamingStrategy(),
-            new BaseTypeMapper($this->getTypeMapper()),
+            $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService()
-            ),
-            $this->getTypeRegistry()
+            )
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);
@@ -408,6 +410,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(7, $queries);
         $iterableQuery = $queries[3];
 
+        $this->assertSame('arrayObject', $iterableQuery->name);
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
         $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
@@ -424,6 +427,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(7, $queries);
         $iterableQuery = $queries[4];
 
+        $this->assertSame('iterable', $iterableQuery->name);
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
         $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
@@ -485,8 +489,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @return \ArrayObject|User[]');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType::test, "\ArrayObject" is iterable. Please provide a more specific type. For instance: \ArrayObject|User[].');
         $queryProvider->getQueries($controller);
     }
 
@@ -512,16 +516,17 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithIterableParams(): void
+    // Test disabled because we cannot assume that by providing a more specific type, we will be able to handle the iterable.
+    /*public function testQueryProviderWithIterableParams(): void
     {
         $controller = new TestControllerWithIterableParam();
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Parameter $params in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test is type-hinted to "\ArrayObject", which is iterable. Please provide an additional @param in the PHPDoc block to further specify the type. For instance: @param \ArrayObject|User[] $params.');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For parameter $params, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam::test, "\ArrayObject" is iterable. Please provide a more specific type. For instance: \ArrayObject|User[].');
         $queryProvider->getQueries($controller);
-    }
+    }*/
 
     public function testFailWith(): void
     {
@@ -687,5 +692,58 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(BadExpressionInSecurityException::class);
         $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
+    }
+
+    public function testQueryProviderWithNullableArray(): void
+    {
+        $controller = new TestControllerWithNullableArray();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(1, $queries);
+        $usersQuery = $queries[0];
+        $this->assertSame('test', $usersQuery->name);
+
+        $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->args[0]->getType()->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->type);
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->type->getWrappedType()->getWrappedType());
+    }
+
+    public function testQueryProviderWithParamDateTime(): void
+    {
+        $controller = new TestControllerWithParamDateTime();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage('Parameter $dateTime in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $queries = $queryProvider->getQueries($controller);
+    }
+
+    public function testQueryProviderWithReturnDateTime(): void
+    {
+        $controller = new TestControllerWithReturnDateTime();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $queries = $queryProvider->getQueries($controller);
+    }
+
+    public function testQueryProviderWithUnionInputParam(): void
+    {
+        $controller = new TestControllerWithUnionInputParam();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(TypeMappingRuntimeException::class);
+        $this->expectExceptionMessage('Parameter $testObject in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam::test is type-hinted to "\TheCodingMachine\GraphQLite\Fixtures\TestObject|\TheCodingMachine\GraphQLite\Fixtures\TestObject2". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.');
+        $queries = $queryProvider->getQueries($controller);
     }
 }

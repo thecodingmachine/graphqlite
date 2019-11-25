@@ -10,7 +10,6 @@ use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NamedType;
-use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -25,9 +24,9 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
 use function ltrim;
@@ -41,32 +40,37 @@ class BaseTypeMapper implements RootTypeMapperInterface
 {
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
+    /** @var RootTypeMapperInterface */
+    private $topRootTypeMapper;
+    /** @var RootTypeMapperInterface */
+    private $next;
 
-    public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(RootTypeMapperInterface $next, RecursiveTypeMapperInterface $recursiveTypeMapper, RootTypeMapperInterface $topRootTypeMapper)
     {
         $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->topRootTypeMapper = $topRootTypeMapper;
+        $this->next = $next;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
      *
-     * @return (OutputType&GraphQLType)|null
+     * @return OutputType&GraphQLType
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {
             return $mappedType;
         }
+
         if ($type instanceof Array_) {
-            $innerType = $this->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj);
-            if ($innerType === null) {
-                return null;
-            }if ($innerType instanceof NullableType) {
-                $innerType = GraphQLType::nonNull($innerType);
-            }
+            $innerType = $this->topRootTypeMapper->toGraphQLOutputType($type->getValueType(), $subType, $refMethod, $docBlockObj);
+            /*if ($innerType === null) {
+                return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+            }*/
 
             return GraphQLType::listOf($innerType);
         }
@@ -76,27 +80,25 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $this->recursiveTypeMapper->mapClassToInterfaceOrType($className, $subType);
         }
 
-        return null;
+        return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
     }
 
     /**
      * @param (InputType&GraphQLType)|null $subType
      *
-     * @return (InputType&GraphQLType)|null
+     * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {
             return $mappedType;
         }
         if ($type instanceof Array_) {
-            $innerType = $this->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj);
-            if ($innerType === null) {
-                return null;
-            }if ($innerType instanceof NullableType) {
-                $innerType = GraphQLType::nonNull($innerType);
-            }
+            $innerType = $this->topRootTypeMapper->toGraphQLInputType($type->getValueType(), $subType, $argumentName, $refMethod, $docBlockObj);
+            /*if ($innerType === null) {
+                return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            }*/
 
             return GraphQLType::listOf($innerType);
         }
@@ -106,7 +108,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $this->recursiveTypeMapper->mapClassToInputType($className);
         }
 
-        return null;
+        return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
     }
 
     /**
@@ -142,7 +144,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
                 case '\\DateTime':
-                    throw new GraphQLRuntimeException('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+                    throw TypeMappingRuntimeException::createFromType($type);
                 case '\\' . ID::class:
                     return GraphQLType::id();
                 default:
@@ -184,7 +186,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName): NamedType
     {
         // No need to map base types, only types added by us.
         if ($typeName === 'Upload') {
@@ -195,6 +197,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return self::getDateTimeType();
         }
 
-        return null;
+        return $this->next->mapNameToType($typeName);
     }
 }

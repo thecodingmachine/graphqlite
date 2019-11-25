@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
@@ -89,7 +90,7 @@ interface RecursiveTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      *
-     * @return Type&(InputType|OutputType)
+     * @return NamedType&Type&(InputType|OutputType)
      */
     public function mapNameToType(string $typeName): Type;
 

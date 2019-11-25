@@ -26,18 +26,42 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<string, EnumType> */
     private $cache = [];
+    /** @var RootTypeMapperInterface */
+    private $next;
 
-    /**
-     * @return (GraphQLType&OutputType)|null
-     */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
+    public function __construct(RootTypeMapperInterface $next)
     {
-        return $this->map($type);
+        $this->next = $next;
     }
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
+    /**
+     * @param (OutputType&GraphQLType)|null $subType
+     *
+     * @return OutputType&GraphQLType
+     */
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
     {
-        return $this->map($type);
+        $result = $this->map($type);
+        if ($result === null) {
+            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param (InputType&GraphQLType)|null $subType
+     *
+     * @return InputType&GraphQLType
+     */
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
+    {
+        $result = $this->map($type);
+        if ($result === null) {
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+        }
+
+        return $result;
     }
 
     private function map(Type $type): ?EnumType
@@ -82,14 +106,17 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName): NamedType
     {
         if (strpos($typeName, 'MyCLabsEnum_') === 0) {
             $className = str_replace('__', '\\', substr($typeName, 12));
 
-            return $this->mapByClassName($className);
+            $type = $this->mapByClassName($className);
+            if ($type !== null) {
+                return $type;
+            }
         }
 
-        return null;
+        return $this->next->mapNameToType($typeName);
     }
 }

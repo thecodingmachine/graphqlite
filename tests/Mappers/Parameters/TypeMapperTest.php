@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
+use DateTimeImmutable;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionMethod;
 use Symfony\Component\Cache\Simple\ArrayCache;
@@ -19,10 +20,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testMapScalarUnionException(): void
     {
-        $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
-            new MyCLabsEnumTypeMapper(),
-            new BaseTypeMapper($this->getTypeMapper())
-        ]), $this->getTypeResolver(), $this->getTypeRegistry());
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
 
@@ -30,16 +28,13 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('In GraphQL, you can only use union types between objects. These types cannot be used in union types: Int, String');
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: Int!, String!');
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
     public function testHideParameter(): void
     {
-        $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
-            new MyCLabsEnumTypeMapper(),
-            new BaseTypeMapper($this->getTypeMapper())
-        ]), $this->getTypeResolver(), $this->getTypeRegistry());
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
 
@@ -58,10 +53,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testHideParameterException(): void
     {
-        $typeMapper = new TypeHandler($this->getTypeMapper(), $this->getArgumentResolver(), new CompositeRootTypeMapper([
-            new MyCLabsEnumTypeMapper(),
-            new BaseTypeMapper($this->getTypeMapper())
-        ]), $this->getTypeResolver(), $this->getTypeRegistry());
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
 

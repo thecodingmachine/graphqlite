@@ -20,7 +20,7 @@ class TestController
      * @param bool|null $boolean
      * @param float|null $float
      * @param \DateTimeImmutable|null $dateTimeImmutable
-     * @param \DateTime|\DateTimeInterface|null $dateTime
+     * @param \DateTimeInterface|null $dateTime
      * @param string $withDefault
      * @param null|string $string
      * @param ID|null $id
@@ -95,7 +95,7 @@ class TestController
     }
 
     /**
-     * @Query(name="arrayObject")
+     * @Query(name="iterable")
      * @return iterable|TestObject[]
      */
     public function testIterable(): iterable
