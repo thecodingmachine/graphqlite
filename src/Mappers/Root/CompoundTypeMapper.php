@@ -81,7 +81,6 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             throw TypeMappingRuntimeException::createFromType(new Iterable_());
         }
 
-        /** @var OutputType&NonNull $return */
         $return = $this->getTypeFromUnion($unionTypes);
 
         if ($mustBeIterable && ! $this->isWrappedListOfType($return)) {
@@ -127,6 +126,8 @@ class CompoundTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param array<(InputType&GraphQLType)|(OutputType&GraphQLType)> $unionTypes
+     *
+     * @return OutputType&GraphQLType
      *
      * @throws CannotMapTypeException
      */

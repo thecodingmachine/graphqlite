@@ -121,15 +121,16 @@ In order to add a scalar type in GraphQLite, you need to:
 - create a [Webonyx custom scalar type](https://webonyx.github.io/graphql-php/type-system/scalar-types/#writing-custom-scalar-types).
   You do this by creating a class that extends `GraphQL\Type\Definition\ScalarType`.
 - create a "type mapper" that will map PHP types to the GraphQL scalar type. You do this by writing a class implementing the `RootTypeMapperInterface`.
+- create a "type mapper factory" that will be in charge of creating your "type mapper".
 
 ```php
 interface RootTypeMapperInterface
 {
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType;
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType;
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType;
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType;
 
-    public function mapNameToType(string $typeName): ?NamedType;
+    public function mapNameToType(string $typeName): NamedType;
 }
 ```
 
@@ -138,11 +139,21 @@ to your GraphQL scalar type. Return your scalar type if there is a match or `nul
 
 The `mapNameToType` should return your GraphQL scalar type if `$typeName` is the name of your scalar type.
 
+RootTypeMapper are organized **in a chain** (they are actually middlewares).
+Each instance of a `RootTypeMapper` holds a reference on the next root type mapper to be called in the chain.
+
 For instance:
 
 ```php
 class AnyScalarTypeMapper implements RootTypeMapperInterface
 {
+    /** @var RootTypeMapperInterface */
+    private $next;
+
+    public function __construct(RootTypeMapperInterface $next)
+    {
+        $this->next = $next;
+    }
 
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?OutputType
     {
@@ -150,7 +161,8 @@ class AnyScalarTypeMapper implements RootTypeMapperInterface
             // AnyScalarType is a class implementing the Webonyx ScalarType type.
             return AnyScalarType::getInstance();
         }
-        return null;
+        // If the PHPDoc type is not "Scalar", let's pass the control to the next type mapper in the chain
+        return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
     }
 
     public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): ?InputType
@@ -159,7 +171,8 @@ class AnyScalarTypeMapper implements RootTypeMapperInterface
             // AnyScalarType is a class implementing the Webonyx ScalarType type.
             return AnyScalarType::getInstance();
         }
-        return null;
+        // If the PHPDoc type is not "Scalar", let's pass the control to the next type mapper in the chain
+        return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
     }
 
     /**
@@ -179,3 +192,27 @@ class AnyScalarTypeMapper implements RootTypeMapperInterface
     }
 }
 ```
+
+Now, in order to create an instance of your `AnyScalarTypeMapper` class, you need an instance of the `$next` type mapper in the chain.
+How do you get the `$next` type mapper? Through a factory:
+
+```php
+class AnyScalarTypeMapperFactory implements RootTypeMapperFactoryInterface
+{
+    public function create(RootTypeMapperInterface $next, RootTypeMapperFactoryContext $context): RootTypeMapperInterface
+    {
+        return new AnyScalarTypeMapper($next);
+    }
+}
+```
+
+Now, you need to register this factory in your application, and we are done.
+
+You can register your own root mapper factories using the `SchemaFactory::addRootTypeMapperFactory()` method.
+
+```php
+$schemaFactory->addRootTypeMapperFactory(new AnyScalarTypeMapperFactory());
+```
+ 
+If you are using the Symfony bundle, the factory will be automatically registered, you have nothing to do (the service 
+is automatically tagged with the "graphql.root_type_mapper_factory" tag).
