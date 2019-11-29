@@ -16,7 +16,9 @@ use Mouf\Picotainer\Picotainer;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
@@ -231,7 +233,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     throw CannotMapTypeException::createForDecorateName($typeName, $type);
                 }
 
-            }, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+            }, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
         }
         return $this->typeMapper;
     }
@@ -285,7 +287,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             new VoidAuthenticationService(),
             new VoidAuthorizationService()
         ));
-        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new ArrayCache()), [new SecurityExpressionLanguageProvider()]);
+        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]);
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, new VoidAuthenticationService(), new VoidAuthorizationService()));
 
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
@@ -296,7 +298,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache()),
+            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),

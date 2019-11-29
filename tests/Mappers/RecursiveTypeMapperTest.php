@@ -7,6 +7,9 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use Mouf\Picotainer\Picotainer;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Adapter\NullAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
@@ -36,7 +39,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             ClassB::class => $objectType
         ]);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
         $this->assertFalse($typeMapper->canMapClassToType(ClassC::class));
         $this->assertTrue($recursiveTypeMapper->canMapClassToType(ClassC::class));
@@ -58,7 +61,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             ClassB::class => $objectType
         ]);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
         $this->assertTrue($recursiveTypeMapper->canMapNameToType('Foobar'));
         $this->assertSame($objectType, $recursiveTypeMapper->mapNameToType('Foobar'));
@@ -91,7 +94,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             ClassB::class => $inputObjectType
         ]);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+        $recursiveTypeMapper = new RecursiveTypeMapper($typeMapper, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
         $this->assertFalse($recursiveTypeMapper->canMapClassToInputType(ClassC::class));
 
@@ -117,11 +120,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
 
             $compositeMapper = new CompositeTypeMapper();
-            $this->typeMapper = new RecursiveTypeMapper($compositeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+            $this->typeMapper = new RecursiveTypeMapper($compositeMapper, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
             $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry(), $this->typeMapper, $this->getFieldsBuilder());
 
-            $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, $this->typeMapper, new NullCache());
+            $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types', $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), $namingStrategy, $this->typeMapper, new Psr16Cache(new NullAdapter()));
             $compositeMapper->addTypeMapper($mapper);
         }
         return $this->typeMapper;
@@ -185,7 +188,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $compositeTypeMapper->addTypeMapper($typeMapper1);
         $compositeTypeMapper->addTypeMapper($typeMapper2);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
         $this->expectException(DuplicateMappingException::class);
         $this->expectExceptionMessage("The type 'Foobar' is created by 2 different classes: 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB' and 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA'");
@@ -197,7 +200,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
      */
     public function testMapNoTypes(): void
     {
-        $recursiveTypeMapper = new RecursiveTypeMapper(new CompositeTypeMapper(), new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+        $recursiveTypeMapper = new RecursiveTypeMapper(new CompositeTypeMapper(), new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
         $this->expectException(CannotMapTypeException::class);
         $recursiveTypeMapper->mapNameToType('Foo');
@@ -208,11 +211,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $typeGenerator = $this->getTypeGenerator();
         $inputTypeGenerator = $this->getInputTypeGenerator();
 
-        $cache = new ArrayCache();
+        $cache = new Psr16Cache(new ArrayAdapter());
 
         $mapper = new GlobTypeMapper('TheCodingMachine\GraphQLite\Fixtures\Integration', $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
-        $recursiveTypeMapper = new RecursiveTypeMapper($mapper, new NamingStrategy(), new ArrayCache(), $this->getTypeRegistry());
+        $recursiveTypeMapper = new RecursiveTypeMapper($mapper, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
 
         $type = $recursiveTypeMapper->mapNameToType('FilterInput');
         $this->assertInstanceOf(ResolvableMutableInputObjectType::class, $type);

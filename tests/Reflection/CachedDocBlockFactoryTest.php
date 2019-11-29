@@ -4,6 +4,8 @@ namespace TheCodingMachine\GraphQLite\Reflection;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 
 class CachedDocBlockFactoryTest extends TestCase
@@ -11,7 +13,7 @@ class CachedDocBlockFactoryTest extends TestCase
 
     public function testGetDocBlock(): void
     {
-        $arrayCache = new ArrayCache();
+        $arrayCache = new Psr16Cache(new ArrayAdapter());
         $cachedDocBlockFactory = new CachedDocBlockFactory($arrayCache);
 
         $refMethod = new ReflectionMethod(CachedDocBlockFactory::class, 'getDocBlock');

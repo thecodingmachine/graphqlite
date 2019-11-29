@@ -3,6 +3,8 @@
 namespace TheCodingMachine\GraphQLite;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 
@@ -12,7 +14,7 @@ class FactoryContextTest extends AbstractQueryProviderTest
     {
         $namingStrategy = new NamingStrategy();
         $container = new EmptyContainer();
-        $arrayCache = new ArrayCache();
+        $arrayCache = new Psr16Cache(new ArrayAdapter());
 
         $context = new FactoryContext(
             $this->getAnnotationReader(),

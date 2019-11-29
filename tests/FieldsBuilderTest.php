@@ -18,6 +18,8 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
 use stdClass;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
@@ -291,7 +293,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache()),
+            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
@@ -322,7 +324,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache()),
+            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
@@ -383,7 +385,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new ArrayCache()),
+            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
