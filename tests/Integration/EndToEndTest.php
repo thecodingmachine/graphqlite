@@ -9,7 +9,9 @@ use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\AnnotationReader;
@@ -85,7 +87,7 @@ class EndToEndTest extends TestCase
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
-                    $container->get(BasicAutoWiringContainer::class), new ArrayCache());
+                    $container->get(BasicAutoWiringContainer::class), new Psr16Cache(new ArrayAdapter()));
             },
             FieldsBuilder::class => function(ContainerInterface $container) {
                 return new FieldsBuilder(
@@ -114,7 +116,7 @@ class EndToEndTest extends TestCase
             },
             SecurityFieldMiddleware::class => function(ContainerInterface $container) {
                 return new SecurityFieldMiddleware(
-                    new ExpressionLanguage(new Psr16Adapter(new ArrayCache()), [new SecurityExpressionLanguageProvider()]),
+                    new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class)
                 );
@@ -138,7 +140,7 @@ class EndToEndTest extends TestCase
                 return new RecursiveTypeMapper(
                     $container->get(TypeMapperInterface::class),
                     $container->get(NamingStrategyInterface::class),
-                    new ArrayCache(),
+                    new Psr16Cache(new ArrayAdapter()),
                     $container->get(TypeRegistry::class)
                 );
             },
@@ -154,7 +156,7 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new ArrayCache()
+                    new Psr16Cache(new ArrayAdapter())
                 );
             },
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
@@ -166,7 +168,7 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new ArrayCache()
+                    new Psr16Cache(new ArrayAdapter())
                 );
             },
             PorpaginasTypeMapper::class => function(ContainerInterface $container) {
@@ -204,7 +206,7 @@ class EndToEndTest extends TestCase
                 return new NamingStrategy();
             },
             CachedDocBlockFactory::class => function() {
-                return new CachedDocBlockFactory(new ArrayCache());
+                return new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
             },
             RootTypeMapperInterface::class => function(ContainerInterface $container) {
                 return new NullableTypeMapperAdapter();

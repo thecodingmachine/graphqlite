@@ -14,8 +14,8 @@ A PHP library that allows you to write your GraphQL queries in simple-to-write c
 ## Features
 
 * Create a complete GraphQL API by simply annotating your PHP classes
-* Framework agnostic, but Symfony bundle available!
-* Comes with batteries included: queries, mutations, mapping of arrays / iterators, file uploads, extendable types and more!
+* Framework agnostic, but Symfony, Laravel and PSR-15 bindings available!
+* Comes with batteries included: queries, mutations, mapping of arrays / iterators, file uploads, security, validation, extendable types and more!
 
 ## Basic example
 

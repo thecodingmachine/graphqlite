@@ -5,6 +5,8 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 use DateTimeImmutable;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionMethod;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
@@ -22,7 +24,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
 
         $refMethod = new ReflectionMethod($this, 'dummy');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
@@ -36,7 +38,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
 
         $refMethod = new ReflectionMethod($this, 'withDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
@@ -55,7 +57,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new ArrayCache());
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
 
         $refMethod = new ReflectionMethod($this, 'withoutDefaultValue');
         $refParameter = $refMethod->getParameters()[0];

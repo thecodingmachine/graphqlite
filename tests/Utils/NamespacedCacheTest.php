@@ -3,13 +3,15 @@
 namespace TheCodingMachine\GraphQLite\Utils;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 
 class NamespacedCacheTest extends TestCase
 {
     public function testCache(): void
     {
-        $cache = new NamespacedCache(new ArrayCache());
+        $cache = new NamespacedCache(new Psr16Cache(new ArrayAdapter()));
 
         $cache->set('foo', 'bar');
         $this->assertSame('bar', $cache->get('foo'));

@@ -7,7 +7,9 @@ use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\PhpFilesCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -36,7 +38,7 @@ class SchemaFactoryTest extends TestCase
     public function testCreateSchema(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ArrayCache();
+        $cache = new Psr16Cache(new ArrayAdapter());
 
         $factory = new SchemaFactory($cache, $container);
         $factory->setAuthenticationService(new VoidAuthenticationService());
@@ -55,7 +57,7 @@ class SchemaFactoryTest extends TestCase
     public function testSetters(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ArrayCache();
+        $cache = new Psr16Cache(new ArrayAdapter());
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -71,7 +73,7 @@ class SchemaFactoryTest extends TestCase
                 ->addParameterMiddleware(new ParameterMiddlewarePipe())
                 ->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([], $container))
                 ->setSchemaConfig(new SchemaConfig())
-                ->setExpressionLanguage(new ExpressionLanguage(new Psr16Adapter(new ArrayCache())))
+                ->setExpressionLanguage(new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter()))))
                 ->devMode()
                 ->prodMode();
 
@@ -83,7 +85,7 @@ class SchemaFactoryTest extends TestCase
     public function testClassNameMapperInjectionWithValidMapper(): void
     {
         $factory = new SchemaFactory(
-            new ArrayCache(),
+            new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
                 new EmptyContainer()
             )
@@ -102,7 +104,7 @@ class SchemaFactoryTest extends TestCase
     public function testClassNameMapperInjectionWithInvalidMapper(): void
     {
         $factory = new SchemaFactory(
-            new ArrayCache(),
+            new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
                 new EmptyContainer()
             )
@@ -120,7 +122,7 @@ class SchemaFactoryTest extends TestCase
     public function testException(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ArrayCache();
+        $cache = new Psr16Cache(new ArrayAdapter());
 
         $factory = new SchemaFactory($cache, $container);
 
@@ -131,7 +133,7 @@ class SchemaFactoryTest extends TestCase
     public function testException2(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
-        $cache = new ArrayCache();
+        $cache = new Psr16Cache(new ArrayAdapter());
 
         $factory = new SchemaFactory($cache, $container);
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');

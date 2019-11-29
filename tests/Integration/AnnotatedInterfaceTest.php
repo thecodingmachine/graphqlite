@@ -10,6 +10,8 @@ use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Lock\Factory as LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
@@ -30,7 +32,7 @@ class AnnotatedInterfaceTest extends TestCase
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
 
-        $schemaFactory = new SchemaFactory(new ArrayCache(), $container);
+        $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), $container);
         $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\AnnotatedInterfaces\\Controllers');
         $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\AnnotatedInterfaces\\Types');
 

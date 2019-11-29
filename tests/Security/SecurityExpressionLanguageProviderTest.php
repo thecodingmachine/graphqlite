@@ -12,14 +12,14 @@ class SecurityExpressionLanguageProviderTest extends TestCase
 {
     public function testIsGranted(): void
     {
-        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new NullCache()), [new SecurityExpressionLanguageProvider()]);
+        $expressionLanguage = new ExpressionLanguage(new NullAdapter(), [new SecurityExpressionLanguageProvider()]);
         $php = $expressionLanguage->compile('is_granted("Foo")');
         $this->assertSame('$authorizationService->isAllowed("Foo", null)', $php);
     }
 
     public function testIsLogged(): void
     {
-        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new NullCache()), [new SecurityExpressionLanguageProvider()]);
+        $expressionLanguage = new ExpressionLanguage(new NullAdapter(), [new SecurityExpressionLanguageProvider()]);
         $php = $expressionLanguage->compile('is_logged()');
         $this->assertSame('$authenticationService->isLogged()', $php);
     }
