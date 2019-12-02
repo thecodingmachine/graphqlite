@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
-use Symfony\Component\Cache\Simple\PhpFilesCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
@@ -185,7 +183,7 @@ class SchemaFactoryTest extends TestCase
     public function testDuplicateQueryException(): void
     {
         $factory = new SchemaFactory(
-            new ArrayCache(),
+            new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
                 new EmptyContainer()
             )
