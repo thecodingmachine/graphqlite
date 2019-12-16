@@ -133,6 +133,7 @@ class FieldsBuilder
      * Track Field annotation in a self targeted type
      *
      * @param class-string<object> $className
+     *
      * @return array<string, FieldDefinition> QueryField indexed by name.
      */
     public function getSelfFields(string $className): array
@@ -259,7 +260,7 @@ class FieldsBuilder
                     }
 
                     $prefetchParameters = $prefetchRefMethod->getParameters();
-                    $first_prefetch_parameter = array_shift($prefetchParameters);
+                    $firstPrefetchParameter = array_shift($prefetchParameters);
 
                     $prefetchDocBlockObj = $this->cachedDocBlockFactory->getDocBlock($prefetchRefMethod);
 
@@ -338,7 +339,6 @@ class FieldsBuilder
     }
 
     /**
-     * @template T of object
      * @param SourceFieldInterface[] $sourceFields
      * @param ReflectionClass<T> $refClass
      *
@@ -347,6 +347,8 @@ class FieldsBuilder
      * @throws CannotMapTypeException
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
+     *
+     * @template T of object
      */
     private function getQueryFieldsFromSourceFields(array $sourceFields, ReflectionClass $refClass): array
     {
@@ -442,8 +444,9 @@ class FieldsBuilder
     }
 
     /**
-     * @template T of object
      * @param ReflectionClass<T> $reflectionClass
+     *
+     * @template T of object
      */
     private function getMethodFromPropertyName(ReflectionClass $reflectionClass, string $propertyName): ReflectionMethod
     {

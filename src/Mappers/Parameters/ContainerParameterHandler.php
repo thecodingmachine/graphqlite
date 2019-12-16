@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ContainerParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use function assert;
 
 /**
  * Maps parameters with the \@Autowire annotation to container entry based on the FQCN or the passed identifier.
@@ -28,10 +29,8 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
     {
-        /**
-         * @var Autowire|null $autowire
-         */
         $autowire = $parameterAnnotations->getAnnotationByType(Autowire::class);
+        assert($autowire instanceof Autowire || $autowire === null);
 
         if ($autowire === null) {
             return $next->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);

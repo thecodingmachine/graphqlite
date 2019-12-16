@@ -8,6 +8,7 @@ use Exception;
 use GraphQL\Error\ClientAware;
 use Throwable;
 use function array_map;
+use function assert;
 use function count;
 use function max;
 use function reset;
@@ -76,8 +77,8 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
             return;
         }
         if ($count === 1) {
-            /** @var Throwable $exception */
             $exception = reset($exceptions);
+            assert($exception instanceof Throwable);
             throw $exception;
         }
         throw new self($exceptions);

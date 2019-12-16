@@ -81,6 +81,7 @@ class InputTypeUtils
 
     /**
      * Resolves "self" types into the class type.
+     *
      * @param ReflectionClass<object> $reflectionClass
      */
     private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type

@@ -20,6 +20,7 @@ use Webmozart\Assert\Assert;
 use function array_combine;
 use function array_keys;
 use function array_merge;
+use function assert;
 
 /**
  * A field middleware that reads "Security" Symfony annotations.
@@ -53,10 +54,8 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             return $fieldHandler->handle($queryFieldDescriptor);
         }
 
-        /**
-         * @var FailWith|null $failWith
-         */
         $failWith = $annotations->getAnnotationByType(FailWith::class);
+        assert($failWith instanceof FailWith || $failWith === null);
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $makeReturnTypeNullable = false;

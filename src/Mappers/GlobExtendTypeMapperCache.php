@@ -18,6 +18,7 @@ class GlobExtendTypeMapperCache
 
     /**
      * Merges annotations of a given class in the global cache.
+     *
      * @param ReflectionClass<object> $refClass
      */
     public function registerAnnotations(ReflectionClass $refClass, GlobExtendAnnotationsCache $globExtendAnnotationsCache): void

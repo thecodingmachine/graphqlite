@@ -27,6 +27,7 @@ use function array_filter;
 use function array_key_exists;
 use function array_merge;
 use function array_values;
+use function assert;
 use function in_array;
 use function strpos;
 use function strrpos;
@@ -71,14 +72,15 @@ class AnnotationReader
     }
 
     /**
-     * @template T of object
      * @param ReflectionClass<T> $refClass
+     *
+     * @template T of object
      */
     public function getTypeAnnotation(ReflectionClass $refClass): ?Type
     {
         try {
-            /** @var Type|null $type */
             $type = $this->getClassAnnotation($refClass, Type::class);
+            assert($type instanceof Type || $type === null);
             if ($type !== null && $type->isSelfType()) {
                 $type->setClass($refClass->getName());
             }
@@ -90,14 +92,15 @@ class AnnotationReader
     }
 
     /**
-     * @template T of object
      * @param ReflectionClass<T> $refClass
+     *
+     * @template T of object
      */
     public function getExtendTypeAnnotation(ReflectionClass $refClass): ?ExtendType
     {
         try {
-            /** @var ExtendType|null $extendType */
             $extendType = $this->getClassAnnotation($refClass, ExtendType::class);
+            assert($extendType instanceof ExtendType || $extendType === null);
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapExceptionForExtendTag($e, $refClass->getName());
         }
@@ -107,16 +110,18 @@ class AnnotationReader
 
     public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName): ?AbstractRequest
     {
-        /** @var AbstractRequest|null $queryAnnotation */
         $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationName);
+        assert($queryAnnotation instanceof AbstractRequest || $queryAnnotation === null);
 
         return $queryAnnotation;
     }
 
     /**
-     * @template T of object
      * @param ReflectionClass<T> $refClass
+     *
      * @return SourceField[]
+     *
+     * @template T of object
      */
     public function getSourceFields(ReflectionClass $refClass): array
     {
@@ -128,16 +133,16 @@ class AnnotationReader
 
     public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
     {
-        /** @var Factory|null $factoryAnnotation */
         $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
+        assert($factoryAnnotation instanceof Factory || $factoryAnnotation === null);
 
         return $factoryAnnotation;
     }
 
     public function getDecorateAnnotation(ReflectionMethod $refMethod): ?Decorate
     {
-        /** @var Decorate|null $decorateAnnotation */
         $decorateAnnotation = $this->getMethodAnnotation($refMethod, Decorate::class);
+        assert($decorateAnnotation instanceof Decorate || $decorateAnnotation === null);
 
         return $decorateAnnotation;
     }
@@ -168,8 +173,9 @@ class AnnotationReader
     /**
      * Returns a class annotation. Does not look in the parent class.
      *
-     * @template T of object
      * @param ReflectionClass<T> $refClass
+     *
+     * @template T of object
      */
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
@@ -243,9 +249,11 @@ class AnnotationReader
     /**
      * Returns the class annotations. Finds in the parents too.
      *
-     * @template T of object
      * @param ReflectionClass<T> $refClass
+     *
      * @return object[]
+     *
+     * @template T of object
      */
     public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass): array
     {
