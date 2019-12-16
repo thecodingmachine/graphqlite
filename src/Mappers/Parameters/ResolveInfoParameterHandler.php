@@ -12,6 +12,7 @@ use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ResolveInfoParameter;
+use function assert;
 
 class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
 {
