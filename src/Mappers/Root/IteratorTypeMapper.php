@@ -132,6 +132,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     }
 
     /**
+     * @param Compound<Type> $type
      * @return (OutputType&GraphQLType)|(InputType&GraphQLType)|null
      */
     private function toGraphQLType(Compound $type, Closure $topToGraphQLType, bool $isOutputType)

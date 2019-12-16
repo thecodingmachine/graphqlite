@@ -27,7 +27,7 @@ use function ltrim;
  */
 class Type
 {
-    /** @var string|null */
+    /** @var class-string<object>|null */
     private $class;
 
     /** @var string|null */
@@ -74,6 +74,8 @@ class Type
 
     /**
      * Returns the fully qualified class name of the targeted class.
+     *
+     * @return class-string<object>
      */
     public function getClass(): string
     {
@@ -86,11 +88,12 @@ class Type
 
     public function setClass(string $class): void
     {
-        $this->class = ltrim($class, '\\');
-        $isInterface = interface_exists($this->class);
-        if (! class_exists($this->class) && ! $isInterface) {
-            throw ClassNotFoundException::couldNotFindClass($this->class);
+        $class = ltrim($class, '\\');
+        $isInterface = interface_exists($class);
+        if (! class_exists($class) && ! $isInterface) {
+            throw ClassNotFoundException::couldNotFindClass($class);
         }
+        $this->class = $class;
 
         if (! $isInterface) {
             return;

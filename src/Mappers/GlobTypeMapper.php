@@ -33,7 +33,7 @@ final class GlobTypeMapper extends AbstractTypeMapper
      * Only instantiable classes are returned.
      * Key: fully qualified class name
      *
-     * @var array<string,ReflectionClass>
+     * @var array<string,ReflectionClass<object>>
      */
     private $classes;
     /** @var bool */
@@ -57,7 +57,7 @@ final class GlobTypeMapper extends AbstractTypeMapper
      * Returns the array of globbed classes.
      * Only instantiable classes are returned.
      *
-     * @return array<string,ReflectionClass> Key: fully qualified class name
+     * @return array<string,ReflectionClass<object>> Key: fully qualified class name
      */
     protected function getClassList(): array
     {

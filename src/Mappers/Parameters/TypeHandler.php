@@ -239,9 +239,12 @@ class TypeHandler implements ParameterHandlerInterface
         return new Compound($types);
     }
 
+    /**
+     * @param ReflectionClass<object> $reflectionClass
+     */
     private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
-        $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
+        $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $type);
         Assert::notNull($phpdocType);
 
         $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
@@ -255,6 +258,8 @@ class TypeHandler implements ParameterHandlerInterface
 
     /**
      * Resolves "self" types into the class type.
+     *
+     * @param ReflectionClass<object> $reflectionClass
      */
     private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
     {

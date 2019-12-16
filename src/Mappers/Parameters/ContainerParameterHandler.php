@@ -43,7 +43,7 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
             if ($type === null) {
                 throw MissingAutowireTypeException::create($parameter);
             }
-            $id = $type->getName();
+            $id = (string) $type;
         }
 
         return new ContainerParameter($this->container, $id);

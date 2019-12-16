@@ -17,7 +17,7 @@ class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
     {
         $type = $parameter->getType();
-        if ($type!== null && $type->getName() === ResolveInfo::class) {
+        if ($type!== null && ((string) $type) === ResolveInfo::class) {
             return new ResolveInfoParameter();
         }
 

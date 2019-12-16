@@ -18,7 +18,14 @@ parameters:
         -
            message: '#Parameter \#2 \$subType of method .* expects#'
            path: src/Mappers/Root/IteratorTypeMapper.php
+        -
+           message: '#Unreachable statement - code above always terminates.#'
+           path: src/Http/WebonyxGraphqlMiddleware.php
+        -
+           message: '#Property TheCodingMachine\GraphQLite\Annotations\Type::$class \(class-string<object>|null\) does not accept string.#'
+           path: src/Annotations/Type.php
         - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage()#'
+        - '#Method .*::(addSourceFieldInfo|addExtendTypeInfo)\(\) has parameter \$class with generic class ReflectionClass#'
         #-
         #  message: '#If condition is always true#'
         #  path: src/Middlewares/SecurityFieldMiddleware.php

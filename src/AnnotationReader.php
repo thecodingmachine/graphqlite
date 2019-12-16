@@ -70,6 +70,10 @@ class AnnotationReader
         $this->strictNamespaces = $strictNamespaces;
     }
 
+    /**
+     * @template T of object
+     * @param ReflectionClass<T> $refClass
+     */
     public function getTypeAnnotation(ReflectionClass $refClass): ?Type
     {
         try {
@@ -85,6 +89,10 @@ class AnnotationReader
         return $type;
     }
 
+    /**
+     * @template T of object
+     * @param ReflectionClass<T> $refClass
+     */
     public function getExtendTypeAnnotation(ReflectionClass $refClass): ?ExtendType
     {
         try {
@@ -106,6 +114,8 @@ class AnnotationReader
     }
 
     /**
+     * @template T of object
+     * @param ReflectionClass<T> $refClass
      * @return SourceField[]
      */
     public function getSourceFields(ReflectionClass $refClass): array
@@ -157,6 +167,9 @@ class AnnotationReader
 
     /**
      * Returns a class annotation. Does not look in the parent class.
+     *
+     * @template T of object
+     * @param ReflectionClass<T> $refClass
      */
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
@@ -230,6 +243,8 @@ class AnnotationReader
     /**
      * Returns the class annotations. Finds in the parents too.
      *
+     * @template T of object
+     * @param ReflectionClass<T> $refClass
      * @return object[]
      */
     public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass): array
