@@ -42,12 +42,12 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
-        assert($loggedAnnotation instanceof Logged);
+        assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
-        assert($rightAnnotation instanceof Right);
+        assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
         $failWith = $annotations->getAnnotationByType(FailWith::class);
-        assert($failWith instanceof FailWith || $failWith === null);
+        assert($failWith === null || $failWith instanceof FailWith);
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $type = $queryFieldDescriptor->getType();
