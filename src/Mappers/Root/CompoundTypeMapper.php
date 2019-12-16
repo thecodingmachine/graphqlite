@@ -24,6 +24,7 @@ use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_values;
+use function assert;
 use function count;
 use function iterator_to_array;
 
@@ -158,8 +159,8 @@ class CompoundTypeMapper implements RootTypeMapperInterface
             }
 
             $graphQlType = new UnionType($nonNullableUnionTypes, $this->recursiveTypeMapper);
-            /** @var UnionType $graphQlType */
             $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
+            assert($graphQlType instanceof UnionType);
         }
 
         return $graphQlType;

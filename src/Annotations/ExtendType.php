@@ -22,7 +22,7 @@ use function ltrim;
  */
 class ExtendType
 {
-    /** @var string|null */
+    /** @var class-string<object>|null */
     private $class;
     /** @var string|null */
     private $name;
@@ -35,24 +35,23 @@ class ExtendType
         if (! isset($attributes['class']) && ! isset($attributes['name'])) {
             throw new BadMethodCallException('In annotation @ExtendType, missing one of the compulsory parameter "class" or "name".');
         }
-        $this->class = $attributes['class'] ?? null;
+        $class = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
         $this->name = $attributes['name'] ?? null;
-        if ($this->class !== null && ! class_exists($this->class) && ! interface_exists($this->class)) {
-            throw ClassNotFoundException::couldNotFindClass($this->class);
+        if ($class !== null && ! class_exists($class) && ! interface_exists($class)) {
+            throw ClassNotFoundException::couldNotFindClass($class);
         }
+        $this->class = $class;
     }
 
     /**
      * Returns the name of the GraphQL query/mutation/field.
      * If not specified, the name of the method should be used instead.
+     *
+     * @return class-string<object>|null
      */
     public function getClass(): ?string
     {
-        if ($this->class === null) {
-            return null;
-        }
-
-        return ltrim($this->class, '\\');
+        return $this->class;
     }
 
     public function getName(): ?string

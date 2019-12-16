@@ -24,6 +24,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use Webmozart\Assert\Assert;
+use function assert;
 use function count;
 use function iterator_to_array;
 
@@ -132,6 +133,8 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     }
 
     /**
+     * @param Compound<Type> $type
+     *
      * @return (OutputType&GraphQLType)|(InputType&GraphQLType)|null
      */
     private function toGraphQLType(Compound $type, Closure $topToGraphQLType, bool $isOutputType)
@@ -154,8 +157,8 @@ class IteratorTypeMapper implements RootTypeMapperInterface
 
                     // By convention, we trim the NonNull part of the "$subGraphQlType"
                     if ($subGraphQlType instanceof NonNull) {
-                        /** @var OutputType&GraphQLType $subGraphQlType */
                         $subGraphQlType = $subGraphQlType->getWrappedType();
+                        assert($subGraphQlType instanceof OutputType && $subGraphQlType instanceof GraphQLType);
                     }
                 } else {
                     $subGraphQlType = null;

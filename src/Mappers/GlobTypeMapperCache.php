@@ -25,6 +25,8 @@ class GlobTypeMapperCache
 
     /**
      * Merges annotations of a given class in the global cache.
+     *
+     * @param ReflectionClass<object> $refClass
      */
     public function registerAnnotations(ReflectionClass $refClass, GlobAnnotationsCache $globAnnotationsCache): void
     {

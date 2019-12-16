@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use Webmozart\Assert\Assert;
+use function assert;
 
 /**
  * Middleware in charge of managing "Logged" and "Right" annotations.
@@ -40,19 +41,13 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
     {
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
-        /**
-         * @var Logged $loggedAnnotation
-         */
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
-        /**
-         * @var Right $rightAnnotation
-         */
+        assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
+        assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
-        /**
-         * @var FailWith|null $failWith
-         */
         $failWith = $annotations->getAnnotationByType(FailWith::class);
+        assert($failWith === null || $failWith instanceof FailWith);
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $type = $queryFieldDescriptor->getType();
@@ -66,10 +61,8 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
             return $fieldHandler->handle($queryFieldDescriptor);
         }
 
-        /**
-         * @var HideIfUnauthorized|null $hideIfUnauthorized
-         */
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
+        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
 
         if ($failWith !== null && $hideIfUnauthorized !== null) {
             throw IncompatibleAnnotationsException::cannotUseFailWithAndHide();

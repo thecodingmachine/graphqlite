@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use ReflectionMethod;
+use ReflectionNamedType;
+use function assert;
 use function sprintf;
 
 class MissingTypeHintRuntimeException extends GraphQLRuntimeException
@@ -17,7 +19,7 @@ class MissingTypeHintRuntimeException extends GraphQLRuntimeException
     public static function invalidReturnType(ReflectionMethod $method): self
     {
         $returnType = $method->getReturnType();
-
+        assert($returnType === null || $returnType instanceof ReflectionNamedType);
         return new self(sprintf('The return type of factory "%s::%s" must be an object, "%s" passed instead.', $method->getDeclaringClass()->getName(), $method->getName(), $returnType ? $returnType->getName() : 'mixed'));
     }
 

@@ -51,6 +51,9 @@ trait CannotMapTypeTrait
         );
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function addSourceFieldInfo(ReflectionClass $class, SourceFieldInterface $sourceField): void
     {
         if ($this->locationInfoAdded !== false) {
@@ -66,6 +69,9 @@ trait CannotMapTypeTrait
         );
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function addExtendTypeInfo(ReflectionClass $class, ExtendType $extendType): void
     {
         if ($this->locationInfoAdded !== false) {

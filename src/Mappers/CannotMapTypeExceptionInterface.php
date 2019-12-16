@@ -17,7 +17,13 @@ interface CannotMapTypeExceptionInterface extends Throwable
 
     public function addReturnInfo(ReflectionMethod $method): void;
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function addSourceFieldInfo(ReflectionClass $class, SourceFieldInterface $sourceField): void;
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function addExtendTypeInfo(ReflectionClass $class, ExtendType $extendType): void;
 }

@@ -21,6 +21,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionType;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
@@ -36,11 +37,12 @@ use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
-use const SORT_REGULAR;
 use function array_merge;
 use function array_unique;
+use function assert;
 use function count;
 use function iterator_to_array;
+use const SORT_REGULAR;
 
 class TypeHandler implements ParameterHandlerInterface
 {
@@ -79,8 +81,8 @@ class TypeHandler implements ParameterHandlerInterface
         $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
 
         try {
-            /** @var GraphQLType&OutputType $type */
             $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false, $refMethod, $docBlockObj);
+            assert($type instanceof GraphQLType && $type instanceof OutputType);
         } catch (TypeMappingRuntimeException $e) {
             throw TypeMappingRuntimeException::wrapWithReturnInfo($e, $refMethod);
         } catch (CannotMapTypeExceptionInterface $e) {
@@ -117,8 +119,8 @@ class TypeHandler implements ParameterHandlerInterface
             return new DefaultValueParameter($parameter->getDefaultValue());
         }
 
-        /** @var UseInputType|null $useInputType */
         $useInputType = $parameterAnnotations->getAnnotationByType(UseInputType::class);
+        assert($useInputType instanceof UseInputType || $useInputType === null);
         if ($useInputType !== null) {
             try {
                 $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());
@@ -239,8 +241,12 @@ class TypeHandler implements ParameterHandlerInterface
         return new Compound($types);
     }
 
+    /**
+     * @param ReflectionClass<object> $reflectionClass
+     */
     private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
+        assert($type instanceof ReflectionNamedType);
         $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
         Assert::notNull($phpdocType);
 
@@ -255,6 +261,8 @@ class TypeHandler implements ParameterHandlerInterface
 
     /**
      * Resolves "self" types into the class type.
+     *
+     * @param ReflectionClass<object> $reflectionClass
      */
     private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
     {

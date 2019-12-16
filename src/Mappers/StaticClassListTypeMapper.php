@@ -29,7 +29,7 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
      * The array of classes.
      * Key: fully qualified class name
      *
-     * @var array<string,ReflectionClass>
+     * @var array<string,ReflectionClass<object>>
      */
     private $classes;
 
@@ -47,7 +47,7 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
      * Returns the array of globbed classes.
      * Only instantiable classes are returned.
      *
-     * @return array<string,ReflectionClass> Key: fully qualified class name
+     * @return array<string,ReflectionClass<object>> Key: fully qualified class name
      */
     protected function getClassList(): array
     {

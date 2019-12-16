@@ -17,7 +17,6 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Context\ResetableContextInterface;
-use const JSON_ERROR_NONE;
 use function array_map;
 use function explode;
 use function in_array;
@@ -27,6 +26,7 @@ use function json_encode;
 use function json_last_error;
 use function json_last_error_msg;
 use function max;
+use const JSON_ERROR_NONE;
 
 final class WebonyxGraphqlMiddleware implements MiddlewareInterface
 {
@@ -146,6 +146,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         }
 
         throw new RuntimeException('Unexpected response from StandardServer::executePsrRequest');
+
         // @codeCoverageIgnoreEnd
     }
 

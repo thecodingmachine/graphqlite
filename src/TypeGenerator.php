@@ -51,7 +51,7 @@ class TypeGenerator
     }
 
     /**
-     * @param string $annotatedObjectClassName The FQCN of an object with a Type annotation.
+     * @param class-string<object> $annotatedObjectClassName The FQCN of an object with a Type annotation.
      *
      * @return MutableInterface&(MutableInterfaceType|MutableObjectType)
      *

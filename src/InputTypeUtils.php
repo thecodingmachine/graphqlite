@@ -12,12 +12,14 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
+use function assert;
 use function ltrim;
 
 class InputTypeUtils
@@ -57,6 +59,7 @@ class InputTypeUtils
         if ($returnType === null) {
             throw MissingTypeHintRuntimeException::missingReturnType($refMethod);
         }
+        assert($returnType instanceof ReflectionNamedType);
 
         if ($returnType->allowsNull()) {
             throw MissingTypeHintRuntimeException::nullableReturnType($refMethod);
@@ -81,6 +84,8 @@ class InputTypeUtils
 
     /**
      * Resolves "self" types into the class type.
+     *
+     * @param ReflectionClass<object> $reflectionClass
      */
     private function resolveSelf(Type $type, ReflectionClass $reflectionClass): Type
     {

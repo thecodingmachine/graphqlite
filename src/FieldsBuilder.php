@@ -34,6 +34,7 @@ use function array_merge;
 use function array_shift;
 use function array_values;
 use function get_parent_class;
+use function is_string;
 use function ucfirst;
 
 /**
@@ -131,11 +132,13 @@ class FieldsBuilder
     /**
      * Track Field annotation in a self targeted type
      *
+     * @param class-string<object> $className
+     *
      * @return array<string, FieldDefinition> QueryField indexed by name.
      */
     public function getSelfFields(string $className): array
     {
-        $fieldAnnotations = $this->getFieldsByAnnotations(null, Annotations\Field::class, false, $className);
+        $fieldAnnotations = $this->getFieldsByAnnotations($className, Annotations\Field::class, false);
 
         $refClass = new ReflectionClass($className);
 
@@ -193,20 +196,16 @@ class FieldsBuilder
     }
 
     /**
+     * @param object|class-string<object> $controller The controller instance, or the name of the source class name
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
      *
      * @return FieldDefinition[]
      *
-     * @throws CannotMapTypeException
      * @throws ReflectionException
      */
-    private function getFieldsByAnnotations(?object $controller, string $annotationName, bool $injectSource, ?string $sourceClassName = null): array
+    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource): array
     {
-        if ($sourceClassName !== null) {
-            $refClass = new ReflectionClass($sourceClassName);
-        } else {
-            $refClass = new ReflectionClass($controller);
-        }
+        $refClass = new ReflectionClass($controller);
 
         $queryList = [];
 
@@ -261,7 +260,7 @@ class FieldsBuilder
                     }
 
                     $prefetchParameters = $prefetchRefMethod->getParameters();
-                    $first_prefetch_parameter = array_shift($prefetchParameters);
+                    $firstPrefetchParameter = array_shift($prefetchParameters);
 
                     $prefetchDocBlockObj = $this->cachedDocBlockFactory->getDocBlock($prefetchRefMethod);
 
@@ -297,10 +296,9 @@ class FieldsBuilder
             } else {
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
-            if ($sourceClassName !== null) {
+            if (is_string($controller)) {
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
-                Assert::notNull($controller);
                 $callable = [$controller, $methodName];
                 Assert::isCallable($callable);
                 $fieldDescriptor->setCallable($callable);
@@ -342,12 +340,15 @@ class FieldsBuilder
 
     /**
      * @param SourceFieldInterface[] $sourceFields
+     * @param ReflectionClass<T> $refClass
      *
      * @return FieldDefinition[]
      *
      * @throws CannotMapTypeException
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
+     *
+     * @template T of object
      */
     private function getQueryFieldsFromSourceFields(array $sourceFields, ReflectionClass $refClass): array
     {
@@ -442,6 +443,11 @@ class FieldsBuilder
         return $queryList;
     }
 
+    /**
+     * @param ReflectionClass<T> $reflectionClass
+     *
+     * @template T of object
+     */
     private function getMethodFromPropertyName(ReflectionClass $reflectionClass, string $propertyName): ReflectionMethod
     {
         if ($reflectionClass->hasMethod($propertyName)) {

@@ -35,13 +35,13 @@
         "phpunit/phpunit": "^8.2.4",
         "php-coveralls/php-coveralls": "^2.1",
         "mouf/picotainer": "^1.1",
-        "phpstan/phpstan": "^0.11",
+        "phpstan/phpstan": "^0.12.3",
         "beberlei/porpaginas": "^1.2",
         "myclabs/php-enum": "^1.6.6",
-        "doctrine/coding-standard": "^6.0",
-        "phpstan/phpstan-webmozart-assert": "^0.11.2",
+        "doctrine/coding-standard": "^7.0",
+        "phpstan/phpstan-webmozart-assert": "^0.12",
         "phpstan/extension-installer": "^1.0",
-        "thecodingmachine/phpstan-strict-rules": "^0.11.2",
+        "thecodingmachine/phpstan-strict-rules": "^0.12",
         "zendframework/zend-diactoros": "^2"
     },
     "suggest": {
@@ -58,7 +58,7 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=7 --no-progress -vvv",
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=8 --no-progress -vvv",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": ["@cs-check", "@phpstan", "phpunit"]

@@ -10,6 +10,7 @@ use ReflectionParameter;
 use SplQueue;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use function assert;
 
 /**
  * Iterate a queue of middlewares and execute them.
@@ -40,10 +41,8 @@ final class Next implements ParameterHandlerInterface
             return $this->fallbackHandler->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
         }
 
-        /**
-         * @var ParameterMiddlewareInterface $middleware
-         */
         $middleware = $this->queue->dequeue();
+        assert($middleware instanceof ParameterMiddlewareInterface);
 
         return $middleware->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations, $this);
     }

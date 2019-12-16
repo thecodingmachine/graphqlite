@@ -13,7 +13,11 @@ class ReflectionInterfaceUtils
      * Returns a list of all interfaces directly implemented by this class/interface.
      * "Super" interfaces are not returned.
      *
-     * @return array<string,ReflectionClass> Interfaces indexed by FQCN
+     * @param ReflectionClass<T> $reflectionClass
+     *
+     * @return array<string,ReflectionClass<T>> Interfaces indexed by FQCN
+     *
+     * @template T of object
      */
     public static function getDirectlyImplementedInterfaces(ReflectionClass $reflectionClass): array
     {

@@ -60,7 +60,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     /**
      * @param string $name
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function getField($name): InputObjectField
     {
