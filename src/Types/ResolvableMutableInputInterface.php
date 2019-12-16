@@ -17,7 +17,7 @@ interface ResolvableMutableInputInterface extends MutableInputInterface
      * @param mixed[] $args
      * @param mixed   $context
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object;
 

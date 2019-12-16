@@ -14,7 +14,7 @@ class EmptyContainer implements ContainerInterface
     /**
      * @param string $id
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function get($id): void
     {
@@ -24,7 +24,7 @@ class EmptyContainer implements ContainerInterface
     /**
      * @param string $id
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function has($id): bool
     {

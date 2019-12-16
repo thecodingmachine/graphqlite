@@ -60,7 +60,7 @@ class DateTimeType extends ScalarType
      *
      * @throws Exception
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function parseLiteral($valueNode, ?array $variables = null)
     {

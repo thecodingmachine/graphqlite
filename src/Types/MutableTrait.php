@@ -45,7 +45,7 @@ trait MutableTrait
      *
      * @throws Exception
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function getField($name): FieldDefinition
     {
@@ -59,7 +59,7 @@ trait MutableTrait
     /**
      * @param string $name
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function hasField($name): bool
     {

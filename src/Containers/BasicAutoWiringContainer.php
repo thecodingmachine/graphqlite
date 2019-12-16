@@ -40,7 +40,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      * @throws ContainerExceptionInterface Error while retrieving the entry.
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function get($id)
     {
@@ -74,7 +74,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @param string $id Identifier of the entry to look for.
      *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
     public function has($id): bool
     {
