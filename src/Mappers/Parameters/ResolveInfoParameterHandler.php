@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 use GraphQL\Type\Definition\ResolveInfo;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
+use ReflectionNamedType;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
@@ -17,7 +18,8 @@ class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
     {
         $type = $parameter->getType();
-        if ($type!== null && ((string) $type) === ResolveInfo::class) {
+        assert($type === null || $type instanceof ReflectionNamedType);
+        if ($type!== null && $type->getName() === ResolveInfo::class) {
             return new ResolveInfoParameter();
         }
 

@@ -21,6 +21,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Self_;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionType;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
@@ -245,7 +246,8 @@ class TypeHandler implements ParameterHandlerInterface
      */
     private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
-        $phpdocType = $this->phpDocumentorTypeResolver->resolve((string) $type);
+        assert($type instanceof ReflectionNamedType);
+        $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
         Assert::notNull($phpdocType);
 
         $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);

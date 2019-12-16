@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use Psr\Container\ContainerInterface;
+use ReflectionNamedType;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
@@ -42,7 +43,8 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
             if ($type === null) {
                 throw MissingAutowireTypeException::create($parameter);
             }
-            $id = (string) $type;
+            assert($type instanceof ReflectionNamedType);
+            $id = $type->getName();
         }
 
         return new ContainerParameter($this->container, $id);
