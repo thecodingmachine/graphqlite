@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -31,6 +32,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
+use function array_values;
 use function get_parent_class;
 use function ucfirst;
 
@@ -317,7 +319,10 @@ class FieldsBuilder
             });
 
             if ($field !== null) {
-                $queryList[] = $field;
+                if (isset($queryList[$fieldDescriptor->getName()])) {
+                    throw DuplicateMappingException::createForQuery($refClass->getName(), $fieldDescriptor->getName());
+                }
+                $queryList[$fieldDescriptor->getName()] = $field;
             }
 
             /*if ($unauthorized) {
@@ -332,7 +337,7 @@ class FieldsBuilder
             }*/
         }
 
-        return $queryList;
+        return array_values($queryList);
     }
 
     /**
