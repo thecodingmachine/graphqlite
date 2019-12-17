@@ -194,7 +194,7 @@ class SchemaFactoryTest extends TestCase
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
         $this->expectException(DuplicateMappingException::class);
-        $this->expectErrorMessage("The query/mutation 'duplicateQuery' is declared twice in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueries\\TestControllerWithDuplicateQuery");
+        $this->expectExceptionMessage("The query/mutation 'duplicateQuery' is declared twice in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueries\\TestControllerWithDuplicateQuery");
         $schema = $factory->createSchema();
         $queryString = '
         query {
@@ -221,7 +221,7 @@ class SchemaFactoryTest extends TestCase
             ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
         $this->expectException(DuplicateMappingException::class);
-        $this->expectErrorMessage("The query/mutation 'duplicateQuery' is declared twice: in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery1' and in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery2");
+        $this->expectExceptionMessage("The query/mutation 'duplicateQuery' is declared twice: in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery1' and in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery2");
         $schema = $factory->createSchema();
         $queryString = '
         query {
