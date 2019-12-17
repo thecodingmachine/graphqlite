@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 use BadMethodCallException;
 use function array_key_exists;
 use function array_map;
+use function is_array;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.
@@ -51,7 +52,11 @@ class SourceField implements SourceFieldInterface
         $this->outputType = $attributes['outputType'] ?? null;
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
-        foreach ($attributes['annotations'] ?? [] as $annotation) {
+        $annotations = $attributes['annotations'] ?? [];
+        if (! is_array($annotations)) {
+            $annotations = [ $annotations ];
+        }
+        foreach ($annotations ?? [] as $annotation) {
             if ($annotation instanceof MiddlewareAnnotationInterface) {
                 $middlewareAnnotations[] = $annotation;
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
