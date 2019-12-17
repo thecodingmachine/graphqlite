@@ -32,7 +32,6 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
-use function array_values;
 use function get_parent_class;
 use function is_string;
 use function ucfirst;

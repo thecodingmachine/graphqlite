@@ -8,11 +8,15 @@ use GraphQL\Type\Definition\FieldDefinition;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use function array_filter;
+use function array_intersect_key;
 use function array_keys;
+use function array_map;
 use function array_merge;
 use function array_sum;
 use function array_values;
-use function array_walk;
+use function assert;
+use function count;
+use function reset;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
@@ -69,6 +73,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
     /**
      * @param array<int, array<string, FieldDefinition>> $list
+     *
      * @return array<string, FieldDefinition>
      */
     private function flattenList(array $list): array
@@ -88,10 +93,11 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         $duplicates = array_intersect_key(...array_values($list));
         // Let's display an error from the first one.
         $firstDuplicate = reset($duplicates);
+        assert($firstDuplicate instanceof FieldDefinition);
 
         $duplicateName = $firstDuplicate->name;
 
-        $classes = array_keys(array_filter($list, function(array $fields) use ($duplicateName) {
+        $classes = array_keys(array_filter($list, static function (array $fields) use ($duplicateName) {
             return isset($fields[$duplicateName]);
         }));
 
