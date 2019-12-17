@@ -26,6 +26,11 @@ class DuplicateMappingException extends RuntimeException
 
     public static function createForQuery(string $sourceClass, string $queryName): self
     {
-        throw new self(sprintf("The query '%s' is duplicate in class '%s'", $queryName, $sourceClass));
+        throw new self(sprintf("The query/mutation '%s' is declared twice in class '%s'", $queryName, $sourceClass));
+    }
+
+    public static function createForQueryInTwoControllers(string $sourceClass1, string $sourceClass2, string $queryName): self
+    {
+        throw new self(sprintf("The query/mutation '%s' is declared twice: in class '%s' and in class '%s'", $queryName, $sourceClass1, $sourceClass2));
     }
 }
