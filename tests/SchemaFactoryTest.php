@@ -206,4 +206,29 @@ class SchemaFactoryTest extends TestCase
         );
     }
 
+    public function testDuplicateQueryInTwoControllersException(): void
+    {
+        $factory = new SchemaFactory(
+            new Psr16Cache(new ArrayAdapter()),
+            new BasicAutoWiringContainer(
+                new EmptyContainer()
+            )
+        );
+        $factory->setAuthenticationService(new VoidAuthenticationService())
+            ->setAuthorizationService(new VoidAuthorizationService())
+            ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers')
+            ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+
+        $this->expectException(DuplicateMappingException::class);
+        $schema = $factory->createSchema();
+        $queryString = '
+        query {
+            duplicateQuery
+        }
+        ';
+        GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+    }
 }
