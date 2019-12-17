@@ -81,7 +81,7 @@ class FieldsBuilder
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
      */
@@ -91,7 +91,7 @@ class FieldsBuilder
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
      */
@@ -118,10 +118,7 @@ class FieldsBuilder
 
         $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
 
-        $fields = [];
-        foreach ($fieldAnnotations as $field) {
-            $fields[$field->name] = $field;
-        }
+        $fields = $fieldAnnotations;
         foreach ($fieldsFromSourceFields as $field) {
             $fields[$field->name] = $field;
         }
@@ -147,10 +144,7 @@ class FieldsBuilder
 
         $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
 
-        $fields = [];
-        foreach ($fieldAnnotations as $field) {
-            $fields[$field->name] = $field;
-        }
+        $fields = $fieldAnnotations;
         foreach ($fieldsFromSourceFields as $field) {
             $fields[$field->name] = $field;
         }
@@ -199,7 +193,7 @@ class FieldsBuilder
      * @param object|class-string<object> $controller The controller instance, or the name of the source class name
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
      *
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
      */
@@ -335,7 +329,7 @@ class FieldsBuilder
             }*/
         }
 
-        return array_values($queryList);
+        return $queryList;
     }
 
     /**
