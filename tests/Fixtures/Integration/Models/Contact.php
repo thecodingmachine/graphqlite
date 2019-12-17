@@ -195,12 +195,12 @@ class Contact
         return 'OK';
     }
 
-    public function injectServiceFromExternal(string $testSkip = "foo", stdClass $otherTestService = null, string $id = '42'): string
+    public function injectServiceFromExternal(string $testService, string $testSkip = "foo", string $id = '42'): string
     {
-        if ($testSkip !== 'foo') {
+        if ($testService !== 'foo') {
             return 'KO';
         }
-        if (!$otherTestService instanceof stdClass) {
+        if ($testSkip !== 'foo') {
             return 'KO';
         }
         if ($id !== '42') {

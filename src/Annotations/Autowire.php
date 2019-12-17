@@ -11,7 +11,7 @@ use function ltrim;
  * Use this annotation to autowire a service from the container into a given parameter of a field/query/mutation.
  *
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"METHOD", "ANNOTATION"})
  * @Attributes({
  *   @Attribute("for", type = "string"),
  *   @Attribute("identifier", type = "string")

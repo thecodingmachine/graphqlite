@@ -12,6 +12,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
@@ -399,7 +400,7 @@ class FieldsBuilder
 
             $fieldDescriptor->setComment($docBlockComment);
 
-            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj);
+            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField->getParameterAnnotations());
 
             $fieldDescriptor->setParameters($args);
 
@@ -417,7 +418,7 @@ class FieldsBuilder
 
             $fieldDescriptor->setType($type);
             $fieldDescriptor->setInjectSource(false);
-            $fieldDescriptor->setMiddlewareAnnotations($sourceField->getAnnotations());
+            $fieldDescriptor->setMiddlewareAnnotations($sourceField->getMiddlewareAnnotations());
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
@@ -461,12 +462,11 @@ class FieldsBuilder
 
     /**
      * @param ReflectionParameter[] $refParameters
+     * @param array<string, ParameterAnnotations> $additionalParameterAnnotations Additional parameter annotations to be applied (coming from @SourceField annotations attribute). Key: the parameter name, value: the annotations
      *
      * @return array<string, ParameterInterface>
-     *
-     * @throws MissingTypeHintRuntimeException
      */
-    private function mapParameters(array $refParameters, DocBlock $docBlock): array
+    private function mapParameters(array $refParameters, DocBlock $docBlock, array $additionalParameterAnnotations = []): array
     {
         $args = [];
 
@@ -481,6 +481,9 @@ class FieldsBuilder
 
         foreach ($refParameters as $parameter) {
             $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
+            if (! empty($additionalParameterAnnotations[$parameter->getName()])) {
+                $parameterAnnotations->merge($additionalParameterAnnotations[$parameter->getName()]);
+            }
 
             $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations, $this->typeMapper);
 

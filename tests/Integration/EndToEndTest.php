@@ -885,10 +885,10 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'contacts' => [
                 [
-                    'injectService' => 'OK',
+                    'injectServiceFromExternal' => 'OK',
                 ],
                 [
-                    'injectService' => 'OK',
+                    'injectServiceFromExternal' => 'OK',
                 ]
 
             ]

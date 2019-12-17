@@ -20,7 +20,7 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
  * @SourceField(name="birthDate")
  * @SourceField(name="manager")
  * @SourceField(name="relations")
- * @SourceField(name="injectServiceFromExternal", annotations={@Autowire(for="testService", identifier="testService"), @HideParameter(for="testSkip"), @UseInputType(for="ID!")})
+ * @SourceField(name="injectServiceFromExternal", annotations={@Autowire(for="testService", identifier="testService"), @HideParameter(for="testSkip"), @UseInputType(for="$id", inputType="String")})
  */
 class ContactType
 {

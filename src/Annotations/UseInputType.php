@@ -11,7 +11,7 @@ use function ltrim;
  * Use this annotation to force using a specific input type for an input argument.
  *
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"METHOD", "ANNOTATION"})
  * @Attributes({
  *   @Attribute("for", type = "string"),
  *   @Attribute("inputType", type = "string"),
