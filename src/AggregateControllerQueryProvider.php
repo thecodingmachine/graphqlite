@@ -17,6 +17,7 @@ use function array_values;
 use function assert;
 use function count;
 use function reset;
+use function sort;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
@@ -100,6 +101,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         $classes = array_keys(array_filter($list, static function (array $fields) use ($duplicateName) {
             return isset($fields[$duplicateName]);
         }));
+        sort($classes);
 
         throw DuplicateMappingException::createForQueryInTwoControllers($classes[0], $classes[1], $duplicateName);
     }
