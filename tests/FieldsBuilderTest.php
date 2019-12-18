@@ -21,11 +21,13 @@ use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
@@ -746,6 +748,17 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->expectException(TypeMappingRuntimeException::class);
         $this->expectExceptionMessage('Parameter $testObject in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam::test is type-hinted to "\TheCodingMachine\GraphQLite\Fixtures\TestObject|\TheCodingMachine\GraphQLite\Fixtures\TestObject2". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.');
+        $queries = $queryProvider->getQueries($controller);
+    }
+
+    public function testParameterAnnotationOnNonExistingParameter(): void
+    {
+        $controller = new TestControllerWithInvalidParameterAnnotation();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(InvalidParameterException::class);
+        $this->expectExceptionMessage('Parameter "id" declared in annotation "TheCodingMachine\\GraphQLite\\Annotations\\HideParameter" of method "TheCodingMachine\\GraphQLite\\Fixtures\\TestControllerWithInvalidParameterAnnotation::test()" does not exist.');
         $queries = $queryProvider->getQueries($controller);
     }
 }

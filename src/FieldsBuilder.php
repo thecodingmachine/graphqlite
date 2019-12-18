@@ -479,8 +479,11 @@ class FieldsBuilder
             }
         }
 
+        $parameterAnnotationsPerParameter = $this->annotationReader->getParameterAnnotationsPerParameter($refParameters);
+
         foreach ($refParameters as $parameter) {
-            $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
+            $parameterAnnotations = $parameterAnnotationsPerParameter[$parameter->getName()] ?? new ParameterAnnotations([]);
+            //$parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
             if (! empty($additionalParameterAnnotations[$parameter->getName()])) {
                 $parameterAnnotations->merge($additionalParameterAnnotations[$parameter->getName()]);
             }
