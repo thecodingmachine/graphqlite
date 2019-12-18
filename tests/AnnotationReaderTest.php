@@ -143,4 +143,11 @@ class AnnotationReaderTest extends TestCase
         $this->expectException(AnnotationException::class);
         $annotationReader->getMethodAnnotations(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Type::class);
     }
+
+    public function testEmptyGetParameterAnnotations(): void
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+
+        $this->assertEmpty($annotationReader->getParameterAnnotationsPerParameter([]));
+    }
 }
