@@ -10,6 +10,9 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
+use TheCodingMachine\GraphQLite\Annotations\HideParameter;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 /**
  * @ExtendType(class=Contact::class)
@@ -17,6 +20,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
  * @SourceField(name="birthDate")
  * @SourceField(name="manager")
  * @SourceField(name="relations")
+ * @SourceField(name="injectServiceFromExternal", annotations={@Autowire(for="testService", identifier="testService"), @HideParameter(for="testSkip"), @UseInputType(for="$id", inputType="String")})
  */
 class ContactType
 {

@@ -194,4 +194,18 @@ class Contact
         }
         return 'OK';
     }
+
+    public function injectServiceFromExternal(string $testService, string $testSkip = "foo", string $id = '42'): string
+    {
+        if ($testService !== 'foo') {
+            return 'KO';
+        }
+        if ($testSkip !== 'foo') {
+            return 'KO';
+        }
+        if ($id !== '42') {
+            return 'KO';
+        }
+        return 'OK';
+    }
 }

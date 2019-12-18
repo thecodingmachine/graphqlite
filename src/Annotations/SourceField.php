@@ -6,6 +6,8 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
 use function array_key_exists;
+use function array_map;
+use function is_array;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.
@@ -19,7 +21,7 @@ use function array_key_exists;
  *   @Attribute("outputType", type = "string"),
  *   @Attribute("isId", type = "bool"),
  *   @Attribute("failWith", type = "mixed"),
- *   @Attribute("annotations", type = "TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface[]"),
+ *   @Attribute("annotations", type = "mixed"),
  * })
  *
  * FIXME: remove idId since outputType="ID" is equivalent
@@ -33,7 +35,10 @@ class SourceField implements SourceFieldInterface
     private $outputType;
 
     /** @var MiddlewareAnnotations */
-    private $annotations;
+    private $middlewareAnnotations;
+
+    /** @var array<string, ParameterAnnotations> */
+    private $parameterAnnotations;
 
     /**
      * @param mixed[] $attributes
@@ -45,7 +50,25 @@ class SourceField implements SourceFieldInterface
         }
         $this->name       = $attributes['name'];
         $this->outputType = $attributes['outputType'] ?? null;
-        $this->annotations = new MiddlewareAnnotations($attributes['annotations'] ?? []);
+        $middlewareAnnotations = [];
+        $parameterAnnotations = [];
+        $annotations = $attributes['annotations'] ?? [];
+        if (! is_array($annotations)) {
+            $annotations = [ $annotations ];
+        }
+        foreach ($annotations ?? [] as $annotation) {
+            if ($annotation instanceof MiddlewareAnnotationInterface) {
+                $middlewareAnnotations[] = $annotation;
+            } elseif ($annotation instanceof ParameterAnnotationInterface) {
+                $parameterAnnotations[$annotation->getTarget()][] = $annotation;
+            } else {
+                throw new BadMethodCallException('The @SourceField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+            }
+        }
+        $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);
+        $this->parameterAnnotations = array_map(static function (array $parameterAnnotationsForAttribute): ParameterAnnotations {
+            return new ParameterAnnotations($parameterAnnotationsForAttribute);
+        }, $parameterAnnotations);
         if (! array_key_exists('failWith', $attributes)) {
             return;
         }
@@ -68,8 +91,16 @@ class SourceField implements SourceFieldInterface
         return $this->outputType;
     }
 
-    public function getAnnotations(): MiddlewareAnnotations
+    public function getMiddlewareAnnotations(): MiddlewareAnnotations
     {
-        return $this->annotations;
+        return $this->middlewareAnnotations;
+    }
+
+    /**
+     * @return array<string, ParameterAnnotations> Key: the name of the attribute
+     */
+    public function getParameterAnnotations(): array
+    {
+        return $this->parameterAnnotations;
     }
 }

@@ -20,5 +20,10 @@ interface SourceFieldInterface
      */
     public function getOutputType(): ?string;
 
-    public function getAnnotations(): MiddlewareAnnotations;
+    public function getMiddlewareAnnotations(): MiddlewareAnnotations;
+
+    /**
+     * @return array<string, ParameterAnnotations> Key: the name of the attribute
+     */
+    public function getParameterAnnotations(): array;
 }

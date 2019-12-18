@@ -12,7 +12,7 @@ use function ltrim;
  * This is only possible if the parameter has a default value.
  *
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"METHOD", "ANNOTATION"})
  * @Attributes({
  *   @Attribute("for", type = "string")
  * })
