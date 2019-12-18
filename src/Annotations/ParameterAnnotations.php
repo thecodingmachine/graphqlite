@@ -55,6 +55,14 @@ class ParameterAnnotations
         return array_pop($annotations);
     }
 
+    /**
+     * @return array<int, ParameterAnnotationInterface>
+     */
+    public function getAllAnnotations(): array
+    {
+        return $this->annotations;
+    }
+
     public function merge(ParameterAnnotations $parameterAnnotations): void
     {
         $this->annotations = array_merge($this->annotations, $parameterAnnotations->annotations);

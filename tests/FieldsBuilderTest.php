@@ -60,6 +60,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
@@ -250,7 +251,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $fields = $queryProvider->getFields($controller, true);
+        $fields = $queryProvider->getFields($controller);
 
         $this->assertCount(3, $fields);
 
@@ -267,7 +268,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     {
         $queryProvider = $this->buildFieldsBuilder();
 
-        $fields = $queryProvider->getSelfFields(TestSelfType::class, true);
+        $fields = $queryProvider->getSelfFields(TestSelfType::class);
 
         $this->assertCount(1, $fields);
 
@@ -760,5 +761,16 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(InvalidParameterException::class);
         $this->expectExceptionMessage('Parameter "id" declared in annotation "TheCodingMachine\\GraphQLite\\Annotations\\HideParameter" of method "TheCodingMachine\\GraphQLite\\Fixtures\\TestControllerWithInvalidParameterAnnotation::test()" does not exist.');
         $queries = $queryProvider->getQueries($controller);
+    }
+
+    public function testParameterAnnotationOnNonExistingParameterInSourceField(): void
+    {
+        $controller = new TestTypeWithSourceFieldInvalidParameterAnnotation();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $this->expectException(InvalidParameterException::class);
+        $this->expectExceptionMessage('Could not find parameter "foo" declared in annotation "TheCodingMachine\\GraphQLite\\Annotations\\HideParameter". This annotation is itself declared in a SourceField annotation targeting resolver "TheCodingMachine\\GraphQLite\\Fixtures\\TestObject::getSibling()".');
+        $fields = $queryProvider->getFields($controller);
     }
 }

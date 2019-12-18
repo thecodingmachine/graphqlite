@@ -10,6 +10,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
@@ -33,8 +34,11 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
+use function assert;
+use function get_class;
 use function get_parent_class;
 use function is_string;
+use function reset;
 use function ucfirst;
 
 /**
@@ -400,7 +404,7 @@ class FieldsBuilder
 
             $fieldDescriptor->setComment($docBlockComment);
 
-            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField->getParameterAnnotations());
+            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
 
             $fieldDescriptor->setParameters($args);
 
@@ -462,13 +466,15 @@ class FieldsBuilder
 
     /**
      * @param ReflectionParameter[] $refParameters
-     * @param array<string, ParameterAnnotations> $additionalParameterAnnotations Additional parameter annotations to be applied (coming from @SourceField annotations attribute). Key: the parameter name, value: the annotations
      *
      * @return array<string, ParameterInterface>
      */
-    private function mapParameters(array $refParameters, DocBlock $docBlock, array $additionalParameterAnnotations = []): array
+    private function mapParameters(array $refParameters, DocBlock $docBlock, ?SourceFieldInterface $sourceField = null): array
     {
-        $args = [];
+        if (empty($refParameters)) {
+            return [];
+        }
+        $additionalParameterAnnotations = $sourceField !== null ? $sourceField->getParameterAnnotations() : [];
 
         $docBlockTypes = [];
         if (! empty($refParameters)) {
@@ -486,11 +492,24 @@ class FieldsBuilder
             //$parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
             if (! empty($additionalParameterAnnotations[$parameter->getName()])) {
                 $parameterAnnotations->merge($additionalParameterAnnotations[$parameter->getName()]);
+                unset($additionalParameterAnnotations[$parameter->getName()]);
             }
 
             $parameterObj = $this->parameterMapper->mapParameter($parameter, $docBlock, $docBlockTypes[$parameter->getName()] ?? null, $parameterAnnotations, $this->typeMapper);
 
             $args[$parameter->getName()] = $parameterObj;
+        }
+
+        // Sanity check, are the parameters declared in $additionalParameterAnnotations available in $refParameters?
+        if (! empty($additionalParameterAnnotations)) {
+            $refParameter = reset($refParameters);
+            foreach ($additionalParameterAnnotations as $parameterName => $parameterAnnotations) {
+                foreach ($parameterAnnotations->getAllAnnotations() as $annotation) {
+                    $refMethod = $refParameter->getDeclaringFunction();
+                    assert($refMethod instanceof ReflectionMethod);
+                    throw InvalidParameterException::parameterNotFoundFromSourceField($refParameter->getName(), get_class($annotation), $refMethod);
+                }
+            }
         }
 
         return $args;
