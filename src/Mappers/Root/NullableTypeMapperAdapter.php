@@ -15,7 +15,7 @@ use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use function array_filter;
 use function array_map;
@@ -50,7 +50,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         if ($isNullable) {
             $nonNullableType = $this->getNonNullable($type);
             if ($nonNullableType === null) {
-                throw TypeMappingRuntimeException::createFromType($type);
+                throw CannotMapTypeException::createForNull();
             }
             $type = $nonNullableType;
         }
@@ -77,7 +77,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         if ($isNullable) {
             $nonNullableType = $this->getNonNullable($type);
             if ($nonNullableType === null) {
-                throw TypeMappingRuntimeException::createFromType($type);
+                throw CannotMapTypeException::createForNull();
             }
             $type = $nonNullableType;
         }

@@ -11,8 +11,14 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use phpDocumentor\Reflection\Type as PhpDocumentorType;
+use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Iterable_;
+use phpDocumentor\Reflection\Types\Mixed_;
+use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use function array_map;
+use function assert;
 use function implode;
 use function sprintf;
 
@@ -108,5 +114,54 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     public static function extendTypeWithBadTargetedClass(string $className, ExtendType $extendType): self
     {
         return new self('For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $className . '", the pointed at GraphQL type cannot be extended. You can only target types extending the MutableObjectType (like types created with the @Type annotation).');
+    }
+
+    /**
+     * @param Array_|Iterable_|Mixed_ $type
+     */
+    public static function createForMissingPhpDoc(PhpDocumentorType $type, ReflectionMethod $refMethod, ?string $argumentName = null): self
+    {
+        $typeStr = '';
+        if ($type instanceof Array_) {
+            $typeStr = 'array';
+        } elseif ($type instanceof Iterable_) {
+            $typeStr = 'iterable';
+        } elseif ($type instanceof Mixed_) {
+            $typeStr = 'mixed';
+        }
+        assert($typeStr !== '');
+        if ($argumentName === null) {
+            if ($typeStr === 'mixed') {
+                return new self('a type-hint is missing (or PHPDoc specifies a "mixed" type-hint). Please provide a better type-hint.');
+            }
+
+            return new self(sprintf('please provide an additional @return in the PHPDoc block to further specify the return type of %s. For instance: @return string[]', $typeStr));
+        }
+
+        if ($typeStr === 'mixed') {
+            return new self(sprintf('a type-hint is missing (or PHPDoc specifies a "mixed" type-hint). Please provide a better type-hint. For instance: "string $%s".', $argumentName));
+        }
+
+        return new self(sprintf('please provide an additional @param in the PHPDoc block to further specify the type of the %s. For instance: @param string[] $%s.', $typeStr, $argumentName));
+    }
+
+    public static function createForDateTime(): self
+    {
+        return new self('type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+    }
+
+    public static function createForNull(): self
+    {
+        return new self('type-hinting against null only in the PHPDoc is not allowed.');
+    }
+
+    public static function createForInputUnionType(PhpDocumentorType $type): self
+    {
+        return new self('parameter is type-hinted to "' . $type . '". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.');
+    }
+
+    public static function createForPhpDocType(PhpDocumentorType $type): self
+    {
+        return new self("don't know how to handle type " . (string) $type);
     }
 }

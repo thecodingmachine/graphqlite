@@ -24,9 +24,9 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
 use function ltrim;
@@ -144,7 +144,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
                 case '\\DateTime':
-                    throw TypeMappingRuntimeException::createFromType($type);
+                    throw CannotMapTypeException::createForDateTime();
                 case '\\' . ID::class:
                     return GraphQLType::id();
                 default:

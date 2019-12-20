@@ -11,7 +11,7 @@ class TestControllerWithArrayParam
     /**
      * @Query()
      */
-    public function test(array $params): array
+    public function test(iterable $params): array
     {
         return $params;
     }

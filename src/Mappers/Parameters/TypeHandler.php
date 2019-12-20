@@ -28,12 +28,12 @@ use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockRuntimeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
@@ -83,8 +83,6 @@ class TypeHandler implements ParameterHandlerInterface
         try {
             $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false, $refMethod, $docBlockObj);
             assert($type instanceof GraphQLType && $type instanceof OutputType);
-        } catch (TypeMappingRuntimeException $e) {
-            throw TypeMappingRuntimeException::wrapWithReturnInfo($e, $refMethod);
         } catch (CannotMapTypeExceptionInterface $e) {
             $e->addReturnInfo($refMethod);
             throw $e;
@@ -146,8 +144,6 @@ class TypeHandler implements ParameterHandlerInterface
                 $declaringFunction = $parameter->getDeclaringFunction();
                 Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
                 $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $declaringFunction, $docBlock, $parameter->getName());
-            } catch (TypeMappingRuntimeException $e) {
-                throw TypeMappingRuntimeException::wrapWithParamInfo($e, $parameter);
             } catch (CannotMapTypeExceptionInterface $e) {
                 $e->addParamInfo($parameter);
                 throw $e;
@@ -179,7 +175,7 @@ class TypeHandler implements ParameterHandlerInterface
         if ($innerType instanceof Array_ || $innerType instanceof Iterable_ || $innerType instanceof Mixed_) {
             // We need to use the docBlockType
             if ($docBlockType === null) {
-                throw TypeMappingRuntimeException::createFromType($type);
+                throw CannotMapTypeException::createForMissingPhpDoc($innerType, $refMethod, $argumentName);
             }
             if ($mapToInputType === true) {
                 Assert::notNull($argumentName);

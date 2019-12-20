@@ -16,9 +16,9 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
 use ReflectionMethod;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
@@ -63,9 +63,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         }
 
         $filteredDocBlockTypes = iterator_to_array($type);
-        if (empty($filteredDocBlockTypes)) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
+        Assert::notEmpty($filteredDocBlockTypes);
 
         $unionTypes    = [];
         $lastException = null;
@@ -79,7 +77,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         }
 
         if ($mustBeIterable && empty($unionTypes)) {
-            throw TypeMappingRuntimeException::createFromType(new Iterable_());
+            throw new RuntimeException('Iterable compound type cannot be alone in the compound.');
         }
 
         $return = $this->getTypeFromUnion($unionTypes);
@@ -107,7 +105,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         // At this point, the |null has been removed and the |iterable has been removed too.
         // So there should only be compound input types, which is forbidden by the GraphQL spec.
         // Let's kill this right away
-        throw TypeMappingRuntimeException::createFromType($type);
+        throw CannotMapTypeException::createForInputUnionType($type);
     }
 
     private function isWrappedListOfType(GraphQLType $type): bool
