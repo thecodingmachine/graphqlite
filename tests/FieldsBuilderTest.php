@@ -511,14 +511,14 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider->getQueries($controller);
     }
 
-    public function testQueryProviderWithArrayParams(): void
+    public function testQueryProviderWithIterableParams(): void
     {
         $controller = new TestControllerWithArrayParam();
 
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For parameter $params, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam::test, please provide an additional @param in the PHPDoc block to further specify the type of the array. For instance: @param string[] $params.');
+        $this->expectExceptionMessage('For parameter $params, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam::test, please provide an additional @param in the PHPDoc block to further specify the type of the iterable. For instance: @param string[] $params.');
         $queryProvider->getQueries($controller);
     }
 
