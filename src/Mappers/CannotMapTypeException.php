@@ -154,4 +154,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     {
         return new self('type-hinting against null only in the PHPDoc is not allowed.');
     }
+
+    public static function createForInputUnionType(PhpDocumentorType $type): self
+    {
+        return new self('parameter is type-hinted to "' . $type . '". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.');
+    }
 }

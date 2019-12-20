@@ -107,7 +107,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         // At this point, the |null has been removed and the |iterable has been removed too.
         // So there should only be compound input types, which is forbidden by the GraphQL spec.
         // Let's kill this right away
-        throw TypeMappingRuntimeException::createFromType($type);
+        throw CannotMapTypeException::createForInputUnionType($type);
     }
 
     private function isWrappedListOfType(GraphQLType $type): bool

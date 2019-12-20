@@ -28,32 +28,11 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
 
     public static function wrapWithParamInfo(TypeMappingRuntimeException $previous, ReflectionParameter $parameter): TypeMappingRuntimeException
     {
-        $declaringClass = $parameter->getDeclaringClass();
-        Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
-
-        $message = '';
-        if ($previous->type instanceof Compound) {
-            $message = sprintf(
-                'Parameter $%s in %s::%s is type-hinted to "' . $previous->type . '". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.',
-                $parameter->getName(),
-                $declaringClass->getName(),
-                $parameter->getDeclaringFunction()->getName()
-            );
-        } elseif (! ($previous->type instanceof Object_)) {
-            throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
-        }
-
-        $e       = new self($message, 0, $previous);
-        $e->type = $previous->type;
-
-        return $e;
+        throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
     }
 
     public static function wrapWithReturnInfo(TypeMappingRuntimeException $previous, ReflectionMethod $method): TypeMappingRuntimeException
     {
-        //if (! ($previous->type instanceof Object_)) {
-            throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
-
-        //}
+        throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
     }
 }
