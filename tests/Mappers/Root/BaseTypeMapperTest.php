@@ -12,7 +12,6 @@ use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 
 class BaseTypeMapperTest extends AbstractQueryProviderTest
 {

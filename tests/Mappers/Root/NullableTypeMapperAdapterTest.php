@@ -4,22 +4,11 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\NonNull;
 use phpDocumentor\Reflection\DocBlock;
-use phpDocumentor\Reflection\Fqsen;
-use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
-use phpDocumentor\Reflection\Types\Boolean;
-use phpDocumentor\Reflection\Types\Compound;
-use phpDocumentor\Reflection\Types\Iterable_;
-use phpDocumentor\Reflection\Types\Null_;
-use phpDocumentor\Reflection\Types\Object_;
-use phpDocumentor\Reflection\Types\String_;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
-use phpDocumentor\Reflection\Type;
 
 class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 {

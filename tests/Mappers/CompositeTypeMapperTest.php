@@ -2,21 +2,17 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class CompositeTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -38,7 +34,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                         ],
                     ]);
                 } else {
-                    throw TypeMappingRuntimeException::createFromType(TestObject::class);
+                    throw CannotMapTypeException::createForType(TestObject::class);
                 }
             }
 
@@ -52,7 +48,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
                         ],
                     ]);
                 } else {
-                    throw TypeMappingRuntimeException::createFromType(TestObject::class);
+                    throw CannotMapTypeException::createForType(TestObject::class);
                 }
             }
 

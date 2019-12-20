@@ -22,7 +22,6 @@ use ReflectionClass;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 use Webmozart\Assert\Assert;
 use function assert;
 use function count;
@@ -165,7 +164,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 }
 
                 $unionTypes[] = $topToGraphQLType($iteratorType, $subGraphQlType);
-            } catch (TypeMappingRuntimeException | CannotMapTypeExceptionInterface $e) {
+            } catch (CannotMapTypeExceptionInterface $e) {
                 // We have several types. It is ok not to be able to match one.
                 $lastException = $e;
 
@@ -183,7 +182,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             // We have an issue, let's try without the subType
             try {
                 $result = $topToGraphQLType($iteratorType, null);
-            } catch (TypeMappingRuntimeException | CannotMapTypeExceptionInterface $otherException) {
+            } catch (CannotMapTypeExceptionInterface $otherException) {
                 // Still an issue? Let's rethrow the previous exception.
                 throw $lastException;
             }

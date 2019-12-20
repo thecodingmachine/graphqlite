@@ -4,11 +4,9 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Types\Object_;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 
 class MyCLabsEnumTypeMapperTest extends AbstractQueryProviderTest
 {
