@@ -30,12 +30,4 @@ class TypeTest extends TestCase
         $this->expectExceptionMessage('Problem in annotation @Type for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
         $type->setClass(FooInterface::class);
     }
-
-    public function testException3()
-    {
-        $type = new Type(['disableInheritance'=>true]);
-        $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('Problem in annotation @Type for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the disableInheritance="true" attribute on interfaces');
-        $type->setClass(FooInterface::class);
-    }
 }
