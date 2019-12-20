@@ -2,12 +2,14 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
+use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\String_;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
@@ -23,8 +25,7 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
             $this->getTypeMapper()
         );
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage("Don't know how to handle type");
+        $this->expectException(InvalidArgumentException::class);
         $compoundTypeMapper->toGraphQLOutputType(new Compound([]), null, new ReflectionMethod(__CLASS__, 'testException1'), new DocBlock());
     }
 
@@ -37,8 +38,8 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
             $this->getTypeMapper()
         );
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage("Don't know how to handle type iterable");
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Iterable compound type cannot be alone in the compound.');
         $compoundTypeMapper->toGraphQLOutputType(new Compound([new Iterable_()]), null, new ReflectionMethod(__CLASS__, 'testException1'), new DocBlock());
     }
 

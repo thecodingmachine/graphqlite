@@ -16,6 +16,7 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
 use ReflectionMethod;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
@@ -63,9 +64,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         }
 
         $filteredDocBlockTypes = iterator_to_array($type);
-        if (empty($filteredDocBlockTypes)) {
-            throw TypeMappingRuntimeException::createFromType($type);
-        }
+        Assert::notEmpty($filteredDocBlockTypes);
 
         $unionTypes    = [];
         $lastException = null;
@@ -79,7 +78,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         }
 
         if ($mustBeIterable && empty($unionTypes)) {
-            throw TypeMappingRuntimeException::createFromType(new Iterable_());
+            throw new RuntimeException('Iterable compound type cannot be alone in the compound.');
         }
 
         $return = $this->getTypeFromUnion($unionTypes);
