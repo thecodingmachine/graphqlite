@@ -21,8 +21,8 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     {
         $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage("Don't know how to handle type ?\Exception");
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage("don't know how to handle type ?\Exception");
         $baseTypeMapper->toGraphQLInputType(new Nullable(new Object_(new Fqsen('\\Exception'))), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
@@ -39,8 +39,8 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     {
         $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage("Don't know how to handle type resource");
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage("don't know how to handle type resource");
         $mappedType = $baseTypeMapper->toGraphQLOutputType(new Array_(new Resource_()), null, new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
@@ -48,8 +48,8 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     {
         $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage("Don't know how to handle type resource");
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage("don't know how to handle type resource");
         $mappedType = $baseTypeMapper->toGraphQLInputType(new Array_(new Resource_()), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 }

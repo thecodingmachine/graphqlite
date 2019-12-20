@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use phpDocumentor\Reflection\Type;
-use phpDocumentor\Reflection\Types\Compound;
-use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
 use ReflectionParameter;
-use Webmozart\Assert\Assert;
 use function get_class;
-use function sprintf;
 
 class TypeMappingRuntimeException extends GraphQLRuntimeException
 {

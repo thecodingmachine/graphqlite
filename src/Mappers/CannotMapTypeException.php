@@ -159,4 +159,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     {
         return new self('parameter is type-hinted to "' . $type . '". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.');
     }
+
+    public static function createForPhpDocType(PhpDocumentorType $type): self
+    {
+        return new self("don't know how to handle type " . (string) $type);
+    }
 }
