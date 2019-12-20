@@ -149,4 +149,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     {
         return new self('type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
     }
+
+    public static function createForNull(): self
+    {
+        return new self('type-hinting against null only in the PHPDoc is not allowed.');
+    }
 }

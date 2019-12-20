@@ -35,8 +35,8 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
     {
         $compoundTypeMapper = $this->getRootTypeMapper();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Don\'t know how to handle type null');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('type-hinting against null only in the PHPDoc is not allowed.');
         $compoundTypeMapper->toGraphQLOutputType($this->resolveType('null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 
@@ -44,8 +44,8 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
     {
         $compoundTypeMapper = $this->getRootTypeMapper();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Don\'t know how to handle type null');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('type-hinting against null only in the PHPDoc is not allowed.');
         $compoundTypeMapper->toGraphQLInputType($this->resolveType('null'), null, 'foo', new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 }
