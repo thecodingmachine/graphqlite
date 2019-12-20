@@ -19,12 +19,9 @@ use function is_array;
  *   @Attribute("logged", type = "bool"),
  *   @Attribute("right", type = "TheCodingMachine\GraphQLite\Annotations\Right"),
  *   @Attribute("outputType", type = "string"),
- *   @Attribute("isId", type = "bool"),
  *   @Attribute("failWith", type = "mixed"),
  *   @Attribute("annotations", type = "mixed"),
  * })
- *
- * FIXME: remove idId since outputType="ID" is equivalent
  */
 class SourceField implements SourceFieldInterface
 {

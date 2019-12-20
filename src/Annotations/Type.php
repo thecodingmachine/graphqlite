@@ -22,7 +22,6 @@ use function ltrim;
  *   @Attribute("name", type = "string"),
  *   @Attribute("default", type = "bool"),
  *   @Attribute("external", type = "bool"),
- *   @Attribute("disableInheritance", type = "bool")
  * })
  */
 class Type
@@ -35,9 +34,6 @@ class Type
 
     /** @var bool */
     private $default;
-
-    /** @var bool */
-    private $disableInheritance;
 
     /**
      * Is the class having the annotation a GraphQL type itself?
@@ -62,8 +58,6 @@ class Type
 
         // If no value is passed for default, "default" = true
         $this->default = $attributes['default'] ?? true;
-
-        $this->disableInheritance = $attributes['disableInheritance'] ?? false;
 
         if ($external === null) {
             return;
@@ -102,9 +96,6 @@ class Type
         if ($this->default === false) {
             throw new GraphQLRuntimeException('Problem in annotation @Type for interface "' . $class . '": you cannot use the default="false" attribute on interfaces');
         }
-        if ($this->disableInheritance === true) {
-            throw new GraphQLRuntimeException('Problem in annotation @Type for interface "' . $class . '": you cannot use the disableInheritance="true" attribute on interfaces');
-        }
     }
 
     public function isSelfType(): bool
@@ -126,13 +117,5 @@ class Type
     public function isDefault(): bool
     {
         return $this->default;
-    }
-
-    /**
-     * Returns true if the parent type fields should be ignored.
-     */
-    public function isInheritanceDisabled(): bool
-    {
-        return $this->disableInheritance;
     }
 }
