@@ -726,8 +726,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Parameter $dateTime in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For parameter $dateTime, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime::test, type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
         $queries = $queryProvider->getQueries($controller);
     }
 
@@ -737,8 +737,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $this->expectException(TypeMappingRuntimeException::class);
-        $this->expectExceptionMessage('Return type in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime::test is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime::test, type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
         $queries = $queryProvider->getQueries($controller);
     }
 

@@ -144,4 +144,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
         return new self(sprintf('please provide an additional @param in the PHPDoc block to further specify the type of the %s. For instance: @param string[] $%s.', $typeStr, $argumentName));
     }
+
+    public static function createForDateTime(): self
+    {
+        return new self('type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
+    }
 }

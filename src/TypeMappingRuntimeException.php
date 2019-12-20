@@ -31,6 +31,7 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
         $declaringClass = $parameter->getDeclaringClass();
         Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
 
+        $message = '';
         if ($previous->type instanceof Compound) {
             $message = sprintf(
                 'Parameter $%s in %s::%s is type-hinted to "' . $previous->type . '". Type-hinting a parameter to a union type is forbidden in GraphQL. Only return types can be union types.',
@@ -40,19 +41,6 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
             );
         } elseif (! ($previous->type instanceof Object_)) {
             throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
-        } else {
-            $fqcn     = (string) $previous->type->getFqsen();
-
-            if ($fqcn !== '\\DateTime') {
-                throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a '" . $fqcn . '"');
-            }
-
-            $message = sprintf(
-                'Parameter $%s in %s::%s is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.',
-                $parameter->getName(),
-                $declaringClass->getName(),
-                $parameter->getDeclaringFunction()->getName()
-            );
         }
 
         $e       = new self($message, 0, $previous);
@@ -63,24 +51,9 @@ class TypeMappingRuntimeException extends GraphQLRuntimeException
 
     public static function wrapWithReturnInfo(TypeMappingRuntimeException $previous, ReflectionMethod $method): TypeMappingRuntimeException
     {
-        if (! ($previous->type instanceof Object_)) {
+        //if (! ($previous->type instanceof Object_)) {
             throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got '" . get_class($previous->type) . '"');
-        }
 
-        $fqcn     = (string) $previous->type->getFqsen();
-        if ($fqcn !== '\\DateTime') {
-            throw new GraphQLRuntimeException("Unexpected type in TypeMappingException. Got a '" . $fqcn . '"');
-        }
-
-        $message = sprintf(
-            'Return type in %s::%s is type-hinted to "DateTime". Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.',
-            $method->getDeclaringClass()->getName(),
-            $method->getName()
-        );
-
-        $e       = new self($message, 0, $previous);
-        $e->type = $previous->type;
-
-        return $e;
+        //}
     }
 }

@@ -11,6 +11,7 @@ use phpDocumentor\Reflection\Types\Resource_;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\TypeMappingRuntimeException;
 
 class BaseTypeMapperTest extends AbstractQueryProviderTest
@@ -29,9 +30,8 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     {
         $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
-        $this->expectException(GraphQLRuntimeException::class);
-        //$this->expectExceptionMessage('Type-hinting a parameter against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
-        $this->expectExceptionMessage('Don\'t know how to handle type \DateTime');
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage("type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.");
         $baseTypeMapper->toGraphQLInputType(new Object_(new Fqsen('\\DateTime')), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
