@@ -28,6 +28,7 @@ use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockRuntimeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
@@ -179,7 +180,7 @@ class TypeHandler implements ParameterHandlerInterface
         if ($innerType instanceof Array_ || $innerType instanceof Iterable_ || $innerType instanceof Mixed_) {
             // We need to use the docBlockType
             if ($docBlockType === null) {
-                throw TypeMappingRuntimeException::createFromType($type);
+                throw CannotMapTypeException::createForMissingPhpDoc($innerType, $refMethod, $argumentName);
             }
             if ($mapToInputType === true) {
                 Assert::notNull($argumentName);
