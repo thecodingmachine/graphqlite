@@ -20,6 +20,12 @@ class MagicFieldTest extends TestCase
         new MagicField(['name'=>'test', 'outputType'=>'String!', 'annotations'=>new Field()]);
     }
 
+    public function testExceptionInConstruct3(): void
+    {
+        $this->expectException(BadMethodCallException::class);
+        new MagicField(['name'=>'test', 'phpType'=>'string', 'outputType'=>'String!']);
+    }
+
     public function testAnnotations(): void
     {
         $magicField = new MagicField(['name'=>'test', 'outputType'=>'String!', 'annotations'=>[new Logged(), new Autowire(['for'=>'foo'])]]);

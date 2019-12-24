@@ -19,4 +19,10 @@ class SourceFieldTest extends TestCase
         $this->expectException(BadMethodCallException::class);
         new SourceField(['name'=>'test', 'annotations'=>new Field()]);
     }
+
+    public function testExceptionInConstruct3(): void
+    {
+        $this->expectException(BadMethodCallException::class);
+        new SourceField(['name'=>'test', 'phpType'=>'string', 'outputType'=>'String!']);
+    }
 }
