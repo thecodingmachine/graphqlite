@@ -160,7 +160,68 @@ iterate over it.</div>
 }
 </code></pre>
 <p>The behaviour will be exactly the same except you will be missing the <code>totalCount</code> and <code>lastPage</code> fields.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/symfony-bundle-advanced"><span class="arrow-prev">← </span><span>Symfony specific features</span></a><a class="docs-next button" href="/docs/next/internals"><span>Internals</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#support-for-laravel-validation-rules">Support for Laravel validation rules</a></li><li><a href="#support-for-pagination">Support for pagination</a><ul class="toc-headings"><li><a href="#simple-paginator">Simple paginator</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="using-graphqlite-with-eloquent-efficiently"></a><a href="#using-graphqlite-with-eloquent-efficiently" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using GraphQLite with Eloquent efficiently</h2>
+<p>In GraphQLite, you are supposed to put a <code>@Field</code> annotation on each getter.</p>
+<p>Eloquent uses PHP magic properties to expose your database records.
+Because Eloquent relies on magic properties, it is quite rare for an Eloquent model to have proper getters and setters.</p>
+<p>So we need to find a workaround. GraphQLite comes with a <code>@MagicField</code> annotation to help you
+working with magic properties.</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@Type</span>()
+ * <span class="hljs-doctag">@MagicField</span>(name="id" outputType="ID!")
+ * <span class="hljs-doctag">@MagicField</span>(name="name" phpType="string")
+ * <span class="hljs-doctag">@MagicField</span>(name="categories" phpType="Category[]")
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span>
+</span>{
+}
+</code></pre>
+<p>Please note that since the properties are &quot;magic&quot;, they don't have a type. Therefore,
+you need to pass either the &quot;outputType&quot; attribute with the GraphQL type matching the property,
+or the &quot;phpType&quot; attribute with the PHP type matching the property.</p>
+<h3><a class="anchor" aria-hidden="true" id="pitfalls-to-avoid-with-eloquent"></a><a href="#pitfalls-to-avoid-with-eloquent" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pitfalls to avoid with Eloquent</h3>
+<p>When designing relationships in Eloquent, you write a method to expose that relationship this way:</p>
+<pre><code class="hljs css language-php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span>
+</span>{
+    <span class="hljs-comment">/**
+     * Get the phone record associated with the user.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">phone</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;hasOne(<span class="hljs-string">'App\Phone'</span>);
+    }
+}
+</code></pre>
+<p>It would be tempting to put a <code>@Field</code> annotation on the <code>phone()</code> method, but this will not work. Indeed,
+the <code>phone()</code> method does not return a <code>App\Phone</code> object. It is the <code>phone</code> magic property that returns it.</p>
+<p>In short:</p>
+<div class="alert alert-error">This does not work:
+<pre><code class="hljs css language-php">
+class User extends Model
+{
+    /**
+     * @Field
+     */
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}</code></pre>
+</div>
+<div class="alert alert-success">This works:
+<pre><code class="hljs css language-php">
+/**
+ * @MagicField(name="phone", phpType="App\\Phone")
+ */
+class User extends Model
+{
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}</code></pre>
+</div>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/symfony-bundle-advanced"><span class="arrow-prev">← </span><span>Symfony specific features</span></a><a class="docs-next button" href="/docs/next/internals"><span>Internals</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#support-for-laravel-validation-rules">Support for Laravel validation rules</a></li><li><a href="#support-for-pagination">Support for pagination</a><ul class="toc-headings"><li><a href="#simple-paginator">Simple paginator</a></li></ul></li><li><a href="#using-graphqlite-with-eloquent-efficiently">Using GraphQLite with Eloquent efficiently</a><ul class="toc-headings"><li><a href="#pitfalls-to-avoid-with-eloquent">Pitfalls to avoid with Eloquent</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2019 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
