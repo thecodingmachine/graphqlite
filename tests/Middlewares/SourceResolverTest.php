@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
-class ServiceResolverTest extends TestCase
+class SourceResolverTest extends TestCase
 {
 
     public function testExceptionInInvoke()

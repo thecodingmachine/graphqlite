@@ -49,7 +49,7 @@ class MagicPropertyResolver implements ResolverInterface
     public function __invoke(...$args)
     {
         if ($this->object === null) {
-            throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
+            throw new GraphQLRuntimeException('You must call "setObject" on MagicPropertyResolver before invoking the object.');
         }
         if (! method_exists($this->object, '__get')) {
             throw MissingMagicGetException::cannotFindMagicGet(get_class($this->object));

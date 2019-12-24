@@ -26,6 +26,16 @@ class QueryFieldDescriptorTest extends TestCase
         $descriptor->setTargetMethodOnSource('test');
     }
 
+    public function testExceptionInSetMagicProperty(): void
+    {
+        $descriptor = new QueryFieldDescriptor();
+        $descriptor->setMagicProperty('test');
+        $descriptor->getResolver();
+
+        $this->expectException(GraphQLRuntimeException::class);
+        $descriptor->setMagicProperty('test');
+    }
+
     public function testExceptionInGetOriginalResolver(): void
     {
         $descriptor = new QueryFieldDescriptor();

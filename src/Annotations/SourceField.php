@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
-use function array_key_exists;
 use function array_map;
 use function is_array;
 
@@ -17,7 +16,6 @@ use function is_array;
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("outputType", type = "string"),
- *   @Attribute("failWith", type = "mixed"),
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
@@ -64,9 +62,6 @@ class SourceField implements SourceFieldInterface
         $this->parameterAnnotations = array_map(static function (array $parameterAnnotationsForAttribute): ParameterAnnotations {
             return new ParameterAnnotations($parameterAnnotationsForAttribute);
         }, $parameterAnnotations);
-        if (! array_key_exists('failWith', $attributes)) {
-            return;
-        }
     }
 
     /**
