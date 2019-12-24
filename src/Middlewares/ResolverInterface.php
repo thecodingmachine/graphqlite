@@ -13,7 +13,7 @@ interface ResolverInterface
 {
     public function getObject(): object;
 
-    public function getMethodName(): string;
+    public function toString(): string;
 
     /**
      * @param mixed $args

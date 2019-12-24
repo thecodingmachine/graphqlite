@@ -9,6 +9,7 @@ use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\Context;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\SimpleCache\CacheInterface;
+use ReflectionClass;
 use ReflectionMethod;
 use Webmozart\Assert\Assert;
 use function filemtime;
@@ -90,5 +91,45 @@ class CachedDocBlockFactory
         }
 
         return $this->docBlockFactory->create($docComment, $this->contextArrayCache[$refClassName]);
+    }
+
+    /**
+     * @param ReflectionClass<object> $reflectionClass
+     */
+    public function getContextFromClass(ReflectionClass $reflectionClass): Context
+    {
+        $className = $reflectionClass->getName();
+        if (isset($this->contextArrayCache[$className])) {
+            return $this->contextArrayCache[$className];
+        }
+
+        $key = 'docblockcontext_' . md5($className);
+
+        $fileName = $reflectionClass->getFileName();
+        Assert::string($fileName);
+
+        $cacheItem = $this->cache->get($key);
+        if ($cacheItem !== null) {
+            [
+                'time' => $time,
+                'context' => $context,
+            ] = $cacheItem;
+
+            if (filemtime($fileName) === $time) {
+                $this->contextArrayCache[$className] = $context;
+
+                return $context;
+            }
+        }
+
+        $context = $this->contextFactory->createFromReflector($reflectionClass);
+
+        $this->cache->set($key, [
+            'time' => filemtime($fileName),
+            'context' => $context,
+        ]);
+
+        $this->contextArrayCache[$className] = $context;
+        return $context;
     }
 }

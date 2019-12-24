@@ -13,7 +13,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 /**
  * @ExtendType(name="ContactOther")
- * @SourceField(name="name")
+ * @SourceField(name="name", phpType="string")
  */
 class ExtendedContactOtherType
 {

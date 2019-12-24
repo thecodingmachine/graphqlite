@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 
+use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use function array_search;
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -20,6 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
 /**
  * @Type()
+ * @MagicField(name="magicNumber", phpType="int")
  */
 class Contact
 {
@@ -52,11 +54,8 @@ class Contact
     {
         $this->name = $name;
     }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
+    
+    public function getName()
     {
         return $this->name;
     }
@@ -109,7 +108,7 @@ class Contact
     /**
      * @return DateTimeInterface
      */
-    public function getBirthDate(): DateTimeInterface
+    public function getBirthDate()
     {
         return $this->birthDate;
     }
@@ -207,5 +206,10 @@ class Contact
             return 'KO';
         }
         return 'OK';
+    }
+
+    public function __get(string $property)
+    {
+        return 42;
     }
 }

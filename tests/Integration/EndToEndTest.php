@@ -1282,4 +1282,35 @@ class EndToEndTest extends TestCase
         $this->assertEquals('unicorn', $resultArray['data']['getProducts2'][0]['special']);
     }
 
+    public function testEndToEndMagicFieldWithPhpType(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contacts {
+                magicNumber
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'contacts' => [
+                [
+                    'magicNumber' => 42,
+                ],
+                [
+                    'magicNumber' => 42,
+                ],
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
 }

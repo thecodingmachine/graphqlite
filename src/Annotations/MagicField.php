@@ -20,7 +20,7 @@ use function is_array;
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
-class SourceField implements SourceFieldInterface
+class MagicField implements SourceFieldInterface
 {
     /** @var string */
     private $name;
@@ -42,13 +42,13 @@ class SourceField implements SourceFieldInterface
      */
     public function __construct(array $attributes = [])
     {
-        if (! isset($attributes['name'])) {
-            throw new BadMethodCallException('The @SourceField annotation must be passed a name. For instance: "@SourceField(name=\'phone\')"');
+        if (! isset($attributes['name']) || (! isset($attributes['outputType']) && ! isset($attributes['phpType']))) {
+            throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type or a php type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
         }
         if (isset($attributes['outputType']) && isset($attributes['phpType'])) {
-            throw new BadMethodCallException('In a @SourceField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@SourceField(name=\'phone\', outputType=\'String!\')" or "@SourceField(name=\'phone\', phpType=\'string\')"');
+            throw new BadMethodCallException('In a @MagicField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
         }
-        $this->name       = $attributes['name'];
+        $this->name = $attributes['name'];
         $this->outputType = $attributes['outputType'] ?? null;
         $this->phpType = $attributes['phpType'] ?? null;
         $middlewareAnnotations = [];
@@ -63,7 +63,7 @@ class SourceField implements SourceFieldInterface
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
                 $parameterAnnotations[$annotation->getTarget()][] = $annotation;
             } else {
-                throw new BadMethodCallException('The @SourceField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+                throw new BadMethodCallException('The @MagicField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
             }
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);
@@ -81,7 +81,7 @@ class SourceField implements SourceFieldInterface
     }
 
     /**
-     * Returns the GraphQL return type of the request (as a string).
+     * Returns the GraphQL return type of the property (as a string).
      * The string is the GraphQL output type name.
      */
     public function getOutputType(): ?string
@@ -89,6 +89,10 @@ class SourceField implements SourceFieldInterface
         return $this->outputType;
     }
 
+    /**
+     * Returns the PHP return type of the property (as a string).
+     * The string is the PHPDoc for the PHP type.
+     */
     public function getPhpType(): ?string
     {
         return $this->phpType;
@@ -109,6 +113,6 @@ class SourceField implements SourceFieldInterface
 
     public function shouldFetchFromMagicProperty(): bool
     {
-        return false;
+        return true;
     }
 }

@@ -73,7 +73,25 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
 [outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
+phpType        | *no*       | string | The PHP type of the field (as you would write it in a Docblock)
 annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+
+**Note**: `outputType` and `phpType` are mutually exclusive.
+
+## @MagicField annotation
+
+The `@MagicField` annotation is used to declare a GraphQL field that originates from a PHP magic property (using `__get` magic method).
+
+**Applies on**: classes annotated with `@Type` or `@ExtendType`.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+name           | *yes*       | string | The name of the field.
+[outputType](custom_output_types.md)  | *no*(*)       | string | The GraphQL output type of the field.
+phpType     | *no*(*)       | string | The PHP type of the field (as you would write it in a Docblock)
+annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+
+(*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
 ## @Logged annotation
 

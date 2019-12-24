@@ -53,6 +53,7 @@ You can use the `outputType` attribute in the following annotations:
 * `@Mutation`
 * `@Field`
 * `@SourceField`
+* `@MagicField`
 
 ## Registering a custom output type (advanced)
 

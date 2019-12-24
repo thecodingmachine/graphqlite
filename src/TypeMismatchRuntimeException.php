@@ -32,8 +32,8 @@ class TypeMismatchRuntimeException extends GraphQLRuntimeException
         return new self('Expected resolved value to be an object but got "' . gettype($result) . '"');
     }
 
-    public function addInfo(string $fieldName, string $className, string $methodName): void
+    public function addInfo(string $fieldName, string $location): void
     {
-        $this->message = 'In ' . $className . '::' . $methodName . '() (declaring field "' . $fieldName . '"): ' . $this->message;
+        $this->message = 'In ' . $location . ' (declaring field "' . $fieldName . '"): ' . $this->message;
     }
 }

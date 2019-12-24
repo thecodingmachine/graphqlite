@@ -25,7 +25,7 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
             '%s in GraphQL input type \'%s\' used in factory \'%s\'',
             $previous->getMessage(),
             $inputType,
-            self::toMethod($callable)
+            self::toLocation($callable)
         );
 
         return new self($message, 0, $previous);
@@ -37,7 +37,7 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
             '%s in GraphQL input type \'%s\' used in decorator \'%s\'',
             $previous->getMessage(),
             $inputType,
-            self::toMethod($callable)
+            self::toLocation($callable)
         );
 
         return new self($message, 0, $previous);
@@ -49,20 +49,16 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
             '%s in GraphQL query/mutation/field \'%s\' used in method \'%s\'',
             $previous->getMessage(),
             $name,
-            self::toMethod($callable)
+            self::toLocation($callable)
         );
 
         return new self($message, 0, $previous);
     }
 
-    private static function toMethod(callable $callable): string
+    private static function toLocation(callable $callable): string
     {
-        // TODO: is $callable not only a ResolverInterface ???
-        // TODO: is $callable not only a ResolverInterface ???
-        // TODO: is $callable not only a ResolverInterface ???
-        // TODO: CHECK CODE COVERAGE!
         if ($callable instanceof ResolverInterface) {
-            return get_class($callable->getObject()) . '::' . $callable->getMethodName() . '()';
+            return $callable->toString();
         }
         if (! is_array($callable)) {
             return '';
