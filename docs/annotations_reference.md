@@ -75,6 +75,18 @@ name           | *yes*       | string | The name of the field.
 [outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
+## @MagicField annotation
+
+The `@MagicField` annotation is used to declare a GraphQL field that originates from a PHP magic property (using `__get` magic method).
+
+**Applies on**: classes annotated with `@Type` or `@ExtendType`.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+name           | *yes*       | string | The name of the field.
+[outputType](custom_output_types.md)     | *yes*       | string | The GraphQL output type of the field.
+annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+
 ## @Logged annotation
 
 The `@Logged` annotation is used to declare a Query/Mutation/Field is only visible to logged users.

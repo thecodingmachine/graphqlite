@@ -21,7 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use Webmozart\Assert\Assert;
 use function array_diff_key;
@@ -124,14 +124,14 @@ class AnnotationReader
     /**
      * @param ReflectionClass<T> $refClass
      *
-     * @return SourceField[]
+     * @return SourceFieldInterface[]
      *
      * @template T of object
      */
     public function getSourceFields(ReflectionClass $refClass): array
     {
-        /** @var SourceField[] $sourceFields */
-        $sourceFields = $this->getClassAnnotations($refClass, SourceField::class);
+        /** @var SourceFieldInterface[] $sourceFields */
+        $sourceFields = $this->getClassAnnotations($refClass, SourceFieldInterface::class);
 
         return $sourceFields;
     }

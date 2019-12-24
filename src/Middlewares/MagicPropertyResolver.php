@@ -8,24 +8,25 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use Webmozart\Assert\Assert;
 use function get_class;
 use function is_object;
+use function method_exists;
 
 /**
- * A class that represents a callable on an object.
+ * A class that represents a magic property of an object.
  * The object can be modified after class invocation.
  *
  * @internal
  */
-class SourceResolver implements ResolverInterface
+class MagicPropertyResolver implements ResolverInterface
 {
     /** @var string */
-    private $methodName;
+    private $propertyName;
 
     /** @var object|null */
     private $object;
 
-    public function __construct(string $methodName)
+    public function __construct(string $propertyName)
     {
-        $this->methodName = $methodName;
+        $this->propertyName = $propertyName;
     }
 
     public function setObject(object $object): void
@@ -50,10 +51,11 @@ class SourceResolver implements ResolverInterface
         if ($this->object === null) {
             throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
         }
-        $callable = [$this->object, $this->methodName];
-        Assert::isCallable($callable);
+        if (! method_exists($this->object, '__get')) {
+            throw MissingMagicGetException::cannotFindMagicGet(get_class($this->object));
+        }
 
-        return $callable(...$args);
+        return $this->object->__get($this->propertyName);
     }
 
     public function toString(): string
@@ -63,6 +65,6 @@ class SourceResolver implements ResolverInterface
             $class = get_class($class);
         }
 
-        return $class . '::' . $this->methodName . '()';
+        return $class . '::__get(\'' . $this->propertyName . '\')';
     }
 }

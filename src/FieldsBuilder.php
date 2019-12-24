@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionClass;
 use ReflectionException;
@@ -15,7 +17,6 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -113,7 +114,7 @@ class FieldsBuilder
 
         $refClass = new ReflectionClass($controller);
 
-        /** @var SourceField[] $sourceFields */
+        /** @var SourceFieldInterface[] $sourceFields */
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         if ($controller instanceof FromSourceFieldsInterface) {
@@ -143,7 +144,7 @@ class FieldsBuilder
 
         $refClass = new ReflectionClass($className);
 
-        /** @var SourceField[] $sourceFields */
+        /** @var SourceFieldInterface[] $sourceFields */
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
@@ -338,15 +339,13 @@ class FieldsBuilder
 
     /**
      * @param SourceFieldInterface[] $sourceFields
-     * @param ReflectionClass<T> $refClass
+     * @param ReflectionClass<object> $refClass
      *
      * @return FieldDefinition[]
      *
      * @throws CannotMapTypeException
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
-     *
-     * @template T of object
      */
     private function getQueryFieldsFromSourceFields(array $sourceFields, ReflectionClass $refClass): array
     {
@@ -385,39 +384,38 @@ class FieldsBuilder
         $queryList         = [];
 
         foreach ($sourceFields as $sourceField) {
-            try {
-                $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
-            } catch (FieldNotFoundException $e) {
-                throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
-            }
-
             $fieldDescriptor = new QueryFieldDescriptor();
-            $fieldDescriptor->setRefMethod($refMethod);
             $fieldDescriptor->setName($sourceField->getName());
 
-            $methodName = $refMethod->getName();
-
-            $fieldDescriptor->setTargetMethodOnSource($methodName);
-
-            $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-            $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
-
-            $fieldDescriptor->setComment($docBlockComment);
-
-            $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
-
-            $fieldDescriptor->setParameters($args);
-
-            $outputType = $sourceField->getOutputType();
-            if ($outputType) {
+            if (! $sourceField->shouldFetchFromMagicProperty()) {
                 try {
-                    $type = $this->typeResolver->mapNameToOutputType($outputType);
-                } catch (CannotMapTypeExceptionInterface $e) {
-                    $e->addSourceFieldInfo($refClass, $sourceField);
-                    throw $e;
+                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
+                } catch (FieldNotFoundException $e) {
+                    throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
+                }
+                $fieldDescriptor->setRefMethod($refMethod);
+                $methodName = $refMethod->getName();
+                $fieldDescriptor->setTargetMethodOnSource($methodName);
+
+                $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+                $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+
+                $fieldDescriptor->setComment($docBlockComment);
+                $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
+
+                $fieldDescriptor->setParameters($args);
+
+                $outputType = $sourceField->getOutputType();
+                if ($outputType) {
+                    $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
+                } else {
+                    $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
             } else {
-                $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
+                $fieldDescriptor->setMagicProperty($sourceField->getName());
+                $outputType = $sourceField->getOutputType();
+                Assert::notNull($outputType);
+                $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
             }
 
             $fieldDescriptor->setType($type);
@@ -439,6 +437,21 @@ class FieldsBuilder
         }
 
         return $queryList;
+    }
+
+    /**
+     * @param ReflectionClass<object> $refClass
+     *
+     * @return OutputType&Type
+     */
+    private function resolveOutputType(string $outputType, ReflectionClass $refClass, SourceFieldInterface $sourceField): OutputType
+    {
+        try {
+            return $this->typeResolver->mapNameToOutputType($outputType);
+        } catch (CannotMapTypeExceptionInterface $e) {
+            $e->addSourceFieldInfo($refClass, $sourceField);
+            throw $e;
+        }
     }
 
     /**

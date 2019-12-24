@@ -72,6 +72,35 @@ By doing so, you let GraphQLite know that the type exposes the `getName` method 
 
 Internally, GraphQLite will look for methods named `name()`, `getName()` and `isName()`).
 
+## `@MagicField` annotation
+
+If your object has no getters, but instead uses magic properties (using the magic `__get` method), you should use the `@MagicField` annotation:
+
+```php
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use App\Entities\Product;
+
+/**
+ * @Type()
+ * @MagicField(name="name", outputType="String!")
+ * @MagicField(name="price", outputType="Float")
+ */
+class ProductType
+{
+    public function __get(string $property) {
+        // return some magic property
+    }
+}
+```
+
+By doing so, you let GraphQLite know that the type exposes "name" and the "price" magic properties of the underlying `Product` object.
+
+This is particularly useful in frameworks like Laravel, where Eloquent is making a very wide use of such properties.
+
+Please note that GraphQLite has no way to know the type of a magic property. Therefore, you have specify the GraphQL type
+of each property manually.
+
 ### Authentication and authorization
 
 You may also check for logged users or users with a specific right using the "annotations" property.

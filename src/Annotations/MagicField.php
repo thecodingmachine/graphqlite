@@ -21,12 +21,12 @@ use function is_array;
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
-class SourceField implements SourceFieldInterface
+class MagicField implements SourceFieldInterface
 {
     /** @var string */
     private $name;
 
-    /** @var string|null */
+    /** @var string */
     private $outputType;
 
     /** @var MiddlewareAnnotations */
@@ -40,11 +40,11 @@ class SourceField implements SourceFieldInterface
      */
     public function __construct(array $attributes = [])
     {
-        if (! isset($attributes['name'])) {
-            throw new BadMethodCallException('The @SourceField annotation must be passed a name. For instance: "@SourceField(name=\'phone\')"');
+        if (! isset($attributes['name']) || ! isset($attributes['outputType'])) {
+            throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')"');
         }
         $this->name       = $attributes['name'];
-        $this->outputType = $attributes['outputType'] ?? null;
+        $this->outputType = $attributes['outputType'];
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
         $annotations = $attributes['annotations'] ?? [];
@@ -57,7 +57,7 @@ class SourceField implements SourceFieldInterface
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
                 $parameterAnnotations[$annotation->getTarget()][] = $annotation;
             } else {
-                throw new BadMethodCallException('The @SourceField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+                throw new BadMethodCallException('The @MagicField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
             }
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);
@@ -81,7 +81,7 @@ class SourceField implements SourceFieldInterface
      * Returns the GraphQL return type of the request (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType(): ?string
+    public function getOutputType(): string
     {
         return $this->outputType;
     }
@@ -101,6 +101,6 @@ class SourceField implements SourceFieldInterface
 
     public function shouldFetchFromMagicProperty(): bool
     {
-        return false;
+        return true;
     }
 }

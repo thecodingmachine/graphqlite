@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
+use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
@@ -35,6 +36,8 @@ class QueryFieldDescriptor
     private $callable;
     /** @var string|null */
     private $targetMethodOnSource;
+    /** @var string|null */
+    private $magicProperty;
     /**
      * Whether we should inject the source as the first parameter or not.
      *
@@ -134,15 +137,27 @@ class QueryFieldDescriptor
         }
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
+        $this->magicProperty = null;
     }
 
-    public function setTargetMethodOnSource(?string $targetMethodOnSource): void
+    public function setTargetMethodOnSource(string $targetMethodOnSource): void
     {
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
+        $this->magicProperty = null;
+    }
+
+    public function setMagicProperty(string $magicProperty): void
+    {
+        if ($this->originalResolver !== null) {
+            throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
+        }
+        $this->callable = null;
+        $this->targetMethodOnSource = null;
+        $this->magicProperty = $magicProperty;
     }
 
     public function isInjectSource(): bool
@@ -198,8 +213,10 @@ class QueryFieldDescriptor
             $this->originalResolver = new ServiceResolver($this->callable);
         } elseif ($this->targetMethodOnSource !== null) {
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
+        } elseif ($this->magicProperty !== null) {
+            $this->originalResolver = new MagicPropertyResolver($this->magicProperty);
         } else {
-            throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
+            throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource) or a magic property (via setMagicProperty).');
         }
 
         return $this->originalResolver;

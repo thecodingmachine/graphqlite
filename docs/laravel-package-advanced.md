@@ -125,3 +125,28 @@ class MyController
 ```
 
 The behaviour will be exactly the same except you will be missing the `totalCount` and `lastPage` fields.
+
+## Using GraphQLite with Eloquent efficiently
+
+In GraphQLite, you are supposed to put a `@Field` annotation on each getter.
+
+Eloquent uses PHP magic properties to expose your database records.
+Because Eloquent relies on magic properties, it is quite rare for an Eloquent model to have proper getters and setters.
+
+So we need to find a workaround. GraphQLite comes with a `@MagicField` annotation to help you
+working with magic properties.
+
+```php
+/**
+ * @Type()
+ * @MagicField(name="id" outputType="ID!")
+ * @MagicField(name="name" outputType="String!")
+ * @MagicField(name="category" outputType="Category")
+ */
+class Product extends Model
+{
+}
+```
+
+Please note that since the properties are "magic", they don't have a type. Therefore,
+you need to pass the "outputType" attribute with the GraphQL type matching the property.

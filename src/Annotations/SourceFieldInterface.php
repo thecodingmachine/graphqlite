@@ -26,4 +26,10 @@ interface SourceFieldInterface
      * @return array<string, ParameterAnnotations> Key: the name of the attribute
      */
     public function getParameterAnnotations(): array;
+
+    /**
+     * If true, this source field should be fetched from a magic property (rather than from a getter)
+     * In this case, getOutputType MUST NOT return null.
+     */
+    public function shouldFetchFromMagicProperty(): bool;
 }
