@@ -16,6 +16,7 @@ use function is_array;
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("outputType", type = "string"),
+ *   @Attribute("phpType", type = "string"),
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
@@ -24,8 +25,11 @@ class MagicField implements SourceFieldInterface
     /** @var string */
     private $name;
 
-    /** @var string */
+    /** @var string|null */
     private $outputType;
+
+    /** @var string|null */
+    private $phpType;
 
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
@@ -38,11 +42,15 @@ class MagicField implements SourceFieldInterface
      */
     public function __construct(array $attributes = [])
     {
-        if (! isset($attributes['name']) || ! isset($attributes['outputType'])) {
-            throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')"');
+        if (! isset($attributes['name']) || (! isset($attributes['outputType']) && ! isset($attributes['phpType']))) {
+            throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type or a php type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
         }
-        $this->name       = $attributes['name'];
-        $this->outputType = $attributes['outputType'];
+        if (isset($attributes['outputType']) && isset($attributes['phpType'])) {
+            throw new BadMethodCallException('In a @MagicField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
+        }
+        $this->name = $attributes['name'];
+        $this->outputType = $attributes['outputType'] ?? null;
+        $this->phpType = $attributes['phpType'] ?? null;
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
         $annotations = $attributes['annotations'] ?? [];
@@ -73,12 +81,21 @@ class MagicField implements SourceFieldInterface
     }
 
     /**
-     * Returns the GraphQL return type of the request (as a string).
+     * Returns the GraphQL return type of the property (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType(): string
+    public function getOutputType(): ?string
     {
         return $this->outputType;
+    }
+
+    /**
+     * Returns the PHP return type of the property (as a string).
+     * The string is the PHPDoc for the PHP type.
+     */
+    public function getPhpType(): ?string
+    {
+        return $this->phpType;
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

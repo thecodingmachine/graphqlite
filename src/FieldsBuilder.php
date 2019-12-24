@@ -406,16 +406,25 @@ class FieldsBuilder
                 $fieldDescriptor->setParameters($args);
 
                 $outputType = $sourceField->getOutputType();
-                if ($outputType) {
+                $phpTypeStr = $sourceField->getPhpType();
+                if ($outputType !== null) {
                     $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
+                } elseif ($phpTypeStr !== null) {
+                    $type = $this->resolvePhpType($phpTypeStr, $refClass, $refMethod);
                 } else {
                     $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
             } else {
                 $fieldDescriptor->setMagicProperty($sourceField->getName());
                 $outputType = $sourceField->getOutputType();
-                Assert::notNull($outputType);
-                $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
+                if ($outputType !== null) {
+                    $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
+                } else {
+                    $phpTypeStr = $sourceField->getPhpType();
+                    Assert::notNull($phpTypeStr);
+                    $refMethod = $refClass->getMethod('__get');
+                    $type = $this->resolvePhpType($phpTypeStr, $refClass, $refMethod);
+                }
             }
 
             $fieldDescriptor->setType($type);
@@ -452,6 +461,24 @@ class FieldsBuilder
             $e->addSourceFieldInfo($refClass, $sourceField);
             throw $e;
         }
+    }
+
+    /**
+     * @param ReflectionClass<object> $refClass
+     *
+     * @return OutputType&Type
+     */
+    private function resolvePhpType(string $phpTypeStr, ReflectionClass $refClass, ReflectionMethod $refMethod): OutputType
+    {
+        $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
+
+        $phpdocType = $typeResolver->resolve($phpTypeStr);
+        Assert::notNull($phpdocType);
+
+        $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $this->cachedDocBlockFactory->getContextFromClass($refClass));
+        return $this->typeMapper->mapReturnType($refMethod, $fakeDocBlock);
+
+        // TODO: add a catch to CannotMapTypeExceptionInterface and a "addMagicFieldInfo" method to know where the issues are coming from.
     }
 
     /**

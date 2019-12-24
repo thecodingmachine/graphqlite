@@ -16,6 +16,7 @@ use function is_array;
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("outputType", type = "string"),
+ *   @Attribute("phpType", type = "string"),
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
@@ -26,6 +27,9 @@ class SourceField implements SourceFieldInterface
 
     /** @var string|null */
     private $outputType;
+
+    /** @var string|null */
+    private $phpType;
 
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
@@ -41,8 +45,12 @@ class SourceField implements SourceFieldInterface
         if (! isset($attributes['name'])) {
             throw new BadMethodCallException('The @SourceField annotation must be passed a name. For instance: "@SourceField(name=\'phone\')"');
         }
+        if (isset($attributes['outputType']) && isset($attributes['phpType'])) {
+            throw new BadMethodCallException('In a @SourceField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@SourceField(name=\'phone\', outputType=\'String!\')" or "@SourceField(name=\'phone\', phpType=\'string\')"');
+        }
         $this->name       = $attributes['name'];
         $this->outputType = $attributes['outputType'] ?? null;
+        $this->phpType = $attributes['phpType'] ?? null;
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
         $annotations = $attributes['annotations'] ?? [];
@@ -79,6 +87,11 @@ class SourceField implements SourceFieldInterface
     public function getOutputType(): ?string
     {
         return $this->outputType;
+    }
+
+    public function getPhpType(): ?string
+    {
+        return $this->phpType;
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

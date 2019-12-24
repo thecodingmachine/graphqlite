@@ -140,8 +140,8 @@ working with magic properties.
 /**
  * @Type()
  * @MagicField(name="id" outputType="ID!")
- * @MagicField(name="name" outputType="String!")
- * @MagicField(name="category" outputType="Category")
+ * @MagicField(name="name" phpType="string")
+ * @MagicField(name="categories" phpType="Category[]")
  */
 class Product extends Model
 {
@@ -149,4 +149,55 @@ class Product extends Model
 ```
 
 Please note that since the properties are "magic", they don't have a type. Therefore,
-you need to pass the "outputType" attribute with the GraphQL type matching the property.
+you need to pass either the "outputType" attribute with the GraphQL type matching the property,
+or the "phpType" attribute with the PHP type matching the property.
+
+### Pitfalls to avoid with Eloquent
+
+When designing relationships in Eloquent, you write a method to expose that relationship this way:
+
+```php
+class User extends Model
+{
+    /**
+     * Get the phone record associated with the user.
+     */
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}
+```
+
+It would be tempting to put a `@Field` annotation on the `phone()` method, but this will not work. Indeed,
+the `phone()` method does not return a `App\Phone` object. It is the `phone` magic property that returns it.
+
+In short:
+
+<div class="alert alert-error">This does not work:
+<pre><code class="hljs css language-php">
+class User extends Model
+{
+    /**
+     * @Field
+     */
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}</code></pre>
+</div>
+
+<div class="alert alert-success">This works:
+<pre><code class="hljs css language-php">
+/**
+ * @MagicField(name="phone", phpType="App\\Phone")
+ */
+class User extends Model
+{
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}</code></pre>
+</div>

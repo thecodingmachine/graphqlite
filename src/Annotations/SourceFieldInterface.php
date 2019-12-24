@@ -15,10 +15,16 @@ interface SourceFieldInterface
     public function getName(): string;
 
     /**
-     * Returns the GraphQL return type of the request (as a string).
+     * Returns the GraphQL return type of the field (as a string).
      * The string is the GraphQL output type name.
      */
     public function getOutputType(): ?string;
+
+    /**
+     * Returns the PHP return type of the field (as a string).
+     * The string is the PHPDoc for the PHP type.
+     */
+    public function getPhpType(): ?string;
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations;
 
