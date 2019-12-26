@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Http;
 
 use Exception;
+use GraphQL\Error\ClientAware;
 use GraphQL\Error\Error;
 use GraphQL\Executor\ExecutionResult;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +33,19 @@ class HttpCodeDeciderTest extends TestCase
         $exception600 = new Exception('foo', 600);
         $errorCode600 = new Error('Foo', null, null, null, null, $exception600);
 
+        $clientAwareException = new class extends Exception implements ClientAware {
+            public function isClientSafe()
+            {
+                return true;
+            }
+
+            public function getCategory()
+            {
+                return 'foo';
+            }
+        };
+        $clientAwareError = new Error('Foo', null, null, null, null, $clientAwareException);
+
         $executionResult = new ExecutionResult(null, [ $errorCode0 ]);
         $this->assertSame(500, $codeDecider->decideHttpStatusCode($executionResult));
 
@@ -39,6 +53,9 @@ class HttpCodeDeciderTest extends TestCase
         $this->assertSame(404, $codeDecider->decideHttpStatusCode($executionResult));
 
         $executionResult = new ExecutionResult(null, [ $graphqlError ]);
+        $this->assertSame(400, $codeDecider->decideHttpStatusCode($executionResult));
+
+        $executionResult = new ExecutionResult(null, [ $clientAwareError ]);
         $this->assertSame(400, $codeDecider->decideHttpStatusCode($executionResult));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Http;
 
+use GraphQL\Error\ClientAware;
 use GraphQL\Executor\ExecutionResult;
 use function max;
 
@@ -28,8 +29,15 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
             if ($wrappedException !== null) {
                 $code = $wrappedException->getCode();
                 if ($code < 400 || $code >= 600) {
-                    // The exception code is not a valid HTTP code. Let's ignore it
-                    continue;
+                    if (! ($wrappedException instanceof ClientAware) || $wrappedException->isClientSafe() !== true) {
+                        // The exception code is not a valid HTTP code. Let's ignore it
+                        continue;
+                    }
+
+                    // A "client aware" exception is almost certainly targeting the client (there is
+                    // no need to pass a server exception error message to the client).
+                    // So a ClientAware exception is almost certainly a HTTP 400 code
+                    $code = 400;
                 }
             } else {
                 $code = 400;
