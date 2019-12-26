@@ -52,6 +52,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
+use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
@@ -451,7 +452,7 @@ class EndToEndTest extends TestCase
                     {
                         name: "bar"
                     }
-                ]   
+                ]
             }
           ) {
             name,
@@ -1363,5 +1364,15 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame(42, $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
+    }
+
+    public function testInputOutputNameConflict(): void
+    {
+        $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Types');
+
+        $schema = $schemaFactory->createSchema();
+        $schema->validate();
     }
 }
