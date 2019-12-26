@@ -53,7 +53,7 @@ graphqlite:
     namespace:
       # The namespace(s) that will store your GraphQLite controllers.
       # It accept either a string or a list of strings.
-      controllers: App\Controller\
+      controllers: App\GraphqlController\
       # The namespace(s) that will store your GraphQL types and factories.
       # It accept either a string or a list of strings.
       types: 
@@ -73,6 +73,11 @@ graphqlite:
 
 The debug parameters are detailed in the [documentation of the Webonyx GraphQL library](https://webonyx.github.io/graphql-php/error-handling/)
 which is used internally by GraphQLite.
+
+<div class="alert alert-warning"><strong>Do not put your GraphQL controllers in the <code>App\Controller</code> namespace</strong>
+Symfony applies a particular compiler pass to classes in the <code>App\Controller</code> namespace. This compiler pass will prevent you
+from using input types. Put your controllers in another namespace. We advise using <code>App\GraphqlController</code>.
+</div>
 
 The Symfony bundle come with a set of advanced features that are not described in this install documentation (like providing a login/logout mutation out of the box).
 Jump to the ["Symfony specific features"](symfony-bundle-advanced.md) documentation of GraphQLite if you want to learn more.
