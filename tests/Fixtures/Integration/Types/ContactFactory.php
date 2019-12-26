@@ -15,7 +15,7 @@ class ContactFactory
 {
     /**
      * @Factory()
-     * @UseInputType(for="$relations", inputType="[ContactRefInput!]!")
+     * @UseInputType(for="$relations", inputType="[ContactRef!]!")
      * @param string $name
      * @param Contact|null $manager
      * @param Contact[] $relations
@@ -34,7 +34,7 @@ class ContactFactory
     }
 
     /**
-     * @Factory(name="ContactRefInput", default=false)
+     * @Factory(name="ContactRef", default=false)
      * @return Contact
      */
     public function getContact(string $name): Contact

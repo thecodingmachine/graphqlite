@@ -83,7 +83,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     public static function mustBeInputType(string $subTypeName): self
     {
-        return new self('type "' . $subTypeName . '" must be an input type.');
+        return new self('type "' . $subTypeName . '" must be an input type (if you declared an input type with the name "' . $subTypeName . '", make sure that there are no output type with the same name as this is forbidden by the GraphQL spec).');
     }
 
     /**

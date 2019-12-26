@@ -22,7 +22,7 @@ use function get_class;
 class TypeRegistry
 {
     /** @var array<string,NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))> */
-    private $outputTypes = [];
+    private $types = [];
 
     /**
      * Registers a type.
@@ -33,10 +33,10 @@ class TypeRegistry
      */
     public function registerType(NamedType $type): void
     {
-        if (isset($this->outputTypes[$type->name])) {
+        if (isset($this->types[$type->name])) {
             throw new GraphQLRuntimeException('Type "' . $type->name . '" is already registered');
         }
-        $this->outputTypes[$type->name] = $type;
+        $this->types[$type->name] = $type;
     }
 
     /**
@@ -50,17 +50,17 @@ class TypeRegistry
      */
     public function getOrRegisterType(NamedType $type): NamedType
     {
-        if (isset($this->outputTypes[$type->name])) {
-            return $this->outputTypes[$type->name];
+        if (isset($this->types[$type->name])) {
+            return $this->types[$type->name];
         }
-        $this->outputTypes[$type->name] = $type;
+        $this->types[$type->name] = $type;
 
         return $type;
     }
 
     public function hasType(string $typeName): bool
     {
-        return isset($this->outputTypes[$typeName]);
+        return isset($this->types[$typeName]);
     }
 
     /**
@@ -68,11 +68,11 @@ class TypeRegistry
      */
     public function getType(string $typeName): NamedType
     {
-        if (! isset($this->outputTypes[$typeName])) {
+        if (! isset($this->types[$typeName])) {
             throw new GraphQLRuntimeException('Could not find type "' . $typeName . '" in registry');
         }
 
-        return $this->outputTypes[$typeName];
+        return $this->types[$typeName];
     }
 
     public function getMutableObjectType(string $typeName): MutableObjectType
