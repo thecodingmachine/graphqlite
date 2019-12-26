@@ -20,6 +20,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
@@ -365,6 +366,7 @@ class SchemaFactory
         }
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
         $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
+        $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
         $fieldsBuilder = new FieldsBuilder(
             $annotationReader,

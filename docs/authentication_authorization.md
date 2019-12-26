@@ -82,6 +82,39 @@ class UserController
 }
 ```
 
+## Injecting the current user as a parameter
+
+Use the `@InjectUser` annotation to get an instance of the current user logged in.
+
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+
+class ProductController
+{
+    /**
+     * @Query
+     * @InjectUser(for="$user") 
+     * @return Product
+     */
+    public function product(int $id, User $user): Product
+    {
+        // ...
+    }
+}
+```
+
+The `@InjectUser` annotation can be used next to:
+
+* `@Query` annotations
+* `@Mutation` annotations
+* `@Field` annotations
+
+The object injected as the current user depends on your framework. It is in fact the object returned by the 
+["authentication service" configured in GraphQLite](implementing-security.md).
+
 ## Hiding fields / queries / mutations
 
 By default, a user analysing the GraphQL schema can see all queries/mutations/types available.

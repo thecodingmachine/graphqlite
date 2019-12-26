@@ -28,7 +28,11 @@ class ParameterAnnotations
     /**
      * Return annotations of the $className type
      *
-     * @return array<int, ParameterAnnotationInterface>
+     * @param class-string<T> $className
+     *
+     * @return array<int, T>
+     *
+     * @template T of ParameterAnnotationInterface
      */
     public function getAnnotationsByType(string $className): array
     {
@@ -39,6 +43,12 @@ class ParameterAnnotations
 
     /**
      * Returns at most 1 annotation of the $className type.
+     *
+     * @param class-string<T> $className
+     *
+     * @return T|null
+     *
+     * @template T of ParameterAnnotationInterface
      */
     public function getAnnotationByType(string $className): ?ParameterAnnotationInterface
     {

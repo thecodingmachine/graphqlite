@@ -31,7 +31,6 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
     {
         $autowire = $parameterAnnotations->getAnnotationByType(Autowire::class);
-        assert($autowire instanceof Autowire || $autowire === null);
 
         if ($autowire === null) {
             return $next->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
