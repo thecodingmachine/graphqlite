@@ -21,7 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
 /**
  * @Type()
- * @MagicField(name="magicNumber", phpType="int")
+ * @MagicField(name="magicContact", phpType="Contact")
  */
 class Contact
 {
@@ -54,7 +54,7 @@ class Contact
     {
         $this->name = $name;
     }
-    
+
     public function getName()
     {
         return $this->name;
@@ -210,6 +210,6 @@ class Contact
 
     public function __get(string $property)
     {
-        return 42;
+        return new Contact('foo');
     }
 }

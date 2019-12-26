@@ -1297,7 +1297,9 @@ class EndToEndTest extends TestCase
         $queryString = '
         query {
             contacts {
-                magicNumber
+                magicContact {
+                    name
+                }
             }
         }
         ';
@@ -1310,10 +1312,14 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'contacts' => [
                 [
-                    'magicNumber' => 42,
+                    'magicContact' => [
+                        'name' => 'foo'
+                    ]
                 ],
                 [
-                    'magicNumber' => 42,
+                    'magicContact' => [
+                        'name' => 'foo'
+                    ]
                 ],
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
