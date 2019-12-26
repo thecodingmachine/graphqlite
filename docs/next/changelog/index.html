@@ -75,6 +75,7 @@ changed.</p>
 <li>Unauthorized access to fields can now generate GraphQL errors (rather that schema errors in GraphQLite v3)</li>
 <li>Added fine-grained security using the <code>@Security</code> annotation. A field can now be <a href="/docs/next/fine-grained-security">marked accessible or not depending on the context</a>.
 For instance, you can restrict access to the field &quot;viewsCount&quot; of the type <code>BlogPost</code> only for post that the current user wrote.</li>
+<li>You can now inject the current logged user in any query / mutation / field using the <code>@InjectUser</code> annotation</li>
 </ul></li>
 <li>Performance:
 <ul>
