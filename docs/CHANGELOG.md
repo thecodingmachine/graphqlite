@@ -18,6 +18,7 @@ New features:
   - Unauthorized access to fields can now generate GraphQL errors (rather that schema errors in GraphQLite v3)
   - Added fine-grained security using the `@Security` annotation. A field can now be [marked accessible or not depending on the context](fine-grained-security.md).
     For instance, you can restrict access to the field "viewsCount" of the type `BlogPost` only for post that the current user wrote.
+  - You can now inject the current logged user in any query / mutation / field using the `@InjectUser` annotation
 - Performance:
   - You can inject the [Webonyx query plan in a parameter from a resolver](query_plan.md)
   - You can use the [dataloader pattern to improve performance drastically via the "prefetchMethod" attribute](prefetch_method.md)
