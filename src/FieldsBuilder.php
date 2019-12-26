@@ -472,10 +472,11 @@ class FieldsBuilder
     {
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
-        $phpdocType = $typeResolver->resolve($phpTypeStr);
+        $context = $this->cachedDocBlockFactory->getContextFromClass($refClass);
+        $phpdocType = $typeResolver->resolve($phpTypeStr, $context);
         Assert::notNull($phpdocType);
 
-        $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $this->cachedDocBlockFactory->getContextFromClass($refClass));
+        $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $context);
         return $this->typeMapper->mapReturnType($refMethod, $fakeDocBlock);
 
         // TODO: add a catch to CannotMapTypeExceptionInterface and a "addMagicFieldInfo" method to know where the issues are coming from.
