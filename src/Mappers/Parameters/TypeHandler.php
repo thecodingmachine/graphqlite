@@ -118,7 +118,6 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         $useInputType = $parameterAnnotations->getAnnotationByType(UseInputType::class);
-        assert($useInputType instanceof UseInputType || $useInputType === null);
         if ($useInputType !== null) {
             try {
                 $type = $this->typeResolver->mapNameToInputType($useInputType->getInputType());

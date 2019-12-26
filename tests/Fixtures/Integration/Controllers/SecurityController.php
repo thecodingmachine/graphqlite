@@ -5,7 +5,9 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 
 use Porpaginas\Arrays\ArrayResult;
+use stdClass;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -67,6 +69,16 @@ class SecurityController
     public function getSecretUsingThis(string $secret): string
     {
         return 'you can see this secret only if isAllowed() returns true';
+    }
+
+    /**
+     * @Query()
+     * @InjectUser(for="$user")
+     * @param stdClass $user
+     */
+    public function getInjectedUser(stdClass $user): int
+    {
+        return $user->bar;
     }
 
     public function isAllowed(string $secret): bool

@@ -131,6 +131,30 @@ to access it (according to the `@Logged` and `@Right` annotations).
 
 `@HideIfUnauthorized` and `@FailWith` are mutually exclusive.
 
+## @InjectUser annotation
+
+Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your 
+query / mutation / field.
+
+**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
+
+Attribute      | Compulsory | Type   | Definition
+---------------|------------|--------|--------
+*for*          | *yes*      | string | The name of the PHP parameter
+
+## @Security annotation
+
+The `@Security` annotation can be used to check fin-grained access rights.
+It is very flexible: it allows you to pass an expression that can contains custom logic.
+
+See [the fine grained security page](fine-grained-security.md) for more details.
+
+**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
+
+Attribute      | Compulsory | Type   | Definition
+---------------|------------|--------|--------
+*default*      | *yes*      | string | The security expression
+
 ## @Factory annotation
 
 The `@Factory` annotation is used to declare a factory that turns GraphQL input types into objects.

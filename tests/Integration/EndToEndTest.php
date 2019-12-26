@@ -24,6 +24,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
@@ -222,6 +223,9 @@ class EndToEndTest extends TestCase
             ContainerParameterHandler::class => function(ContainerInterface $container) {
                 return new ContainerParameterHandler($container, true, true);
             },
+            InjectUserParameterHandler::class => function(ContainerInterface $container) {
+                return new InjectUserParameterHandler($container->get(AuthenticationServiceInterface::class));
+            },
             'testService' => function() {
                 return 'foo';
             },
@@ -233,6 +237,7 @@ class EndToEndTest extends TestCase
                 $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
                 $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
                 $parameterMiddlewarePipe->pipe($container->get(ContainerParameterHandler::class));
+                $parameterMiddlewarePipe->pipe($container->get(InjectUserParameterHandler::class));
 
                 return $parameterMiddlewarePipe;
             }
@@ -1312,5 +1317,45 @@ class EndToEndTest extends TestCase
                 ],
             ]
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndInjectUser(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            }
+        ]);
+
+        /**
+         * @var Schema $schema
+         */
+        $schema = $container->get(Schema::class);
+
+        // Test with failWith attribute
+        $queryString = '
+        query {
+            injectedUser
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame(42, $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
     }
 }
