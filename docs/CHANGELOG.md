@@ -4,7 +4,7 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
-## 4.0-beta1
+## 4.0
 
 This is a complete refactoring from 3.x. While existing annotations are kept compatible, the internals have completely
 changed.
