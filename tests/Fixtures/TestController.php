@@ -14,6 +14,16 @@ use TheCodingMachine\GraphQLite\Types\ID;
 class TestController
 {
     /**
+     * @Mutation
+     * @param TestObject $testObject
+     * @return TestObject
+     */
+    public function mutation(TestObject $testObject): TestObject
+    {
+        return $testObject;
+    }
+
+    /**
      * @Query
      * @param int $int
      * @param TestObject[] $list
@@ -37,16 +47,6 @@ class TestController
             $str .= $test->getTest();
         }
         return new TestObject($string.$int.$str.($boolean?'true':'false').$float.$dateTimeImmutable->format('YmdHis').$dateTime->format('YmdHis').$withDefault.($id !== null ? $id->val() : '').$enum->getValue());
-    }
-
-    /**
-     * @Mutation
-     * @param TestObject $testObject
-     * @return TestObject
-     */
-    public function mutation(TestObject $testObject): TestObject
-    {
-        return $testObject;
     }
 
     /**
