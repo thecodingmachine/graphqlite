@@ -9,9 +9,12 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 use Webmozart\Assert\Assert;
 use function class_exists;
 use function interface_exists;
@@ -45,13 +48,15 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private $recursive;
     /** @var CacheContractInterface */
     private $cacheContract;
+    /** @var AnnotationReader */
+    private $annotationReader;
 
     /**
      * @param string             $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
      * @param bool               $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $cacheTtl = null, bool $recursive = true)
     {
         $this->namespace       = $namespace;
         $this->container       = $container;
@@ -61,6 +66,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $this->cacheTtl        = $cacheTtl;
         $this->fieldsBuilder   = $fieldsBuilder;
         $this->recursive       = $recursive;
+        $this->annotationReader = $annotationReader;
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -105,6 +111,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             if (! $refClass->isInstantiable()) {
                 continue;
             }
+            if (! $this->hasQueriesOrMutations($refClass)) {
+                continue;
+            }
             if (! $this->container->has($className)) {
                 continue;
             }
@@ -113,6 +122,24 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         }
 
         return $instances;
+    }
+
+    /**
+     * @param ReflectionClass<object> $reflectionClass
+     */
+    private function hasQueriesOrMutations(ReflectionClass $reflectionClass): bool
+    {
+        foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
+            $queryAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Query::class);
+            if ($queryAnnotation !== null) {
+                return true;
+            }
+            $mutationAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Mutation::class);
+            if ($mutationAnnotation !== null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

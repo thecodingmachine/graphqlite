@@ -435,6 +435,7 @@ class SchemaFactory
                 $controllerNamespace,
                 $fieldsBuilder,
                 $this->container,
+                $annotationReader,
                 $this->cache,
                 $this->classNameMapper,
                 $this->globTtl

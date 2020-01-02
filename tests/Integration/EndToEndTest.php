@@ -90,7 +90,7 @@ class EndToEndTest extends TestCase
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
                 return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
-                    $container->get(BasicAutoWiringContainer::class), new Psr16Cache(new ArrayAdapter()));
+                    $container->get(BasicAutoWiringContainer::class), $container->get(AnnotationReader::class), new Psr16Cache(new ArrayAdapter()));
             },
             FieldsBuilder::class => function(ContainerInterface $container) {
                 return new FieldsBuilder(
