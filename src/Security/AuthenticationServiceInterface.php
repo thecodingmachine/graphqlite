@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Security;
 
+/**
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
+ */
 interface AuthenticationServiceInterface
 {
     /**

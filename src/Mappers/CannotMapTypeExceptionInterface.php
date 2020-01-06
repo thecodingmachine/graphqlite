@@ -11,6 +11,9 @@ use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use Throwable;
 
+/**
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
+ */
 interface CannotMapTypeExceptionInterface extends Throwable
 {
     public function addParamInfo(ReflectionParameter $parameter): void;

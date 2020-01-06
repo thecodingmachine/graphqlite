@@ -18,6 +18,8 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
  * Maps a PHP class to a GraphQL type.
  *
  * Unlike the TypeMapperInterface, if a given class does not map a type, parent classes are explored.
+ *
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
 interface RecursiveTypeMapperInterface
 {

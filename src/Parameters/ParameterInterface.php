@@ -8,6 +8,8 @@ use GraphQL\Type\Definition\ResolveInfo;
 
 /**
  * Instances of ParameterInterface represent a single PHP parameter in a Query/Mutation/Field/Factory.
+ *
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
 interface ParameterInterface
 {

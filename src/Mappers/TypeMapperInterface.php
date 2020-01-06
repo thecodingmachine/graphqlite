@@ -15,6 +15,8 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 /**
  * Maps a PHP class to a GraphQL type
+ *
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
 interface TypeMapperInterface
 {

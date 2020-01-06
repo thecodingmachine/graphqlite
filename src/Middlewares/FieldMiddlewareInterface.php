@@ -9,6 +9,8 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 /**
  * A middleware use to process annotations when evaluating a field/query/mutation
+ *
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
 interface FieldMiddlewareInterface
 {

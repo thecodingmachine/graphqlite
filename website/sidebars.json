@@ -6,6 +6,6 @@
     "Security": ["authentication_authorization", "fine-grained-security", "implementing-security"],
     "Performance": ["query-plan", "prefetch-method"],
     "Advanced": ["file-uploads", "pagination", "custom-types", "field-middlewares", "argument-resolving", "extend_input_type", "multiple_output_types", "symfony-bundle-advanced", "laravel-package-advanced", "internals", "troubleshooting", "migrating"],
-    "Reference": ["annotations_reference", "changelog"]
+    "Reference": ["annotations_reference", "semver","changelog"]
   }
 }
