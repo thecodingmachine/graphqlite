@@ -7,6 +7,9 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ResolveInfo;
 
+/**
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
+ */
 interface InputTypeParameterInterface extends ParameterInterface
 {
     /**

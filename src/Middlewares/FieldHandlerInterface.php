@@ -7,6 +7,9 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use GraphQL\Type\Definition\FieldDefinition;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
+/**
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
+ */
 interface FieldHandlerInterface
 {
     /**

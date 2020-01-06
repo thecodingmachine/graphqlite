@@ -7,6 +7,9 @@ namespace TheCodingMachine\GraphQLite;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
+/**
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
+ */
 interface NamingStrategyInterface
 {
     /**

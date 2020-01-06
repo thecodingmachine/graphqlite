@@ -9,6 +9,8 @@ use TheCodingMachine\GraphQLite\QueryField;
 
 /**
  * A context class that should be passed to the Webonyx executor.
+ *
+ * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
 interface ContextInterface
 {
