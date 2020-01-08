@@ -4,7 +4,7 @@ title: Getting started with Symfony
 sidebar_label: Symfony bundle
 ---
 
-The GraphQLite bundle is compatible with **Symfony 4.x**.
+The GraphQLite bundle is compatible with **Symfony 4.x** and **Symfony 5.x**.
 
 <div class="alert alert-warning">
     The Symfony Flex recipe is not yet available.
