@@ -1,7 +1,8 @@
 ---
-id: other-frameworks
+id: version-4.0-other-frameworks
 title: Getting started with any framework
 sidebar_label: Other frameworks / No framework
+original_id: other-frameworks
 ---
 
 If you are using **Symfony 4.x**, checkout the [Symfony bundle](symfony-bundle.md).

@@ -1,0 +1,54 @@
+{
+  "version-4.0-docs": {
+    "Introduction": [
+      "version-4.0-features"
+    ],
+    "Installation": [
+      "version-4.0-getting-started",
+      "version-4.0-symfony-bundle",
+      "version-4.0-laravel-package",
+      "version-4.0-universal_service_providers",
+      "version-4.0-other-frameworks"
+    ],
+    "Usage": [
+      "version-4.0-queries",
+      "version-4.0-mutations",
+      "version-4.0-type_mapping",
+      "version-4.0-autowiring",
+      "version-4.0-extend_type",
+      "version-4.0-external_type_declaration",
+      "version-4.0-input-types",
+      "version-4.0-inheritance-interfaces",
+      "version-4.0-error-handling",
+      "version-4.0-validation"
+    ],
+    "Security": [
+      "version-4.0-authentication_authorization",
+      "version-4.0-fine-grained-security",
+      "version-4.0-implementing-security"
+    ],
+    "Performance": [
+      "version-4.0-query-plan",
+      "version-4.0-prefetch-method"
+    ],
+    "Advanced": [
+      "version-4.0-file-uploads",
+      "version-4.0-pagination",
+      "version-4.0-custom-types",
+      "version-4.0-field-middlewares",
+      "version-4.0-argument-resolving",
+      "version-4.0-extend_input_type",
+      "version-4.0-multiple_output_types",
+      "version-4.0-symfony-bundle-advanced",
+      "version-4.0-laravel-package-advanced",
+      "version-4.0-internals",
+      "version-4.0-troubleshooting",
+      "version-4.0-migrating"
+    ],
+    "Reference": [
+      "version-4.0-annotations_reference",
+      "version-4.0-semver",
+      "version-4.0-changelog"
+    ]
+  }
+}
