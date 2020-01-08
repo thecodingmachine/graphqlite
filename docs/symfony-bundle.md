@@ -6,11 +6,6 @@ sidebar_label: Symfony bundle
 
 The GraphQLite bundle is compatible with **Symfony 4.x** and **Symfony 5.x**.
 
-<div class="alert alert-warning">
-    The Symfony Flex recipe is not yet available.
-</div>
-
-
 ## Applications that use Symfony Flex
 
 Open a command console, enter your project directory and execute:
@@ -27,7 +22,7 @@ graphqlite:
     namespace:
       # The namespace(s) that will store your GraphQLite controllers.
       # It accept either a string or a list of strings.
-      controllers: App\Controller\
+      controllers: App\GraphQLController\
       # The namespace(s) that will store your GraphQL types and factories.
       # It accept either a string or a list of strings.
       types: 
