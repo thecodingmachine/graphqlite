@@ -24,7 +24,7 @@ In order to bootstrap GraphQLite, you will need:
 Additionally, you will have to route the HTTP requests to the underlying GraphQL library.
 
 GraphQLite relies on the [webonyx/graphql-php](http://webonyx.github.io/graphql-php/) library internally.
-This library plays well with PSR-7 requests and we also provide a [PSR-15 middleware](https://github.com/phps-cans/psr7-middleware-graphql).
+This library plays well with PSR-7 requests and we also provide a [PSR-15 middleware](#psr-15-middleware).
 
 ## Integration
 
