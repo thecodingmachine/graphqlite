@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Annotations reference · GraphQLite</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## @Query annotation"/><meta name="docsearch:version" content="3.0"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Annotations reference · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqlite.thecodingmachine.io/"/><meta property="og:description" content="## @Query annotation"/><meta property="og:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Annotations reference · GraphQLite</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## @Query annotation"/><meta name="docsearch:version" content="4.0"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Annotations reference · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqlite.thecodingmachine.io/"/><meta property="og:description" content="## @Query annotation"/><meta property="og:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -6,7 +6,7 @@
 
               ga('create', 'UA-10196481-8', 'auto');
               ga('send', 'pageview');
-            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><a href="/versions"><h3>3.0</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Reference</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/features">GraphQLite</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Installation</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/symfony-bundle">Symfony bundle</a></li><li class="navListItem"><a class="navItem" href="/docs/laravel-package">Laravel package</a></li><li class="navListItem"><a class="navItem" href="/docs/universal_service_providers">Universal service providers</a></li><li class="navListItem"><a class="navItem" href="/docs/other-frameworks">Other frameworks / No framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Usage</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/queries">Queries</a></li><li class="navListItem"><a class="navItem" href="/docs/mutations">Mutations</a></li><li class="navListItem"><a class="navItem" href="/docs/type_mapping">Type mapping</a></li><li class="navListItem"><a class="navItem" href="/docs/extend_type">Extending a type</a></li><li class="navListItem"><a class="navItem" href="/docs/authentication_authorization">Authentication and authorization</a></li><li class="navListItem"><a class="navItem" href="/docs/external_type_declaration">External type declaration</a></li><li class="navListItem"><a class="navItem" href="/docs/input-types">Input types</a></li><li class="navListItem"><a class="navItem" href="/docs/inheritance">Inheritance and interfaces</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/file-uploads">File uploads</a></li><li class="navListItem"><a class="navItem" href="/docs/pagination">Pagination</a></li><li class="navListItem"><a class="navItem" href="/docs/custom-output-types">Custom output types</a></li><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Reference</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/annotations_reference">Annotations reference</a></li></ul></div></div></section></div><script>
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><a href="/versions"><h3>4.0</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Reference</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/features">GraphQLite</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Installation</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/symfony-bundle">Symfony bundle</a></li><li class="navListItem"><a class="navItem" href="/docs/laravel-package">Laravel package</a></li><li class="navListItem"><a class="navItem" href="/docs/universal_service_providers">Universal service providers</a></li><li class="navListItem"><a class="navItem" href="/docs/other-frameworks">Other frameworks / No framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Usage</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/queries">Queries</a></li><li class="navListItem"><a class="navItem" href="/docs/mutations">Mutations</a></li><li class="navListItem"><a class="navItem" href="/docs/type_mapping">Type mapping</a></li><li class="navListItem"><a class="navItem" href="/docs/autowiring">Autowiring services</a></li><li class="navListItem"><a class="navItem" href="/docs/extend_type">Extending a type</a></li><li class="navListItem"><a class="navItem" href="/docs/external_type_declaration">External type declaration</a></li><li class="navListItem"><a class="navItem" href="/docs/input-types">Input types</a></li><li class="navListItem"><a class="navItem" href="/docs/inheritance-interfaces">Inheritance and interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/error-handling">Error handling</a></li><li class="navListItem"><a class="navItem" href="/docs/validation">User input validation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Security</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/authentication_authorization">Authentication and authorization</a></li><li class="navListItem"><a class="navItem" href="/docs/fine-grained-security">Fine grained security</a></li><li class="navListItem"><a class="navItem" href="/docs/implementing-security">Connecting security to your framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Performance</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/query-plan">Query plan</a></li><li class="navListItem"><a class="navItem" href="/docs/prefetch-method">Prefetching records</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/file-uploads">File uploads</a></li><li class="navListItem"><a class="navItem" href="/docs/pagination">Pagination</a></li><li class="navListItem"><a class="navItem" href="/docs/custom-types">Custom types</a></li><li class="navListItem"><a class="navItem" href="/docs/field-middlewares">Custom annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/argument-resolving">Custom argument resolving</a></li><li class="navListItem"><a class="navItem" href="/docs/extend_input_type">Extending an input type</a></li><li class="navListItem"><a class="navItem" href="/docs/multiple_output_types">Class with multiple output types</a></li><li class="navListItem"><a class="navItem" href="/docs/symfony-bundle-advanced">Symfony specific features</a></li><li class="navListItem"><a class="navItem" href="/docs/laravel-package-advanced">Laravel specific features</a></li><li class="navListItem"><a class="navItem" href="/docs/internals">Internals</a></li><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/migrating">Migrating</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Reference</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/annotations_reference">Annotations reference</a></li><li class="navListItem"><a class="navItem" href="/docs/semver">Semantic versioning</a></li><li class="navListItem"><a class="navItem" href="/docs/changelog">Changelog</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -95,6 +95,9 @@
 </thead>
 <tbody>
 <tr><td>class</td><td><em>no</em></td><td>string</td><td>The targeted class. If no class is passed, the type applies to the current class. The current class is assumed to be an entity. If the &quot;class&quot; attribute is passed, <a href="/docs/external_type_declaration">the class annotated with <code>@Type</code> is a service</a>.</td></tr>
+<tr><td>name</td><td><em>no</em></td><td>string</td><td>The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with &quot;Type&quot;, the &quot;Type&quot; suffix is removed</td></tr>
+<tr><td>default</td><td><em>no</em></td><td>bool</td><td>Defaults to <em>true</em>. Whether the targeted PHP class should be mapped by default to this type.</td></tr>
+<tr><td>external</td><td><em>no</em></td><td>bool</td><td>Whether this is an <a href="/docs/external_type_declaration">external type declaration</a> or not. You usually do not need to use this attribute since this value defaults to true if a &quot;class&quot; attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the &quot;name&quot; attribute.</td></tr>
 </tbody>
 </table>
 <h2><a class="anchor" aria-hidden="true" id="extendtype-annotation"></a><a href="#extendtype-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@ExtendType annotation</h2>
@@ -105,9 +108,11 @@
 <tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
 </thead>
 <tbody>
-<tr><td>class</td><td><em>yes</em></td><td>string</td><td>The targeted class. <a href="/docs/extend_type">The class annotated with <code>@ExtendType</code> is a service</a>.</td></tr>
+<tr><td>class</td><td>see below</td><td>string</td><td>The targeted class. <a href="/docs/extend_type">The class annotated with <code>@ExtendType</code> is a service</a>.</td></tr>
+<tr><td>name</td><td>see below</td><td>string</td><td>The targeted GraphQL output type.</td></tr>
 </tbody>
 </table>
+<p>One and only one of &quot;class&quot; and &quot;name&quot; parameter can be passed at the same time.</p>
 <h2><a class="anchor" aria-hidden="true" id="field-annotation"></a><a href="#field-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Field annotation</h2>
 <p>The <code>@Field</code> annotation is used to declare a GraphQL field.</p>
 <p><strong>Applies on</strong>: methods of classes annotated with <code>@Type</code> or <code>@ExtendType</code>.</p>
@@ -130,11 +135,26 @@
 <tbody>
 <tr><td>name</td><td><em>yes</em></td><td>string</td><td>The name of the field.</td></tr>
 <tr><td><a href="custom_output_types.md">outputType</a></td><td><em>no</em></td><td>string</td><td>Forces the GraphQL output type of the field. Otherwise, return type is used.</td></tr>
-<tr><td>logged</td><td><em>no</em></td><td>bool</td><td>Whether the user must be logged or not to see the field.</td></tr>
-<tr><td>right</td><td><em>no</em></td><td>Right annotation</td><td>The right the user must have to see the field.</td></tr>
-<tr><td>failWith</td><td><em>no</em></td><td>mixed</td><td>A value to return if the user is not authorized to see the field. If not specified, the field will not be visible at all to the user.</td></tr>
+<tr><td>phpType</td><td><em>no</em></td><td>string</td><td>The PHP type of the field (as you would write it in a Docblock)</td></tr>
+<tr><td>annotations</td><td><em>no</em></td><td>array<Annotations></td><td>A set of annotations that apply to this field. You would typically used a &quot;@Logged&quot; or &quot;@Right&quot; annotation here.</td></tr>
 </tbody>
 </table>
+<p><strong>Note</strong>: <code>outputType</code> and <code>phpType</code> are mutually exclusive.</p>
+<h2><a class="anchor" aria-hidden="true" id="magicfield-annotation"></a><a href="#magicfield-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@MagicField annotation</h2>
+<p>The <code>@MagicField</code> annotation is used to declare a GraphQL field that originates from a PHP magic property (using <code>__get</code> magic method).</p>
+<p><strong>Applies on</strong>: classes annotated with <code>@Type</code> or <code>@ExtendType</code>.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td>name</td><td><em>yes</em></td><td>string</td><td>The name of the field.</td></tr>
+<tr><td><a href="custom_output_types.md">outputType</a></td><td><em>no</em>(*)</td><td>string</td><td>The GraphQL output type of the field.</td></tr>
+<tr><td>phpType</td><td><em>no</em>(*)</td><td>string</td><td>The PHP type of the field (as you would write it in a Docblock)</td></tr>
+<tr><td>annotations</td><td><em>no</em></td><td>array<Annotations></td><td>A set of annotations that apply to this field. You would typically used a &quot;@Logged&quot; or &quot;@Right&quot; annotation here.</td></tr>
+</tbody>
+</table>
+<p>(*) <strong>Note</strong>: <code>outputType</code> and <code>phpType</code> are mutually exclusive. You MUST provide one of them.</p>
 <h2><a class="anchor" aria-hidden="true" id="logged-annotation"></a><a href="#logged-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Logged annotation</h2>
 <p>The <code>@Logged</code> annotation is used to declare a Query/Mutation/Field is only visible to logged users.</p>
 <p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
@@ -162,6 +182,36 @@ query / mutation / field (according to the <code>@Logged</code> and <code>@Right
 <tr><td><em>default</em></td><td><em>yes</em></td><td>mixed</td><td>The value to return if the user is not authorized.</td></tr>
 </tbody>
 </table>
+<h2><a class="anchor" aria-hidden="true" id="hideifunauthorized-annotation"></a><a href="#hideifunauthorized-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@HideIfUnauthorized annotation</h2>
+<p>The <code>@HideIfUnauthorized</code> annotation is used to completely hide the query / mutation / field if the user is not authorized
+to access it (according to the <code>@Logged</code> and <code>@Right</code> annotations).</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> and one of <code>@Logged</code> or <code>@Right</code> annotations.</p>
+<p><code>@HideIfUnauthorized</code> and <code>@FailWith</code> are mutually exclusive.</p>
+<h2><a class="anchor" aria-hidden="true" id="injectuser-annotation"></a><a href="#injectuser-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@InjectUser annotation</h2>
+<p>Use the <code>@InjectUser</code> annotation to inject an instance of the current user logged in into a parameter of your
+query / mutation / field.</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>for</em></td><td><em>yes</em></td><td>string</td><td>The name of the PHP parameter</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="security-annotation"></a><a href="#security-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Security annotation</h2>
+<p>The <code>@Security</code> annotation can be used to check fin-grained access rights.
+It is very flexible: it allows you to pass an expression that can contains custom logic.</p>
+<p>See <a href="/docs/fine-grained-security">the fine grained security page</a> for more details.</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>default</em></td><td><em>yes</em></td><td>string</td><td>The security expression</td></tr>
+</tbody>
+</table>
 <h2><a class="anchor" aria-hidden="true" id="factory-annotation"></a><a href="#factory-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Factory annotation</h2>
 <p>The <code>@Factory</code> annotation is used to declare a factory that turns GraphQL input types into objects.</p>
 <p><strong>Applies on</strong>: methods from classes in the &quot;types&quot; namespace.</p>
@@ -171,9 +221,86 @@ query / mutation / field (according to the <code>@Logged</code> and <code>@Right
 </thead>
 <tbody>
 <tr><td>name</td><td><em>no</em></td><td>string</td><td>The name of the input type. If skipped, the name of class returned by the factory is used instead.</td></tr>
+<tr><td>default</td><td><em>no</em></td><td>bool</td><td>If <code>true</code>, this factory will be used by default for its PHP return type. If set to <code>false</code>, you must explicitly <a href="http://localhost:3000/docs/input-types#declaring-several-input-types-for-the-same-php-class">reference this factory using the <code>@Parameter</code> annotation</a>.</td></tr>
 </tbody>
 </table>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/troubleshooting"><span class="arrow-prev">← </span><span>Troubleshooting</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#query-annotation">@Query annotation</a></li><li><a href="#mutation-annotation">@Mutation annotation</a></li><li><a href="#type-annotation">@Type annotation</a></li><li><a href="#extendtype-annotation">@ExtendType annotation</a></li><li><a href="#field-annotation">@Field annotation</a></li><li><a href="#sourcefield-annotation">@SourceField annotation</a></li><li><a href="#logged-annotation">@Logged annotation</a></li><li><a href="#right-annotation">@Right annotation</a></li><li><a href="#failwith-annotation">@FailWith annotation</a></li><li><a href="#factory-annotation">@Factory annotation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2020 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="useinputtype-annotation"></a><a href="#useinputtype-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@UseInputType annotation</h2>
+<p>Used to override the GraphQL input type of a PHP parameter.</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> annotation.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>for</em></td><td><em>yes</em></td><td>string</td><td>The name of the PHP parameter</td></tr>
+<tr><td><em>inputType</em></td><td><em>yes</em></td><td>string</td><td>The GraphQL input type to force for this input field</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="decorate-annotation"></a><a href="#decorate-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Decorate annotation</h2>
+<p>The <code>@Decorate</code> annotation is used <a href="/docs/extend_input_type">to extend/modify/decorate an input type declared with the <code>@Factory</code> annotation</a>.</p>
+<p><strong>Applies on</strong>: methods from classes in the &quot;types&quot; namespace.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td>name</td><td><em>yes</em></td><td>string</td><td>The GraphQL input type name extended by this decorator.</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="autowire-annotation"></a><a href="#autowire-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Autowire annotation</h2>
+<p><a href="/docs/autowiring">Resolves a PHP parameter from the container</a>.</p>
+<p>Useful to inject services directly into <code>@Field</code> method arguments.</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> annotation.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>for</em></td><td><em>yes</em></td><td>string</td><td>The name of the PHP parameter</td></tr>
+<tr><td><em>identifier</em></td><td><em>no</em></td><td>string</td><td>The identifier of the service to fetch. This is optional. Please avoid using this attribute as this leads to a &quot;service locator&quot; anti-pattern.</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="hideparameter-annotation"></a><a href="#hideparameter-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@HideParameter annotation</h2>
+<p>Removes <a href="/docs/input-types#ignoring_some_parameters">an argument from the GraphQL schema</a>.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>for</em></td><td><em>yes</em></td><td>string</td><td>The name of the PHP parameter to hide</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="validate-annotation"></a><a href="#validate-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Validate annotation</h2>
+<div class="alert alert-info">This annotation is only available in the GraphQLite Laravel package</div>
+<p><a href="/docs/laravel-package-advanced">Validates a user input in Laravel</a>.</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code>, <code>@Field</code>, <code>@Factory</code> or <code>@Decorator</code> annotation.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>for</em></td><td><em>yes</em></td><td>string</td><td>The name of the PHP parameter</td></tr>
+<tr><td><em>rule</em></td><td>*yes</td><td>string</td><td>Laravel validation rules</td></tr>
+</tbody>
+</table>
+<p>Sample:</p>
+<pre><code class="hljs"><span class="hljs-meta">@Validate(for=<span class="hljs-meta-string">"<span class="hljs-variable">$email</span>"</span>, rule=<span class="hljs-meta-string">"email|unique:users"</span>)</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="assertion-annotation"></a><a href="#assertion-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Assertion annotation</h2>
+<p><a href="/docs/validation">Validates a user input</a>.</p>
+<p>The <code>@Assertion</code> annotation  is available in the <em>thecodingmachine/graphqlite-symfony-validator-bridge</em> third party package.
+It is available out of the box if you use the Symfony bundle.</p>
+<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code>, <code>@Field</code>, <code>@Factory</code> or <code>@Decorator</code> annotation.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td><em>for</em></td><td><em>yes</em></td><td>string</td><td>The name of the PHP parameter</td></tr>
+<tr><td><em>constraint</em></td><td>*yes</td><td>annotation</td><td>One (or many) Symfony validation annotations.</td></tr>
+</tbody>
+</table>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/migrating"><span class="arrow-prev">← </span><span>Migrating</span></a><a class="docs-next button" href="/docs/semver"><span>Semantic versioning</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#query-annotation">@Query annotation</a></li><li><a href="#mutation-annotation">@Mutation annotation</a></li><li><a href="#type-annotation">@Type annotation</a></li><li><a href="#extendtype-annotation">@ExtendType annotation</a></li><li><a href="#field-annotation">@Field annotation</a></li><li><a href="#sourcefield-annotation">@SourceField annotation</a></li><li><a href="#magicfield-annotation">@MagicField annotation</a></li><li><a href="#logged-annotation">@Logged annotation</a></li><li><a href="#right-annotation">@Right annotation</a></li><li><a href="#failwith-annotation">@FailWith annotation</a></li><li><a href="#hideifunauthorized-annotation">@HideIfUnauthorized annotation</a></li><li><a href="#injectuser-annotation">@InjectUser annotation</a></li><li><a href="#security-annotation">@Security annotation</a></li><li><a href="#factory-annotation">@Factory annotation</a></li><li><a href="#useinputtype-annotation">@UseInputType annotation</a></li><li><a href="#decorate-annotation">@Decorate annotation</a></li><li><a href="#autowire-annotation">@Autowire annotation</a></li><li><a href="#hideparameter-annotation">@HideParameter annotation</a></li><li><a href="#validate-annotation">@Validate annotation</a></li><li><a href="#assertion-annotation">@Assertion annotation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2020 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
