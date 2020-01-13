@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
@@ -140,10 +141,12 @@ class EndToEndTest extends TestCase
                 return new VoidAuthenticationService();
             },
             RecursiveTypeMapperInterface::class => function(ContainerInterface $container) {
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
                 return new RecursiveTypeMapper(
                     $container->get(TypeMapperInterface::class),
                     $container->get(NamingStrategyInterface::class),
-                    new Psr16Cache(new ArrayAdapter()),
+                    new Psr16Cache($arrayAdapter),
                     $container->get(TypeRegistry::class)
                 );
             },
@@ -151,6 +154,8 @@ class EndToEndTest extends TestCase
                 return new CompositeTypeMapper();
             },
             GlobTypeMapper::class => function(ContainerInterface $container) {
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
                 return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
@@ -159,10 +164,12 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new Psr16Cache(new ArrayAdapter())
+                    new Psr16Cache($arrayAdapter)
                 );
             },
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
                 return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
@@ -171,7 +178,7 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new Psr16Cache(new ArrayAdapter())
+                    new Psr16Cache($arrayAdapter)
                 );
             },
             PorpaginasTypeMapper::class => function(ContainerInterface $container) {
@@ -209,7 +216,9 @@ class EndToEndTest extends TestCase
                 return new NamingStrategy();
             },
             CachedDocBlockFactory::class => function() {
-                return new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
+                return new CachedDocBlockFactory(new Psr16Cache($arrayAdapter));
             },
             RootTypeMapperInterface::class => function(ContainerInterface $container) {
                 return new NullableTypeMapperAdapter();
@@ -1369,7 +1378,9 @@ class EndToEndTest extends TestCase
 
     public function testInputOutputNameConflict(): void
     {
-        $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), new BasicAutoWiringContainer(new EmptyContainer()));
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
         $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers');
         $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Types');
 

@@ -16,6 +16,7 @@ use Mouf\Picotainer\Picotainer;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use SplFileInfo;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -25,6 +26,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
+use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
@@ -121,6 +123,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getTypeMapper()
     {
         if ($this->typeMapper === null) {
+            $arrayAdapter = new ArrayAdapter();
+            $arrayAdapter->setLogger(new ExceptionLogger());
+
             $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()/*, $this->getInputTestObjectType2()*/) implements TypeMapperInterface {
                 /**
                  * @var ObjectType
@@ -233,7 +238,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     throw CannotMapTypeException::createForDecorateName($typeName, $type);
                 }
 
-            }, new NamingStrategy(), new Psr16Cache(new ArrayAdapter()), $this->getTypeRegistry());
+            }, new NamingStrategy(), new Psr16Cache($arrayAdapter), $this->getTypeRegistry());
         }
         return $this->typeMapper;
     }
@@ -282,12 +287,16 @@ abstract class AbstractQueryProviderTest extends TestCase
 
     protected function buildFieldsBuilder(): FieldsBuilder
     {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $psr16Cache = new Psr16Cache($arrayAdapter);
+
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware(
             new VoidAuthenticationService(),
             new VoidAuthorizationService()
         ));
-        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]);
+        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter($psr16Cache), [new SecurityExpressionLanguageProvider()]);
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, new VoidAuthenticationService(), new VoidAuthorizationService()));
 
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
@@ -298,7 +307,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            new CachedDocBlockFactory($psr16Cache),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
