@@ -65,13 +65,13 @@ final class GlobTypeMapper extends AbstractTypeMapper
             $this->classes = [];
             $explorer      = new GlobClassExplorer($this->namespace, $this->cache, $this->globTtl, $this->classNameMapper, $this->recursive);
             $classes       = $explorer->getClassMap();
-            foreach ($classes as $className => $fileInfo) {
+            foreach ($classes as $className => $phpFile) {
                 if (! class_exists($className, false) && ! interface_exists($className, false)) {
                     // Let's try to load the file if it was not imported yet.
                     // We are importing the file manually to avoid triggering the autoloader.
                     // The autoloader might trigger errors if the file does not respect PSR-4 or if the
                     // Symfony DebugAutoLoader is installed. (see https://github.com/thecodingmachine/graphqlite/issues/216)
-                    require_once $fileInfo->getRealPath();
+                    require_once $phpFile;
                     // Does it exists now?
                     if (! class_exists($className, false) && ! interface_exists($className, false)) {
                         continue;
