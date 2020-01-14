@@ -76,7 +76,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         }
 
         // Let's json deserialize if this is not already done.
-        if ($request->getParsedBody() === null) {
+        if (empty($request->getParsedBody())) {
             $content = $request->getBody()->getContents();
             $data = json_decode($content, true);
 
