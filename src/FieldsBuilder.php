@@ -207,6 +207,8 @@ class FieldsBuilder
         $refClass = new ReflectionClass($controller);
 
         $queryList = [];
+        /** @var array<string, ReflectionMethod> $refMethodByFields */
+        $refMethodByFields = [];
 
         $oldDeclaringClass = null;
         $context           = null;
@@ -316,10 +318,11 @@ class FieldsBuilder
             });
 
             if ($field !== null) {
-                if (isset($queryList[$fieldDescriptor->getName()])) {
-                    throw DuplicateMappingException::createForQuery($refClass->getName(), $fieldDescriptor->getName());
+                if (isset($refMethodByFields[$name])) {
+                    throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $refMethodByFields[$name], $refMethod);
                 }
-                $queryList[$fieldDescriptor->getName()] = $field;
+                $queryList[$name] = $field;
+                $refMethodByFields[$name] = $refMethod;
             }
 
             /*if ($unauthorized) {
