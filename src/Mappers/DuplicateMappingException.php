@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use RuntimeException;
+use ReflectionMethod;
 use function sprintf;
 
 class DuplicateMappingException extends RuntimeException
@@ -24,7 +25,7 @@ class DuplicateMappingException extends RuntimeException
         throw new self(sprintf("The type '%s' is created by 2 different classes: '%s' and '%s'", $type, $sourceClass1, $sourceClass2));
     }
 
-    public static function createForQuery(string $sourceClass, string $queryName, \ReflectionMethod $method1, \ReflectionMethod $method2): self
+    public static function createForQuery(string $sourceClass, string $queryName, ReflectionMethod $method1, ReflectionMethod $method2): self
     {
         throw new self(sprintf("The query/mutation/field '%s' is declared twice in class '%s'. First in '%s::%s()', second in '%s::%s()'", $queryName, $sourceClass, $method1->getDeclaringClass()->getName(), $method1->getName(), $method2->getDeclaringClass()->getName(), $method2->getName()));
     }
