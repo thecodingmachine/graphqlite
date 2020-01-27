@@ -152,15 +152,15 @@ You can use the `this` variable to access any (public) property / method of the 
 ```php
 class Post {
     /**
-     * @Query
-     * @Security("this.canAccess(post, user)")
+     * @Field
+     * @Security("this.canAccessBody(user)")
      */
-    public function getPost(Post $post): array
+    public function getBody(): array
     {
         // ...
     }
    
-    public function canAccess(Post $post, User $user): bool
+    public function canAccessBody(User $user): bool
     {
         // Some custom logic here
     }
