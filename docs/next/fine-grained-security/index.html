@@ -168,15 +168,15 @@ You can use the <code>is_logged()</code> function to check if a user is logged o
 <p>You can use the <code>this</code> variable to access any (public) property / method of the current class.</p>
 <pre><code class="hljs css language-php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span> </span>{
     <span class="hljs-comment">/**
-     * <span class="hljs-doctag">@Query</span>
-     * <span class="hljs-doctag">@Security</span>("this.canAccess(post, user)")
+     * <span class="hljs-doctag">@Field</span>
+     * <span class="hljs-doctag">@Security</span>("this.canAccessBody(user)")
      */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getPost</span><span class="hljs-params">(Post $post)</span>: <span class="hljs-title">array</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBody</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
     </span>{
         <span class="hljs-comment">// ...</span>
     }
    
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canAccess</span><span class="hljs-params">(Post $post, User $user)</span>: <span class="hljs-title">bool</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canAccessBody</span><span class="hljs-params">(User $user)</span>: <span class="hljs-title">bool</span>
     </span>{
         <span class="hljs-comment">// Some custom logic here</span>
     }
