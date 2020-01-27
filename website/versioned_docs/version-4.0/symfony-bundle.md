@@ -7,11 +7,33 @@ original_id: symfony-bundle
 
 The GraphQLite bundle is compatible with **Symfony 4.x** and **Symfony 5.x**.
 
-<div class="alert alert-warning">
-    The Symfony Flex recipe is not yet available.
-</div>
+## Applications that use Symfony Flex
 
-## Installation
+Open a command console, enter your project directory and execute:
+
+```console
+$ composer require thecodingmachine/graphqlite-bundle
+```
+
+Now, go to the `config/packages/graphqlite.yaml` file and edit the namespaces to match your application.
+
+**config/packages/graphqlite.yaml**
+```yaml
+graphqlite:
+    namespace:
+      # The namespace(s) that will store your GraphQLite controllers.
+      # It accept either a string or a list of strings.
+      controllers: App\GraphQLController\
+      # The namespace(s) that will store your GraphQL types and factories.
+      # It accept either a string or a list of strings.
+      types: 
+      - App\Types\
+      - App\Entity\
+```
+
+More advanced parameters are detailed in the ["advanced configuration" section](#advanced-configuration)
+
+## Applications that don't use Symfony Flex
 
 Open a terminal in your current project directory and run:
 
@@ -60,6 +82,24 @@ graphqlite:
       types: 
       - App\Types\
       - App\Entity\
+```
+
+## Advanced configuration
+
+### Customizing error handling
+
+You can add a "debug" section in the `graphqlite.yaml` file to customize the way errors are handled.
+By default, GraphQLite configures the underlying Webonyx GraphQL library this way:
+
+- All exceptions that implement the `ClientAware` interface are caught by GraphQLite
+- All other exceptions will bubble up and by caught by Symfony error handling mechanism
+
+We found out those settings to be quite convenient but you can override those to your preference.
+
+**config/packages/graphqlite.yaml**
+```yaml
+graphqlite:
+    # ...
     debug:
       # Include exception messages in output when an error arises.
       INCLUDE_DEBUG_MESSAGE: false
