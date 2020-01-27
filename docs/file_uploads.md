@@ -43,6 +43,13 @@ class MyController
 }
 ```
 
-Of course, you need to use a GraphQL client that is compatible with multipart requests.
+Of course, you need to use a GraphQL client that is compatible with multipart requests. See [jaydenseric/graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec#client) for a list of compatible clients.
 
-See [jaydenseric/graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec#client) for a list of compatible clients.
+The GraphQL client must send the file using the Upload type.
+
+```
+mutation upload($file: Upload!) {
+    upload(file: $file)
+}
+```
+
