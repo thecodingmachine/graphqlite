@@ -54,6 +54,14 @@ class ProductController
     /**
      * @Query()
      */
+    public function echoSomeProductType(): ProductTypeEnum
+    {
+        return ProductTypeEnum::FOOD();
+    }
+
+    /**
+     * @Query()
+     */
     public function echoDate(DateTimeImmutable $date): DateTimeImmutable
     {
         return $date;
