@@ -953,7 +953,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoProductType' => 'FOOD'
+            'echoSomeProductType' => 'FOOD'
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 

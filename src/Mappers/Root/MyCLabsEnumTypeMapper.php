@@ -14,6 +14,7 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Types\MyclabsEnumType;
 use function is_a;
 use function str_replace;
 use function strpos;
@@ -93,7 +94,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             $constInstances[$key] = ['value' => $enumClass::$key()];
         }
 
-        return $this->cache[$enumClass] = new EnumType([
+        return $this->cache[$enumClass] = new MyclabsEnumType([
             'name' => 'MyCLabsEnum_' . str_replace('\\', '__', $enumClass),
             'values' => $constInstances,
         ]);
