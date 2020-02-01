@@ -54,11 +54,10 @@ class DateTimeType extends ScalarType
      *
      * In the case of an invalid node or value this method must throw an Exception
      *
+     * @param mixed $valueNode
      * @param array<string, mixed>|null $variables
      *
      * @return mixed
-     *
-     * @throws Exception
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */

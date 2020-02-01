@@ -34,6 +34,9 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
         parent::__construct($config, $className);
     }
 
+    /**
+     * @param class-string<object> $className
+     */
     public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper): self
     {
         return new self($className, [
@@ -76,9 +79,11 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
     /**
      * Resolves concrete ObjectType for given object value
      *
+     * @param mixed $objectValue
      * @param mixed[] $context
+     *
      */
-    public function resolveType($objectValue, $context, ResolveInfo $info)
+    public function resolveType($objectValue, $context, ResolveInfo $info): MutableObjectType
     {
         if (! is_object($objectValue)) {
             throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($objectValue) . '"');

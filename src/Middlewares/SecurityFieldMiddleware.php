@@ -149,6 +149,6 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             }
         }*/
 
-        return array_merge($argsByName, $variables);
+        return $variables + $argsByName;
     }
 }

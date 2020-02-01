@@ -41,6 +41,9 @@ class TypeResolver
         }
 
         try {
+            /**
+             * @var \GraphQL\Language\AST\ListTypeNode|\GraphQL\Language\AST\NamedTypeNode|\GraphQL\Language\AST\NonNullTypeNode
+             */
             $parsedOutputType = Parser::parseType($typeName);
             $type             = AST::typeFromAST($this->schema, $parsedOutputType);
         } catch (Error $e) {

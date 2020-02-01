@@ -141,6 +141,9 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         return $object;
     }
 
+    /**
+     * @param callable&array<int, object|string> $decorator
+     */
     public function decorate(callable $decorator): void
     {
         $this->decorators[] = $decorator;

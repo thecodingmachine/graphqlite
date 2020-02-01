@@ -26,14 +26,14 @@ interface RecursiveTypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
+     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type).
      */
     public function canMapClassToType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
+     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type).
      *
      * @throws CannotMapTypeExceptionInterface
      */

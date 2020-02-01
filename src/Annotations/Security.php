@@ -25,7 +25,7 @@ class Security implements MiddlewareAnnotationInterface
     private $failWith;
     /** @var bool */
     private $failWithIsSet = false;
-    /** @var int|null */
+    /** @var int */
     private $statusCode;
     /** @var string */
     private $message;

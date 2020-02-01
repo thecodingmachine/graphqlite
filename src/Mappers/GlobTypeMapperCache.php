@@ -12,11 +12,11 @@ use function array_keys;
  */
 class GlobTypeMapperCache
 {
-    /** @var array<string,string> Maps a domain class to the GraphQL type annotated class */
+    /** @var array<class-string<object>,class-string<object>> Maps a domain class to the GraphQL type annotated class */
     private $mapClassToTypeArray = [];
-    /** @var array<string,string> Maps a GraphQL type name to the GraphQL type annotated class */
+    /** @var array<string,class-string<object>> Maps a GraphQL type name to the GraphQL type annotated class */
     private $mapNameToType = [];
-    /** @var array<string,string[]> Maps a domain class to the factory method that creates the input type in the form [classname, methodName] */
+    /** @var array<class-string<object>,array{0: class-string<object>, 1: string}> Maps a domain class to the factory method that creates the input type in the form [classname, methodName] */
     private $mapClassToFactory = [];
     /** @var array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodName] */
     private $mapInputNameToFactory = [];
@@ -49,7 +49,7 @@ class GlobTypeMapperCache
 
         foreach ($globAnnotationsCache->getFactories() as $methodName => [$inputName, $inputClassName, $isDefault, $declaringClass]) {
             if ($isDefault) {
-                if (isset($this->mapClassToFactory[$inputClassName])) {
+                if ($inputClassName !== null && isset($this->mapClassToFactory[$inputClassName])) {
                     throw DuplicateMappingException::createForFactory($inputClassName, $this->mapClassToFactory[$inputClassName][0], $this->mapClassToFactory[$inputClassName][1], $refClass->getName(), $methodName);
                 }
             } else {
@@ -69,19 +69,26 @@ class GlobTypeMapperCache
         }
     }
 
+    /**
+     * @param class-string<object> $className
+     * @return class-string<object>|null
+     */
     public function getTypeByObjectClass(string $className): ?string
     {
         return $this->mapClassToTypeArray[$className] ?? null;
     }
 
     /**
-     * @return string[]
+     * @return class-string<object>[]
      */
     public function getSupportedClasses(): array
     {
         return array_keys($this->mapClassToTypeArray);
     }
 
+    /**
+     * @return class-string<object>|null
+     */
     public function getTypeByGraphQLTypeName(string $graphqlTypeName): ?string
     {
         return $this->mapNameToType[$graphqlTypeName] ?? null;

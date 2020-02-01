@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
@@ -143,6 +144,7 @@ class TypeHandler implements ParameterHandlerInterface
                 $declaringFunction = $parameter->getDeclaringFunction();
                 Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
                 $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $declaringFunction, $docBlock, $parameter->getName());
+                Assert::isInstanceOf($type, InputType::class);
             } catch (CannotMapTypeExceptionInterface $e) {
                 $e->addParamInfo($parameter);
                 throw $e;

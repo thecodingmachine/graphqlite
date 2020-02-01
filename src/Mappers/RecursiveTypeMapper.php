@@ -39,14 +39,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * An array mapping a class name to the MappedClass instance (useful to know if the class has children)
      *
-     * @var array<string,MappedClass>|null
+     * @var array<class-string<object>,MappedClass>|null
      */
     private $mappedClasses;
 
     /**
      * An array of interfaces OR object types if no interface matching.
      *
-     * @var array<string,OutputType&Type&NamedType>
+     * @var array<string,OutputType&Type&NamedType&(InterfaceType|MutableObjectType)>
      */
     private $interfaces = [];
 
@@ -65,7 +65,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /** @var int|null */
     private $ttl;
 
-    /** @var array<string, string> An array mapping a GraphQL interface name to the PHP class name that triggered its generation. */
+    /** @var array<string, class-string<object>> An array mapping a GraphQL interface name to the PHP class name that triggered its generation. */
     private $interfaceToClassNameMap;
 
     /** @var TypeRegistry */
@@ -83,7 +83,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type).
+     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type).
      */
     public function canMapClassToType(string $className): bool
     {
@@ -93,7 +93,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string $className The class name to look for (this function looks into parent classes if the class does not match a type)
+     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type)
      * @param (OutputType&Type)|null $subType
      *
      * @throws CannotMapTypeExceptionInterface
@@ -164,6 +164,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
     /**
      * Returns the closest parent that can be mapped, or null if nothing can be matched.
+     * @param class-string<object> $className
+     * @return class-string<object>|null
      */
     public function findClosestMatchingParent(string $className): ?string
     {
@@ -180,7 +182,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Extends a type using available type extenders.
      *
-     * @param MutableObjectType|MutableInterfaceType $type
+     * @param class-string<object> $className
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -207,7 +210,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type. Returns an interface if possible (if the class
      * has children) or returns an output type otherwise.
      *
-     * @param string      $className                                   The exact class name to look for (this function does not look into parent classes).
+     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
      * @param (OutputType&Type)|null $subType A subtype (if the main className is an iterator)
      *
      * @return OutputType&Type&NamedType
@@ -246,7 +249,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Build a map mapping GraphQL interface names to the PHP class name of the object creating this interface.
      *
-     * @return array<string, string>
+     * @return array<string, class-string<object>>
      */
     private function buildInterfaceToClassNameMap(): array
     {
@@ -269,7 +272,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Returns a map mapping GraphQL interface names to the PHP class name of the object creating this interface.
      * The map may come from the cache.
      *
-     * @return array<string, string>
+     * @return array<string, class-string<object>>
      */
     private function getInterfaceToClassNameMap(): array
     {
@@ -290,13 +293,18 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Finds the list of interfaces returned by $className.
      *
+     * @param class-string<object> $className
      * @return InterfaceType[]
      */
     public function findInterfaces(string $className): array
     {
         $interfaces = [];
 
-        foreach (class_implements($className) as $interface) {
+        /**
+         * @var array<int, class-string<object>>
+         */
+        $implements = class_implements($className);
+        foreach ($implements as $interface) {
             if (! $this->typeMapper->canMapClassToType($interface)) {
                 continue;
             }
@@ -322,7 +330,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     }
 
     /**
-     * @return array<string,MappedClass>
+     * @return array<class-string<object>,MappedClass>
      */
     private function getClassTree(): array
     {
@@ -371,6 +379,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
+     *
+     * @param class-string<object> $className
      */
     public function canMapClassToInputType(string $className): bool
     {
@@ -380,6 +390,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
+     * @param class-string<object> $className
      * @return InputObjectType&ResolvableMutableInputInterface
      *
      * @throws CannotMapTypeExceptionInterface

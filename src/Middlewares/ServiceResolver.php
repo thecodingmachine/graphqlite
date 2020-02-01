@@ -32,7 +32,7 @@ class ServiceResolver implements ResolverInterface
     }
 
     /**
-     * @param mixed $args
+     * @param array<int, mixed> $args
      * @return mixed
      */
     public function __invoke(...$args)

@@ -41,7 +41,7 @@ class SourceResolver implements ResolverInterface
     }
 
     /**
-     * @param mixed $args
+     * @param array<int, mixed> $args
      *
      * @return mixed
      */

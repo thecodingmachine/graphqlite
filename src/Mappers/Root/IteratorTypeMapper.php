@@ -56,6 +56,9 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
             } catch (CannotMapTypeException $e) {
                 if ($type instanceof Object_) {
+                    /**
+                     * @var class-string<object>
+                     */
                     $fqcn = (string) $type->getFqsen();
                     $refClass = new ReflectionClass($fqcn);
                     // Note : $refClass->isIterable() is only accessible in PHP 7.2
@@ -221,6 +224,9 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 continue;
             }
 
+            /**
+             * @var class-string<object>
+             */
             $fqcn     = (string) $singleDocBlockType->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2

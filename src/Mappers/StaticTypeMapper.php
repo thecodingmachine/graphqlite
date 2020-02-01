@@ -77,7 +77,8 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @throws CannotMapTypeExceptionInterface
+     * @param class-string<object> $className
+     * @throws CannotMapTypeException
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
     {
@@ -113,6 +114,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
+     * @param class-string<object> $className
      * @return ResolvableMutableInputInterface&InputObjectType
      *
      * @throws CannotMapTypeExceptionInterface
@@ -186,6 +188,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
+     * @param class-string<object> $className
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      *
      * @throws CannotMapTypeExceptionInterface
