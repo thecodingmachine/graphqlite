@@ -22,6 +22,9 @@ class TypeAnnotatedObjectType extends MutableObjectType
         parent::__construct($config, $className);
     }
 
+    /**
+     * @param class-string<object> $className
+     */
     public static function createFromAnnotatedClass(string $typeName, string $className, ?object $annotatedObject, FieldsBuilder $fieldsBuilder, RecursiveTypeMapperInterface $recursiveTypeMapper, bool $doNotMapInterfaces): self
     {
         return new self($className, [
@@ -54,6 +57,10 @@ class TypeAnnotatedObjectType extends MutableObjectType
 
                 // FIXME: add an interface with a @Type that is implemented by noone.
                 // Check that it does not trigger an exception.
+
+                /**
+                 * @var array<int, class-string<object>>
+                 */
                 $interfaces = class_implements($className);
                 foreach ($interfaces as $interface) {
                     if (! $recursiveTypeMapper->canMapClassToType($interface)) {

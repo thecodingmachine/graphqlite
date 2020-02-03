@@ -26,11 +26,17 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 {
     use CannotMapTypeTrait;
 
+    /**
+     * @param class-string<object> $className
+     */
     public static function createForType(string $className): self
     {
         return new self('cannot map class "' . $className . '" to a known GraphQL type. Check your TypeMapper configuration.');
     }
 
+    /**
+     * @param class-string<object> $className
+     */
     public static function createForInputType(string $className): self
     {
         return new self('cannot map class "' . $className . '" to a known GraphQL input type. Check your TypeMapper configuration.');
@@ -46,6 +52,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self($error->getMessage(), $error->getCode(), $error);
     }
 
+    /**
+     * @param class-string<object> $className
+     */
     public static function createForMissingIteratorValue(string $className, self $e): self
     {
         $message = sprintf(
@@ -87,6 +96,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     }
 
     /**
+     * @param class-string<object> $className
      * @param NamedType&(ObjectType|InterfaceType) $type
      *
      * @return CannotMapTypeException
@@ -111,6 +121,9 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('cannot decorate GraphQL input type "' . $type->name . '" with type "' . $name . '". Check your TypeMapper configuration.');
     }
 
+    /**
+     * @param class-string<object> $className
+     */
     public static function extendTypeWithBadTargetedClass(string $className, ExtendType $extendType): self
     {
         return new self('For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $className . '", the pointed at GraphQL type cannot be extended. You can only target types extending the MutableObjectType (like types created with the @Type annotation).');

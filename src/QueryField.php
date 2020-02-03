@@ -218,10 +218,10 @@ class QueryField extends FieldDefinition
     {
         $arguments = $fieldDescriptor->getParameters();
         if ($fieldDescriptor->getPrefetchMethodName() !== null) {
-            array_unshift($arguments, new PrefetchDataParameter());
+            $arguments = [ '__graphqlite_prefectData' => new PrefetchDataParameter() ] + $arguments;
         }
         if ($fieldDescriptor->isInjectSource() === true) {
-            array_unshift($arguments, new SourceParameter());
+            $arguments = [ '__graphqlite_source' => new SourceParameter() ] + $arguments;
         }
         $fieldDescriptor->setParameters($arguments);
 

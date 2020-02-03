@@ -24,7 +24,7 @@ use function sort;
  */
 class AggregateControllerQueryProvider implements QueryProviderInterface
 {
-    /** @var array|string[] */
+    /** @var iterable<string> */
     private $controllers;
     /** @var ContainerInterface */
     private $controllersContainer;
@@ -32,7 +32,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     private $fieldsBuilder;
 
     /**
-     * @param string[]           $controllers          A list of controllers name in the container.
+     * @param iterable<string>   $controllers          A list of controllers name in the container.
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
     public function __construct(iterable $controllers, FieldsBuilder $fieldsBuilder, ContainerInterface $controllersContainer)
@@ -73,7 +73,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @param array<int, array<string, FieldDefinition>> $list
+     * @param array<string, array<string, FieldDefinition>> $list
      *
      * @return array<string, FieldDefinition>
      */

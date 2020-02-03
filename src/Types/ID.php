@@ -14,7 +14,11 @@ use function method_exists;
  */
 class ID
 {
-    /** @var bool|float|int|string */
+    /**
+     * Note: if $value is an object, it has a __toString method on it.
+     *
+     * @var bool|float|int|string|object
+     */
     private $value;
 
     /**
@@ -29,7 +33,9 @@ class ID
     }
 
     /**
-     * @return bool|float|int|string
+     * Note: if returned value is an object, it has a __toString method on it.
+     *
+     * @return bool|float|int|string|object
      */
     public function val()
     {

@@ -11,7 +11,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
  */
 final class GlobAnnotationsCache
 {
-    /** @var string|null */
+    /** @var class-string<object>|null */
     private $typeClassName;
 
     /** @var string|null */
@@ -20,12 +20,15 @@ final class GlobAnnotationsCache
     /** @var bool */
     private $default;
 
-    /** @var array<string, array<int, string|bool>> An array mapping a factory method name to an input name / class name / default flag / declaring class */
+    /** @var array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> An array mapping a factory method name to an input name / class name / default flag / declaring class */
     private $factories = [];
 
-    /** @var array<string, array<int, string>> An array mapping a decorator method name to an input name / declaring class */
+    /** @var array<string, array{0: string, 1:class-string<object>}> An array mapping a decorator method name to an input name / declaring class */
     private $decorators = [];
 
+    /**
+     * @param class-string<object> $className
+     */
     public function setType(string $className, string $typeName, bool $isDefault): void
     {
         $this->typeClassName = $className;
@@ -33,6 +36,9 @@ final class GlobAnnotationsCache
         $this->default = $isDefault;
     }
 
+    /**
+     * @return class-string<object>|null
+     */
     public function getTypeClassName(): ?string
     {
         return $this->typeClassName;
@@ -48,18 +54,25 @@ final class GlobAnnotationsCache
         return $this->default;
     }
 
+    /**
+     * @param class-string<object>|null $className
+     * @param class-string<object> $declaringClass
+     */
     public function registerFactory(string $methodName, string $inputName, ?string $className, bool $isDefault, string $declaringClass): void
     {
         $this->factories[$methodName] = [$inputName, $className, $isDefault, $declaringClass];
     }
 
+    /**
+     * @param class-string<object> $declaringClass
+     */
     public function registerDecorator(string $methodName, string $inputName, string $declaringClass): void
     {
         $this->decorators[$methodName] = [$inputName, $declaringClass];
     }
 
     /**
-     * @return array<string, array<int, string|bool>>
+     * @return array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}>
      */
     public function getFactories(): array
     {
@@ -67,7 +80,7 @@ final class GlobAnnotationsCache
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array{0: string, 1:class-string<object>}>
      */
     public function getDecorators(): array
     {

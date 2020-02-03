@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\Error;
+use GraphQL\Language\AST\ListTypeNode;
+use GraphQL\Language\AST\NamedTypeNode;
+use GraphQL\Language\AST\NonNullTypeNode;
 use GraphQL\Language\Parser;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
@@ -41,6 +44,9 @@ class TypeResolver
         }
 
         try {
+            /**
+             * @var ListTypeNode|NamedTypeNode|NonNullTypeNode
+             */
             $parsedOutputType = Parser::parseType($typeName);
             $type             = AST::typeFromAST($this->schema, $parsedOutputType);
         } catch (Error $e) {

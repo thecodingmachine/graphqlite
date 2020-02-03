@@ -40,10 +40,13 @@ class InputTypeUtils
     /**
      * Returns an array with 2 elements: [ $inputName, $className ]
      *
-     * @return string[]
+     * @return array{0: string, 1:class-string<object>}
      */
     public function getInputTypeNameAndClassName(ReflectionMethod $method): array
     {
+        /**
+         * @var class-string<object>
+         */
         $fqsen   = ltrim((string) $this->validateReturnType($method), '\\');
         $factory = $this->annotationReader->getFactoryAnnotation($method);
         if ($factory === null) {

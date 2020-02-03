@@ -19,7 +19,6 @@ use Throwable;
 use Webmozart\Assert\Assert;
 use function array_combine;
 use function array_keys;
-use function array_merge;
 use function assert;
 
 /**
@@ -149,6 +148,6 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             }
         }*/
 
-        return array_merge($argsByName, $variables);
+        return $variables + $argsByName;
     }
 }

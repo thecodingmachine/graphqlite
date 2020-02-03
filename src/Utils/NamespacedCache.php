@@ -164,7 +164,7 @@ class NamespacedCache implements CacheInterface
     }
 
     /**
-     * @param iterable<int, string> $keys
+     * @param iterable<int|string, string> $keys
      *
      * @return string[]
      */

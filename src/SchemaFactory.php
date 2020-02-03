@@ -94,7 +94,7 @@ class SchemaFactory
     private $classNameMapper;
     /** @var SchemaConfig */
     private $schemaConfig;
-    /** @var int */
+    /** @var int|null */
     private $globTtl = 2;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];

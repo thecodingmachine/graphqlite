@@ -11,13 +11,13 @@ use Psr\Container\ContainerInterface;
  */
 class AggregateControllerQueryProviderFactory implements QueryProviderFactoryInterface
 {
-    /** @var array|string[] */
+    /** @var iterable<string> */
     private $controllers;
     /** @var ContainerInterface */
     private $controllersContainer;
 
     /**
-     * @param string[]           $controllers          A list of controllers name in the container.
+     * @param iterable<string>   $controllers          A list of controllers name in the container.
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
     public function __construct(iterable $controllers, ContainerInterface $controllersContainer)
