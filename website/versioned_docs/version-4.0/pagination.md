@@ -15,6 +15,14 @@ PHP arrays, Doctrine and [TDBM](https://thecodingmachine.github.io/tdbm/doc/limi
 <div class="alert alert-warning">If you are a Laravel user, Eloquent does not come with a Porpaginas
 iterator. However, the GraphQLite Laravel bundle <a href="laravel-package-advanced.md">comes with its own pagination system</a>.</div>
 
+## Installation
+
+You will need to install the [Porpaginas](https://github.com/beberlei/porpaginas) library to benefit from this feature.
+
+```bash
+$ composer require beberlei/porpaginas
+```
+
 ## Usage
 
 In your query, simply return a class that implements `Porpaginas\Result`:
