@@ -164,7 +164,9 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
     /**
      * Returns the closest parent that can be mapped, or null if nothing can be matched.
+     *
      * @param class-string<object> $className
+     *
      * @return class-string<object>|null
      */
     public function findClosestMatchingParent(string $className): ?string
@@ -294,6 +296,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Finds the list of interfaces returned by $className.
      *
      * @param class-string<object> $className
+     *
      * @return InterfaceType[]
      */
     public function findInterfaces(string $className): array
@@ -391,6 +394,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param class-string<object> $className
+     *
      * @return InputObjectType&ResolvableMutableInputInterface
      *
      * @throws CannotMapTypeExceptionInterface

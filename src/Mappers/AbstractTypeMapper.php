@@ -290,6 +290,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param class-string<object> $className
+     *
      * @return ResolvableMutableInputInterface&InputObjectType
      *
      * @throws CannotMapTypeException

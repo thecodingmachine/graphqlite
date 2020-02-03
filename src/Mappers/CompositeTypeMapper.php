@@ -35,6 +35,7 @@ class CompositeTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
+     *
      * @param class-string<object> $className
      */
     public function canMapClassToType(string $className): bool
@@ -89,6 +90,7 @@ class CompositeTypeMapper implements TypeMapperInterface
 
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL input type.
+     *
      * @param class-string<object> $className
      */
     public function canMapClassToInputType(string $className): bool
@@ -106,6 +108,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param class-string<object> $className
+     *
      * @return ResolvableMutableInputInterface&InputObjectType
      *
      * @throws CannotMapTypeExceptionInterface

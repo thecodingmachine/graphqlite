@@ -71,6 +71,7 @@ class GlobTypeMapperCache
 
     /**
      * @param class-string<object> $className
+     *
      * @return class-string<object>|null
      */
     public function getTypeByObjectClass(string $className): ?string

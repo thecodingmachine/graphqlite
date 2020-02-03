@@ -6,7 +6,6 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use DateTime;
 use DateTimeImmutable;
-use Exception;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Type\Definition\ScalarType;

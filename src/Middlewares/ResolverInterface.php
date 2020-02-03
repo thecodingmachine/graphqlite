@@ -16,7 +16,7 @@ interface ResolverInterface
     public function toString(): string;
 
     /**
-     * @param array<int, mixed> $args
+     * @param mixed $args
      *
      * @return mixed
      */
