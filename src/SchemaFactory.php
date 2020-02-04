@@ -334,7 +334,7 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader);
 
         if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(

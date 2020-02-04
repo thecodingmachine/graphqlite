@@ -10,7 +10,7 @@ class MyclabsEnumTypeTest extends TestCase
 {
     public function testException()
     {
-        $enumType = new MyCLabsEnumType(ProductTypeEnum::class);
+        $enumType = new MyCLabsEnumType(ProductTypeEnum::class, 'foo');
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected a Myclabs Enum instance');
         $enumType->serialize('foo');

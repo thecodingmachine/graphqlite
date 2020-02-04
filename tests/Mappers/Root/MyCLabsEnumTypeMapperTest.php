@@ -13,7 +13,7 @@ class MyCLabsEnumTypeMapperTest extends AbstractQueryProviderTest
 
     public function testObjectTypeHint(): void
     {
-        $mapper = new MyCLabsEnumTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()));
+        $mapper = new MyCLabsEnumTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getAnnotationReader());
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage("don't know how to handle type object");

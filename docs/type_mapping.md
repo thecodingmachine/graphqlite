@@ -223,7 +223,7 @@ class StatusEnum extends Enum
  */
 public function users(StatusEnum $status): array
 {
-    if ($status == StatusEum::ON()) {
+    if ($status == StatusEnum::ON()) {
         // Note that the "magic" ON() method returns an instance of the StatusEnum class.
         // Also, note that we are comparing this instance using "==" (using "===" would fail as we have 2 different instances here)
         // ...
@@ -231,6 +231,30 @@ public function users(StatusEnum $status): array
     // ...
 }
 ```
+
+```graphql
+query users($status: StatusEnum!) {}
+    users(status: $status) {
+        id
+    }
+}
+```
+
+By default, the name of the GraphQL enum type will be the name of the class. If you have a naming conflict (two classes
+that live in different namespaces with the same class name), you can solve it using the `@EnumType` annotation:
+
+```php
+use TheCodingMachine\GraphQLite\Annotations\EnumType;
+
+/**
+ * @EnumType(name="UserStatus")
+ */
+class StatusEnum extends Enum
+{
+    // ...
+}
+```
+
 
 <div class="alert alert-info">There are many enumeration library in PHP and you might be using another library.
 If you want to add support for your own library, this is not extremely difficult to do. You need to register a custom

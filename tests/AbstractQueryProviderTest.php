@@ -329,7 +329,7 @@ abstract class AbstractQueryProviderTest extends TestCase
 
         $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper);
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $this->getAnnotationReader());
         $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
