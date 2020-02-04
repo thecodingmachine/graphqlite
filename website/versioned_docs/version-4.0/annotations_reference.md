@@ -242,3 +242,15 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *for*          | *yes*      | string | The name of the PHP parameter
 *constraint*   | *yes       | annotation | One (or many) Symfony validation annotations.
+
+## @EnumType annotation
+
+The `@EnumType` annotation is used to change the name of a "Enum" type.
+Note that if you do not want to change the name, the annotation is optionnal. Any object extending `MyCLabs\Enum\Enum`
+is automatically mapped to a GraphQL enum type.
+
+**Applies on**: classes extending the `MyCLabs\Enum\Enum` base class.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+name           | *no*       | string | The name of the enum type (in the GraphQL schema)
