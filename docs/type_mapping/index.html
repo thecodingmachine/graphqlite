@@ -228,11 +228,29 @@ native support for it.</p>
  */</span>
 <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">users</span><span class="hljs-params">(StatusEnum $status)</span>: <span class="hljs-title">array</span>
 </span>{
-    <span class="hljs-keyword">if</span> ($status == StatusEum::ON()) {
+    <span class="hljs-keyword">if</span> ($status == StatusEnum::ON()) {
         <span class="hljs-comment">// Note that the "magic" ON() method returns an instance of the StatusEnum class.</span>
         <span class="hljs-comment">// Also, note that we are comparing this instance using "==" (using "===" would fail as we have 2 different instances here)</span>
         <span class="hljs-comment">// ...</span>
     }
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<pre><code class="hljs css language-graphql"><span class="hljs-selector-tag">query</span> <span class="hljs-selector-tag">users</span>($<span class="hljs-attribute">status</span>: StatusEnum!) {}
+    <span class="hljs-selector-tag">users</span>(<span class="hljs-attribute">status</span>: $status) {
+        <span class="hljs-selector-tag">id</span>
+    }
+}
+</code></pre>
+<p>By default, the name of the GraphQL enum type will be the name of the class. If you have a naming conflict (two classes
+that live in different namespaces with the same class name), you can solve it using the <code>@EnumType</code> annotation:</p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Annotations</span>\<span class="hljs-title">EnumType</span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@EnumType</span>(name="UserStatus")
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StatusEnum</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Enum</span>
+</span>{
     <span class="hljs-comment">// ...</span>
 }
 </code></pre>
