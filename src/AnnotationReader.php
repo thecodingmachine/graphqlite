@@ -7,12 +7,14 @@ namespace TheCodingMachine\GraphQLite;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\Reader;
 use InvalidArgumentException;
+use MyCLabs\Enum\Enum;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
+use TheCodingMachine\GraphQLite\Annotations\EnumType;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
@@ -85,7 +87,6 @@ class AnnotationReader
     {
         try {
             $type = $this->getClassAnnotation($refClass, Type::class);
-            assert($type instanceof Type || $type === null);
             if ($type !== null && $type->isSelfType()) {
                 $type->setClass($refClass->getName());
             }
@@ -105,7 +106,6 @@ class AnnotationReader
     {
         try {
             $extendType = $this->getClassAnnotation($refClass, ExtendType::class);
-            assert($extendType instanceof ExtendType || $extendType === null);
         } catch (ClassNotFoundException $e) {
             throw ClassNotFoundException::wrapExceptionForExtendTag($e, $refClass->getName());
         }
@@ -230,7 +230,12 @@ class AnnotationReader
     /**
      * Returns a class annotation. Does not look in the parent class.
      *
-     * @param ReflectionClass<T> $refClass
+     * @param ReflectionClass<object> $refClass
+     * @param class-string<T> $annotationClass
+     *
+     * @return T|null
+     *
+     * @throws AnnotationException
      *
      * @template T of object
      */
@@ -239,6 +244,7 @@ class AnnotationReader
         $type = null;
         try {
             $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
+            assert($type === null || $type instanceof $annotationClass);
         } catch (AnnotationException $e) {
             switch ($this->mode) {
                 case self::STRICT_MODE:
@@ -388,5 +394,13 @@ class AnnotationReader
         $this->methodAnnotationsCache[$cacheKey] = $toAddAnnotations;
 
         return $toAddAnnotations;
+    }
+
+    /**
+     * @param ReflectionClass<Enum> $refClass
+     */
+    public function getEnumTypeAnnotation(ReflectionClass $refClass): ?EnumType
+    {
+        return $this->getClassAnnotation($refClass, EnumType::class);
     }
 }

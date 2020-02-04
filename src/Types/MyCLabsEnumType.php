@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Type\Definition\EnumType;
 use InvalidArgumentException;
 use MyCLabs\Enum\Enum;
-use function str_replace;
 
 /**
  * An extension of the EnumType to support Myclabs enum.
@@ -17,7 +16,7 @@ use function str_replace;
  */
 class MyCLabsEnumType extends EnumType
 {
-    public function __construct(string $enumClassName)
+    public function __construct(string $enumClassName, string $typeName)
     {
         $consts         = $enumClassName::toArray();
         $constInstances = [];
@@ -26,7 +25,7 @@ class MyCLabsEnumType extends EnumType
         }
 
         parent::__construct([
-            'name' => 'MyCLabsEnum_' . str_replace('\\', '__', $enumClassName),
+            'name' => $typeName,
             'values' => $constInstances,
         ]);
     }
