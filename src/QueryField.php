@@ -42,7 +42,7 @@ class QueryField extends FieldDefinition
      * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?string $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
+    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?string $deprecationReason, ?string $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
@@ -51,6 +51,9 @@ class QueryField extends FieldDefinition
         ];
         if ($comment) {
             $config['description'] = $comment;
+        }
+        if ($deprecationReason) {
+            $config['deprecationReason'] = $deprecationReason;
         }
 
         $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
@@ -209,6 +212,7 @@ class QueryField extends FieldDefinition
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
             $fieldDescriptor->getComment(),
+            $fieldDescriptor->getDeprecationReason(),
             $fieldDescriptor->getPrefetchMethodName(),
             $fieldDescriptor->getPrefetchParameters()
         );

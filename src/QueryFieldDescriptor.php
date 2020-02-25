@@ -46,6 +46,8 @@ class QueryFieldDescriptor
     private $injectSource;
     /** @var string|null */
     private $comment;
+    /** @var string|null */
+    private $deprecationReason;
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
     /** @var ReflectionMethod */
@@ -178,6 +180,16 @@ class QueryFieldDescriptor
     public function setComment(?string $comment): void
     {
         $this->comment = $comment;
+    }
+
+    public function getDeprecationReason(): ?string
+    {
+        return $this->deprecationReason;
+    }
+
+    public function setDeprecationReason(?string $deprecationReason): void
+    {
+        $this->deprecationReason = $deprecationReason;
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations
