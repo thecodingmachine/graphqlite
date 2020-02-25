@@ -351,6 +351,90 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
+    public function testDeprecatedField(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                uppercaseName
+                deprecatedUppercaseName
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            new Context()
+        );
+
+        $this->assertSame([
+            'contacts' => [
+                [
+                    'name' => 'Joe',
+                    'uppercaseName' => 'JOE',
+                    'deprecatedUppercaseName' => 'JOE',
+                ],
+                [
+                    'name' => 'Bill',
+                    'uppercaseName' => 'BILL',
+                    'deprecatedUppercaseName' => 'BILL',
+                ]
+
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Let's introspect to see if the field is marked as deprecated
+        // in the resulting GraphQL schema
+        $queryString = '
+            query deprecatedField {
+              __type(name: "Contact") {
+                fields(includeDeprecated: true) {
+                  name
+                  isDeprecated
+                  deprecationReason
+                }
+              }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            new Context()
+        );
+
+        $fields = $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']['__type']['fields'];
+        $field = null;
+        foreach ($fields as $field) {
+            if ($field['name'] == 'deprecatedUppercaseName') {
+                break;
+            }
+            $field = null;
+        }
+        $this->assertNotNull(
+            $field,
+            'Missing field `deprecatedUppercaseName` in GraphQL Schema'
+        );
+        $this->assertTrue(
+            $field['isDeprecated']
+        );
+        $this->assertSame(
+            'use field `uppercaseName`',
+            $field['deprecationReason']
+        );
+    }
+
     public function testPrefetchException(): void
     {
         /**
