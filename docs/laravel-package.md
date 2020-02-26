@@ -138,6 +138,12 @@ $ composer require mll-lab/laravel-graphql-playground
 
 By default, the playground will be available at `/graphql-playground`.
 
+Or you can install [Altair GraphQL Client](https://github.com/XKojiMedia/laravel-altair-graphql)
+
+```console
+$ composer require xkojimedia/laravel-altair-graphql
+```
+
 You can also use any external client with GraphQLite, make sure to point it to the URL defined in the config (`'/graphql'` by default).
 
 ## Troubleshooting HTTP 419 errors
