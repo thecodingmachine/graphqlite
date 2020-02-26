@@ -24,6 +24,15 @@ class ExtendedContactType
     }
 
     /**
+     * @Field()
+     * @deprecated use field `uppercaseName`
+     */
+    public function deprecatedUppercaseName(Contact $contact): string
+    {
+        return strtoupper($contact->getName());
+    }
+
+    /**
      * Here, we are testing overriding the field in the extend class.
      *
      * @Field()

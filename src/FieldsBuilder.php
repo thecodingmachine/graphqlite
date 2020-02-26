@@ -36,10 +36,12 @@ use Webmozart\Assert\Assert;
 use function array_merge;
 use function array_shift;
 use function assert;
+use function count;
 use function get_class;
 use function get_parent_class;
 use function is_string;
 use function reset;
+use function trim;
 use function ucfirst;
 
 /**
@@ -241,6 +243,11 @@ class FieldsBuilder
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
 
+            $deprecated      = $docBlockObj->getTagsByName('deprecated');
+            if (count($deprecated) >= 1) {
+                $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
+            }
+
             $methodName = $refMethod->getName();
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
@@ -402,6 +409,11 @@ class FieldsBuilder
 
                 $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
                 $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+
+                $deprecated      = $docBlockObj->getTagsByName('deprecated');
+                if (count($deprecated) >= 1) {
+                    $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
+                }
 
                 $fieldDescriptor->setComment($docBlockComment);
                 $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);

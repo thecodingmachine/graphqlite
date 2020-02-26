@@ -261,6 +261,56 @@ If you want to add support for your own library, this is not extremely difficult
 "RootTypeMapper" with GraphQLite. You can learn more about <em>type mappers</em> in the <a href="internals.md">"internals" documentation</a>
 and <a href="https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Root/MyCLabsEnumTypeMapper.php">copy/paste and adapt the root type mapper used for myclabs/php-enum</a>.</div>
 
+## Deprecation of fields
+
+You can mark a field as deprecated in your GraphQL Schema by just annotating it with the `@deprecated` PHPDoc annotation.
+
+```php
+namespace App\Entities;
+
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
+/**
+ * @Type()
+ */
+class Product
+{
+    // ...
+
+    /**
+     * @Field()
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @Field()
+     * @deprecated use field `name` instead
+     */
+    public function getProductName(): string
+    {
+        return $this->name;
+    }
+}
+```
+
+This will add the `@deprecated` directive to the field in the GraphQL Schema which sets the `isDeprecated` field to `true` and adds the reason to the `deprecationReason` field in an introspection query. Fields marked as deprecated can still be queried, but will be returned in an introspection query only if `includeDeprecated` is set to `true`.
+
+```graphql
+query {
+    __type(name: "Product") {
+￼       fields(includeDeprecated: true) {
+￼           name
+￼           isDeprecated
+￼           deprecationReason
+￼       }
+￼   }
+}
+```
+
 ## More scalar types
 
 <small>Available in GraphQLite 4.0+</small>

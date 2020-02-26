@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 /**
  * @ExtendType(class=Contact::class)
  * @SourceField(name="name", phpType="string")
+ * @SourceField(name="deprecatedName", phpType="string")
  * @SourceField(name="birthDate")
  * @SourceField(name="manager")
  * @SourceField(name="relations")

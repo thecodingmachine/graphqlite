@@ -351,6 +351,101 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
+    public function testDeprecatedField(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                uppercaseName
+                deprecatedUppercaseName
+                deprecatedName
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            new Context()
+        );
+
+        $this->assertSame([
+            'contacts' => [
+                [
+                    'name' => 'Joe',
+                    'uppercaseName' => 'JOE',
+                    'deprecatedUppercaseName' => 'JOE',
+                    'deprecatedName' => 'Joe',
+                ],
+                [
+                    'name' => 'Bill',
+                    'uppercaseName' => 'BILL',
+                    'deprecatedUppercaseName' => 'BILL',
+                    'deprecatedName' => 'Bill',
+                ]
+
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+
+        // Let's introspect to see if the field is marked as deprecated
+        // in the resulting GraphQL schema
+        $queryString = '
+            query deprecatedField {
+              __type(name: "Contact") {
+                fields(includeDeprecated: true) {
+                  name
+                  isDeprecated
+                  deprecationReason
+                }
+              }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            new Context()
+        );
+
+        $fields = $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']['__type']['fields'];
+        $deprecatedFields = [
+            'deprecatedUppercaseName',
+            'deprecatedName'
+        ];
+        $fields = array_filter($fields, function($field) use ($deprecatedFields) {
+            if (in_array($field['name'], $deprecatedFields)) {
+                return true;
+            }
+            return false;
+        });
+        $this->assertCount(
+            count($deprecatedFields),
+            $fields,
+            'Missing deprecated fields on GraphQL Schema'
+        );
+        foreach ($fields as $field) {
+            $this->assertTrue(
+                $field['isDeprecated'],
+                'Field ' . $field['name'] . ' must be marked deprecated, but is not'
+            );
+            $this->assertStringContainsString(
+                'use field ',
+                $field['deprecationReason'],
+                'Field ' . $field['name'] . ' is misssing a deprecation reason'
+            );
+        }
+    }
+
     public function testPrefetchException(): void
     {
         /**
