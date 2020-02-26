@@ -57,6 +57,14 @@ class Contact
         return $this->name;
     }
 
+    /**
+     * @deprecated use field `name`
+     */
+    public function getDeprecatedName()
+    {
+        return $this->name;
+    }
+
     public function getManager(): ?Contact
     {
         return $this->manager;
