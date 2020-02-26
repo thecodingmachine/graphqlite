@@ -410,6 +410,11 @@ class FieldsBuilder
                 $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
                 $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
 
+                $deprecated      = $docBlockObj->getTagsByName('deprecated');
+                if (count($deprecated) >= 1) {
+                    $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
+                }
+
                 $fieldDescriptor->setComment($docBlockComment);
                 $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
 
