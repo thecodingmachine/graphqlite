@@ -95,7 +95,7 @@ class SchemaFactory
     /** @var SchemaConfig */
     private $schemaConfig;
     /** @var int|null */
-    private $globTtl = 2;
+    private $globTTL = 2;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
     /** @var ExpressionLanguage|null */
@@ -257,9 +257,9 @@ class SchemaFactory
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
      */
-    public function setGlobTtl(?int $globTtl): self
+    public function setGlobTtl(?int $globTTL): self
     {
-        $this->globTtl = $globTtl;
+        $this->globTTL = $globTTL;
 
         return $this;
     }
@@ -344,7 +344,8 @@ class SchemaFactory
                 $typeRegistry,
                 $recursiveTypeMapper,
                 $this->container,
-                $this->cache
+                $this->cache,
+                $this->globTTL
             );
 
             $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
@@ -400,7 +401,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->cache,
                 $this->classNameMapper,
-                $this->globTtl
+                $this->globTTL
             ));
         }
 
@@ -419,7 +420,8 @@ class SchemaFactory
                 $inputTypeGenerator,
                 $recursiveTypeMapper,
                 $this->container,
-                $this->cache
+                $this->cache,
+                $this->globTTL
             );
         }
 
@@ -438,7 +440,7 @@ class SchemaFactory
                 $annotationReader,
                 $this->cache,
                 $this->classNameMapper,
-                $this->globTtl
+                $this->globTTL
             );
         }
 
