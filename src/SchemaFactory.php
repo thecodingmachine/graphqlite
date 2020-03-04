@@ -62,6 +62,8 @@ use function sys_get_temp_dir;
  */
 class SchemaFactory
 {
+    public const GLOB_CACHE_SECONDS = 2;
+
     /** @var string[] */
     private $controllerNamespaces = [];
     /** @var string[] */
@@ -95,7 +97,7 @@ class SchemaFactory
     /** @var SchemaConfig */
     private $schemaConfig;
     /** @var int|null */
-    private $globTTL = 2;
+    private $globTTL = self::GLOB_CACHE_SECONDS;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
     /** @var ExpressionLanguage|null */
@@ -281,7 +283,7 @@ class SchemaFactory
      */
     public function devMode(): self
     {
-        return $this->setGlobTtl(2);
+        return $this->setGlobTtl(self::GLOB_CACHE_SECONDS);
     }
 
     /**
