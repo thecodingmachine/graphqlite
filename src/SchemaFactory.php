@@ -259,7 +259,7 @@ class SchemaFactory
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
      */
-    public function setGlobTtl(?int $globTTL): self
+    public function setGlobTTL(?int $globTTL): self
     {
         $this->globTTL = $globTTL;
 
@@ -269,21 +269,21 @@ class SchemaFactory
     /**
      * Sets GraphQLite in "prod" mode (cache settings optimized for best performance).
      *
-     * This is a shortcut for `$schemaFactory->setGlobTtl(null)`
+     * This is a shortcut for `$schemaFactory->setGlobTTL(null)`
      */
     public function prodMode(): self
     {
-        return $this->setGlobTtl(null);
+        return $this->setGlobTTL(null);
     }
 
     /**
      * Sets GraphQLite in "dev" mode (this is the default mode: cache settings optimized for best developer experience).
      *
-     * This is a shortcut for `$schemaFactory->setGlobTtl(2)`
+     * This is a shortcut for `$schemaFactory->setGlobTTL(2)`
      */
     public function devMode(): self
     {
-        return $this->setGlobTtl(self::GLOB_CACHE_SECONDS);
+        return $this->setGlobTTL(self::GLOB_CACHE_SECONDS);
     }
 
     /**
