@@ -202,14 +202,14 @@ Each instance of a <code>RootTypeMapper</code> holds a reference on the next roo
      * also map these types by name in the "mapNameToType" method.
      *
      * <span class="hljs-doctag">@param</span> string $typeName The name of the GraphQL type
-     * <span class="hljs-doctag">@return</span> NamedType|null
+     * <span class="hljs-doctag">@return</span> NamedType
      */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapNameToType</span><span class="hljs-params">(string $typeName)</span>: ?<span class="hljs-title">NamedType</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapNameToType</span><span class="hljs-params">(string $typeName)</span>: <span class="hljs-title">NamedType</span>
     </span>{
         <span class="hljs-keyword">if</span> ($typeName === AnyScalarType::NAME) {
             <span class="hljs-keyword">return</span> AnyScalarType::getInstance();
         }
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;next-&gt;mapNameToType($typeName);
     }
 }
 </code></pre>
