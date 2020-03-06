@@ -183,14 +183,14 @@ class AnyScalarTypeMapper implements RootTypeMapperInterface
      * also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
-     * @return NamedType|null
+     * @return NamedType
      */
-    public function mapNameToType(string $typeName): ?NamedType
+    public function mapNameToType(string $typeName): NamedType
     {
         if ($typeName === AnyScalarType::NAME) {
             return AnyScalarType::getInstance();
         }
-        return null;
+        return $this->next->mapNameToType($typeName);
     }
 }
 ```
