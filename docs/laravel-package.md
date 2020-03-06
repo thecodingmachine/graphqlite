@@ -4,7 +4,7 @@ title: Getting started with Laravel
 sidebar_label: Laravel package
 ---
 
-The GraphQLite-Laravel package is compatible with **Laravel 5.7+** and **Laravel 6.x**.
+The GraphQLite-Laravel package is compatible with **Laravel 5.7+**, **Laravel 6.x** and  **Laravel 7.x**.
 
 ## Installation
 
