@@ -41,6 +41,7 @@ use function get_class;
 use function get_parent_class;
 use function is_string;
 use function reset;
+use function rtrim;
 use function trim;
 use function ucfirst;
 
