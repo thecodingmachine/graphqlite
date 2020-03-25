@@ -264,6 +264,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $fields['sibling']->getType());
         $this->assertInstanceOf(ObjectType::class, $fields['sibling']->getType()->getWrappedType());
         $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
+        $this->assertSame('This is a test summary', $fields['test']->description);
     }
 
     public function testSourceFieldOnSelfType(): void
