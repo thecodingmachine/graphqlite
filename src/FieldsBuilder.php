@@ -408,7 +408,7 @@ class FieldsBuilder
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
 
                 $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-                $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+                $docBlockComment = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
 
                 $deprecated      = $docBlockObj->getTagsByName('deprecated');
                 if (count($deprecated) >= 1) {
