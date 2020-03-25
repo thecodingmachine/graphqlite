@@ -1052,6 +1052,36 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
+    public function testEndToEndEnums3(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query echo($productType: ProductTypes!) {
+            echoProductType(productType: $productType)
+        }
+        ';
+
+        $variables = [
+            'productType' => 'NON_FOOD'
+        ];
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            null,
+            $variables
+        );
+
+        $this->assertSame([
+            'echoProductType' => 'NON_FOOD'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
     public function testEndToEndDateTime(): void
     {
         /**
