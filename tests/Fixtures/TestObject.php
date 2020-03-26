@@ -21,6 +21,7 @@ class TestObject
     }
 
     /**
+     * This is a test summary
      * @return string
      */
     public function getTest(): string
