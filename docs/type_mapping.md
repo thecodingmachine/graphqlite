@@ -255,6 +255,11 @@ class StatusEnum extends Enum
 }
 ```
 
+<div class="alert alert-warning">GraphQLite must be able to find all the classes extending the "MyCLabs\Enum" class
+in your project. By default, GraphQLite will look for "Enum" classes in the namespaces declared for the types. For this 
+reason, <strong>your enum classes MUST be in one of the namespaces declared for the types in your GraphQLite 
+configuration file.</strong></div>
+
 
 <div class="alert alert-info">There are many enumeration library in PHP and you might be using another library.
 If you want to add support for your own library, this is not extremely difficult to do. You need to register a custom

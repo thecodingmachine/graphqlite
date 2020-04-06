@@ -318,6 +318,12 @@ class SchemaFactory
         $cachedDocBlockFactory = new CachedDocBlockFactory($this->cache);
         $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry          = new TypeRegistry();
+        $symfonyCache          = new Psr16Adapter($this->cache);
+
+        $namespaceFactory = new NamespaceFactory($this->cache, $this->classNameMapper, $this->globTTL);
+        $nsList = array_map(static function (string $namespace) use ($namespaceFactory) {
+            return $namespaceFactory->createNamespace($namespace);
+        }, $this->typeNamespaces);
 
         $psr6Cache = new Psr16Adapter($this->cache);
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($psr6Cache);
@@ -338,7 +344,7 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader);
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
 
         if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
@@ -392,11 +398,6 @@ class SchemaFactory
         if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
             throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
-
-        $namespaceFactory = new NamespaceFactory($this->cache, $this->classNameMapper, $this->globTTL);
-        $nsList = array_map(static function (string $namespace) use ($namespaceFactory) {
-            return $namespaceFactory->createNamespace($namespace);
-        }, $this->typeNamespaces);
 
         foreach ($nsList as $ns) {
             $compositeTypeMapper->addTypeMapper(new GlobTypeMapper(
