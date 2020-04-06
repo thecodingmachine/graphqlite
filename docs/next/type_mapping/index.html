@@ -254,6 +254,10 @@ that live in different namespaces with the same class name), you can solve it us
     <span class="hljs-comment">// ...</span>
 }
 </code></pre>
+<div class="alert alert-warning">GraphQLite must be able to find all the classes extending the "MyCLabs\Enum" class
+in your project. By default, GraphQLite will look for "Enum" classes in the namespaces declared for the types. For this 
+reason, <strong>your enum classes MUST be in one of the namespaces declared for the types in your GraphQLite 
+configuration file.</strong></div>
 <div class="alert alert-info">There are many enumeration library in PHP and you might be using another library.
 If you want to add support for your own library, this is not extremely difficult to do. You need to register a custom
 "RootTypeMapper" with GraphQLite. You can learn more about <em>type mappers</em> in the <a href="internals.md">"internals" documentation</a>
