@@ -10,6 +10,8 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 
 class FactoryContextTest extends AbstractQueryProviderTest
 {
+    const GLOB_TTL_SECONDS = 2;
+
     public function testContext(): void
     {
         $namingStrategy = new NamingStrategy();
@@ -26,7 +28,8 @@ class FactoryContextTest extends AbstractQueryProviderTest
             $this->getInputTypeGenerator(),
             $this->getTypeMapper(),
             $container,
-            $arrayCache
+            $arrayCache,
+            self::GLOB_TTL_SECONDS
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());
@@ -39,7 +42,7 @@ class FactoryContextTest extends AbstractQueryProviderTest
         $this->assertSame($this->getTypeMapper(), $context->getRecursiveTypeMapper());
         $this->assertSame($container, $context->getContainer());
         $this->assertSame($arrayCache, $context->getCache());
-        $this->assertSame(2, $context->getGlobTtl());
-        $this->assertNull($context->getMapTtl());
+        $this->assertSame(self::GLOB_TTL_SECONDS, $context->getGlobTTL());
+        $this->assertNull($context->getMapTTL());
     }
 }

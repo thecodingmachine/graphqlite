@@ -40,8 +40,8 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
             $context->getNamingStrategy(),
             $context->getRecursiveTypeMapper(),
             $context->getCache(),
-            $context->getGlobTtl(),
-            $context->getMapTtl()
+            $context->getGlobTTL(),
+            $context->getMapTTL()
         );
     }
 }

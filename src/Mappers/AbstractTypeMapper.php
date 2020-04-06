@@ -43,7 +43,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /** @var CacheInterface */
     protected $cache;
     /** @var int|null */
-    protected $globTtl;
+    protected $globTTL;
 
     /**
      * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
@@ -63,7 +63,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /** @var TypeGenerator */
     private $typeGenerator;
     /** @var int|null */
-    private $mapTtl;
+    private $mapTTL;
     /** @var NamingStrategyInterface */
     private $namingStrategy;
     /** @var InputTypeGenerator */
@@ -79,16 +79,16 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /** @var GlobExtendTypeMapperCache */
     private $globExtendTypeMapperCache;
 
-    public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTtl = 2, ?int $mapTtl = null)
+    public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
     {
         $this->typeGenerator       = $typeGenerator;
         $this->container           = $container;
         $this->annotationReader    = $annotationReader;
         $this->namingStrategy      = $namingStrategy;
         $this->cache               = $cache;
-        $this->globTtl             = $globTtl;
-        $this->cacheContract       = new Psr16Adapter($this->cache, $cachePrefix, $this->globTtl ?? 0);
-        $this->mapTtl              = $mapTtl;
+        $this->globTTL             = $globTTL;
+        $this->cacheContract       = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
+        $this->mapTTL              = $mapTTL;
         $this->inputTypeGenerator  = $inputTypeGenerator;
         $this->inputTypeUtils      = $inputTypeUtils;
         $this->recursiveTypeMapper = $recursiveTypeMapper;
@@ -177,7 +177,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 }
 
                 return $annotationsCache;
-            }, '', $this->mapTtl);
+            }, '', $this->mapTTL);
 
             if ($annotationsCache === 'nothing') {
                 continue;
@@ -227,7 +227,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 }
 
                 return 'nothing';
-            }, '', $this->mapTtl);
+            }, '', $this->mapTTL);
 
             if ($annotationsCache === 'nothing') {
                 continue;

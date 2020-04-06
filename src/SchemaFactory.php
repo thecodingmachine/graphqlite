@@ -62,6 +62,8 @@ use function sys_get_temp_dir;
  */
 class SchemaFactory
 {
+    public const GLOB_CACHE_SECONDS = 2;
+
     /** @var string[] */
     private $controllerNamespaces = [];
     /** @var string[] */
@@ -95,7 +97,7 @@ class SchemaFactory
     /** @var SchemaConfig */
     private $schemaConfig;
     /** @var int|null */
-    private $globTtl = 2;
+    private $globTTL = self::GLOB_CACHE_SECONDS;
     /** @var array<int, FieldMiddlewareInterface> */
     private $fieldMiddlewares = [];
     /** @var ExpressionLanguage|null */
@@ -257,9 +259,9 @@ class SchemaFactory
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
      */
-    public function setGlobTtl(?int $globTtl): self
+    public function setGlobTTL(?int $globTTL): self
     {
-        $this->globTtl = $globTtl;
+        $this->globTTL = $globTTL;
 
         return $this;
     }
@@ -267,21 +269,21 @@ class SchemaFactory
     /**
      * Sets GraphQLite in "prod" mode (cache settings optimized for best performance).
      *
-     * This is a shortcut for `$schemaFactory->setGlobTtl(null)`
+     * This is a shortcut for `$schemaFactory->setGlobTTL(null)`
      */
     public function prodMode(): self
     {
-        return $this->setGlobTtl(null);
+        return $this->setGlobTTL(null);
     }
 
     /**
      * Sets GraphQLite in "dev" mode (this is the default mode: cache settings optimized for best developer experience).
      *
-     * This is a shortcut for `$schemaFactory->setGlobTtl(2)`
+     * This is a shortcut for `$schemaFactory->setGlobTTL(2)`
      */
     public function devMode(): self
     {
-        return $this->setGlobTtl(2);
+        return $this->setGlobTTL(self::GLOB_CACHE_SECONDS);
     }
 
     /**
@@ -344,7 +346,8 @@ class SchemaFactory
                 $typeRegistry,
                 $recursiveTypeMapper,
                 $this->container,
-                $this->cache
+                $this->cache,
+                $this->globTTL
             );
 
             $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
@@ -400,7 +403,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->cache,
                 $this->classNameMapper,
-                $this->globTtl
+                $this->globTTL
             ));
         }
 
@@ -419,7 +422,8 @@ class SchemaFactory
                 $inputTypeGenerator,
                 $recursiveTypeMapper,
                 $this->container,
-                $this->cache
+                $this->cache,
+                $this->globTTL
             );
         }
 
@@ -438,7 +442,7 @@ class SchemaFactory
                 $annotationReader,
                 $this->cache,
                 $this->classNameMapper,
-                $this->globTtl
+                $this->globTTL
             );
         }
 

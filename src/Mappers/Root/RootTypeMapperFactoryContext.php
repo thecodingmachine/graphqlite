@@ -33,9 +33,9 @@ final class RootTypeMapperFactoryContext
     /** @var CacheInterface */
     private $cache;
     /** @var int|null */
-    private $globTtl;
+    private $globTTL;
     /** @var int|null */
-    private $mapTtl;
+    private $mapTTL;
 
     public function __construct(
         AnnotationReader $annotationReader,
@@ -45,8 +45,8 @@ final class RootTypeMapperFactoryContext
         RecursiveTypeMapperInterface $recursiveTypeMapper,
         ContainerInterface $container,
         CacheInterface $cache,
-        ?int $globTtl = 2,
-        ?int $mapTtl = null
+        ?int $globTTL,
+        ?int $mapTTL = null
     ) {
         $this->annotationReader = $annotationReader;
         $this->typeResolver = $typeResolver;
@@ -55,8 +55,8 @@ final class RootTypeMapperFactoryContext
         $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->container = $container;
         $this->cache = $cache;
-        $this->globTtl = $globTtl;
-        $this->mapTtl = $mapTtl;
+        $this->globTTL = $globTTL;
+        $this->mapTTL = $mapTTL;
     }
 
     public function getAnnotationReader(): AnnotationReader
@@ -94,13 +94,13 @@ final class RootTypeMapperFactoryContext
         return $this->cache;
     }
 
-    public function getGlobTtl(): ?int
+    public function getGlobTTL(): ?int
     {
-        return $this->globTtl;
+        return $this->globTTL;
     }
 
-    public function getMapTtl(): ?int
+    public function getMapTTL(): ?int
     {
-        return $this->mapTtl;
+        return $this->mapTTL;
     }
 }
