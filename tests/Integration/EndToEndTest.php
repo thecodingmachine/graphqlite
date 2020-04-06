@@ -65,6 +65,7 @@ use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use function var_dump;
 use function var_export;
 
@@ -153,10 +154,15 @@ class EndToEndTest extends TestCase
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeTypeMapper();
             },
+            NamespaceFactory::class => function(ContainerInterface $container) {
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
+                return new NamespaceFactory(new Psr16Cache($arrayAdapter));
+            },
             GlobTypeMapper::class => function(ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
+                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -170,7 +176,7 @@ class EndToEndTest extends TestCase
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
+                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -226,7 +232,7 @@ class EndToEndTest extends TestCase
             'rootTypeMapper' => function(ContainerInterface $container) {
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
-                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class));
+                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models') ]);
                 $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
                 return $rootTypeMapper;
@@ -1049,6 +1055,36 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoSomeProductType' => 'FOOD'
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+    }
+
+    public function testEndToEndEnums3(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query echo($productType: ProductTypes!) {
+            echoProductType(productType: $productType)
+        }
+        ';
+
+        $variables = [
+            'productType' => 'NON_FOOD'
+        ];
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            null,
+            $variables
+        );
+
+        $this->assertSame([
+            'echoProductType' => 'NON_FOOD'
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 

@@ -58,6 +58,8 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 use function array_reverse;
 
 abstract class AbstractQueryProviderTest extends TestCase
@@ -75,9 +77,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     private $annotationReader;
     private $typeResolver;
     private $typeRegistry;
-    private $lockFactory;
     private $parameterMiddlewarePipe;
     private $rootTypeMapper;
+    private $namespaceFactory;
 
     protected function getTestObjectType(): MutableObjectType
     {
@@ -325,11 +327,14 @@ abstract class AbstractQueryProviderTest extends TestCase
 
     protected function buildRootTypeMapper(): RootTypeMapperInterface
     {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+
         $topRootTypeMapper = new NullableTypeMapperAdapter();
 
         $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $this->getAnnotationReader());
+        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $this->getAnnotationReader(), $arrayAdapter, []);
         $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
@@ -392,5 +397,17 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         $phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
         return $phpDocumentorTypeResolver->resolve($type);
+    }
+
+    protected function getNamespaceFactory(): NamespaceFactory
+    {
+        if ($this->namespaceFactory === null) {
+            $arrayAdapter = new ArrayAdapter();
+            $arrayAdapter->setLogger(new ExceptionLogger());
+            $psr16Cache = new Psr16Cache($arrayAdapter);
+
+            $this->namespaceFactory = new NamespaceFactory($psr16Cache);
+        }
+        return $this->namespaceFactory;
     }
 }

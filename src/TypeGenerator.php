@@ -146,7 +146,6 @@ class TypeGenerator
                         $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
                     }
                 }*/
-
                 return $this->fieldsBuilder->getFields($annotatedObject);
 
                 /*if ($parentType !== null) {

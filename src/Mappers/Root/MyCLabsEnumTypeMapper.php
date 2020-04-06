@@ -15,9 +15,13 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
+use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
+use function assert;
 use function is_a;
+use function ltrim;
 
 /**
  * Maps an class extending MyCLabs enums to a GraphQL type
@@ -32,11 +36,20 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     private $next;
     /** @var AnnotationReader */
     private $annotationReader;
+    /** @var array|NS[] */
+    private $namespaces;
+    /** @var CacheInterface */
+    private $cacheService;
 
-    public function __construct(RootTypeMapperInterface $next, AnnotationReader $annotationReader)
+    /**
+     * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
+     */
+    public function __construct(RootTypeMapperInterface $next, AnnotationReader $annotationReader, CacheInterface $cacheService, array $namespaces)
     {
         $this->next = $next;
         $this->annotationReader = $annotationReader;
+        $this->cacheService = $cacheService;
+        $this->namespaces = $namespaces;
     }
 
     /**
@@ -94,20 +107,21 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         if (! is_a($enumClass, Enum::class, true)) {
             return null;
         }
+        /**
+         * @var class-string<Enum>
+         */
+        $enumClass = ltrim($enumClass, '\\');
         if (isset($this->cache[$enumClass])) {
             return $this->cache[$enumClass];
         }
 
-        $type = new MyCLabsEnumType($enumClass, $this->getTypeName($enumClass));
+        $refClass = new ReflectionClass($enumClass);
+        $type = new MyCLabsEnumType($enumClass, $this->getTypeName($refClass));
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }
 
-    /**
-     * @param class-string<Enum> $enumClass
-     */
-    private function getTypeName(string $enumClass): string
+    private function getTypeName(ReflectionClass $refClass): string
     {
-        $refClass = new ReflectionClass($enumClass);
         $enumType = $this->annotationReader->getEnumTypeAnnotation($refClass);
         if ($enumType !== null) {
             $name = $enumType->getName();
@@ -133,6 +147,15 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         if (isset($this->cacheByName[$typeName])) {
             return $this->cacheByName[$typeName];
         }
+
+        $nameToClassMapping = $this->getNameToClassMapping();
+        if (isset($this->nameToClassMapping[$typeName])) {
+            $className = $nameToClassMapping[$typeName];
+            $type = $this->mapByClassName($className);
+            assert($type !== null);
+            return $type;
+        }
+
         /*if (strpos($typeName, 'MyCLabsEnum_') === 0) {
             $className = str_replace('__', '\\', substr($typeName, 12));
 
@@ -143,5 +166,34 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         }*/
 
         return $this->next->mapNameToType($typeName);
+    }
+
+    /** @var array<string, class-string<Enum>> */
+    private $nameToClassMapping;
+
+    /**
+     * Go through all classes in the defined namespaces and loads the cache.
+     *
+     * @return array<string, class-string<Enum>>
+     */
+    private function getNameToClassMapping(): array
+    {
+        if ($this->nameToClassMapping === null) {
+            $this->nameToClassMapping = $this->cacheService->get('myclabsenum_name_to_class', function () {
+                $nameToClassMapping = [];
+                foreach ($this->namespaces as $ns) {
+                    foreach ($ns->getClassList() as $className => $classRef) {
+                        if (! $classRef->isSubclassOf(Enum::class)) {
+                            continue;
+                        }
+
+                        $nameToClassMapping[$this->getTypeName($classRef)] = $className;
+                    }
+                }
+                return $nameToClassMapping;
+            });
+        }
+
+        return $this->nameToClassMapping;
     }
 }
