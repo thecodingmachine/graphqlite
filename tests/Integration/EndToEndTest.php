@@ -65,6 +65,7 @@ use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use function var_dump;
 use function var_export;
 
@@ -153,10 +154,15 @@ class EndToEndTest extends TestCase
             TypeMapperInterface::class => function(ContainerInterface $container) {
                 return new CompositeTypeMapper();
             },
+            NamespaceFactory::class => function(ContainerInterface $container) {
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
+                return new NamespaceFactory(new Psr16Cache($arrayAdapter));
+            },
             GlobTypeMapper::class => function(ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
+                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -170,7 +176,7 @@ class EndToEndTest extends TestCase
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
+                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
