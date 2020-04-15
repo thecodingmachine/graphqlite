@@ -104,10 +104,13 @@ class SchemaFactory
     private $fieldMiddlewares = [];
     /** @var ExpressionLanguage|null */
     private $expressionLanguage;
+    /** @var string */
+    private $cacheNamespace;
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
-        $this->cache     = new NamespacedCache($cache);
+        $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
+        $this->cache = $cache;
         $this->container = $container;
     }
 
@@ -210,8 +213,7 @@ class SchemaFactory
 
             $cache = function_exists('apcu_fetch') ? new ApcuCache() : new PhpFileCache(sys_get_temp_dir() . '/graphqlite.' . crc32(__DIR__));
 
-            $namespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
-            $cache->setNamespace($namespace);
+            $cache->setNamespace($this->cacheNamespace);
 
             $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, $cache, true);
 
@@ -315,18 +317,18 @@ class SchemaFactory
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
         $authorizationService  = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver          = new TypeResolver();
-        $cachedDocBlockFactory = new CachedDocBlockFactory($this->cache);
+        $namespacedCache       = new NamespacedCache($this->cache);
+        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
         $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry          = new TypeRegistry();
-        $symfonyCache          = new Psr16Adapter($this->cache);
+        $symfonyCache          = new Psr16Adapter($this->cache, $this->cacheNamespace);
 
-        $namespaceFactory = new NamespaceFactory($this->cache, $this->classNameMapper, $this->globTTL);
+        $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(static function (string $namespace) use ($namespaceFactory) {
             return $namespaceFactory->createNamespace($namespace);
         }, $this->typeNamespaces);
 
-        $psr6Cache = new Psr16Adapter($this->cache);
-        $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($psr6Cache);
+        $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
 
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
@@ -338,7 +340,7 @@ class SchemaFactory
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         $compositeTypeMapper = new CompositeTypeMapper();
-        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $this->cache, $typeRegistry);
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry);
 
         $topRootTypeMapper = new NullableTypeMapperAdapter();
 
@@ -354,7 +356,7 @@ class SchemaFactory
                 $typeRegistry,
                 $recursiveTypeMapper,
                 $this->container,
-                $this->cache,
+                $namespacedCache,
                 $this->globTTL
             );
 
@@ -409,7 +411,7 @@ class SchemaFactory
                 $annotationReader,
                 $namingStrategy,
                 $recursiveTypeMapper,
-                $this->cache,
+                $namespacedCache,
                 $this->globTTL
             ));
         }
@@ -429,7 +431,7 @@ class SchemaFactory
                 $inputTypeGenerator,
                 $recursiveTypeMapper,
                 $this->container,
-                $this->cache,
+                $namespacedCache,
                 $this->globTTL
             );
         }
@@ -447,7 +449,7 @@ class SchemaFactory
                 $fieldsBuilder,
                 $this->container,
                 $annotationReader,
-                $this->cache,
+                $namespacedCache,
                 $this->classNameMapper,
                 $this->globTTL
             );
