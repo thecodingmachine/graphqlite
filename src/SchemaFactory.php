@@ -90,8 +90,6 @@ class SchemaFactory
     private $authorizationService;
     /** @var CacheInterface */
     private $cache;
-    /** @var CacheInterface */
-    private $cacheWithoutNamespace;
     /** @var NamingStrategyInterface|null */
     private $namingStrategy;
     /** @var ContainerInterface */
