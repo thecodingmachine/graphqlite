@@ -42,7 +42,7 @@
         "phpstan/phpstan-webmozart-assert": "^0.12",
         "phpstan/extension-installer": "^1.0",
         "thecodingmachine/phpstan-strict-rules": "^0.12",
-        "zendframework/zend-diactoros": "^2"
+        "laminas/laminas-diactoros": "^2"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types"
