@@ -30,6 +30,9 @@ parameters:
         -
            message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getMethodAnnotations\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
+        -
+           message: '#Unreachable statement - code above always terminates.#'
+           path: src/Utils/CacheConverter.php
         - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage()#'
         # Needed because of a bug in PHP-CS
         - '#PHPDoc tag @param for parameter \$args with type mixed is not subtype of native type array<int, mixed>.#'
