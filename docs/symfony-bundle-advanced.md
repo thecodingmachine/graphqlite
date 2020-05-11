@@ -53,6 +53,26 @@ By default, GraphQLite assumes that your firewall name is "main". This is the de
 Symfony security bundle so it is likely the value you are using. If for some reason you want to use
 another firewall, configure the name with `graphqlite.security.firewall_name`.
 
+You can disable the introspection of your GraphQL API (for instance in production mode) using
+the `introspection` configuration properties.
+
+```yaml
+graphqlite:
+  security:
+    introspection: false
+```
+
+
+You can set the maximum complexity and depth of your GraphQL queries using the `maximum_query_complexity` 
+and `maximum_query_depth` configuration properties
+
+```yaml
+graphqlite:
+  security:
+    maximum_query_complexity: 314
+    maximum_query_depth: 42
+```
+
 ### Login using the "login" mutation
 
 The mutation below will log-in a user:
