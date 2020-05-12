@@ -53,6 +53,8 @@ By default, GraphQLite assumes that your firewall name is "main". This is the de
 Symfony security bundle so it is likely the value you are using. If for some reason you want to use
 another firewall, configure the name with `graphqlite.security.firewall_name`.
 
+## Schema and request security
+
 You can disable the introspection of your GraphQL API (for instance in production mode) using
 the `introspection` configuration properties.
 
