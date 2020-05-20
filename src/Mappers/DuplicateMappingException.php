@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use ReflectionMethod;
+use ReflectionProperty;
 use RuntimeException;
 use function sprintf;
 
@@ -30,13 +31,53 @@ class DuplicateMappingException extends RuntimeException
         throw new self(sprintf("The type '%s' is created by 2 different classes: '%s' and '%s'", $type, $sourceClass1, $sourceClass2));
     }
 
-    public static function createForQuery(string $sourceClass, string $queryName, ReflectionMethod $method1, ReflectionMethod $method2): self
+    /**
+     * @param string                              $sourceClass
+     * @param string                              $queryName
+     * @param ReflectionMethod|ReflectionProperty $firstReflector
+     * @param ReflectionMethod|ReflectionProperty $secondReflector
+     *
+     * @return static
+     */
+    public static function createForQuery(string $sourceClass, string $queryName, $firstReflector, $secondReflector): self
     {
-        throw new self(sprintf("The query/mutation/field '%s' is declared twice in class '%s'. First in '%s::%s()', second in '%s::%s()'", $queryName, $sourceClass, $method1->getDeclaringClass()->getName(), $method1->getName(), $method2->getDeclaringClass()->getName(), $method2->getName()));
+        $firstName = sprintf('%s::%s', $firstReflector->getDeclaringClass()->getName(), $firstReflector->getName());
+        if ($firstReflector instanceof ReflectionMethod) {
+            $firstName .= '()';
+        }
+
+        $secondName = sprintf('%s::%s', $secondReflector->getDeclaringClass()->getName(), $secondReflector->getName());
+        if ($secondReflector instanceof ReflectionMethod) {
+            $secondName .= '()';
+        }
+
+        throw new self(sprintf("The query/mutation/field '%s' is declared twice in class '%s'. First in '%s', second in '%s'", $queryName, $sourceClass, $firstName, $secondName));
     }
 
     public static function createForQueryInTwoControllers(string $sourceClass1, string $sourceClass2, string $queryName): self
     {
         throw new self(sprintf("The query/mutation '%s' is declared twice: in class '%s' and in class '%s'", $queryName, $sourceClass1, $sourceClass2));
+    }
+
+    /**
+     * @param string           $queryName
+     * @param ReflectionMethod $method
+     *
+     * @return self
+     */
+    public static function createForQueryInOneMethod(string $queryName, ReflectionMethod $method): self
+    {
+        throw new self(sprintf("The query/mutation/field '%s' is declared twice in '%s::%s()'", $queryName, $method->getDeclaringClass()->getName(), $method->getName()));
+    }
+
+    /**
+     * @param string             $queryName
+     * @param ReflectionProperty $property
+     *
+     * @return self
+     */
+    public static function createForQueryInOneProperty(string $queryName, ReflectionProperty $property): self
+    {
+        throw new self(sprintf("The query/mutation/field '%s' is declared twice in '%s::%s'", $queryName, $property->getDeclaringClass()->getName(), $property->getName()));
     }
 }

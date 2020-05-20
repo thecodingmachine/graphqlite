@@ -7,18 +7,24 @@ namespace TheCodingMachine\GraphQLite;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use ReflectionProperty;
 
 class InvalidPrefetchMethodRuntimeException extends GraphQLRuntimeException
 {
     /**
-     * @param ReflectionClass<object> $reflectionClass
+     * @param ReflectionMethod|ReflectionProperty $reflector
+     * @param ReflectionClass                     $reflectionClass
      */
-    public static function methodNotFound(ReflectionMethod $annotationMethod, ReflectionClass $reflectionClass, string $methodName, ReflectionException $previous): self
+    public static function methodNotFound($reflector, ReflectionClass $reflectionClass, string $methodName, ReflectionException $previous)
     {
-        throw new self('The @Field annotation in ' . $annotationMethod->getDeclaringClass()->getName() . '::' . $annotationMethod->getName() . ' specifies a "prefetch method" that could not be found. Unable to find method ' . $reflectionClass->getName() . '::' . $methodName . '.', 0, $previous);
+        throw new self('The @Field annotation in ' . $reflector->getDeclaringClass()->getName() . '::' . $reflector->getName() . ' specifies a "prefetch method" that could not be found. Unable to find method ' . $reflectionClass->getName() . '::' . $methodName . '.', 0, $previous);
     }
 
-    public static function prefetchDataIgnored(ReflectionMethod $annotationMethod, bool $isSecond): self
+    /**
+     * @param ReflectionMethod $annotationMethod
+     * @param bool             $isSecond
+     */
+    public static function prefetchDataIgnored(ReflectionMethod $annotationMethod, bool $isSecond)
     {
         throw new self('The @Field annotation in ' . $annotationMethod->getDeclaringClass()->getName() . '::' . $annotationMethod->getName() . ' specifies a "prefetch method" but the data from the prefetch method is not gathered. The "' . $annotationMethod->getName() . '" method should accept a ' . ($isSecond?'second':'first') . ' parameter that will contain data returned by the prefetch method.');
     }

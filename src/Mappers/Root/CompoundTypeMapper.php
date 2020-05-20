@@ -15,7 +15,6 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
-use ReflectionMethod;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -56,10 +55,10 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
-            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+            return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }
 
         $filteredDocBlockTypes = iterator_to_array($type);
@@ -73,7 +72,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
                 $mustBeIterable = true;
                 continue;
             }
-            $unionTypes[] = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $refMethod, $docBlockObj);
+            $unionTypes[] = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $reflector, $docBlockObj);
         }
 
         if ($mustBeIterable && empty($unionTypes)) {
@@ -96,10 +95,10 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
     {
         if (! $type instanceof Compound) {
-            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }
 
         // At this point, the |null has been removed and the |iterable has been removed too.

@@ -15,7 +15,7 @@ use function is_object;
  *
  * @internal
  */
-class SourceResolver implements ResolverInterface
+class SourceResolver implements SourceResolverInterface
 {
     /** @var string */
     private $methodName;

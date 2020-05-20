@@ -8,7 +8,7 @@ use BadMethodCallException;
 
 /**
  * @Annotation
- * @Target({"ANNOTATION", "METHOD"})
+ * @Target({"PROPERTY", "ANNOTATION", "METHOD"})
  * @Attributes({
  *   @Attribute("name", type = "string"),
  * })

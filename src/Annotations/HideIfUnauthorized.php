@@ -9,7 +9,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
  * or has no right associated.
  *
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
  */
 class HideIfUnauthorized implements MiddlewareAnnotationInterface
 {

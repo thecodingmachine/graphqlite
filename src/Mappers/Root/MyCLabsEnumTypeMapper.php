@@ -14,7 +14,6 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
-use ReflectionMethod;
 use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
@@ -57,11 +56,11 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
     {
         $result = $this->map($type);
         if ($result === null) {
-            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+            return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }
 
         return $result;
@@ -72,11 +71,11 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
     {
         $result = $this->map($type);
         if ($result === null) {
-            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }
 
         return $result;

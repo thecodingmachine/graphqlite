@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 /**
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"PROPERTY", "METHOD"})
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("outputType", type = "string"),

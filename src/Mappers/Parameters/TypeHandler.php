@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
@@ -24,6 +25,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionProperty;
 use ReflectionType;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
@@ -107,6 +109,28 @@ class TypeHandler implements ParameterHandlerInterface
         return $docBlockReturnType;
     }
 
+    /**
+     * Gets property type from its dock block.
+     *
+     * @param DocBlock           $docBlock
+     * @param ReflectionProperty $refProperty
+     *
+     * @return Type|null
+     */
+    private function getDocBlockPropertyType(DocBlock $docBlock, ReflectionProperty $refProperty): ?Type
+    {
+        /** @var Var_[] $varTags */
+        $varTags = $docBlock->getTagsByName('var');
+
+        if (!$varTags) {
+            return null;
+        } elseif (count($varTags) > 1) {
+            throw InvalidDocBlockRuntimeException::tooManyVarTags($refProperty);
+        }
+
+        return reset($varTags)->getType();
+    }
+
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
     {
         $hideParameter = $parameterAnnotations->getAnnotationByType(HideParameter::class);
@@ -164,7 +188,37 @@ class TypeHandler implements ParameterHandlerInterface
         return new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
     }
 
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
+    /**
+     * Map class property to a GraphQL type.
+     *
+     * @param ReflectionProperty $refProperty
+     * @param DocBlock           $docBlock
+     * @param bool               $toInput
+     *
+     * @return GraphQLType
+     *
+     * @throws CannotMapTypeException
+     */
+    public function mapProperty(ReflectionProperty $refProperty, DocBlock $docBlock, bool $toInput): GraphQLType
+    {
+        $propertyType = null;
+
+        // getType function on property reflection is available only since PHP 7.4
+        if (method_exists($refProperty, 'getType') && $propertyType = $refProperty->getType()) {
+            $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
+        } else {
+            $phpdocType = new Mixed_();
+        }
+
+        $docBlockPropertyType = $this->getDocBlockPropertyType($docBlock, $refProperty);
+
+        $type = $this->mapType($phpdocType, $docBlockPropertyType, $propertyType ? $propertyType->allowsNull() : false, $toInput, null, $docBlock);
+        assert($type instanceof GraphQLType && $type instanceof OutputType);
+
+        return $type;
+    }
+
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ?ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         $graphQlType = null;
         if ($isNullable && ! $type instanceof Nullable) {

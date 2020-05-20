@@ -6,12 +6,13 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use InvalidArgumentException;
 use ReflectionMethod;
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -37,6 +38,8 @@ class QueryFieldDescriptor
     /** @var string|null */
     private $targetMethodOnSource;
     /** @var string|null */
+    private $targetPropertyOnSource;
+    /** @var string|null */
     private $magicProperty;
     /**
      * Whether we should inject the source as the first parameter or not.
@@ -52,6 +55,8 @@ class QueryFieldDescriptor
     private $middlewareAnnotations;
     /** @var ReflectionMethod */
     private $refMethod;
+    /** @var ReflectionProperty */
+    private $refProperty;
     /** @var ResolverInterface */
     private $originalResolver;
     /** @var callable */
@@ -139,6 +144,7 @@ class QueryFieldDescriptor
         }
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
+        $this->targetPropertyOnSource = null;
         $this->magicProperty = null;
     }
 
@@ -149,6 +155,21 @@ class QueryFieldDescriptor
         }
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
+        $this->targetPropertyOnSource = null;
+        $this->magicProperty = null;
+    }
+
+    /**
+     * @param string|null $targetPropertyOnSource
+     */
+    public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
+    {
+        if ($this->originalResolver !== null) {
+            throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
+        }
+        $this->callable = null;
+        $this->targetMethodOnSource = null;
+        $this->targetPropertyOnSource = $targetPropertyOnSource;
         $this->magicProperty = null;
     }
 
@@ -159,6 +180,7 @@ class QueryFieldDescriptor
         }
         $this->callable = null;
         $this->targetMethodOnSource = null;
+        $this->targetPropertyOnSource = null;
         $this->magicProperty = $magicProperty;
     }
 
@@ -212,6 +234,16 @@ class QueryFieldDescriptor
         $this->refMethod = $refMethod;
     }
 
+    public function getRefProperty(): ReflectionProperty
+    {
+        return $this->refProperty;
+    }
+
+    public function setRefProperty(ReflectionProperty $refProperty): void
+    {
+        $this->refProperty = $refProperty;
+    }
+
     /**
      * Returns the original callable that will be used to resolve the field.
      */
@@ -225,6 +257,8 @@ class QueryFieldDescriptor
             $this->originalResolver = new ServiceResolver($this->callable);
         } elseif ($this->targetMethodOnSource !== null) {
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
+        } elseif ($this->targetPropertyOnSource !== null) {
+            $this->originalResolver = new SourcePropertyResolver($this->targetPropertyOnSource);
         } elseif ($this->magicProperty !== null) {
             $this->originalResolver = new MagicPropertyResolver($this->magicProperty);
         } else {

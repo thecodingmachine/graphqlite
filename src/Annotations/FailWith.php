@@ -9,7 +9,7 @@ use function array_key_exists;
 
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
  * @Attributes({
  *   @Attribute("value", type = "mixed"),
  *   @Attribute("mode", type = "string")

@@ -19,7 +19,6 @@ use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
-use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use Webmozart\Assert\Assert;
@@ -49,11 +48,11 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
             try {
-                return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+                return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
             } catch (CannotMapTypeException $e) {
                 if ($type instanceof Object_) {
                     /**
@@ -70,12 +69,12 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             }
         }
 
-        $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($refMethod, $docBlockObj) {
-            return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+        $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($reflector, $docBlockObj) {
+            return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }, true);
 
         if ($result === null) {
-            return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+            return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }
         Assert::isInstanceOf($result, OutputType::class);
 
@@ -87,22 +86,22 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
     {
         if (! $type instanceof Compound) {
             //try {
-                return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+                return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
 
             /*} catch (CannotMapTypeException $e) {
                 $this->throwIterableMissingTypeHintException($e, $type);
             }*/
         }
 
-        $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($refMethod, $docBlockObj, $argumentName) {
-            return $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+        $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($reflector, $docBlockObj, $argumentName) {
+            return $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }, false);
         if ($result === null) {
-            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }
         Assert::isInstanceOf($result, InputType::class);
 
