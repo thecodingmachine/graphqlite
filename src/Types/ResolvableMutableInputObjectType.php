@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use Webmozart\Assert\Assert;
 use function count;
 use function is_array;
 
@@ -21,7 +22,7 @@ use function is_array;
  */
 class ResolvableMutableInputObjectType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
-    /** @var callable&array<int, object|string> */
+    /** @var callable&array{object|string, string} */
     private $resolve;
     /** @var ParameterInterface[] */
     private $parameters;
@@ -49,7 +50,9 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      */
     public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ?string $comment, bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
-        $this->resolve       = [ $factory, $methodName ];
+        $resolve = [ $factory, $methodName ];
+        Assert::isCallable($resolve);
+        $this->resolve       = $resolve;
         $this->fieldsBuilder = $fieldsBuilder;
 
         $fields = function () {
