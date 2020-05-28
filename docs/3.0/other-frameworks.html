@@ -164,13 +164,13 @@ By chance, it plays well with PSR-7 requests and there is a PSR-15 middleware av
 <p><strong>index.php</strong></p>
 <pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Response</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequest</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequestFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequest</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequestFactory</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">HttpHandlerRunner</span>\<span class="hljs-title">Emitter</span>\<span class="hljs-title">SapiStreamEmitter</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">Middleware</span>\<span class="hljs-title">ErrorResponseGenerator</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">MiddlewarePipe</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Server</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Server</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">HttpHandlerRunner</span>\<span class="hljs-title">RequestHandlerRunner</span>;
 
 <span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/vendor/autoload.php'</span>;
@@ -205,8 +205,8 @@ This <code>MiddlewarePipe</code> comes from the container declared in the <code>
 <span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">SimpleCache</span>\<span class="hljs-title">CacheInterface</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Simple</span>\<span class="hljs-title">ApcuCache</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">SchemaFactory</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ResponseFactory</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">StreamFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ResponseFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">StreamFactory</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">MiddlewarePipe</span>;
 
 <span class="hljs-comment">// Picotainer is a minimalist PSR-11 container.</span>

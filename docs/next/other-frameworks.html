@@ -212,13 +212,13 @@ $builder-&gt;setHttpCodeDecider(<span class="hljs-keyword">new</span> HttpCodeDe
 <p><strong>index.php</strong></p>
 <pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Response</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequest</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequestFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequest</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequestFactory</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">HttpHandlerRunner</span>\<span class="hljs-title">Emitter</span>\<span class="hljs-title">SapiStreamEmitter</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">Middleware</span>\<span class="hljs-title">ErrorResponseGenerator</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">MiddlewarePipe</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Server</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Server</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">HttpHandlerRunner</span>\<span class="hljs-title">RequestHandlerRunner</span>;
 
 <span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/vendor/autoload.php'</span>;
