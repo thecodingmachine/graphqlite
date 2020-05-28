@@ -1,15 +1,19 @@
 name: Phpunit
 on:
-  pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - '**.md'
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - '**.md'
+  # Disabled on pull requests
+  # pull_request:
+  #   branches:
+  #     - master
+  #   paths-ignore:
+  #     - '**.md'
+  # push:
+  #   branches:
+  #     - master
+  #   paths-ignore:
+  #     - '**.md'
+  create:
+    tags:
+      - v.*
 jobs:
   run:
     name: Run
