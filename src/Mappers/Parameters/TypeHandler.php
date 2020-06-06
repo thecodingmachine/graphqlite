@@ -36,6 +36,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -194,12 +195,13 @@ class TypeHandler implements ParameterHandlerInterface
      * @param ReflectionProperty $refProperty
      * @param DocBlock           $docBlock
      * @param bool               $toInput
+     * @param string|null        $argumentName
      *
      * @return GraphQLType
      *
      * @throws CannotMapTypeException
      */
-    public function mapProperty(ReflectionProperty $refProperty, DocBlock $docBlock, bool $toInput): GraphQLType
+    public function mapPropertyType(ReflectionProperty $refProperty, DocBlock $docBlock, bool $toInput, ?string $argumentName = null, ?bool $isNullable = null): GraphQLType
     {
         $propertyType = null;
 
@@ -212,10 +214,57 @@ class TypeHandler implements ParameterHandlerInterface
 
         $docBlockPropertyType = $this->getDocBlockPropertyType($docBlock, $refProperty);
 
-        $type = $this->mapType($phpdocType, $docBlockPropertyType, $propertyType ? $propertyType->allowsNull() : false, $toInput, null, $docBlock);
+        if (null === $isNullable) {
+            $isNullable = $propertyType ? $propertyType->allowsNull() : false;
+        }
+
+        $type = $this->mapType($phpdocType, $docBlockPropertyType, $isNullable, $toInput, null, $docBlock, $argumentName);
         assert($type instanceof GraphQLType && $type instanceof OutputType);
 
         return $type;
+    }
+
+    /**
+     * Maps class property into input property.
+     *
+     * @param ReflectionProperty $refProperty
+     * @param DocBlock           $docBlock
+     * @param string|null        $argumentName
+     * @param mixed              $defaultValue
+     * @param bool|null          $isNullable
+     *
+     * @return InputTypeProperty
+     */
+    public function mapInputProperty(ReflectionProperty $refProperty, DocBlock $docBlock, ?string $argumentName = null, $defaultValue = null, ?bool $isNullable = null): InputTypeProperty
+    {
+        $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
+
+        /** @var Var_[] $varTags */
+        $varTags = $docBlock->getTagsByName('var');
+        if ($varTag = reset($varTags)) {
+            $docBlockComment .= PHP_EOL . $varTag->getDescription();
+
+            if (null === $isNullable && $varType = $varTag->getType()) {
+                $isNullable = in_array('null', explode('|', (string) $varType));
+            }
+        }
+
+        if (null === $isNullable) {
+            $isNullable = false;
+            // getType function on property reflection is available only since PHP 7.4
+            if (method_exists($refProperty, 'getType') && $refType = $refProperty->getType()) {
+                $isNullable = $refType->allowsNull();
+            }
+        }
+
+        /** @var InputType $type */
+        $type = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
+        $hasDefault = $defaultValue !== null || $isNullable;
+
+        $inputProperty = new InputTypeProperty($refProperty->getName(), $argumentName, $type, $hasDefault, $defaultValue, $this->argumentResolver);
+        $inputProperty->setDescription(trim($docBlockComment));
+
+        return $inputProperty;
     }
 
     private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ?ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
@@ -29,7 +30,13 @@ interface NamingStrategyInterface
      */
     public function getOutputTypeName(string $typeClassName, Type $type): string;
 
-    public function getInputTypeName(string $className, Factory $factory): string;
+    /**
+     * @param string        $className
+     * @param Input|Factory $input
+     *
+     * @return string
+     */
+    public function getInputTypeName(string $className, $input): string;
 
     /**
      * Returns the name of a GraphQL field from the name of the annotated method.

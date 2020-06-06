@@ -139,6 +139,50 @@ class FieldsBuilder
     }
 
     /**
+     * @param string $className
+     * @param string $inputName
+     * @param bool   $isUpdate
+     *
+     * @return array
+     *
+     * @throws AnnotationException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function getInputFields(string $className, string $inputName, bool $isUpdate = false): array
+    {
+        $refClass = new ReflectionClass($className);
+        $reflectors = $refClass->getProperties();
+
+        $fields = [];
+        $defaultProperties = $refClass->getDefaultProperties();
+        foreach ($reflectors as $reflector) {
+
+            /** @var Annotations\Field[] $annotations */
+            $annotations = $this->annotationReader->getPropertyAnnotations($reflector, Annotations\Field::class);
+            $docBlock = $this->cachedDocBlockFactory->getDocBlock($reflector);
+
+            foreach ($annotations as $annotation) {
+                $for = $annotation->getFor();
+                if ($for && !in_array($inputName, $for)) {
+                    continue;
+                }
+
+                $name = $annotation->getName() ?: $reflector->getName();
+
+                $field = $this->typeMapper->mapInputProperty($reflector, $docBlock, $name, $defaultProperties[$reflector->getName()] ?? null, $isUpdate ? true : null);
+                if ($description = $annotation->getDescription()) {
+                    $field->setDescription($description);
+                }
+
+                $fields[$name] = $field;
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
      * Track Field annotation in a self targeted type
      *
      * @param class-string<object> $className
@@ -407,7 +451,7 @@ class FieldsBuilder
             if ($outputType) {
                 $type = $this->typeResolver->mapNameToOutputType($outputType);
             } else {
-                $type = $this->typeMapper->mapProperty($refProperty, $docBlock, false);
+                $type = $this->typeMapper->mapPropertyType($refProperty, $docBlock, false);
             }
             $fieldDescriptor->setType($type);
             $fieldDescriptor->setInjectSource(false);

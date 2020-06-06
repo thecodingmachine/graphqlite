@@ -133,6 +133,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     {
         $globTypeMapperCache = new GlobTypeMapperCache();
 
+        /** @var ReflectionClass[] $classes */
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
             $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
@@ -144,6 +145,13 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 if ($type !== null) {
                     $typeName = $this->namingStrategy->getOutputTypeName($className, $type);
                     $annotationsCache->setType($type->getClass(), $typeName, $type->isDefault());
+                    $containsAnnotations = true;
+                }
+
+                $inputs = $this->annotationReader->getInputAnnotations($refClass);
+                foreach ($inputs as $input) {
+                    $inputName = $this->namingStrategy->getInputTypeName($className, $input);
+                    $annotationsCache->registerInput($inputName, $className, $input);
                     $containsAnnotations = true;
                 }
 
@@ -283,7 +291,11 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToInputType(string $className): bool
     {
-        return $this->getMaps()->getFactoryByObjectClass($className) !== null;
+        if ($this->getMaps()->getFactoryByObjectClass($className) !== null) {
+            return true;
+        }
+
+        return $this->getMaps()->getInputByObjectClass($className) !== null;
     }
 
     /**
@@ -299,11 +311,17 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     {
         $factory = $this->getMaps()->getFactoryByObjectClass($className);
 
-        if ($factory === null) {
-            throw CannotMapTypeException::createForInputType($className);
+        if ($factory !== null) {
+            return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
         }
 
-        return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
+        $input = $this->getMaps()->getInputByObjectClass($className);
+        if ($input !== null) {
+            [ $typeName, $description, $isUpdate ] = $input;
+            return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
+        }
+
+        throw CannotMapTypeException::createForInputType($className);
     }
 
     /**
@@ -329,6 +347,12 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
             return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
         }
 
+        $input = $this->getMaps()->getInputByGraphQLInputTypeName($typeName);
+        if ($input !== null) {
+            [ $className, $description, $isUpdate ] = $input;
+            return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
+        }
+
         throw CannotMapTypeException::createForName($typeName);
     }
 
@@ -347,7 +371,11 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         $factory = $this->getMaps()->getFactoryByGraphQLInputTypeName($typeName);
 
-        return $factory !== null;
+        if ($factory !== null) {
+            return true;
+        }
+
+        return $this->getMaps()->getInputByGraphQLInputTypeName($typeName) !== null;
     }
 
     /**

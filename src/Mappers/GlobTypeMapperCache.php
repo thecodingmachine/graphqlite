@@ -22,6 +22,10 @@ class GlobTypeMapperCache
     private $mapInputNameToFactory = [];
     /** @var array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private $mapInputNameToDecorator = [];
+    /** @var array<string,array<string, string, bool>> Maps a domain class to the input */
+    private $mapClassToInput = [];
+    /** @var array<string,array<string, string, bool>> Maps a GraphQL type name to the input */
+    private $mapNameToInput = [];
 
     /**
      * Merges annotations of a given class in the global cache.
@@ -62,6 +66,18 @@ class GlobTypeMapperCache
                 $this->mapClassToFactory[$inputClassName] = $refArray;
             }
             $this->mapInputNameToFactory[$inputName] = $refArray;
+        }
+
+        foreach ($globAnnotationsCache->getInputs() as $inputName => [$inputClassName, $isDefault, $description, $isUpdate]) {
+            if ($isDefault) {
+                if (isset($this->mapClassToInput[$inputClassName])) {
+                    throw DuplicateMappingException::createForInput($refClass->getName());
+                }
+
+                $this->mapClassToInput[$inputClassName] = [$inputName, $description, $isUpdate];
+            }
+
+            $this->mapNameToInput[$inputName] = [$inputClassName, $description, $isUpdate];
         }
 
         foreach ($globAnnotationsCache->getDecorators() as $methodName => [$inputName, $declaringClass]) {
@@ -117,5 +133,25 @@ class GlobTypeMapperCache
     public function getFactoryByObjectClass(string $className): ?array
     {
         return $this->mapClassToFactory[$className] ?? null;
+    }
+
+    /**
+     * @param string $graphqlTypeName
+     *
+     * @return array|null
+     */
+    public function getInputByGraphQLInputTypeName(string $graphqlTypeName): ?array
+    {
+        return $this->mapNameToInput[$graphqlTypeName] ?? null;
+    }
+
+    /**
+     * @param string $className
+     *
+     * @return array|null
+     */
+    public function getInputByObjectClass(string $className): ?array
+    {
+        return $this->mapClassToInput[$className] ?? null;
     }
 }

@@ -20,6 +20,7 @@ use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
@@ -111,6 +112,28 @@ class AnnotationReader
         }
 
         return $type;
+    }
+
+    /**
+     * @param ReflectionClass $refClass
+     *
+     * @return array|Input[]
+     *
+     * @throws AnnotationException
+     */
+    public function getInputAnnotations(ReflectionClass $refClass): array
+    {
+        try {
+            /** @var Input[] $inputs */
+            $inputs = $this->getClassAnnotations($refClass, Input::class);
+            foreach ($inputs as $input) {
+                $input->setClass($refClass->getName());
+            }
+        } catch (ClassNotFoundException $e) {
+            throw ClassNotFoundException::wrapException($e, $refClass->getName());
+        }
+
+        return $inputs;
     }
 
     /**

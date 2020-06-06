@@ -80,4 +80,14 @@ class DuplicateMappingException extends RuntimeException
     {
         throw new self(sprintf("The query/mutation/field '%s' is declared twice in '%s::%s'", $queryName, $property->getDeclaringClass()->getName(), $property->getName()));
     }
+
+    /**
+     * @param string $sourceClass
+     *
+     * @return static
+     */
+    public static function createForInput(string $sourceClass): self
+    {
+        throw new self(sprintf("The class '%s' should be mapped to only one GraphQL Input type. Two default inputs are declared as default via @Input annotation.", $sourceClass));
+    }
 }
