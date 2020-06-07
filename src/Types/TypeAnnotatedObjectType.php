@@ -29,7 +29,7 @@ class TypeAnnotatedObjectType extends MutableObjectType
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder) {
+            'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder, $typeName) {
                 $parentClass = get_parent_class($className);
                 $parentType  = null;
                 if ($parentClass !== false) {
@@ -39,9 +39,9 @@ class TypeAnnotatedObjectType extends MutableObjectType
                 }
 
                 if ($annotatedObject !== null) {
-                    $fields = $fieldsBuilder->getFields($annotatedObject);
+                    $fields = $fieldsBuilder->getFields($annotatedObject, $typeName);
                 } else {
-                    $fields = $fieldsBuilder->getSelfFields($className);
+                    $fields = $fieldsBuilder->getSelfFields($className, $typeName);
                 }
                 if ($parentType !== null) {
                     $finalFields = $parentType->getFields();

@@ -115,9 +115,9 @@ class FieldsBuilder
     /**
      * @return array<string, FieldDefinition> QueryField indexed by name.
      */
-    public function getFields(object $controller): array
+    public function getFields(object $controller, ?string $typeName = null): array
     {
-        $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true);
+        $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true, $typeName);
 
         $refClass = new ReflectionClass($controller);
 
@@ -186,12 +186,13 @@ class FieldsBuilder
      * Track Field annotation in a self targeted type
      *
      * @param class-string<object> $className
+     * @param string|null $typeName
      *
      * @return array<string, FieldDefinition> QueryField indexed by name.
      */
-    public function getSelfFields(string $className): array
+    public function getSelfFields(string $className, ?string $typeName = null): array
     {
-        $fieldAnnotations = $this->getFieldsByAnnotations($className, Annotations\Field::class, false);
+        $fieldAnnotations = $this->getFieldsByAnnotations($className, Annotations\Field::class, false, $typeName);
 
         $refClass = new ReflectionClass($className);
 
@@ -247,13 +248,15 @@ class FieldsBuilder
 
     /**
      * @param object|class-string<object> $controller The controller instance, or the name of the source class name
-     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
+     * @param string      $annotationName
+     * @param bool        $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
+     * @param string|null $typeName Type name for which fields should be extracted for.
      *
      * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
      */
-    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource): array
+    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource, ?string $typeName = null): array
     {
         $refClass = new ReflectionClass($controller);
         $queryList = [];
@@ -282,9 +285,9 @@ class FieldsBuilder
             }
 
             if ($reflector instanceof ReflectionMethod) {
-                $fields = $this->getFieldsByMethodAnnotations($controller, $refClass, $reflector, $annotationName, $injectSource);
+                $fields = $this->getFieldsByMethodAnnotations($controller, $refClass, $reflector, $annotationName, $injectSource, $typeName);
             } else {
-                $fields = $this->getFieldsByPropertyAnnotations($controller, $refClass, $reflector, $annotationName);
+                $fields = $this->getFieldsByPropertyAnnotations($controller, $refClass, $reflector, $annotationName, $typeName);
             }
 
             $duplicates = array_intersect_key($reflectorByFields, $fields);
@@ -312,19 +315,27 @@ class FieldsBuilder
      * @param ReflectionMethod $refMethod
      * @param string           $annotationName
      * @param bool             $injectSource
+     * @param string|null      $typeName
      *
-     * @return array
+     * @return FieldDefinition[]
      *
      * @throws AnnotationException
      * @throws InvalidArgumentException
      * @throws CannotMapTypeExceptionInterface
      */
-    private function getFieldsByMethodAnnotations($controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource): array
+    private function getFieldsByMethodAnnotations($controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, ?string $typeName = null): array
     {
         $fields = [];
 
         $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
         foreach ($annotations as $queryAnnotation) {
+            if ($typeName && $queryAnnotation instanceof Field) {
+                $for = $queryAnnotation->getFor();
+                if ($for && !in_array($typeName, $for)) {
+                    continue;
+                }
+            }
+
             $fieldDescriptor = new QueryFieldDescriptor();
             $fieldDescriptor->setRefMethod($refMethod);
 
@@ -410,19 +421,27 @@ class FieldsBuilder
      * @param ReflectionClass    $refClass
      * @param ReflectionProperty $refProperty
      * @param string             $annotationName
+     * @param string|null        $typeName
      *
-     * @return array
+     * @return FieldDefinition[]
      *
      * @throws AnnotationException
      * @throws InvalidArgumentException
      * @throws CannotMapTypeException
      */
-    private function getFieldsByPropertyAnnotations($controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName): array
+    private function getFieldsByPropertyAnnotations($controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, ?string $typeName = null): array
     {
         $fields = [];
 
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
         foreach ($annotations as $queryAnnotation) {
+            if ($typeName && $queryAnnotation instanceof Field) {
+                $for = $queryAnnotation->getFor();
+                if ($for && !in_array($typeName, $for)) {
+                    continue;
+                }
+            }
+
             $fieldDescriptor = new QueryFieldDescriptor();
             $fieldDescriptor->setRefProperty($refProperty);
 

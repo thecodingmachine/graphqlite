@@ -138,7 +138,7 @@ class TypeGenerator
         }
         */
 
-        $type->addFields(function () use ($annotatedObject) {
+        $type->addFields(function () use ($annotatedObject, $typeName) {
                 /*$parentClass = get_parent_class($extendTypeAnnotation->getClass());
                 $parentType = null;
                 if ($parentClass !== false) {
@@ -146,7 +146,7 @@ class TypeGenerator
                         $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
                     }
                 }*/
-                return $this->fieldsBuilder->getFields($annotatedObject);
+                return $this->fieldsBuilder->getFields($annotatedObject, $typeName);
 
                 /*if ($parentType !== null) {
                     $fields = $parentType->getFields() + $fields;
