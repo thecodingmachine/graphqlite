@@ -20,7 +20,9 @@ use function array_shift;
 class InputTypeGenerator
 {
     /** @var array<string, ResolvableMutableInputObjectType> */
-    private $cache = [];
+    private $factoryCache = [];
+    /** @var array<string, InputType> */
+    private $inputCache = [];
     /** @var InputTypeUtils */
     private $inputTypeUtils;
     /** @var FieldsBuilder */
@@ -46,29 +48,29 @@ class InputTypeGenerator
 
         [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
-        if (! isset($this->cache[$inputName])) {
+        if (! isset($this->factoryCache[$inputName])) {
             // TODO: add comment argument.
-            $this->cache[$inputName] = new ResolvableMutableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, null, $this->canBeInstantiatedWithoutParameter($method, false));
+            $this->factoryCache[$inputName] = new ResolvableMutableInputObjectType($inputName, $this->fieldsBuilder, $object, $methodName, null, $this->canBeInstantiatedWithoutParameter($method, false));
         }
 
-        return $this->cache[$inputName];
+        return $this->factoryCache[$inputName];
     }
 
     /**
-     * @param string      $className
-     * @param string      $inputName
-     * @param string|null $description
-     * @param bool        $isUpdate
+     * @param class-string<object> $className
+     * @param string               $inputName
+     * @param string|null          $description
+     * @param bool                 $isUpdate
      *
      * @return InputType
      */
     public function mapInput(string $className, string $inputName, ?string $description, bool $isUpdate): InputType
     {
-        if (!isset($this->cache[$inputName])) {
-            $this->cache[$inputName] = new InputType($className, $inputName, $description, $isUpdate, $this->fieldsBuilder);
+        if (!isset($this->inputCache[$inputName])) {
+            $this->inputCache[$inputName] = new InputType($className, $inputName, $description, $isUpdate, $this->fieldsBuilder);
         }
 
-        return $this->cache[$inputName];
+        return $this->inputCache[$inputName];
     }
 
     public static function canBeInstantiatedWithoutParameter(ReflectionFunctionAbstract $refMethod, bool $skipFirstArgument): bool

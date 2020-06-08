@@ -11,6 +11,8 @@ use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use Psr\SimpleCache\InvalidArgumentException;
+use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use ReflectionClass;
 use ReflectionException;
@@ -139,16 +141,14 @@ class FieldsBuilder
     }
 
     /**
-     * @param string $className
-     * @param string $inputName
-     * @param bool   $isUpdate
+     * @param class-string<object> $className
+     * @param string               $inputName
+     * @param bool                 $isUpdate
      *
-     * @return array
+     * @return array<InputTypeProperty>
      *
      * @throws AnnotationException
-     * @throws InvalidArgumentException
      * @throws ReflectionException
-     * @throws CannotMapTypeException
      */
     public function getInputFields(string $className, string $inputName, bool $isUpdate = false): array
     {
@@ -248,10 +248,10 @@ class FieldsBuilder
     }
 
     /**
-     * @param object|class-string<object> $controller The controller instance, or the name of the source class name
-     * @param string      $annotationName
-     * @param bool        $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
-     * @param string|null $typeName Type name for which fields should be extracted for.
+     * @param object|class-string<object>   $controller The controller instance, or the name of the source class name
+     * @param class-string<AbstractRequest> $annotationName
+     * @param bool                          $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
+     * @param string|null                   $typeName Type name for which fields should be extracted for.
      *
      * @return array<string, FieldDefinition>
      *
@@ -293,6 +293,7 @@ class FieldsBuilder
 
             $duplicates = array_intersect_key($reflectorByFields, $fields);
             if ($duplicates) {
+                /** @var string $name */
                 $name = key($duplicates);
                 throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
             }
@@ -305,24 +306,23 @@ class FieldsBuilder
             $queryList = array_merge($queryList, $fields);
         }
 
+        /** @var array<string, FieldDefinition> $queryList */
         return $queryList;
     }
 
     /**
      * Gets fields by class method annotations.
      *
-     * @param string|object    $controller
-     * @param ReflectionClass  $refClass
-     * @param ReflectionMethod $refMethod
-     * @param string           $annotationName
-     * @param bool             $injectSource
-     * @param string|null      $typeName
+     * @param string|object                 $controller
+     * @param ReflectionClass               $refClass
+     * @param ReflectionMethod              $refMethod
+     * @param class-string<AbstractRequest> $annotationName
+     * @param bool                          $injectSource
+     * @param string|null                   $typeName
      *
      * @return FieldDefinition[]
      *
      * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws CannotMapTypeExceptionInterface
      */
     private function getFieldsByMethodAnnotations($controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, ?string $typeName = null): array
     {
@@ -362,7 +362,7 @@ class FieldsBuilder
                 $firstParameter = array_shift($parameters);
                 // TODO: check that $first_parameter type is correct.
             }
-            if ($prefetchMethodName !== null) {
+            if ($prefetchMethodName !== null && $prefetchRefMethod !== null) {
                 $secondParameter = array_shift($parameters);
                 if ($secondParameter === null) {
                     throw InvalidPrefetchMethodRuntimeException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
@@ -418,17 +418,15 @@ class FieldsBuilder
     /**
      * Gets fields by class property annotations.
      *
-     * @param string|object      $controller
-     * @param ReflectionClass    $refClass
-     * @param ReflectionProperty $refProperty
-     * @param string             $annotationName
-     * @param string|null        $typeName
+     * @param string|object                 $controller
+     * @param ReflectionClass               $refClass
+     * @param ReflectionProperty            $refProperty
+     * @param class-string<AbstractRequest> $annotationName
+     * @param string|null                   $typeName
      *
      * @return FieldDefinition[]
      *
      * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws CannotMapTypeException
      */
     private function getFieldsByPropertyAnnotations($controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, ?string $typeName = null): array
     {
@@ -473,6 +471,8 @@ class FieldsBuilder
             } else {
                 $type = $this->typeMapper->mapPropertyType($refProperty, $docBlock, false);
             }
+
+            /** @var OutputType&Type $type */
             $fieldDescriptor->setType($type);
             $fieldDescriptor->setInjectSource(false);
 
@@ -749,7 +749,7 @@ class FieldsBuilder
      * @param ReflectionMethod|ReflectionProperty $reflector
      * @param object                              $annotation
      *
-     * @return array
+     * @return array{0: string|null, 1: array<mixed>, 2: ReflectionMethod|null}
      *
      * @throws InvalidArgumentException
      */

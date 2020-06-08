@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Parameters;
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 class InputTypeProperty extends InputTypeParameter
@@ -16,7 +17,7 @@ class InputTypeProperty extends InputTypeParameter
     /**
      * @param string           $propertyName
      * @param string           $fieldName
-     * @param InputType        $type
+     * @param InputType&Type   $type
      * @param bool             $hasDefaultValue
      * @param mixed            $defaultValue
      * @param ArgumentResolver $argumentResolver

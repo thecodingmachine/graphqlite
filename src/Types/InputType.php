@@ -21,16 +21,16 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     private $fields;
 
     /**
-     * @var string
+     * @var class-string<object>
      */
     private $className;
 
     /**
-     * @param string        $className
-     * @param string        $inputName
-     * @param string|null   $description
-     * @param bool          $isUpdate
-     * @param FieldsBuilder $fieldsBuilder
+     * @param class-string<object> $className
+     * @param string               $inputName
+     * @param string|null          $description
+     * @param bool                 $isUpdate
+     * @param FieldsBuilder        $fieldsBuilder
      */
     public function __construct(string $className, string $inputName, ?string $description, bool $isUpdate, FieldsBuilder $fieldsBuilder)
     {
@@ -64,8 +64,14 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         $this->className = $className;
     }
 
+
     /**
-     * {@inheritdoc}
+     * @param object|null          $source
+     * @param array<string, mixed> $args
+     * @param mixed                $context
+     * @param ResolveInfo          $resolveInfo
+     *
+     * @return object
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
@@ -96,7 +102,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     /**
      * Creates an instance of the input class.
      *
-     * @param array $values
+     * @param array<string, mixed> $values
      *
      * @return object
      */

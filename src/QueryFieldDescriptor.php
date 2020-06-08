@@ -33,7 +33,7 @@ class QueryFieldDescriptor
     private $prefetchParameters = [];
     /** @var string|null */
     private $prefetchMethodName;
-    /** @var (callable&array{0:object, 1:string})|null */
+    /** @var (callable&array{0:object, 1:string})|callable|null */
     private $callable;
     /** @var string|null */
     private $targetMethodOnSource;
@@ -135,7 +135,7 @@ class QueryFieldDescriptor
      * This should not be used in the context of a field middleware.
      * Use getResolver/setResolver if you want to wrap the resolver in another method.
      *
-     * @param callable&array{0:object, 1:string}  $callable
+     * @param (callable&array{0:object, 1:string})|callable  $callable
      */
     public function setCallable(callable $callable): void
     {
@@ -253,8 +253,10 @@ class QueryFieldDescriptor
             return $this->originalResolver;
         }
 
-        if ($this->callable !== null) {
-            $this->originalResolver = new ServiceResolver($this->callable);
+        if (is_array($this->callable)) {
+            /** @var callable&array{0:object, 1:string} $callable */
+            $callable = $this->callable;
+            $this->originalResolver = new ServiceResolver($callable);
         } elseif ($this->targetMethodOnSource !== null) {
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {

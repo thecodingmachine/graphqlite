@@ -22,9 +22,9 @@ class GlobTypeMapperCache
     private $mapInputNameToFactory = [];
     /** @var array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private $mapInputNameToDecorator = [];
-    /** @var array<string,array<string, string, bool>> Maps a domain class to the input */
+    /** @var array<class-string<object>,array{0: string, 1: string|null, 2: bool}> Maps a domain class to the input */
     private $mapClassToInput = [];
-    /** @var array<string,array<string, string, bool>> Maps a GraphQL type name to the input */
+    /** @var array<string,array{0: class-string<object>, 1: string|null, 2: bool}> Maps a GraphQL type name to the input */
     private $mapNameToInput = [];
 
     /**
@@ -138,7 +138,7 @@ class GlobTypeMapperCache
     /**
      * @param string $graphqlTypeName
      *
-     * @return array|null
+     * @return array{0: class-string<object>, 1: string|null, 2: bool}|null
      */
     public function getInputByGraphQLInputTypeName(string $graphqlTypeName): ?array
     {
@@ -148,7 +148,7 @@ class GlobTypeMapperCache
     /**
      * @param string $className
      *
-     * @return array|null
+     * @return array{0: string, 1: string|null, 2: bool}|null
      */
     public function getInputByObjectClass(string $className): ?array
     {

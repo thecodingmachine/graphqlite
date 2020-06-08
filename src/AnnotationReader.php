@@ -67,17 +67,17 @@ class AnnotationReader
     private $mode;
 
     /**
-     * @var object[]
+     * @var array<string, (object|null)>
      */
     private $methodAnnotationCache = [];
 
     /**
-     * @var object[][]
+     * @var array<string, array<object>>
      */
     private $methodAnnotationsCache = [];
 
     /**
-     * @var object[][]
+     * @var array<string, array<object>>
      */
     private $propertyAnnotationsCache = [];
 
@@ -115,11 +115,13 @@ class AnnotationReader
     }
 
     /**
-     * @param ReflectionClass $refClass
+     * @param ReflectionClass<T> $refClass
      *
-     * @return array|Input[]
+     * @return Input[]
      *
      * @throws AnnotationException
+     *
+     * @template T of object
      */
     public function getInputAnnotations(ReflectionClass $refClass): array
     {
@@ -267,7 +269,6 @@ class AnnotationReader
      */
     public function getMiddlewareAnnotations($reflection): MiddlewareAnnotations
     {
-        /** @var MiddlewareAnnotationInterface[] $middlewareAnnotations */
         if ($reflection instanceof ReflectionMethod) {
             $middlewareAnnotations = $this->getMethodAnnotations($reflection, MiddlewareAnnotationInterface::class);
         } else {
@@ -443,18 +444,22 @@ class AnnotationReader
     /**
      * Returns the property's annotations.
      *
-     * @param ReflectionProperty $refProperty
-     * @param string             $annotationClass
+     * @param class-string<T> $annotationClass
      *
-     * @return array
+     * @return array<int, T>
      *
      * @throws AnnotationException
+     *
+     * @template T of object
      */
     public function getPropertyAnnotations(ReflectionProperty $refProperty, string $annotationClass): array
     {
         $cacheKey = $refProperty->getDeclaringClass()->getName() . '::' . $refProperty->getName() . '_s_' . $annotationClass;
         if (isset($this->propertyAnnotationsCache[$cacheKey])) {
-            return $this->propertyAnnotationsCache[$cacheKey];
+            /** @var array<int, T> $annotations */
+            $annotations = $this->propertyAnnotationsCache[$cacheKey];
+
+            return $annotations;
         }
 
         $toAddAnnotations = [];

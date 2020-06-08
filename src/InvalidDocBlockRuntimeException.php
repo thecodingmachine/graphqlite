@@ -19,7 +19,7 @@ class InvalidDocBlockRuntimeException extends GraphQLRuntimeException
      *
      * @param ReflectionProperty $refProperty
      */
-    public static function tooManyVarTags(ReflectionProperty $refProperty)
+    public static function tooManyVarTags(ReflectionProperty $refProperty): self
     {
         throw new self('Property ' . $refProperty->getDeclaringClass()->getName() . '::' . $refProperty->getName() . ' has several @var annotations.');
     }

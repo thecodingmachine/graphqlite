@@ -133,7 +133,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     {
         $globTypeMapperCache = new GlobTypeMapperCache();
 
-        /** @var ReflectionClass[] $classes */
+        /** @var array<class-string<object>,ReflectionClass<object>> $classes */
         $classes = $this->getClassList();
         foreach ($classes as $className => $refClass) {
             $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {

@@ -28,7 +28,7 @@ final class GlobAnnotationsCache
     /** @var array<string, array{0: string, 1:class-string<object>}> An array mapping a decorator method name to an input name / declaring class */
     private $decorators = [];
 
-    /** @var array<string, array{0:class-string<object>, 1:bool, 2:string, 3:bool}> An array mapping an input type name to an input name / declaring class */
+    /** @var array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}> An array mapping an input type name to an input name / declaring class */
     private $inputs = [];
 
     /**
@@ -95,9 +95,9 @@ final class GlobAnnotationsCache
     /**
      * Register a new input.
      *
-     * @param string $name
-     * @param string $className
-     * @param Input  $input
+     * @param string               $name
+     * @param class-string<object> $className
+     * @param Input                $input
      */
     public function registerInput(string $name, string $className, Input $input): void
     {
@@ -107,7 +107,7 @@ final class GlobAnnotationsCache
     /**
      * Returns registered inputs.
      *
-     * @return array<string, array{0:class-string<object>, 1:bool, 2:string, 3:bool}>
+     * @return array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}>
      */
     public function getInputs(): array
     {

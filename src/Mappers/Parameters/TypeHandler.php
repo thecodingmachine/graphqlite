@@ -197,7 +197,7 @@ class TypeHandler implements ParameterHandlerInterface
      * @param bool               $toInput
      * @param string|null        $argumentName
      *
-     * @return GraphQLType
+     * @return InputType&GraphQLType
      *
      * @throws CannotMapTypeException
      */
@@ -218,7 +218,8 @@ class TypeHandler implements ParameterHandlerInterface
             $isNullable = $propertyType ? $propertyType->allowsNull() : false;
         }
 
-        $type = $this->mapType($phpdocType, $docBlockPropertyType, $isNullable, $toInput, null, $docBlock, $argumentName);
+        /** @var InputType&GraphQLType $type */
+        $type = $this->mapType($phpdocType, $docBlockPropertyType, $isNullable, $toInput, $refProperty, $docBlock, $argumentName);
         assert($type instanceof GraphQLType && $type instanceof OutputType);
 
         return $type;
@@ -267,14 +268,27 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         $hasDefault = $defaultValue !== null || $isNullable;
+        $fieldName = $argumentName ?? $refProperty->getName();
 
-        $inputProperty = new InputTypeProperty($refProperty->getName(), $argumentName, $inputType, $hasDefault, $defaultValue, $this->argumentResolver);
+        $inputProperty = new InputTypeProperty($refProperty->getName(), $fieldName, $inputType, $hasDefault, $defaultValue, $this->argumentResolver);
         $inputProperty->setDescription(trim($docBlockComment));
 
         return $inputProperty;
     }
 
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, ?ReflectionMethod $refMethod, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
+    /**
+     * @param Type                                $type
+     * @param Type|null                           $docBlockType
+     * @param bool                                $isNullable
+     * @param bool                                $mapToInputType
+     * @param ReflectionMethod|ReflectionProperty $reflector
+     * @param DocBlock                            $docBlockObj
+     * @param string|null                         $argumentName
+     *
+     * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
+     * @throws CannotMapTypeException
+     */
+    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, $reflector, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
     {
         $graphQlType = null;
         if ($isNullable && ! $type instanceof Nullable) {
@@ -286,21 +300,21 @@ class TypeHandler implements ParameterHandlerInterface
         if ($innerType instanceof Array_ || $innerType instanceof Iterable_ || $innerType instanceof Mixed_) {
             // We need to use the docBlockType
             if ($docBlockType === null) {
-                throw CannotMapTypeException::createForMissingPhpDoc($innerType, $refMethod, $argumentName);
+                throw CannotMapTypeException::createForMissingPhpDoc($innerType, $reflector, $argumentName);
             }
             if ($mapToInputType === true) {
                 Assert::notNull($argumentName);
-                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($docBlockType, null, $argumentName, $refMethod, $docBlockObj);
+                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($docBlockType, null, $argumentName, $reflector, $docBlockObj);
             } else {
-                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($docBlockType, null, $refMethod, $docBlockObj);
+                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($docBlockType, null, $reflector, $docBlockObj);
             }
         } else {
             $completeType = $this->appendTypes($type, $docBlockType);
             if ($mapToInputType === true) {
                 Assert::notNull($argumentName);
-                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($completeType, null, $argumentName, $refMethod, $docBlockObj);
+                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($completeType, null, $argumentName, $reflector, $docBlockObj);
             } else {
-                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($completeType, null, $refMethod, $docBlockObj);
+                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($completeType, null, $reflector, $docBlockObj);
             }
         }
 
