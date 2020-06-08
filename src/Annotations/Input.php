@@ -12,7 +12,6 @@ use RuntimeException;
  * @Annotation
  * @Target({"CLASS"})
  * @Attributes({
- *   @Attribute("class", type = "string"),
  *   @Attribute("name", type = "string"),
  *   @Attribute("default", type = "bool"),
  *   @Attribute("decsription", type = "string"),
@@ -51,7 +50,6 @@ class Input
      */
     public function __construct(array $attributes = [])
     {
-        $this->class = $attributes['class'] ?? null;
         $this->name = $attributes['name'] ?? null;
         $this->default = $attributes['default'] ?? !isset($attributes['name']);
         $this->description = $attributes['description'] ?? null;
