@@ -15,6 +15,7 @@ use Doctrine\Common\Annotations\Annotation\Attribute;
  *   @Attribute("prefetchMethod", type = "string"),
  *   @Attribute("for", type = "string[]"),
  *   @Attribute("description", type = "string"),
+ *   @Attribute("inputType", type = "string"),
  * })
  */
 class Field extends AbstractRequest
@@ -35,6 +36,11 @@ class Field extends AbstractRequest
     private $description;
 
     /**
+     * @var string|null
+     */
+    private $inputType;
+
+    /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
@@ -42,6 +48,7 @@ class Field extends AbstractRequest
         parent::__construct($attributes);
         $this->prefetchMethod = $attributes['prefetchMethod'] ?? null;
         $this->description = $attributes['description'] ?? null;
+        $this->inputType = $attributes['inputType'] ?? null;
 
         if (!empty($attributes['for'])) {
             $this->for = (array) $attributes['for'];
@@ -70,5 +77,13 @@ class Field extends AbstractRequest
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getInputType(): ?string
+    {
+        return $this->inputType;
     }
 }

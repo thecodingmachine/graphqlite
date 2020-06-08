@@ -148,6 +148,7 @@ class FieldsBuilder
      * @throws AnnotationException
      * @throws InvalidArgumentException
      * @throws ReflectionException
+     * @throws CannotMapTypeException
      */
     public function getInputFields(string $className, string $inputName, bool $isUpdate = false): array
     {
@@ -170,7 +171,7 @@ class FieldsBuilder
 
                 $name = $annotation->getName() ?: $reflector->getName();
 
-                $field = $this->typeMapper->mapInputProperty($reflector, $docBlock, $name, $defaultProperties[$reflector->getName()] ?? null, $isUpdate ? true : null);
+                $field = $this->typeMapper->mapInputProperty($reflector, $docBlock, $name, $annotation->getInputType(), $defaultProperties[$reflector->getName()] ?? null, $isUpdate ? true : null);
                 if ($description = $annotation->getDescription()) {
                     $field->setDescription($description);
                 }

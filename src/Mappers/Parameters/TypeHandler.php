@@ -232,10 +232,13 @@ class TypeHandler implements ParameterHandlerInterface
      * @param string|null        $argumentName
      * @param mixed              $defaultValue
      * @param bool|null          $isNullable
+     * @param string|null        $inputTypeName
      *
      * @return InputTypeProperty
+     *
+     * @throws CannotMapTypeException
      */
-    public function mapInputProperty(ReflectionProperty $refProperty, DocBlock $docBlock, ?string $argumentName = null, $defaultValue = null, ?bool $isNullable = null): InputTypeProperty
+    public function mapInputProperty(ReflectionProperty $refProperty, DocBlock $docBlock, ?string $argumentName = null, ?string $inputTypeName = null, $defaultValue = null, ?bool $isNullable = null): InputTypeProperty
     {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
@@ -257,11 +260,15 @@ class TypeHandler implements ParameterHandlerInterface
             }
         }
 
-        /** @var InputType $type */
-        $type = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
+        if ($inputTypeName) {
+            $inputType = $this->typeResolver->mapNameToInputType($inputTypeName);
+        } else {
+            $inputType = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
+        }
+
         $hasDefault = $defaultValue !== null || $isNullable;
 
-        $inputProperty = new InputTypeProperty($refProperty->getName(), $argumentName, $type, $hasDefault, $defaultValue, $this->argumentResolver);
+        $inputProperty = new InputTypeProperty($refProperty->getName(), $argumentName, $inputType, $hasDefault, $defaultValue, $this->argumentResolver);
         $inputProperty->setDescription(trim($docBlockComment));
 
         return $inputProperty;
