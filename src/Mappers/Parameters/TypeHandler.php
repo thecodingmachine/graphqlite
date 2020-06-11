@@ -197,7 +197,7 @@ class TypeHandler implements ParameterHandlerInterface
      * @param bool               $toInput
      * @param string|null        $argumentName
      *
-     * @return InputType&GraphQLType
+     * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
      *
      * @throws CannotMapTypeException
      */
@@ -218,11 +218,7 @@ class TypeHandler implements ParameterHandlerInterface
             $isNullable = $propertyType ? $propertyType->allowsNull() : false;
         }
 
-        /** @var InputType&GraphQLType $type */
-        $type = $this->mapType($phpdocType, $docBlockPropertyType, $isNullable, $toInput, $refProperty, $docBlock, $argumentName);
-        assert($type instanceof GraphQLType && $type instanceof OutputType);
-
-        return $type;
+        return $this->mapType($phpdocType, $docBlockPropertyType, $isNullable, $toInput, $refProperty, $docBlock, $argumentName);
     }
 
     /**
@@ -264,6 +260,7 @@ class TypeHandler implements ParameterHandlerInterface
         if ($inputTypeName) {
             $inputType = $this->typeResolver->mapNameToInputType($inputTypeName);
         } else {
+            /** @var InputType&GraphQLType $inputType */
             $inputType = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
         }
 
