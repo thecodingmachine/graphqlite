@@ -14,7 +14,7 @@ use RuntimeException;
  * @Attributes({
  *   @Attribute("name", type = "string"),
  *   @Attribute("default", type = "bool"),
- *   @Attribute("decsription", type = "string"),
+ *   @Attribute("description", type = "string"),
  *   @Attribute("update", type = "bool"),
  * })
  */
