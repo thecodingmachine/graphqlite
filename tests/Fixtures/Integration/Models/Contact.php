@@ -4,6 +4,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 
+use DateTimeImmutable;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use function array_search;
 use DateTimeInterface;
@@ -46,6 +47,16 @@ class Contact
      * @var string
      */
     private $company;
+    /**
+     * @Field()
+     * @var int
+     */
+    private $age = 42;
+    /**
+     * @Field()
+     * @var string
+     */
+    public $nickName = 'foo';
 
     public function __construct(string $name)
     {
@@ -180,6 +191,14 @@ class Contact
     public function secret(): string
     {
         return 'you can see this only if you have the good right';
+    }
+
+    /**
+     * @return int
+     */
+    public function getAge(): int
+    {
+        return $this->age;
     }
 
     /**

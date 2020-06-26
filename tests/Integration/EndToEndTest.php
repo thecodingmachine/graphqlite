@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite\Integration;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\Debug;
+use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
@@ -66,8 +67,10 @@ use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use function json_encode;
 use function var_dump;
 use function var_export;
+use const JSON_PRETTY_PRINT;
 
 class EndToEndTest extends TestCase
 {
@@ -275,6 +278,17 @@ class EndToEndTest extends TestCase
         return $container;
     }
 
+    /**
+     * @return mixed
+     */
+    private function getSuccessResult(ExecutionResult $result, int $debugFlag = Debug::RETHROW_INTERNAL_EXCEPTIONS) {
+        $array = $result->toArray($debugFlag);
+        if (isset($array['errors']) || !isset($array['data'])) {
+            $this->fail('Expected a successful answer. Got '.json_encode($array, JSON_PRETTY_PRINT));
+        }
+        return $array['data'];
+    }
+
     public function testEndToEnd(): void
     {
         /**
@@ -325,7 +339,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
@@ -354,7 +368,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testDeprecatedField(): void
@@ -400,7 +414,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's introspect to see if the field is marked as deprecated
         // in the resulting GraphQL schema
@@ -423,7 +437,7 @@ class EndToEndTest extends TestCase
             new Context()
         );
 
-        $fields = $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']['__type']['fields'];
+        $fields = $this->getSuccessResult($result)['__type']['fields'];
         $deprecatedFields = [
             'deprecatedUppercaseName',
             'deprecatedName'
@@ -511,7 +525,7 @@ class EndToEndTest extends TestCase
                 'name' => 'Bill',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInputTypeDateAsParam()
@@ -544,7 +558,7 @@ class EndToEndTest extends TestCase
                 'name' => 'Bill',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInputType()
@@ -590,7 +604,7 @@ class EndToEndTest extends TestCase
                     ]
                 ]
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndPorpaginas(): void
@@ -631,7 +645,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
@@ -650,7 +664,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's run a query with no limit but an offset
         $invalidQueryString = '
@@ -708,7 +722,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndPorpaginasOnScalarType(): void
@@ -737,7 +751,7 @@ class EndToEndTest extends TestCase
                 'items' => ['Bill'],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     /**
@@ -800,7 +814,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 1
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
     }
 
@@ -824,7 +838,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
         $result = GraphQL::executeQuery(
@@ -834,7 +848,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testNonNullableTypesWithOptionnalFactoryArguments(): void
@@ -857,7 +871,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoFilters' => []
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testNullableTypesWithOptionnalFactoryArguments(): void
@@ -880,7 +894,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoNullableFilters' => null
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndResolveInfo(): void
@@ -903,7 +917,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoResolveInfo' => 'echoResolveInfo'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndRightIssues(): void
@@ -976,7 +990,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testParameterAnnotationsInSourceField(): void
@@ -1009,7 +1023,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums(): void
@@ -1032,7 +1046,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoProductType' => 'NON_FOOD'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums2(): void
@@ -1055,7 +1069,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoSomeProductType' => 'FOOD'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums3(): void
@@ -1085,7 +1099,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoProductType' => 'NON_FOOD'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndDateTime(): void
@@ -1108,7 +1122,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoDate' => '2019-05-05T01:02:03+00:00'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndErrorHandlingOfInconstentTypesInArrays(): void
@@ -1164,7 +1178,7 @@ class EndToEndTest extends TestCase
                 'fullName' => 'JOE',
                 'phone' => '0123456789'
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndSecurityAnnotation(): void
@@ -1187,7 +1201,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'secretPhrase' => 'you can see this secret only if passed parameter is "foo"'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         $queryString = '
         query {
@@ -1226,7 +1240,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'nullableSecretPhrase' => null
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Test with @FailWith annotation
         $queryString = '
@@ -1242,7 +1256,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'nullableSecretPhrase2' => null
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndSecurityWithUser(): void
@@ -1487,7 +1501,7 @@ class EndToEndTest extends TestCase
                     ]
                 ],
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInjectUser(): void
@@ -1544,5 +1558,32 @@ class EndToEndTest extends TestCase
         $this->expectExceptionMessage('For parameter $inAndOut, in TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers\\InAndOutController::testInAndOut, type "InAndOut" must be an input type (if you declared an input type with the name "InAndOut", make sure that there are no output type with the same name as this is forbidden by the GraphQL spec).');
 
         $schema->validate();
+    }
+
+    public function testEndToEndFieldAnnotationInProperty(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contacts {
+                age
+                nickName
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+
+        $this->assertSame(42, $data['contacts'][0]['age']);
+        $this->assertSame('foo', $data['contacts'][0]['nickName']);
     }
 }
