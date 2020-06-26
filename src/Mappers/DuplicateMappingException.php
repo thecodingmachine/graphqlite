@@ -32,8 +32,6 @@ class DuplicateMappingException extends RuntimeException
     }
 
     /**
-     * @param string                              $sourceClass
-     * @param string                              $queryName
      * @param ReflectionMethod|ReflectionProperty $firstReflector
      * @param ReflectionMethod|ReflectionProperty $secondReflector
      *
@@ -59,31 +57,17 @@ class DuplicateMappingException extends RuntimeException
         throw new self(sprintf("The query/mutation '%s' is declared twice: in class '%s' and in class '%s'", $queryName, $sourceClass1, $sourceClass2));
     }
 
-    /**
-     * @param string           $queryName
-     * @param ReflectionMethod $method
-     *
-     * @return self
-     */
     public static function createForQueryInOneMethod(string $queryName, ReflectionMethod $method): self
     {
         throw new self(sprintf("The query/mutation/field '%s' is declared twice in '%s::%s()'", $queryName, $method->getDeclaringClass()->getName(), $method->getName()));
     }
 
-    /**
-     * @param string             $queryName
-     * @param ReflectionProperty $property
-     *
-     * @return self
-     */
     public static function createForQueryInOneProperty(string $queryName, ReflectionProperty $property): self
     {
         throw new self(sprintf("The query/mutation/field '%s' is declared twice in '%s::%s'", $queryName, $property->getDeclaringClass()->getName(), $property->getName()));
     }
 
     /**
-     * @param string $sourceClass
-     *
      * @return static
      */
     public static function createForInput(string $sourceClass): self

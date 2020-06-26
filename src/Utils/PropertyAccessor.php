@@ -1,27 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Utils;
+
+use function get_class;
+use function method_exists;
+use function ucfirst;
 
 /**
  * Util class that helps accessing class properties.
  */
 class PropertyAccessor
 {
-
     /**
      * Finds a getter for a property.
-     *
-     * @param string $class
-     * @param string $propertyName
-     *
-     * @return string|null
      */
     public static function findGetter(string $class, string $propertyName): ?string
     {
         $name = ucfirst($propertyName);
 
         foreach (['get', 'is'] as $prefix) {
-            $methodName = "$prefix$name";
+            $methodName = $prefix . $name;
             if (method_exists($class, $methodName)) {
                 return $methodName;
             }
@@ -32,17 +32,12 @@ class PropertyAccessor
 
     /**
      * Finds a setter for a property.
-     *
-     * @param string $class
-     * @param string $propertyName
-     *
-     * @return string|null
      */
     public static function findSetter(string $class, string $propertyName): ?string
     {
         $name = ucfirst($propertyName);
 
-        $methodName = "set$name";
+        $methodName = 'set' . $name;
         if (method_exists($class, $methodName)) {
             return $methodName;
         }
@@ -51,15 +46,14 @@ class PropertyAccessor
     }
 
     /**
-     * @param object $object
-     * @param string $propertyName
      * @param mixed  ...$args
      *
      * @return mixed
      */
     public static function getValue(object $object, string $propertyName, ...$args)
     {
-        if ($method = self::findGetter(get_class($object), $propertyName)) {
+        $method = self::findGetter(get_class($object), $propertyName);
+        if ($method) {
             return $object->$method(...$args);
         }
 
@@ -67,13 +61,12 @@ class PropertyAccessor
     }
 
     /**
-     * @param object $instance
-     * @param string $propertyName
      * @param mixed  $value
      */
     public static function setValue(object $instance, string $propertyName, $value): void
     {
-        if ($setter = self::findSetter(get_class($instance), $propertyName)) {
+        $setter = self::findSetter(get_class($instance), $propertyName);
+        if ($setter) {
             $instance->$setter($value);
         } else {
             $instance->$propertyName = $value;

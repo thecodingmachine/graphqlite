@@ -14,6 +14,8 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
@@ -53,6 +55,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      */
@@ -68,6 +71,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (InputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return InputType&GraphQLType
      */

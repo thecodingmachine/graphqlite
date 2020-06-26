@@ -11,14 +11,12 @@ use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use Psr\SimpleCache\InvalidArgumentException;
-use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
-use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
+use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -34,22 +32,30 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use Webmozart\Assert\Assert;
+use function array_fill_keys;
+use function array_intersect_key;
+use function array_keys;
 use function array_merge;
 use function array_shift;
 use function assert;
 use function count;
 use function get_class;
 use function get_parent_class;
+use function in_array;
 use function is_string;
+use function key;
 use function reset;
 use function rtrim;
 use function trim;
+use const PHP_EOL;
 
 /**
  * A class in charge if returning list of fields for queries / mutations / entities / input types
@@ -142,8 +148,6 @@ class FieldsBuilder
 
     /**
      * @param class-string<object> $className
-     * @param string               $inputName
-     * @param bool                 $isUpdate
      *
      * @return array<InputTypeProperty>
      *
@@ -165,14 +169,15 @@ class FieldsBuilder
 
             foreach ($annotations as $annotation) {
                 $for = $annotation->getFor();
-                if ($for && !in_array($inputName, $for)) {
+                if ($for && ! in_array($inputName, $for)) {
                     continue;
                 }
 
                 $name = $annotation->getName() ?: $reflector->getName();
 
                 $field = $this->typeMapper->mapInputProperty($reflector, $docBlock, $name, $annotation->getInputType(), $defaultProperties[$reflector->getName()] ?? null, $isUpdate ? true : null);
-                if ($description = $annotation->getDescription()) {
+                $description = $annotation->getDescription();
+                if ($description) {
                     $field->setDescription($description);
                 }
 
@@ -187,7 +192,6 @@ class FieldsBuilder
      * Track Field annotation in a self targeted type
      *
      * @param class-string<object> $className
-     * @param string|null $typeName
      *
      * @return array<string, FieldDefinition> QueryField indexed by name.
      */
@@ -260,6 +264,7 @@ class FieldsBuilder
     private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource, ?string $typeName = null): array
     {
         $refClass = new ReflectionClass($controller);
+        /** @var array<string, FieldDefinition> $queryList */
         $queryList = [];
 
         /** @var ReflectionMethod[]|ReflectionProperty[] $reflectorByFields */
@@ -293,20 +298,19 @@ class FieldsBuilder
 
             $duplicates = array_intersect_key($reflectorByFields, $fields);
             if ($duplicates) {
-                /** @var string $name */
                 $name = key($duplicates);
+                assert(is_string($name));
                 throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
             }
 
             $reflectorByFields = array_merge(
-              $reflectorByFields,
-              array_fill_keys(array_keys($fields), $reflector)
+                $reflectorByFields,
+                array_fill_keys(array_keys($fields), $reflector)
             );
 
             $queryList = array_merge($queryList, $fields);
         }
 
-        /** @var array<string, FieldDefinition> $queryList */
         return $queryList;
     }
 
@@ -314,13 +318,9 @@ class FieldsBuilder
      * Gets fields by class method annotations.
      *
      * @param string|object                 $controller
-     * @param ReflectionClass               $refClass
-     * @param ReflectionMethod              $refMethod
      * @param class-string<AbstractRequest> $annotationName
-     * @param bool                          $injectSource
-     * @param string|null                   $typeName
      *
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
      *
      * @throws AnnotationException
      */
@@ -332,7 +332,7 @@ class FieldsBuilder
         foreach ($annotations as $queryAnnotation) {
             if ($typeName && $queryAnnotation instanceof Field) {
                 $for = $queryAnnotation->getFor();
-                if ($for && !in_array($typeName, $for)) {
+                if ($for && ! in_array($typeName, $for)) {
                     continue;
                 }
             }
@@ -404,12 +404,14 @@ class FieldsBuilder
                 }
             });
 
-            if ($field !== null) {
-                if (isset($fields[$name])) {
-                    throw DuplicateMappingException::createForQueryInOneMethod($name, $refMethod);
-                }
-                $fields[$name] = $field;
+            if ($field === null) {
+                continue;
             }
+
+            if (isset($fields[$name])) {
+                throw DuplicateMappingException::createForQueryInOneMethod($name, $refMethod);
+            }
+            $fields[$name] = $field;
         }
 
         return $fields;
@@ -419,12 +421,9 @@ class FieldsBuilder
      * Gets fields by class property annotations.
      *
      * @param string|object                 $controller
-     * @param ReflectionClass               $refClass
-     * @param ReflectionProperty            $refProperty
      * @param class-string<AbstractRequest> $annotationName
-     * @param string|null                   $typeName
      *
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
      *
      * @throws AnnotationException
      */
@@ -436,7 +435,7 @@ class FieldsBuilder
         foreach ($annotations as $queryAnnotation) {
             if ($typeName && $queryAnnotation instanceof Field) {
                 $for = $queryAnnotation->getFor();
-                if ($for && !in_array($typeName, $for)) {
+                if ($for && ! in_array($typeName, $for)) {
                     continue;
                 }
             }
@@ -449,7 +448,8 @@ class FieldsBuilder
 
             /** @var Var_[] $varTags */
             $varTags = $docBlock->getTagsByName('var');
-            if ($varTag = reset($varTags)) {
+            $varTag = reset($varTags);
+            if ($varTag) {
                 $docBlockComment .= PHP_EOL . $varTag->getDescription();
             }
 
@@ -470,17 +470,16 @@ class FieldsBuilder
                 $type = $this->typeResolver->mapNameToOutputType($outputType);
             } else {
                 $type = $this->typeMapper->mapPropertyType($refProperty, $docBlock, false);
+                assert($type instanceof OutputType);
             }
 
-            /** @var OutputType&Type $type */
             $fieldDescriptor->setType($type);
             $fieldDescriptor->setInjectSource(false);
 
             if (is_string($controller)) {
                 $fieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
             } else {
-                $fieldDescriptor->setCallable(function () use ($controller, $refProperty) {
-                    /** @var $controller object */
+                $fieldDescriptor->setCallable(static function () use ($controller, $refProperty) {
                     return PropertyAccessor::getValue($controller, $refProperty->getName());
                 });
             }
@@ -494,12 +493,14 @@ class FieldsBuilder
                 }
             });
 
-            if ($field !== null) {
-                if (isset($fields[$name])) {
-                    throw DuplicateMappingException::createForQueryInOneProperty($name, $refProperty);
-                }
-                $fields[$name] = $field;
+            if ($field === null) {
+                continue;
             }
+
+            if (isset($fields[$name])) {
+                throw DuplicateMappingException::createForQueryInOneProperty($name, $refProperty);
+            }
+            $fields[$name] = $field;
         }
 
         return $fields;
@@ -666,7 +667,7 @@ class FieldsBuilder
             $methodName = $propertyName;
         } else {
             $methodName = PropertyAccessor::findGetter($reflectionClass->getName(), $propertyName);
-            if (!$methodName) {
+            if (! $methodName) {
                 throw FieldNotFoundException::missingField($reflectionClass->getName(), $propertyName);
             }
         }
@@ -727,10 +728,6 @@ class FieldsBuilder
 
     /**
      * Extracts deprecation reason from doc block.
-     *
-     * @param DocBlock $docBlockObj
-     *
-     * @return string|null
      */
     private function getDeprecationReason(DocBlock $docBlockObj): ?string
     {
@@ -745,9 +742,7 @@ class FieldsBuilder
     /**
      * Extracts prefetch method info from annotation.
      *
-     * @param ReflectionClass                     $refClass
      * @param ReflectionMethod|ReflectionProperty $reflector
-     * @param object                              $annotation
      *
      * @return array{0: string|null, 1: array<mixed>, 2: ReflectionMethod|null}
      *

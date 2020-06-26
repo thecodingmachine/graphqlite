@@ -15,6 +15,7 @@ use ReflectionMethod;
 use ReflectionProperty;
 use Webmozart\Assert\Assert;
 use function filemtime;
+use function get_class;
 use function md5;
 
 /**
@@ -47,8 +48,6 @@ class CachedDocBlockFactory
      * Fetches a DocBlock object from a ReflectionMethod
      *
      * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return DocBlock
      *
      * @throws InvalidArgumentException
      */
@@ -89,8 +88,6 @@ class CachedDocBlockFactory
 
     /**
      * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return DocBlock
      */
     private function doGetDocBlock($reflector): DocBlock
     {

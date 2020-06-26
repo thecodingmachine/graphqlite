@@ -30,14 +30,10 @@ class Field extends AbstractRequest
      */
     private $for = null;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $description;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $inputType;
 
     /**
@@ -50,9 +46,11 @@ class Field extends AbstractRequest
         $this->description = $attributes['description'] ?? null;
         $this->inputType = $attributes['inputType'] ?? null;
 
-        if (!empty($attributes['for'])) {
-            $this->for = (array) $attributes['for'];
+        if (empty($attributes['for'])) {
+            return;
         }
+
+        $this->for = (array) $attributes['for'];
     }
 
     /**
@@ -71,17 +69,11 @@ class Field extends AbstractRequest
         return $this->for;
     }
 
-    /**
-     * @return string|null
-     */
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    /**
-     * @return string|null
-     */
     public function getInputType(): ?string
     {
         return $this->inputType;

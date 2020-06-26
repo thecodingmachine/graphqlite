@@ -63,10 +63,8 @@ class InputTypeParameter implements InputTypeParameterInterface
         throw MissingArgumentException::create($this->name);
     }
 
-    /**
-     * @return string
-     */
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
@@ -88,17 +86,13 @@ class InputTypeParameter implements InputTypeParameterInterface
         return $this->defaultValue;
     }
 
-    /**
-     * @return string
-     */
-    public function getDescription(): string {
+    public function getDescription(): string
+    {
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     */
-    public function setDescription(string $description): void {
+    public function setDescription(string $description): void
+    {
         $this->description = $description;
     }
 }

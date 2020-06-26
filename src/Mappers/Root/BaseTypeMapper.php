@@ -23,6 +23,8 @@ use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Psr\Http\Message\UploadedFileInterface;
+use ReflectionMethod;
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -53,6 +55,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      *
@@ -84,6 +87,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (InputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return InputType&GraphQLType
      */

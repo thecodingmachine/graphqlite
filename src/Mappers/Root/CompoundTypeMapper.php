@@ -15,6 +15,8 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
+use ReflectionMethod;
+use ReflectionProperty;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -52,6 +54,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      */
@@ -92,6 +95,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (InputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return InputType&GraphQLType
      */

@@ -45,7 +45,13 @@ use function array_merge;
 use function array_unique;
 use function assert;
 use function count;
+use function explode;
+use function in_array;
 use function iterator_to_array;
+use function method_exists;
+use function reset;
+use function trim;
+use const PHP_EOL;
 use const SORT_REGULAR;
 
 class TypeHandler implements ParameterHandlerInterface
@@ -112,20 +118,17 @@ class TypeHandler implements ParameterHandlerInterface
 
     /**
      * Gets property type from its dock block.
-     *
-     * @param DocBlock           $docBlock
-     * @param ReflectionProperty $refProperty
-     *
-     * @return Type|null
      */
     private function getDocBlockPropertyType(DocBlock $docBlock, ReflectionProperty $refProperty): ?Type
     {
         /** @var Var_[] $varTags */
         $varTags = $docBlock->getTagsByName('var');
 
-        if (!$varTags) {
+        if (! $varTags) {
             return null;
-        } elseif (count($varTags) > 1) {
+        }
+
+        if (count($varTags) > 1) {
             throw InvalidDocBlockRuntimeException::tooManyVarTags($refProperty);
         }
 
@@ -192,11 +195,6 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Map class property to a GraphQL type.
      *
-     * @param ReflectionProperty $refProperty
-     * @param DocBlock           $docBlock
-     * @param bool               $toInput
-     * @param string|null        $argumentName
-     *
      * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
      *
      * @throws CannotMapTypeException
@@ -206,15 +204,20 @@ class TypeHandler implements ParameterHandlerInterface
         $propertyType = null;
 
         // getType function on property reflection is available only since PHP 7.4
-        if (method_exists($refProperty, 'getType') && $propertyType = $refProperty->getType()) {
-            $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
+        if (method_exists($refProperty, 'getType')) {
+            $propertyType = $refProperty->getType();
+            if ($propertyType !== null) {
+                $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
+            } else {
+                $phpdocType = new Mixed_();
+            }
         } else {
             $phpdocType = new Mixed_();
         }
 
         $docBlockPropertyType = $this->getDocBlockPropertyType($docBlock, $refProperty);
 
-        if (null === $isNullable) {
+        if ($isNullable === null) {
             $isNullable = $propertyType ? $propertyType->allowsNull() : false;
         }
 
@@ -224,14 +227,7 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Maps class property into input property.
      *
-     * @param ReflectionProperty $refProperty
-     * @param DocBlock           $docBlock
-     * @param string|null        $argumentName
      * @param mixed              $defaultValue
-     * @param bool|null          $isNullable
-     * @param string|null        $inputTypeName
-     *
-     * @return InputTypeProperty
      *
      * @throws CannotMapTypeException
      */
@@ -241,27 +237,34 @@ class TypeHandler implements ParameterHandlerInterface
 
         /** @var Var_[] $varTags */
         $varTags = $docBlock->getTagsByName('var');
-        if ($varTag = reset($varTags)) {
+        $varTag = reset($varTags);
+        if ($varTag) {
             $docBlockComment .= PHP_EOL . $varTag->getDescription();
 
-            if (null === $isNullable && $varType = $varTag->getType()) {
-                $isNullable = in_array('null', explode('|', (string) $varType));
+            if ($isNullable === null) {
+                $varType = $varTag->getType();
+                if ($varType !== null) {
+                    $isNullable = in_array('null', explode('|', (string) $varType));
+                }
             }
         }
 
-        if (null === $isNullable) {
+        if ($isNullable === null) {
             $isNullable = false;
             // getType function on property reflection is available only since PHP 7.4
-            if (method_exists($refProperty, 'getType') && $refType = $refProperty->getType()) {
-                $isNullable = $refType->allowsNull();
+            if (method_exists($refProperty, 'getType')) {
+                $refType = $refProperty->getType();
+                if ($refType !== null) {
+                    $isNullable = $refType->allowsNull();
+                }
             }
         }
 
         if ($inputTypeName) {
             $inputType = $this->typeResolver->mapNameToInputType($inputTypeName);
         } else {
-            /** @var InputType&GraphQLType $inputType */
             $inputType = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
+            assert($inputType instanceof InputType && $inputType instanceof GraphQLType);
         }
 
         $hasDefault = $defaultValue !== null || $isNullable;
@@ -274,15 +277,10 @@ class TypeHandler implements ParameterHandlerInterface
     }
 
     /**
-     * @param Type                                $type
-     * @param Type|null                           $docBlockType
-     * @param bool                                $isNullable
-     * @param bool                                $mapToInputType
      * @param ReflectionMethod|ReflectionProperty $reflector
-     * @param DocBlock                            $docBlockObj
-     * @param string|null                         $argumentName
      *
      * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
+     *
      * @throws CannotMapTypeException
      */
     private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, $reflector, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType

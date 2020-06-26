@@ -95,9 +95,7 @@ final class GlobAnnotationsCache
     /**
      * Register a new input.
      *
-     * @param string               $name
      * @param class-string<object> $className
-     * @param Input                $input
      */
     public function registerInput(string $name, string $className, Input $input): void
     {

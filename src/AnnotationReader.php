@@ -66,19 +66,13 @@ class AnnotationReader
      */
     private $mode;
 
-    /**
-     * @var array<string, (object|null)>
-     */
+    /** @var array<string, (object|null)> */
     private $methodAnnotationCache = [];
 
-    /**
-     * @var array<string, array<object>>
-     */
+    /** @var array<string, array<object>> */
     private $methodAnnotationsCache = [];
 
-    /**
-     * @var array<string, array<object>>
-     */
+    /** @var array<string, array<object>> */
     private $propertyAnnotationsCache = [];
 
     /**
@@ -262,8 +256,6 @@ class AnnotationReader
 
     /**
      * @param ReflectionMethod|ReflectionProperty $reflection
-     *
-     * @return MiddlewareAnnotations
      *
      * @throws AnnotationException
      */

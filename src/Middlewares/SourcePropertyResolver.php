@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use Webmozart\Assert\Assert;
 use function get_class;
 use function is_object;
@@ -18,35 +18,22 @@ use function is_object;
  */
 class SourcePropertyResolver implements SourceResolverInterface
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $propertyName;
 
-    /**
-     * @var object|null
-     */
+    /** @var object|null */
     private $object;
 
-    /**
-     * @param string $propertyName
-     */
     public function __construct(string $propertyName)
     {
         $this->propertyName = $propertyName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setObject(object $object): void
     {
         $this->object = $object;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getObject(): object
     {
         Assert::notNull($this->object);
@@ -68,9 +55,6 @@ class SourcePropertyResolver implements SourceResolverInterface
         return PropertyAccessor::getValue($this->object, $this->propertyName, ...$args);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function toString(): string
     {
         $class = $this->getObject();

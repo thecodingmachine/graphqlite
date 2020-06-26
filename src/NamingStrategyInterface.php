@@ -35,8 +35,6 @@ interface NamingStrategyInterface
      *
      * @param class-string<object> $className
      * @param Input|Factory        $input
-     *
-     * @return string
      */
     public function getInputTypeName(string $className, $input): string;
 

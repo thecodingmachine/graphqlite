@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 /**
@@ -7,11 +9,8 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
  */
 interface SourceResolverInterface extends ResolverInterface
 {
-
     /**
      * Set source object for which field value should be resolved.
-     *
-     * @param object $object
      */
     public function setObject(object $object): void;
 }

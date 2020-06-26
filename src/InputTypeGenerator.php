@@ -58,15 +58,10 @@ class InputTypeGenerator
 
     /**
      * @param class-string<object> $className
-     * @param string               $inputName
-     * @param string|null          $description
-     * @param bool                 $isUpdate
-     *
-     * @return InputType
      */
     public function mapInput(string $className, string $inputName, ?string $description, bool $isUpdate): InputType
     {
-        if (!isset($this->inputCache[$inputName])) {
+        if (! isset($this->inputCache[$inputName])) {
             $this->inputCache[$inputName] = new InputType($className, $inputName, $description, $isUpdate, $this->fieldsBuilder);
         }
 

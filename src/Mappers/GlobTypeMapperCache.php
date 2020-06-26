@@ -136,8 +136,6 @@ class GlobTypeMapperCache
     }
 
     /**
-     * @param string $graphqlTypeName
-     *
      * @return array{0: class-string<object>, 1: string|null, 2: bool}|null
      */
     public function getInputByGraphQLInputTypeName(string $graphqlTypeName): ?array
@@ -146,8 +144,6 @@ class GlobTypeMapperCache
     }
 
     /**
-     * @param string $className
-     *
      * @return array{0: string, 1: string|null, 2: bool}|null
      */
     public function getInputByObjectClass(string $className): ?array

@@ -16,8 +16,6 @@ class InvalidDocBlockRuntimeException extends GraphQLRuntimeException
 
     /**
      * Creates an exception for property to have multiple var tags.
-     *
-     * @param ReflectionProperty $refProperty
      */
     public static function tooManyVarTags(ReflectionProperty $refProperty): self
     {

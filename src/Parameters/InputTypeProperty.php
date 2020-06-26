@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Parameters;
 
 use GraphQL\Type\Definition\InputType;
@@ -8,29 +10,21 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 class InputTypeProperty extends InputTypeParameter
 {
-
-    /**
-     * @var string
-     */
+    /** @var string */
     private $propertyName;
 
     /**
-     * @param string           $propertyName
-     * @param string           $fieldName
      * @param InputType&Type   $type
-     * @param bool             $hasDefaultValue
      * @param mixed            $defaultValue
-     * @param ArgumentResolver $argumentResolver
      */
-    public function __construct(string $propertyName, string $fieldName, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver) {
+    public function __construct(string $propertyName, string $fieldName, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
+    {
         parent::__construct($fieldName, $type, $hasDefaultValue, $defaultValue, $argumentResolver);
         $this->propertyName = $propertyName;
     }
 
-    /**
-     * @return string
-     */
-    public function getPropertyName(): string {
+    public function getPropertyName(): string
+    {
         return $this->propertyName;
     }
 }

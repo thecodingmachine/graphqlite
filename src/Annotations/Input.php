@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Doctrine\Common\Annotations\Annotation\Attribute;
@@ -20,29 +22,19 @@ use RuntimeException;
  */
 class Input
 {
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $class;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $name;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $default;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $description;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $update;
 
     /**
@@ -51,15 +43,13 @@ class Input
     public function __construct(array $attributes = [])
     {
         $this->name = $attributes['name'] ?? null;
-        $this->default = $attributes['default'] ?? !isset($attributes['name']);
+        $this->default = $attributes['default'] ?? ! isset($attributes['name']);
         $this->description = $attributes['description'] ?? null;
         $this->update = $attributes['update'] ?? false;
     }
 
     /**
      * Returns the fully qualified class name of the targeted class.
-     *
-     * @return string
      */
     public function getClass(): string
     {
@@ -70,9 +60,6 @@ class Input
         return $this->class;
     }
 
-    /**
-     * @param string $class
-     */
     public function setClass(string $class): void
     {
         $this->class = $class;
@@ -96,8 +83,6 @@ class Input
 
     /**
      * Returns description about this input type.
-     *
-     * @return string|null
      */
     public function getDescription(): ?string
     {
@@ -107,8 +92,6 @@ class Input
     /**
      * Returns true if this type should behave as update resource.
      * Such input type has all fields optional and without default value in the documentation.
-     *
-     * @return bool
      */
     public function isUpdate(): bool
     {
