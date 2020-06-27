@@ -287,7 +287,7 @@ class FieldsBuilder
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $reflector->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
                 // We will merge the fields anyway.
-                break;
+                continue;
             }
 
             if ($reflector instanceof ReflectionMethod) {
