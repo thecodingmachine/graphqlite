@@ -350,7 +350,7 @@ class FieldsBuilder
             $methodName = $refMethod->getName();
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
-            if (!$description) {
+            if (! $description) {
                 $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
             }
 
@@ -457,7 +457,7 @@ class FieldsBuilder
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlock));
             $name = $queryAnnotation->getName() ?: $refProperty->getName();
 
-            if (!$description) {
+            if (! $description) {
                 $description = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
                 /** @var Var_[] $varTags */
