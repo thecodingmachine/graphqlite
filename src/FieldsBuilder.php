@@ -330,26 +330,32 @@ class FieldsBuilder
 
         $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
         foreach ($annotations as $queryAnnotation) {
-            if ($typeName && $queryAnnotation instanceof Field) {
+            $description = null;
+
+            if ($queryAnnotation instanceof Field) {
                 $for = $queryAnnotation->getFor();
-                if ($for && ! in_array($typeName, $for)) {
+                if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
                 }
+
+                $description = $queryAnnotation->getDescription();
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
             $fieldDescriptor->setRefMethod($refMethod);
 
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-            $docBlockComment = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
-
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlockObj));
 
             $methodName = $refMethod->getName();
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
+            if (!$description) {
+                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+            }
+
             $fieldDescriptor->setName($name);
-            $fieldDescriptor->setComment($docBlockComment);
+            $fieldDescriptor->setComment($description);
 
             [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod] = $this->getPrefetchMethodInfo($refClass, $refMethod, $queryAnnotation);
             if ($prefetchMethodName) {
@@ -433,31 +439,37 @@ class FieldsBuilder
 
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
         foreach ($annotations as $queryAnnotation) {
-            if ($typeName && $queryAnnotation instanceof Field) {
+            $description = null;
+
+            if ($queryAnnotation instanceof Field) {
                 $for = $queryAnnotation->getFor();
-                if ($for && ! in_array($typeName, $for)) {
+                if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
                 }
+
+                $description = $queryAnnotation->getDescription();
             }
 
             $fieldDescriptor = new QueryFieldDescriptor();
             $fieldDescriptor->setRefProperty($refProperty);
 
             $docBlock        = $this->cachedDocBlockFactory->getDocBlock($refProperty);
-            $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
+            $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlock));
+            $name = $queryAnnotation->getName() ?: $refProperty->getName();
 
-            /** @var Var_[] $varTags */
-            $varTags = $docBlock->getTagsByName('var');
-            $varTag = reset($varTags);
-            if ($varTag) {
-                $docBlockComment .= PHP_EOL . $varTag->getDescription();
+            if (!$description) {
+                $description = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
+
+                /** @var Var_[] $varTags */
+                $varTags = $docBlock->getTagsByName('var');
+                $varTag = reset($varTags);
+                if ($varTag) {
+                    $description .= PHP_EOL . $varTag->getDescription();
+                }
             }
 
-            $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlock));
-
-            $name = $queryAnnotation->getName() ?: $refProperty->getName();
             $fieldDescriptor->setName($name);
-            $fieldDescriptor->setComment($docBlockComment);
+            $fieldDescriptor->setComment($description);
 
             [$prefetchMethodName, $prefetchArgs] = $this->getPrefetchMethodInfo($refClass, $refProperty, $queryAnnotation);
             if ($prefetchMethodName) {
