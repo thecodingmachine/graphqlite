@@ -30,7 +30,7 @@ trait MutableAdapterTrait
     private $className;
 
     /** @var string */
-    private $status;
+    private $status = MutableInterface::STATUS_PENDING;
 
     /** @var array<callable> */
     private $fieldsCallables = [];

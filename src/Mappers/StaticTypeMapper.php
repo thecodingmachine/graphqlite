@@ -37,11 +37,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     public function setTypes(array $types): void
     {
         foreach ($types as $className => $type) {
-            if ($type instanceof ObjectType && ! $type instanceof MutableObjectType) {
-                $type = new MutableObjectTypeAdapter($type);
-            } elseif ($type instanceof InterfaceType && ! $type instanceof MutableInterfaceType) {
-                $type = new MutableInterfaceTypeAdapter($type);
-            }
+            $type = $this->castOutputTypeToMutable($type);
             $this->types[$className] = $type;
         }
     }
@@ -66,15 +62,35 @@ final class StaticTypeMapper implements TypeMapperInterface
      * An array containing ObjectType or ResolvableMutableInputInterface instances that are not mapped by default to any class.
      * ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
      *
-     * @param array<int,Type> $types
+     * @param array<int,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> $types
      */
     public function setNotMappedTypes(array $types): void
     {
-        $this->notMappedTypes = array_reduce($types, static function ($result, Type $type) {
+        $this->notMappedTypes = array_reduce($types, function ($result, Type $type) {
+            if ($type instanceof ObjectType || $type instanceof InterfaceType) {
+                $type = $this->castOutputTypeToMutable($type);
+            }
+
             $result[$type->name] = $type;
 
             return $result;
         }, []);
+    }
+
+    /**
+     * @param ObjectType|InterfaceType $type
+     *
+     * @return MutableInterfaceTypeAdapter|MutableObjectTypeAdapter
+     */
+    private function castOutputTypeToMutable($type)
+    {
+        if ($type instanceof ObjectType && ! $type instanceof MutableObjectType) {
+            return new MutableObjectTypeAdapter($type);
+        }
+        if ($type instanceof InterfaceType && ! $type instanceof MutableInterfaceType) {
+            return new MutableInterfaceTypeAdapter($type);
+        }
+        return $type;
     }
 
     /**

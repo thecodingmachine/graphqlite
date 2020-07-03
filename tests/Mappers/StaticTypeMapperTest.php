@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -150,7 +151,11 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
                         }
                     ]
                 ]
-            ])
+            ]),
+        ]);
+
+        $staticTypeMapper->setNotMappedTypes([
+            new InterfaceType(['name' => 'FooInterface'])
         ]);
 
         // Register the static type mapper in your application using the SchemaFactory instance
