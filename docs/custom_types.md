@@ -89,7 +89,7 @@ services:
 
 ### Other frameworks
 
-The easiest way is to use a `StaticTypeMapper`. This class is used to register custom output types.
+The easiest way is to use a `StaticTypeMapper`. Use this class to register custom output types.
 
 ```php
 // Sample code:
@@ -105,10 +105,9 @@ $staticTypeMapper->setNotMappedTypes([
     new MyCustomOutputType()
 ]);
 
+// Register the static type mapper in your application using the SchemaFactory instance
+$schemaFactory->addTypeMapper($staticTypeMapper);
 ```
-
-The `StaticTypeMapper` instance MUST be registered in your container and linked to a `CompositeTypeMapper`
-that will aggregate all the type mappers of the application.
 
 ## Registering a custom scalar type (advanced)
 
