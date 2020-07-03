@@ -78,7 +78,7 @@ trait MutableAdapterTrait
      *
      * @throws Exception
      */
-    public function getField($name)
+    public function getField($name): FieldDefinition
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a '.get_class($this).' before fetching its fields.');
@@ -92,7 +92,7 @@ trait MutableAdapterTrait
      *
      * @return bool
      */
-    public function hasField($name)
+    public function hasField($name): bool
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a '.get_class($this).' before fetching its fields.');

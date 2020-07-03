@@ -2,18 +2,24 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use GraphQL\Error\Debug;
+use GraphQL\GraphQL;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
-use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Fixtures\StaticTypeMapper\Types\TestLegacyObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class StaticTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -122,5 +128,55 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
     {
         $this->expectException(CannotMapTypeException::class);
         $this->typeMapper->mapClassToType(TestObject::class, new StringType());
+    }
+
+    public function testEndToEnd(): void
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\StaticTypeMapper\\Controllers');
+
+        $staticTypeMapper = new StaticTypeMapper();
+        // Let's register a type that maps by default to the "MyClass" PHP class
+        $staticTypeMapper->setTypes([
+            TestLegacyObject::class => new ObjectType([
+                'name' => 'TestLegacyObject',
+                'fields' => [
+                    'foo' => [
+                        'type' =>Type::int(),
+                        'resolve' => function(TestLegacyObject $source) {
+                            return $source->getFoo();
+                        }
+                    ]
+                ]
+            ])
+        ]);
+
+        // Register the static type mapper in your application using the SchemaFactory instance
+        $schemaFactory->addTypeMapper($staticTypeMapper);
+
+        $schema = $schemaFactory->createSchema();
+
+        $schema->validate();
+
+        $queryString = '
+        query {
+            legacyObject {
+                foo
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'legacyObject' => [
+                'foo' => 42
+            ]
+        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 }

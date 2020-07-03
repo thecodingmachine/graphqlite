@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Utils\Utils;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\NoFieldsException;
 use function call_user_func;
 use function is_array;
@@ -24,7 +25,7 @@ use function sprintf;
  *
  * @internal
  */
-class MutableInterfaceTypeAdapter extends InterfaceType implements MutableInterface
+class MutableInterfaceTypeAdapter extends MutableInterfaceType implements MutableInterface
 {
     /** @use MutableAdapterTrait<InterfaceType> */
     use MutableAdapterTrait;

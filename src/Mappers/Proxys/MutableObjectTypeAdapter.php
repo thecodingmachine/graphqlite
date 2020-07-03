@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Utils\Utils;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\NoFieldsException;
 use function assert;
 use function call_user_func;
@@ -25,7 +26,7 @@ use function sprintf;
  *
  * @internal
  */
-class MutableObjectTypeAdapter extends ObjectType implements MutableInterface
+class MutableObjectTypeAdapter extends MutableObjectType implements MutableInterface
 {
     /** @use MutableAdapterTrait<ObjectType> */
     use MutableAdapterTrait;
