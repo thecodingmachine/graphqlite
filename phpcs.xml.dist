@@ -16,6 +16,7 @@
     <exclude-pattern>tests/dependencies/*</exclude-pattern>
     <exclude-pattern>src/Utils/NamespacedCache.php</exclude-pattern>
     <exclude-pattern>src/Types/TypeAnnotatedInterfaceType.php</exclude-pattern>
+    <exclude-pattern>src/Mappers/Proxys/*</exclude-pattern>
 
     <!-- Excluding ServiceResolver.php and QueryFieldDescriptor.php because Slevomat 5.0 does not support array shaped. -->
     <!-- Support is added in 5.1 so we can remove these excludes when Slevomat 5.1 is out -->

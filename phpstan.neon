@@ -9,6 +9,9 @@ parameters:
         -
            message: '#Method TheCodingMachine\\GraphQLite\\Types\\Mutable(Interface|Object)Type::getFields\(\) should return array<GraphQL\\Type\\Definition\\FieldDefinition> but returns array\|float\|int#'
            path: src/Types/MutableTrait.php
+        -
+           message: '#Method TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\Mutable(Interface|Object)TypeAdapter::getFields\(\) should return array<GraphQL\\Type\\Definition\\FieldDefinition> but returns array\|float\|int#'
+           path: src/Mappers/Proxys/MutableAdapterTrait.php
         #- "#Parameter \\#2 \\$inputTypeNode of static method GraphQL\\\\Utils\\\\AST::typeFromAST() expects GraphQL\\\\Language\\\\AST\\\\ListTypeNode\\|GraphQL\\\\Language\\\\AST\\\\NamedTypeNode\\|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode, GraphQL\\\\Language\\\\AST\\\\ListTypeNode\\|GraphQL\\\\Language\\\\AST\\\\NameNode\\|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode given.#"
         - "#PHPDoc tag @throws with type Psr\\\\SimpleCache\\\\InvalidArgumentException is not subtype of Throwable#"
         - '#Variable \$context might not be defined.#'
@@ -22,6 +25,9 @@ parameters:
            message: '#Parameter \#2 \$subType of method .* expects#'
            path: src/Mappers/Root/IteratorTypeMapper.php
         -
+           message: '#Method TheCodingMachine\\GraphQLite\\Mappers\\StaticTypeMapper::castOutputTypeToMutable() should return TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableInterfaceTypeAdapter\|TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableObjectTypeAdapter but returns GraphQL\\Type\\Definition\\InterfaceType|GraphQL\\Type\\Definition\\ObjectType.#'
+           path: src/Mappers/StaticTypeMapper.php
+        -
            message: '#Unreachable statement - code above always terminates.#'
            path: src/Http/WebonyxGraphqlMiddleware.php
         -
@@ -31,8 +37,7 @@ parameters:
            message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getMethodAnnotations\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
         - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage()#'
-        # Needed because of a bug in PHP-CS
-        - '#PHPDoc tag @param for parameter \$args with type mixed is not subtype of native type array<int, mixed>.#'
+
 
         #-
         #  message: '#If condition is always true#'
