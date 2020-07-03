@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Mappers\Proxys\MutableInterfaceTypeAdapter;
+use TheCodingMachine\GraphQLite\Mappers\Proxys\MutableObjectTypeAdapter;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -22,17 +26,24 @@ use function array_reduce;
  */
 final class StaticTypeMapper implements TypeMapperInterface
 {
-    /** @var array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> */
+    /** @var array<string,MutableObjectType|MutableInterfaceType> */
     private $types = [];
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
      *
-     * @param array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> $types
+     * @param array<string,ObjectType|InterfaceType> $types
      */
     public function setTypes(array $types): void
     {
-        $this->types = $types;
+        foreach ($types as $className => $type) {
+            if ($type instanceof ObjectType && ! $type instanceof MutableObjectType) {
+                $type = new MutableObjectTypeAdapter($type);
+            } elseif ($type instanceof InterfaceType && ! $type instanceof MutableInterfaceType) {
+                $type = new MutableInterfaceTypeAdapter($type);
+            }
+            $this->types[$className] = $type;
+        }
     }
 
     /** @var array<string,ResolvableMutableInputInterface&InputObjectType> */

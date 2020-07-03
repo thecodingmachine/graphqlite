@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
@@ -27,6 +28,12 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->typeMapper->setTypes([
             TestObject::class => new MutableObjectType([
                 'name'    => 'TestObject',
+                'fields'  => [
+                    'test'   => Type::string(),
+                ],
+            ]),
+            TestObject2::class => new ObjectType([
+                'name'    => 'TestObject2',
                 'fields'  => [
                     'test'   => Type::string(),
                 ],
@@ -58,7 +65,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $this->assertFalse($this->typeMapper->canMapClassToInputType(\Exception::class));
         $this->assertInstanceOf(ObjectType::class, $this->typeMapper->mapClassToType(TestObject::class, null));
         $this->assertInstanceOf(InputObjectType::class, $this->typeMapper->mapClassToInputType(TestObject::class));
-        $this->assertSame([TestObject::class], $this->typeMapper->getSupportedClasses());
+        $this->assertSame([TestObject::class, TestObject2::class], $this->typeMapper->getSupportedClasses());
         $this->assertSame('TestObject', $this->typeMapper->mapNameToType('TestObject')->name);
         $this->assertSame('TestInputObject', $this->typeMapper->mapNameToType('TestInputObject')->name);
         $this->assertSame('TestNotMappedObject', $this->typeMapper->mapNameToType('TestNotMappedObject')->name);
