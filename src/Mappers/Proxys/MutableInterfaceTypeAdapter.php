@@ -21,11 +21,11 @@ use function is_string;
 use function sprintf;
 
 /**
- * An adapter class (actually a proxy) that adds the "mutable" feature to any Webonyx ObjectType.
+ * An adapter class (actually a proxy) that adds the "mutable" feature to any Webonyx InterfaceType.
  *
  * @internal
  */
-class MutableInterfaceTypeAdapter extends MutableInterfaceType implements MutableInterface
+class MutableInterfaceTypeAdapter extends MutableInterfaceType
 {
     /** @use MutableAdapterTrait<InterfaceType> */
     use MutableAdapterTrait;
