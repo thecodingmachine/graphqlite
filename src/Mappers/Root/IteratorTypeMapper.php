@@ -78,6 +78,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
         }
         Assert::isInstanceOf($result, OutputType::class);
+        Assert::notInstanceOf($result, NonNull::class);
 
         return $result;
     }
@@ -99,7 +100,11 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         }
 
         $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($refMethod, $docBlockObj, $argumentName) {
-            return $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            $topType = $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+            if ($topType instanceof NonNull) {
+                $topType = $topType->getWrappedType();
+            }
+            return $topType;
         }, false);
         if ($result === null) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
@@ -197,6 +202,9 @@ class IteratorTypeMapper implements RootTypeMapperInterface
 
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
+            if ($graphQlType instanceof NonNull) {
+                $graphQlType = $graphQlType->getWrappedType();
+            }
             /*} elseif ($isOutputType) {
                 // This clearly cannot work. We are only gathering types from arrays and we cannot join arrays (I think)
                 $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);

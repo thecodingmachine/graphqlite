@@ -1545,4 +1545,30 @@ class EndToEndTest extends TestCase
 
         $schema->validate();
     }
+
+    public function testNullableResult(){
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            nullableResult {
+                count
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+        $resultArray = $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS);
+        if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
+            $this->fail('Expected a successful answer. Got '.json_encode($resultArray, JSON_PRETTY_PRINT));
+        }
+        $this->assertNull($resultArray['data']['nullableResult']);
+    }
+
 }

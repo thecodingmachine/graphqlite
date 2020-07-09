@@ -46,7 +46,7 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
         $compoundTypeMapper = $this->getRootTypeMapper();
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('the value must be iterable, but its computed GraphQL type (String!) is not a list.');
+        $this->expectExceptionMessage('the value must be iterable, but its computed GraphQL type (String) is not a list.');
         $compoundTypeMapper->toGraphQLOutputType(new Compound([new Iterable_(), new String_()]), null, new ReflectionMethod(__CLASS__, 'testException1'), new DocBlock());
     }
 }
