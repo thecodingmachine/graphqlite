@@ -1568,7 +1568,7 @@ class EndToEndTest extends TestCase
         if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
             $this->fail('Expected a successful answer. Got '.json_encode($resultArray, JSON_PRETTY_PRINT));
         }
-        $this->assertNull($resultArray['data']['getNullableResult']);
+        $this->assertNull($resultArray['data']['nullableResult']);
     }
 
 }

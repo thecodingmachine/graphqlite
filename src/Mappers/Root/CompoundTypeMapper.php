@@ -138,6 +138,9 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         if (count($unionTypes) === 1) {
             $graphQlType = $unionTypes[0];
             Assert::isInstanceOf($graphQlType, NonNull::class);
+            // If we have only one type, let's make it nullable (it is the role of the NullableTypeMapperAdapter to make it non nullable)
+            $graphQlType = $graphQlType->getWrappedType();
+            assert($graphQlType instanceof OutputType);
         } else {
             $badTypes = [];
             $nonNullableUnionTypes = [];

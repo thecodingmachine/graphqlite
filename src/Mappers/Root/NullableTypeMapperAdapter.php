@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -56,6 +57,10 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         }
 
         $graphQlType = $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+
+        if ($graphQlType instanceof NonNull) {
+            throw CannotMapTypeException::createForNonNullReturnByTypeMapper();
+        }
 
         if (! $isNullable && $graphQlType instanceof NullableType) {
             $graphQlType = GraphQLType::nonNull($graphQlType);
