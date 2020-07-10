@@ -494,7 +494,7 @@ class EndToEndTest extends TestCase
         $schema = $this->mainContainer->get(Schema::class);
         $queryString = '
         mutation {
-          saveBirthDate(birthDate: "1942-12-24 00:00:00")  {
+          saveBirthDate(birthDate: "1942-12-24T00:00:00+00:00")  {
             name
             birthDate
           }
@@ -535,7 +535,7 @@ class EndToEndTest extends TestCase
             null,
             null,
             [
-                "birthDate" => "1942-12-24 00:00:00"
+                "birthDate" => "1942-12-24T00:00:00+00:00"
             ]
         );
 
@@ -558,7 +558,7 @@ class EndToEndTest extends TestCase
           saveContact(
             contact: {
                 name: "foo",
-                birthDate: "1942-12-24 00:00:00",
+                birthDate: "1942-12-24T00:00:00+00:00",
                 relations: [
                     {
                         name: "bar"
