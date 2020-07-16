@@ -16,14 +16,14 @@ class PrefetchBufferTest extends TestCase
         $object2 = new stdClass();
         $object3 = new stdClass();
 
-        $buffer->register($object1, ['int'=>42]);
-        $buffer->register($object2, ['int'=>24]);
-        $buffer->register($object3, ['int'=>42]);
+        $buffer->register($object1, 'test', ['int'=>42]);
+        $buffer->register($object2, 'test', ['int'=>24]);
+        $buffer->register($object3, 'test', ['int'=>42]);
 
-        $this->assertSame([$object1, $object3], $buffer->getObjectsByArguments(['int'=>42]));
-        $this->assertSame([$object2], $buffer->getObjectsByArguments(['int'=>24]));
+        $this->assertSame([$object1, $object3], $buffer->getObjectsByArguments('test', ['int'=>42]));
+        $this->assertSame([$object2], $buffer->getObjectsByArguments('test', ['int'=>24]));
 
-        $buffer->purge(['int'=>42]);
-        $this->assertSame([], $buffer->getObjectsByArguments(['int'=>42]));
+        $buffer->purge('test', ['int'=>42]);
+        $this->assertSame([], $buffer->getObjectsByArguments('test', ['int'=>42]));
     }
 }

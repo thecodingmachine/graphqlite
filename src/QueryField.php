@@ -101,10 +101,10 @@ class QueryField extends FieldDefinition
 
                 $prefetchBuffer = $context->getPrefetchBuffer($this);
 
-                $prefetchBuffer->register($source, $args);
+                $prefetchBuffer->register($source, $prefetchMethodName, $args);
 
                 return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $originalResolver) {
-                    if (! $prefetchBuffer->hasResult($args)) {
+                    if (! $prefetchBuffer->hasResult($prefetchMethodName, $args)) {
                         if ($originalResolver instanceof SourceResolver || $originalResolver instanceof MagicPropertyResolver) {
                             $originalResolver->setObject($source);
                         }
@@ -112,7 +112,7 @@ class QueryField extends FieldDefinition
                         // TODO: originalPrefetchResolver and prefetchResolver needed!!!
                         $prefetchCallable = [$originalResolver->getObject(), $prefetchMethodName];
 
-                        $sources = $prefetchBuffer->getObjectsByArguments($args);
+                        $sources = $prefetchBuffer->getObjectsByArguments($prefetchMethodName, $args);
 
                         Assert::isCallable($prefetchCallable);
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
@@ -120,9 +120,9 @@ class QueryField extends FieldDefinition
                         array_unshift($toPassPrefetchArgs, $sources);
                         Assert::isCallable($prefetchCallable);
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
-                        $prefetchBuffer->storeResult($prefetchResult, $args);
+                        $prefetchBuffer->storeResult($prefetchResult, $prefetchMethodName, $args);
                     } else {
-                        $prefetchResult = $prefetchBuffer->getResult($args);
+                        $prefetchResult = $prefetchBuffer->getResult($prefetchMethodName, $args);
                     }
 
                     foreach ($arguments as $argument) {
