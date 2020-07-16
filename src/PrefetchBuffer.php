@@ -48,7 +48,7 @@ class PrefetchBuffer
     /**
      * @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field.
      */
-    public function purge($prefetchMethodName, array $arguments): void
+    public function purge(string $prefetchMethodName, array $arguments): void
     {
         unset($this->objects[$this->computeHash($prefetchMethodName, $arguments)]);
     }
