@@ -263,7 +263,7 @@ configuration file.</strong></div>
 
 <div class="alert alert-info">There are many enumeration library in PHP and you might be using another library.
 If you want to add support for your own library, this is not extremely difficult to do. You need to register a custom
-"RootTypeMapper" with GraphQLite. You can learn more about <em>type mappers</em> in the <a href="internals.md">"internals" documentation</a>
+"RootTypeMapper" with GraphQLite. You can learn more about <em>type mappers</em> in the <a href="internals">"internals" documentation</a>
 and <a href="https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Root/MyCLabsEnumTypeMapper.php">copy/paste and adapt the root type mapper used for myclabs/php-enum</a>.</div>
 
 ## Deprecation of fields
