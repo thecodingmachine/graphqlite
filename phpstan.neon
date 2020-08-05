@@ -25,7 +25,7 @@ parameters:
            message: '#Parameter \#2 \$subType of method .* expects#'
            path: src/Mappers/Root/IteratorTypeMapper.php
         -
-           message: '#Method TheCodingMachine\\GraphQLite\\Mappers\\StaticTypeMapper::castOutputTypeToMutable() should return TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableInterfaceTypeAdapter\|TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableObjectTypeAdapter but returns GraphQL\\Type\\Definition\\InterfaceType|GraphQL\\Type\\Definition\\ObjectType.#'
+           message: '#Method TheCodingMachine\\GraphQLite\\Mappers\\StaticTypeMapper::castOutputTypeToMutable\(\) should return TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableInterfaceTypeAdapter\|TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableObjectTypeAdapter but returns GraphQL\\Type\\Definition\\InterfaceType|GraphQL\\Type\\Definition\\ObjectType.#'
            path: src/Mappers/StaticTypeMapper.php
         -
            message: '#Unreachable statement - code above always terminates.#'
@@ -36,7 +36,7 @@ parameters:
         -
            message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getMethodAnnotations\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
-        - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage()#'
+        - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage\(\)#'
 
 
         #-
