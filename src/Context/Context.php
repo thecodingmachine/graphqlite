@@ -27,11 +27,11 @@ class Context implements ContextInterface, ResetableContextInterface
      */
     public function getPrefetchBuffer(QueryField $field): PrefetchBuffer
     {
-        if ($this->prefetchBuffers->offsetExists($this)) {
-            $prefetchBuffer = $this->prefetchBuffers->offsetGet($this);
+        if ($this->prefetchBuffers->offsetExists($field)) {
+            $prefetchBuffer = $this->prefetchBuffers->offsetGet($field);
         } else {
             $prefetchBuffer = new PrefetchBuffer();
-            $this->prefetchBuffers->offsetSet($this, $prefetchBuffer);
+            $this->prefetchBuffers->offsetSet($field, $prefetchBuffer);
         }
 
         return $prefetchBuffer;
