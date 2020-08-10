@@ -45,7 +45,7 @@ class QueryField extends FieldDefinition
         $config = [
             'name' => $name,
             'type' => $type,
-            'args' => array_map(function(array $item) { return $item['type']; }, $arguments)
+            'args' => $arguments,
         ];
         if ($comment) {
             $config['description'] = $comment;

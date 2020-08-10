@@ -508,4 +508,42 @@ class EndToEndTest extends TestCase
         ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
+    public function testDefaultValueInSchema()
+    {
+        /** @var Schema $schema */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+            query deprecatedField {
+              __type(name: "Query") {
+                fields {
+                  name
+                  args {
+                    name
+                    defaultValue
+                  }
+                }
+              }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $defaultField = null;
+        foreach ($result->data['__type']['fields'] as $field) {
+            if ($field['name'] === 'defaultValue') {
+                $defaultField = $field;
+                break;
+            }
+        }
+
+        $this->assertSame(
+            $defaultField['args'][0]['defaultValue'],
+            '"value"'
+        );
+    }
+
 }
