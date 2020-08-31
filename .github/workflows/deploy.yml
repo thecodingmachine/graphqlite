@@ -1,0 +1,11 @@
+#todo: create deploy build
+
+#name: "Deploy"
+
+#on:
+  create:
+    tags:
+      - v.*
+
+#jobs:
+  
