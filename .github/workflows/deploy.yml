@@ -3,9 +3,9 @@
 #name: "Deploy"
 
 #on:
-  create:
-    tags:
-      - v.*
+#  create:
+#    tags:
+#      - v.*
 
 #jobs:
   

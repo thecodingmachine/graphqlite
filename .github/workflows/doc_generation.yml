@@ -1,0 +1,37 @@
+#todo: finish doc generation
+
+name: "Doc generation"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  doc-generation:
+
+    name: "Doc generation"
+
+    steps:
+
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+
+      - name: "Setup NodeJS"
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      
+      - name: "Update git config"
+        run: git config --global user.name "${GH_NAME}" && git config --global user.email "${GH_EMAIL}" && echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+        
+      - name: "Yarn install"
+        run: yarn install
+        working-directory: "website"
+      
+      - name: "Push the new doc"
+        run: GIT_USER="${GH_NAME}" yarn run publish-gh-pages
+        working-directory: "website"
+
+  

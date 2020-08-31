@@ -1,0 +1,78 @@
+# test for breaking changes on the different bundle projects
+
+name: "Test dependancies"
+
+on:
+  - "pull_request"
+  - "push"
+
+jobs:
+
+  symfony-test:
+    name: "Test symfony bundle"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+        
+      - name: "copy the project"
+        run: rsync -av . tests/dependencies/copy/ --exclude tests --exclude vendor
+        
+      - name: "Clone the bundle project"
+        run: git clone https://github.com/thecodingmachine/graphqlite-bundle.git
+        working-directory: "tests/dependencies"
+        
+      - name: "edit the composer.json"
+        run: php ./makeComposerLocal.php graphqlite-bundle/composer.json
+        working-directory: "tests/dependencies"
+        
+      - name: "install dependancies"
+        run: composer install
+        working-directory: "tests/dependencies/graphqlite-bundle"
+
+
+  universal-service-provider-test:
+    name: "Test graphqlite-universal-service-provider"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+
+      - name: "copy the project"
+        run: rsync -av . tests/dependencies/copy/ --exclude tests --exclude vendor
+
+      - name: "Clone the bundle project"
+        run: git clone https://github.com/thecodingmachine/graphqlite-universal-service-provider.git
+        working-directory: "tests/dependencies"
+
+      - name: "edit the composer.json"
+        run: php ./makeComposerLocal.php graphqlite-universal-service-provider/composer.json
+        working-directory: "tests/dependencies"
+
+      - name: "install dependancies"
+        run: composer install
+        working-directory: "tests/dependencies/graphqlite-universal-service-provider"
+
+
+  graphqlite-test:
+    name: "Test graphqlite-laravel"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+
+      - name: "copy the project"
+        run: rsync -av . tests/dependencies/copy/ --exclude tests --exclude vendor
+
+      - name: "Clone the bundle project"
+        run: git clone https://github.com/thecodingmachine/graphqlite-laravel.git
+        working-directory: "tests/dependencies"
+
+      - name: "edit the composer.json"
+        run: php ./makeComposerLocal.php graphqlite-laravel/composer.json
+        working-directory: "tests/dependencies"
+
+      - name: "install dependancies"
+        run: composer install
+        working-directory: "tests/dependencies/graphqlite-laravel"
+  
