@@ -70,6 +70,6 @@ Want to learn more? Head to the [documentation](https://graphqlite.thecodingmach
 [![Total Downloads](https://poser.pugx.org/thecodingmachine/graphqlite/downloads)](https://packagist.org/packages/thecodingmachine/graphqlite)
 [![Latest Unstable Version](https://poser.pugx.org/thecodingmachine/graphqlite/v/unstable)](https://packagist.org/packages/thecodingmachine/graphqlite)
 [![License](https://poser.pugx.org/thecodingmachine/graphqlite/license)](https://packagist.org/packages/thecodingmachine/graphqlite)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/graphqlite/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/thecodingmachine/graphqlite/?branch=master)
-[![Build Status](https://travis-ci.org/thecodingmachine/graphqlite.svg?branch=master)](https://travis-ci.org/thecodingmachine/graphqlite)
-[![Coverage Status](https://coveralls.io/repos/thecodingmachine/graphqlite/badge.svg?branch=master&service=github)](https://coveralls.io/github/thecodingmachine/graphqlite?branch=master)
+[![Continuous Integration](https://github.com/thecodingmachine/graphqlite/workflows/Continuous%20Integration/badge.svg)](https://github.com/thecodingmachine/graphqlite/actions)
+[![codecov](https://codecov.io/gh/thecodingmachine/graphqlite/branch/master/graph/badge.svg)](https://codecov.io/gh/thecodingmachine/graphqlite)
+
