@@ -1,7 +1,8 @@
 # test for breaking changes on the different bundle projects
 #todo: verify this always works
+#todo: use a matrix syntax?
 
-name: "Test dependancies"
+name: "Test the bundles' dependancies"
 
 on:
   - "pull_request"

@@ -1,6 +1,5 @@
-#todo: finish doc generation
-
-name: "Doc generation"
+# Generate the complete documentation then upload to the website under the master section
+name: "Doc generation on master"
 
 on:
   push:
@@ -24,7 +23,7 @@ jobs:
           node-version: '12.x'
       
       - name: "Update git config"
-        run: git config --global user.name "${GH_NAME}" && git config --global user.email "${GH_EMAIL}" && echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+        run: git config --global user.name "${GH_NAME}" && git config --global user.email "${GH_EMAIL}" && echo "machine github.com login ${GH_NAME} password ${GITHUB_TOKEN}" > ~/.netrc
         
       - name: "Yarn install"
         run: yarn install
