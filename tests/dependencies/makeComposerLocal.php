@@ -1,17 +1,23 @@
 #!/bin/env php
 <?php
 
-$file = $argv[1];
+$composerBundlePath = $argv[1];
 
-$composer = json_decode(file_get_contents($file), true);
+//fetch the dev-master alias from the local graphqlite composer
+$composerGraphqlite = json_decode(file_get_contents(__DIR__.'/copy/composer.json'), true);
 
-$composer['repositories'] = [
+$masterAlias = $composerGraphqlite['extra']['branch-alias']['dev-master'];
+
+//edit the bundle composer to use the local graphqlite
+$composerBundle = json_decode(file_get_contents($composerBundlePath), true);
+
+$composerBundle['repositories'] = [
     [
         'type' => 'path',
         'url' => '../copy/'
     ]
 ];
 
-$composer['require']['thecodingmachine/graphqlite'] = '4.0.x-dev';
+$composerBundle['require']['thecodingmachine/graphqlite'] = $masterAlias;
 
-file_put_contents($file, json_encode($composer));
+file_put_contents($composerBundlePath, json_encode($composerBundle));

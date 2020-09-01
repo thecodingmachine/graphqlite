@@ -1,4 +1,5 @@
 # test for breaking changes on the different bundle projects
+#todo: verify this always works
 
 name: "Test dependancies"
 
