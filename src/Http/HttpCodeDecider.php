@@ -12,6 +12,13 @@ use function max;
 class HttpCodeDecider implements HttpCodeDeciderInterface
 {
     /**
+     * Default HTTP Error code.
+     *
+     * @var int
+     */
+    private $defaultHTTPErrorCode = 200;
+
+    /**
      * Decides the HTTP status code based on the answer.
      *
      * @see https://github.com/APIs-guru/graphql-over-http#status-codes
@@ -37,11 +44,11 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
 
                     // A "client aware" exception is almost certainly targeting the client (there is
                     // no need to pass a server exception error message to the client).
-                    // So a ClientAware exception is almost certainly a HTTP 400 code
-                    $code = 400;
+                    // So a ClientAware exception is almost certainly a HTTP 200 code
+                    $code = $this->defaultHTTPErrorCode;
                 }
             } else {
-                $code = 400;
+                $code = $this->defaultHTTPErrorCode;
             }
             $status = max($status, $code);
         }
@@ -52,5 +59,10 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
         }
 
         return $status;
+    }
+
+    public function setDefaultHTTPErrorCode(int $code): void
+    {
+        $this->defaultHTTPErrorCode = $code;
     }
 }
