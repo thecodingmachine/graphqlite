@@ -12,6 +12,7 @@ use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
+use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -52,6 +53,7 @@ use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use function array_map;
 use function array_reverse;
+use function class_exists;
 use function crc32;
 use function function_exists;
 use function md5;
@@ -346,7 +348,9 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        if (class_exists(Enum::class)) {
+            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        }
 
         if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
