@@ -19,6 +19,7 @@ jobs:
           - "7.2"
           - "7.3"
           - "7.4"
+          - "8.0"
 
         dependencies:
           - "highest"
@@ -39,6 +40,9 @@ jobs:
           path: "~/.composer/cache"
           key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.lock') }}"
           restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
+
+      - name: "Install composer v1"
+        run: "composer selfupdate --1"
 
       - name: "Install dependencies with composer"
         run: "composer install --no-interaction"
