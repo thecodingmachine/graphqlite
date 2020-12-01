@@ -362,7 +362,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $mappedClass = new MappedClass(/*$className*/);
             $this->mappedClasses[$className] = $mappedClass;
             $parentClassName = $className;
-            foreach (class_implements($className) as $interfaceName) {
+            foreach (class_implements($className) ?: [] as $interfaceName) {
                 if (! isset($supportedClasses[$interfaceName])) {
                     continue;
                 }

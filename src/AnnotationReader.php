@@ -113,9 +113,12 @@ class AnnotationReader
         return $extendType;
     }
 
-    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationName): ?AbstractRequest
+    /**
+     * @param class-string<AbstractRequest> $annotationClass
+     */
+    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?AbstractRequest
     {
-        $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationName);
+        $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationClass);
         assert($queryAnnotation instanceof AbstractRequest || $queryAnnotation === null);
 
         return $queryAnnotation;
@@ -268,6 +271,8 @@ class AnnotationReader
 
     /**
      * Returns a method annotation and handles correctly errors.
+     *
+     * @param class-string<object> $annotationClass
      */
     private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?object
     {
