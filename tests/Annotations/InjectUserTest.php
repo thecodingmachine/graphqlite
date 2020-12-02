@@ -10,6 +10,6 @@ class InjectUserTest extends TestCase
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);
-        new InjectUser([]);
+        (new InjectUser([]))->getTarget();
     }
 }

@@ -25,16 +25,18 @@ class InjectUser implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed> $values
      */
-    public function __construct(array $values)
+    public function __construct(array $values = [])
     {
-        if (! isset($values['for'])) {
-            throw new BadMethodCallException('The @InjectUser annotation must be passed a target. For instance: "@InjectUser(for="$user")"');
+        if (isset($values['for'])) {
+            $this->for = ltrim($values['for'], '$');
         }
-        $this->for = ltrim($values['for'], '$');
     }
 
     public function getTarget(): string
     {
+        if ($this->for === null) {
+            throw new BadMethodCallException('The @InjectUser annotation must be passed a target. For instance: "@InjectUser(for="$user")"');
+        }
         return $this->for;
     }
 }

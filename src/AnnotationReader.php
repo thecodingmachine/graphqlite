@@ -35,10 +35,12 @@ use function array_values;
 use function assert;
 use function get_class;
 use function in_array;
+use function is_a;
 use function reset;
 use function strpos;
 use function strrpos;
 use function substr;
+use const PHP_MAJOR_VERSION;
 
 class AnnotationReader
 {
@@ -217,6 +219,21 @@ class AnnotationReader
             }
         }
 
+        // Now, let's add PHP 8 parameter attributes
+        if (PHP_MAJOR_VERSION >= 8) {
+            foreach ($refParameters as $refParameter) {
+                $attributes = $refParameter->getAttributes();
+                $parameterAnnotationsPerParameter[$refParameter->getName()] = array_merge($parameterAnnotationsPerParameter[$refParameter->getName()] ?? [], array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation): bool {
+                        return is_a($annotation->getName(), ParameterAnnotationInterface::class, true);
+                    })
+                ));
+            }
+        }
+
         return array_map(static function (array $parameterAnnotations) {
             return new ParameterAnnotations($parameterAnnotations);
         }, $parameterAnnotationsPerParameter);
@@ -246,6 +263,16 @@ class AnnotationReader
     {
         $type = null;
         try {
+            // If attribute & annotation, let's prefer the PHP 8 attribute
+            if (PHP_MAJOR_VERSION >= 8) {
+                $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
+                if ($attribute) {
+                    /** @var T $instance */
+                    $instance = $attribute->newInstance();
+                    return $instance;
+                }
+            }
+
             $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
             assert($type === null || $type instanceof $annotationClass);
         } catch (AnnotationException $e) {
@@ -282,6 +309,14 @@ class AnnotationReader
         }
 
         try {
+            // If attribute & annotation, let's prefer the PHP 8 attribute
+            if (PHP_MAJOR_VERSION >= 8) {
+                $attribute = $refMethod->getAttributes($annotationClass)[0] ?? null;
+                if ($attribute) {
+                    return $this->methodAnnotationCache[$cacheKey] = $attribute->newInstance();
+                }
+            }
+
             return $this->methodAnnotationCache[$cacheKey] = $this->reader->getMethodAnnotation($refMethod, $annotationClass);
         } catch (AnnotationException $e) {
             switch ($this->mode) {
@@ -336,6 +371,17 @@ class AnnotationReader
                 $toAddAnnotations[] = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
+                if (PHP_MAJOR_VERSION >= 8) {
+                    $attributes = $refClass->getAttributes();
+                    $toAddAnnotations[] = array_map(
+                        static function ($attribute) {
+                            return $attribute->newInstance();
+                        },
+                        array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                            return is_a($annotation->getName(), $annotationClass, true);
+                        })
+                    );
+                }
             } catch (AnnotationException $e) {
                 if ($this->mode === self::STRICT_MODE) {
                     throw $e;
@@ -384,6 +430,17 @@ class AnnotationReader
             $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });
+            if (PHP_MAJOR_VERSION >= 8) {
+                $attributes = $refMethod->getAttributes();
+                $toAddAnnotations = array_merge($toAddAnnotations, array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                        return is_a($annotation->getName(), $annotationClass, true);
+                    })
+                ));
+            }
         } catch (AnnotationException $e) {
             if ($this->mode === self::STRICT_MODE) {
                 throw $e;

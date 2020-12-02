@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite;
 
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use Doctrine\Common\Annotations\AnnotationException;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -10,10 +11,12 @@ use ReflectionClass;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\Attributes\TestType;
 
 class AnnotationReaderTest extends TestCase
 {
@@ -149,5 +152,63 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
 
         $this->assertEmpty($annotationReader->getParameterAnnotationsPerParameter([]));
+    }
+
+    public function testPhp8AttributeClassAnnotation(): void
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+
+        $type = $annotationReader->getTypeAnnotation(new ReflectionClass(TestType::class));
+        $this->assertSame(TestType::class, $type->getClass());
+
+        // We get the same instance
+        //$type2 = $annotationReader->getTypeAnnotation(new ReflectionClass(TestType::class));
+        //$this->assertSame($type, $type2, 'Assert some cache is available');
+    }
+
+    public function testPhp8AttributeClassAnnotations(): void
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+
+        $types = $annotationReader->getSourceFields(new ReflectionClass(TestType::class));
+
+        $this->assertCount(3, $types);
+    }
+
+    public function testPhp8AttributeMethodAnnotation(): void
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+
+        $type = $annotationReader->getRequestAnnotation(new ReflectionMethod(TestType::class, 'getField'), Field::class);
+        $this->assertInstanceOf(Field::class, $type);
+    }
+
+    public function testPhp8AttributeMethodAnnotations(): void
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+
+        $middlewareAnnotations = $annotationReader->getMiddlewareAnnotations(new ReflectionMethod(TestType::class, 'getField'));
+
+        /** @var Security[] $securitys */
+        $securitys = $middlewareAnnotations->getAnnotationsByType(Security::class);
+        $this->assertCount(2, $securitys);
+        $this->assertFalse($securitys[0]->isFailWithSet());
+        $this->assertNull($securitys[1]->getFailWith());
+        $this->assertTrue($securitys[1]->isFailWithSet());
+    }
+
+    public function testPhp8AttributeParameterAnnotations(): void
+    {
+        $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
+
+        $parameterAnnotations = $annotationReader->getParameterAnnotationsPerParameter((new ReflectionMethod(__CLASS__, 'method1'))->getParameters());
+
+        $this->assertInstanceOf(Autowire::class, $parameterAnnotations['dao']->getAnnotationByType(Autowire::class));
+    }
+
+    private function method1(
+        #[Autowire('myService')]
+        $dao
+    ): void {
     }
 }

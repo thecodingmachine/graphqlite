@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use function class_exists;
@@ -20,6 +21,7 @@ use function ltrim;
  *   @Attribute("name", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_CLASS)]
 class ExtendType
 {
     /** @var class-string<object>|null */
@@ -30,17 +32,18 @@ class ExtendType
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], string $class = null, string $name = null)
     {
-        if (! isset($attributes['class']) && ! isset($attributes['name'])) {
+        $className = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
+        $className = $className ?? $class;
+        if ($className !== null && ! class_exists($className) && ! interface_exists($className)) {
+            throw ClassNotFoundException::couldNotFindClass($className);
+        }
+        $this->name = $name ?? $attributes['name'] ?? null;
+        $this->class = $className;
+        if (! $this->class && ! $this->name) {
             throw new BadMethodCallException('In annotation @ExtendType, missing one of the compulsory parameter "class" or "name".');
         }
-        $class = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
-        $this->name = $attributes['name'] ?? null;
-        if ($class !== null && ! class_exists($class) && ! interface_exists($class)) {
-            throw ClassNotFoundException::couldNotFindClass($class);
-        }
-        $this->class = $class;
     }
 
     /**

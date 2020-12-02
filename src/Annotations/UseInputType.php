@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
+use function is_string;
 use function ltrim;
 
 /**
@@ -19,27 +20,36 @@ use function ltrim;
  */
 class UseInputType implements ParameterAnnotationInterface
 {
-    /** @var string */
+    /** @var string|null */
     private $for;
     /** @var string */
     private $inputType;
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, mixed>|string $inputType
      *
      * @throws BadMethodCallException
      */
-    public function __construct(array $values)
+    public function __construct($inputType = [])
     {
-        if (! isset($values['for'], $values['inputType'])) {
-            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")"');
+        $values = $inputType;
+        if (is_string($values)) {
+            $values = ['inputType' => $values];
         }
-        $this->for = ltrim($values['for'], '$');
+        if (! isset($values['inputType'])) {
+            throw new BadMethodCallException('The @UseInputType annotation must be passed an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")" in PHP 7+ or #[UseInputType("MyInputType")] in PHP 8+');
+        }
         $this->inputType = $values['inputType'];
+        if (isset($values['for'])) {
+            $this->for = ltrim($values['for'], '$');
+        }
     }
 
     public function getTarget(): string
     {
+        if ($this->for === null) {
+            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")" in PHP 7+ or #[UseInputType("MyInputType")] in PHP 8+');
+        }
         return $this->for;
     }
 

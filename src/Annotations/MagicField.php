@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
 use function array_map;
 use function is_array;
@@ -20,6 +21,7 @@ use function is_array;
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class MagicField implements SourceFieldInterface
 {
     /** @var string */
@@ -40,17 +42,17 @@ class MagicField implements SourceFieldInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], string $name = null, ?string $outputType = null, ?string $phpType = null)
     {
-        if (! isset($attributes['name']) || (! isset($attributes['outputType']) && ! isset($attributes['phpType']))) {
+        $this->name = $attributes['name'] ?? $name;
+        $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
+        $this->phpType = $attributes['phpType'] ?? $phpType ?? null;
+        if (! $this->name || (! $this->outputType && ! $this->phpType)) {
             throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type or a php type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
         }
-        if (isset($attributes['outputType']) && isset($attributes['phpType'])) {
+        if (isset($this->outputType) && $this->phpType) {
             throw new BadMethodCallException('In a @MagicField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
         }
-        $this->name = $attributes['name'];
-        $this->outputType = $attributes['outputType'] ?? null;
-        $this->phpType = $attributes['phpType'] ?? null;
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
         $annotations = $attributes['annotations'] ?? [];

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
+
 /**
  * @Annotation
  * @Target({"METHOD"})
@@ -13,6 +15,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
  *   @Attribute("prefetchMethod", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_METHOD)]
 class Field extends AbstractRequest
 {
     /** @var string|null */
@@ -21,10 +24,10 @@ class Field extends AbstractRequest
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], string $name = null, string $outputType = null, string $prefetchMethod = null)
     {
-        parent::__construct($attributes);
-        $this->prefetchMethod = $attributes['prefetchMethod'] ?? null;
+        parent::__construct($attributes, $name, $outputType);
+        $this->prefetchMethod = $prefetchMethod ?? $attributes['prefetchMethod'] ?? null;
     }
 
     /**

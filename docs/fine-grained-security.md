@@ -17,6 +17,7 @@ Using the `@Security` annotation, you can write an *expression* that can contain
 
 The `@Security` annotation is very flexible: it allows you to pass an expression that can contains custom logic:
 
+**PHP 7**
 ```php
 use TheCodingMachine\GraphQLite\Annotations\Security;
 
@@ -26,6 +27,20 @@ use TheCodingMachine\GraphQLite\Annotations\Security;
  * @Query
  * @Security("is_granted('ROLE_ADMIN') or is_granted('POST_SHOW', post)")
  */
+public function getPost(Post $post): array
+{
+    // ...
+}
+```
+
+**PHP 8+**
+```php
+use TheCodingMachine\GraphQLite\Annotations\Security;
+
+// ...
+
+#[Query]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('POST_SHOW', post)")]
 public function getPost(Post $post): array
 {
     // ...
@@ -75,11 +90,22 @@ In the example above, the `getPost` method can be called only if the logged user
 
 All parameters passed to the method can be accessed in the `@Security` expression.
 
+**PHP 7**
 ```php
 /**
  * @Query
  * @Security("startDate < endDate", statusCode=400, message="End date must be after start date")
  */
+public function getPosts(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+{
+    // ...
+}
+```
+
+**PHP 8+**
+```php
+#[Query]
+#[Security(expression: "startDate < endDate", statusCode: 400, message: "End date must be after start date")]
 public function getPosts(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
 {
     // ...

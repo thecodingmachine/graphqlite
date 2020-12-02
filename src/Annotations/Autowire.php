@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
+use function is_string;
 use function ltrim;
 
 /**
@@ -17,27 +19,35 @@ use function ltrim;
  *   @Attribute("identifier", type = "string")
  * })
  */
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class Autowire implements ParameterAnnotationInterface
 {
-    /** @var string */
+    /** @var string|null */
     private $for;
     /** @var string|null */
     private $identifier;
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, mixed>|string $identifier
      */
-    public function __construct(array $values)
+    public function __construct($identifier = [])
     {
-        if (! isset($values['for'])) {
-            throw new BadMethodCallException('The @Autowire annotation must be passed a target. For instance: "@Autowire(for="$myService")"');
+        $values = $identifier;
+        if (is_string($values)) {
+            $this->identifier = $values;
+        } else {
+            $this->identifier = $values['identifier'] ?? $values['value'] ?? null;
+            if (isset($values['for'])) {
+                $this->for = ltrim($values['for'], '$');
+            }
         }
-        $this->for = ltrim($values['for'], '$');
-        $this->identifier = $values['identifier'] ?? $values['value'] ?? null;
     }
 
     public function getTarget(): string
     {
+        if ($this->for === null) {
+            throw new BadMethodCallException('The @Autowire annotation must be passed a target. For instance: "@Autowire(for="$myService")"');
+        }
         return $this->for;
     }
 
