@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+
 use function class_implements;
 use function get_parent_class;
 

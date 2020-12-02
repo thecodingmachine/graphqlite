@@ -23,6 +23,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use Webmozart\Assert\Assert;
+
 use function array_unshift;
 use function get_class;
 use function is_object;
@@ -222,10 +223,10 @@ class QueryField extends FieldDefinition
     {
         $arguments = $fieldDescriptor->getParameters();
         if ($fieldDescriptor->getPrefetchMethodName() !== null) {
-            $arguments = [ '__graphqlite_prefectData' => new PrefetchDataParameter() ] + $arguments;
+            $arguments = ['__graphqlite_prefectData' => new PrefetchDataParameter()] + $arguments;
         }
         if ($fieldDescriptor->isInjectSource() === true) {
-            $arguments = [ '__graphqlite_source' => new SourceParameter() ] + $arguments;
+            $arguments = ['__graphqlite_source' => new SourceParameter()] + $arguments;
         }
         $fieldDescriptor->setParameters($arguments);
 

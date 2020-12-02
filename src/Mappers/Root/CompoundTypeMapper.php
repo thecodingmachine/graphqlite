@@ -22,6 +22,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 use Webmozart\Assert\Assert;
+
 use function array_filter;
 use function array_values;
 use function assert;

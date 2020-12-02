@@ -15,6 +15,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+
 use function class_exists;
 
 /**

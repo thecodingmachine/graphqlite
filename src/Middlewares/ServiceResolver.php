@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use function get_class;
-use function is_object;
 
 /**
  * A class that represents a callable on an object.
@@ -33,6 +32,7 @@ class ServiceResolver implements ResolverInterface
 
     /**
      * @param mixed $args
+     *
      * @return mixed
      */
     public function __invoke(...$args)
@@ -46,6 +46,6 @@ class ServiceResolver implements ResolverInterface
     {
         $class = get_class($this->getObject());
 
-        return $class.'::'.$this->callable[1].'()';
+        return $class . '::' . $this->callable[1] . '()';
     }
 }

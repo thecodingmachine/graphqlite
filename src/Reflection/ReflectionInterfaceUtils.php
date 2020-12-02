@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Reflection;
 
 use ReflectionClass;
+
 use function array_diff_key;
 
 class ReflectionInterfaceUtils

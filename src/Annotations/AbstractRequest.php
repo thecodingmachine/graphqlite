@@ -15,7 +15,7 @@ abstract class AbstractRequest
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], string $name = null, string $outputType = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null)
     {
         $this->outputType = $outputType ?? $attributes['outputType'] ?? null;
         $this->name       = $name ?? $attributes['name'] ?? null;

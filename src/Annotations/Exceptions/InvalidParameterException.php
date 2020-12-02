@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Annotations\Exceptions;
 
 use BadMethodCallException;
 use ReflectionMethod;
+
 use function sprintf;
 
 class InvalidParameterException extends BadMethodCallException

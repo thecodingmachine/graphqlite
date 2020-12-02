@@ -22,6 +22,7 @@ use TheCodingMachine\GraphQLite\Types\ObjectFromInterfaceType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TypeError;
 use Webmozart\Assert\Assert;
+
 use function array_flip;
 use function array_reverse;
 use function class_implements;

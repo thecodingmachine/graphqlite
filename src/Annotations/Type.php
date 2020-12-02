@@ -8,6 +8,7 @@ use Attribute;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+
 use function class_exists;
 use function interface_exists;
 use function ltrim;
@@ -48,7 +49,7 @@ class Type
      * @param mixed[] $attributes
      * @param class-string<object>|null $class
      */
-    public function __construct(array $attributes = [], string $class = null, string $name = null, bool $default = null, bool $external = null)
+    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?bool $external = null)
     {
         $external = $external ?? $attributes['external'] ?? null;
         $class = $class ?? $attributes['class'] ?? null;

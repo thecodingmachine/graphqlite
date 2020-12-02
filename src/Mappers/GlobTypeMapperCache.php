@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use ReflectionClass;
+
 use function array_keys;
 
 /**

@@ -28,7 +28,7 @@ class Factory
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null, bool $default = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null)
     {
         $this->name = $name ?? $attributes['name'] ?? null;
         // This IS the default if no name is set and no "default" attribute is passed.

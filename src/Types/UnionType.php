@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Type\Definition\ObjectType;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+
 use function get_class;
 use function gettype;
 use function is_object;

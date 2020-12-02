@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 use BadMethodCallException;
+
 use function array_key_exists;
 
 /**

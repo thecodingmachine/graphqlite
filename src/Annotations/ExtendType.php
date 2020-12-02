@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 use Attribute;
 use BadMethodCallException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+
 use function class_exists;
 use function interface_exists;
 use function ltrim;
@@ -32,10 +33,10 @@ class ExtendType
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], string $class = null, string $name = null)
+    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null)
     {
         $className = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
-        $className = $className ?? $class;
+        $className ??= $class;
         if ($className !== null && ! class_exists($className) && ! interface_exists($className)) {
             throw ClassNotFoundException::couldNotFindClass($className);
         }

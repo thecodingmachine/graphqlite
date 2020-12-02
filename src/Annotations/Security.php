@@ -6,8 +6,13 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 use BadMethodCallException;
+use TypeError;
+
 use function array_key_exists;
 use function gettype;
+use function is_array;
+use function is_string;
+use function sprintf;
 
 /**
  * @Annotation
@@ -39,16 +44,16 @@ class Security implements MiddlewareAnnotationInterface
      *
      * @throws BadMethodCallException
      */
-    public function __construct($data = [], string $expression = null, $failWith = '__fail__with__magic__key__', string $message = null, int $statusCode = null)
+    public function __construct($data = [], ?string $expression = null, $failWith = '__fail__with__magic__key__', ?string $message = null, ?int $statusCode = null)
     {
-        if (\is_string($data)) {
+        if (is_string($data)) {
             $data = ['expression' => $data];
-        } elseif (!\is_array($data)) {
-            throw new \TypeError(sprintf('"%s": Argument $data is expected to be a string or array, got "%s".', __METHOD__, gettype($data)));
+        } elseif (! is_array($data)) {
+            throw new TypeError(sprintf('"%s": Argument $data is expected to be a string or array, got "%s".', __METHOD__, gettype($data)));
         }
 
         $this->expression = $data['value'] ?? $data['expression'] ?? $expression;
-        if (!$this->expression) {
+        if (! $this->expression) {
             throw new BadMethodCallException('The @Security annotation must be passed an expression. For instance: "@Security("is_granted(\'CAN_EDIT_STUFF\')")"');
         }
 

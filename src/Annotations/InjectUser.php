@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
+
 use function ltrim;
 
 /**
@@ -27,9 +28,11 @@ class InjectUser implements ParameterAnnotationInterface
      */
     public function __construct(array $values = [])
     {
-        if (isset($values['for'])) {
-            $this->for = ltrim($values['for'], '$');
+        if (! isset($values['for'])) {
+            return;
         }
+
+        $this->for = ltrim($values['for'], '$');
     }
 
     public function getTarget(): string

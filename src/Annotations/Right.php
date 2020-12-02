@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 use BadMethodCallException;
+
 use function is_string;
 
 /**

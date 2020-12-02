@@ -19,6 +19,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
+
 use function assert;
 use function is_a;
 use function ltrim;

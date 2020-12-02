@@ -24,7 +24,7 @@ class EnumType
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], string $name = null)
+    public function __construct(array $attributes = [], ?string $name = null)
     {
         $this->name = $name ?? $attributes['name'] ?? null;
     }

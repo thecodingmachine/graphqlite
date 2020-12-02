@@ -16,6 +16,7 @@ use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
 use Webmozart\Assert\Assert;
+
 use function array_map;
 use function get_class;
 use function is_array;

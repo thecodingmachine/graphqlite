@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use Webmozart\Assert\Assert;
+
 use function array_diff_key;
 use function array_filter;
 use function array_key_exists;
@@ -40,6 +41,7 @@ use function reset;
 use function strpos;
 use function strrpos;
 use function substr;
+
 use const PHP_MAJOR_VERSION;
 
 class AnnotationReader
@@ -267,8 +269,8 @@ class AnnotationReader
             if (PHP_MAJOR_VERSION >= 8) {
                 $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
                 if ($attribute) {
-                    /** @var T $instance */
                     $instance = $attribute->newInstance();
+                    assert($instance instanceof T);
                     return $instance;
                 }
             }
@@ -279,6 +281,7 @@ class AnnotationReader
             switch ($this->mode) {
                 case self::STRICT_MODE:
                     throw $e;
+
                 case self::LAX_MODE:
                     if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
@@ -322,6 +325,7 @@ class AnnotationReader
             switch ($this->mode) {
                 case self::STRICT_MODE:
                     throw $e;
+
                 case self::LAX_MODE:
                     if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                         throw $e;

@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 use BadMethodCallException;
+
 use function array_map;
 use function is_array;
 
@@ -42,7 +43,7 @@ class MagicField implements SourceFieldInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], string $name = null, ?string $outputType = null, ?string $phpType = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null)
     {
         $this->name = $attributes['name'] ?? $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
@@ -57,7 +58,7 @@ class MagicField implements SourceFieldInterface
         $parameterAnnotations = [];
         $annotations = $attributes['annotations'] ?? [];
         if (! is_array($annotations)) {
-            $annotations = [ $annotations ];
+            $annotations = [$annotations];
         }
         foreach ($annotations ?? [] as $annotation) {
             if ($annotation instanceof MiddlewareAnnotationInterface) {
