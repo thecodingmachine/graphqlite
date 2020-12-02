@@ -36,7 +36,7 @@ class ExtendType
     public function __construct(array $attributes = [], ?string $class = null, ?string $name = null)
     {
         $className = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
-        $className ??= $class;
+        $className = $className ?? $class;
         if ($className !== null && ! class_exists($className) && ! interface_exists($className)) {
             throw ClassNotFoundException::couldNotFindClass($className);
         }
