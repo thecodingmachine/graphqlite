@@ -33,6 +33,7 @@ jobs:
         with:
           coverage: "pcov"
           php-version: "${{ matrix.php-version }}"
+          tools: composer:v2
 
       - name: "Cache dependencies installed with composer"
         uses: "actions/cache@v1"
@@ -40,9 +41,6 @@ jobs:
           path: "~/.composer/cache"
           key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.lock') }}"
           restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-      - name: "Install composer v1"
-        run: "composer selfupdate --1"
 
       - name: "Install dependencies with composer"
         run: "composer install --no-interaction"
@@ -52,10 +50,10 @@ jobs:
 
       - name: "Run static code analysis with phpstan/phpstan"
         run: "composer phpstan"
-        
+
       - name: "Run coding standard checks with squizlabs/php_codesniffer"
         run: "composer cs-check"
-        
+
       - name: "Archive code coverage results"
         uses: "actions/upload-artifact@v1"
         with:
