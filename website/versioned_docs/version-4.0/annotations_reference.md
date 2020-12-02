@@ -25,7 +25,7 @@ The `@Mutation` annotation is used to declare a GraphQL mutation.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the mutation. If skipped, the name of the method is used instead.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](custom_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @Type annotation
 

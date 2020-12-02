@@ -42,6 +42,14 @@ As you can see, GraphQLite will automatically do the mapping between PHP types a
 
 <div class="alert alert-warning"><strong>Heads up!</strong> If you are not using a framework with an autowiring container (like Symfony or Laravel), please be aware that the <code>MyController</code> class must exist in the container of your application. Furthermore, the identifier of the controller in the container MUST be the fully qualified class name of controller.</div>
 
+## About annotations / attributes
+
+GraphQLite relies a lot on annotations (we call them attributes since PHP 8).
+
+It supports both the old "Doctrine annotations" style (`@Query`) and the new PHP 8 attributes (`#[Query]`). 
+
+Read the [Doctrine annotations VS attributes](doctrine_annotations_attributes.md) documentation if you are not familiar with this concept.  
+
 ## Testing the query
 
 The default GraphQL endpoint is `/graphql`.
