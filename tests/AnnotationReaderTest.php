@@ -154,6 +154,9 @@ class AnnotationReaderTest extends TestCase
         $this->assertEmpty($annotationReader->getParameterAnnotationsPerParameter([]));
     }
 
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testPhp8AttributeClassAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
@@ -166,6 +169,9 @@ class AnnotationReaderTest extends TestCase
         //$this->assertSame($type, $type2, 'Assert some cache is available');
     }
 
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testPhp8AttributeClassAnnotations(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
@@ -175,6 +181,9 @@ class AnnotationReaderTest extends TestCase
         $this->assertCount(3, $types);
     }
 
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testPhp8AttributeMethodAnnotation(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
@@ -183,6 +192,9 @@ class AnnotationReaderTest extends TestCase
         $this->assertInstanceOf(Field::class, $type);
     }
 
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testPhp8AttributeMethodAnnotations(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
@@ -197,6 +209,9 @@ class AnnotationReaderTest extends TestCase
         $this->assertTrue($securitys[1]->isFailWithSet());
     }
 
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testPhp8AttributeParameterAnnotations(): void
     {
         $annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
