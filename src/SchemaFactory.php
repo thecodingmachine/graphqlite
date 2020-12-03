@@ -222,8 +222,12 @@ class SchemaFactory
             AnnotationRegistry::registerLoader('class_exists');
             $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            $cacheDir = $this->annotationCacheDir ?? sys_get_temp_dir();
-            $cache = function_exists('apcu_fetch') ? new ApcuCache() : new PhpFileCache($cacheDir . '/graphqlite.' . crc32(__DIR__));
+            if (function_exists('apcu_enabled') && apcu_enabled()) {
+                $cache = new ApcuCache();
+            } else {
+                $cacheDir = $this->annotationCacheDir ?? sys_get_temp_dir();
+                $cache = new PhpFileCache($cacheDir . '/graphqlite.' . crc32(__DIR__));
+            }
 
             $cache->setNamespace($this->cacheNamespace);
 
