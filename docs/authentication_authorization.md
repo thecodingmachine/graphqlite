@@ -22,7 +22,30 @@ See <a href="implementing-security.md">Connecting GraphQLite to your framework's
 ## `@Logged` and `@Right` annotations
 
 GraphQLite exposes two annotations (`@Logged` and `@Right`) that you can use to restrict access to a resource.
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Controller;
 
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Right;
+
+class UserController
+{
+    /**
+     * @return User[]
+     */
+    #[Query]
+    #[Logged]
+    #[Right("CAN_VIEW_USER_LIST")]
+    public function users(int $limit, int $offset): array
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Controller;
 
@@ -44,6 +67,8 @@ class UserController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 
 In the example above, the query `users` will only be available if the user making the query is logged AND if he
 has the `CAN_VIEW_USER_LIST` right.
@@ -62,6 +87,28 @@ If you do not want an error to be thrown when a user attempts to query a field/q
 
 The `@FailWith` annotation contains the value that will be returned for users with insufficient rights.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class UserController
+{
+    /**
+     * If a user is not logged or if the user has not the right "CAN_VIEW_USER_LIST",
+     * the value returned will be "null".
+     *
+     * @return User[]
+     */
+    #[Query]
+    #[Logged]
+    #[Right("CAN_VIEW_USER_LIST")]
+    #[FailWith(null)]
+    public function users(int $limit, int $offset): array
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class UserController
 {
@@ -81,11 +128,37 @@ class UserController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ## Injecting the current user as a parameter
 
 Use the `@InjectUser` annotation to get an instance of the current user logged in.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+
+class ProductController
+{
+    /**
+     * @Query
+     * @return Product
+     */
+    public function product(
+            int $id,
+            #[InjectUser] 
+            User $user
+        ): Product
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Controller;
 
@@ -105,6 +178,7 @@ class ProductController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 The `@InjectUser` annotation can be used next to:
 
@@ -123,6 +197,29 @@ Some will be available to him and some won't.
 If you want to add an extra level of security (or if you want your schema to be kept secret to unauthorized users),
 you can use the `@HideIfUnauthorized` annotation.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class UserController
+{
+    /**
+     * If a user is not logged or if the user has not the right "CAN_VIEW_USER_LIST",
+     * the schema will NOT contain the "users" query at all (so trying to call the
+     * "users" query will result in a GraphQL "query not found" error.
+     *
+     * @return User[]
+     */
+    #[Query]
+    #[Logged]
+    #[Right("CAN_VIEW_USER_LIST")]
+    #[HideIfUnauthorized]
+    public function users(int $limit, int $offset): array
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class UserController
 {
@@ -143,6 +240,7 @@ class UserController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 While this is the most secured mode, it can have drawbacks when working with development tools
 (you need to be logged as admin to fetch the complete schema).

@@ -10,6 +10,23 @@ To create a mutation, you must annotate a method in a controller with the `@Muta
 
 For instance:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+
+class ProductController
+{
+    #[Mutation]
+    public function saveProduct(int $id, string $name, ?float $price = null): Product
+    {
+        // Some code that saves a product.
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Controller;
 
@@ -26,3 +43,4 @@ class ProductController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->

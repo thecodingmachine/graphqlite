@@ -29,6 +29,20 @@ for more information on how to integrate it in your framework.
 
 To handle an uploaded file, you type-hint against the PSR-7 `UploadedFileInterface`:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class MyController
+{
+    #[Mutation]
+    public function saveDocument(string $name, UploadedFileInterface $file): Document
+    {
+        // Some code that saves the document.
+        $file->moveTo($someDir);
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class MyController
 {
@@ -42,6 +56,7 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Of course, you need to use a GraphQL client that is compatible with multipart requests. See [jaydenseric/graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec#client) for a list of compatible clients.
 

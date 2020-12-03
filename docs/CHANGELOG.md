@@ -4,6 +4,13 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 4.1
+
+New features:
+
+- All annotations can now be accessed as PHP 8 attributes
+
+
 ## 4.0
 
 This is a complete refactoring from 3.x. While existing annotations are kept compatible, the internals have completely

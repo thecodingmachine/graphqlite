@@ -26,6 +26,25 @@ $ composer require beberlei/porpaginas
 
 In your query, simply return a class that implements `Porpaginas\Result`:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class MyController
+{
+    /**
+     * @return Product[]
+     */
+    #[Query]
+    public function products(): Porpaginas\Result
+    {
+        // Some code that returns a list of products
+
+        // If you are using Doctrine, something like:
+        return new Porpaginas\Doctrine\ORM\ORMQueryResult($doctrineQuery);
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class MyController
 {
@@ -42,6 +61,7 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Notice that:
 

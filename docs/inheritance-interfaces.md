@@ -10,6 +10,22 @@ Some of your entities may extend other entities. GraphQLite will do its best to 
 
 Let's say you have two classes, `Contact` and `User` (which extends `Contact`):
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+class Contact
+{
+    // ...
+}
+
+#[Type]
+class User extends Contact
+{
+    // ...
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type
@@ -27,9 +43,23 @@ class User extends Contact
     // ...
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Now, let's assume you have a query that returns a contact:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class ContactController
+{
+    #[Query]
+    public function getContact(): Contact
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class ContactController
 {
@@ -42,6 +72,7 @@ class ContactController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 When writing your GraphQL query, you are able to use fragments to retrieve fields from the `User` type:
 
@@ -81,6 +112,17 @@ available in the `Contact` type.
 
 If you want to create a pure GraphQL interface, you can also add a `@Type` annotation on a PHP interface.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+interface UserInterface
+{
+    #[Field]
+    public function getUserName(): string;
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type
@@ -93,6 +135,7 @@ interface UserInterface
     public function getUserName(): string;
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 This will automatically create a GraphQL interface whose description is:
 
@@ -107,6 +150,16 @@ interface UserInterface {
 You don't have to do anything special to implement an interface in your GraphQL types.
 Simply "implement" the interface in PHP and you are done!
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+class User implements UserInterface
+{
+    public function getUserName(): string;
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type
@@ -116,6 +169,7 @@ class User implements UserInterface
     public function getUserName(): string;
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 This will translate in GraphQL schema as:
 
@@ -136,6 +190,29 @@ Please note that you do not need to put the `@Field` annotation again in the imp
 You don't have to explicitly put a `@Type` annotation on the class implementing the interface (though this
 is usually a good idea).
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+/**
+ * Look, this class has no #Type attribute
+ */
+class User implements UserInterface
+{
+    public function getUserName(): string;
+}
+```
+
+```php
+class UserController
+{
+    #[Query]
+    public function getUser(): UserInterface // This will work!
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * Look, this class has no @Type annotation
@@ -158,6 +235,7 @@ class UserController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 <div class="alert alert-info">If GraphQLite cannot find a proper GraphQL Object type implementing an interface, it
 will create an object type "on the fly".</div>
