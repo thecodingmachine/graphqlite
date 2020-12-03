@@ -44,6 +44,11 @@ jobs:
 
       - name: "Install dependencies with composer"
         run: "composer install --no-interaction"
+        if: ${{ matrix.php-version != '8.0' }}
+
+      - name: "Install dependencies with composer. Ignoring platform reqs to bypass a problem with ecodev/graphql-upload available only with latest Webonyx on PHP8."
+        run: "composer install --no-interaction --ignore-platform-reqs"
+        if: ${{ matrix.php-version == '8.0' }}
 
       - name: "Run tests with phpunit/phpunit"
         run: "vendor/bin/phpunit"
