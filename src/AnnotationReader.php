@@ -270,7 +270,7 @@ class AnnotationReader
                 $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
                 if ($attribute) {
                     $instance = $attribute->newInstance();
-                    assert($instance instanceof T);
+                    assert($instance instanceof $annotationClass);
                     return $instance;
                 }
             }

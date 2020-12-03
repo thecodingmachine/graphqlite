@@ -55,9 +55,11 @@ jobs:
 
       - name: "Run static code analysis with phpstan/phpstan"
         run: "composer phpstan"
+        if: ${{ matrix.php-version == '8.0' }}
 
       - name: "Run coding standard checks with squizlabs/php_codesniffer"
         run: "composer cs-check"
+        if: ${{ matrix.php-version == '8.0' }}
 
       - name: "Archive code coverage results"
         uses: "actions/upload-artifact@v1"
