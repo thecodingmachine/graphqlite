@@ -6,6 +6,13 @@ sidebar_label: Changelog
 
 ## 4.1
 
+Breaking change:
+
+There is one breaking change introduced in the minor version (this was important to allow PHP 8 compatibility).
+
+- The **ecodev/graphql-upload** package (used to get support for file uploads in GraphQL input types) is now a "recommended" dependency only.
+  If you are using GraphQL file uploads, you need to add this package to your `composer.json`. 
+
 New features:
 
 - All annotations can now be accessed as PHP 8 attributes

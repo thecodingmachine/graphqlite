@@ -7,7 +7,15 @@ sidebar_label: File uploads
 GraphQL does not support natively the notion of file uploads, but an extension to the GraphQL protocol was proposed
 to add support for [multipart requests](https://github.com/jaydenseric/graphql-multipart-request-spec).
 
+## Installation
+
 GraphQLite supports this extension through the use of the [Ecodev/graphql-upload](https://github.com/Ecodev/graphql-upload) library.
+
+You must start by installing this package:
+
+```console
+$ composer require ecodev/graphql-upload
+```
 
 ## If you are using the Symfony bundle
 
