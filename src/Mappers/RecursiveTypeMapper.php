@@ -20,7 +20,9 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ObjectFromInterfaceType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+use TypeError;
 use Webmozart\Assert\Assert;
+
 use function array_flip;
 use function array_reverse;
 use function class_implements;
@@ -175,7 +177,11 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             if ($this->typeMapper->canMapClassToType($className)) {
                 return $className;
             }
-            $className = get_parent_class($className);
+            try {
+                $className = get_parent_class($className);
+            } catch (TypeError $exception) {
+                return null;
+            }
         } while ($className);
 
         return null;
@@ -357,7 +363,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $mappedClass = new MappedClass(/*$className*/);
             $this->mappedClasses[$className] = $mappedClass;
             $parentClassName = $className;
-            foreach (class_implements($className) as $interfaceName) {
+            foreach (class_implements($className) ?: [] as $interfaceName) {
                 if (! isset($supportedClasses[$interfaceName])) {
                     continue;
                 }

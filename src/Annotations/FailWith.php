@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
+
 use function array_key_exists;
+use function is_array;
 
 /**
  * @Annotation
@@ -15,6 +18,7 @@ use function array_key_exists;
  *   @Attribute("mode", type = "string")
  * })
  */
+#[Attribute(Attribute::TARGET_METHOD)]
 class FailWith implements MiddlewareAnnotationInterface
 {
     /**
@@ -25,16 +29,20 @@ class FailWith implements MiddlewareAnnotationInterface
     private $value;
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, mixed>|mixed $values
+     * @param mixed $value
      *
      * @throws BadMethodCallException
      */
-    public function __construct(array $values)
+    public function __construct($values = [], $value = '__fail__with__magic__key__')
     {
-        if (! array_key_exists('value', $values)) {
+        if ($value !== '__fail__with__magic__key__') {
+            $this->value = $value;
+        } elseif (is_array($values) && array_key_exists('value', $values)) {
+            $this->value = $values['value'];
+        } else {
             throw new BadMethodCallException('The @FailWith annotation must be passed a defaultValue. For instance: "@FailWith(null)"');
         }
-        $this->value = $values['value'];
     }
 
     /**

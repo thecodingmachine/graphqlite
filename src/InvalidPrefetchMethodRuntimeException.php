@@ -20,6 +20,6 @@ class InvalidPrefetchMethodRuntimeException extends GraphQLRuntimeException
 
     public static function prefetchDataIgnored(ReflectionMethod $annotationMethod, bool $isSecond): self
     {
-        throw new self('The @Field annotation in ' . $annotationMethod->getDeclaringClass()->getName() . '::' . $annotationMethod->getName() . ' specifies a "prefetch method" but the data from the prefetch method is not gathered. The "' . $annotationMethod->getName() . '" method should accept a ' . ($isSecond?'second':'first') . ' parameter that will contain data returned by the prefetch method.');
+        throw new self('The @Field annotation in ' . $annotationMethod->getDeclaringClass()->getName() . '::' . $annotationMethod->getName() . ' specifies a "prefetch method" but the data from the prefetch method is not gathered. The "' . $annotationMethod->getName() . '" method should accept a ' . ($isSecond ? 'second' : 'first') . ' parameter that will contain data returned by the prefetch method.');
     }
 }

@@ -13,6 +13,26 @@ For instance, in Symfony, the controllers namespace is `App\Controller` by defau
 
 In a controller class, each query method must be annotated with the `@Query` annotation. For instance:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+class MyController
+{
+    #[Query]
+    public function hello(string $name): string
+    {
+        return 'Hello ' . $name;
+    }
+}
+```
+
+<!--PHP 7+-->
+
 ```php
 namespace App\Controller;
 
@@ -30,6 +50,8 @@ class MyController
 }
 ```
 
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 This query is equivalent to the following [GraphQL type language](https://graphql.org/learn/schema/#type-language):
 
 ```graphql
@@ -41,6 +63,14 @@ Type Query {
 As you can see, GraphQLite will automatically do the mapping between PHP types and GraphQL types.
 
 <div class="alert alert-warning"><strong>Heads up!</strong> If you are not using a framework with an autowiring container (like Symfony or Laravel), please be aware that the <code>MyController</code> class must exist in the container of your application. Furthermore, the identifier of the controller in the container MUST be the fully qualified class name of controller.</div>
+
+## About annotations / attributes
+
+GraphQLite relies a lot on annotations (we call them attributes since PHP 8).
+
+It supports both the old "Doctrine annotations" style (`@Query`) and the new PHP 8 attributes (`#[Query]`). 
+
+Read the [Doctrine annotations VS attributes](doctrine_annotations_attributes.md) documentation if you are not familiar with this concept.  
 
 ## Testing the query
 
@@ -64,6 +94,23 @@ So far, we simply declared a query. But we did not yet declare a type.
 
 Let's assume you want to return a product:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+class ProductController
+{
+    #[Query]
+    public function product(string $id): Product
+    {
+        // Some code that looks for a product and returns it.
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Controller;
 
@@ -80,9 +127,39 @@ class ProductController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+
 
 As the `Product` class is not a scalar type, you must tell GraphQLite how to handle it:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Entities;
+
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
+#[Type]
+class Product
+{
+    // ...
+
+    #[Field]
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    #[Field]
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Entities;
 
@@ -113,6 +190,7 @@ class Product
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 The `@Type` annotation is used to inform GraphQLite that the `Product` class is a GraphQL type.
 

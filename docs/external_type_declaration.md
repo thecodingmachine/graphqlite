@@ -16,6 +16,26 @@ For instance:
 
 GraphQLite allows you to use a *proxy* class thanks to the `@Type` annotation with the `class` attribute:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Types;
+
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use App\Entities\Product;
+
+#[Type(class: Product::class)]
+class ProductType
+{    
+    #[Field]
+    public function getId(Product $product): string
+    {
+        return $product->getId();
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Types;
 
@@ -37,6 +57,7 @@ class ProductType
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 The `ProductType` class must be in the *types* namespace. You configured this namespace when you installed GraphQLite.
 
@@ -53,6 +74,21 @@ In methods with a `@Field` annotation, the first parameter is the *resolved obje
 
 If you don't want to rewrite all *getters* of your base class, you may use the `@SourceField` annotation:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use App\Entities\Product;
+
+#[Type(class: Product::class)]
+#[SourceField(name: "name")]
+#[SourceField(name: "price")]
+class ProductType
+{
+}
+```
+<!--PHP 7+-->
 ```php
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
@@ -67,6 +103,7 @@ class ProductType
 {
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 By doing so, you let GraphQLite know that the type exposes the `getName` method of the underlying `Product` object.
 
@@ -76,6 +113,24 @@ Internally, GraphQLite will look for methods named `name()`, `getName()` and `is
 
 If your object has no getters, but instead uses magic properties (using the magic `__get` method), you should use the `@MagicField` annotation:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use App\Entities\Product;
+
+#[Type]
+#[MagicField(name: "name", outputType: "String!")]
+#[MagicField(name: "price", outputType: "Float")]
+class ProductType
+{
+    public function __get(string $property) {
+        // return some magic property
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
@@ -93,6 +148,7 @@ class ProductType
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 By doing so, you let GraphQLite know that the type exposes "name" and the "price" magic properties of the underlying `Product` object.
 
@@ -123,13 +179,43 @@ class ProductType extends AbstractAnnotatedObjectType
 }
 ```
 
-Any annotations described in the [Authentication and authorization page](authentication_authorization.md) can be used in the `@SourceField` "annotations" attribute.
+Any annotations described in the [Authentication and authorization page](authentication_authorization.md), or any annotation this is actually a ["field middleware"](field_middlewares.md) can be used in the `@SourceField` "annotations" attribute.
+
+<div class="alert alert-warning"><strong>Heads up!</strong> The "annotation" attribute in @SourceField and @MagicField is only available as a <strong>Doctrine annotations</strong>. You cannot use it in PHP 8 attributes (because PHP 8 attributes cannot be nested)</div>
 
 ## Declaring fields dynamically (without annotations)
 
 In some very particular cases, you might not know exactly the list of `@SourceField` annotations at development time.
 If you need to decide the list of `@SourceField` at runtime, you can implement the `FromSourceFieldsInterface`:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use TheCodingMachine\GraphQLite\FromSourceFieldsInterface;
+
+#[Type(class: Product::class)]
+class ProductType implements FromSourceFieldsInterface
+{
+    /**
+     * Dynamically returns the array of source fields 
+     * to be fetched from the original object.
+     *
+     * @return SourceFieldInterface[]
+     */
+    public function getSourceFields(): array
+    {
+        // You may want to enable fields conditionally based on feature flags...
+        if (ENABLE_STATUS_GLOBALLY) {
+            return [
+                new SourceField(['name'=>'status', 'logged'=>true]),
+            ];        
+        } else {
+            return [];
+        }
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 use TheCodingMachine\GraphQLite\FromSourceFieldsInterface;
 
@@ -157,3 +243,4 @@ class ProductType implements FromSourceFieldsInterface
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->

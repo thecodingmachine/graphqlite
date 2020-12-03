@@ -17,6 +17,33 @@ the service instance.
 Let's assume you are running an international store. You have a `Product` class. Each product has many names (depending
 on the language of the user).
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Entities;
+
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
+use Symfony\Component\Translation\TranslatorInterface;
+
+#[Type]
+class Product
+{
+    // ...
+
+    #[Field]
+    public function getName(
+            #[Autowire]
+            TranslatorInterface $translator
+        ): string
+    {
+        return $translator->trans('product_name_'.$this->id);
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Entities;
 
@@ -43,6 +70,7 @@ class Product
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 When GraphQLite queries the name, it will automatically fetch the translator service.
 
@@ -59,10 +87,8 @@ with a particular service implementation. This makes your code tightly coupled a
 <div class="alert alert-error">
 Please don't do that:
 
-<pre><code>    /**
-     * @Field()
-     */
-    public function getName(MyTranslator $translator): string
+<pre><code>    #[Field]
+    public function getName(#[Autowire] MyTranslator $translator): string
     {
         // Your domain is suddenly tightly coupled to the MyTranslator class.
     }
@@ -74,10 +100,8 @@ Instead, be sure to type-hint against an interface.
 <div class="alert alert-success">
 Do this instead:
 
-<pre><code>    /**
-     * @Field()
-     */
-    public function getName(TranslatorInterface $translator): string
+<pre><code>    #[Field]
+    public function getName(#[Autowire] TranslatorInterface $translator): string
     {
         // Good. You can switch translator implementation any time.
     }
@@ -90,11 +114,18 @@ By type-hinting against an interface, your code remains testable and is decouple
 
 Optionally, you can specify the identifier of the service you want to fetch from the controller:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Autowire(identifier: "translator")]
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Autowire(for="$translator", identifier="translator")
  */
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 <div class="alert alert-error">While GraphQLite offers the possibility to specify the name of the service to be
 autowired, we would like to emphasize that this is <strong>highly discouraged</strong>. Hard-coding a container

@@ -4,6 +4,9 @@ title: Annotations reference
 sidebar_label: Annotations reference
 ---
 
+Note: all annotations are available both in a Doctrine annotation format (`@Query`) and in PHP 8 attribute format (`#[Query]`).
+See [Doctrine annotations vs PHP 8 attributes](doctrine_annotations_attributes.md) for more details.
+
 ## @Query annotation
 
 The `@Query` annotation is used to declare a GraphQL query.
@@ -74,7 +77,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *yes*       | string | The name of the field.
 [outputType](custom_types.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 phpType        | *no*       | string | The PHP type of the field (as you would write it in a Docblock)
-annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here. Available in Doctrine annotations only (not available in the #SourceField PHP 8 attribute)
 
 **Note**: `outputType` and `phpType` are mutually exclusive.
 
@@ -89,7 +92,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *yes*       | string | The name of the field.
 [outputType](custom_types.md)  | *no*(*)       | string | The GraphQL output type of the field.
 phpType     | *no*(*)       | string | The PHP type of the field (as you would write it in a Docblock)
-annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here. Available in Doctrine annotations only (not available in the #MagicField PHP 8 attribute)
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
@@ -120,7 +123,7 @@ query / mutation / field (according to the `@Logged` and `@Right` annotations).
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-*default*      | *yes*       | mixed | The value to return if the user is not authorized.
+value          | *yes*       | mixed | The value to return if the user is not authorized.
 
 ## @HideIfUnauthorized annotation
 

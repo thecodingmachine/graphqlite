@@ -10,6 +10,6 @@ class HideParameterTest extends TestCase
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);
-        new HideParameter([]);
+        (new HideParameter([]))->getTarget();
     }
 }

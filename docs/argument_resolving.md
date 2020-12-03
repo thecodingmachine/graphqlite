@@ -15,9 +15,9 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
 - Inject the Webonyx GraphQL resolution object when you type-hint on the `ResolveInfo` object. For instance:
   ```php
   /**
-   * @Query
    * @return Product[]
    */
+  #[Query]
   public function products(ResolveInfo $info): array  
   ```
   In the query above, the `$info` argument is filled with the Webonyx `ResolveInfo` class thanks to the 
@@ -58,14 +58,19 @@ If you plan to use annotations while resolving arguments, your annotation should
 
 For instance, if we want GraphQLite to inject a service in an argument, we can use `@Autowire(for="myService")`.
 
+For PHP 8 attributes, we only need to put declare the annotation can target parameters: `#[Attribute(Attribute::TARGET_PARAMETER)]`.
+
 The annotation looks like this:
 
 ```php
+use Attribute;
+
 /**
  * Use this annotation to autowire a service from the container into a given parameter of a field/query/mutation.
  *
  * @Annotation
  */
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class Autowire implements ParameterAnnotationInterface
 {
     /**

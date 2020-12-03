@@ -17,6 +17,7 @@ use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+
 use function array_map;
 use function assert;
 use function implode;

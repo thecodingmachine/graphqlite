@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations\Exceptions;
 
 use InvalidArgumentException;
+
 use function sprintf;
 
 class ClassNotFoundException extends InvalidArgumentException

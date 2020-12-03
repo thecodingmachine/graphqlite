@@ -9,14 +9,28 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 
 class CannotMapTypeTraitTest extends AbstractQueryProviderTest
 {
-
-    public function testAddParamInfo()
+    /**
+     * @requires PHP <= 7.4
+     */
+    public function testAddParamInfoInfphp80()
     {
         $e = CannotMapTypeException::createForType('Foo');
         $e->addParamInfo((new ReflectionClass('DateTime'))->getMethod('__construct')->getParameters()[0]);
         $e->addParamInfo((new ReflectionClass('DateTime'))->getMethod('__construct')->getParameters()[0]);
 
         $this->assertSame('For parameter $time, in DateTime::__construct, cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
+    }
+
+    /**
+     * @requires PHP >= 8.0
+     */
+    public function testAddParamInfoSupphp74()
+    {
+        $e = CannotMapTypeException::createForType('Foo');
+        $e->addParamInfo((new ReflectionClass('DateTime'))->getMethod('__construct')->getParameters()[0]);
+        $e->addParamInfo((new ReflectionClass('DateTime'))->getMethod('__construct')->getParameters()[0]);
+
+        $this->assertSame('For parameter $datetime, in DateTime::__construct, cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
     }
 
     public function testAddSourceFieldInfo()

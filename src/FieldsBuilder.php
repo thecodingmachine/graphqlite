@@ -12,6 +12,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
+use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -33,6 +34,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
+
 use function array_merge;
 use function array_shift;
 use function assert;
@@ -199,6 +201,7 @@ class FieldsBuilder
 
     /**
      * @param object|class-string<object> $controller The controller instance, or the name of the source class name
+     * @param class-string<AbstractRequest> $annotationName
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
      *
      * @return array<string, FieldDefinition>

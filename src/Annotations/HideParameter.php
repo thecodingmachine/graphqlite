@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
+
 use function ltrim;
 
 /**
@@ -25,16 +26,20 @@ class HideParameter implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed> $values
      */
-    public function __construct(array $values)
+    public function __construct(array $values = [])
     {
         if (! isset($values['for'])) {
-            throw new BadMethodCallException('The @HideParameter annotation must be passed a target. For instance: "@HideParameter(for="$myParameterToHide")"');
+            return;
         }
+
         $this->for = ltrim($values['for'], '$');
     }
 
     public function getTarget(): string
     {
+        if ($this->for === null) {
+            throw new BadMethodCallException('The @HideParameter annotation must be passed a target. For instance: "@HideParameter(for="$myParameterToHide")"');
+        }
         return $this->for;
     }
 }

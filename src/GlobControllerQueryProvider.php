@@ -16,6 +16,7 @@ use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use Webmozart\Assert\Assert;
+
 use function class_exists;
 use function interface_exists;
 use function str_replace;

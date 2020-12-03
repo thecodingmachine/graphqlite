@@ -18,6 +18,7 @@ use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
+
 use function array_filter;
 use function array_map;
 use function array_values;

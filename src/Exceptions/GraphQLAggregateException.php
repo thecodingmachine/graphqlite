@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Exceptions;
 use Exception;
 use GraphQL\Error\ClientAware;
 use Throwable;
+
 use function array_map;
 use function assert;
 use function count;

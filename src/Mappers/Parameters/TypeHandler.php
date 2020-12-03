@@ -38,11 +38,13 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
+
 use function array_merge;
 use function array_unique;
 use function assert;
 use function count;
 use function iterator_to_array;
+
 use const SORT_REGULAR;
 
 class TypeHandler implements ParameterHandlerInterface
@@ -210,7 +212,7 @@ class TypeHandler implements ParameterHandlerInterface
             return $type;
         }
 
-        $types = [ $type ];
+        $types = [$type];
         if ($docBlockType instanceof Compound) {
             $docBlockTypes = iterator_to_array($docBlockType);
             $types = array_merge($types, $docBlockTypes);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
+
 /**
  * The EnumType annotation is useful to change the name of the generated "enum" type.
  *
@@ -13,6 +15,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
  *   @Attribute("name", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_CLASS)]
 class EnumType
 {
     /** @var string|null */
@@ -21,9 +24,9 @@ class EnumType
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], ?string $name = null)
     {
-        $this->name = $attributes['name'] ?? null;
+        $this->name = $name ?? $attributes['name'] ?? null;
     }
 
     /**

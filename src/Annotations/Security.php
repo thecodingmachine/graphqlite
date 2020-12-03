@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
+use TypeError;
+
 use function array_key_exists;
+use function gettype;
+use function is_array;
+use function is_string;
+use function sprintf;
 
 /**
  * @Annotation
@@ -17,6 +24,7 @@ use function array_key_exists;
  *   @Attribute("message", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Security implements MiddlewareAnnotationInterface
 {
     /** @var string */
@@ -31,23 +39,34 @@ class Security implements MiddlewareAnnotationInterface
     private $message;
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, mixed>|string $data  data array managed by the Doctrine Annotations library or the expression
+     * @param mixed $failWith
      *
      * @throws BadMethodCallException
      */
-    public function __construct(array $values)
+    public function __construct($data = [], ?string $expression = null, $failWith = '__fail__with__magic__key__', ?string $message = null, ?int $statusCode = null)
     {
-        if (! isset($values['value']) && ! isset($values['expression'])) {
+        if (is_string($data)) {
+            $data = ['expression' => $data];
+        } elseif (! is_array($data)) {
+            throw new TypeError(sprintf('"%s": Argument $data is expected to be a string or array, got "%s".', __METHOD__, gettype($data)));
+        }
+
+        $this->expression = $data['value'] ?? $data['expression'] ?? $expression;
+        if (! $this->expression) {
             throw new BadMethodCallException('The @Security annotation must be passed an expression. For instance: "@Security("is_granted(\'CAN_EDIT_STUFF\')")"');
         }
-        $this->expression = $values['value'] ?? $values['expression'];
-        if (array_key_exists('failWith', $values)) {
-            $this->failWith = $values['failWith'];
+
+        if (array_key_exists('failWith', $data)) {
+            $this->failWith = $data['failWith'];
+            $this->failWithIsSet = true;
+        } elseif ($failWith !== '__fail__with__magic__key__') {
+            $this->failWith = $failWith;
             $this->failWithIsSet = true;
         }
-        $this->message = $values['message'] ?? 'Access denied.';
-        $this->statusCode = $values['statusCode'] ?? 403;
-        if ($this->failWithIsSet === true && (isset($values['message']) || isset($values['statusCode']))) {
+        $this->message = $message ?? $data['message'] ?? 'Access denied.';
+        $this->statusCode = $statusCode ?? $data['statusCode'] ?? 403;
+        if ($this->failWithIsSet === true && (($message || isset($data['message'])) || ($statusCode || isset($data['statusCode'])))) {
             throw new BadMethodCallException('A @Security annotation that has "failWith" attribute set cannot have a message or a statusCode attribute.');
         }
     }

@@ -14,6 +14,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use Webmozart\Assert\Assert;
+
 use function count;
 use function is_array;
 
@@ -50,7 +51,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      */
     public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ?string $comment, bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
-        $resolve = [ $factory, $methodName ];
+        $resolve = [$factory, $methodName];
         Assert::isCallable($resolve);
         $this->resolve       = $resolve;
         $this->fieldsBuilder = $fieldsBuilder;
@@ -126,7 +127,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         foreach ($this->decorators as $key => $decorator) {
             $decoratorParameters = $this->getParametersForDecorator($key);
 
-            $toPassArgs = [ $object ];
+            $toPassArgs = [$object];
             foreach ($decoratorParameters as $parameter) {
                 try {
                     $toPassArgs[] = $parameter->resolve($source, $args, $context, $resolveInfo);
@@ -151,7 +152,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     {
         $this->decorators[] = $decorator;
 
-        $key = count($this->decorators)-1;
+        $key = count($this->decorators) - 1;
 
         $this->addFields(function () use ($key) {
             return InputTypeUtils::getInputTypeArgs($this->getParametersForDecorator($key));

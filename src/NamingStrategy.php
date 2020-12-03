@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+
 use function lcfirst;
 use function str_replace;
 use function strlen;

@@ -15,6 +15,7 @@ class MutableInterfaceType extends InterfaceType implements MutableInterface
 
     /**
      * @param mixed[] $config
+     * @param class-string<object>|null $className
      */
     public function __construct(array $config, ?string $className = null)
     {

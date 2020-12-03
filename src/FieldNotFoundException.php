@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use RuntimeException;
+
 use function sprintf;
 use function ucfirst;
 

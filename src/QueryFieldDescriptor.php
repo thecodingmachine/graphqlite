@@ -6,7 +6,6 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use InvalidArgumentException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;

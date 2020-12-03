@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+
 use function get_class;
 use function gettype;
 use function is_object;

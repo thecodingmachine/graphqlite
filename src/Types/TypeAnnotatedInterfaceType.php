@@ -26,7 +26,8 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
     private $recursiveTypeMapper;
 
     /**
-     * @param mixed[] $config
+     * @param class-string<object> $className
+     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      */
     public function __construct(string $className, array $config, RecursiveTypeMapperInterface $recursiveTypeMapper)
     {

@@ -15,7 +15,33 @@ To do so, you need to create 2 output types for the same PHP class. You typicall
 ## Example
 
 Here is an example. Say we are manipulating products. When I query a `Product` details, I want to have access to all fields.
-But for some reason, I don't want to expose the price field of a product if I query the list of all products.  
+But for some reason, I don't want to expose the price field of a product if I query the list of all products.
+
+
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+
+```php
+#[Type]
+class Product
+{
+    // ...
+
+    #[Field]
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    #[Field]
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+}
+```
+
+<!--PHP 7+-->
 
 ```php
 /**
@@ -43,8 +69,21 @@ class Product
 }
 ```
 
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 The `Product` class is declaring a classic GraphQL output type named "Product".
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type(class: Product::class, name: "LimitedProduct", default: false)]
+#[SourceField(name: "name")]
+class LimitedProductType
+{
+    // ...
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type(class=Product::class, name="LimitedProduct", default=false)
@@ -53,19 +92,13 @@ The `Product` class is declaring a classic GraphQL output type named "Product".
 class LimitedProductType
 {
     // ...
-
-    /**
-     * @Field()
-     */
-    public function getName(Product $product): string
-    {
-        return $product->getName();
-    }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 
-The `LimitedProductType` also declares a ["external" type](external_type_declaration.md) mapping the `Product` class.
+
+The `LimitedProductType` also declares an ["external" type](external_type_declaration.md) mapping the `Product` class.
 But pay special attention to the `@Type` annotation.
 
 First of all, we specify `name="LimitedProduct"`. This is useful to avoid having colliding names with the "Product" GraphQL output type
@@ -76,6 +109,27 @@ This type will only be used when we explicitly request it.
 
 Finally, we can write our requests:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class ProductController
+{
+    /**
+     * This field will use the default type.
+     */
+    #[Field]
+    public function getProduct(int $id): Product { /* ... */ } 
+    
+    /**
+     * Because we use the "outputType" attribute, this field will use the other type.
+     *
+     * @return Product[]
+     */
+    #[Field(outputType: "[LimitedProduct!]!")]
+    public function getProducts(): array { /* ... */ } 
+}
+``` 
+<!--PHP 7+-->
 ```php
 class ProductController
 {
@@ -94,7 +148,10 @@ class ProductController
      */
     public function getProducts(): array { /* ... */ } 
 }
-``` 
+```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+
 
 Notice how the "outputType" attribute is used in the `@Field` annotation to force the output type.
 
@@ -109,18 +166,32 @@ you need to target the type by name instead of by class.
 
 So instead of writing:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[ExtendType(class: Product::class)]
+```
+<!--PHP 7+-->
 ```php
 /**
  * @ExtendType(class=Product::class)
  */
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 you will write:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#ExtendType(name: "LimitedProduct")
+```
+<!--PHP 7+-->
 ```php
 /**
  * @ExtendType(name="LimitedProduct")
  */
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Notice how we use the "name" attribute instead of the "class" attribute in the `@ExtendType` annotation.

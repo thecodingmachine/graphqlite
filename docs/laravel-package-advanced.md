@@ -11,6 +11,26 @@ The Laravel package comes with a number of features to ease the integration of G
 The GraphQLite Laravel package comes with a special `@Validate` annotation to use Laravel validation rules in your 
 input types.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use TheCodingMachine\GraphQLite\Laravel\Annotations\Validate;
+
+class MyController
+{
+    #[Mutation]
+    public function createUser(
+            #[Validate("email|unique:users")]
+            string $email,
+            #[Validate("gte:8")]
+            string $password
+        ): User
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 use TheCodingMachine\GraphQLite\Laravel\Annotations\Validate;
 
@@ -27,6 +47,7 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 You can use the `@Validate` annotation in any query / mutation / field / factory / decorator.
 
@@ -60,6 +81,22 @@ You can use any validation rule described in [the Laravel documentation](https:/
 In your query, if you explicitly return an object that extends the `Illuminate\Pagination\LengthAwarePaginator` class,
 the query result will be wrapped in a "paginator" type.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class MyController
+{
+    /**
+     * @return Product[]
+     */
+    #[Query]
+    public function products(): Illuminate\Pagination\LengthAwarePaginator
+    {
+        return Product::paginate(15);
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class MyController
 {
@@ -73,6 +110,8 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 
 Notice that:
 
@@ -110,6 +149,22 @@ iterate over it.</div>
 
 Note: if you are using `simplePaginate` instead of `paginate`, you can type hint on the `Illuminate\Pagination\Paginator` class.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class MyController
+{
+    /**
+     * @return Product[]
+     */
+    #[Query]
+    public function products(): Illuminate\Pagination\Paginator
+    {
+        return Product::simplePaginate(15);
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class MyController
 {
@@ -123,6 +178,7 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 The behaviour will be exactly the same except you will be missing the `totalCount` and `lastPage` fields.
 
@@ -136,17 +192,30 @@ Because Eloquent relies on magic properties, it is quite rare for an Eloquent mo
 So we need to find a workaround. GraphQLite comes with a `@MagicField` annotation to help you
 working with magic properties.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+#[MagicField(name: "id", outputType: "ID!")]
+#[MagicField(name: "name", phpType: "string")]
+#[MagicField(name: "categories", phpType: "Category[]")]
+class Product extends Model
+{
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type()
- * @MagicField(name="id" outputType="ID!")
- * @MagicField(name="name" phpType="string")
- * @MagicField(name="categories" phpType="Category[]")
+ * @MagicField(name="id", outputType="ID!")
+ * @MagicField(name="name", phpType="string")
+ * @MagicField(name="categories", phpType="Category[]")
  */
 class Product extends Model
 {
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Please note that since the properties are "magic", they don't have a type. Therefore,
 you need to pass either the "outputType" attribute with the GraphQL type matching the property,

@@ -275,6 +275,23 @@ It assumes that the container has an entry whose name is the controller's fully 
 
 **src/Controllers/MyController.php**
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Controllers;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+class MyController
+{
+    #[Query]
+    public function hello(string $name): string
+    {
+        return 'Hello '.$name;
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Controllers;
 
@@ -291,6 +308,8 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 
 **config/container.php**
 

@@ -21,6 +21,19 @@ A PHP library that allows you to write your GraphQL queries in simple-to-write c
 
 First, declare a query in your controller:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class ProductController
+{
+    #[Query]
+    public function product(string $id): Product
+    {
+        // Some code that looks for a product and returns it.
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class ProductController
 {
@@ -33,9 +46,25 @@ class ProductController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Then, annotate the `Product` class to declare what fields are exposed to the GraphQL API:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+class Product
+{
+    #[Field]
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    // ...
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type()
@@ -52,6 +81,7 @@ class Product
     // ...
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 That's it, you're good to go! Query and enjoy!
 

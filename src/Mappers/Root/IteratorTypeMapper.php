@@ -23,6 +23,7 @@ use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use Webmozart\Assert\Assert;
+
 use function assert;
 use function count;
 use function iterator_to_array;

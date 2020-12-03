@@ -8,6 +8,20 @@ In some special cases, you want to override the GraphQL return type that is attr
 
 For instance:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type(class: Product::class)]
+class ProductType
+{
+    #[Field]
+    public function getId(Product $source): string
+    {
+        return $source->getId();
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type(class=Product::class)
@@ -15,7 +29,7 @@ For instance:
 class ProductType
 {
     /**
-     * @Field(name="id")
+     * @Field
      */
     public function getId(Product $source): string
     {
@@ -23,6 +37,7 @@ class ProductType
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 In the example above, GraphQLite will generate a GraphQL schema with a field `id` of type `string`:
 
@@ -37,11 +52,18 @@ is an `ID` or not.
 
 You can help GraphQLite by manually specifying the output type to use:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+    #[Field(outputType: "ID")]
+``` 
+<!--PHP 7+-->
 ```php
     /**
      * @Field(name="id", outputType="ID")
      */
 ``` 
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ## Usage
 

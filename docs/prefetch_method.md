@@ -40,6 +40,38 @@ Instead, GraphQLite offers an easier to implement solution: the ability to fetch
 
 ## The "prefetch" method
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+class PostType {
+    /**
+     * @param Post $post
+     * @param mixed $prefetchedUsers
+     * @return User
+     */
+    #[Field(prefetchMethod: "prefetchUsers")]
+    public function getUser(Post $post, $prefetchedUsers): User
+    {
+        // This method will receive the $prefetchedUsers as second argument. This is the return value of the "prefetchUsers" method below.
+        // Using this prefetched list, it should be easy to map it to the post
+    }
+
+    /**
+     * @param Post[] $posts
+     * @return mixed
+     */
+    public function prefetchUsers(iterable $posts)
+    {
+        // This function is called only once per GraphQL request
+        // with the list of posts. You can fetch the list of users
+        // associated with this posts in a single request,
+        // for instance using a "IN" query in SQL or a multi-fetch
+        // in your cache back-end.
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type
@@ -71,6 +103,8 @@ class PostType {
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 
 When the "prefetchMethod" attribute is detected in the "@Field" annotation, the method is called automatically.
 The first argument of the method is an array of instances of the main type.
@@ -82,6 +116,34 @@ Field arguments can be set either on the @Field annotated method OR/AND on the p
 
 For instance:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+class PostType {
+    /**
+     * @param Post $post
+     * @param mixed $prefetchedComments
+     * @return Comment[]
+     */
+    #[Field(prefetchMethod: "prefetchComments")]
+    public function getComments(Post $post, $prefetchedComments): array
+    {
+        // ...
+    }
+
+    /**
+     * @param Post[] $posts
+     * @return mixed
+     */
+    public function prefetchComments(iterable $posts, bool $hideSpam, int $filterByScore)
+    {
+        // Parameters passed after the first parameter (hideSpam, filterByScore...) are automatically exposed 
+        // as GraphQL arguments for the "comments" field.
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type
@@ -109,5 +171,6 @@ class PostType {
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 The prefetch method MUST be in the same class as the @Field-annotated method and MUST be public.

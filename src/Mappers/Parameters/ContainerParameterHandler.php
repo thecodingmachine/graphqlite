@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ContainerParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+
 use function assert;
 
 /**
