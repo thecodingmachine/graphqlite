@@ -101,7 +101,7 @@ class UserController
     #[Query]
     #[Logged]
     #[Right("CAN_VIEW_USER_LIST")]
-    #[FailWith(null)]
+    #[FailWith(value: null)]
     public function users(int $limit, int $offset): array
     {
         // ...

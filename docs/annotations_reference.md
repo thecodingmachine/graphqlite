@@ -123,7 +123,7 @@ query / mutation / field (according to the `@Logged` and `@Right` annotations).
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-*default*      | *yes*       | mixed | The value to return if the user is not authorized.
+value          | *yes*       | mixed | The value to return if the user is not authorized.
 
 ## @HideIfUnauthorized annotation
 

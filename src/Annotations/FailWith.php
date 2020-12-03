@@ -8,6 +8,7 @@ use Attribute;
 use BadMethodCallException;
 
 use function array_key_exists;
+use function is_array;
 
 /**
  * @Annotation
@@ -37,7 +38,7 @@ class FailWith implements MiddlewareAnnotationInterface
     {
         if ($value !== '__fail__with__magic__key__') {
             $this->value = $value;
-        } elseif (array_key_exists('value', $values)) {
+        } elseif (is_array($values) && array_key_exists('value', $values)) {
             $this->value = $values['value'];
         } else {
             throw new BadMethodCallException('The @FailWith annotation must be passed a defaultValue. For instance: "@FailWith(null)"');
