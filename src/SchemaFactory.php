@@ -87,6 +87,8 @@ class SchemaFactory
     private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
+    /** @var string */
+    private $annotationCacheDir;
     /** @var AuthenticationServiceInterface|null */
     private $authenticationService;
     /** @var AuthorizationServiceInterface|null */
@@ -204,6 +206,13 @@ class SchemaFactory
         return $this;
     }
 
+    public function setAnnotationCacheDir(string $cacheDir): self
+    {
+        $this->annotationCacheDir = $cacheDir;
+
+        return $this;
+    }
+
     /**
      * Returns a cached Doctrine annotation reader.
      * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
@@ -214,7 +223,12 @@ class SchemaFactory
             AnnotationRegistry::registerLoader('class_exists');
             $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            $cache = function_exists('apcu_fetch') ? new ApcuCache() : new PhpFileCache(sys_get_temp_dir() . '/graphqlite.' . crc32(__DIR__));
+            if (function_exists('apcu_enabled') && apcu_enabled()) {
+                $cache = new ApcuCache();
+            } else {
+                $cacheDir = $this->annotationCacheDir ?? sys_get_temp_dir();
+                $cache = new PhpFileCache($cacheDir . '/graphqlite.' . crc32(__DIR__));
+            }
 
             $cache->setNamespace($this->cacheNamespace);
 
