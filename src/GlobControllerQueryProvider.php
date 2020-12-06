@@ -73,7 +73,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
     {
         if ($this->aggregateControllerQueryProvider === null) {
-            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilder, $this->container);
+            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilder, (new ClassResolverFactory())->create($this->container, $this->cache));
         }
 
         return $this->aggregateControllerQueryProvider;

@@ -34,13 +34,12 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
     /**
      * @param iterable<string>   $controllers          A list of controllers name in the container.
-     * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(iterable $controllers, FieldsBuilder $fieldsBuilder, ContainerInterface $controllersContainer)
+    public function __construct(iterable $controllers, FieldsBuilder $fieldsBuilder, ClassResolver $classResolver)
     {
         $this->controllers          = $controllers;
         $this->fieldsBuilder        = $fieldsBuilder;
-        $this->controllersContainer = $controllersContainer;
+        $this->controllersContainer = $classResolver;
     }
 
     /**
@@ -50,9 +49,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     {
         $queryList = [];
 
-        foreach ($this->controllers as $controllerName) {
-            $controller = $this->controllersContainer->get($controllerName);
-            $queryList[$controllerName] = $this->fieldsBuilder->getQueries($controller);
+        foreach ($this->controllersContainer->__invoke($this->controllers) as $controllerName => $real) {
+            $queryList[$controllerName] = $this->fieldsBuilder->getQueries($real);
         }
 
         return $this->flattenList($queryList);
@@ -65,9 +63,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     {
         $mutationList = [];
 
-        foreach ($this->controllers as $controllerName) {
-            $controller   = $this->controllersContainer->get($controllerName);
-            $mutationList[$controllerName] = $this->fieldsBuilder->getMutations($controller);
+        foreach ($this->controllersContainer->__invoke($this->controllers) as $controllerName => $real) {
+            $mutationList[$controllerName] = $this->fieldsBuilder->getMutations($real);
         }
 
         return $this->flattenList($mutationList);

@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
@@ -29,13 +30,19 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
     private $authenticationService;
     /** @var AuthorizationServiceInterface */
     private $authorizationService;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     public function __construct(
         AuthenticationServiceInterface $authenticationService,
-        AuthorizationServiceInterface $authorizationService
+        AuthorizationServiceInterface $authorizationService,
+        ContainerInterface $container
     ) {
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
+        $this->container = $container;
     }
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
@@ -72,14 +79,14 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         if ($failWith !== null) {
             $failWithValue = $failWith->getValue();
 
-            return QueryField::alwaysReturn($queryFieldDescriptor, $failWithValue);
+            return QueryField::alwaysReturn($queryFieldDescriptor, $failWithValue, $this->container);
         }
 
         if ($hideIfUnauthorized !== null) {
             return null;
         }
 
-        return QueryField::unauthorizedError($queryFieldDescriptor, $loggedAnnotation !== null && ! $this->authenticationService->isLogged());
+        return QueryField::unauthorizedError($queryFieldDescriptor, $loggedAnnotation !== null && ! $this->authenticationService->isLogged(), $this->container);
     }
 
     /**

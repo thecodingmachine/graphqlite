@@ -55,6 +55,10 @@ class QueryFieldDescriptor
     private $originalResolver;
     /** @var callable */
     private $resolver;
+    /**
+     * @var string|null
+     */
+    private $originalObj;
 
     public function getName(): string
     {
@@ -141,13 +145,14 @@ class QueryFieldDescriptor
         $this->magicProperty = null;
     }
 
-    public function setTargetMethodOnSource(string $targetMethodOnSource): void
+    public function setTargetMethodOnSource(string $targetMethodOnSource, string $originalObj = null): void
     {
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
+        $this->originalObj = $originalObj;
         $this->magicProperty = null;
     }
 
@@ -223,7 +228,7 @@ class QueryFieldDescriptor
         if ($this->callable !== null) {
             $this->originalResolver = new ServiceResolver($this->callable);
         } elseif ($this->targetMethodOnSource !== null) {
-            $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
+            $this->originalResolver = new SourceResolver($this->targetMethodOnSource, $this->originalObj);
         } elseif ($this->magicProperty !== null) {
             $this->originalResolver = new MagicPropertyResolver($this->magicProperty);
         } else {
@@ -249,5 +254,13 @@ class QueryFieldDescriptor
     public function setResolver(callable $resolver): void
     {
         $this->resolver = $resolver;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOriginalObj(): ?string
+    {
+        return $this->originalObj;
     }
 }
