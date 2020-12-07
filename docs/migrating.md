@@ -4,6 +4,19 @@ title: Migrating
 sidebar_label: Migrating
 ---
 
+## Migrating from v4.0 to v4.1
+
+GraphQLite follows Semantic Versioning. GraphQLite 4.1 is backward compatible with GraphQLite 4.0. See 
+[semantic versioning](semver.md) for more details.
+
+There is one exception though: the **ecodev/graphql-upload** package (used to get support for file uploads in GraphQL 
+input types) is now a "recommended" dependency only.
+If you are using GraphQL file uploads, you need to add `ecodev/graphql-upload` to your `composer.json` by running this command:
+
+```console
+$ composer require ecodev/graphql-upload
+```
+
 ## Migrating from v3.0 to v4.0
 
 If you are a "regular" GraphQLite user, migration to v4 should be straightforward:
