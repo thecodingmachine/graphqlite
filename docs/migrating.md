@@ -48,7 +48,7 @@ On the other hand, if you are a power user and if you are wiring GraphQLite serv
 - The `HydratorInterface` and all implementations are gone. When returning an input object from a TypeMapper, the object
   must now implement the `ResolvableMutableInputInterface` (an input object type that contains its own resolver)
 
-Note: we strongly recommend to use the Symfony bundle, the Laravel package, the Universal module or the SchemaManager
+Note: we strongly recommend using the Symfony bundle, the Laravel package, the Universal module or the SchemaManager
 to bootstrap GraphQLite. Wiring directly GraphQLite classes (like the `FieldsBuilder`) into your container is not recommended,
 as the signature of the constructor of those classes may vary from one minor release to another.
 Use the `SchemaManager` instead.
