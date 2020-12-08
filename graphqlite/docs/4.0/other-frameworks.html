@@ -1,0 +1,334 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Getting started with any framework · GraphQLite</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="If you are using **Symfony 4.x**, checkout the [Symfony bundle](/docs/4.0/symfony-bundle)."/><meta name="docsearch:version" content="4.0"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Getting started with any framework · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqlite.thecodingmachine.io/"/><meta property="og:description" content="If you are using **Symfony 4.x**, checkout the [Symfony bundle](/docs/4.0/symfony-bundle)."/><meta property="og:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-10196481-8', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/graphqlite.svg" alt="GraphQLite"/><h2 class="headerTitleWithLogo">GraphQLite</h2></a><a href="/versions"><h3>4.0</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/4.0/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/thecodingmachine/graphqlite" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Installation</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/features">GraphQLite</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Installation</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/symfony-bundle">Symfony bundle</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/laravel-package">Laravel package</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/universal_service_providers">Universal service providers</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/4.0/other-frameworks">Other frameworks / No framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Usage</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/queries">Queries</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/mutations">Mutations</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/type_mapping">Type mapping</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/autowiring">Autowiring services</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/extend_type">Extending a type</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/external_type_declaration">External type declaration</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/input-types">Input types</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/inheritance-interfaces">Inheritance and interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/error-handling">Error handling</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/validation">User input validation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Security</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/authentication_authorization">Authentication and authorization</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/fine-grained-security">Fine grained security</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/implementing-security">Connecting security to your framework</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Performance</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/query-plan">Query plan</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/prefetch-method">Prefetching records</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/file-uploads">File uploads</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/pagination">Pagination</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/custom-types">Custom types</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/field-middlewares">Custom annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/argument-resolving">Custom argument resolving</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/extend_input_type">Extending an input type</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/multiple_output_types">Class with multiple output types</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/symfony-bundle-advanced">Symfony specific features</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/laravel-package-advanced">Laravel specific features</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/internals">Internals</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/migrating">Migrating</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Reference</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/4.0/annotations_reference">Annotations reference</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/semver">Semantic versioning</a></li><li class="navListItem"><a class="navItem" href="/docs/4.0/changelog">Changelog</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/other_frameworks.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Getting started with any framework</h1></header><article><div><span><p>If you are using <strong>Symfony 4.x</strong>, checkout the <a href="/docs/4.0/symfony-bundle">Symfony bundle</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="installation"></a><a href="#installation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installation</h2>
+<p>Open a terminal in your current project directory and run:</p>
+<pre><code class="hljs css language-console"><span class="hljs-meta">$</span><span class="bash"> composer require thecodingmachine/graphqlite</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<p>In order to bootstrap GraphQLite, you will need:</p>
+<ul>
+<li>A PSR-11 compatible container</li>
+<li>A PSR-16 cache</li>
+</ul>
+<p>Additionally, you will have to route the HTTP requests to the underlying GraphQL library.</p>
+<p>GraphQLite relies on the <a href="http://webonyx.github.io/graphql-php/">webonyx/graphql-php</a> library internally.
+This library plays well with PSR-7 requests and we also provide a <a href="#psr-15-middleware">PSR-15 middleware</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="integration"></a><a href="#integration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Integration</h2>
+<p>Webonyx/graphql-php library requires a <a href="https://webonyx.github.io/graphql-php/type-system/schema/">Schema</a> in order to resolve
+GraphQL queries. We provide a <code>SchemaFactory</code> class to create such a schema:</p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">SchemaFactory</span>;
+
+<span class="hljs-comment">// $cache is a PSR-16 compatible cache</span>
+<span class="hljs-comment">// $container is a PSR-11 compatible container</span>
+$factory = <span class="hljs-keyword">new</span> SchemaFactory($cache, $container);
+$factory-&gt;addControllerNamespace(<span class="hljs-string">'App\\Controllers\\'</span>)
+        -&gt;addTypeNamespace(<span class="hljs-string">'App\\'</span>);
+
+$schema = $factory-&gt;createSchema();
+</code></pre>
+<p>You can now use this schema with <a href="https://webonyx.github.io/graphql-php/getting-started/#hello-world">Webonyx GraphQL facade</a>
+or the <a href="https://webonyx.github.io/graphql-php/executing-queries/#using-server">StandardServer class</a>.</p>
+<p>The <code>SchemaFactory</code> class also comes with a number of methods that you can use to customize your GraphQLite settings.</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">// Configure an authentication service (to resolve the @Logged annotations).</span>
+$factory-&gt;setAuthenticationService(<span class="hljs-keyword">new</span> VoidAuthenticationService());
+<span class="hljs-comment">// Configure an authorization service (to resolve the @Right annotations).</span>
+$factory-&gt;setAuthorizationService(<span class="hljs-keyword">new</span> VoidAuthorizationService());
+<span class="hljs-comment">// Change the naming convention of GraphQL types globally.</span>
+$factory-&gt;setNamingStrategy(<span class="hljs-keyword">new</span> NamingStrategy());
+<span class="hljs-comment">// Add a custom type mapper.</span>
+$factory-&gt;addTypeMapper($typeMapper);
+<span class="hljs-comment">// Add a custom type mapper using a factory to create it.</span>
+<span class="hljs-comment">// Type mapper factories are useful if you need to inject the "recursive type mapper" into your type mapper constructor.</span>
+$factory-&gt;addTypeMapperFactory($typeMapperFactory);
+<span class="hljs-comment">// Add a root type mapper.</span>
+$factory-&gt;addRootTypeMapper($rootTypeMapper);
+<span class="hljs-comment">// Add a parameter mapper.</span>
+$factory-&gt;addParameterMapper($parameterMapper);
+<span class="hljs-comment">// Add a query provider. These are used to find queries and mutations in the application.</span>
+$factory-&gt;addQueryProvider($queryProvider);
+<span class="hljs-comment">// Add a query provider using a factory to create it.</span>
+<span class="hljs-comment">// Query provider factories are useful if you need to inject the "fields builder" into your query provider constructor.</span>
+$factory-&gt;addQueryProviderFactory($queryProviderFactory);
+<span class="hljs-comment">// Add custom options to the Webonyx underlying Schema.</span>
+$factory-&gt;setSchemaConfig($schemaConfig);
+<span class="hljs-comment">// Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.</span>
+$factory-&gt;setGlobTtl(<span class="hljs-number">2</span>);
+<span class="hljs-comment">// Enables prod-mode (cache settings optimized for best performance).</span>
+<span class="hljs-comment">// This is a shortcut for `$schemaFactory-&gt;setGlobTtl(null)`</span>
+$factory-&gt;prodMode();
+<span class="hljs-comment">// Enables dev-mode (this is the default mode: cache settings optimized for best developer experience).</span>
+<span class="hljs-comment">// This is a shortcut for `$schemaFactory-&gt;setGlobTtl(2)`</span>
+$factory-&gt;devMode();
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="graphqlite-context"></a><a href="#graphqlite-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>GraphQLite context</h3>
+<p>Webonyx allows you pass a &quot;context&quot; object when running a query.
+For some GraphQLite features to work (namely: the prefetch feature), GraphQLite needs you to initialize the Webonyx context
+with an instance of the <code>TheCodingMachine\GraphQLite\Context\Context</code> class.</p>
+<p>For instance:</p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">Context</span>;
+
+$result = GraphQL::executeQuery($schema, $query, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">new</span> Context(), $variableValues);
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="minimal-example"></a><a href="#minimal-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Minimal example</h2>
+<p>The smallest working example using no framework is:</p>
+<pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">GraphQL</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">Schema</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">SchemaFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">Context</span>;
+
+<span class="hljs-comment">// $cache is a PSR-16 compatible cache.</span>
+<span class="hljs-comment">// $container is a PSR-11 compatible container.</span>
+$factory = <span class="hljs-keyword">new</span> SchemaFactory($cache, $container);
+$factory-&gt;addControllerNamespace(<span class="hljs-string">'App\\Controllers\\'</span>)
+        -&gt;addTypeNamespace(<span class="hljs-string">'App\\'</span>);
+
+$schema = $factory-&gt;createSchema();
+
+$rawInput = file_get_contents(<span class="hljs-string">'php://input'</span>);
+$input = json_decode($rawInput, <span class="hljs-keyword">true</span>);
+$query = $input[<span class="hljs-string">'query'</span>];
+$variableValues = <span class="hljs-keyword">isset</span>($input[<span class="hljs-string">'variables'</span>]) ? $input[<span class="hljs-string">'variables'</span>] : <span class="hljs-keyword">null</span>;
+
+$result = GraphQL::executeQuery($schema, $query, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">new</span> Context(), $variableValues);
+$output = $result-&gt;toArray();
+
+header(<span class="hljs-string">'Content-Type: application/json'</span>);
+<span class="hljs-keyword">echo</span> json_encode($output);
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="psr-15-middleware"></a><a href="#psr-15-middleware" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PSR-15 Middleware</h2>
+<p>When using a framework, you will need a way to route your HTTP requests to the <code>webonyx/graphql-php</code> library.</p>
+<p>If the framework you are using is compatible with PSR-15 (like Slim PHP or Zend-Expressive / Laminas), GraphQLite
+comes with a PSR-15 middleware out of the box.</p>
+<p>In order to get an instance of this middleware, you can use the <code>Psr15GraphQLMiddlewareBuilder</code> builder class:</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">// $schema is an instance of the GraphQL schema returned by SchemaFactory::createSchema (see previous chapter)</span>
+$builder = <span class="hljs-keyword">new</span> Psr15GraphQLMiddlewareBuilder($schema);
+
+$middleware = $builder-&gt;createMiddleware();
+
+<span class="hljs-comment">// You can now inject your middleware in your favorite PSR-15 compatible framework.</span>
+<span class="hljs-comment">// For instance:</span>
+$zendMiddlewarePipe-&gt;pipe($middleware);
+</code></pre>
+<p>The builder offers a number of setters to modify its behaviour:</p>
+<pre><code class="hljs css language-php">$builder-&gt;setUrl(<span class="hljs-string">"/graphql"</span>); <span class="hljs-comment">// Modify the URL endpoint (defaults to /graphql)</span>
+$config = $builder-&gt;getConfig(); <span class="hljs-comment">// Returns a Webonyx ServerConfig object. Use this object to configure Webonyx in details.</span>
+$builder-&gt;setConfig($config);
+
+$builder-&gt;setResponseFactory(<span class="hljs-keyword">new</span> ResponseFactory()); <span class="hljs-comment">// Set a PSR-18 ResponseFactory (not needed if you are using zend-framework/zend-diactoros ^2</span>
+$builder-&gt;setStreamFactory(<span class="hljs-keyword">new</span> StreamFactory()); <span class="hljs-comment">// Set a PSR-18 StreamFactory (not needed if you are using zend-framework/zend-diactoros ^2</span>
+$builder-&gt;setHttpCodeDecider(<span class="hljs-keyword">new</span> HttpCodeDecider()); <span class="hljs-comment">// Set a class in charge of deciding the HTTP status code based on the response.</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h3>
+<p>In this example, we will focus on getting a working version of GraphQLite using:</p>
+<ul>
+<li><a href="https://docs.zendframework.com/zend-stratigility/">Zend Stratigility</a> as a PSR-15 server</li>
+<li><code>mouf/picotainer</code> (a micro-container) for the PSR-11 container</li>
+<li><code>symfony/cache</code> for the PSR-16 cache</li>
+</ul>
+<p>The choice of the libraries is really up to you. You can adapt it based on your needs.</p>
+<p><strong>composer.json</strong></p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"autoload"</span>: {
+    <span class="hljs-attr">"psr-4"</span>: {
+      <span class="hljs-attr">"App\\"</span>: <span class="hljs-string">"src/"</span>
+    }
+  },
+  <span class="hljs-attr">"require"</span>: {
+    <span class="hljs-attr">"thecodingmachine/graphqlite"</span>: <span class="hljs-string">"^4"</span>,
+    <span class="hljs-attr">"zendframework/zend-diactoros"</span>: <span class="hljs-string">"^2"</span>,
+    <span class="hljs-attr">"zendframework/zend-stratigility"</span>: <span class="hljs-string">"^3"</span>,
+    <span class="hljs-attr">"zendframework/zend-httphandlerrunner"</span>: <span class="hljs-string">"^1.0"</span>,
+    <span class="hljs-attr">"mouf/picotainer"</span>: <span class="hljs-string">"^1.1"</span>,
+    <span class="hljs-attr">"symfony/cache"</span>: <span class="hljs-string">"^4.2"</span>
+  },
+  <span class="hljs-attr">"minimum-stability"</span>: <span class="hljs-string">"dev"</span>,
+  <span class="hljs-attr">"prefer-stable"</span>: <span class="hljs-literal">true</span>
+}
+</code></pre>
+<p><strong>index.php</strong></p>
+<pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequest</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">ServerRequestFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">HttpHandlerRunner</span>\<span class="hljs-title">Emitter</span>\<span class="hljs-title">SapiStreamEmitter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">Middleware</span>\<span class="hljs-title">ErrorResponseGenerator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">MiddlewarePipe</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Laminas</span>\<span class="hljs-title">Diactoros</span>\<span class="hljs-title">Server</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">HttpHandlerRunner</span>\<span class="hljs-title">RequestHandlerRunner</span>;
+
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/vendor/autoload.php'</span>;
+
+$container = <span class="hljs-keyword">require</span> <span class="hljs-string">'config/container.php'</span>;
+
+$serverRequestFactory = [ServerRequestFactory::class, <span class="hljs-string">'fromGlobals'</span>];
+
+$errorResponseGenerator = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Throwable $e)</span> </span>{
+    $generator = <span class="hljs-keyword">new</span> ErrorResponseGenerator();
+    <span class="hljs-keyword">return</span> $generator($e, <span class="hljs-keyword">new</span> ServerRequest(), <span class="hljs-keyword">new</span> Response());
+};
+
+$runner = <span class="hljs-keyword">new</span> RequestHandlerRunner(
+    $container-&gt;get(MiddlewarePipe::class),
+    <span class="hljs-keyword">new</span> SapiStreamEmitter(),
+    $serverRequestFactory,
+    $errorResponseGenerator
+);
+$runner-&gt;run();
+</code></pre>
+<p>Here we are initializing a Zend <code>RequestHandler</code> (it receives requests) and we pass it to a Zend Stratigility <code>MiddlewarePipe</code>.
+This <code>MiddlewarePipe</code> comes from the container declared in the <code>config/container.php</code> file:</p>
+<p><strong>config/container.php</strong></p>
+<pre><code class="hljs css language-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">GraphQL</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">Schema</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Mouf</span>\<span class="hljs-title">Picotainer</span>\<span class="hljs-title">Picotainer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Container</span>\<span class="hljs-title">ContainerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">SimpleCache</span>\<span class="hljs-title">CacheInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Simple</span>\<span class="hljs-title">ApcuCache</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Psr15GraphQLMiddlewareBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">SchemaFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Zend</span>\<span class="hljs-title">Stratigility</span>\<span class="hljs-title">MiddlewarePipe</span>;
+
+<span class="hljs-comment">// Picotainer is a minimalist PSR-11 container.</span>
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Picotainer([
+    MiddlewarePipe::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerInterface $container)</span> </span>{
+        $pipe = <span class="hljs-keyword">new</span> MiddlewarePipe();
+        $pipe-&gt;pipe($container-&gt;get(WebonyxGraphqlMiddleware::class));
+        <span class="hljs-keyword">return</span> $pipe;
+    },
+    <span class="hljs-comment">// The WebonyxGraphqlMiddleware is a PSR-15 compatible</span>
+    <span class="hljs-comment">// middleware that exposes Webonyx schemas. </span>
+    WebonyxGraphqlMiddleware::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerInterface $container)</span> </span>{
+        $builder = <span class="hljs-keyword">new</span> Psr15GraphQLMiddlewareBuilder($container-&gt;get(Schema::class));
+        <span class="hljs-keyword">return</span> $builder-&gt;createMiddleware();
+    },
+    CacheInterface::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ApcuCache();
+    },
+    Schema::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerInterface $container)</span> </span>{
+        <span class="hljs-comment">// The magic happens here. We create a schema using GraphQLite SchemaFactory.</span>
+        $factory = <span class="hljs-keyword">new</span> SchemaFactory($container-&gt;get(CacheInterface::class), $container);
+        $factory-&gt;addControllerNamespace(<span class="hljs-string">'App\\Controllers\\'</span>);
+        $factory-&gt;addTypeNamespace(<span class="hljs-string">'App\\'</span>);
+        <span class="hljs-keyword">return</span> $factory-&gt;createSchema();
+    }
+]);
+</code></pre>
+<p>Now, we need to add a first query and therefore create a controller.
+The application will look into the <code>App\Controllers</code> namespace for GraphQLite controllers.</p>
+<p>It assumes that the container has an entry whose name is the controller's fully qualified class name.</p>
+<p><strong>src/Controllers/MyController.php</strong></p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controllers</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">TheCodingMachine</span>\<span class="hljs-title">GraphQLite</span>\<span class="hljs-title">Annotations</span>\<span class="hljs-title">Query</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyController</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Query</span>
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hello</span><span class="hljs-params">(string $name)</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'Hello '</span>.$name;
+    }
+}
+</code></pre>
+<p><strong>config/container.php</strong></p>
+<pre><code class="hljs css language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controllers</span>\<span class="hljs-title">MyController</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Picotainer([
+    <span class="hljs-comment">// ...</span>
+    
+    <span class="hljs-comment">// We declare the controller in the container.</span>
+    MyController::class =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> MyController();
+    },
+]);
+</code></pre>
+<p>And we are done! You can now test your query using your favorite GraphQL client.</p>
+<p><img src="/docs/assets/query1.png" alt=""></p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/4.0/universal_service_providers"><span class="arrow-prev">← </span><span>Universal service providers</span></a><a class="docs-next button" href="/docs/4.0/queries"><span>Queries</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#integration">Integration</a><ul class="toc-headings"><li><a href="#graphqlite-context">GraphQLite context</a></li></ul></li><li><a href="#minimal-example">Minimal example</a></li><li><a href="#psr-15-middleware">PSR-15 Middleware</a><ul class="toc-headings"><li><a href="#example">Example</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2020 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '8fcce617e281864dc03c68d17f6206db',
+                indexName: 'graphqlite_thecodingmachine',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
