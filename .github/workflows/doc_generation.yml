@@ -42,5 +42,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: website/build # The folder the action should deploy.
+          FOLDER: website/build/graphqlite # The folder the action should deploy.
           CLEAN: true # Automatically remove deleted files from the deploy branch
