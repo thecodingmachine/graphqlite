@@ -23,7 +23,7 @@
         "webmozart/assert": "^1.4",
         "symfony/cache": "^4.3 | ^5",
         "thecodingmachine/cache-utils": "^1",
-        "ocramius/package-versions": "^1.4",
+        "ocramius/package-versions": "^1.4 || ^2",
         "symfony/expression-language": "^4 | ^5",
         "ext-json": "*",
         "psr/http-server-handler": "^1",
