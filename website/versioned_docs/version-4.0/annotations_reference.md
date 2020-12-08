@@ -14,7 +14,7 @@ The `@Query` annotation is used to declare a GraphQL query.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the query. If skipped, the name of the method is used instead.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](custom_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @Mutation annotation
 
@@ -62,7 +62,7 @@ The `@Field` annotation is used to declare a GraphQL field.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the field. If skipped, the name of the method is used instead.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @SourceField annotation
 
@@ -73,7 +73,7 @@ The `@SourceField` annotation is used to declare a GraphQL field.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
+[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 phpType        | *no*       | string | The PHP type of the field (as you would write it in a Docblock)
 annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
@@ -88,7 +88,7 @@ The `@MagicField` annotation is used to declare a GraphQL field that originates 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
-[outputType](custom_output_types.md)  | *no*(*)       | string | The GraphQL output type of the field.
+[outputType](type_mapping.md)  | *no*(*)       | string | The GraphQL output type of the field.
 phpType     | *no*(*)       | string | The PHP type of the field (as you would write it in a Docblock)
 annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
