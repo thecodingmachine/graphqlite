@@ -14,6 +14,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use Webmozart\Assert\Assert;
+
 use function filemtime;
 use function get_class;
 use function md5;

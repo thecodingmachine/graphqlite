@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use ReflectionMethod;
 use ReflectionNamedType;
+
 use function assert;
 use function sprintf;
 

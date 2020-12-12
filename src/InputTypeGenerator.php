@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Types\InputType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use Webmozart\Assert\Assert;
+
 use function array_shift;
 
 /**

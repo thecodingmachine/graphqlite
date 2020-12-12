@@ -17,6 +17,7 @@ use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use Webmozart\Assert\Assert;
+
 use function array_filter;
 use function array_map;
 use function assert;

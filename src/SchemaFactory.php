@@ -12,6 +12,7 @@ use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
+use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -50,8 +51,10 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+
 use function array_map;
 use function array_reverse;
+use function class_exists;
 use function crc32;
 use function function_exists;
 use function md5;
@@ -84,6 +87,8 @@ class SchemaFactory
     private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
+    /** @var string */
+    private $annotationCacheDir;
     /** @var AuthenticationServiceInterface|null */
     private $authenticationService;
     /** @var AuthorizationServiceInterface|null */
@@ -201,6 +206,13 @@ class SchemaFactory
         return $this;
     }
 
+    public function setAnnotationCacheDir(string $cacheDir): self
+    {
+        $this->annotationCacheDir = $cacheDir;
+
+        return $this;
+    }
+
     /**
      * Returns a cached Doctrine annotation reader.
      * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
@@ -211,7 +223,12 @@ class SchemaFactory
             AnnotationRegistry::registerLoader('class_exists');
             $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            $cache = function_exists('apcu_fetch') ? new ApcuCache() : new PhpFileCache(sys_get_temp_dir() . '/graphqlite.' . crc32(__DIR__));
+            if (function_exists('apcu_enabled') && apcu_enabled()) {
+                $cache = new ApcuCache();
+            } else {
+                $cacheDir = $this->annotationCacheDir ?? sys_get_temp_dir();
+                $cache = new PhpFileCache($cacheDir . '/graphqlite.' . crc32(__DIR__));
+            }
 
             $cache->setNamespace($this->cacheNamespace);
 
@@ -346,7 +363,9 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        if (class_exists(Enum::class)) {
+            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        }
 
         if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(

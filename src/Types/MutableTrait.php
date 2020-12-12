@@ -19,7 +19,7 @@ trait MutableTrait
 
     /** @var FieldDefinition[]|null */
     private $finalFields;
-    /** @var string|null */
+    /** @var class-string<object>|null */
     private $className;
 
     public function freeze(): void
@@ -96,6 +96,8 @@ trait MutableTrait
 
     /**
      * Returns the PHP class mapping this GraphQL type (if any)
+     *
+     * @return class-string<object>|null
      */
     public function getMappedClassName(): ?string
     {

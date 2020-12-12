@@ -5,13 +5,18 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Mappers\Proxys\MutableInterfaceTypeAdapter;
+use TheCodingMachine\GraphQLite\Mappers\Proxys\MutableObjectTypeAdapter;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+
 use function array_keys;
 use function array_reduce;
 
@@ -22,17 +27,20 @@ use function array_reduce;
  */
 final class StaticTypeMapper implements TypeMapperInterface
 {
-    /** @var array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> */
+    /** @var array<string,MutableObjectType|MutableInterfaceType> */
     private $types = [];
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
      *
-     * @param array<string,MutableInterface&(MutableObjectType|MutableInterfaceType)> $types
+     * @param array<string,ObjectType|InterfaceType> $types
      */
     public function setTypes(array $types): void
     {
-        $this->types = $types;
+        foreach ($types as $className => $type) {
+            $type = $this->castOutputTypeToMutable($type);
+            $this->types[$className] = $type;
+        }
     }
 
     /** @var array<string,ResolvableMutableInputInterface&InputObjectType> */
@@ -55,15 +63,35 @@ final class StaticTypeMapper implements TypeMapperInterface
      * An array containing ObjectType or ResolvableMutableInputInterface instances that are not mapped by default to any class.
      * ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
      *
-     * @param array<int,Type> $types
+     * @param array<int,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> $types
      */
     public function setNotMappedTypes(array $types): void
     {
-        $this->notMappedTypes = array_reduce($types, static function ($result, Type $type) {
+        $this->notMappedTypes = array_reduce($types, function ($result, Type $type) {
+            if ($type instanceof ObjectType || $type instanceof InterfaceType) {
+                $type = $this->castOutputTypeToMutable($type);
+            }
+
             $result[$type->name] = $type;
 
             return $result;
         }, []);
+    }
+
+    /**
+     * @param ObjectType|InterfaceType $type
+     *
+     * @return MutableInterfaceTypeAdapter|MutableObjectTypeAdapter
+     */
+    private function castOutputTypeToMutable($type)
+    {
+        if ($type instanceof ObjectType && ! $type instanceof MutableObjectType) {
+            return new MutableObjectTypeAdapter($type);
+        }
+        if ($type instanceof InterfaceType && ! $type instanceof MutableInterfaceType) {
+            return new MutableInterfaceTypeAdapter($type);
+        }
+        return $type;
     }
 
     /**

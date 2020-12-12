@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Http;
 
 use GraphQL\Error\ClientAware;
 use GraphQL\Executor\ExecutionResult;
+
 use function max;
 
 class HttpCodeDecider implements HttpCodeDeciderInterface

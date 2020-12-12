@@ -14,7 +14,7 @@ The `@Query` annotation is used to declare a GraphQL query.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the query. If skipped, the name of the method is used instead.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @Mutation annotation
 
@@ -25,7 +25,7 @@ The `@Mutation` annotation is used to declare a GraphQL mutation.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the mutation. If skipped, the name of the method is used instead.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @Type annotation
 
@@ -57,7 +57,7 @@ The `@Field` annotation is used to declare a GraphQL field.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the field. If skipped, the name of the method is used instead.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @SourceField annotation
 
@@ -68,7 +68,7 @@ The `@SourceField` annotation is used to declare a GraphQL field.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
-[outputType](custom_output_types.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
+[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 logged         | *no*       | bool  | Whether the user must be logged or not to see the field.
 right          | *no*       | Right annotation  | The right the user must have to see the field.
 failWith          | *no*       | mixed  | A value to return if the user is not authorized to see the field. If not specified, the field will not be visible at all to the user.

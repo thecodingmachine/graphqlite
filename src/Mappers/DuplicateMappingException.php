@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use ReflectionMethod;
 use ReflectionProperty;
 use RuntimeException;
+
 use function sprintf;
 
 class DuplicateMappingException extends RuntimeException

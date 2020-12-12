@@ -4,6 +4,32 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 4.1
+
+Breaking change:
+
+There is one breaking change introduced in the minor version (this was important to allow PHP 8 compatibility).
+
+- The **ecodev/graphql-upload** package (used to get support for file uploads in GraphQL input types) is now a "recommended" dependency only.
+  If you are using GraphQL file uploads, you need to add `ecodev/graphql-upload` to your `composer.json`. 
+
+New features:
+
+- All annotations can now be accessed as PHP 8 attributes
+- The `@deprecated` annotation in your PHP code translates into deprecated fields in your GraphQL schema 
+- You can now specify the GraphQL name of the Enum types you define
+- Added the possibility to inject pure Webonyx objects in GraphQLite schema
+
+Minor changes:
+
+- Migrated from `zend/diactoros` to `laminas/diactoros`
+- Making the annotation cache directory configurable
+
+Miscellaneous:
+
+- Migrated from Travis to Github actions 
+ 
+
 ## 4.0
 
 This is a complete refactoring from 3.x. While existing annotations are kept compatible, the internals have completely

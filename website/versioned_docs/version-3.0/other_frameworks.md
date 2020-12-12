@@ -135,13 +135,13 @@ The choice of the libraries is really up to you. You can adapt it based on your 
 ```php
 <?php
 
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequestFactory;
 use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use Zend\Stratigility\Middleware\ErrorResponseGenerator;
 use Zend\Stratigility\MiddlewarePipe;
-use Zend\Diactoros\Server;
+use Laminas\Diactoros\Server;
 use Zend\HttpHandlerRunner\RequestHandlerRunner;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -180,8 +180,8 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Simple\ApcuCache;
 use TheCodingMachine\GraphQLite\SchemaFactory;
-use Zend\Diactoros\ResponseFactory;
-use Zend\Diactoros\StreamFactory;
+use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\StreamFactory;
 use Zend\Stratigility\MiddlewarePipe;
 
 // Picotainer is a minimalist PSR-11 container.

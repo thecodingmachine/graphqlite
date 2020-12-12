@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 /**
@@ -16,6 +17,7 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
  *   @Attribute("default", type = "bool")
  * })
  */
+#[Attribute(Attribute::TARGET_METHOD)]
 class Factory
 {
     /** @var string|null */
@@ -26,11 +28,11 @@ class Factory
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null)
     {
-        $this->name = $attributes['name'] ?? null;
+        $this->name = $name ?? $attributes['name'] ?? null;
         // This IS the default if no name is set and no "default" attribute is passed.
-        $this->default = $attributes['default'] ?? ! isset($attributes['name']);
+        $this->default = $default ?? $attributes['default'] ?? ! isset($attributes['name']);
 
         if ($this->name === null && $this->default === false) {
             throw new GraphQLRuntimeException('A @Factory that has "default=false" attribute must be given a name (i.e. add a name="FooBarInput" attribute).');

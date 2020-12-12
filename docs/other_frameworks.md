@@ -79,6 +79,9 @@ $factory->prodMode();
 // Enables dev-mode (this is the default mode: cache settings optimized for best developer experience).
 // This is a shortcut for `$schemaFactory->setGlobTtl(2)`
 $factory->devMode();
+// If APCu is not available, Doctrine annotations are stored in files.
+// This setter can configure the cache directory for Doctrine annotations.
+$factory->setAnnotationCacheDir($directory);
 ```
 
 ### GraphQLite context
@@ -195,13 +198,13 @@ The choice of the libraries is really up to you. You can adapt it based on your 
 ```php
 <?php
 
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequestFactory;
 use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use Zend\Stratigility\Middleware\ErrorResponseGenerator;
 use Zend\Stratigility\MiddlewarePipe;
-use Zend\Diactoros\Server;
+use Laminas\Diactoros\Server;
 use Zend\HttpHandlerRunner\RequestHandlerRunner;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -275,6 +278,23 @@ It assumes that the container has an entry whose name is the controller's fully 
 
 **src/Controllers/MyController.php**
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+namespace App\Controllers;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+class MyController
+{
+    #[Query]
+    public function hello(string $name): string
+    {
+        return 'Hello '.$name;
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 namespace App\Controllers;
 
@@ -291,6 +311,8 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 
 **config/container.php**
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
-use Doctrine\Common\Annotations\Annotation\Attribute;
+use Attribute;
 use RuntimeException;
 
 /**
@@ -20,6 +20,7 @@ use RuntimeException;
  *   @Attribute("update", type = "bool"),
  * })
  */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class Input
 {
     /** @var string|null */
@@ -39,13 +40,15 @@ class Input
 
     /**
      * @param mixed[] $attributes
+     * @param class-string<object>|null $class
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?string $description = null, ?bool $update = null)
     {
-        $this->name = $attributes['name'] ?? null;
-        $this->default = $attributes['default'] ?? ! isset($attributes['name']);
-        $this->description = $attributes['description'] ?? null;
-        $this->update = $attributes['update'] ?? false;
+        $this->class = $class ?? $attributes['class'] ?? null;
+        $this->name = $name ?? $attributes['name'] ?? null;
+        $this->default = $default ?? $attributes['default'] ?? $this->name === null;
+        $this->description = $description ?? $attributes['description'] ?? null;
+        $this->update = $update ?? $attributes['update'] ?? false;
     }
 
     /**

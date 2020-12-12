@@ -40,6 +40,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use Webmozart\Assert\Assert;
+
 use function array_fill_keys;
 use function array_intersect_key;
 use function array_keys;
@@ -252,10 +253,10 @@ class FieldsBuilder
     }
 
     /**
-     * @param object|class-string<object>   $controller The controller instance, or the name of the source class name
+     * @param object|class-string<object> $controller The controller instance, or the name of the source class name
      * @param class-string<AbstractRequest> $annotationName
-     * @param bool                          $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
-     * @param string|null                   $typeName Type name for which fields should be extracted for.
+     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
+     * @param string|null $typeName Type name for which fields should be extracted for.
      *
      * @return array<string, FieldDefinition>
      *

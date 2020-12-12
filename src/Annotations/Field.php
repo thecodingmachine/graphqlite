@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
-use Doctrine\Common\Annotations\Annotation\Attribute;
+use Attribute;
 
 /**
  * @Annotation
@@ -18,6 +18,7 @@ use Doctrine\Common\Annotations\Annotation\Attribute;
  *   @Attribute("inputType", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Field extends AbstractRequest
 {
     /** @var string|null */
@@ -39,18 +40,17 @@ class Field extends AbstractRequest
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $prefetchMethod = null, $for = null, ?string $description = null, ?string $inputType = null)
     {
-        parent::__construct($attributes);
-        $this->prefetchMethod = $attributes['prefetchMethod'] ?? null;
-        $this->description = $attributes['description'] ?? null;
-        $this->inputType = $attributes['inputType'] ?? null;
+        parent::__construct($attributes, $name, $outputType);
+        $this->prefetchMethod = $prefetchMethod ?? $attributes['prefetchMethod'] ?? null;
+        $this->description = $description ?? $attributes['description'] ?? null;
+        $this->inputType = $inputType ?? $attributes['inputType'] ?? null;
 
-        if (empty($attributes['for'])) {
-            return;
+        $forValue = $for ?? $attributes['for'] ?? null;
+        if ($forValue) {
+            $this->for = (array) $for;
         }
-
-        $this->for = (array) $attributes['for'];
     }
 
     /**

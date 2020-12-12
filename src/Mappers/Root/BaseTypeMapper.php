@@ -30,6 +30,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
+
 use function ltrim;
 
 /**
@@ -144,12 +145,16 @@ class BaseTypeMapper implements RootTypeMapperInterface
                 case '\\DateTimeImmutable':
                 case '\\DateTimeInterface':
                     return self::getDateTimeType();
+
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
+
                 case '\\DateTime':
                     throw CannotMapTypeException::createForDateTime();
+
                 case '\\' . ID::class:
                     return GraphQLType::id();
+
                 default:
                     return null;
             }

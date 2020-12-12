@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
+
 use function lcfirst;
 use function str_replace;
 use function strlen;

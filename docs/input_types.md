@@ -8,6 +8,45 @@ Let's admit you are developing an API that returns a list of cities around a loc
 
 Your GraphQL query might look like this:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class MyController
+{
+    /**
+     * @return City[]
+     */
+    #[Query]
+    public function getCities(Location $location, float $radius): array
+    {
+        // Some code that returns an array of cities.
+    }
+}
+
+// Class Location is a simple value-object.
+class Location
+{
+    private $latitude;
+    private $longitude;
+
+    public function __construct(float $latitude, float $longitude)
+    {
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+    }
+
+    public function getLatitude(): float
+    {
+        return $this->latitude;
+    }
+
+    public function getLongitude(): float
+    {
+        return $this->longitude;
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class MyController
 {
@@ -44,6 +83,7 @@ class Location
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 If you try to run this code, you will get the following error:
 
@@ -61,6 +101,22 @@ A **Factory** is a method that takes in parameter all the fields of the input ty
 
 Here is an example of factory:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```
+class MyFactory
+{
+    /**
+     * The Factory annotation will create automatically a LocationInput input type in GraphQL.    
+     */
+    #[Factory]
+    public function createLocation(float $latitude, float $longitude): Location
+    {
+        return new Location($latitude, $longitude);
+    }
+}
+```
+<!--PHP 7+-->
 ```
 class MyFactory
 {
@@ -75,6 +131,7 @@ class MyFactory
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 and now, you can run query like this:
 
@@ -107,6 +164,8 @@ The GraphQL input type name is derived from the return type of the factory.
 
 Given the factory below, the return type is "Location", therefore, the GraphQL input type will be named "LocationInput".
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
 ```
 /**
  * @Factory()
@@ -116,6 +175,15 @@ public function createLocation(float $latitude, float $longitude): Location
     return new Location($latitude, $longitude);
 }
 ```
+<!--PHP 7+-->
+```
+#[Factory]
+public function createLocation(float $latitude, float $longitude): Location
+{
+    return new Location($latitude, $longitude);
+}
+```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 In case you want to override the input type name, you can use the "name" attribute of the @Factory annotation:
 
@@ -137,6 +205,17 @@ You can use the `@UseInputType` annotation to force an input type of a parameter
 
 Let's say you want to force a parameter to be of type "ID", you can use this:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Factory]
+#[UseInputType(for: "$id", inputType:"ID!")]
+public function getProductById(string $id): Product
+{
+    return $this->productRepository->findById($id);
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Factory()
@@ -147,6 +226,7 @@ public function getProductById(string $id): Product
     return $this->productRepository->findById($id);
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ### Declaring several input types for the same PHP class
 <small>Available in GraphQLite 4.0+</small>
@@ -158,6 +238,61 @@ In these cases, you can use combine the use of `@UseInputType` and `@Factory` an
 
 Here is an annotated sample:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+/**
+ * This class contains 2 factories to create Product objects.
+ * The "getProduct" method is used by default to map "Product" classes.
+ * The "createProduct" method will generate another input type named "CreateProductInput"
+ */
+class ProductFactory
+{
+    // ...
+    
+    /**
+     * This factory will be used by default to map "Product" classes.
+     */
+    #[Factory(name: "ProductRefInput", default: true)]
+    public function getProduct(string $id): Product
+    {
+        return $this->productRepository->findById($id);
+    }
+    /**
+     * We specify a name for this input type explicitly.
+     */
+    #[Factory(name: "CreateProductInput", default: false)]
+    public function createProduct(string $name, string $type): Product
+    {
+        return new Product($name, $type);
+    }
+}
+
+class ProductController
+{
+    /**
+     * The "createProduct" factory will be used for this mutation.
+     */
+    #[Mutation]
+    #[UseInputType(for: "$product", inputType: "CreateProductInput!")]
+    public function saveProduct(Product $product): Product
+    {
+        // ...
+    }
+    
+    /**
+     * The default "getProduct" factory will be used for this query.
+     *
+     * @return Color[]
+     */
+    #[Query]
+    public function availableColors(Product $product): array
+    {
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * This class contains 2 factories to create Product objects.
@@ -211,6 +346,7 @@ class ProductController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ### Ignoring some parameters
 <small>Available in GraphQLite 4.0+</small>
@@ -222,6 +358,20 @@ Image your `getProductById` has an additional `lazyLoad` parameter. This paramet
 directly the function in PHP because you can have some level of optimisation on your code. But it is not something that 
 you want to expose in the GraphQL API. Let's hide it! 
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Factory]
+public function getProductById(
+        string $id, 
+        #[HideParameter]
+        bool $lazyLoad = true
+    ): Product
+{
+    return $this->productRepository->findById($id, $lazyLoad);
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Factory()
@@ -232,6 +382,7 @@ public function getProductById(string $id, bool $lazyLoad = true): Product
     return $this->productRepository->findById($id, $lazyLoad);
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 With the `@HideParameter` annotation, you can choose to remove from the GraphQL schema any argument.
 

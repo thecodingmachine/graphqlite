@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Security;
 
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+
 use function sprintf;
 
 /**

@@ -18,6 +18,7 @@ use phpDocumentor\Reflection\Types\Mixed_;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+
 use function array_map;
 use function assert;
 use function implode;
@@ -178,5 +179,10 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     public static function createForPhpDocType(PhpDocumentorType $type): self
     {
         return new self("don't know how to handle type " . (string) $type);
+    }
+
+    public static function createForNonNullReturnByTypeMapper(): self
+    {
+        return new self('a type mapper returned a GraphQL\Type\Definition\NonNull instance. All instances returned by type mappers should be nullable. It is the role of the NullableTypeMapperAdapter class to make a GraphQL type in a "NonNull". Note: this is an error in the TypeMapper code or in GraphQLite itself. Please check your custom type mappers or open an issue on GitHub if you don\'t have any custom type mapper.');
     }
 }

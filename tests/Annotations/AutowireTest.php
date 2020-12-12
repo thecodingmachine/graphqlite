@@ -12,6 +12,6 @@ class AutowireTest extends TestCase
     {
         $this->expectException(BadMethodCallException::class);
         $this->expectExceptionMessage('The @Autowire annotation must be passed a target. For instance: "@Autowire(for="$myService")"');
-        new Autowire([]);
+        (new Autowire([]))->getTarget();
     }
 }

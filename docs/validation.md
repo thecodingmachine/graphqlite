@@ -30,6 +30,39 @@ GraphQLite provides a bridge to use the [Symfony validator](https://symfony.com/
 Usually, when you use the Symfony validator component, you put annotations in your entities and you validate those entities
 using the `Validator` object.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+**UserController.php**
+```php
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use TheCodingMachine\Graphqlite\Validator\ValidationFailedException
+
+class UserController
+{
+    private $validator;
+
+    public function __construct(ValidatorInterface $validator)
+    {
+        $this->validator = $validator;
+    }
+
+    #[Mutation]
+    public function createUser(string $email, string $password): User
+    {
+        $user = new User($email, $password);
+
+        // Let's validate the user
+        $errors = $this->validator->validate($user);
+
+        // Throw an appropriate GraphQL exception if validation errors are encountered
+        ValidationFailedException::throwException($errors);
+
+        // No errors? Let's continue and save the user
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 **UserController.php**
 ```php
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -62,9 +95,37 @@ class UserController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Validation rules are added directly to the object in the domain model:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+**User.php**
+```php
+use Symfony\Component\Validator\Constraints as Assert;
+
+class User
+{
+    #[Assert\Email(message: "The email '{{ value }}' is not a valid email.", checkMX: true)]
+    private $email;
+
+    /**
+     * The NotCompromisedPassword assertion asks the "HaveIBeenPawned" service if your password has already leaked or not.
+     */
+    #[Assert\NotCompromisedPassword]
+    private $password;
+
+    public function __construct(string $email, string $password)
+    {
+        $this->email = $email;
+        $this->password = $password;
+    }
+
+    // ...
+}
+```
+<!--PHP 7+-->
 **User.php**
 ```php
 use Symfony\Component\Validator\Constraints as Assert;
@@ -94,6 +155,7 @@ class User
     // ...
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 If a validation fails, GraphQLite will return the failed validations in the "errors" section of the JSON response:
 
@@ -147,3 +209,5 @@ You can also pass an array to the `constraint` parameter:
 ```php
 @Assertion(for="email", constraint={@Assert\NotBlank(), @Assert\Email()})
 ```
+
+<div class="alert alert-warning"><strong>Heads up!</strong> The "@Assertion" annotation is only available as a <strong>Doctrine annotations</strong>. You cannot use it as a PHP 8 attributes</div>

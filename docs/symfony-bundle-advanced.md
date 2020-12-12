@@ -53,6 +53,28 @@ By default, GraphQLite assumes that your firewall name is "main". This is the de
 Symfony security bundle so it is likely the value you are using. If for some reason you want to use
 another firewall, configure the name with `graphqlite.security.firewall_name`.
 
+## Schema and request security
+
+You can disable the introspection of your GraphQL API (for instance in production mode) using
+the `introspection` configuration properties.
+
+```yaml
+graphqlite:
+  security:
+    introspection: false
+```
+
+
+You can set the maximum complexity and depth of your GraphQL queries using the `maximum_query_complexity` 
+and `maximum_query_depth` configuration properties
+
+```yaml
+graphqlite:
+  security:
+    maximum_query_complexity: 314
+    maximum_query_depth: 42
+```
+
 ### Login using the "login" mutation
 
 The mutation below will log-in a user:
@@ -87,6 +109,21 @@ This interface is automatically mapped to a type with 2 fields:
 
 If you want to get more fields, just add the `@Type` annotation to your user class:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Type]
+class User implements UserInterface
+{
+    #[Field]
+    public function getEmail() : string
+    {
+        // ...
+    }
+
+}
+```
+<!--PHP 7+-->
 ```php
 /**
  * @Type
@@ -103,6 +140,7 @@ class User implements UserInterface
 
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 You can now query this field using an [inline fragment](https://graphql.org/learn/queries/#inline-fragments):
 
@@ -136,6 +174,18 @@ Most of the time, getting the request object is irrelevant. Indeed, it is GraphQ
 manage it for you. Sometimes yet, fetching the request can be needed. In those cases, simply type-hint on the request
 in any parameter of your query/mutation/field.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use Symfony\Component\HttpFoundation\Request;
+
+#[Query]
+public function getUser(int $id, Request $request): User
+{
+    // The $request object contains the Symfony Request.
+}
+```
+<!--PHP 7+-->
 ```php
 use Symfony\Component\HttpFoundation\Request;
 
@@ -147,3 +197,4 @@ public function getUser(int $id, Request $request): User
     // The $request object contains the Symfony Request.
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->

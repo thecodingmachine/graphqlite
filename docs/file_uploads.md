@@ -7,7 +7,15 @@ sidebar_label: File uploads
 GraphQL does not support natively the notion of file uploads, but an extension to the GraphQL protocol was proposed
 to add support for [multipart requests](https://github.com/jaydenseric/graphql-multipart-request-spec).
 
+## Installation
+
 GraphQLite supports this extension through the use of the [Ecodev/graphql-upload](https://github.com/Ecodev/graphql-upload) library.
+
+You must start by installing this package:
+
+```console
+$ composer require ecodev/graphql-upload
+```
 
 ## If you are using the Symfony bundle
 
@@ -29,6 +37,20 @@ for more information on how to integrate it in your framework.
 
 To handle an uploaded file, you type-hint against the PSR-7 `UploadedFileInterface`:
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+class MyController
+{
+    #[Mutation]
+    public function saveDocument(string $name, UploadedFileInterface $file): Document
+    {
+        // Some code that saves the document.
+        $file->moveTo($someDir);
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 class MyController
 {
@@ -42,6 +64,7 @@ class MyController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 Of course, you need to use a GraphQL client that is compatible with multipart requests. See [jaydenseric/graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec#client) for a list of compatible clients.
 

@@ -10,6 +10,7 @@ use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use Webmozart\Assert\Assert;
+
 use function sprintf;
 
 trait CannotMapTypeTrait

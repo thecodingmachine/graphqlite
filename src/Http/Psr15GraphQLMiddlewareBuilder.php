@@ -7,14 +7,15 @@ namespace TheCodingMachine\GraphQLite\Http;
 use GraphQL\Error\Debug;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Type\Schema;
+use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\StreamFactory;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
-use Zend\Diactoros\ResponseFactory;
-use Zend\Diactoros\StreamFactory;
+
 use function class_exists;
 
 /**

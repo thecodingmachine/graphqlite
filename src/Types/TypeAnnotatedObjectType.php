@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+
 use function class_implements;
 use function get_parent_class;
 
@@ -15,6 +16,7 @@ use function get_parent_class;
 class TypeAnnotatedObjectType extends MutableObjectType
 {
     /**
+     * @param class-string<object> $className
      * @param mixed[] $config
      */
     public function __construct(string $className, array $config)

@@ -508,7 +508,7 @@ class EndToEndTest extends TestCase
         $schema = $this->mainContainer->get(Schema::class);
         $queryString = '
         mutation {
-          saveBirthDate(birthDate: "1942-12-24 00:00:00")  {
+          saveBirthDate(birthDate: "1942-12-24T00:00:00+00:00")  {
             name
             birthDate
           }
@@ -549,7 +549,7 @@ class EndToEndTest extends TestCase
             null,
             null,
             [
-                "birthDate" => "1942-12-24 00:00:00"
+                "birthDate" => "1942-12-24T00:00:00+00:00"
             ]
         );
 
@@ -572,7 +572,7 @@ class EndToEndTest extends TestCase
           saveContact(
             contact: {
                 name: "foo",
-                birthDate: "1942-12-24 00:00:00",
+                birthDate: "1942-12-24T00:00:00+00:00",
                 relations: [
                     {
                         name: "bar"
@@ -1558,6 +1558,31 @@ class EndToEndTest extends TestCase
         $this->expectExceptionMessage('For parameter $inAndOut, in TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers\\InAndOutController::testInAndOut, type "InAndOut" must be an input type (if you declared an input type with the name "InAndOut", make sure that there are no output type with the same name as this is forbidden by the GraphQL spec).');
 
         $schema->validate();
+    }
+
+    public function testNullableResult(){
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            nullableResult {
+                count
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+        $resultArray = $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS);
+        if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
+            $this->fail('Expected a successful answer. Got '.json_encode($resultArray, JSON_PRETTY_PRINT));
+        }
+        $this->assertNull($resultArray['data']['nullableResult']);
     }
 
     public function testEndToEndFieldAnnotationInProperty(): void

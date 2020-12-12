@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Exceptions;
 use GraphQL\Error\ClientAware;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
+
 use function array_map;
 use function array_merge;
 

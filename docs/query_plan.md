@@ -40,6 +40,29 @@ With GraphQLite, you can answer this question by tapping into the `ResolveInfo` 
 
 <small>Available in GraphQLite 4.0+</small>
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use GraphQL\Type\Definition\ResolveInfo;
+
+class ProductsController
+{
+    /**
+     * @return Product[]
+     */
+    #[Query]
+    public function products(ResolveInfo $info): array
+    {
+        if (isset($info->getFieldSelection()['manufacturer']) {
+            // Let's perform a request with a JOIN on manufacturer
+        } else {
+            // Let's perform a request without a JOIN on manufacturer
+        }
+        // ...
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 use GraphQL\Type\Definition\ResolveInfo;
 
@@ -60,6 +83,8 @@ class ProductsController
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
 
 `ResolveInfo` is a class provided by Webonyx/GraphQL-PHP (the low-level GraphQL library used by GraphQLite).
 It contains info about the query and what fields are requested. Using `ResolveInfo::getFieldSelection` you can analyze the query 

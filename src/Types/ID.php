@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use InvalidArgumentException;
+
 use function is_object;
 use function is_scalar;
 use function method_exists;

@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 use BadMethodCallException;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
+
 use function get_class;
 use function is_array;
 use function is_string;

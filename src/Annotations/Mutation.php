@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
+
 /**
  * @Annotation
  * @Target({"METHOD"})
@@ -11,6 +13,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
  *   @Attribute("outputType", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_METHOD)]
 class Mutation extends AbstractRequest
 {
 }

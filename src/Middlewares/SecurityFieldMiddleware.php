@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
+
 use function array_combine;
 use function array_keys;
 use function assert;

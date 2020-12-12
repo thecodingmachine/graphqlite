@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite;
 use GraphQL\Type\Definition\FieldDefinition;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
+
 use function array_filter;
 use function array_intersect_key;
 use function array_keys;

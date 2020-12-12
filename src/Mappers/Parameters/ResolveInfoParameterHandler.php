@@ -12,6 +12,7 @@ use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ResolveInfoParameter;
+
 use function assert;
 
 class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
@@ -20,7 +21,7 @@ class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
     {
         $type = $parameter->getType();
         assert($type === null || $type instanceof ReflectionNamedType);
-        if ($type!== null && $type->getName() === ResolveInfo::class) {
+        if ($type !== null && $type->getName() === ResolveInfo::class) {
             return new ResolveInfoParameter();
         }
 

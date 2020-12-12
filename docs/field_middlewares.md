@@ -73,24 +73,26 @@ It returns the list of annotations applied to your field that implements the `Mi
 Let's imagine you want to add a `@OnlyDebug` annotation that displays a field/query/mutation only in debug mode (and 
 hides the field in production). That could be useful, right?
 
-First, we have to define the annotation. Annotations are handled by the great [doctrine/annotations](https://www.doctrine-project.org/projects/doctrine-annotations/en/1.6/index.html) library.
+First, we have to define the annotation. Annotations are handled by the great [doctrine/annotations](https://www.doctrine-project.org/projects/doctrine-annotations/en/1.6/index.html) library (for PHP 7+) and/or by PHP 8 attributes.
 
 **OnlyDebug.php**
 ```php
 namespace App\Annotations;
 
+use Attribute;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 
 /**
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
  */
+#[Attribute(Attribute::TARGET_METHOD)]
 class OnlyDebug implements MiddlewareAnnotationInterface
 {
 }
 ```
 
-Apart from being a classical annotation, this class implements the `MiddlewareAnnotationInterface`. This interface
+Apart from being a classical annotation/attribute, this class implements the `MiddlewareAnnotationInterface`. This interface
 is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this annotation 
 is to be used by middlewares.
 

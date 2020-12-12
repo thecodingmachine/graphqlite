@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
 
 use Porpaginas\Arrays\ArrayResult;
+use Porpaginas\Result;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -77,5 +78,16 @@ class ContactController
     public function getOtherContact(): Contact
     {
         return new Contact('Joe');
+    }
+
+    /**
+     * Test that we can have nullable results from Porpaginas.
+     *
+     * @Query()
+     * @return Result|Contact[]|null
+     */
+    public function getNullableResult(): ?Result
+    {
+        return null;
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+
 use function class_exists;
 use function interface_exists;
 use function ltrim;
@@ -24,6 +26,7 @@ use function ltrim;
  *   @Attribute("external", type = "bool"),
  * })
  */
+#[Attribute(Attribute::TARGET_CLASS)]
 class Type
 {
     /** @var class-string<object>|null */
@@ -44,20 +47,22 @@ class Type
 
     /**
      * @param mixed[] $attributes
+     * @param class-string<object>|null $class
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?bool $external = null)
     {
-        $external = $attributes['external'] ?? null;
-        if (isset($attributes['class'])) {
-            $this->setClass($attributes['class']);
+        $external = $external ?? $attributes['external'] ?? null;
+        $class = $class ?? $attributes['class'] ?? null;
+        if ($class !== null) {
+            $this->setClass($class);
         } else {
             $this->selfType = true;
         }
 
-        $this->name = $attributes['name'] ?? null;
+        $this->name = $name ?? $attributes['name'] ?? null;
 
         // If no value is passed for default, "default" = true
-        $this->default = $attributes['default'] ?? true;
+        $this->default = $default ?? $attributes['default'] ?? true;
 
         if ($external === null) {
             return;

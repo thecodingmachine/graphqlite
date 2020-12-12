@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
+
 use function array_map;
 use function is_array;
 
@@ -20,6 +22,7 @@ use function is_array;
  *   @Attribute("annotations", type = "mixed"),
  * })
  */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class SourceField implements SourceFieldInterface
 {
     /** @var string */
@@ -40,22 +43,24 @@ class SourceField implements SourceFieldInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null)
     {
-        if (! isset($attributes['name'])) {
+        $name = $name ?? $attributes['name'] ?? null;
+        if ($name === null) {
             throw new BadMethodCallException('The @SourceField annotation must be passed a name. For instance: "@SourceField(name=\'phone\')"');
         }
-        if (isset($attributes['outputType']) && isset($attributes['phpType'])) {
+        $this->name = $name;
+
+        $this->outputType = $outputType ?? $attributes['outputType'] ?? null;
+        $this->phpType = $phpType ?? $attributes['phpType'] ?? null;
+        if ($this->outputType && $this->phpType) {
             throw new BadMethodCallException('In a @SourceField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@SourceField(name=\'phone\', outputType=\'String!\')" or "@SourceField(name=\'phone\', phpType=\'string\')"');
         }
-        $this->name       = $attributes['name'];
-        $this->outputType = $attributes['outputType'] ?? null;
-        $this->phpType = $attributes['phpType'] ?? null;
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
         $annotations = $attributes['annotations'] ?? [];
         if (! is_array($annotations)) {
-            $annotations = [ $annotations ];
+            $annotations = [$annotations];
         }
         foreach ($annotations ?? [] as $annotation) {
             if ($annotation instanceof MiddlewareAnnotationInterface) {

@@ -139,6 +139,29 @@ throw only one exception.
 If you want to display several exceptions, you can bundle these exceptions in a `GraphQLAggregateException` that you can
 throw.
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
+
+#[Query]
+public function createProduct(string $name, float $price): Product
+{
+    $exceptions = new GraphQLAggregateException();
+
+    if ($name === '') {
+        $exceptions->add(new GraphQLException('Name cannot be empty', 400, null, 'VALIDATION'));
+    }
+    if ($price <= 0) {
+        $exceptions->add(new GraphQLException('Price must be positive', 400, null, 'VALIDATION'));
+    }
+
+    if ($exceptions->hasExceptions()) {
+        throw $exceptions;
+    }
+}
+```
+<!--PHP 7+-->
 ```php
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 
@@ -161,6 +184,7 @@ public function createProduct(string $name, float $price): Product
     }
 }
 ```
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ## Webonyx exceptions
 

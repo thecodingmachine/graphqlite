@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -18,6 +19,7 @@ use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
+
 use function array_filter;
 use function array_map;
 use function array_values;
@@ -58,6 +60,10 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         }
 
         $graphQlType = $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
+
+        if ($graphQlType instanceof NonNull) {
+            throw CannotMapTypeException::createForNonNullReturnByTypeMapper();
+        }
 
         if (! $isNullable && $graphQlType instanceof NullableType) {
             $graphQlType = GraphQLType::nonNull($graphQlType);
