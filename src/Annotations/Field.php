@@ -39,6 +39,7 @@ class Field extends AbstractRequest
 
     /**
      * @param mixed[] $attributes
+     * @param string|string[] $for
      */
     public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $prefetchMethod = null, $for = null, ?string $description = null, ?string $inputType = null)
     {
