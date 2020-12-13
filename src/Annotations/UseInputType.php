@@ -43,7 +43,7 @@ class UseInputType implements ParameterAnnotationInterface
             throw new BadMethodCallException('The @UseInputType annotation must be passed an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")" in PHP 7+ or #[UseInputType("MyInputType")] in PHP 8+');
         }
         $this->inputType = $values['inputType'];
-        if (! isset($for) &&! isset($values['for'])) {
+        if (! isset($for) && ! isset($values['for'])) {
             return;
         }
 
