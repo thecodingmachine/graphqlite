@@ -19,7 +19,7 @@ use function ltrim;
  *   @Attribute("for", type = "string")
  * })
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class HideParameter implements ParameterAnnotationInterface
 {
     /** @var string */
@@ -28,13 +28,13 @@ class HideParameter implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed> $values
      */
-    public function __construct(array $values = [], ?string $for = null)
+    public function __construct(array $values = [])
     {
-        if (! isset($for) && ! isset($values['for'])) {
+        if (! isset($values['for'])) {
             return;
         }
 
-        $this->for = ltrim($for ?? $values['for'], '$');
+        $this->for = ltrim($values['for'], '$');
     }
 
     public function getTarget(): string

@@ -20,7 +20,7 @@ use function ltrim;
  *   @Attribute("inputType", type = "string"),
  * })
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class UseInputType implements ParameterAnnotationInterface
 {
     /** @var string|null */
@@ -33,7 +33,7 @@ class UseInputType implements ParameterAnnotationInterface
      *
      * @throws BadMethodCallException
      */
-    public function __construct($inputType = [], ?string $for = null)
+    public function __construct($inputType = [])
     {
         $values = $inputType;
         if (is_string($values)) {
@@ -43,11 +43,11 @@ class UseInputType implements ParameterAnnotationInterface
             throw new BadMethodCallException('The @UseInputType annotation must be passed an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")" in PHP 7+ or #[UseInputType("MyInputType")] in PHP 8+');
         }
         $this->inputType = $values['inputType'];
-        if (! isset($for) && ! isset($values['for'])) {
+        if (! isset($values['for'])) {
             return;
         }
 
-        $this->for = ltrim($for ?? $values['for'], '$');
+        $this->for = ltrim($values['for'], '$');
     }
 
     public function getTarget(): string
