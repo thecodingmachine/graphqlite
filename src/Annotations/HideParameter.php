@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
 
 use function ltrim;
@@ -18,6 +19,7 @@ use function ltrim;
  *   @Attribute("for", type = "string")
  * })
  */
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class HideParameter implements ParameterAnnotationInterface
 {
     /** @var string */
@@ -26,13 +28,13 @@ class HideParameter implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed> $values
      */
-    public function __construct(array $values = [])
+    public function __construct(array $values = [], ?string $for = null)
     {
-        if (! isset($values['for'])) {
+        if (! isset($for) && ! isset($values['for'])) {
             return;
         }
 
-        $this->for = ltrim($values['for'], '$');
+        $this->for = ltrim($for ?? $values['for'], '$');
     }
 
     public function getTarget(): string
