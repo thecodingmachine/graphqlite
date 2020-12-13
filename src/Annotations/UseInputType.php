@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
 
 use function is_string;
@@ -19,6 +20,7 @@ use function ltrim;
  *   @Attribute("inputType", type = "string"),
  * })
  */
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class UseInputType implements ParameterAnnotationInterface
 {
     /** @var string|null */

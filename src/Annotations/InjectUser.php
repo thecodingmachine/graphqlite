@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
+use Attribute;
 use BadMethodCallException;
 
 use function ltrim;
@@ -18,6 +19,7 @@ use function ltrim;
  *   @Attribute("for", type = "string")
  * })
  */
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class InjectUser implements ParameterAnnotationInterface
 {
     /** @var string */
