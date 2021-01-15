@@ -15,7 +15,7 @@ use Iterator;
 use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
-use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\AbstractList;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
@@ -133,11 +133,11 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      */
     private function getTypeInArray(Type $typeHint): ?Type
     {
-        if (! $typeHint instanceof Array_) {
-            return null;
+        if ($typeHint instanceof AbstractList) {
+            return $typeHint->getValueType();
         }
 
-        return $typeHint->getValueType();
+        return null;
     }
 
     /**
