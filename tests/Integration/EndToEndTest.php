@@ -1258,6 +1258,23 @@ class EndToEndTest extends TestCase
         $this->assertSame([
             'nullableSecretPhrase2' => null
         ], $this->getSuccessResult($result));
+
+        // Test with @FailWith annotation on property
+        $queryString = '
+        query {
+            contacts {
+              failWithNull
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+          $schema,
+          $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(null, $data['contacts'][0]['failWithNull']);
     }
 
     public function testEndToEndSecurityWithUser(): void

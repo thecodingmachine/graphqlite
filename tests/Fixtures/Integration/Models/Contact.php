@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 
 use DateTimeImmutable;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use function array_search;
 use DateTimeInterface;
@@ -72,6 +73,13 @@ class Contact
      * @var bool
      */
     private $private = true;
+    /**
+     * @Field()
+     * @Right("NO_ACCESS")
+     * @FailWith(null)
+     * @var string
+     */
+    public $failWithNull = 'This should fail with NULL!';
 
     public function __construct(string $name)
     {

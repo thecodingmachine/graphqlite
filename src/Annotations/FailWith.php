@@ -18,7 +18,7 @@ use function is_array;
  *   @Attribute("mode", type = "string")
  * })
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class FailWith implements MiddlewareAnnotationInterface
 {
     /**
