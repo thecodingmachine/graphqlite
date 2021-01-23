@@ -66,6 +66,7 @@ use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use function json_encode;
 use function var_dump;
@@ -1597,6 +1598,8 @@ class EndToEndTest extends TestCase
             contacts {
                 age
                 nickName
+                status
+                address
             }
         }
         ';
@@ -1610,5 +1613,24 @@ class EndToEndTest extends TestCase
 
         $this->assertSame(42, $data['contacts'][0]['age']);
         $this->assertSame('foo', $data['contacts'][0]['nickName']);
+        $this->assertSame('bar', $data['contacts'][0]['status']);
+        $this->assertSame('foo', $data['contacts'][0]['address']);
+
+        $queryString = '
+        query {
+            contacts {
+                private
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+          $schema,
+          $queryString
+        );
+
+        $this->expectException(AccessPropertyException::class);
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::private'. Either make the property public or add a public getter for it like this: 'getPrivate' or 'isPrivate'");
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
 }

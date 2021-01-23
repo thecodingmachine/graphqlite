@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Utils;
 
+use ReflectionMethod;
+use ReflectionProperty;
 use function get_class;
 use function method_exists;
 use function ucfirst;
@@ -22,7 +24,7 @@ class PropertyAccessor
 
         foreach (['get', 'is'] as $prefix) {
             $methodName = $prefix . $name;
-            if (method_exists($class, $methodName)) {
+            if (self::publicMethodExists($class, $methodName)) {
                 return $methodName;
             }
         }
@@ -38,7 +40,7 @@ class PropertyAccessor
         $name = ucfirst($propertyName);
 
         $methodName = 'set' . $name;
-        if (method_exists($class, $methodName)) {
+        if (self::publicMethodExists($class, $methodName)) {
             return $methodName;
         }
 
@@ -52,12 +54,18 @@ class PropertyAccessor
      */
     public static function getValue(object $object, string $propertyName, ...$args)
     {
-        $method = self::findGetter(get_class($object), $propertyName);
+        $class = get_class($object);
+
+        $method = self::findGetter($class, $propertyName);
         if ($method) {
             return $object->$method(...$args);
         }
 
-        return $object->$propertyName;
+        if (self::publicPropertyExists($class, $propertyName)) {
+            return $object->$propertyName;
+        }
+
+        throw AccessPropertyException::createForUnreadableProperty($class, $propertyName);
     }
 
     /**
@@ -65,11 +73,40 @@ class PropertyAccessor
      */
     public static function setValue(object $instance, string $propertyName, $value): void
     {
-        $setter = self::findSetter(get_class($instance), $propertyName);
+        $class = get_class($instance);
+
+        $setter = self::findSetter($class, $propertyName);
         if ($setter) {
             $instance->$setter($value);
-        } else {
+            return;
+        }
+
+        if (self::publicPropertyExists($class, $propertyName)) {
             $instance->$propertyName = $value;
         }
+
+        throw AccessPropertyException::createForUnwritableProperty($class, $propertyName);
+    }
+
+    private static function publicPropertyExists(string $class, string $propertyName): bool
+    {
+        if (!property_exists($class, $propertyName)) {
+            return false;
+        }
+
+        $reflection = new ReflectionProperty($class, $propertyName);
+
+        return $reflection->isPublic();
+    }
+
+    private static function publicMethodExists(string $class, string $methodName): bool
+    {
+        if (!method_exists($class, $methodName)) {
+            return false;
+        }
+
+        $reflection = new ReflectionMethod($class, $methodName);
+
+        return $reflection->isPublic();
     }
 }

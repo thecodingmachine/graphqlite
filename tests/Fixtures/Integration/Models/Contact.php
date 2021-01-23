@@ -57,6 +57,21 @@ class Contact
      * @var string
      */
     public $nickName = 'foo';
+    /**
+     * @Field()
+     * @var string
+     */
+    public $status = 'foo';
+    /**
+     * @Field()
+     * @var string
+     */
+    public $address = 'foo';
+    /**
+     * @Field()
+     * @var bool
+     */
+    private $private = true;
 
     public function __construct(string $name)
     {
@@ -199,6 +214,22 @@ class Contact
     public function getAge(): int
     {
         return $this->age;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return 'bar';
+    }
+
+    /**
+     * @return string
+     */
+    private function getAddress(): string
+    {
+        return $this->address;
     }
 
     /**
