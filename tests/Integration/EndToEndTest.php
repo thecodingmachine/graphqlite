@@ -948,6 +948,22 @@ class EndToEndTest extends TestCase
         $queryString = '
         query {
             contacts {
+                name
+                forLogged
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+          $schema,
+          $queryString
+        );
+
+        $this->assertSame('You need to be logged to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
                 secret
             }
         }
@@ -959,6 +975,37 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                withRight
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+          $schema,
+          $queryString
+        );
+
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                hidden
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+          $schema,
+          $queryString
+        );
+
+        $this->assertSame('Cannot query field "hidden" on type "ContactInterface".', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testAutowireService(): void
@@ -1421,6 +1468,21 @@ class EndToEndTest extends TestCase
         $result = GraphQL::executeQuery(
             $schema,
             $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                secured
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+          $schema,
+          $queryString
         );
 
         $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);

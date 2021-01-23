@@ -6,7 +6,9 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeImmutable;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
+use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use function array_search;
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -80,6 +82,31 @@ class Contact
      * @var string
      */
     public $failWithNull = 'This should fail with NULL!';
+    /**
+     * @Field()
+     * @Right("NO_ACCESS")
+     * @HideIfUnauthorized()
+     * @var string
+     */
+    public $hidden = 'you can see the property only if you have access';
+    /**
+     * @Field()
+     * @Logged()
+     * @var string
+     */
+    public $forLogged = 'you can see this only if you are logged';
+    /**
+     * @Field()
+     * @Right("NO_ACCESS")
+     * @var string
+     */
+    public $withRight = 'you can see this only if you have sufficient right';
+    /**
+     * @Field()
+     * @Security("is_granted('NO_ACCESS')")
+     * @var string
+     */
+    public $secured = 'you can see this only if access granted';
 
     public function __construct(string $name)
     {
