@@ -10,7 +10,7 @@ class AccessPropertyException extends LogicException
     {
         $name = ucfirst($propertyName);
 
-        return new self("Could not get value from property '$class::$propertyName'. Either make the property public or add a public getter for it like this: 'get$name' or 'is$name'");
+        return new self("Could not get value from property '$class::$propertyName'. Either make the property public or add a public getter for it like 'get$name' or 'is$name' with no required parameters");
     }
 
     public static function createForUnwritableProperty(string $class, string $propertyName): self

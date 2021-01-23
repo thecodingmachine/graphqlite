@@ -77,6 +77,11 @@ class Contact
     private $private = true;
     /**
      * @Field()
+     * @var string
+     */
+    private $zipcode = '5555';
+    /**
+     * @Field()
      * @Right("NO_ACCESS")
      * @FailWith(null)
      * @var string
@@ -257,6 +262,14 @@ class Contact
     public function getStatus(): string
     {
         return 'bar';
+    }
+
+    /**
+     * @return string
+     */
+    public function getZipcode(string $foo): string
+    {
+        return $this->zipcode;
     }
 
     /**

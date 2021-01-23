@@ -24,7 +24,7 @@ class PropertyAccessor
 
         foreach (['get', 'is'] as $prefix) {
             $methodName = $prefix . $name;
-            if (self::publicMethodExists($class, $methodName)) {
+            if (self::isPublicMethod($class, $methodName)) {
                 return $methodName;
             }
         }
@@ -40,7 +40,7 @@ class PropertyAccessor
         $name = ucfirst($propertyName);
 
         $methodName = 'set' . $name;
-        if (self::publicMethodExists($class, $methodName)) {
+        if (self::isPublicMethod($class, $methodName)) {
             return $methodName;
         }
 
@@ -57,7 +57,7 @@ class PropertyAccessor
         $class = get_class($object);
 
         $method = self::findGetter($class, $propertyName);
-        if ($method) {
+        if ($method && self::isValidGetter($class, $method)) {
             return $object->$method(...$args);
         }
 
@@ -99,7 +99,7 @@ class PropertyAccessor
         return $reflection->isPublic();
     }
 
-    private static function publicMethodExists(string $class, string $methodName): bool
+    private static function isPublicMethod(string $class, string $methodName): bool
     {
         if (!method_exists($class, $methodName)) {
             return false;
@@ -108,5 +108,17 @@ class PropertyAccessor
         $reflection = new ReflectionMethod($class, $methodName);
 
         return $reflection->isPublic();
+    }
+
+    private static function isValidGetter(string $class, string $methodName): bool
+    {
+        $reflection = new ReflectionMethod($class, $methodName);
+        foreach ($reflection->getParameters() as $parameter) {
+            if (!$parameter->isDefaultValueAvailable()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

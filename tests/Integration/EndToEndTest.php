@@ -955,8 +955,8 @@ class EndToEndTest extends TestCase
         ';
 
         $result = GraphQL::executeQuery(
-          $schema,
-          $queryString
+            $schema,
+            $queryString
         );
 
         $this->assertSame('You need to be logged to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -985,8 +985,8 @@ class EndToEndTest extends TestCase
         ';
 
         $result = GraphQL::executeQuery(
-          $schema,
-          $queryString
+            $schema,
+            $queryString
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1001,8 +1001,8 @@ class EndToEndTest extends TestCase
         ';
 
         $result = GraphQL::executeQuery(
-          $schema,
-          $queryString
+            $schema,
+            $queryString
         );
 
         $this->assertSame('Cannot query field "hidden" on type "ContactInterface".', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1316,8 +1316,8 @@ class EndToEndTest extends TestCase
         ';
 
         $result = GraphQL::executeQuery(
-          $schema,
-          $queryString
+            $schema,
+            $queryString
         );
 
         $data = $this->getSuccessResult($result);
@@ -1481,8 +1481,8 @@ class EndToEndTest extends TestCase
         ';
 
         $result = GraphQL::executeQuery(
-          $schema,
-          $queryString
+            $schema,
+            $queryString
         );
 
         $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1703,13 +1703,29 @@ class EndToEndTest extends TestCase
         }
         ';
 
-        $result = GraphQL::executeQuery(
-          $schema,
-          $queryString
+        GraphQL::executeQuery(
+            $schema,
+            $queryString
         );
 
         $this->expectException(AccessPropertyException::class);
-        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::private'. Either make the property public or add a public getter for it like this: 'getPrivate' or 'isPrivate'");
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::private'. Either make the property public or add a public getter for it like 'getPrivate' or 'isPrivate' with no required parameters");
+
+        $queryString = '
+        query {
+            contacts {
+                zipcode
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(AccessPropertyException::class);
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::zipcode'. Either make the property public or add a public getter for it like 'getZipcode' or 'isZipcode' with no required parameters");
         $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
 }
