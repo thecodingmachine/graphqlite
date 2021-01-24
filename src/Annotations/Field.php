@@ -50,7 +50,7 @@ class Field extends AbstractRequest
 
         $forValue = $for ?? $attributes['for'] ?? null;
         if ($forValue) {
-            $this->for = (array) $for;
+            $this->for = (array) $forValue;
         }
     }
 

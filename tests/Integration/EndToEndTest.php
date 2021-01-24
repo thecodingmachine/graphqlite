@@ -1728,4 +1728,126 @@ class EndToEndTest extends TestCase
         $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::zipcode'. Either make the property public or add a public getter for it like 'getZipcode' or 'isZipcode' with no required parameters");
         $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
+
+    public function testEndToEndInputAnnotations(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+            createPost(
+                post: {
+                    title: "foo",
+                    publishedAt: "2021-01-24T00:00:00+00:00"
+                    author: {
+                      name: "foo",
+                      birthDate: "1942-12-24T00:00:00+00:00",
+                      relations: [
+                        {
+                            name: "bar"
+                        }
+                      ]
+                    }
+                }
+            ) {
+                id
+                title
+                publishedAt
+                description
+                summary
+                author {
+                  name
+                }
+            }
+            updatePost(
+                id: 100,
+                post: {
+                    title: "bar"
+                }
+            ) {
+                id
+                title
+                description
+                summary
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'createPost' => [
+                'id' => 1,
+                'title' => 'foo',
+                'publishedAt' => '2021-01-24T00:00:00+00:00',
+                'description' => 'foo',
+                'summary' => 'foo',
+                'author' => [
+                    'name' => 'foo',
+                ],
+            ],
+            'updatePost' => [
+                'id' => 100,
+                'title' => 'bar',
+                'description' => 'bar',
+                'summary' => 'foo',
+            ],
+        ], $this->getSuccessResult($result));
+    }
+
+    public function testEndToEndInputAnnotationIssues(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+            createPost(
+                post: {
+                    id: 20,
+                }
+            ) {
+                id
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Field PostInput.publishedAt of required type DateTime! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "id" is not defined by type PostInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+
+        $queryString = '
+        mutation {
+            updatePost(
+                id: 100,
+                post: {
+                    title: "foo",
+                    inaccessible: "foo"
+                }
+            ) {
+                id
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(AccessPropertyException::class);
+        $this->expectExceptionMessage("Could not set value for property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post::inaccessible'. Either make the property public or add a public setter for it like this: 'setInaccessible'");
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+    }
 }

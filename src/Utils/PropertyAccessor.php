@@ -61,7 +61,7 @@ class PropertyAccessor
             return $object->$method(...$args);
         }
 
-        if (self::publicPropertyExists($class, $propertyName)) {
+        if (self::isPublicProperty($class, $propertyName)) {
             return $object->$propertyName;
         }
 
@@ -81,14 +81,15 @@ class PropertyAccessor
             return;
         }
 
-        if (self::publicPropertyExists($class, $propertyName)) {
+        if (self::isPublicProperty($class, $propertyName)) {
             $instance->$propertyName = $value;
+            return;
         }
 
         throw AccessPropertyException::createForUnwritableProperty($class, $propertyName);
     }
 
-    private static function publicPropertyExists(string $class, string $propertyName): bool
+    private static function isPublicProperty(string $class, string $propertyName): bool
     {
         if (!property_exists($class, $propertyName)) {
             return false;
