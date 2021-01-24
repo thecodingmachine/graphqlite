@@ -40,11 +40,9 @@ class Input
 
     /**
      * @param mixed[] $attributes
-     * @param class-string<object>|null $class
      */
-    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?string $description = null, ?bool $update = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null, ?string $description = null, ?bool $update = null)
     {
-        $this->class = $class ?? $attributes['class'] ?? null;
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->default = $default ?? $attributes['default'] ?? $this->name === null;
         $this->description = $description ?? $attributes['description'] ?? null;
