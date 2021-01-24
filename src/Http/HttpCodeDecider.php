@@ -16,7 +16,7 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
      *
      * @var int
      */
-    private $defaultHTTPErrorCode = 200;
+    private $defaultHTTPErrorCode = 400;
 
     /**
      * Decides the HTTP status code based on the answer.

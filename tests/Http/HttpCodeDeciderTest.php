@@ -54,20 +54,20 @@ class HttpCodeDeciderTest extends TestCase
         $this->assertSame(404, $codeDecider->decideHttpStatusCode($executionResult));
 
         $executionResult = new ExecutionResult(null, [ $graphqlError ]);
-        $this->assertSame(200, $codeDecider->decideHttpStatusCode($executionResult));
+        $this->assertSame(400, $codeDecider->decideHttpStatusCode($executionResult));
 
         $executionResult = new ExecutionResult(null, [ $clientAwareError ]);
-        $this->assertSame(200, $codeDecider->decideHttpStatusCode($executionResult));
+        $this->assertSame(400, $codeDecider->decideHttpStatusCode($executionResult));
     }
 
     public function testSetTheDefaultHTTPErroCode(): void
     {
         $codeDecider = new HttpCodeDecider();
-        $codeDecider->setDefaultHTTPErrorCode(400);
+        $codeDecider->setDefaultHTTPErrorCode(200);
         $graphqlError = new Exception('foo');
 
         $executionResult = new ExecutionResult(null, [ $graphqlError ]);
 
-        $this->assertSame(400, $codeDecider->decideHttpStatusCode($executionResult));
+        $this->assertSame(200, $codeDecider->decideHttpStatusCode($executionResult));
     }
 }
