@@ -78,6 +78,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     private $globTypeMapperCache;
     /** @var GlobExtendTypeMapperCache */
     private $globExtendTypeMapperCache;
+    /** @var array<string, class-string<object>> */
+    private array $registeredInputs;
 
     public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
     {
@@ -135,6 +137,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         /** @var array<class-string<object>,ReflectionClass<object>> $classes */
         $classes = $this->getClassList();
+
         foreach ($classes as $className => $refClass) {
             $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
                 $annotationsCache = new GlobAnnotationsCache();
@@ -151,6 +154,11 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 $inputs = $this->annotationReader->getInputAnnotations($refClass);
                 foreach ($inputs as $input) {
                     $inputName = $this->namingStrategy->getInputTypeName($className, $input);
+                    if (isset($this->registeredInputs[$inputName])) {
+                        throw DuplicateMappingException::createForTwoInputs($inputName, $this->registeredInputs[$inputName], $refClass->getName());
+                    }
+
+                    $this->registeredInputs[$inputName] = $refClass->getName();
                     $annotationsCache->registerInput($inputName, $className, $input);
                     $containsAnnotations = true;
                 }

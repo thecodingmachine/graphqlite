@@ -71,8 +71,17 @@ class DuplicateMappingException extends RuntimeException
     /**
      * @return static
      */
-    public static function createForInput(string $sourceClass): self
+    public static function createForDefaultInput(string $sourceClass): self
     {
-        throw new self(sprintf("The class '%s' should be mapped to only one GraphQL Input type. Two default inputs are declared as default via @Input annotation.", $sourceClass));
+        throw new self(sprintf("The class '%s' should be mapped to only one GraphQL Input type as default. Two default inputs are declared as default via @Input annotation.", $sourceClass));
+    }
+
+    public static function createForTwoInputs(string $typeName, string $firstClass, string $secondClass): self
+    {
+        if ($firstClass === $secondClass) {
+            throw new self(sprintf("The input type '%s' is created 2 times in '%s'", $typeName, $firstClass));
+        }
+
+        throw new self(sprintf("The input type '%s' is created by 2 different classes: '%s' and '%s'", $typeName, $firstClass, $secondClass));
     }
 }

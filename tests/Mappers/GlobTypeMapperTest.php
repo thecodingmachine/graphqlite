@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2;
 use TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes\ChildTestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\FilterDecorator;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Fixtures\TestInput;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
@@ -79,6 +80,22 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
+    }
+
+    public function testGlobTypeMapperDuplicateInputsException(): void
+    {
+        $container = new Picotainer([
+            TestInput::class => function () {
+                return new TestInput();
+            }
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+
+        $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\DuplicateInputs'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+
+        $this->expectException(DuplicateMappingException::class);
+        $mapper->canMapClassToInputType(TestInput::class);
     }
 
     public function testGlobTypeMapperDuplicateInputTypesException(): void

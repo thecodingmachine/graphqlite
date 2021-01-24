@@ -72,7 +72,7 @@ class GlobTypeMapperCache
         foreach ($globAnnotationsCache->getInputs() as $inputName => [$inputClassName, $isDefault, $description, $isUpdate]) {
             if ($isDefault) {
                 if (isset($this->mapClassToInput[$inputClassName])) {
-                    throw DuplicateMappingException::createForInput($refClass->getName());
+                    throw DuplicateMappingException::createForDefaultInput($refClass->getName());
                 }
 
                 $this->mapClassToInput[$inputClassName] = [$inputName, $description, $isUpdate];
