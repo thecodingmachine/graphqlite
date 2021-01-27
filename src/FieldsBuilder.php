@@ -186,6 +186,12 @@ class FieldsBuilder
             }
         }
 
+        // Make sure @Field annotations applied to parent's private properties are taken into account as well.
+        if ($parent = $refClass->getParentClass()) {
+            $parentFields = $this->getInputFields($parent->getName(), $inputName, $isUpdate);
+            $fields = array_merge($fields, array_diff_key($parentFields, $fields));
+        }
+
         return $fields;
     }
 

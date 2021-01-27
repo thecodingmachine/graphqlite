@@ -125,7 +125,7 @@ class AnnotationReader
     {
         try {
             /** @var Input[] $inputs */
-            $inputs = $this->getClassAnnotations($refClass, Input::class);
+            $inputs = $this->getClassAnnotations($refClass, Input::class, false);
             foreach ($inputs as $input) {
                 $input->setClass($refClass->getName());
             }
@@ -398,6 +398,7 @@ class AnnotationReader
      *
      * @param ReflectionClass<T> $refClass
      * @param class-string<A> $annotationClass
+     * @param bool $inherited
      *
      * @return A[]
      *
@@ -406,7 +407,7 @@ class AnnotationReader
      * @template T of object
      * @template A of object
      */
-    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass): array
+    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass, bool $inherited = true): array
     {
         $toAddAnnotations = [];
         do {
@@ -438,7 +439,7 @@ class AnnotationReader
                 }
             }
             $refClass = $refClass->getParentClass();
-        } while ($refClass);
+        } while ($inherited && $refClass);
 
         if (! empty($toAddAnnotations)) {
             return array_merge(...$toAddAnnotations);

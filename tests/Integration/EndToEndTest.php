@@ -1772,6 +1772,31 @@ class EndToEndTest extends TestCase
                 description
                 summary
             }
+            createArticle(
+                article: {
+                    title: "foo",
+                    description: "some description",
+                    magazine: "bar",
+                    author: {
+                      name: "foo",
+                      birthDate: "1942-12-24T00:00:00+00:00",
+                      relations: [
+                        {
+                            name: "bar"
+                        }
+                      ]
+                    }
+                }
+            ) {
+                id
+                title
+                description
+                summary
+                magazine
+                author {
+                  name
+                }
+            }
         }
         ';
 
@@ -1796,6 +1821,16 @@ class EndToEndTest extends TestCase
                 'title' => 'bar',
                 'description' => 'bar',
                 'summary' => 'foo',
+            ],
+            'createArticle' => [
+                'id' => 2,
+                'title' => 'foo',
+                'description' => 'some description',
+                'summary' => 'foo',
+                'magazine' => 'bar',
+                'author' => [
+                    'name' => 'foo',
+                ],
             ],
         ], $this->getSuccessResult($result));
     }
@@ -1826,6 +1861,29 @@ class EndToEndTest extends TestCase
         $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
         $this->assertSame('Field PostInput.publishedAt of required type DateTime! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
         $this->assertSame('Field "id" is not defined by type PostInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+
+        $queryString = '
+        mutation {
+            createArticle(
+                article: {
+                    id: 20,
+                    publishedAt: "2021-01-24T00:00:00+00:00"
+                }
+            ) {
+                id
+                publishedAt
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Field ArticleInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Field "id" is not defined by type ArticleInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "publishedAt" is not defined by type ArticleInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
 
         $queryString = '
         mutation {
