@@ -19,6 +19,14 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
     private $defaultHTTPErrorCode = 400;
 
     /**
+     * @param int $defaultHTTPErrorCode Default error code used in the HTTP requests.
+     */
+    public function __construct(int $defaultHTTPErrorCode = 400)
+    {
+        $this->defaultHTTPErrorCode = $defaultHTTPErrorCode;
+    }
+
+    /**
      * Decides the HTTP status code based on the answer.
      *
      * @see https://github.com/APIs-guru/graphql-over-http#status-codes
@@ -59,10 +67,5 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
         }
 
         return $status;
-    }
-
-    public function setDefaultHTTPErrorCode(int $code): void
-    {
-        $this->defaultHTTPErrorCode = $code;
     }
 }

@@ -62,8 +62,7 @@ class HttpCodeDeciderTest extends TestCase
 
     public function testSetTheDefaultHTTPErroCode(): void
     {
-        $codeDecider = new HttpCodeDecider();
-        $codeDecider->setDefaultHTTPErrorCode(200);
+        $codeDecider = new HttpCodeDecider(200);
         $graphqlError = new Exception('foo');
 
         $executionResult = new ExecutionResult(null, [ $graphqlError ]);
