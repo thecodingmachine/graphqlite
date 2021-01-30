@@ -18,4 +18,9 @@ class FailedResolvingInputType extends RuntimeException
     {
         return new self('Input type cannot be a decorator');
     }
+
+    public static function createForNotInstantiableClass(string $class): self
+    {
+        return new self("Class '$class' annotated with @Input must be instantiable.");
+    }
 }

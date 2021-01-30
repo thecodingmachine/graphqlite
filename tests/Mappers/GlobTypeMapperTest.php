@@ -13,11 +13,13 @@ use Symfony\Component\Cache\Simple\NullCache;
 use Test;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType\BadExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2;
 use TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes\ChildTestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\FilterDecorator;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Fixtures\NonInstantiableInput\AbstractFoo;
 use TheCodingMachine\GraphQLite\Fixtures\TestInput;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
@@ -386,5 +388,20 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('Class "TheCodingMachine\GraphQLite\Fixtures\NonInstantiableType\AbstractFooType" annotated with @Type(class="TheCodingMachine\GraphQLite\Fixtures\TestObject") must be instantiable.');
         $mapper->mapClassToType(TestObject::class, null);
+    }
+
+    public function testNonInstantiableInput(): void
+    {
+        $container = new Picotainer([]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $cache = new Psr16Cache(new ArrayAdapter());
+        $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\NonInstantiableInput'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
+
+        $this->expectException(FailedResolvingInputType::class);
+        $this->expectExceptionMessage("Class 'TheCodingMachine\GraphQLite\Fixtures\NonInstantiableInput\AbstractFoo' annotated with @Input must be instantiable.");
+        $mapper->mapClassToInputType(AbstractFoo::class);
     }
 }

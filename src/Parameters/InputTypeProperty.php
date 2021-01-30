@@ -14,8 +14,8 @@ class InputTypeProperty extends InputTypeParameter
     private $propertyName;
 
     /**
-     * @param InputType&Type   $type
-     * @param mixed            $defaultValue
+     * @param InputType&Type $type
+     * @param mixed          $defaultValue
      */
     public function __construct(string $propertyName, string $fieldName, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
     {

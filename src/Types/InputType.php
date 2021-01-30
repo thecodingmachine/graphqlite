@@ -28,6 +28,11 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
      */
     public function __construct(string $className, string $inputName, ?string $description, bool $isUpdate, FieldsBuilder $fieldsBuilder)
     {
+        $reflection = new ReflectionClass($className);
+        if (!$reflection->isInstantiable()) {
+          throw FailedResolvingInputType::createForNotInstantiableClass($className);
+        }
+
         $this->fields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
 
         $fields = function () use ($isUpdate) {
