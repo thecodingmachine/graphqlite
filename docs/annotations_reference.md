@@ -55,16 +55,35 @@ name           | see below  | string | The targeted GraphQL output type.
 
 One and only one of "class" and "name" parameter can be passed at the same time.
 
+## @Input annotation
+
+The `@Input` annotation is used to declare a GraphQL input type.
+
+**Applies on**: classes.
+
+Attribute      | Compulsory | Type   | Definition
+---------------|------------|--------|--------
+name           | *no*       | string | The name of the GraphQL input type generated. If not passed, the name of the class with suffix "Input" is used. If the class ends with "Input", the "Input" suffix is not added.
+description    | *no*       | string | Description of the input type in the documentation. If not passed, PHP doc comment is used.
+default        | *no*       | bool   | Defaults to *true* if name is not specified. Whether the annotated PHP class should be mapped by default to this type.
+update         | *no*       | bool   | Determines if the the input represents a partial update. When set to *true* input fields won't have default values thus won't be set on resolve if they are not specified in the query/mutation.
+
+
 ## @Field annotation
 
 The `@Field` annotation is used to declare a GraphQL field.
 
-**Applies on**: methods of classes annotated with `@Type` or `@ExtendType`.
+**Applies on**: methods or properties of classes annotated with `@Type`, `@ExtendType` or `@Input`. 
+When it's applied on private or protected property, public getter or/and setter method is expected in the class accordingly 
+whether it's used for output type or input type. For example if property name is `foo` then getter should be `getFoo()` or setter should be `setFoo($foo)`. Setter can be omitted if property related to the field is present in the constructor with the same name.
 
-Attribute      | Compulsory | Type | Definition
----------------|------------|------|--------
-name           | *no*       | string | The name of the field. If skipped, the name of the method is used instead.
-[outputType](custom_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+Attribute                     | Compulsory | Type | Definition
+------------------------------|------------|---------------|--------
+name                          | *no*       | string        | The name of the field. If skipped, the name of the method is used instead.
+for                           | *no*       | string, array | Forces the field to be used only for specific output or input type(s). By default field is used for all possible declared types.
+description                   | *no*       | string        | Field description displayed in the GraphQL docs. If it's empty PHP doc comment is used instead.
+[outputType](custom_types.md) | *no*       | string        | Forces the GraphQL output type of a query.
+[inputType](input_types.md)   | *no*       | string        | Forces the GraphQL input type of a query.
 
 ## @SourceField annotation
 
@@ -100,7 +119,7 @@ annotations    | *no*       | array<Annotations>  | A set of annotations that ap
 
 The `@Logged` annotation is used to declare a Query/Mutation/Field is only visible to logged users.
 
-**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
+**Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field`.
 
 This annotation allows no attributes.
 
@@ -108,7 +127,7 @@ This annotation allows no attributes.
 
 The `@Right` annotation is used to declare a Query/Mutation/Field is only visible to users with a specific right.
 
-**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
+**Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field`.
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
@@ -119,7 +138,7 @@ name           | *yes*       | string | The name of the right.
 The `@FailWith` annotation is used to declare a default value to return in the user is not authorized to see a specific
 query / mutation / field (according to the `@Logged` and `@Right` annotations).
 
-**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
+**Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
@@ -130,7 +149,7 @@ value          | *yes*       | mixed | The value to return if the user is not au
 The `@HideIfUnauthorized` annotation is used to completely hide the query / mutation / field if the user is not authorized
 to access it (according to the `@Logged` and `@Right` annotations).
 
-**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
+**Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
 
 `@HideIfUnauthorized` and `@FailWith` are mutually exclusive.
 
@@ -152,7 +171,7 @@ It is very flexible: it allows you to pass an expression that can contains custo
 
 See [the fine grained security page](fine-grained-security.md) for more details.
 
-**Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
+**Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field`.
 
 Attribute      | Compulsory | Type   | Definition
 ---------------|------------|--------|--------
