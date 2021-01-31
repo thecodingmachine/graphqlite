@@ -95,7 +95,9 @@ You are running into this error because GraphQLite does not know how to handle t
 
 In GraphQL, an object passed in parameter of a query or mutation (or any field) is called an **Input Type**.
 
-In order to declare that type, in GraphQLite, we will declare a **Factory**.
+There are two ways for declaring that type, in GraphQLite: using **Factory** or annotating the class with `@Input`.
+
+## Factory
 
 A **Factory** is a method that takes in parameter all the fields of the input type and return an object.
 
@@ -136,7 +138,7 @@ class MyFactory
 and now, you can run query like this:
 
 ```
-mutation {
+query {
   getCities(location: {
               latitude: 45.0,
               longitude: 0.0,
@@ -387,3 +389,87 @@ public function getProductById(string $id, bool $lazyLoad = true): Product
 With the `@HideParameter` annotation, you can choose to remove from the GraphQL schema any argument.
 
 To be able to hide an argument, the argument must have a default value.
+
+## @Input Annotation
+
+Let's transform `Location` class into an input type by adding `@Input` annotation to it and `@Field` annotation to corresponding properties:
+
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Input]
+class Location
+{
+
+    #[Field]
+    private float $latitude;
+    
+    #[Field]
+    private float $longitude;
+
+    public function __construct(float $latitude, float $longitude)
+    {
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+    }
+   
+    public function getLatitude(): float
+    {
+        return $this->latitude;
+    }
+    
+    public function getLongitude(): float
+    {
+        return $this->longitude;
+    }
+}
+```
+<!--PHP 7+-->
+```php
+/**
+ * @Input
+ */
+class Location
+{
+   
+    /**
+     * @Field
+     * @var float 
+     */
+    private $latitude;
+    
+    /**
+     * @Field 
+     * @var float 
+     */
+    private $longitude;
+
+    public function __construct(float $latitude, float $longitude)
+    {
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+    }
+
+    public function getLatitude(): float
+    {
+        return $this->latitude;
+    }
+
+    public function getLongitude(): float
+    {
+        return $this->longitude;
+    }
+}
+```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+Now if you call `getCities()` query you can pass the location input in the same way as with factories.
+The `Location` object will be automatically instantiated with provided `latitude` / `longitude` and passed to the controller as a parameter.
+
+There are some important things to notice:
+
+- `@Field` annotation is recognized only on properties for Input Type.
+- There are 3 ways for fields to be resolved:
+  - Via constructor if corresponding properties are mentioned as parameters with the same names - exactly as in the example above.
+  - If properties are public, they will be just set without any additional effort.
+  - For private or protected properties implemented public setter is required (if they are not set via constructor). For example `setLatitude(float $latitude)`.
