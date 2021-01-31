@@ -16,7 +16,6 @@ class FooBar
      * Foo comment.
      *
      * @Field(description="Foo description.")
-     *
      * @var string
      */
     public $foo;
@@ -25,14 +24,12 @@ class FooBar
      * Bar comment.
      *
      * @Field()
-     *
      * @var string|null
      */
     public $bar = 'bar';
 
     /**
      * @Field(for="FooBarUpdateInput", name="timestamp")
-     *
      * @var string|null
      */
     public $date;

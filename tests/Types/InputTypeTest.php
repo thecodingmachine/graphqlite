@@ -10,6 +10,7 @@ use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
 class InputTypeTest extends AbstractQueryProviderTest
@@ -113,6 +114,24 @@ class InputTypeTest extends AbstractQueryProviderTest
             'bar' => 'test',
             'date' => null,
         ], (array) $result);
+    }
+
+    public function testResolvesCorrectlyWithOnlyConstruct(): void
+    {
+        $input = new InputType(TestOnlyConstruct::class, 'TestOnlyConstructInput', null, false, $this->getFieldsBuilder());
+
+        $args = [
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        /** @var TestOnlyConstruct $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals('Foo', $result->getFoo());
+        $this->assertEquals(200, $result->getBar());
     }
 
     public function testFailsResolvingFieldWithoutRequiredConstructParam(): void

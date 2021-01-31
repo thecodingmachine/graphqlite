@@ -82,7 +82,9 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         }
 
         $instance = $this->createInstance($mappedValues);
-        foreach ($mappedValues as $property => $value) {
+        $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
+
+        foreach ($values as $property => $value) {
             PropertyAccessor::setValue($instance, $property, $value);
         }
 
@@ -116,5 +118,22 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         }
 
         return $refClass->newInstanceArgs($parameters);
+    }
+
+    private function getClassConstructParameterNames(): array
+    {
+        $refClass = new ReflectionClass($this->className);
+        $constructor = $refClass->getConstructor();
+
+        if (!$constructor) {
+            return [];
+        }
+
+        $names = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            $names[] = $parameter->getName();
+        }
+
+        return $names;
     }
 }
