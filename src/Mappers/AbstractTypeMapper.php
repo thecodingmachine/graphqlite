@@ -79,7 +79,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /** @var GlobExtendTypeMapperCache */
     private $globExtendTypeMapperCache;
     /** @var array<string, class-string<object>> */
-    private array $registeredInputs;
+    private $registeredInputs;
 
     public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
     {

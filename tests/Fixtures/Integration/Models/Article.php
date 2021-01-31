@@ -17,11 +17,11 @@ class Article extends Post
      * @Field(for="Article")
      * @var int
      */
-    public int $id = 2;
+    public $id = 2;
 
     /**
      * @Field()
-     * @var string
+     * @var string|null
      */
-    public ?string $magazine = null;
+    public $magazine = null;
 }

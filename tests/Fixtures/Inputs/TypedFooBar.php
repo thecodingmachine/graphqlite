@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\NonInstantiableInput;
+namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
@@ -8,12 +8,16 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
 /**
  * @Input()
  */
-abstract class AbstractFoo
+class TypedFooBar
 {
 
     /**
      * @Field()
-     * @var string
      */
-    public $foo = 'bar';
+    public string $foo;
+
+    /**
+     * @Field()
+     */
+    public ?int $bar = 10;
 }

@@ -19,7 +19,7 @@ class Post
      * @Field(for="Post")
      * @var int
      */
-    public int $id = 1;
+    public $id = 1;
 
     /**
      * @Field()
@@ -32,13 +32,13 @@ class Post
      * @Field(for="PostUpdateInput", inputType="DateTime")
      * @var DateTimeInterface
      */
-    public DateTimeInterface $publishedAt;
+    public $publishedAt;
 
     /**
      * @Field(name="comment")
      * @var string|null
      */
-    private ?string $description = 'foo';
+    private $description = 'foo';
 
     /**
      * @Field()
@@ -50,13 +50,13 @@ class Post
      * @Field()
      * @var Contact|null
      */
-    public ?Contact $author = null;
+    public $author = null;
 
     /**
      * @Field(for="UpdatePostInput")
      * @var string|null
      */
-    private ?string $inaccessible;
+    private $inaccessible;
 
     /**
      * @param string $title

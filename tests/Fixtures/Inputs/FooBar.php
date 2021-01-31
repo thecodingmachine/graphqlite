@@ -16,20 +16,26 @@ class FooBar
      * Foo comment.
      *
      * @Field(description="Foo description.")
+     *
+     * @var string
      */
-    public string $foo;
+    public $foo;
 
     /**
      * Bar comment.
      *
      * @Field()
+     *
+     * @var string|null
      */
-    public ?string $bar = 'bar';
+    public $bar = 'bar';
 
     /**
      * @Field(for="FooBarUpdateInput", name="timestamp")
+     *
+     * @var string|null
      */
-    public ?string $date;
+    public $date;
 
     /**
      * FooBar constructor.

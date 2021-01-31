@@ -2,11 +2,15 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Type\Definition\IntType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\StringType;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
 class InputTypeTest extends AbstractQueryProviderTest
 {
@@ -25,10 +29,34 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals('foo', $fields['foo']->config['name']);
         $this->assertEquals('Foo description.', $fields['foo']->config['description']);
         $this->assertArrayNotHasKey('defaultValue', $fields['foo']->config);
+        $this->assertInstanceOf(NonNull::class, $fields['foo']->getType());
+        $this->assertInstanceOf(StringType::class, $fields['foo']->getType()->getWrappedType());
 
         $this->assertEquals('bar', $fields['bar']->config['name']);
         $this->assertEquals('Bar comment.', $fields['bar']->config['description']);
         $this->assertEquals('bar', $fields['bar']->config['defaultValue']);
+        $this->assertNotInstanceOf(NonNull::class, $fields['bar']->getType());
+    }
+
+    /**
+     * @requires PHP >= 7.4
+     */
+    public function testInputConfiguredCorrectlyWithTypedProperties(): void
+    {
+        $input = new InputType(TypedFooBar::class, 'TypedFooBarInput', 'Test', false, $this->getFieldsBuilder());
+        $input->freeze();
+
+        $fields = $input->getFields();
+        $this->assertCount(2, $fields);
+
+        $this->assertEquals('foo', $fields['foo']->config['name']);
+        $this->assertArrayNotHasKey('defaultValue', $fields['foo']->config);
+        $this->assertInstanceOf(NonNull::class, $fields['foo']->getType());
+        $this->assertInstanceOf(StringType::class, $fields['foo']->getType()->getWrappedType());
+
+        $this->assertEquals('bar', $fields['bar']->config['name']);
+        $this->assertEquals(10, $fields['bar']->config['defaultValue']);
+        $this->assertInstanceOf(IntType::class, $fields['bar']->getType());
     }
 
     public function testUpdateInputConfiguredCorrectly(): void
@@ -83,6 +111,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertSame([
             'foo' => 'Foo',
             'bar' => 'test',
+            'date' => null,
         ], (array) $result);
     }
 

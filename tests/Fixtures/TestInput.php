@@ -16,5 +16,5 @@ class TestInput
      * @Field()
      * @var string
      */
-    public string $foo;
+    public $foo;
 }
