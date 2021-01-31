@@ -75,6 +75,10 @@ class NamingStrategy implements NamingStrategyInterface
             $className = substr($className, $prevPos + 1);
         }
 
+        if (substr($className, -5) === 'Input') {
+            return $className;
+        }
+
         return $className . 'Input';
     }
 

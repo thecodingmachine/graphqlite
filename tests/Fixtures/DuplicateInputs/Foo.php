@@ -5,8 +5,8 @@ namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateInputs;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 
 /**
- * @Input(name="FooInput")
+ * @Input()
  */
-class Test
+class Foo
 {
 }
