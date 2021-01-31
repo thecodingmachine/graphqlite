@@ -1755,7 +1755,7 @@ class EndToEndTest extends TestCase
                 id
                 title
                 publishedAt
-                description
+                comment
                 summary
                 author {
                   name
@@ -1769,13 +1769,13 @@ class EndToEndTest extends TestCase
             ) {
                 id
                 title
-                description
+                comment
                 summary
             }
             createArticle(
                 article: {
                     title: "foo",
-                    description: "some description",
+                    comment: "some description",
                     magazine: "bar",
                     author: {
                       name: "foo",
@@ -1790,7 +1790,7 @@ class EndToEndTest extends TestCase
             ) {
                 id
                 title
-                description
+                comment
                 summary
                 magazine
                 author {
@@ -1810,7 +1810,7 @@ class EndToEndTest extends TestCase
                 'id' => 1,
                 'title' => 'foo',
                 'publishedAt' => '2021-01-24T00:00:00+00:00',
-                'description' => 'foo',
+                'comment' => 'foo',
                 'summary' => 'foo',
                 'author' => [
                     'name' => 'foo',
@@ -1819,13 +1819,13 @@ class EndToEndTest extends TestCase
             'updatePost' => [
                 'id' => 100,
                 'title' => 'bar',
-                'description' => 'bar',
+                'comment' => 'bar',
                 'summary' => 'foo',
             ],
             'createArticle' => [
                 'id' => 2,
                 'title' => 'foo',
-                'description' => 'some description',
+                'comment' => 'some description',
                 'summary' => 'foo',
                 'magazine' => 'bar',
                 'author' => [

@@ -25,7 +25,7 @@ class Post
      * @Field()
      * @var string
      */
-    public string $title;
+    public $title;
 
     /**
      * @Field(for={"Post", "PostInput"})
@@ -35,7 +35,7 @@ class Post
     public DateTimeInterface $publishedAt;
 
     /**
-     * @Field()
+     * @Field(name="comment")
      * @var string|null
      */
     private ?string $description = 'foo';
@@ -44,7 +44,7 @@ class Post
      * @Field()
      * @var string|null
      */
-    public ?string $summary = 'foo';
+    public $summary = 'foo';
 
     /**
      * @Field()

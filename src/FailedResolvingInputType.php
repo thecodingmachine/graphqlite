@@ -14,9 +14,9 @@ class FailedResolvingInputType extends RuntimeException
         return new self(sprintf("Parameter '%s' is missing for class '%s' constructor. It should be mapped as required field.", $parameter, $class));
     }
 
-    public static function createForDecorator(): self
+    public static function createForDecorator(string $class): self
     {
-        return new self('Input type cannot be a decorator');
+        return new self("Input type '$class' cannot be a decorator.");
     }
 
     public static function createForNotInstantiableClass(string $class): self

@@ -91,7 +91,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
     public function decorate(callable $decorator): void
     {
-        throw FailedResolvingInputType::createForDecorator();
+        throw FailedResolvingInputType::createForDecorator($this->className);
     }
 
     /**
