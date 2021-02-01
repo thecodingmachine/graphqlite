@@ -473,3 +473,81 @@ There are some important things to notice:
   - Via constructor if corresponding properties are mentioned as parameters with the same names - exactly as in the example above.
   - If properties are public, they will be just set without any additional effort.
   - For private or protected properties implemented public setter is required (if they are not set via constructor). For example `setLatitude(float $latitude)`.
+
+### Multiple input types per one class
+
+Simple usage of `@Input` annotation on a class creates an GraphQl input named by class name + "Input" suffix if a class name does not end with it already.
+You can add multiple `@Input` annotations to the same class, give them different names and link different fields.
+Consider the following example:
+
+<!--DOCUSAURUS_CODE_TABS-->
+<!--PHP 8+-->
+```php
+#[Input(name: 'CreateUserInput', default: true)]
+#[Input(name: 'UpdateUserInput', update: true)]
+class UserInput
+{
+
+    #[Field]
+    public string $username;
+
+    #[Field(for: 'CreateUserInput')]
+    public string $email;
+
+    #[Field(for: 'CreateUserInput', inputType: 'String!')]
+    #[Field(for: 'UpdateUserInput', inputType: 'String')]
+    public string $password;
+    
+    #[Field]
+    public ?int $age;
+}
+```
+<!--PHP 7+-->
+```php
+/**
+ * @Input(name="CreateUserInput", default=true)
+ * @Input(name="UpdateUserInput", update=true)
+ */
+class UserInput
+{
+
+    /**
+     * @Field()
+     * @var string
+     */
+    public $username;
+
+    /**
+     * @Field(for="CreateUserInput")
+     * @var string
+     */
+    public string $email;
+
+    /**
+     * @Field(for="CreateUserInput", inputType="String!")
+     * @Field(for="UpdateUserInput", inputType="String") 
+     * @var string|null
+     */
+    public $password;
+    
+    /**
+     * @Field() 
+     * @var int|null
+     */
+    public $age;
+}
+```
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+There are 2 input types created for just one class: `CreateUserInput` and `UpdateUserInput`. A few notes:
+- `CreateUserInput` input will be used by default for this class.
+- Field `username` is created for both input types, and it is required because the property type is not nullable.
+- Field `email` will appear only for `CreateUserInput` input.
+- Field `password` will appear for both. For `CreateUserInput` it'll be the required field and for `UpdateUserInput` optional.
+- Field `age` is optional for both input types.
+
+Note that `update: true` argument for `UpdateUserInput`. It should be used when input type is used for a partial update,
+It removes all default values from all fields thus prevents setting default values via setters or directly to public properties.
+In example above if you use the class as `UpdateUserInput` and set only `username` the other ones will be ignored.
+In PHP 7 they will be set to `null`, while in PHP 8 they will be in not initialized state - this can be used as a trick
+to check if user actually passed a value for a certain field.
