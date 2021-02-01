@@ -28,6 +28,6 @@ class AggregateControllerQueryProviderFactory implements QueryProviderFactoryInt
 
     public function create(FactoryContext $context): QueryProviderInterface
     {
-        return new AggregateControllerQueryProvider($this->controllers, $context->getFieldsBuilder(), $this->controllersContainer);
+        return new AggregateControllerQueryProvider($this->controllers, $context->getFieldsBuilder(), (new ClassResolverFactory())->create($this->controllersContainer, null));
     }
 }

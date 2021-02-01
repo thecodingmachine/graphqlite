@@ -23,10 +23,15 @@ class SourceResolver implements ResolverInterface
 
     /** @var object|null */
     private $object;
+    /**
+     * @var string|null
+     */
+    private $className;
 
-    public function __construct(string $methodName)
+    public function __construct(string $methodName, string $className = null)
     {
         $this->methodName = $methodName;
+        $this->className = $className;
     }
 
     public function setObject(object $object): void
@@ -65,5 +70,13 @@ class SourceResolver implements ResolverInterface
         }
 
         return $class . '::' . $this->methodName . '()';
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getClassName(): ?string
+    {
+        return $this->className;
     }
 }

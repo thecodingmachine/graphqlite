@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
@@ -43,7 +44,7 @@ class QueryField extends FieldDefinition
      * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?string $deprecationReason, ?string $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
+    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?string $deprecationReason, ?string $prefetchMethodName, array $prefetchArgs, ContainerInterface $container, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
@@ -57,9 +58,9 @@ class QueryField extends FieldDefinition
             $config['deprecationReason'] = $deprecationReason;
         }
 
-        $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+        $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver, $container) {
             if ($originalResolver instanceof SourceResolver || $originalResolver instanceof MagicPropertyResolver) {
-                $originalResolver->setObject($source);
+                $originalResolver->setObject($container->get($originalResolver->getClassName()));
             }
             /*if ($resolve !== null) {
                 $method = $resolve;
@@ -174,7 +175,7 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, $value): self
+    public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, $value, ContainerInterface $container): self
     {
         $callable = static function () use ($value) {
             return $value;
@@ -182,7 +183,7 @@ class QueryField extends FieldDefinition
 
         $fieldDescriptor->setResolver($callable);
 
-        return self::fromDescriptor($fieldDescriptor);
+        return self::fromDescriptor($fieldDescriptor, $container);
     }
 
     /**
@@ -190,7 +191,7 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
+    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isNotLogged, ContainerInterface $container): self
     {
         $callable = static function () use ($isNotLogged): void {
             if ($isNotLogged) {
@@ -201,10 +202,10 @@ class QueryField extends FieldDefinition
 
         $fieldDescriptor->setResolver($callable);
 
-        return self::fromDescriptor($fieldDescriptor);
+        return self::fromDescriptor($fieldDescriptor, $container);
     }
 
-    private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor): self
+    private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor, ContainerInterface $container): self
     {
         return new self(
             $fieldDescriptor->getName(),
@@ -215,11 +216,12 @@ class QueryField extends FieldDefinition
             $fieldDescriptor->getComment(),
             $fieldDescriptor->getDeprecationReason(),
             $fieldDescriptor->getPrefetchMethodName(),
-            $fieldDescriptor->getPrefetchParameters()
+            $fieldDescriptor->getPrefetchParameters(),
+            $container
         );
     }
 
-    public static function fromFieldDescriptor(QueryFieldDescriptor $fieldDescriptor): self
+    public static function fromFieldDescriptor(QueryFieldDescriptor $fieldDescriptor, ContainerInterface $container): self
     {
         $arguments = $fieldDescriptor->getParameters();
         if ($fieldDescriptor->getPrefetchMethodName() !== null) {
@@ -230,7 +232,7 @@ class QueryField extends FieldDefinition
         }
         $fieldDescriptor->setParameters($arguments);
 
-        return self::fromDescriptor($fieldDescriptor);
+        return self::fromDescriptor($fieldDescriptor, $container);
     }
 
     /**

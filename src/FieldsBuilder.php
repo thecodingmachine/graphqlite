@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\DocBlock;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -68,6 +69,10 @@ class FieldsBuilder
     private $parameterMapper;
     /** @var FieldMiddlewareInterface */
     private $fieldMiddleware;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     public function __construct(
         AnnotationReader $annotationReader,
@@ -78,7 +83,8 @@ class FieldsBuilder
         NamingStrategyInterface $namingStrategy,
         RootTypeMapperInterface $rootTypeMapper,
         ParameterMiddlewareInterface $parameterMapper,
-        FieldMiddlewareInterface $fieldMiddleware
+        FieldMiddlewareInterface $fieldMiddleware,
+        ContainerInterface $container
     ) {
         $this->annotationReader      = $annotationReader;
         $this->recursiveTypeMapper   = $typeMapper;
@@ -88,6 +94,7 @@ class FieldsBuilder
         $this->typeMapper            = new TypeHandler($argumentResolver, $rootTypeMapper, $typeResolver);
         $this->parameterMapper       = $parameterMapper;
         $this->fieldMiddleware = $fieldMiddleware;
+        $this->container = $container;
     }
 
     /**
@@ -95,7 +102,7 @@ class FieldsBuilder
      *
      * @throws ReflectionException
      */
-    public function getQueries(object $controller): array
+    public function getQueries(string $controller): array
     {
         return $this->getFieldsByAnnotations($controller, Query::class, false);
     }
@@ -105,7 +112,7 @@ class FieldsBuilder
      *
      * @throws ReflectionException
      */
-    public function getMutations(object $controller): array
+    public function getMutations(string $controller): array
     {
         return $this->getFieldsByAnnotations($controller, Mutation::class, false);
     }
@@ -309,7 +316,7 @@ class FieldsBuilder
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
             if (is_string($controller)) {
-                $fieldDescriptor->setTargetMethodOnSource($methodName);
+                $fieldDescriptor->setTargetMethodOnSource($methodName, $controller);
             } else {
                 $callable = [$controller, $methodName];
                 Assert::isCallable($callable);
@@ -321,10 +328,20 @@ class FieldsBuilder
 
             $fieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
-            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class($this->container) implements FieldHandlerInterface {
+                /**
+                 * @var ContainerInterface
+                 */
+                private $container;
+
+                public function __construct(ContainerInterface $container)
+                {
+                    $this->container = $container;
+                }
+
                 public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
                 {
-                    return QueryField::fromFieldDescriptor($fieldDescriptor);
+                    return QueryField::fromFieldDescriptor($fieldDescriptor, $this->container);
                 }
             });
 
@@ -450,10 +467,19 @@ class FieldsBuilder
             $fieldDescriptor->setInjectSource(false);
             $fieldDescriptor->setMiddlewareAnnotations($sourceField->getMiddlewareAnnotations());
 
-            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class($this->container) implements FieldHandlerInterface {
+                /**
+                 * @var ContainerInterface
+                 */
+                private $container;
+
+                public function __construct(ContainerInterface $container)
+                {
+                    $this->container = $container;
+                }
                 public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
                 {
-                    return QueryField::fromFieldDescriptor($fieldDescriptor);
+                    return QueryField::fromFieldDescriptor($fieldDescriptor, $this->container);
                 }
             });
 

@@ -354,7 +354,7 @@ class SchemaFactory
         }
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
-        $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
+        $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService, $this->container));
 
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry);
@@ -409,7 +409,8 @@ class SchemaFactory
             $namingStrategy,
             $topRootTypeMapper,
             $parameterMiddlewarePipe,
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $this->container
         );
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
