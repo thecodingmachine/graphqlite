@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
@@ -39,6 +40,10 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             $fields = [];
             foreach ($this->fields as $name => $field) {
                 $type = $field->getType();
+
+                if ($isUpdate && $type instanceof NonNull) {
+                    $type = $type->getWrappedType();
+                }
 
                 $fields[$name] = [
                     'type' => $type,

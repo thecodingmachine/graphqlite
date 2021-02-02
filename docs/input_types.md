@@ -547,7 +547,7 @@ There are 2 input types created for just one class: `CreateUserInput` and `Updat
 - Field `age` is optional for both input types.
 
 Note that `update: true` argument for `UpdateUserInput`. It should be used when input type is used for a partial update,
-It removes all default values from all fields thus prevents setting default values via setters or directly to public properties.
+It makes all fields optional and removes all default values from thus prevents setting default values via setters or directly to public properties.
 In example above if you use the class as `UpdateUserInput` and set only `username` the other ones will be ignored.
 In PHP 7 they will be set to `null`, while in PHP 8 they will be in not initialized state - this can be used as a trick
 to check if user actually passed a value for a certain field.

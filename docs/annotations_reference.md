@@ -66,7 +66,7 @@ Attribute      | Compulsory | Type   | Definition
 name           | *no*       | string | The name of the GraphQL input type generated. If not passed, the name of the class with suffix "Input" is used. If the class ends with "Input", the "Input" suffix is not added.
 description    | *no*       | string | Description of the input type in the documentation. If not passed, PHP doc comment is used.
 default        | *no*       | bool   | Defaults to *true* if name is not specified. Whether the annotated PHP class should be mapped by default to this type.
-update         | *no*       | bool   | Determines if the the input represents a partial update. When set to *true* input fields won't have default values thus won't be set on resolve if they are not specified in the query/mutation.
+update         | *no*       | bool   | Determines if the the input represents a partial update. When set to *true* all input fields will become optional and won't have default values thus won't be set on resolve if they are not specified in the query/mutation.
 
 
 ## @Field annotation

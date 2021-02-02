@@ -54,6 +54,12 @@ class Post
 
     /**
      * @Field(for="UpdatePostInput")
+     * @var int
+     */
+    public $views;
+
+    /**
+     * @Field(for="UpdatePostInput")
      * @var string|null
      */
     private $inaccessible;
