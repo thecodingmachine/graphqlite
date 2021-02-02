@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Http;
 
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Type\Schema;
 use Laminas\Diactoros\ResponseFactory;
@@ -41,7 +41,7 @@ class Psr15GraphQLMiddlewareBuilder
     {
         $this->config = new ServerConfig();
         $this->config->setSchema($schema);
-        $this->config->setDebug(Debug::RETHROW_UNSAFE_EXCEPTIONS);
+        $this->config->setDebugFlag(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
         $this->config->setErrorFormatter([WebonyxErrorHandler::class, 'errorFormatter']);
         $this->config->setErrorsHandler([WebonyxErrorHandler::class, 'errorHandler']);
         $this->config->setContext(new Context());
