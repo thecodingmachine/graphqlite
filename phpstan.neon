@@ -4,7 +4,7 @@ parameters:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
         #- "#Property TheCodingMachine\\\\GraphQLite\\\\Types\\\\ResolvableInputObjectType::\\$resolve \\(array<int, object\\|string>&callable\\) does not accept array<int,object\\|string>#"
         #- "#Parameter \\#2 \\$type of class TheCodingMachine\\\\GraphQLite\\\\Parameters\\\\InputTypeParameter constructor expects GraphQL\\\\Type\\\\Definition\\\\InputType&GraphQL\\\\Type\\\\Definition\\\\Type, GraphQL\\\\Type\\\\Definition\\\\InputType\\|GraphQL\\\\Type\\\\Definition\\\\Type given.#"
-        - "#Parameter .* of class ReflectionMethod constructor expects string, object\\|string given.#"
+        - "#Parameter .* of class ReflectionMethod constructor expects string(\\|null)?, object\\|string given.#"
         -
            message: '#Method TheCodingMachine\\GraphQLite\\Types\\Mutable(Interface|Object)Type::getFields\(\) should return array<GraphQL\\Type\\Definition\\FieldDefinition> but returns array\|float\|int#'
            path: src/Types/MutableTrait.php
