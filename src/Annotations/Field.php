@@ -49,9 +49,11 @@ class Field extends AbstractRequest
         $this->inputType = $inputType ?? $attributes['inputType'] ?? null;
 
         $forValue = $for ?? $attributes['for'] ?? null;
-        if ($forValue) {
-            $this->for = (array) $forValue;
+        if (! $forValue) {
+            return;
         }
+
+        $this->for = (array) $forValue;
     }
 
     /**

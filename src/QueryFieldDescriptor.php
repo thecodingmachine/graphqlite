@@ -16,6 +16,8 @@ use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
+use function is_array;
+
 /**
  * A class that describes a field to be created.
  * To contains getters and setters to alter the field behaviour.
@@ -134,8 +136,6 @@ class QueryFieldDescriptor
      * Sets the callable targeting the resolver function if the resolver function is part of a service.
      * This should not be used in the context of a field middleware.
      * Use getResolver/setResolver if you want to wrap the resolver in another method.
-     *
-     * @param callable $callable
      */
     public function setCallable(callable $callable): void
     {
@@ -159,9 +159,6 @@ class QueryFieldDescriptor
         $this->magicProperty = null;
     }
 
-    /**
-     * @param string|null $targetPropertyOnSource
-     */
     public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
     {
         if ($this->originalResolver !== null) {

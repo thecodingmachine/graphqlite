@@ -6,8 +6,10 @@ namespace TheCodingMachine\GraphQLite\Utils;
 
 use ReflectionMethod;
 use ReflectionProperty;
+
 use function get_class;
 use function method_exists;
+use function property_exists;
 use function ucfirst;
 
 /**
@@ -91,7 +93,7 @@ class PropertyAccessor
 
     private static function isPublicProperty(string $class, string $propertyName): bool
     {
-        if (!property_exists($class, $propertyName)) {
+        if (! property_exists($class, $propertyName)) {
             return false;
         }
 
@@ -102,7 +104,7 @@ class PropertyAccessor
 
     private static function isPublicMethod(string $class, string $methodName): bool
     {
-        if (!method_exists($class, $methodName)) {
+        if (! method_exists($class, $methodName)) {
             return false;
         }
 
@@ -115,7 +117,7 @@ class PropertyAccessor
     {
         $reflection = new ReflectionMethod($class, $methodName);
         foreach ($reflection->getParameters() as $parameter) {
-            if (!$parameter->isDefaultValueAvailable()) {
+            if (! $parameter->isDefaultValueAvailable()) {
                 return false;
             }
         }

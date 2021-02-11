@@ -41,6 +41,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use Webmozart\Assert\Assert;
 
+use function array_diff_key;
 use function array_fill_keys;
 use function array_intersect_key;
 use function array_keys;
@@ -56,6 +57,7 @@ use function key;
 use function reset;
 use function rtrim;
 use function trim;
+
 use const PHP_EOL;
 
 /**
@@ -187,7 +189,8 @@ class FieldsBuilder
         }
 
         // Make sure @Field annotations applied to parent's private properties are taken into account as well.
-        if ($parent = $refClass->getParentClass()) {
+        $parent = $refClass->getParentClass();
+        if ($parent) {
             $parentFields = $this->getInputFields($parent->getName(), $inputName, $isUpdate);
             $fields = array_merge($fields, array_diff_key($parentFields, $fields));
         }

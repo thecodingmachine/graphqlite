@@ -11,6 +11,9 @@ use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
+
+use function array_diff_key;
+use function array_flip;
 use function array_key_exists;
 
 /**
@@ -30,8 +33,8 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     public function __construct(string $className, string $inputName, ?string $description, bool $isUpdate, FieldsBuilder $fieldsBuilder)
     {
         $reflection = new ReflectionClass($className);
-        if (!$reflection->isInstantiable()) {
-          throw FailedResolvingInputType::createForNotInstantiableClass($className);
+        if (! $reflection->isInstantiable()) {
+            throw FailedResolvingInputType::createForNotInstantiableClass($className);
         }
 
         $this->fields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
@@ -133,7 +136,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         $refClass = new ReflectionClass($this->className);
         $constructor = $refClass->getConstructor();
 
-        if (!$constructor) {
+        if (! $constructor) {
             return [];
         }
 

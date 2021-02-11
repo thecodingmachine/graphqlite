@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use Webmozart\Assert\Assert;
+
 use function get_class;
 use function is_object;
 

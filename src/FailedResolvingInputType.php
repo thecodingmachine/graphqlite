@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use RuntimeException;
+
 use function sprintf;
 
 class FailedResolvingInputType extends RuntimeException
@@ -16,11 +17,11 @@ class FailedResolvingInputType extends RuntimeException
 
     public static function createForDecorator(string $class): self
     {
-        return new self("Input type '$class' cannot be a decorator.");
+        return new self(sprintf("Input type '%s' cannot be a decorator.", $class));
     }
 
     public static function createForNotInstantiableClass(string $class): self
     {
-        return new self("Class '$class' annotated with @Input must be instantiable.");
+        return new self(sprintf("Class '%s' annotated with @Input must be instantiable.", $class));
     }
 }

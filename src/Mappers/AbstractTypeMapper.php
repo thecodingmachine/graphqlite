@@ -325,7 +325,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         $input = $this->getMaps()->getInputByObjectClass($className);
         if ($input !== null) {
-            [ $typeName, $description, $isUpdate ] = $input;
+            [$typeName, $description, $isUpdate] = $input;
             return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
         }
 
@@ -357,7 +357,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         $input = $this->getMaps()->getInputByGraphQLInputTypeName($typeName);
         if ($input !== null) {
-            [ $className, $description, $isUpdate ] = $input;
+            [$className, $description, $isUpdate] = $input;
             return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
         }
 

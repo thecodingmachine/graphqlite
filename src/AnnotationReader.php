@@ -398,7 +398,6 @@ class AnnotationReader
      *
      * @param ReflectionClass<T> $refClass
      * @param class-string<A> $annotationClass
-     * @param bool $inherited
      *
      * @return A[]
      *
@@ -530,12 +529,12 @@ class AnnotationReader
             if (PHP_MAJOR_VERSION >= 8) {
                 $attributes = $refProperty->getAttributes();
                 $toAddAnnotations = array_merge($toAddAnnotations, array_map(
-                  static function ($attribute) {
-                      return $attribute->newInstance();
-                  },
-                  array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
-                      return is_a($annotation->getName(), $annotationClass, true);
-                  })
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                        return is_a($annotation->getName(), $annotationClass, true);
+                    })
                 ));
             }
         } catch (AnnotationException $e) {
