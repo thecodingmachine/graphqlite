@@ -19,7 +19,7 @@ class IteratorTypeMapperTest extends AbstractQueryProviderTest
 
         // A type like ArrayObject|int[] CAN be mapped to an output type, but NOT to an input type.
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('cannot map class "ArrayObject" to a known GraphQL input type. Check your TypeMapper configuration.');
+        $this->expectExceptionMessage('cannot map class "ArrayObject" to a known GraphQL input type. Are you missing a @Factory annotation? If you have a @Factory annotation, is it in a namespace analyzed by GraphQLite?');
         $typeMapper->toGraphQLInputType($this->resolveType('ArrayObject|int[]'), null, 'foo', new ReflectionMethod(__CLASS__, 'testInputIterator'), new DocBlock());
     }
 
