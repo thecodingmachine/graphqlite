@@ -40,7 +40,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
      */
     public static function createForInputType(string $className): self
     {
-        return new self('cannot map class "' . $className . '" to a known GraphQL input type. Check your TypeMapper configuration.');
+        return new self('cannot map class "' . $className . '" to a known GraphQL input type. Are you missing a @Factory annotation? If you have a @Factory annotation, is it in a namespace analyzed by GraphQLite?.');
     }
 
     public static function createForName(string $name): self
