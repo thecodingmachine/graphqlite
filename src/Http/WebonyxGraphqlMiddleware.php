@@ -137,7 +137,15 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
                 return $this->httpCodeDecider->decideHttpStatusCode($executionResult);
             }, $result);
 
-            return max($codes);
+            // PHPStan will trigger an error if we don't check the return value of the max function.
+            // @see https://www.php.net/manual/en/function.max.php
+            // > If an empty array is passed, then false will be returned and an E_WARNING error will be emitted.
+            $maxStatusCode = max($codes);
+            if ($maxStatusCode === false) {
+                $maxStatusCode = 400;
+            }
+
+            return $maxStatusCode;
         }
 
         // @codeCoverageIgnoreStart
