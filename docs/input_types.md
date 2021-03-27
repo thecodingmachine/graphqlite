@@ -4,7 +4,7 @@ title: Input types
 sidebar_label: Input types
 ---
 
-Let's admit you are developing an API that returns a list of cities around a location.
+Let's assume you are developing an API that returns a list of cities around a location.
 
 Your GraphQL query might look like this:
 
