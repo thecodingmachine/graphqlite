@@ -115,16 +115,35 @@ See <a href="/docs/next/doctrine-annotations-attributes">Doctrine annotations vs
 </tbody>
 </table>
 <p>One and only one of &quot;class&quot; and &quot;name&quot; parameter can be passed at the same time.</p>
+<h2><a class="anchor" aria-hidden="true" id="input-annotation"></a><a href="#input-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Input annotation</h2>
+<p>The <code>@Input</code> annotation is used to declare a GraphQL input type.</p>
+<p><strong>Applies on</strong>: classes.</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td>name</td><td><em>no</em></td><td>string</td><td>The name of the GraphQL input type generated. If not passed, the name of the class with suffix &quot;Input&quot; is used. If the class ends with &quot;Input&quot;, the &quot;Input&quot; suffix is not added.</td></tr>
+<tr><td>description</td><td><em>no</em></td><td>string</td><td>Description of the input type in the documentation. If not passed, PHP doc comment is used.</td></tr>
+<tr><td>default</td><td><em>no</em></td><td>bool</td><td>Defaults to <em>true</em> if name is not specified. Whether the annotated PHP class should be mapped by default to this type.</td></tr>
+<tr><td>update</td><td><em>no</em></td><td>bool</td><td>Determines if the the input represents a partial update. When set to <em>true</em> all input fields will become optional and won't have default values thus won't be set on resolve if they are not specified in the query/mutation.</td></tr>
+</tbody>
+</table>
 <h2><a class="anchor" aria-hidden="true" id="field-annotation"></a><a href="#field-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Field annotation</h2>
 <p>The <code>@Field</code> annotation is used to declare a GraphQL field.</p>
-<p><strong>Applies on</strong>: methods of classes annotated with <code>@Type</code> or <code>@ExtendType</code>.</p>
+<p><strong>Applies on</strong>: methods or properties of classes annotated with <code>@Type</code>, <code>@ExtendType</code> or <code>@Input</code>.
+When it's applied on private or protected property, public getter or/and setter method is expected in the class accordingly
+whether it's used for output type or input type. For example if property name is <code>foo</code> then getter should be <code>getFoo()</code> or setter should be <code>setFoo($foo)</code>. Setter can be omitted if property related to the field is present in the constructor with the same name.</p>
 <table>
 <thead>
 <tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
 </thead>
 <tbody>
 <tr><td>name</td><td><em>no</em></td><td>string</td><td>The name of the field. If skipped, the name of the method is used instead.</td></tr>
+<tr><td>for</td><td><em>no</em></td><td>string, array</td><td>Forces the field to be used only for specific output or input type(s). By default field is used for all possible declared types.</td></tr>
+<tr><td>description</td><td><em>no</em></td><td>string</td><td>Field description displayed in the GraphQL docs. If it's empty PHP doc comment is used instead.</td></tr>
 <tr><td><a href="/docs/next/custom-types">outputType</a></td><td><em>no</em></td><td>string</td><td>Forces the GraphQL output type of a query.</td></tr>
+<tr><td><a href="/docs/next/input-types">inputType</a></td><td><em>no</em></td><td>string</td><td>Forces the GraphQL input type of a query.</td></tr>
 </tbody>
 </table>
 <h2><a class="anchor" aria-hidden="true" id="sourcefield-annotation"></a><a href="#sourcefield-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@SourceField annotation</h2>
@@ -159,11 +178,11 @@ See <a href="/docs/next/doctrine-annotations-attributes">Doctrine annotations vs
 <p>(*) <strong>Note</strong>: <code>outputType</code> and <code>phpType</code> are mutually exclusive. You MUST provide one of them.</p>
 <h2><a class="anchor" aria-hidden="true" id="logged-annotation"></a><a href="#logged-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Logged annotation</h2>
 <p>The <code>@Logged</code> annotation is used to declare a Query/Mutation/Field is only visible to logged users.</p>
-<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
+<p><strong>Applies on</strong>: methods or properties annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
 <p>This annotation allows no attributes.</p>
 <h2><a class="anchor" aria-hidden="true" id="right-annotation"></a><a href="#right-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@Right annotation</h2>
 <p>The <code>@Right</code> annotation is used to declare a Query/Mutation/Field is only visible to users with a specific right.</p>
-<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
+<p><strong>Applies on</strong>: methods or properties annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
 <table>
 <thead>
 <tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
@@ -175,7 +194,7 @@ See <a href="/docs/next/doctrine-annotations-attributes">Doctrine annotations vs
 <h2><a class="anchor" aria-hidden="true" id="failwith-annotation"></a><a href="#failwith-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@FailWith annotation</h2>
 <p>The <code>@FailWith</code> annotation is used to declare a default value to return in the user is not authorized to see a specific
 query / mutation / field (according to the <code>@Logged</code> and <code>@Right</code> annotations).</p>
-<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> and one of <code>@Logged</code> or <code>@Right</code> annotations.</p>
+<p><strong>Applies on</strong>: methods or properties annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> and one of <code>@Logged</code> or <code>@Right</code> annotations.</p>
 <table>
 <thead>
 <tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
@@ -187,7 +206,7 @@ query / mutation / field (according to the <code>@Logged</code> and <code>@Right
 <h2><a class="anchor" aria-hidden="true" id="hideifunauthorized-annotation"></a><a href="#hideifunauthorized-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@HideIfUnauthorized annotation</h2>
 <p>The <code>@HideIfUnauthorized</code> annotation is used to completely hide the query / mutation / field if the user is not authorized
 to access it (according to the <code>@Logged</code> and <code>@Right</code> annotations).</p>
-<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> and one of <code>@Logged</code> or <code>@Right</code> annotations.</p>
+<p><strong>Applies on</strong>: methods or properties annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code> and one of <code>@Logged</code> or <code>@Right</code> annotations.</p>
 <p><code>@HideIfUnauthorized</code> and <code>@FailWith</code> are mutually exclusive.</p>
 <h2><a class="anchor" aria-hidden="true" id="injectuser-annotation"></a><a href="#injectuser-annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@InjectUser annotation</h2>
 <p>Use the <code>@InjectUser</code> annotation to inject an instance of the current user logged in into a parameter of your
@@ -205,7 +224,7 @@ query / mutation / field.</p>
 <p>The <code>@Security</code> annotation can be used to check fin-grained access rights.
 It is very flexible: it allows you to pass an expression that can contains custom logic.</p>
 <p>See <a href="/docs/next/fine-grained-security">the fine grained security page</a> for more details.</p>
-<p><strong>Applies on</strong>: methods annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
+<p><strong>Applies on</strong>: methods or properties annotated with <code>@Query</code>, <code>@Mutation</code> or <code>@Field</code>.</p>
 <table>
 <thead>
 <tr><th>Attribute</th><th>Compulsory</th><th>Type</th><th>Definition</th></tr>
@@ -315,7 +334,7 @@ is automatically mapped to a GraphQL enum type.</p>
 <tr><td>name</td><td><em>no</em></td><td>string</td><td>The name of the enum type (in the GraphQL schema)</td></tr>
 </tbody>
 </table>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/doctrine-annotations-attributes"><span class="arrow-prev">← </span><span>Annotations VS Attributes</span></a><a class="docs-next button" href="/docs/next/semver"><span>Semantic versioning</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#query-annotation">@Query annotation</a></li><li><a href="#mutation-annotation">@Mutation annotation</a></li><li><a href="#type-annotation">@Type annotation</a></li><li><a href="#extendtype-annotation">@ExtendType annotation</a></li><li><a href="#field-annotation">@Field annotation</a></li><li><a href="#sourcefield-annotation">@SourceField annotation</a></li><li><a href="#magicfield-annotation">@MagicField annotation</a></li><li><a href="#logged-annotation">@Logged annotation</a></li><li><a href="#right-annotation">@Right annotation</a></li><li><a href="#failwith-annotation">@FailWith annotation</a></li><li><a href="#hideifunauthorized-annotation">@HideIfUnauthorized annotation</a></li><li><a href="#injectuser-annotation">@InjectUser annotation</a></li><li><a href="#security-annotation">@Security annotation</a></li><li><a href="#factory-annotation">@Factory annotation</a></li><li><a href="#useinputtype-annotation">@UseInputType annotation</a></li><li><a href="#decorate-annotation">@Decorate annotation</a></li><li><a href="#autowire-annotation">@Autowire annotation</a></li><li><a href="#hideparameter-annotation">@HideParameter annotation</a></li><li><a href="#validate-annotation">@Validate annotation</a></li><li><a href="#assertion-annotation">@Assertion annotation</a></li><li><a href="#enumtype-annotation">@EnumType annotation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2021 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/doctrine-annotations-attributes"><span class="arrow-prev">← </span><span>Annotations VS Attributes</span></a><a class="docs-next button" href="/docs/next/semver"><span>Semantic versioning</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#query-annotation">@Query annotation</a></li><li><a href="#mutation-annotation">@Mutation annotation</a></li><li><a href="#type-annotation">@Type annotation</a></li><li><a href="#extendtype-annotation">@ExtendType annotation</a></li><li><a href="#input-annotation">@Input annotation</a></li><li><a href="#field-annotation">@Field annotation</a></li><li><a href="#sourcefield-annotation">@SourceField annotation</a></li><li><a href="#magicfield-annotation">@MagicField annotation</a></li><li><a href="#logged-annotation">@Logged annotation</a></li><li><a href="#right-annotation">@Right annotation</a></li><li><a href="#failwith-annotation">@FailWith annotation</a></li><li><a href="#hideifunauthorized-annotation">@HideIfUnauthorized annotation</a></li><li><a href="#injectuser-annotation">@InjectUser annotation</a></li><li><a href="#security-annotation">@Security annotation</a></li><li><a href="#factory-annotation">@Factory annotation</a></li><li><a href="#useinputtype-annotation">@UseInputType annotation</a></li><li><a href="#decorate-annotation">@Decorate annotation</a></li><li><a href="#autowire-annotation">@Autowire annotation</a></li><li><a href="#hideparameter-annotation">@HideParameter annotation</a></li><li><a href="#validate-annotation">@Validate annotation</a></li><li><a href="#assertion-annotation">@Assertion annotation</a></li><li><a href="#enumtype-annotation">@EnumType annotation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2021 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
