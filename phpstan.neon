@@ -3,9 +3,8 @@ parameters:
     ignoreErrors:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
         #- "#Property TheCodingMachine\\\\GraphQLite\\\\Types\\\\ResolvableInputObjectType::\\$resolve \\(array<int, object\\|string>&callable\\) does not accept array<int,object\\|string>#"
-        - "#Variable \\$prefetchRefMethod might not be defined.#"
         #- "#Parameter \\#2 \\$type of class TheCodingMachine\\\\GraphQLite\\\\Parameters\\\\InputTypeParameter constructor expects GraphQL\\\\Type\\\\Definition\\\\InputType&GraphQL\\\\Type\\\\Definition\\\\Type, GraphQL\\\\Type\\\\Definition\\\\InputType\\|GraphQL\\\\Type\\\\Definition\\\\Type given.#"
-        - "#Parameter .* of class ReflectionMethod constructor expects string, object\\|string given.#"
+        - "#Parameter .* of class ReflectionMethod constructor expects string(\\|null)?, object\\|string given.#"
         -
            message: '#Method TheCodingMachine\\GraphQLite\\Types\\Mutable(Interface|Object)Type::getFields\(\) should return array<GraphQL\\Type\\Definition\\FieldDefinition> but returns array\|float\|int#'
            path: src/Types/MutableTrait.php
@@ -34,9 +33,14 @@ parameters:
            message: '#Property TheCodingMachine\\GraphQLite\\Annotations\\Type::\$class \(class-string<object>\\|null\) does not accept string.#'
            path: src/Annotations/Type.php
         -
-           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getMethodAnnotations\(\) should return array<int, T of object> but returns array<object>.#'
+           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::(getMethodAnnotations|getPropertyAnnotations)\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
-        - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage\(\)#'
+        -
+           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getClassAnnotations\(\) should return array<A of object> but returns array<object>.#'
+           path: src/AnnotationReader.php
+        -
+           message: '#Parameter \#1 \$annotations of class TheCodingMachine\\GraphQLite\\Annotations\\ParameterAnnotations constructor expects array<int, TheCodingMachine\\GraphQLite\\Annotations\\ParameterAnnotationInterface>, array<object> given.#'
+           path: src/AnnotationReader.php
 
 
         #-

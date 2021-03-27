@@ -52,6 +52,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 
+use function apcu_enabled;
 use function array_map;
 use function array_reverse;
 use function class_exists;

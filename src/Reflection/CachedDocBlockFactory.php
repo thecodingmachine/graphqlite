@@ -9,11 +9,14 @@ use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\Context;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionProperty;
 use Webmozart\Assert\Assert;
 
 use function filemtime;
+use function get_class;
 use function md5;
 
 /**
@@ -44,15 +47,19 @@ class CachedDocBlockFactory
 
     /**
      * Fetches a DocBlock object from a ReflectionMethod
+     *
+     * @param ReflectionMethod|ReflectionProperty $reflector
+     *
+     * @throws InvalidArgumentException
      */
-    public function getDocBlock(ReflectionMethod $refMethod): DocBlock
+    public function getDocBlock($reflector): DocBlock
     {
-        $key = 'docblock_' . md5($refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName());
+        $key = 'docblock_' . md5($reflector->getDeclaringClass()->getName() . '::' . $reflector->getName() . '::' . get_class($reflector));
         if (isset($this->docBlockArrayCache[$key])) {
             return $this->docBlockArrayCache[$key];
         }
 
-        $fileName = $refMethod->getFileName();
+        $fileName = $reflector->getDeclaringClass()->getFileName();
         Assert::string($fileName);
 
         $cacheItem = $this->cache->get($key);
@@ -69,7 +76,7 @@ class CachedDocBlockFactory
             }
         }
 
-        $docBlock = $this->doGetDocBlock($refMethod);
+        $docBlock = $this->doGetDocBlock($reflector);
 
         $this->cache->set($key, [
             'time' => filemtime($fileName),
@@ -80,15 +87,18 @@ class CachedDocBlockFactory
         return $docBlock;
     }
 
-    private function doGetDocBlock(ReflectionMethod $refMethod): DocBlock
+    /**
+     * @param ReflectionMethod|ReflectionProperty $reflector
+     */
+    private function doGetDocBlock($reflector): DocBlock
     {
-        $docComment = $refMethod->getDocComment() ?: '/** */';
+        $docComment = $reflector->getDocComment() ?: '/** */';
 
-        $refClass     = $refMethod->getDeclaringClass();
+        $refClass     = $reflector->getDeclaringClass();
         $refClassName = $refClass->getName();
 
         if (! isset($this->contextArrayCache[$refClassName])) {
-            $this->contextArrayCache[$refClassName] = $this->contextFactory->createFromReflector($refMethod);
+            $this->contextArrayCache[$refClassName] = $this->contextFactory->createFromReflector($reflector);
         }
 
         return $this->docBlockFactory->create($docComment, $this->contextArrayCache[$refClassName]);

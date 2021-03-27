@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use TheCodingMachine\GraphQLite\Annotations\Input;
+
 /**
  * An object containing a description of ALL annotations relevant to GlobTypeMapper for a given class.
  *
@@ -25,6 +27,9 @@ final class GlobAnnotationsCache
 
     /** @var array<string, array{0: string, 1:class-string<object>}> An array mapping a decorator method name to an input name / declaring class */
     private $decorators = [];
+
+    /** @var array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}> An array mapping an input type name to an input name / declaring class */
+    private $inputs = [];
 
     /**
      * @param class-string<object> $className
@@ -85,5 +90,25 @@ final class GlobAnnotationsCache
     public function getDecorators(): array
     {
         return $this->decorators;
+    }
+
+    /**
+     * Register a new input.
+     *
+     * @param class-string<object> $className
+     */
+    public function registerInput(string $name, string $className, Input $input): void
+    {
+        $this->inputs[$name] = [$className, $input->isDefault(), $input->getDescription(), $input->isUpdate()];
+    }
+
+    /**
+     * Returns registered inputs.
+     *
+     * @return array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}>
+     */
+    public function getInputs(): array
+    {
+        return $this->inputs;
     }
 }

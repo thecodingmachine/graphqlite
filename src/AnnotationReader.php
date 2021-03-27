@@ -11,6 +11,7 @@ use MyCLabs\Enum\Enum;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionProperty;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
@@ -19,6 +20,7 @@ use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
@@ -68,6 +70,15 @@ class AnnotationReader
      */
     private $mode;
 
+    /** @var array<string, (object|null)> */
+    private $methodAnnotationCache = [];
+
+    /** @var array<string, array<object>> */
+    private $methodAnnotationsCache = [];
+
+    /** @var array<string, array<object>> */
+    private $propertyAnnotationsCache = [];
+
     /**
      * @param string   $mode             One of self::LAX_MODE or self::STRICT_MODE
      * @param string[] $strictNamespaces
@@ -99,6 +110,30 @@ class AnnotationReader
         }
 
         return $type;
+    }
+
+    /**
+     * @param ReflectionClass<T> $refClass
+     *
+     * @return Input[]
+     *
+     * @throws AnnotationException
+     *
+     * @template T of object
+     */
+    public function getInputAnnotations(ReflectionClass $refClass): array
+    {
+        try {
+            /** @var Input[] $inputs */
+            $inputs = $this->getClassAnnotations($refClass, Input::class, false);
+            foreach ($inputs as $input) {
+                $input->setClass($refClass->getName());
+            }
+        } catch (ClassNotFoundException $e) {
+            throw ClassNotFoundException::wrapException($e, $refClass->getName());
+        }
+
+        return $inputs;
     }
 
     /**
@@ -241,10 +276,18 @@ class AnnotationReader
         }, $parameterAnnotationsPerParameter);
     }
 
-    public function getMiddlewareAnnotations(ReflectionMethod $refMethod): MiddlewareAnnotations
+    /**
+     * @param ReflectionMethod|ReflectionProperty $reflection
+     *
+     * @throws AnnotationException
+     */
+    public function getMiddlewareAnnotations($reflection): MiddlewareAnnotations
     {
-        /** @var MiddlewareAnnotationInterface[] $middlewareAnnotations */
-        $middlewareAnnotations = $this->getMethodAnnotations($refMethod, MiddlewareAnnotationInterface::class);
+        if ($reflection instanceof ReflectionMethod) {
+            $middlewareAnnotations = $this->getMethodAnnotations($reflection, MiddlewareAnnotationInterface::class);
+        } else {
+            $middlewareAnnotations = $this->getPropertyAnnotations($reflection, MiddlewareAnnotationInterface::class);
+        }
 
         return new MiddlewareAnnotations($middlewareAnnotations);
     }
@@ -295,9 +338,6 @@ class AnnotationReader
 
         return $type;
     }
-
-    /** @var array<string, (object|null)> */
-    private $methodAnnotationCache = [];
 
     /**
      * Returns a method annotation and handles correctly errors.
@@ -366,8 +406,11 @@ class AnnotationReader
      * @template T of object
      * @template A of object
      */
-    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass): array
+    public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass, bool $inherited = true): array
     {
+        /**
+         * @var array<array<A>>
+         */
         $toAddAnnotations = [];
         do {
             try {
@@ -398,7 +441,7 @@ class AnnotationReader
                 }
             }
             $refClass = $refClass->getParentClass();
-        } while ($refClass);
+        } while ($inherited && $refClass);
 
         if (! empty($toAddAnnotations)) {
             return array_merge(...$toAddAnnotations);
@@ -406,9 +449,6 @@ class AnnotationReader
 
         return [];
     }
-
-    /** @var array<string, array<object>> */
-    private $methodAnnotationsCache = [];
 
     /**
      * Returns the method's annotations.
@@ -458,6 +498,61 @@ class AnnotationReader
         }
 
         $this->methodAnnotationsCache[$cacheKey] = $toAddAnnotations;
+
+        return $toAddAnnotations;
+    }
+
+    /**
+     * Returns the property's annotations.
+     *
+     * @param class-string<T> $annotationClass
+     *
+     * @return array<int, T>
+     *
+     * @throws AnnotationException
+     *
+     * @template T of object
+     */
+    public function getPropertyAnnotations(ReflectionProperty $refProperty, string $annotationClass): array
+    {
+        $cacheKey = $refProperty->getDeclaringClass()->getName() . '::' . $refProperty->getName() . '_s_' . $annotationClass;
+        if (isset($this->propertyAnnotationsCache[$cacheKey])) {
+            /** @var array<int, T> $annotations */
+            $annotations = $this->propertyAnnotationsCache[$cacheKey];
+
+            return $annotations;
+        }
+
+        $toAddAnnotations = [];
+        try {
+            $allAnnotations   = $this->reader->getPropertyAnnotations($refProperty);
+            $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
+                return $annotation instanceof $annotationClass;
+            });
+            if (PHP_MAJOR_VERSION >= 8) {
+                $attributes = $refProperty->getAttributes();
+                $toAddAnnotations = array_merge($toAddAnnotations, array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                        return is_a($annotation->getName(), $annotationClass, true);
+                    })
+                ));
+            }
+        } catch (AnnotationException $e) {
+            if ($this->mode === self::STRICT_MODE) {
+                throw $e;
+            }
+
+            if ($this->mode === self::LAX_MODE) {
+                if ($this->isErrorImportant($annotationClass, $refProperty->getDocComment() ?: '', $refProperty->getDeclaringClass()->getName())) {
+                    throw $e;
+                }
+            }
+        }
+
+        $this->propertyAnnotationsCache[$cacheKey] = $toAddAnnotations;
 
         return $toAddAnnotations;
     }

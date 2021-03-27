@@ -78,6 +78,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     private $globTypeMapperCache;
     /** @var GlobExtendTypeMapperCache */
     private $globExtendTypeMapperCache;
+    /** @var array<string, class-string<object>> */
+    private $registeredInputs;
 
     public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
     {
@@ -133,7 +135,9 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     {
         $globTypeMapperCache = new GlobTypeMapperCache();
 
+        /** @var array<class-string<object>,ReflectionClass<object>> $classes */
         $classes = $this->getClassList();
+
         foreach ($classes as $className => $refClass) {
             $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
                 $annotationsCache = new GlobAnnotationsCache();
@@ -144,6 +148,18 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 if ($type !== null) {
                     $typeName = $this->namingStrategy->getOutputTypeName($className, $type);
                     $annotationsCache->setType($type->getClass(), $typeName, $type->isDefault());
+                    $containsAnnotations = true;
+                }
+
+                $inputs = $this->annotationReader->getInputAnnotations($refClass);
+                foreach ($inputs as $input) {
+                    $inputName = $this->namingStrategy->getInputTypeName($className, $input);
+                    if (isset($this->registeredInputs[$inputName])) {
+                        throw DuplicateMappingException::createForTwoInputs($inputName, $this->registeredInputs[$inputName], $refClass->getName());
+                    }
+
+                    $this->registeredInputs[$inputName] = $refClass->getName();
+                    $annotationsCache->registerInput($inputName, $className, $input);
                     $containsAnnotations = true;
                 }
 
@@ -283,7 +299,11 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToInputType(string $className): bool
     {
-        return $this->getMaps()->getFactoryByObjectClass($className) !== null;
+        if ($this->getMaps()->getFactoryByObjectClass($className) !== null) {
+            return true;
+        }
+
+        return $this->getMaps()->getInputByObjectClass($className) !== null;
     }
 
     /**
@@ -299,11 +319,17 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     {
         $factory = $this->getMaps()->getFactoryByObjectClass($className);
 
-        if ($factory === null) {
-            throw CannotMapTypeException::createForInputType($className);
+        if ($factory !== null) {
+            return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
         }
 
-        return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
+        $input = $this->getMaps()->getInputByObjectClass($className);
+        if ($input !== null) {
+            [$typeName, $description, $isUpdate] = $input;
+            return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
+        }
+
+        throw CannotMapTypeException::createForInputType($className);
     }
 
     /**
@@ -329,6 +355,12 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
             return $this->inputTypeGenerator->mapFactoryMethod($factory[0], $factory[1], $this->container);
         }
 
+        $input = $this->getMaps()->getInputByGraphQLInputTypeName($typeName);
+        if ($input !== null) {
+            [$className, $description, $isUpdate] = $input;
+            return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
+        }
+
         throw CannotMapTypeException::createForName($typeName);
     }
 
@@ -347,7 +379,11 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         $factory = $this->getMaps()->getFactoryByGraphQLInputTypeName($typeName);
 
-        return $factory !== null;
+        if ($factory !== null) {
+            return true;
+        }
+
+        return $this->getMaps()->getInputByGraphQLInputTypeName($typeName) !== null;
     }
 
     /**

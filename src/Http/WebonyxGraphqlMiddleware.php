@@ -137,7 +137,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
                 return $this->httpCodeDecider->decideHttpStatusCode($executionResult);
             }, $result);
 
-            return max($codes);
+            return (int) max($codes);
         }
 
         // @codeCoverageIgnoreStart

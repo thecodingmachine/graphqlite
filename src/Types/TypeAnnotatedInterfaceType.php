@@ -42,7 +42,7 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => static function () use ($annotatedObject, $className, $fieldsBuilder) {
+            'fields' => static function () use ($annotatedObject, $className, $fieldsBuilder, $typeName) {
                 // There is no need for an interface that extends another interface to get all its fields.
                 // Indeed, if the interface is used, the extended interfaces will be used too. Therefore, fetching the fields
                 // and putting them in the child interface is a waste of resources.
@@ -65,9 +65,9 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                 }*/
 
                 if ($annotatedObject !== null) {
-                    $fields = $fieldsBuilder->getFields($annotatedObject);
+                    $fields = $fieldsBuilder->getFields($annotatedObject, $typeName);
                 } else {
-                    $fields = $fieldsBuilder->getSelfFields($className);
+                    $fields = $fieldsBuilder->getSelfFields($className, $typeName);
                 }
 
                 //$fields += $interfaceFields;
