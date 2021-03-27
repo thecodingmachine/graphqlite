@@ -34,7 +34,7 @@
         "phpunit/phpunit": "^8.2.4||^9.4",
         "php-coveralls/php-coveralls": "^2.1",
         "mouf/picotainer": "^1.1",
-        "phpstan/phpstan": "^0.12.25",
+        "phpstan/phpstan": "^0.12.82",
         "beberlei/porpaginas": "^1.2",
         "myclabs/php-enum": "^1.6.6",
         "doctrine/coding-standard": "^8.2",

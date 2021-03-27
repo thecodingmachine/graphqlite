@@ -408,6 +408,9 @@ class AnnotationReader
      */
     public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass, bool $inherited = true): array
     {
+        /**
+         * @var array<array<A>>
+         */
         $toAddAnnotations = [];
         do {
             try {

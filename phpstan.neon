@@ -33,9 +33,14 @@ parameters:
            message: '#Property TheCodingMachine\\GraphQLite\\Annotations\\Type::\$class \(class-string<object>\\|null\) does not accept string.#'
            path: src/Annotations/Type.php
         -
-           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getMethodAnnotations\(\) should return array<int, T of object> but returns array<object>.#'
+           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::(getMethodAnnotations|getPropertyAnnotations)\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
-        - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage\(\)#'
+        -
+           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getClassAnnotations\(\) should return array<A of object> but returns array<object>.#'
+           path: src/AnnotationReader.php
+        -
+           message: '#Parameter \#1 \$annotations of class TheCodingMachine\\GraphQLite\\Annotations\\ParameterAnnotations constructor expects array<int, TheCodingMachine\\GraphQLite\\Annotations\\ParameterAnnotationInterface>, array<object> given.#'
+           path: src/AnnotationReader.php
 
 
         #-
