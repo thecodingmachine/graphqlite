@@ -441,7 +441,7 @@ and <a href="https://github.com/thecodingmachine/graphqlite/blob/master/src/Mapp
 
 ## Deprecation of fields
 
-You can mark a field as deprecated in your GraphQL Schema by just annotating it with the `@deprecated` PHPDoc annotation.
+You can mark a field as deprecated in your GraphQL Schema by just annotating it with the `@deprecated` PHPDoc annotation. Note that a description (reason) is required for the annotation to be rendered.
 
 ```php
 namespace App\Entities;
