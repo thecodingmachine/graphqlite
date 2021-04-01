@@ -17,7 +17,7 @@ use function method_exists;
  *
  * @internal
  */
-class MagicPropertyResolver implements ResolverInterface
+class MagicPropertyResolver implements SourceResolverInterface
 {
     /** @var string */
     private $propertyName;

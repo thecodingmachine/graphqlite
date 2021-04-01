@@ -12,13 +12,13 @@ use function is_array;
 
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
  * @Attributes({
  *   @Attribute("value", type = "mixed"),
  *   @Attribute("mode", type = "string")
  * })
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class FailWith implements MiddlewareAnnotationInterface
 {
     /**

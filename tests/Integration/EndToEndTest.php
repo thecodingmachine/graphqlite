@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite\Integration;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\Debug;
+use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
@@ -65,9 +66,12 @@ use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use function json_encode;
 use function var_dump;
 use function var_export;
+use const JSON_PRETTY_PRINT;
 
 class EndToEndTest extends TestCase
 {
@@ -275,6 +279,17 @@ class EndToEndTest extends TestCase
         return $container;
     }
 
+    /**
+     * @return mixed
+     */
+    private function getSuccessResult(ExecutionResult $result, int $debugFlag = Debug::RETHROW_INTERNAL_EXCEPTIONS) {
+        $array = $result->toArray($debugFlag);
+        if (isset($array['errors']) || !isset($array['data'])) {
+            $this->fail('Expected a successful answer. Got '.json_encode($array, JSON_PRETTY_PRINT));
+        }
+        return $array['data'];
+    }
+
     public function testEndToEnd(): void
     {
         /**
@@ -325,7 +340,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
@@ -354,7 +369,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testDeprecatedField(): void
@@ -400,7 +415,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's introspect to see if the field is marked as deprecated
         // in the resulting GraphQL schema
@@ -423,7 +438,7 @@ class EndToEndTest extends TestCase
             new Context()
         );
 
-        $fields = $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']['__type']['fields'];
+        $fields = $this->getSuccessResult($result)['__type']['fields'];
         $deprecatedFields = [
             'deprecatedUppercaseName',
             'deprecatedName'
@@ -511,7 +526,7 @@ class EndToEndTest extends TestCase
                 'name' => 'Bill',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInputTypeDateAsParam()
@@ -544,7 +559,7 @@ class EndToEndTest extends TestCase
                 'name' => 'Bill',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInputType()
@@ -590,7 +605,7 @@ class EndToEndTest extends TestCase
                     ]
                 ]
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndPorpaginas(): void
@@ -631,7 +646,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
@@ -650,7 +665,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Let's run a query with no limit but an offset
         $invalidQueryString = '
@@ -708,7 +723,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndPorpaginasOnScalarType(): void
@@ -737,7 +752,7 @@ class EndToEndTest extends TestCase
                 'items' => ['Bill'],
                 'count' => 2
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     /**
@@ -800,7 +815,7 @@ class EndToEndTest extends TestCase
                 ],
                 'count' => 1
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
     }
 
@@ -824,7 +839,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
         $result = GraphQL::executeQuery(
@@ -834,7 +849,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testNonNullableTypesWithOptionnalFactoryArguments(): void
@@ -857,7 +872,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoFilters' => []
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testNullableTypesWithOptionnalFactoryArguments(): void
@@ -880,7 +895,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoNullableFilters' => null
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndResolveInfo(): void
@@ -903,7 +918,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoResolveInfo' => 'echoResolveInfo'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndRightIssues(): void
@@ -933,6 +948,22 @@ class EndToEndTest extends TestCase
         $queryString = '
         query {
             contacts {
+                name
+                forLogged
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('You need to be logged to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
                 secret
             }
         }
@@ -944,6 +975,37 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                withRight
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                hidden
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Cannot query field "hidden" on type "ContactInterface".', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testAutowireService(): void
@@ -976,7 +1038,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testParameterAnnotationsInSourceField(): void
@@ -1009,7 +1071,7 @@ class EndToEndTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums(): void
@@ -1032,7 +1094,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoProductType' => 'NON_FOOD'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums2(): void
@@ -1055,7 +1117,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoSomeProductType' => 'FOOD'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums3(): void
@@ -1085,7 +1147,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoProductType' => 'NON_FOOD'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndDateTime(): void
@@ -1108,7 +1170,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoDate' => '2019-05-05T01:02:03+00:00'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndErrorHandlingOfInconstentTypesInArrays(): void
@@ -1164,7 +1226,7 @@ class EndToEndTest extends TestCase
                 'fullName' => 'JOE',
                 'phone' => '0123456789'
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndSecurityAnnotation(): void
@@ -1187,7 +1249,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'secretPhrase' => 'you can see this secret only if passed parameter is "foo"'
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         $queryString = '
         query {
@@ -1226,7 +1288,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'nullableSecretPhrase' => null
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
 
         // Test with @FailWith annotation
         $queryString = '
@@ -1242,7 +1304,24 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'nullableSecretPhrase2' => null
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
+
+        // Test with @FailWith annotation on property
+        $queryString = '
+        query {
+            contacts {
+              failWithNull
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(null, $data['contacts'][0]['failWithNull']);
     }
 
     public function testEndToEndSecurityWithUser(): void
@@ -1392,6 +1471,21 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $queryString = '
+        query {
+            contacts {
+                secured
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testEndToEndUnions(){
@@ -1487,7 +1581,7 @@ class EndToEndTest extends TestCase
                     ]
                 ],
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInjectUser(): void
@@ -1571,4 +1665,247 @@ class EndToEndTest extends TestCase
         $this->assertNull($resultArray['data']['nullableResult']);
     }
 
+    public function testEndToEndFieldAnnotationInProperty(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            contacts {
+                age
+                nickName
+                status
+                address
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+
+        $this->assertSame(42, $data['contacts'][0]['age']);
+        $this->assertSame('foo', $data['contacts'][0]['nickName']);
+        $this->assertSame('bar', $data['contacts'][0]['status']);
+        $this->assertSame('foo', $data['contacts'][0]['address']);
+
+        $queryString = '
+        query {
+            contacts {
+                private
+            }
+        }
+        ';
+
+        GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(AccessPropertyException::class);
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::private'. Either make the property public or add a public getter for it like 'getPrivate' or 'isPrivate' with no required parameters");
+
+        $queryString = '
+        query {
+            contacts {
+                zipcode
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(AccessPropertyException::class);
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::zipcode'. Either make the property public or add a public getter for it like 'getZipcode' or 'isZipcode' with no required parameters");
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    public function testEndToEndInputAnnotations(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+            createPost(
+                post: {
+                    title: "foo",
+                    publishedAt: "2021-01-24T00:00:00+00:00"
+                    author: {
+                      name: "foo",
+                      birthDate: "1942-12-24T00:00:00+00:00",
+                      relations: [
+                        {
+                            name: "bar"
+                        }
+                      ]
+                    }
+                }
+            ) {
+                id
+                title
+                publishedAt
+                comment
+                summary
+                author {
+                  name
+                }
+            }
+            updatePost(
+                id: 100,
+                post: {
+                    title: "bar"
+                }
+            ) {
+                id
+                title
+                comment
+                summary
+            }
+            createArticle(
+                article: {
+                    title: "foo",
+                    comment: "some description",
+                    magazine: "bar",
+                    author: {
+                      name: "foo",
+                      birthDate: "1942-12-24T00:00:00+00:00",
+                      relations: [
+                        {
+                            name: "bar"
+                        }
+                      ]
+                    }
+                }
+            ) {
+                id
+                title
+                comment
+                summary
+                magazine
+                author {
+                  name
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'createPost' => [
+                'id' => 1,
+                'title' => 'foo',
+                'publishedAt' => '2021-01-24T00:00:00+00:00',
+                'comment' => 'foo',
+                'summary' => 'foo',
+                'author' => [
+                    'name' => 'foo',
+                ],
+            ],
+            'updatePost' => [
+                'id' => 100,
+                'title' => 'bar',
+                'comment' => 'bar',
+                'summary' => 'foo',
+            ],
+            'createArticle' => [
+                'id' => 2,
+                'title' => 'foo',
+                'comment' => 'some description',
+                'summary' => 'foo',
+                'magazine' => 'bar',
+                'author' => [
+                    'name' => 'foo',
+                ],
+            ],
+        ], $this->getSuccessResult($result));
+    }
+
+    public function testEndToEndInputAnnotationIssues(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+            createPost(
+                post: {
+                    id: 20,
+                }
+            ) {
+                id
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Field PostInput.publishedAt of required type DateTime! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "id" is not defined by type PostInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+
+        $queryString = '
+        mutation {
+            createArticle(
+                article: {
+                    id: 20,
+                    publishedAt: "2021-01-24T00:00:00+00:00"
+                }
+            ) {
+                id
+                publishedAt
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Field ArticleInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Field "id" is not defined by type ArticleInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "publishedAt" is not defined by type ArticleInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+
+        $queryString = '
+        mutation {
+            updatePost(
+                id: 100,
+                post: {
+                    title: "foo",
+                    inaccessible: "foo"
+                }
+            ) {
+                id
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->expectException(AccessPropertyException::class);
+        $this->expectExceptionMessage("Could not set value for property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post::inaccessible'. Either make the property public or add a public setter for it like this: 'setInaccessible'");
+        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+    }
 }

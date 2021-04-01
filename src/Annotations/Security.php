@@ -16,7 +16,7 @@ use function sprintf;
 
 /**
  * @Annotation
- * @Target({"ANNOTATION", "METHOD"})
+ * @Target({"PROPERTY", "ANNOTATION", "METHOD"})
  * @Attributes({
  *   @Attribute("expression", type = "string"),
  *   @Attribute("failWith", type = "mixed"),
@@ -24,7 +24,7 @@ use function sprintf;
  *   @Attribute("message", type = "string"),
  * })
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Security implements MiddlewareAnnotationInterface
 {
     /** @var string */

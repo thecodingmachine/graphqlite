@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 use function lcfirst;
@@ -62,15 +61,22 @@ class NamingStrategy implements NamingStrategyInterface
         return $typeClassName;
     }
 
-    public function getInputTypeName(string $className, Factory $factory): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getInputTypeName(string $className, $input): string
     {
-        $inputTypeName = $factory->getName();
+        $inputTypeName = $input->getName();
         if ($inputTypeName !== null) {
             return $inputTypeName;
         }
         $prevPos = strrpos($className, '\\');
         if ($prevPos) {
             $className = substr($className, $prevPos + 1);
+        }
+
+        if (substr($className, -5) === 'Input') {
+            return $className;
         }
 
         return $className . 'Input';

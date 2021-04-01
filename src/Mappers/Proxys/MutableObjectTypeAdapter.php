@@ -28,7 +28,7 @@ use function sprintf;
  */
 class MutableObjectTypeAdapter extends MutableObjectType implements MutableInterface
 {
-    /** @use MutableAdapterTrait<ObjectType> */
+    /** @use MutableAdapterTrait */
     use MutableAdapterTrait;
 
     public function __construct(ObjectType $type, ?string $className = null)

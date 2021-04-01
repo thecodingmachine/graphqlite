@@ -27,7 +27,7 @@ use function sprintf;
  */
 class MutableInterfaceTypeAdapter extends MutableInterfaceType implements MutableInterface
 {
-    /** @use MutableAdapterTrait<InterfaceType> */
+    /** @use MutableAdapterTrait */
     use MutableAdapterTrait;
 
     public function __construct(InterfaceType $type, ?string $className = null)

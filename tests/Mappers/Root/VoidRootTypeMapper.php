@@ -11,6 +11,7 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
+use ReflectionProperty;
 
 class VoidRootTypeMapper implements RootTypeMapperInterface
 {
@@ -26,22 +27,24 @@ class VoidRootTypeMapper implements RootTypeMapperInterface
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
     {
-        return $this->next->toGraphQLOutputType($type, $subType, $refMethod, $docBlockObj);
+        return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
     /**
      * @param (InputType&GraphQLType)|null $subType
+     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
     {
-        return $this->next->toGraphQLInputType($type, $subType, $argumentName, $refMethod, $docBlockObj);
+        return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
     }
 
     /**

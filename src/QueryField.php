@@ -14,10 +14,9 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
-use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
-use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
@@ -58,7 +57,7 @@ class QueryField extends FieldDefinition
         }
 
         $resolveFn = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
-            if ($originalResolver instanceof SourceResolver || $originalResolver instanceof MagicPropertyResolver) {
+            if ($originalResolver instanceof SourceResolverInterface) {
                 $originalResolver->setObject($source);
             }
             /*if ($resolve !== null) {
@@ -106,7 +105,7 @@ class QueryField extends FieldDefinition
 
                 return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $originalResolver) {
                     if (! $prefetchBuffer->hasResult($args)) {
-                        if ($originalResolver instanceof SourceResolver || $originalResolver instanceof MagicPropertyResolver) {
+                        if ($originalResolver instanceof SourceResolverInterface) {
                             $originalResolver->setObject($source);
                         }
 

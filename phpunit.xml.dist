@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit backupGlobals="false"
+<phpunit
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.5/phpunit.xsd"
+         backupGlobals="false"
          backupStaticAttributes="false"
          colors="true"
          convertErrorsToExceptions="true"
@@ -10,21 +13,21 @@
          stopOnFailure="false"
          bootstrap="tests/Bootstrap.php"
 >
-    <testsuites>
-        <testsuite name="GraphQLite Test Suite">
-            <directory>./tests/</directory>
-            <exclude>./tests/dependencies/</exclude>
-            <exclude>./tests/Bootstrap.php</exclude>
-        </testsuite>
-    </testsuites>
+  <testsuites>
+    <testsuite name="GraphQLite Test Suite">
+      <directory>./tests/</directory>
+      <exclude>./tests/dependencies/</exclude>
+      <exclude>./tests/Bootstrap.php</exclude>
+    </testsuite>
+  </testsuites>
 
-    <filter>
-  		<whitelist processUncoveredFilesFromWhitelist="true">
-    		<directory suffix=".php">src/</directory>
-        </whitelist>
-	</filter>
-    <logging>
-        <log type="coverage-html" target="build/coverage"/>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-    </logging>
+  <filter>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+      <directory suffix=".php">src/</directory>
+    </whitelist>
+  </filter>
+  <logging>
+    <log type="coverage-html" target="build/coverage"/>
+    <log type="coverage-clover" target="build/logs/clover.xml"/>
+  </logging>
 </phpunit>

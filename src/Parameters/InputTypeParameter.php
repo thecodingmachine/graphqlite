@@ -22,6 +22,8 @@ class InputTypeParameter implements InputTypeParameterInterface
     private $defaultValue;
     /** @var ArgumentResolver */
     private $argumentResolver;
+    /** @var string */
+    private $description;
 
     /**
      * @param InputType&Type $type
@@ -61,6 +63,11 @@ class InputTypeParameter implements InputTypeParameterInterface
         throw MissingArgumentException::create($this->name);
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function getType(): InputType
     {
         return $this->type;
@@ -77,5 +84,15 @@ class InputTypeParameter implements InputTypeParameterInterface
     public function getDefaultValue()
     {
         return $this->defaultValue;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
     }
 }

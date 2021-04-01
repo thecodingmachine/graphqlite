@@ -11,9 +11,9 @@ use Attribute;
  * or has no right associated.
  *
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class HideIfUnauthorized implements MiddlewareAnnotationInterface
 {
 }
