@@ -2,7 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
@@ -16,15 +16,8 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
-use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
-use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
@@ -177,7 +170,7 @@ class SchemaFactoryTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
     public function testDuplicateQueryException(): void
