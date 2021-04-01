@@ -3,7 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Integration;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use Mouf\Picotainer\Picotainer;
@@ -13,7 +13,6 @@ use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Context\Context;
@@ -34,7 +33,6 @@ use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
@@ -69,8 +67,6 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use function json_encode;
-use function var_dump;
-use function var_export;
 use const JSON_PRETTY_PRINT;
 
 class EndToEndTest extends TestCase
@@ -282,7 +278,7 @@ class EndToEndTest extends TestCase
     /**
      * @return mixed
      */
-    private function getSuccessResult(ExecutionResult $result, int $debugFlag = Debug::RETHROW_INTERNAL_EXCEPTIONS) {
+    private function getSuccessResult(ExecutionResult $result, int $debugFlag = DebugFlag::RETHROW_INTERNAL_EXCEPTIONS) {
         $array = $result->toArray($debugFlag);
         if (isset($array['errors']) || !isset($array['data'])) {
             $this->fail('Expected a successful answer. Got '.json_encode($array, JSON_PRETTY_PRINT));
@@ -498,7 +494,7 @@ class EndToEndTest extends TestCase
 
         $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
-        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
     public function testEndToEndInputTypeDate()
@@ -687,7 +683,7 @@ class EndToEndTest extends TestCase
             $invalidQueryString
         );
 
-        $this->assertSame('In the items field of a result set, you cannot add a "offset" without also adding a "limit"', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('In the items field of a result set, you cannot add a "offset" without also adding a "limit"', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
 
         // Let's run a query with no limit offset
@@ -943,7 +939,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('You need to be logged to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('You need to be logged to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $queryString = '
         query {
@@ -959,7 +955,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('You need to be logged to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('You need to be logged to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $queryString = '
         query {
@@ -974,7 +970,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $queryString = '
         query {
@@ -989,7 +985,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $queryString = '
         query {
@@ -1005,7 +1001,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Cannot query field "hidden" on type "ContactInterface".', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Cannot query field "hidden" on type "ContactInterface".', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testAutowireService(): void
@@ -1195,7 +1191,7 @@ class EndToEndTest extends TestCase
 
         $this->expectException(TypeMismatchRuntimeException::class);
         $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
-        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
     public function testEndToEndNonDefaultOutputType(): void
@@ -1264,7 +1260,7 @@ class EndToEndTest extends TestCase
 
         $this->expectException(MissingAuthorizationException::class);
         $this->expectExceptionMessage('Wrong secret passed');
-        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
     public function testEndToEndSecurityFailWithAnnotation(): void
@@ -1343,7 +1339,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testEndToEndSecurityWithUserConnected(): void
@@ -1396,7 +1392,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('you can see this secret only if user.bar is set to 42', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingUser']);
+        $this->assertSame('you can see this secret only if user.bar is set to 42', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingUser']);
 
 
         // Test with failWith attribute
@@ -1411,7 +1407,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGranted']);
+        $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGranted']);
     }
 
     public function testEndToEndSecurityWithThis(): void
@@ -1432,7 +1428,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $queryString = '
         query {
@@ -1445,7 +1441,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingThis']);
+        $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingThis']);
     }
 
     public function testEndToEndSecurityInField(): void
@@ -1470,7 +1466,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $queryString = '
         query {
@@ -1485,7 +1481,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Access denied.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testEndToEndUnions(){
@@ -1510,7 +1506,7 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString
         );
-        $resultArray = $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS);
+        $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
 
         $this->assertEquals('SpecialProduct', $resultArray['data']['getProduct']['__typename']);
         $this->assertEquals('Special box', $resultArray['data']['getProduct']['name']);
@@ -1539,7 +1535,7 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString
         );
-        $resultArray = $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS);
+        $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
 
         $this->assertEquals('SpecialProduct', $resultArray['data']['getProducts2'][0]['__typename']);
         $this->assertEquals('Special box', $resultArray['data']['getProducts2'][0]['name']);
@@ -1621,7 +1617,7 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame(42, $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
+        $this->assertSame(42, $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
     }
 
     public function testInputOutputNameConflict(): void
@@ -1658,7 +1654,7 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString
         );
-        $resultArray = $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS);
+        $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
         if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
             $this->fail('Expected a successful answer. Got '.json_encode($resultArray, JSON_PRETTY_PRINT));
         }
@@ -1726,7 +1722,7 @@ class EndToEndTest extends TestCase
 
         $this->expectException(AccessPropertyException::class);
         $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::zipcode'. Either make the property public or add a public getter for it like 'getZipcode' or 'isZipcode' with no required parameters");
-        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
     public function testEndToEndInputAnnotations(): void
@@ -1858,9 +1854,9 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
-        $this->assertSame('Field PostInput.publishedAt of required type DateTime! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
-        $this->assertSame('Field "id" is not defined by type PostInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+        $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Field PostInput.publishedAt of required type DateTime! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "id" is not defined by type PostInput.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
 
         $queryString = '
         mutation {
@@ -1881,9 +1877,9 @@ class EndToEndTest extends TestCase
             $queryString
         );
 
-        $this->assertSame('Field ArticleInput.title of required type String! was not provided.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
-        $this->assertSame('Field "id" is not defined by type ArticleInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
-        $this->assertSame('Field "publishedAt" is not defined by type ArticleInput.', $result->toArray(Debug::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+        $this->assertSame('Field ArticleInput.title of required type String! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Field "id" is not defined by type ArticleInput.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "publishedAt" is not defined by type ArticleInput.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
 
         $queryString = '
         mutation {
@@ -1906,6 +1902,6 @@ class EndToEndTest extends TestCase
 
         $this->expectException(AccessPropertyException::class);
         $this->expectExceptionMessage("Could not set value for property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post::inaccessible'. Either make the property public or add a public setter for it like this: 'setInaccessible'");
-        $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 }

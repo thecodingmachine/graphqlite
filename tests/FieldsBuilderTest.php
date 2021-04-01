@@ -2,8 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use GraphQL\Deferred;
 use GraphQL\Type\Definition\BooleanType;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\FloatType;
@@ -20,7 +18,6 @@ use ReflectionMethod;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
@@ -30,22 +27,18 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamIterator;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestResolveInfo;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
@@ -59,14 +52,9 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
-use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
@@ -78,7 +66,6 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
-use function var_dump;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
 {
@@ -718,9 +705,9 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
         $this->assertInstanceOf(ListOfType::class, $usersQuery->args[0]->getType()->getWrappedType());
         $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType()->getWrappedType());
-        $this->assertInstanceOf(NonNull::class, $usersQuery->type);
-        $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getWrappedType());
-        $this->assertInstanceOf(IntType::class, $usersQuery->type->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->getType()->getWrappedType()->getWrappedType());
     }
 
     public function testQueryProviderWithParamDateTime(): void
