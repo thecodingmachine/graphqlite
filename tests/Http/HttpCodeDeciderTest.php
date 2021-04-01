@@ -22,16 +22,16 @@ class HttpCodeDeciderTest extends TestCase
         $graphqlError = new Error('Foo');
 
         $exception = new Exception('foo', 0);
-        $errorCode0 = new Error('Foo', null, null, null, null, $exception);
+        $errorCode0 = new Error('Foo', null, null, [], null, $exception);
 
         $exception401 = new Exception('foo', 401);
-        $errorCode401 = new Error('Foo', null, null, null, null, $exception401);
+        $errorCode401 = new Error('Foo', null, null, [], null, $exception401);
 
         $exception404 = new Exception('foo', 404);
-        $errorCode404 = new Error('Foo', null, null, null, null, $exception404);
+        $errorCode404 = new Error('Foo', null, null, [], null, $exception404);
 
         $exception600 = new Exception('foo', 600);
-        $errorCode600 = new Error('Foo', null, null, null, null, $exception600);
+        $errorCode600 = new Error('Foo', null, null, [], null, $exception600);
 
         $clientAwareException = new class extends Exception implements ClientAware {
             public function isClientSafe()
@@ -44,7 +44,7 @@ class HttpCodeDeciderTest extends TestCase
                 return 'foo';
             }
         };
-        $clientAwareError = new Error('Foo', null, null, null, null, $clientAwareException);
+        $clientAwareError = new Error('Foo', null, null, [], null, $clientAwareException);
 
         $executionResult = new ExecutionResult(null, [ $errorCode0 ]);
         $this->assertSame(500, $codeDecider->decideHttpStatusCode($executionResult));

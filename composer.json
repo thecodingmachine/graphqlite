@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=7.2",
-        "webonyx/graphql-php": "^v14.5.0",
+        "webonyx/graphql-php": "^14.6.1",
         "psr/container": "^1",
         "doctrine/annotations": "^1.7.0",
         "doctrine/cache": "^1.8",
