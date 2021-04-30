@@ -52,7 +52,7 @@ class AppKernel extends Kernel
     {
         $bundles = array(
             // other bundles...
-            new TheCodingMachine\GraphQLite\Bundle\GraphQLiteBundle,
+            new TheCodingMachine\GraphQLite\Bundle\GraphqliteBundle,
         );
     }
 }
