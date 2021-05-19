@@ -50,7 +50,9 @@ trait MutableTrait
     public function getField($name): FieldDefinition
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
-            throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
+            throw new RuntimeException(
+                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
+            );
         }
 
         return parent::getField($name);
@@ -64,7 +66,9 @@ trait MutableTrait
     public function hasField($name): bool
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
-            throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
+            throw new RuntimeException(
+                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
+            );
         }
 
         return parent::hasField($name);
@@ -79,7 +83,9 @@ trait MutableTrait
     {
         if ($this->finalFields === null) {
             if ($this->status === MutableInterface::STATUS_PENDING) {
-                throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
+                throw new RuntimeException(
+                    'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
+                );
             }
 
             $this->finalFields = parent::getFields();
