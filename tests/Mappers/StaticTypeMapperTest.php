@@ -2,7 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\StringType;
@@ -182,6 +182,6 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
             'legacyObject' => [
                 'foo' => 42
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 }

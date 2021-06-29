@@ -107,12 +107,12 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     private function processResult($result): array
     {
         if ($result instanceof ExecutionResult) {
-            return $result->toArray($this->config->getDebug());
+            return $result->toArray($this->config->getDebugFlag());
         }
 
         if (is_array($result)) {
             return array_map(function (ExecutionResult $executionResult) {
-                return $executionResult->toArray($this->config->getDebug());
+                return $executionResult->toArray($this->config->getDebugFlag());
             }, $result);
         }
 
