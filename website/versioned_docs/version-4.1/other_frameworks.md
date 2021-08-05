@@ -54,6 +54,8 @@ The `SchemaFactory` class also comes with a number of methods that you can use t
 $factory->setAuthenticationService(new VoidAuthenticationService());
 // Configure an authorization service (to resolve the @Right annotations).
 $factory->setAuthorizationService(new VoidAuthorizationService());
+//Add class mapper to map a class names to one or many possible file names according to PSR-0 or PSR-4
+$factory->setClassNameMapper(new ClassNameMapper());
 // Change the naming convention of GraphQL types globally.
 $factory->setNamingStrategy(new NamingStrategy());
 // Add a custom type mapper.
