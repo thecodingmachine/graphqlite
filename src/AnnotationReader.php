@@ -273,6 +273,7 @@ class AnnotationReader
         }
 
         return array_map(static function (array $parameterAnnotations) {
+            Assert::allIsInstanceOf($parameterAnnotations, ParameterAnnotationInterface::class);
             return new ParameterAnnotations($parameterAnnotations);
         }, $parameterAnnotationsPerParameter);
     }
