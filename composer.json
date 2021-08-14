@@ -59,7 +59,7 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse -c phpstan.neon --no-progress -vvv",
+        "phpstan": "phpstan analyse -c phpstan.neon --no-progress -vvv --memory-limit=1G",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": ["@cs-check", "@phpstan", "phpunit"]
