@@ -19,7 +19,7 @@ jobs:
       matrix:
         install-args: ['', '--prefer-lowest']
         php-version: ['7.2', '7.3', '7.4', '8.0']
-        fail-fast: false
+      fail-fast: false
 
     steps:
       # Cancel previous runs of the same branch
