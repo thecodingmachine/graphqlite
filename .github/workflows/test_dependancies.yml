@@ -4,8 +4,10 @@
 name: "Test the bundles' dependencies"
 
 on:
-  - "pull_request"
-  - "push"
+  pull_request: ~
+  push:
+    branches:
+      - master
 
 jobs:
 
@@ -15,18 +17,18 @@ jobs:
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
-        
+
       - name: "copy the project"
         run: rsync -av . tests/dependencies/copy/ --exclude tests --exclude vendor
-        
+
       - name: "Clone the bundle project"
         run: git clone https://github.com/thecodingmachine/graphqlite-bundle.git
         working-directory: "tests/dependencies"
-        
+
       - name: "edit the composer.json"
         run: php ./makeComposerLocal.php graphqlite-bundle/composer.json
         working-directory: "tests/dependencies"
-        
+
       - name: "install dependancies"
         run: composer install
         working-directory: "tests/dependencies/graphqlite-bundle"
@@ -76,4 +78,3 @@ jobs:
       - name: "install dependancies"
         run: composer install
         working-directory: "tests/dependencies/graphqlite-laravel"
-  
