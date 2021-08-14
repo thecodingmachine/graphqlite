@@ -424,15 +424,18 @@ class AnnotationReader
                 });
                 if (PHP_MAJOR_VERSION >= 8) {
                     Assert::methodExists($refClass, 'getAttributes');
-                    $attributes = $refClass->getAttributes();
-                    $toAddAnnotations[] = array_map(
+
+                    /** @var A[] $attributes */
+                    $attributes = array_map(
                         static function ($attribute) {
                             return $attribute->newInstance();
                         },
-                        array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                        array_filter($refClass->getAttributes(), static function ($annotation) use ($annotationClass): bool {
                             return is_a($annotation->getName(), $annotationClass, true);
                         })
                     );
+
+                    $toAddAnnotations[] = $attributes;
                 }
             } catch (AnnotationException $e) {
                 if ($this->mode === self::STRICT_MODE) {
