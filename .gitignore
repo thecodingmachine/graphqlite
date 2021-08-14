@@ -24,3 +24,4 @@ website/i18n/*
 /tests/dependencies/graphqlite-universal-service-provider/
 
 .phpunit.result.cache
+.phpstan-cache

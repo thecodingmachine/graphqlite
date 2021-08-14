@@ -259,6 +259,7 @@ class AnnotationReader
         // Now, let's add PHP 8 parameter attributes
         if (PHP_MAJOR_VERSION >= 8) {
             foreach ($refParameters as $refParameter) {
+                Assert::methodExists($refParameter, 'getAttributes');
                 $attributes = $refParameter->getAttributes();
                 $parameterAnnotationsPerParameter[$refParameter->getName()] = array_merge($parameterAnnotationsPerParameter[$refParameter->getName()] ?? [], array_map(
                     static function ($attribute) {
@@ -310,6 +311,7 @@ class AnnotationReader
         try {
             // If attribute & annotation, let's prefer the PHP 8 attribute
             if (PHP_MAJOR_VERSION >= 8) {
+                Assert::methodExists($refClass, 'getAttributes');
                 $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
                 if ($attribute) {
                     $instance = $attribute->newInstance();
@@ -354,6 +356,7 @@ class AnnotationReader
         try {
             // If attribute & annotation, let's prefer the PHP 8 attribute
             if (PHP_MAJOR_VERSION >= 8) {
+                Assert::methodExists($refMethod, 'getAttributes');
                 $attribute = $refMethod->getAttributes($annotationClass)[0] ?? null;
                 if ($attribute) {
                     return $this->methodAnnotationCache[$cacheKey] = $attribute->newInstance();
@@ -419,6 +422,7 @@ class AnnotationReader
                     return $annotation instanceof $annotationClass;
                 });
                 if (PHP_MAJOR_VERSION >= 8) {
+                    Assert::methodExists($refClass, 'getAttributes');
                     $attributes = $refClass->getAttributes();
                     $toAddAnnotations[] = array_map(
                         static function ($attribute) {
@@ -475,6 +479,7 @@ class AnnotationReader
                 return $annotation instanceof $annotationClass;
             });
             if (PHP_MAJOR_VERSION >= 8) {
+                Assert::methodExists($refMethod, 'getAttributes');
                 $attributes = $refMethod->getAttributes();
                 $toAddAnnotations = array_merge($toAddAnnotations, array_map(
                     static function ($attribute) {
@@ -530,6 +535,7 @@ class AnnotationReader
                 return $annotation instanceof $annotationClass;
             });
             if (PHP_MAJOR_VERSION >= 8) {
+                Assert::methodExists($refProperty, 'getAttributes');
                 $attributes = $refProperty->getAttributes();
                 $toAddAnnotations = array_merge($toAddAnnotations, array_map(
                     static function ($attribute) {
