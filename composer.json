@@ -16,7 +16,7 @@
         "doctrine/cache": "^1.8",
         "ocramius/package-versions": "^1.4 || ^2",
         "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
-        "phpdocumentor/type-resolver": "^1.0.1",
+        "phpdocumentor/type-resolver": "^1.4",
         "psr/container": "^1",
         "psr/http-factory": "^1",
         "psr/http-message": "^1.0.1",
@@ -41,7 +41,7 @@
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^0.12.94",
         "phpstan/phpstan-webmozart-assert": "^0.12.15",
-        "phpunit/phpunit": "^8.5.19||^9.5.8",
+        "phpunit/phpunit": "^9.5.8",
         "thecodingmachine/phpstan-strict-rules": "^0.12.1"
     },
     "suggest": {
