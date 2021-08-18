@@ -3,8 +3,10 @@
 name: "Continuous Integration"
 
 on:
-  - "pull_request"
-  - "push"
+  pull_request: ~
+  push:
+    branches:
+      - master
 
 jobs:
 
@@ -15,16 +17,17 @@ jobs:
 
     strategy:
       matrix:
-        php-version:
-          - "7.2"
-          - "7.3"
-          - "7.4"
-          - "8.0"
-
-        dependencies:
-          - "highest"
+        install-args: ['', '--prefer-lowest']
+        php-version: ['7.2', '7.3', '7.4', '8.0']
+      fail-fast: false
 
     steps:
+      # Cancel previous runs of the same branch
+      - name: cancel
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+
       - name: "Checkout"
         uses: "actions/checkout@v2"
 
@@ -35,38 +38,60 @@ jobs:
           php-version: "${{ matrix.php-version }}"
           tools: composer:v2
 
-      - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v1"
+      - name: composer-cache-dir
+        id: composercache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: composer-cache
+        uses: actions/cache@v2.1.6
         with:
-          path: "~/.composer/cache"
-          key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.lock') }}"
-          restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
+          path: ${{ steps.composercache.outputs.dir }}
+          key: composer-${{ hashFiles('**/composer.json') }}-${{ matrix.install-args }}
+          restore-keys: |
+            composer-${{ hashFiles('**/composer.json') }}-${{ matrix.install-args }}
+            composer-${{ hashFiles('**/composer.json') }}-
+            composer-
 
       - name: "Install dependencies with composer"
-        run: "composer install --no-interaction"
+        run: |
+            composer update ${{ matrix.install-args }} --no-interaction --no-progress --prefer-dist
         if: ${{ matrix.php-version != '8.0' }}
 
       - name: "Install dependencies with composer. Ignoring platform reqs to bypass a problem with ecodev/graphql-upload available only with latest Webonyx on PHP8."
-        run: "composer install --no-interaction --ignore-platform-reqs"
+        run: |
+            composer update ${{ matrix.install-args }} --no-interaction --no-progress --prefer-dist --ignore-platform-reqs
         if: ${{ matrix.php-version == '8.0' }}
 
       - name: "Run tests with phpunit/phpunit"
         run: "vendor/bin/phpunit"
 
+      - name: phpstan-cache
+        uses: actions/cache@v2.1.6
+        with:
+          key: phpstan-${{ matrix.php-version }}-${{ matrix.install-args }}-${{ github.ref }}-${{ github.sha }}
+          path: .phpstan-cache
+          restore-keys: |
+            phpstan-${{ matrix.php-version }}-${{ matrix.install-args }}-${{ github.ref }}-
+            phpstan-${{ matrix.php-version }}-${{ matrix.install-args }}-
+            phpstan-${{ matrix.php-version }}-
+            phpstan-
+
       - name: "Run static code analysis with phpstan/phpstan"
         run: "composer phpstan"
-        if: ${{ matrix.php-version == '8.0' }}
 
       - name: "Run coding standard checks with squizlabs/php_codesniffer"
         run: "composer cs-check"
-        if: ${{ matrix.php-version == '8.0' }}
+        if: ${{ matrix.php-version == '7.2' }} # Do not suggest using features after 7.2
 
       - name: "Archive code coverage results"
-        uses: "actions/upload-artifact@v1"
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: "codeCoverage"
           path: "build"
 
-      - uses: codecov/codecov-action@v1 # upload the coverage to codecov
+      - uses: codecov/codecov-action@v2.0.2 # upload the coverage to codecov
         with:
           fail_ci_if_error: true # optional (default = false)
+        # Do not upload in forks, and only on php8, latest deps
+        if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.0' && matrix.install-args == '' }}

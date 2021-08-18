@@ -51,7 +51,7 @@ trait MutableTrait
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException(
-                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
+                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.'
             );
         }
 
@@ -67,7 +67,7 @@ trait MutableTrait
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException(
-                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
+                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.'
             );
         }
 
@@ -84,7 +84,7 @@ trait MutableTrait
         if ($this->finalFields === null) {
             if ($this->status === MutableInterface::STATUS_PENDING) {
                 throw new RuntimeException(
-                    'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
+                    'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.'
                 );
             }
 
