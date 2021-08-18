@@ -29,7 +29,7 @@
         "thecodingmachine/cache-utils": "^1",
         "thecodingmachine/class-explorer": "^1.1.0",
         "webmozart/assert": "^1.10",
-        "webonyx/graphql-php": "^0.13.4"
+        "webonyx/graphql-php": "^0.13.4 || ^14.0.0"
     },
     "require-dev": {
         "beberlei/porpaginas": "^1.2",
