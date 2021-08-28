@@ -14,7 +14,6 @@
         "php": ">=7.2",
         "ext-json": "*",
         "doctrine/annotations": "^1.10.4",
-        "doctrine/cache": "^1.8",
         "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
         "phpdocumentor/type-resolver": "^1.4",
