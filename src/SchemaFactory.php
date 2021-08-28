@@ -83,8 +83,6 @@ class SchemaFactory
     private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
-    /** @var string */
-    private $annotationCacheDir;
     /** @var AuthenticationServiceInterface|null */
     private $authenticationService;
     /** @var AuthorizationServiceInterface|null */
@@ -198,13 +196,6 @@ class SchemaFactory
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
-
-        return $this;
-    }
-
-    public function setAnnotationCacheDir(string $cacheDir): self
-    {
-        $this->annotationCacheDir = $cacheDir;
 
         return $this;
     }
