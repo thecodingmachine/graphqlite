@@ -13,7 +13,6 @@
     <file>src</file>
     <!-- <file>tests</file> -->
 
-    <exclude-pattern>tests/dependencies/*</exclude-pattern>
     <exclude-pattern>src/Utils/NamespacedCache.php</exclude-pattern>
     <exclude-pattern>src/Types/TypeAnnotatedInterfaceType.php</exclude-pattern>
     <exclude-pattern>src/Mappers/Proxys/*</exclude-pattern>

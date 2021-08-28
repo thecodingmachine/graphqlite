@@ -16,7 +16,6 @@
   <testsuites>
     <testsuite name="GraphQLite Test Suite">
       <directory>./tests/</directory>
-      <exclude>./tests/dependencies/</exclude>
       <exclude>./tests/Bootstrap.php</exclude>
     </testsuite>
   </testsuites>
