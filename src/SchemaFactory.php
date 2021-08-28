@@ -51,15 +51,11 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 
-use function apcu_enabled;
 use function array_map;
 use function array_reverse;
 use function class_exists;
-use function crc32;
-use function function_exists;
 use function md5;
 use function substr;
-use function sys_get_temp_dir;
 
 /**
  * A class to help getting started with GraphQLite.
