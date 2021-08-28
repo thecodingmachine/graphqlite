@@ -1,7 +1,6 @@
 {
     "name": "thecodingmachine/graphqlite",
     "description": "Write your GraphQL queries in simple to write controllers (using webonyx/graphql-php).",
-    "version": "dev-master",
     "license": "MIT",
     "type": "library",
     "authors": [
