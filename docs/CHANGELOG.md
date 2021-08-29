@@ -4,6 +4,19 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 4.3
+
+Breaking change:
+
+- The method `setAnnotationCacheDir($directory)` has been removed from the `SchemaFactory`.  The annotation
+  cache will use your `Psr\SimpleCache\CacheInterface` compliant cache handler set through the `SchemaFactory`
+  constructor.
+
+Minor changes:
+
+- Removed dependency for doctrine/cache and unified some of the cache layers following a PSR interface.
+- Cleaned up some of the documentation in an attempt to get things accurate with versioned releases.
+
 ## 4.2
 
 Breaking change:
@@ -52,7 +65,6 @@ Minor changes:
 Miscellaneous:
 
 - Migrated from Travis to Github actions
-
 
 ## 4.0
 
