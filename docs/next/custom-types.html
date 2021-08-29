@@ -141,9 +141,15 @@ You do this by creating a class that extends <code>GraphQL\Type\Definition\Scala
 </ul>
 <pre><code class="hljs css language-php"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">RootTypeMapperInterface</span>
 </span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toGraphQLOutputType</span><span class="hljs-params">(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj)</span>: <span class="hljs-title">OutputType</span></span>;
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@param</span> \ReflectionMethod|\ReflectionProperty $reflector
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toGraphQLOutputType</span><span class="hljs-params">(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj)</span>: <span class="hljs-title">OutputType</span></span>;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toGraphQLInputType</span><span class="hljs-params">(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj)</span>: <span class="hljs-title">InputType</span></span>;
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@param</span> \ReflectionMethod|\ReflectionProperty $reflector
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toGraphQLInputType</span><span class="hljs-params">(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj)</span>: <span class="hljs-title">InputType</span></span>;
 
     <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapNameToType</span><span class="hljs-params">(string $typeName)</span>: <span class="hljs-title">NamedType</span></span>;
 }
