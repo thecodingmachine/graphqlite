@@ -79,9 +79,6 @@ $factory->prodMode();
 // Enables dev-mode (this is the default mode: cache settings optimized for best developer experience).
 // This is a shortcut for `$schemaFactory->setGlobTtl(2)`
 $factory->devMode();
-// If APCu is not available, Doctrine annotations are stored in files.
-// This setter can configure the cache directory for Doctrine annotations.
-$factory->setAnnotationCacheDir($directory);
 ```
 
 ### GraphQLite context

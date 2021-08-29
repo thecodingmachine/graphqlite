@@ -6,14 +6,13 @@ namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Cache\ApcuCache;
-use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
 use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -52,15 +51,11 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 
-use function apcu_enabled;
 use function array_map;
 use function array_reverse;
 use function class_exists;
-use function crc32;
-use function function_exists;
 use function md5;
 use function substr;
-use function sys_get_temp_dir;
 
 /**
  * A class to help getting started with GraphQLite.
@@ -88,8 +83,6 @@ class SchemaFactory
     private $parameterMiddlewares = [];
     /** @var Reader */
     private $doctrineAnnotationReader;
-    /** @var string */
-    private $annotationCacheDir;
     /** @var AuthenticationServiceInterface|null */
     private $authenticationService;
     /** @var AuthorizationServiceInterface|null */
@@ -207,35 +200,16 @@ class SchemaFactory
         return $this;
     }
 
-    public function setAnnotationCacheDir(string $cacheDir): self
-    {
-        $this->annotationCacheDir = $cacheDir;
-
-        return $this;
-    }
-
     /**
      * Returns a cached Doctrine annotation reader.
      * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
      */
-    private function getDoctrineAnnotationReader(): Reader
+    private function getDoctrineAnnotationReader(CacheItemPoolInterface $cache): Reader
     {
         if ($this->doctrineAnnotationReader === null) {
             AnnotationRegistry::registerLoader('class_exists');
-            $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            if (function_exists('apcu_enabled') && apcu_enabled()) {
-                $cache = new ApcuCache();
-            } else {
-                $cacheDir = $this->annotationCacheDir ?? sys_get_temp_dir();
-                $cache = new PhpFileCache($cacheDir . '/graphqlite.' . crc32(__DIR__));
-            }
-
-            $cache->setNamespace($this->cacheNamespace);
-
-            $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, $cache, true);
-
-            return $doctrineAnnotationReader;
+            return new PsrCachedReader(new DoctrineAnnotationReader(), $cache, true);
         }
 
         return $this->doctrineAnnotationReader;
@@ -331,7 +305,8 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
+        $symfonyCache          = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
         $authorizationService  = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver          = new TypeResolver();
@@ -339,7 +314,6 @@ class SchemaFactory
         $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
         $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry          = new TypeRegistry();
-        $symfonyCache          = new Psr16Adapter($this->cache, $this->cacheNamespace);
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(static function (string $namespace) use ($namespaceFactory) {
