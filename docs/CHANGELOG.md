@@ -6,6 +6,22 @@ sidebar_label: Changelog
 
 ## 4.2
 
+Breaking change:
+
+The method signature for `toGraphQLOutputType` and `toGraphQLInputType` have been changed to the following:
+
+```php
+/**
+ * @param \ReflectionMethod|\ReflectionProperty $reflector
+ */
+public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType;
+
+/**
+ * @param \ReflectionMethod|\ReflectionProperty $reflector
+ */
+public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType;
+```
+
 New features:
 
 - [@Input](annotations_reference.md#input-annotation) annotation is introduced as an alternative to `@Factory`. Now GraphQL input type can be created in the same manner as `@Type` in combination with `@Field` - [example](input_types.md#input-annotation).
@@ -19,12 +35,12 @@ Breaking change:
 There is one breaking change introduced in the minor version (this was important to allow PHP 8 compatibility).
 
 - The **ecodev/graphql-upload** package (used to get support for file uploads in GraphQL input types) is now a "recommended" dependency only.
-  If you are using GraphQL file uploads, you need to add `ecodev/graphql-upload` to your `composer.json`. 
+  If you are using GraphQL file uploads, you need to add `ecodev/graphql-upload` to your `composer.json`.
 
 New features:
 
 - All annotations can now be accessed as PHP 8 attributes
-- The `@deprecated` annotation in your PHP code translates into deprecated fields in your GraphQL schema 
+- The `@deprecated` annotation in your PHP code translates into deprecated fields in your GraphQL schema
 - You can now specify the GraphQL name of the Enum types you define
 - Added the possibility to inject pure Webonyx objects in GraphQLite schema
 
@@ -35,8 +51,8 @@ Minor changes:
 
 Miscellaneous:
 
-- Migrated from Travis to Github actions 
- 
+- Migrated from Travis to Github actions
+
 
 ## 4.0
 
@@ -58,15 +74,15 @@ New features:
   - You can use the [dataloader pattern to improve performance drastically via the "prefetchMethod" attribute](prefetch_method.md)
 - Customizable error handling has been added:
   - You can throw [GraphQL errors](error_handling.md) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLException`
-  - You can specify the HTTP response code to send with a given error, and the errors "extensions" section 
-  - You can throw [many errors in one exception](error_handling.md#many-errors-for-one-exception) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` 
+  - You can specify the HTTP response code to send with a given error, and the errors "extensions" section
+  - You can throw [many errors in one exception](error_handling.md#many-errors-for-one-exception) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException`
 - You can map [a given PHP class to several PHP input types](input_types.md#declaring-several-input-types-for-the-same-php-class) (a PHP class can have several `@Factory` annotations)
 - You can force input types using `@UseInputType(for="$id", inputType="ID!")`
 - You can extend an input types (just like you could extend an output type in v3) using [the new `@Decorate` annotation](extend_input_type.md)
 - In a factory, you can [exclude some optional parameters from the GraphQL schema](input_types#ignoring-some-parameters)
 
 
-Many extension points have been added 
+Many extension points have been added
 
 - Added a "root type mapper" (useful to map scalar types to PHP types or to add custom annotations related to resolvers)
 - Added ["field middlewares"](field_middlewares.md) (useful to add middleware that modify the way GraphQL fields are handled)
@@ -84,7 +100,7 @@ Laravel:
 
 Internals:
 
-- The `FieldsBuilder` class has been split in many different services (`FieldsBuilder`, `TypeHandler`, and a 
+- The `FieldsBuilder` class has been split in many different services (`FieldsBuilder`, `TypeHandler`, and a
   chain of *root type mappers*)
 - The `FieldsBuilderFactory` class has been completely removed.
 - Overall, there is not much in common internally between 4.x and 3.x. 4.x is much more flexible with many more hook points
