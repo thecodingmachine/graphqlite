@@ -56,13 +56,13 @@ You can help GraphQLite by manually specifying the output type to use:
 <!--PHP 8+-->
 ```php
     #[Field(outputType: "ID")]
-``` 
+```
 <!--PHP 7+-->
 ```php
     /**
      * @Field(name="id", outputType="ID")
      */
-``` 
+```
 <!--END_DOCUSAURUS_CODE_TABS-->
 
 ## Usage
@@ -95,7 +95,7 @@ you use.
 
 ### Symfony users
 
-Any class extending `GraphQL\Type\Definition\ObjectType` (and available in the container) will be automatically detected 
+Any class extending `GraphQL\Type\Definition\ObjectType` (and available in the container) will be automatically detected
 by Symfony and added to the schema.
 
 If you want to automatically map the output type to a given PHP class, you will have to explicitly declare the output type
@@ -148,9 +148,15 @@ In order to add a scalar type in GraphQLite, you need to:
 ```php
 interface RootTypeMapperInterface
 {
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod $refMethod, DocBlock $docBlockObj): OutputType;
+    /**
+     * @param \ReflectionMethod|\ReflectionProperty $reflector
+     */
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType;
 
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod $refMethod, DocBlock $docBlockObj): InputType;
+    /**
+     * @param \ReflectionMethod|\ReflectionProperty $reflector
+     */
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType;
 
     public function mapNameToType(string $typeName): NamedType;
 }
@@ -235,6 +241,6 @@ You can register your own root mapper factories using the `SchemaFactory::addRoo
 ```php
 $schemaFactory->addRootTypeMapperFactory(new AnyScalarTypeMapperFactory());
 ```
- 
-If you are using the Symfony bundle, the factory will be automatically registered, you have nothing to do (the service 
+
+If you are using the Symfony bundle, the factory will be automatically registered, you have nothing to do (the service
 is automatically tagged with the "graphql.root_type_mapper_factory" tag).
