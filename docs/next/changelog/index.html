@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Changelog · GraphQLite</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## 4.2"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Changelog · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqlite.thecodingmachine.io/"/><meta property="og:description" content="## 4.2"/><meta property="og:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Changelog · GraphQLite</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## 4.3"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Changelog · GraphQLite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://graphqlite.thecodingmachine.io/"/><meta property="og:description" content="## 4.3"/><meta property="og:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://graphqlite.thecodingmachine.io/img/docusaurus.png"/><link rel="shortcut icon" href="/img/logo.svg"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -62,7 +62,31 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/CHANGELOG.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Changelog</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="42"></a><a href="#42" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4.2</h2>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/thecodingmachine/graphqlite/edit/master/docs/CHANGELOG.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Changelog</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="43"></a><a href="#43" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4.3</h2>
+<p>Breaking change:</p>
+<ul>
+<li>The method <code>setAnnotationCacheDir($directory)</code> has been removed from the <code>SchemaFactory</code>.  The annotation
+cache will use your <code>Psr\SimpleCache\CacheInterface</code> compliant cache handler set through the <code>SchemaFactory</code>
+constructor.</li>
+</ul>
+<p>Minor changes:</p>
+<ul>
+<li>Removed dependency for doctrine/cache and unified some of the cache layers following a PSR interface.</li>
+<li>Cleaned up some of the documentation in an attempt to get things accurate with versioned releases.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="42"></a><a href="#42" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4.2</h2>
+<p>Breaking change:</p>
+<p>The method signature for <code>toGraphQLOutputType</code> and <code>toGraphQLInputType</code> have been changed to the following:</p>
+<pre><code class="hljs css language-php"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> \ReflectionMethod|\ReflectionProperty $reflector
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toGraphQLOutputType</span><span class="hljs-params">(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj)</span>: <span class="hljs-title">OutputType</span></span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> \ReflectionMethod|\ReflectionProperty $reflector
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toGraphQLInputType</span><span class="hljs-params">(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj)</span>: <span class="hljs-title">InputType</span></span>;
+</code></pre>
 <p>New features:</p>
 <ul>
 <li><a href="/docs/next/annotations_reference#input-annotation">@Input</a> annotation is introduced as an alternative to <code>@Factory</code>. Now GraphQL input type can be created in the same manner as <code>@Type</code> in combination with <code>@Field</code> - <a href="/docs/next/input-types#input-annotation">example</a>.</li>
@@ -146,7 +170,7 @@ chain of <em>root type mappers</em>)</li>
 <li>Overall, there is not much in common internally between 4.x and 3.x. 4.x is much more flexible with many more hook points
 than 3.x. Try it out!</li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/semver"><span class="arrow-prev">← </span><span>Semantic versioning</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#42">4.2</a></li><li><a href="#41">4.1</a></li><li><a href="#40">4.0</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2021 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/semver"><span class="arrow-prev">← </span><span>Semantic versioning</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#43">4.3</a></li><li><a href="#42">4.2</a></li><li><a href="#41">4.1</a></li><li><a href="#40">4.0</a></li></ul></nav></div><footer class="nav-footer" id="footer"><a href="https://thecodingmachine.io/open-source" target="_blank" class="fbOpenSource"><img src="/img/tcm.png" alt="Proudly brought to you by TheCodingMachine"/></a><section class="copyright">Copyright © 2017-2021 TheCodingMachine</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
