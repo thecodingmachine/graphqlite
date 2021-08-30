@@ -1,6 +1,6 @@
 ---
-id: version-4.0-symfony-bundle-advanced
-title: Symfony bundle: advanced usage
+id: symfony-bundle-advanced
+title: "Symfony bundle: advanced usage"
 sidebar_label: Symfony specific features
 original_id: symfony-bundle-advanced
 ---

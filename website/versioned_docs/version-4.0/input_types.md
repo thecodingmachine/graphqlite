@@ -1,5 +1,5 @@
 ---
-id: version-4.0-input-types
+id: input-types
 title: Input types
 sidebar_label: Input types
 original_id: input-types

@@ -25,7 +25,7 @@ graphqlite:
       controllers: App\GraphQLController\
       # The namespace(s) that will store your GraphQL types and factories.
       # It accept either a string or a list of strings.
-      types: 
+      types:
       - App\Types\
       - App\Entity\
 ```
@@ -78,7 +78,7 @@ graphqlite:
       controllers: App\GraphqlController\
       # The namespace(s) that will store your GraphQL types and factories.
       # It accept either a string or a list of strings.
-      types: 
+      types:
       - App\Types\
       - App\Entity\
 ```
@@ -106,7 +106,7 @@ graphqlite:
       INCLUDE_TRACE: false
       # Exceptions are not caught by the engine and propagated to Symfony.
       RETHROW_INTERNAL_EXCEPTIONS: false
-      # Exceptions that do not implement ClientAware interface are 
+      # Exceptions that do not implement ClientAware interface are
       # not caught by the engine and propagated to Symfony.
       RETHROW_UNSAFE_EXCEPTIONS: true
 ```
@@ -114,7 +114,7 @@ graphqlite:
 The debug parameters are detailed in the [documentation of the Webonyx GraphQL library](https://webonyx.github.io/graphql-php/error-handling/)
 which is used internally by GraphQLite.
 
-<div class="alert alert-warning"><strong>Do not put your GraphQL controllers in the <code>App\Controller</code> namespace</strong>
+<div class="alert alert--warning"><strong>Do not put your GraphQL controllers in the <code>App\Controller</code> namespace</strong>
 Symfony applies a particular compiler pass to classes in the <code>App\Controller</code> namespace. This compiler pass will prevent you
 from using input types. Put your controllers in another namespace. We advise using <code>App\GraphqlController</code>.
 </div>

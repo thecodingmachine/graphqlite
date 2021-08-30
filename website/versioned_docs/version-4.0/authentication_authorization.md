@@ -1,5 +1,5 @@
 ---
-id: version-4.0-authentication_authorization
+id: authentication_authorization
 title: Authentication and authorization
 sidebar_label: Authentication and authorization
 original_id: authentication_authorization
@@ -9,14 +9,14 @@ You might not want to expose your GraphQL API to anyone. Or you might want to ke
 reserved to some users.
 
 GraphQLite offers some control over what a user can do with your API. You can restrict access to resources:
- 
+
 - based on authentication using the [`@Logged` annotation](#logged-and-right-annotations) (restrict access to logged users)
 - based on authorization using the [`@Right` annotation](#logged-and-right-annotations) (restrict access to logged users with certain rights).
 - based on fine-grained authorization using the [`@Security` annotation](fine-grained-security.md) (restrict access for some given resources to some users).
 
-<div class="alert alert-info">
+<div class="alert alert--info">
 GraphQLite does not have its own security mechanism.
-Unless you're using our Symfony Bundle or our Laravel package, it is up to you to connect this feature to your framework's security mechanism.<br>
+Unless you're using our Symfony Bundle or our Laravel package, it is up to you to connect this feature to your framework's security mechanism.<br />
 See <a href="implementing-security.md">Connecting GraphQLite to your framework's security module</a>.
 </div>
 
@@ -55,7 +55,7 @@ has the `CAN_VIEW_USER_LIST` right.
 * `@Mutation` annotations
 * `@Field` annotations
 
-<div class="alert alert-info">By default, if a user tries to access an unauthorized query/mutation/field, an error is raised and the query fails.</div>
+<div class="alert alert--info">By default, if a user tries to access an unauthorized query/mutation/field, an error is raised and the query fails.</div>
 
 ## Not throwing errors
 
@@ -97,7 +97,7 @@ class ProductController
 {
     /**
      * @Query
-     * @InjectUser(for="$user") 
+     * @InjectUser(for="$user")
      * @return Product
      */
     public function product(int $id, User $user): Product
@@ -113,7 +113,7 @@ The `@InjectUser` annotation can be used next to:
 * `@Mutation` annotations
 * `@Field` annotations
 
-The object injected as the current user depends on your framework. It is in fact the object returned by the 
+The object injected as the current user depends on your framework. It is in fact the object returned by the
 ["authentication service" configured in GraphQLite](implementing-security.md).
 
 ## Hiding fields / queries / mutations
@@ -148,4 +148,4 @@ class UserController
 While this is the most secured mode, it can have drawbacks when working with development tools
 (you need to be logged as admin to fetch the complete schema).
 
-<div class="alert alert-info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optionnal from GraphQLite 4+.</div>
+<div class="alert alert--info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optionnal from GraphQLite 4+.</div>

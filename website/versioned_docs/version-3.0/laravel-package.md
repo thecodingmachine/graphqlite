@@ -1,5 +1,5 @@
 ---
-id: version-3.0-laravel-package
+id: laravel-package
 title: Getting started with Laravel
 sidebar_label: Laravel package
 original_id: laravel-package

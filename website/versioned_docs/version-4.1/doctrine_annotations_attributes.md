@@ -1,5 +1,5 @@
 ---
-id: version-4.1-doctrine-annotations-attributes
+id: doctrine-annotations-attributes
 title: Doctrine annotations VS PHP8 attributes
 sidebar_label: Annotations VS Attributes
 original_id: doctrine-annotations-attributes
@@ -9,7 +9,7 @@ GraphQLite is heavily relying on the concept of annotations (also called attribu
 
 ## Doctrine annotations
 
-<div class="alert alert-warning"><strong>Deprecated!</strong> Doctrine annotations are deprecated in favor of native PHP 8 attributes. Support will be dropped in GraphQLite 5.0</div>
+<div class="alert alert--warning"><strong>Deprecated!</strong> Doctrine annotations are deprecated in favor of native PHP 8 attributes. Support will be dropped in GraphQLite 5.0</div>
 
 Historically, attributes were not available in PHP and PHP developers had to "trick" PHP to get annotation support.
 This was the purpose of the [doctrine/annotation](https://www.doctrine-project.org/projects/doctrine-annotations/en/latest/index.html) library.
@@ -33,7 +33,7 @@ Please note that:
 - The `Type` part is actually a class. It must be declared in the `use` statements at the top of your file.
 
 
-<div class="alert alert-info"><strong>Heads up!</strong>
+<div class="alert alert--info"><strong>Heads up!</strong>
 Some IDEs provide support for Doctrine annotations:
 
 <ul>
@@ -81,14 +81,13 @@ Let's take an example with the [`#Autowire` attribute](autowiring.md):
  */
 public function getProduct(ProductRepository $productRepository) : Product {
     //...
-} 
-``` 
+}
+```
 
 **PHP 8**
 ```
 #[Field]
 public function getProduct(#[Autowire] ProductRepository $productRepository) : Product {
     //...
-} 
-``` 
-
+}
+```

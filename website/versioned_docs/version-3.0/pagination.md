@@ -1,5 +1,5 @@
 ---
-id: version-3.0-pagination
+id: pagination
 title: Paginating large result sets
 sidebar_label: Pagination
 original_id: pagination

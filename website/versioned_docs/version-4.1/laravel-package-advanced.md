@@ -1,6 +1,6 @@
 ---
-id: version-4.1-laravel-package-advanced
-title: Laravel package: advanced usage
+id: laravel-package-advanced
+title: "Laravel package: advanced usage"
 sidebar_label: Laravel specific features
 original_id: laravel-package-advanced
 ---
@@ -9,7 +9,7 @@ The Laravel package comes with a number of features to ease the integration of G
 
 ## Support for Laravel validation rules
 
-The GraphQLite Laravel package comes with a special `@Validate` annotation to use Laravel validation rules in your 
+The GraphQLite Laravel package comes with a special `@Validate` annotation to use Laravel validation rules in your
 input types.
 
 <!--DOCUSAURUS_CODE_TABS-->
@@ -141,7 +141,7 @@ products {
 ```
 
 
-<div class="alert alert-warning">Be sure to type hint on the class (<code>Illuminate\Pagination\LengthAwarePaginator</code>)
+<div class="alert alert--warning">Be sure to type hint on the class (<code>Illuminate\Pagination\LengthAwarePaginator</code>)
 and not on the interface (<code>Illuminate\Contracts\Pagination\LengthAwarePaginator</code>). The interface
 itself is not iterable (it does not extend <code>Traversable</code>) and therefore, GraphQLite will refuse to
 iterate over it.</div>
@@ -244,30 +244,36 @@ the `phone()` method does not return a `App\Phone` object. It is the `phone` mag
 
 In short:
 
-<div class="alert alert-error">This does not work:
-<pre><code class="hljs css language-php">
-class User extends Model
-{
-    /**
-     * @Field
-     */
-    public function phone()
+<div class="alert alert--danger">
+    This does not work:
+
+    ```php
+    class User extends Model
     {
-        return $this->hasOne('App\Phone');
+        /**
+         * @Field
+         */
+        public function phone()
+        {
+            return $this->hasOne('App\Phone');
+        }
     }
-}</code></pre>
+    ```
 </div>
 
-<div class="alert alert-success">This works:
-<pre><code class="hljs css language-php">
-/**
- * @MagicField(name="phone", phpType="App\\Phone")
- */
-class User extends Model
-{
-    public function phone()
+<div class="alert alert--success">
+    This works:
+
+    ```php
+    /**
+     * @MagicField(name="phone", phpType="App\\Phone")
+     */
+    class User extends Model
     {
-        return $this->hasOne('App\Phone');
+        public function phone()
+        {
+            return $this->hasOne('App\Phone');
+        }
     }
-}</code></pre>
+    ```
 </div>

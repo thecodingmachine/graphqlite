@@ -1,5 +1,5 @@
 ---
-id: version-4.1-file-uploads
+id: file-uploads
 title: File uploads
 sidebar_label: File uploads
 original_id: file-uploads

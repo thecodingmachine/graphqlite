@@ -1,5 +1,5 @@
 ---
-id: version-4.0-autowiring
+id: autowiring
 title: Autowiring services
 sidebar_label: Autowiring services
 original_id: autowiring
@@ -47,8 +47,8 @@ class Product
 
 When GraphQLite queries the name, it will automatically fetch the translator service.
 
-<div class="alert alert-warning">As with most autowiring solutions, GraphQLite assumes that the service identifier
-in the container is the fully qualified class name of the type-hint. So in the example above, GraphQLite will 
+<div class="alert alert--warning">As with most autowiring solutions, GraphQLite assumes that the service identifier
+in the container is the fully qualified class name of the type-hint. So in the example above, GraphQLite will
 look for a service whose name is <code>Symfony\Component\Translation\TranslatorInterface</code>.</div>
 
 ## Best practices
@@ -57,7 +57,7 @@ It is a good idea to refrain from type-hinting on concrete implementations.
 Most often, your field declaration will be in your model. If you add a type-hint on a service, you are binding your domain
 with a particular service implementation. This makes your code tightly coupled and less testable.
 
-<div class="alert alert-error">
+<div class="alert alert--danger">
 Please don't do that:
 
 <pre><code>    /**
@@ -72,7 +72,7 @@ Please don't do that:
 
 Instead, be sure to type-hint against an interface.
 
-<div class="alert alert-success">
+<div class="alert alert--success">
 Do this instead:
 
 <pre><code>    /**
@@ -97,7 +97,7 @@ Optionally, you can specify the identifier of the service you want to fetch from
  */
 ```
 
-<div class="alert alert-error">While GraphQLite offers the possibility to specify the name of the service to be
+<div class="alert alert--danger">While GraphQLite offers the possibility to specify the name of the service to be
 autowired, we would like to emphasize that this is <strong>highly discouraged</strong>. Hard-coding a container
 identifier in the code of your class is akin to using the "service locator" pattern, which is known to be an
 anti-pattern. Please refrain from doing this as much as possible.</div>
@@ -110,5 +110,5 @@ You may find yourself uncomfortable with the autowiring mechanism of GraphQLite.
 - You do not want to inject a service in a domain object
 - You simply do not like the magic of injecting services in a method signature
 
-If you do not want to use autowiring and if you still need to access services to compute a field, please read on 
+If you do not want to use autowiring and if you still need to access services to compute a field, please read on
 the next chapter to learn [how to extend a type](extend_type).

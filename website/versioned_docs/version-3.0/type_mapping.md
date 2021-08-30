@@ -1,5 +1,5 @@
 ---
-id: version-3.0-type_mapping
+id: type_mapping
 title: Type mapping
 sidebar_label: Type mapping
 original_id: type_mapping
@@ -139,7 +139,7 @@ public function save(ID $id, string $name): Product
 
 Out of the box, GraphQL does not have a `DateTime` type, but we took the liberty to add one, with sensible defaults.
 
-When used as an output type, `DateTimeImmutable` or `DateTimeInterface` PHP classes are 
+When used as an output type, `DateTimeImmutable` or `DateTimeInterface` PHP classes are
 automatically mapped to this `DateTime` GraphQL type.
 
 ```php
@@ -155,7 +155,7 @@ public function getDate(): \DateTimeInterface
 The `date` field will be of type `DateTime`. In the returned JSON response to a query, the date is formatted as a string
 in the **ISO8601** format (aka ATOM format).
 
-<div class="alert alert-error">
+<div class="alert alert--danger">
     PHP <code>DateTime</code> type is not supported.
 </div>
 
@@ -173,4 +173,3 @@ public function companyOrContact(int $id)
     // Some code that returns a company or a contact.
 }
 ```
-

@@ -1,5 +1,5 @@
 ---
-id: version-3.0-external_type_declaration
+id: external_type_declaration
 title: External type declaration
 sidebar_label: External type declaration
 original_id: external_type_declaration
@@ -28,7 +28,7 @@ use App\Entities\Product;
  * @Type(class=Product::class)
  */
 class ProductType
-{    
+{
     /**
      * @Field()
      */
@@ -43,10 +43,10 @@ The `ProductType` class must be in the *types* namespace. You configured this na
 
 The `ProductType` class is actually a **service**. You can therefore inject dependencies in it.
 
-<div class="alert alert-warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your application and the container identifier MUST be the fully qualified class name.<br/><br/>
-If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
-is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
-declare it.</div> 
+<div class="alert alert--warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your application and the container identifier MUST be the fully qualified class name.<br/><br/>
+If you are using the Symfony bundle (or a framework with autowiring like Laravel), this
+is usually not an issue as the container will automatically create the controller entry if you do not explicitly
+declare it.</div>
 
 In methods with a `@Field` annotaiton, the first parameter is the *resolved object* we are working on. Any additional parameters are used as arguments.
 
@@ -116,7 +116,7 @@ use TheCodingMachine\GraphQLite\FromSourceFieldsInterface;
 class ProductType implements FromSourceFieldsInterface
 {
     /**
-     * Dynamically returns the array of source fields 
+     * Dynamically returns the array of source fields
      * to be fetched from the original object.
      *
      * @return SourceFieldInterface[]
@@ -127,7 +127,7 @@ class ProductType implements FromSourceFieldsInterface
         if (ENABLE_STATUS_GLOBALLY) {
             return [
                 new SourceField(['name'=>'status', 'logged'=>true]),
-            ];        
+            ];
         } else {
             return [];
         }

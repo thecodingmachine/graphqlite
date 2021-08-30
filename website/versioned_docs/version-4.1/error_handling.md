@@ -1,5 +1,5 @@
 ---
-id: version-4.1-error-handling
+id: error-handling
 title: Error handling
 sidebar_label: Error handling
 original_id: error-handling
@@ -41,12 +41,12 @@ If your exception code is in the 4xx - 5xx range, the exception code will be use
 throw new GraphQLException("Not found", 404);
 ```
 
-<div class="alert alert-info">GraphQL allows to have several errors for one request. If you have several 
+<div class="alert alert--info">GraphQL allows to have several errors for one request. If you have several
 <code>GraphQLException</code> thrown for the same request, the HTTP status code used will be the highest one.</div>
 
 ## Customizing the category
 
-By default, GraphQLite adds a "category" entry in the "extensions section". You can customize the category with the 
+By default, GraphQLite adds a "category" entry in the "extensions section". You can customize the category with the
 4th parameter of the constructor:
 
 ```php
@@ -204,6 +204,6 @@ The exception will propagate to your framework error handler/middleware that is 
 You can [change the underlying behaviour of Webonyx to catch any exception and turn them into GraphQL errors](http://webonyx.github.io/graphql-php/error-handling/#debugging-tools).
 The way you adjust the error settings depends on the framework you are using ([Symfony](symfony-bundle.md), [Laravel](laravel-package.md)).
 
-<div class="alert alert-info">To be clear: we strongly discourage changing this setting. We strongly believe that the
-default "RETHROW_UNSAFE_EXCEPTIONS" setting of Webonyx is the only sane setting (only putting in "errors" section exceptions 
+<div class="alert alert--info">To be clear: we strongly discourage changing this setting. We strongly believe that the
+default "RETHROW_UNSAFE_EXCEPTIONS" setting of Webonyx is the only sane setting (only putting in "errors" section exceptions
 designed for GraphQL).</div>

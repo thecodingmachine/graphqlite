@@ -1,5 +1,5 @@
 ---
-id: version-4.1-mutations
+id: mutations
 title: Mutations
 sidebar_label: Mutations
 original_id: mutations

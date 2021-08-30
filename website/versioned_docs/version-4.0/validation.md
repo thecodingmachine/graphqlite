@@ -1,5 +1,5 @@
 ---
-id: version-4.0-validation
+id: validation
 title: Validation
 sidebar_label: User input validation
 original_id: validation
@@ -7,7 +7,7 @@ original_id: validation
 
 GraphQLite does not handle user input validation by itself. It is out of its scope.
 
-However, it can integrate with your favorite framework validation mechanism. The way you validate user input will 
+However, it can integrate with your favorite framework validation mechanism. The way you validate user input will
 therefore depend on the framework you are using.
 
 ## Validating user input with Laravel
@@ -20,7 +20,7 @@ to learn how to use the Laravel validation with GraphQLite.
 GraphQLite provides a bridge to use the [Symfony validator](https://symfony.com/doc/current/validation.html) directly in your application.
 
 - If you are using Symfony and the Symfony GraphQLite bundle, the bridge is available out of the box
-- If you are using another framework, the "Symfony validator" component can be used in standalone mode. If you want to 
+- If you are using another framework, the "Symfony validator" component can be used in standalone mode. If you want to
   add it to your project, you can require the *thecodingmachine/graphqlite-symfony-validator-bridge* package:
   ```bash
   $ composer require thecodingmachine/graphqlite-symfony-validator-bridge
@@ -116,12 +116,12 @@ If a validation fails, GraphQLite will return the failed validations in the "err
 
 ### Using the validator directly on a query / mutation / factory ...
 
-If the data entered by the user is mapped to an object, please use the "validator" instance directly as explained in 
+If the data entered by the user is mapped to an object, please use the "validator" instance directly as explained in
 the last chapter. It is a best practice to put your validation layer as close as possible to your domain model.
 
 If the data entered by the user is **not** mapped to an object, you can directly annotate your query, mutation, factory...
 
-<div class="alert alert-warning">You generally don't want to do this. It is a best practice to put your validation constraints
+<div class="alert alert--warning">You generally don't want to do this. It is a best practice to put your validation constraints
 on your domain objects. Only use this technique if you want to validate user input and user input will not be stored
 in a domain object.</div>
 

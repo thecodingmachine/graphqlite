@@ -1,5 +1,5 @@
 ---
-id: version-4.1-custom-types
+id: custom-types
 title: Custom types
 sidebar_label: Custom types
 original_id: custom-types

@@ -1,7 +1,7 @@
 ---
-id: version-3.0-other-frameworks
+id: other-frameworks
 title: Getting started with any framework
-sidebar_label: Other frameworks / No framework
+sidebar_label: "Other frameworks / No framework"
 original_id: other-frameworks
 ---
 
@@ -44,7 +44,7 @@ $factory->addControllerNamespace('App\\Controllers\\')
 $schema = $factory->createSchema();
 ```
 
-You can now use this schema with [Webonyx GraphQL facade](https://webonyx.github.io/graphql-php/getting-started/#hello-world) 
+You can now use this schema with [Webonyx GraphQL facade](https://webonyx.github.io/graphql-php/getting-started/#hello-world)
 or the [StandardServer class](https://webonyx.github.io/graphql-php/executing-queries/#using-server).
 
 The `SchemaFactory` class also comes with a number of methods that you can use to customize your GraphQLite settings.
@@ -94,7 +94,7 @@ echo json_encode($output);
 
 ## Advanced example
 
-When using a framework, you will need a way to route your HTTP requests to the `webonyx/graphql-php` library. 
+When using a framework, you will need a way to route your HTTP requests to the `webonyx/graphql-php` library.
 By chance, it plays well with PSR-7 requests and there is a PSR-15 middleware available.
 
 In this example, we will focus on getting a working version of GraphQLite using:
@@ -194,7 +194,7 @@ return new Picotainer([
         return $pipe;
     },
     // The WebonyxGraphqlMiddleware is a PSR-15 compatible
-    // middleware that exposes Webonyx schemas. 
+    // middleware that exposes Webonyx schemas.
     WebonyxGraphqlMiddleware::class => function(ContainerInterface $container) {
         return new WebonyxGraphqlMiddleware(
             $container->get(StandardServer::class),
@@ -252,7 +252,7 @@ use App\Controllers\MyController;
 
 return new Picotainer([
     // ...
-    
+
     // We declare the controller in the container.
     MyController::class => function() {
         return new MyController();
@@ -262,4 +262,4 @@ return new Picotainer([
 
 And we are done! You can now test your query using your favorite GraphQL client.
 
-![](../img/query1.png)
+![](/img/query1.png)

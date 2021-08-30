@@ -1,5 +1,5 @@
 ---
-id: version-4.0-changelog
+id: changelog
 title: Changelog
 sidebar_label: Changelog
 original_id: changelog

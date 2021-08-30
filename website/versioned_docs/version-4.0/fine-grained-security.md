@@ -1,11 +1,11 @@
 ---
-id: version-4.0-fine-grained-security
+id: fine-grained-security
 title: Fine grained security
 sidebar_label: Fine grained security
 original_id: fine-grained-security
 ---
 
-If the [`@Logged` and `@Right` annotations](authentication_authorization.md#logged-and-right-annotations) are not 
+If the [`@Logged` and `@Right` annotations](authentication_authorization.md#logged-and-right-annotations) are not
 granular enough for your needs, you can use the advanced `@Security` annotation.
 
 Using the `@Security` annotation, you can write an *expression* that can contain custom logic. For instance:
@@ -35,9 +35,9 @@ public function getPost(Post $post): array
 
 The *expression* defined in the `@Security` annotation must conform to [Symfony's Expression Language syntax](https://symfony.com/doc/4.4/components/expression_language/syntax.html)
 
-<div class="alert alert-info">
+<div class="alert alert--info">
     If you are a Symfony user, you might already be used to the <code>@Security</code> annotation. Most of the inspiration
-    of this annotation comes from Symfony. Warning though! GraphQLite's <code>@Security</code> annotation and 
+    of this annotation comes from Symfony. Warning though! GraphQLite's <code>@Security</code> annotation and
     Symfony's <code>@Security</code> annotation are slightly different. Especially, the two annotations do not live
     in the same namespace!
 </div>
@@ -105,7 +105,7 @@ public function getPost(Post $post): array
 ```
 
 Note: since a single GraphQL call contain many errors, 2 errors might have conflicting HTTP status code.
-The resulting status code is up to the GraphQL middleware you use. Most of the time, the status code with the 
+The resulting status code is up to the GraphQL middleware you use. Most of the time, the status code with the
 higher error code will be returned.
 
 ## Setting a default value
@@ -159,7 +159,7 @@ class Post {
     {
         // ...
     }
-   
+
     public function canAccessBody(User $user): bool
     {
         // Some custom logic here
@@ -180,13 +180,13 @@ The `is_granted` method can be used to restrict access to a specific resource.
 @Security("is_granted('POST_SHOW', post)")
 ```
 
-If you are wondering how to configure these fine-grained permissions, this is not something that GraphQLite handles 
+If you are wondering how to configure these fine-grained permissions, this is not something that GraphQLite handles
 itself. Instead, this depends on the framework you are using.
 
 If you are using Symfony, you will [create a custom voter](https://symfony.com/doc/current/security/voters.html).
 
 If you are using Laravel, you will [create a Gate or a Policy](https://laravel.com/docs/6.x/authorization).
 
-If you are using another framework, you need to know that the `is_granted` function simply forwards the call to 
+If you are using another framework, you need to know that the `is_granted` function simply forwards the call to
 the `isAllowed` method of the configured `AuthorizationSerice`. See [Connecting GraphQLite to your framework's security module
 ](implementing-security.md) for more details

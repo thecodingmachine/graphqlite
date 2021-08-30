@@ -1,5 +1,5 @@
 ---
-id: version-4.1-inheritance-interfaces
+id: inheritance-interfaces
 title: Inheritance and interfaces
 sidebar_label: Inheritance and interfaces
 original_id: inheritance-interfaces
@@ -84,7 +84,7 @@ contact {
        email
     }
 }
-``` 
+```
 
 Written in [GraphQL type language](https://graphql.org/learn/schema/#type-language), the representation of types
 would look like this:
@@ -103,7 +103,7 @@ type User implements ContactInterface {
 }
 ```
 
-Behind the scene, GraphQLite will detect that the `Contact` class is extended by the `User` class. 
+Behind the scene, GraphQLite will detect that the `Contact` class is extended by the `User` class.
 Because the class is extended, a GraphQL `ContactInterface` interface is created dynamically.
 
 The GraphQL `User` type will also automatically implement this `ContactInterface`. The interface contains all the fields
@@ -238,7 +238,7 @@ class UserController
 ```
 <!--END_DOCUSAURUS_CODE_TABS-->
 
-<div class="alert alert-info">If GraphQLite cannot find a proper GraphQL Object type implementing an interface, it
+<div class="alert alert--info">If GraphQLite cannot find a proper GraphQL Object type implementing an interface, it
 will create an object type "on the fly".</div>
 
 In the example above, because the `User` class has no `@Type` annotations, GraphQLite will

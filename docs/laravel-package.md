@@ -56,7 +56,7 @@ which is used internally by GraphQLite.
 
 ## Configuring CSRF protection
 
-<div class="alert alert-warning">By default, the <code>/graphql</code> route is placed under <code>web</code> middleware group which requires a 
+<div class="alert alert--warning">By default, the <code>/graphql</code> route is placed under <code>web</code> middleware group which requires a
 <a href="https://laravel.com/docs/6.x/csrf">CSRF token</a>.</div>
 
 You have 3 options:
@@ -67,7 +67,7 @@ You have 3 options:
 
 ### Use the `api` middleware
 
-If you plan to use graphql for server-to-server connection only, you should probably configure GraphQLite to use the 
+If you plan to use graphql for server-to-server connection only, you should probably configure GraphQLite to use the
 `api` middleware instead of the `web` middleware:
 
 **config/graphqlite.php**
@@ -79,9 +79,9 @@ return [
 ];
 ```
 
-### Disable CSRF for the /graphql route 
+### Disable CSRF for the /graphql route
 
-If you plan to use graphql from web browsers and if you want to explicitly allow access from external applications 
+If you plan to use graphql from web browsers and if you want to explicitly allow access from external applications
 (through CORS headers), you need to disable the CSRF token.
 
 Simply add `graphql` to `$except` in `app/Http/Middleware/VerifyCsrfToken.php`.
@@ -105,7 +105,7 @@ const httpLink = new HttpLink({ uri: 'https://api.example.com/graphql' });
 const authLink = new ApolloLink((operation, forward) => {
   // Retrieve the authorization token from local storage.
   const token = localStorage.getItem('auth_token');
-  
+
   // Get the XSRF-TOKEN that is set by Laravel on each request
   var cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
@@ -129,7 +129,7 @@ const client = new ApolloClient({
 ## Adding GraphQL DevTools
 
 GraphQLite does not include additional GraphQL tooling, such as the GraphiQL editor.
-To integrate a web UI to query your GraphQL endpoint with your Laravel installation, 
+To integrate a web UI to query your GraphQL endpoint with your Laravel installation,
 we recommend installing [GraphQL Playground](https://github.com/mll-lab/laravel-graphql-playground)
 
 ```console

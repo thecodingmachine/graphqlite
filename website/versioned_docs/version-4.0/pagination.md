@@ -1,5 +1,5 @@
 ---
-id: version-4.0-pagination
+id: pagination
 title: Paginating large result sets
 sidebar_label: Pagination
 original_id: pagination
@@ -12,7 +12,7 @@ GraphQLite offers a simple way to do that using [Porpaginas](https://github.com/
 Porpaginas is a set of PHP interfaces that can be implemented by result iterators. It comes with a native support for
 PHP arrays, Doctrine and [TDBM](https://thecodingmachine.github.io/tdbm/doc/limit_offset_resultset.html).
 
-<div class="alert alert-warning">If you are a Laravel user, Eloquent does not come with a Porpaginas
+<div class="alert alert--warning">If you are a Laravel user, Eloquent does not come with a Porpaginas
 iterator. However, the GraphQLite Laravel bundle <a href="laravel-package-advanced.md">comes with its own pagination system</a>.</div>
 
 ## Installation

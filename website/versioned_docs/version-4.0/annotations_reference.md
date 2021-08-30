@@ -1,5 +1,5 @@
 ---
-id: version-4.0-annotations_reference
+id: annotations_reference
 title: Annotations reference
 sidebar_label: Annotations reference
 original_id: annotations_reference
@@ -75,7 +75,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *yes*       | string | The name of the field.
 [outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 phpType        | *no*       | string | The PHP type of the field (as you would write it in a Docblock)
-annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+annotations    | *no*       | array\<Annotations\>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
 **Note**: `outputType` and `phpType` are mutually exclusive.
 
@@ -90,7 +90,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *yes*       | string | The name of the field.
 [outputType](type_mapping.md)  | *no*(*)       | string | The GraphQL output type of the field.
 phpType     | *no*(*)       | string | The PHP type of the field (as you would write it in a Docblock)
-annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+annotations    | *no*       | array\<Annotations\>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
@@ -134,7 +134,7 @@ to access it (according to the `@Logged` and `@Right` annotations).
 
 ## @InjectUser annotation
 
-Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your 
+Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your
 query / mutation / field.
 
 **Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
@@ -212,7 +212,7 @@ Attribute      | Compulsory | Type | Definition
 
 ## @Validate annotation
 
-<div class="alert alert-info">This annotation is only available in the GraphQLite Laravel package</div>
+<div class="alert alert--info">This annotation is only available in the GraphQLite Laravel package</div>
 
 [Validates a user input in Laravel](laravel-package-advanced.md).
 

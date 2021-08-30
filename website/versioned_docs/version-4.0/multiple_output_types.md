@@ -1,5 +1,5 @@
 ---
-id: version-4.0-multiple_output_types
+id: multiple_output_types
 title: Mapping multiple output types for the same class
 sidebar_label: Class with multiple output types
 original_id: multiple_output_types

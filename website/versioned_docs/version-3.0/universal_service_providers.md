@@ -1,6 +1,6 @@
 ---
-id: version-3.0-universal_service_providers
-title: Getting started with a framework compatible with container-interop/service-provider
+id: universal_service_providers
+title: "Getting started with a framework compatible with container-interop/service-provider"
 sidebar_label: Universal service providers
 original_id: universal_service_providers
 ---

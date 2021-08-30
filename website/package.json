@@ -1,14 +1,32 @@
 {
   "scripts": {
-    "examples": "docusaurus-examples",
-    "start": "docusaurus-start",
-    "build": "docusaurus-build",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
     "publish-gh-pages": "docusaurus-publish",
-    "write-translations": "docusaurus-write-translations",
     "version": "docusaurus-version",
-    "rename-version": "docusaurus-rename-version"
+    "rename-version": "docusaurus-rename-version",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy"
   },
   "devDependencies": {
-    "docusaurus": "^1.6.2"
+    "@docusaurus/core": "2.0.0-beta.5",
+    "@docusaurus/preset-classic": "2.0.0-beta.5"
+  },
+  "dependencies": {
+    "@docusaurus/core": "2.0.0-beta.5",
+    "@docusaurus/preset-classic": "2.0.0-beta.5",
+    "clsx": "^1.1.1",
+    "mdx-mermaid": "^1.1.0",
+    "mermaid": "^8.12.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "browserslist": {
+    "production": [">0.5%", "not dead", "not op_mini all"],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

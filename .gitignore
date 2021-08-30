@@ -1,8 +1,6 @@
 /vendor/
-/mouf/
 /composer.lock
 /src/Tests/
-/build/
 /phpunit.xml
 /.php_cs/cache
 

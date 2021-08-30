@@ -1,5 +1,5 @@
 ---
-id: version-4.1-extend_type
+id: extend_type
 title: Extending a type
 sidebar_label: Extending a type
 original_id: extend_type
@@ -9,13 +9,13 @@ Fields exposed in a GraphQL type do not need to be all part of the same class.
 
 Use the `@ExtendType` annotation to add additional fields to a type that is already declared.
 
-<div class="alert alert-info">
-    Extending a type has nothing to do with type inheritance. 
-    If you are looking for a way to expose a class and its children classes, have a look at 
-    the <a href="inheritance-interfaces">Inheritance</a> section</a>
+<div class="alert alert--info">
+    Extending a type has nothing to do with type inheritance.
+    If you are looking for a way to expose a class and its children classes, have a look at
+    the <a href="inheritance-interfaces">Inheritance</a> section
 </div>
 
-Let's assume you have a `Product` class. In order to get the name of a product, there is no `getName()` method in 
+Let's assume you have a `Product` class. In order to get the name of a product, there is no `getName()` method in
 the product because the name needs to be translated in the correct language. You have a `TranslationService` to do that.
 
 <!--DOCUSAURUS_CODE_TABS-->
@@ -78,7 +78,7 @@ class Product
 <!--END_DOCUSAURUS_CODE_TABS-->
 
 ```php
-// You need to use a service to get the name of the product in the correct language. 
+// You need to use a service to get the name of the product in the correct language.
 $name = $translationService->getProductName($productId, $language);
 ```
 
@@ -97,12 +97,12 @@ use App\Entities\Product;
 class ProductType
 {
     private $translationService;
-    
+
     public function __construct(TranslationServiceInterface $translationService)
     {
         $this->translationService = $translationService;
     }
-    
+
     #[Field]
     public function getName(Product $product, string $language): string
     {
@@ -124,12 +124,12 @@ use App\Entities\Product;
 class ProductType
 {
     private $translationService;
-    
+
     public function __construct(TranslationServiceInterface $translationService)
     {
         $this->translationService = $translationService;
     }
-    
+
     /**
      * @Field()
      */
@@ -163,12 +163,12 @@ the `Product` PHP class.
 class ProductType
 {
     private $translationService;
-    
+
     public function __construct(TranslationServiceInterface $translationService)
     {
         $this->translationService = $translationService;
     }
-    
+
     // ...
 }
 ```
@@ -177,11 +177,11 @@ class ProductType
 - The `ProductType` class must be in the types namespace. You configured this namespace when you installed GraphQLite.
 - The `ProductType` class is actually a **service**. You can therefore inject dependencies in it (like the `$translationService` in this example)
 
-<div class="alert alert-warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your 
+<div class="alert alert--warning"><strong>Heads up!</strong> The <code>ProductType</code> class must exist in the container of your
 application and the container identifier MUST be the fully qualified class name.<br/><br/>
-If you are using the Symfony bundle (or a framework with autowiring like Laravel), this 
-is usually not an issue as the container will automatically create the controller entry if you do not explicitly 
-declare it.</div> 
+If you are using the Symfony bundle (or a framework with autowiring like Laravel), this
+is usually not an issue as the container will automatically create the controller entry if you do not explicitly
+declare it.</div>
 
 <!--DOCUSAURUS_CODE_TABS-->
 <!--PHP 8+-->
@@ -218,6 +218,6 @@ Extend type Product {
 }
 ```
 
-<div class="alert alert-success">Type extension is a very powerful tool. Use it to add fields that needs to be 
+<div class="alert alert--success">Type extension is a very powerful tool. Use it to add fields that needs to be
 computed from services not available in the entity.
 </div>

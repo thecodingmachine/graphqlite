@@ -1,5 +1,5 @@
 ---
-id: version-4.0-prefetch-method
+id: prefetch-method
 title: Prefetching records
 sidebar_label: Prefetching records
 original_id: prefetch-method

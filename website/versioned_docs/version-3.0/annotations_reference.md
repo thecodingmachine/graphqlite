@@ -1,5 +1,5 @@
 ---
-id: version-3.0-annotations_reference
+id: annotations_reference
 title: Annotations reference
 sidebar_label: Annotations reference
 original_id: annotations_reference

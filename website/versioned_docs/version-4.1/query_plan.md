@@ -1,5 +1,5 @@
 ---
-id: version-4.1-query-plan
+id: query-plan
 title: Query plan
 sidebar_label: Query plan
 original_id: query-plan
@@ -29,7 +29,7 @@ A naive implementation will do this:
 
 Assuming we have "N" products, we will make "N+1" queries.
 
-There are several ways to fix this problem. Assuming you are using a relational database, one solution is to try to look 
+There are several ways to fix this problem. Assuming you are using a relational database, one solution is to try to look
 ahead and perform only one query with a JOIN between "products" and "manufacturers".
 
 But how do I know if I should make the JOIN between "products" and "manufacturers" or not? I need to know ahead
@@ -88,9 +88,9 @@ class ProductsController
 
 
 `ResolveInfo` is a class provided by Webonyx/GraphQL-PHP (the low-level GraphQL library used by GraphQLite).
-It contains info about the query and what fields are requested. Using `ResolveInfo::getFieldSelection` you can analyze the query 
+It contains info about the query and what fields are requested. Using `ResolveInfo::getFieldSelection` you can analyze the query
 and decide whether you should perform additional "JOINS" in your query or not.
 
-<div class="alert alert-info">As of the writing of this documentation, the <code>ResolveInfo</code> class is useful but somewhat limited.
+<div class="alert alert--info">As of the writing of this documentation, the <code>ResolveInfo</code> class is useful but somewhat limited.
 The <a href="https://github.com/webonyx/graphql-php/pull/436">next version of Webonyx/GraphQL-PHP will add a "query plan"</a>
 that allows a deeper analysis of the query.</div>

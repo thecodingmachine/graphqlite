@@ -1,33 +1,110 @@
 {
-  "version-3.0-docs": {
-    "Introduction": [
-      "version-3.0-features"
-    ],
-    "Installation": [
-      "version-3.0-getting-started",
-      "version-3.0-symfony-bundle",
-      "version-3.0-laravel-package",
-      "version-3.0-universal_service_providers",
-      "version-3.0-other-frameworks"
-    ],
-    "Usage": [
-      "version-3.0-queries",
-      "version-3.0-mutations",
-      "version-3.0-type_mapping",
-      "version-3.0-extend_type",
-      "version-3.0-authentication_authorization",
-      "version-3.0-external_type_declaration",
-      "version-3.0-input-types",
-      "version-3.0-inheritance"
-    ],
-    "Advanced": [
-      "version-3.0-file-uploads",
-      "version-3.0-pagination",
-      "version-3.0-custom-output-types",
-      "version-3.0-troubleshooting"
-    ],
-    "Reference": [
-      "version-3.0-annotations_reference"
-    ]
-  }
+  "version-3.0/docs": [
+    {
+      "type": "category",
+      "label": "Introduction",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-3.0/features"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Installation",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-3.0/getting-started"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/symfony-bundle"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/laravel-package"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/universal_service_providers"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/other-frameworks"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Usage",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-3.0/queries"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/mutations"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/type_mapping"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/extend_type"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/authentication_authorization"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/external_type_declaration"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/input-types"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/inheritance"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Advanced",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-3.0/file-uploads"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/pagination"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/custom-output-types"
+        },
+        {
+          "type": "doc",
+          "id": "version-3.0/troubleshooting"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Reference",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-3.0/annotations_reference"
+        }
+      ]
+    }
+  ]
 }
