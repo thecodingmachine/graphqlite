@@ -7,6 +7,10 @@ sidebar_label: Laravel specific features
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<div class="alert alert--warning">
+    <strong>Be advised!</strong> This documentation will be removed in a future release.  For current and up-to-date Laravel extension specific documentation, please see the <a href="https://github.com/thecodingmachine/graphqlite-laravel">Github repository</a>.
+</div>
+
 The Laravel package comes with a number of features to ease the integration of GraphQLite in Laravel.
 
 ## Support for Laravel validation rules
@@ -165,10 +169,9 @@ products {
 ```
 
 
-<div class="alert alert--warning">Be sure to type hint on the class (<code>Illuminate\Pagination\LengthAwarePaginator</code>)
-and not on the interface (<code>Illuminate\Contracts\Pagination\LengthAwarePaginator</code>). The interface
-itself is not iterable (it does not extend <code>Traversable</code>) and therefore, GraphQLite will refuse to
-iterate over it.</div>
+<div class="alert alert--warning">
+  Be sure to type hint on the class (<code>Illuminate\Pagination\LengthAwarePaginator</code>) and not on the interface (<code>Illuminate\Contracts\Pagination\LengthAwarePaginator</code>). The interface itself is not iterable (it does not extend <code>Traversable</code>) and therefore, GraphQLite will refuse to iterate over it.
+</div>
 
 ### Simple paginator
 
@@ -245,7 +248,6 @@ class Product extends Model
 {
 }
 ```
-
 
   </TabItem>
   <TabItem value="php7">

@@ -21,7 +21,7 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
   #[Query]
   public function products(ResolveInfo $info): array
   ```
-  
+
   In the query above, the `$info` argument is filled with the Webonyx `ResolveInfo` class thanks to the
   [`ResolveInfoParameterHandler parameter middleware`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ResolveInfoParameterHandler.php)
 - Inject a service from the container when you use the `@Autowire` annotation
@@ -94,8 +94,7 @@ class Autowire implements ParameterAnnotationInterface
 
 The middleware purpose is to analyze a parameter and decide whether or not it can handle it.
 
-**Parameter middleware class**
-```php
+```php title="Parameter middleware class"
 class ContainerParameterHandler implements ParameterMiddlewareInterface
 {
     /** @var ContainerInterface */
@@ -125,8 +124,7 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
 
 The last step is to write the actual parameter resolver.
 
-**Parameter resolver class**
-```php
+```php title="Parameter resolver class"
 /**
  * A parameter filled from the container.
  */

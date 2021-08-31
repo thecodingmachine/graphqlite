@@ -20,18 +20,18 @@ You must start by installing this package:
 $ composer require ecodev/graphql-upload
 ```
 
-## If you are using the Symfony bundle
+### If you are using the Symfony bundle
 
 If you are using our Symfony bundle, the file upload middleware is managed by the bundle. You have nothing to do
 and can start using it right away.
 
-## If you are using a PSR-15 compatible framework
+### If you are using a PSR-15 compatible framework
 
 In order to use this, you must first be sure that the `ecodev/graphql-upload` PSR-15 middleware is part of your middleware pipe.
 
 Simply add `GraphQL\Upload\UploadMiddleware` to your middleware pipe.
 
-## If you are using another framework not compatible with PSR-15
+### If you are using another framework not compatible with PSR-15
 
 Please check the Ecodev/graphql-upload library [documentation](https://github.com/Ecodev/graphql-upload)
 for more information on how to integrate it in your framework.

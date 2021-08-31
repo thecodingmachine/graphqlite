@@ -5,7 +5,7 @@ sidebar_label: Connecting security to your framework
 ---
 
 <div class="alert alert--info">
-    This step is NOT necessary for users using GraphQLite through the Symfony Bundle or the Laravel package
+    At the time of writing, the Symfony Bundle and the Laravel package handle this implementation. For the latest documentation, please see their respective Github repositories.
 </div>
 
 GraphQLite needs to know if a user is logged or not, and what rights it has.

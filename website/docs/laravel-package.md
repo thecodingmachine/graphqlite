@@ -4,6 +4,10 @@ title: Getting started with Laravel
 sidebar_label: Laravel package
 ---
 
+<div class="alert alert--warning">
+    <strong>Be advised!</strong> This documentation will be removed in a future release.  For current and up-to-date Laravel extension specific documentation, please see the <a href="https://github.com/thecodingmachine/graphqlite-laravel">Github repository</a>.
+</div>
+
 The GraphQLite-Laravel package is compatible with **Laravel 5.7+**, **Laravel 6.x** and  **Laravel 7.x**.
 
 ## Installation
@@ -22,8 +26,7 @@ $ php artisan vendor:publish --provider=TheCodingMachine\GraphQLite\Laravel\Prov
 
 You can then configure the library by editing `config/graphqlite.php`.
 
-**config/graphqlite.php**
-```php
+```php title="config/graphqlite.php"
 <?php
 
 use GraphQL\Error\Debug;
@@ -70,8 +73,7 @@ You have 3 options:
 If you plan to use graphql for server-to-server connection only, you should probably configure GraphQLite to use the
 `api` middleware instead of the `web` middleware:
 
-**config/graphqlite.php**
-```php
+```php title="config/graphqlite.php"
 <?php
 return [
     'middleware' => ['api'],
@@ -96,8 +98,7 @@ The way you do this depends on the Javascript GraphQL client you are using.
 Assuming you are using [Apollo](https://www.apollographql.com/docs/link/links/http/), you need to be sure that Apollo passes the token
 back to Laravel on every request.
 
-**Sample Apollo client setup with CSRF support**
-```js
+```js title="Sample Apollo client setup with CSRF support"
 import { ApolloClient, ApolloLink, InMemoryCache, HttpLink } from 'apollo-boost';
 
 const httpLink = new HttpLink({ uri: 'https://api.example.com/graphql' });

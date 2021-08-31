@@ -4,6 +4,10 @@ title: Getting started with Symfony
 sidebar_label: Symfony bundle
 ---
 
+<div class="alert alert--warning">
+    <strong>Be advised!</strong> This documentation will be removed in a future release.  For current and up-to-date Symfony bundle specific documentation, please see the <a href="https://github.com/thecodingmachine/graphqlite-bundle">Github repository</a>.
+</div>
+
 The GraphQLite bundle is compatible with **Symfony 4.x** and **Symfony 5.x**.
 
 ## Applications that use Symfony Flex
@@ -16,18 +20,17 @@ $ composer require thecodingmachine/graphqlite-bundle
 
 Now, go to the `config/packages/graphqlite.yaml` file and edit the namespaces to match your application.
 
-**config/packages/graphqlite.yaml**
-```yaml
+```yaml title="config/packages/graphqlite.yaml"
 graphqlite:
-    namespace:
-      # The namespace(s) that will store your GraphQLite controllers.
-      # It accept either a string or a list of strings.
-      controllers: App\GraphQLController\
-      # The namespace(s) that will store your GraphQL types and factories.
-      # It accept either a string or a list of strings.
-      types:
-      - App\Types\
-      - App\Entity\
+  namespace:
+    # The namespace(s) that will store your GraphQLite controllers.
+    # It accept either a string or a list of strings.
+    controllers: App\GraphQLController\
+    # The namespace(s) that will store your GraphQL types and factories.
+    # It accept either a string or a list of strings.
+    types:
+    - App\Types\
+    - App\Entity\
 ```
 
 More advanced parameters are detailed in the ["advanced configuration" section](#advanced-configuration)
@@ -42,8 +45,8 @@ $ composer require thecodingmachine/graphqlite-bundle
 
 Enable the library by adding it to the list of registered bundles in the `app/AppKernel.php` file:
 
-**app/AppKernel.php**
-```php
+
+```php title="app/AppKernel.php"
 <?php
 
 class AppKernel extends Kernel
@@ -60,8 +63,7 @@ class AppKernel extends Kernel
 
 Now, enable the "graphql/" route by editing the `config/routes.yaml` file:
 
-**config/routes.yaml**
-```yaml
+```yaml title="config/routes.yaml"
 # Add these 2 lines to config/routes.yaml
 graphqlite_bundle:
   resource: '@GraphqliteBundle/Resources/config/routes.xml'
@@ -69,18 +71,17 @@ graphqlite_bundle:
 
 Last but not least, create the configuration file at `config/packages/graphqlite.yaml`:
 
-**config/packages/graphqlite.yaml**
-```yaml
+```yaml title="config/packages/graphqlite.yaml"
 graphqlite:
-    namespace:
-      # The namespace(s) that will store your GraphQLite controllers.
-      # It accept either a string or a list of strings.
-      controllers: App\GraphqlController\
-      # The namespace(s) that will store your GraphQL types and factories.
-      # It accept either a string or a list of strings.
-      types:
-      - App\Types\
-      - App\Entity\
+  namespace:
+    # The namespace(s) that will store your GraphQLite controllers.
+    # It accept either a string or a list of strings.
+    controllers: App\GraphqlController\
+    # The namespace(s) that will store your GraphQL types and factories.
+    # It accept either a string or a list of strings.
+    types:
+    - App\Types\
+    - App\Entity\
 ```
 
 ## Advanced configuration
@@ -95,29 +96,26 @@ By default, GraphQLite configures the underlying Webonyx GraphQL library this wa
 
 We found out those settings to be quite convenient but you can override those to your preference.
 
-**config/packages/graphqlite.yaml**
-```yaml
+```yaml title="config/packages/graphqlite.yaml"
 graphqlite:
-    # ...
-    debug:
-      # Include exception messages in output when an error arises.
-      INCLUDE_DEBUG_MESSAGE: false
-      # Include stacktrace in output when an error arises.
-      INCLUDE_TRACE: false
-      # Exceptions are not caught by the engine and propagated to Symfony.
-      RETHROW_INTERNAL_EXCEPTIONS: false
-      # Exceptions that do not implement ClientAware interface are
-      # not caught by the engine and propagated to Symfony.
-      RETHROW_UNSAFE_EXCEPTIONS: true
+  # ...
+  debug:
+    # Include exception messages in output when an error arises.
+    INCLUDE_DEBUG_MESSAGE: false
+    # Include stacktrace in output when an error arises.
+    INCLUDE_TRACE: false
+    # Exceptions are not caught by the engine and propagated to Symfony.
+    RETHROW_INTERNAL_EXCEPTIONS: false
+    # Exceptions that do not implement ClientAware interface are
+    # not caught by the engine and propagated to Symfony.
+    RETHROW_UNSAFE_EXCEPTIONS: true
 ```
 
 The debug parameters are detailed in the [documentation of the Webonyx GraphQL library](https://webonyx.github.io/graphql-php/error-handling/)
 which is used internally by GraphQLite.
 
-<div class="alert alert--warning"><strong>Do not put your GraphQL controllers in the <code>App\Controller</code> namespace</strong>
-Symfony applies a particular compiler pass to classes in the <code>App\Controller</code> namespace. This compiler pass will prevent you
-from using input types. Put your controllers in another namespace. We advise using <code>App\GraphqlController</code>.
+<div class="alert alert--warning">
+  <strong>Do not put your GraphQL controllers in the <code>App\Controller</code> namespace</strong> Symfony applies a particular compiler pass to classes in the <code>App\Controller</code> namespace. This compiler pass will prevent you from using input types. Put your controllers in another namespace. We advise using <code>App\GraphqlController</code>.
 </div>
 
-The Symfony bundle come with a set of advanced features that are not described in this install documentation (like providing a login/logout mutation out of the box).
-Jump to the ["Symfony specific features"](symfony-bundle-advanced.mdx) documentation of GraphQLite if you want to learn more.
+The Symfony bundle come with a set of advanced features that are not described in this install documentation (like providing a login/logout mutation out of the box). Jump to the ["Symfony specific features"](symfony-bundle-advanced.mdx) documentation of GraphQLite if you want to learn more.

@@ -76,8 +76,7 @@ hides the field in production). That could be useful, right?
 
 First, we have to define the annotation. Annotations are handled by the great [doctrine/annotations](https://www.doctrine-project.org/projects/doctrine-annotations/en/1.6/index.html) library (for PHP 7+) and/or by PHP 8 attributes.
 
-**OnlyDebug.php**
-```php
+```php title="OnlyDebug.php"
 namespace App\Annotations;
 
 use Attribute;
@@ -93,9 +92,7 @@ class OnlyDebug implements MiddlewareAnnotationInterface
 }
 ```
 
-Apart from being a classical annotation/attribute, this class implements the `MiddlewareAnnotationInterface`. This interface
-is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this annotation
-is to be used by middlewares.
+Apart from being a classical annotation/attribute, this class implements the `MiddlewareAnnotationInterface`. This interface is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this annotation is to be used by middlewares.
 
 Now, we can write a middleware that will act upon this annotation.
 
@@ -136,7 +133,9 @@ class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
 The final thing we have to do is to register the middleware.
 
 - Assuming you are using the `SchemaFactory` to initialize GraphQLite, you can register the field middleware using:
+
   ```php
   $schemaFactory->addFieldMiddleware(new OnlyDebugFieldMiddleware());
   ```
+
 - If you are using the Symfony bundle, you can register your field middleware services by tagging them with the `graphql.field_middleware` tag.

@@ -7,8 +7,6 @@ sidebar_label: "Other frameworks / No framework"
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-If you are using **Symfony 4.x**, checkout the [Symfony bundle](symfony-bundle.md).
-
 ## Installation
 
 Open a terminal in your current project directory and run:
@@ -171,9 +169,7 @@ In this example, we will focus on getting a working version of GraphQLite using:
 
 The choice of the libraries is really up to you. You can adapt it based on your needs.
 
-**composer.json**
-
-```json
+```json title="composer.json"
 {
   "autoload": {
     "psr-4": {
@@ -193,9 +189,7 @@ The choice of the libraries is really up to you. You can adapt it based on your 
 }
 ```
 
-**index.php**
-
-```php
+```php title="index.php"
 <?php
 
 use Laminas\Diactoros\Response;
@@ -230,9 +224,7 @@ $runner->run();
 Here we are initializing a Zend `RequestHandler` (it receives requests) and we pass it to a Zend Stratigility `MiddlewarePipe`.
 This `MiddlewarePipe` comes from the container declared in the `config/container.php` file:
 
-**config/container.php**
-
-```php
+```php title="config/container.php"
 <?php
 
 use GraphQL\Type\Schema;
@@ -276,8 +268,6 @@ The application will look into the `App\Controllers` namespace for GraphQLite co
 It assumes that the container has an entry whose name is the controller's fully qualified class name.
 
 
-**src/Controllers/MyController.php**
-
 <Tabs
   defaultValue="php8"
   values={[
@@ -286,7 +276,7 @@ It assumes that the container has an entry whose name is the controller's fully 
   ]}>
   <TabItem value="php8">
 
-```php
+```php title="src/Controllers/MyController.php"
 namespace App\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -304,7 +294,7 @@ class MyController
   </TabItem>
   <TabItem value="php7">
 
-```php
+```php title="src/Controllers/MyController.php"
 namespace App\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -325,9 +315,7 @@ class MyController
 </Tabs>
 
 
-**config/container.php**
-
-```php
+```php title="config/container.php"
 use App\Controllers\MyController;
 
 return new Picotainer([

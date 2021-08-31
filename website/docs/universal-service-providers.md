@@ -38,8 +38,7 @@ GraphQL queries. The service provider provides this `Schema` class.
 
 ## Sample usage
 
-**composer.json**
-```
+```json title="composer.json"
 {
   "require": {
     "mnapoli/simplex": "^0.5",
@@ -51,8 +50,7 @@ GraphQL queries. The service provider provides this `Schema` class.
 }
 ```
 
-**index.php**
-```php
+```php title="index.php"
 <?php
 use Simplex\Container;
 use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
