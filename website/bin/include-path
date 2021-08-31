@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export LOCAL_PATH=$(dirname $0)
+export PATH="$LOCAL_PATH:$PATH"

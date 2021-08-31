@@ -4,7 +4,7 @@
     "build": "docusaurus build",
     "serve": "docusaurus serve ",
     "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy"
+    "deploy": "bin/deploy-github"
   },
   "devDependencies": {
     "@docusaurus/core": "2.0.0-beta.5",

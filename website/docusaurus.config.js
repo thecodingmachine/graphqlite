@@ -3,6 +3,7 @@ module.exports={
   "tagline": "GraphQL in PHP made easy",
   "url": "https://graphqlite.thecodingmachine.io",
   "baseUrl": "/",
+  "trailingSlash": false,
   "organizationName": "thecodingmachine",
   "projectName": "graphqlite",
   "scripts": [
