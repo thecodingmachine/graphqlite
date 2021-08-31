@@ -66,7 +66,7 @@ Here is an example of factory:
 class MyFactory
 {
     /**
-     * The Factory annotation will create automatically a LocationInput input type in GraphQL.    
+     * The Factory annotation will create automatically a LocationInput input type in GraphQL.
      *
      * @Factory()
      */
@@ -100,7 +100,7 @@ A few important things to notice:
 
 - The container MUST contain the factory class. The identifier of the factory MUST be the fully qualified class name of the class that contains the factory.
   This is usually already the case if you are using a container with auto-wiring capabilities
-- We recommend that you put the factories in the same directories as the types. 
+- We recommend that you put the factories in the same directories as the types.
 
 ### Specifying the input type name
 
@@ -126,10 +126,10 @@ In case you want to override the input type name, you can use the "name" attribu
  */
 ```
 
-Note that you need to add the "default" attribute is you want your factory to be used by default (more on this in 
+Note that you need to add the "default" attribute is you want your factory to be used by default (more on this in
 the next chapter).
 
-Unless you want to have several factories for the same PHP class, the input type name will be completely transparent 
+Unless you want to have several factories for the same PHP class, the input type name will be completely transparent
 to you, so there is no real reason to customize it.
 
 ### Forcing an input type
@@ -168,7 +168,7 @@ Here is an annotated sample:
 class ProductFactory
 {
     // ...
-    
+
     /**
      * This factory will be used by default to map "Product" classes.
      * @Factory(name="ProductRefInput", default=true)
@@ -191,7 +191,7 @@ class ProductController
 {
     /**
      * The "createProduct" factory will be used for this mutation.
-     * 
+     *
      * @Mutation
      * @UseInputType(for="$product", inputType="CreateProductInput!")
      */
@@ -199,7 +199,7 @@ class ProductController
     {
         // ...
     }
-    
+
     /**
      * The default "getProduct" factory will be used for this query.
      *
@@ -220,8 +220,8 @@ GraphQLite will automatically map all your parameters to an input type.
 But sometimes, you might want to avoid exposing some of those parameters.
 
 Image your `getProductById` has an additional `lazyLoad` parameter. This parameter is interesting when you call
-directly the function in PHP because you can have some level of optimisation on your code. But it is not something that 
-you want to expose in the GraphQL API. Let's hide it! 
+directly the function in PHP because you can have some level of optimisation on your code. But it is not something that
+you want to expose in the GraphQL API. Let's hide it!
 
 ```php
 /**
