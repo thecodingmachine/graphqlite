@@ -5,6 +5,9 @@ sidebar_label: External type declaration
 original_id: external_type_declaration
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 In some cases, you cannot or do not want to put an annotation on a domain class.
 
 For instance:
@@ -213,7 +216,7 @@ class ProductType extends AbstractAnnotatedObjectType
 }
 ```
 
-Any annotations described in the [Authentication and authorization page](authentication_authorization.md), or any annotation this is actually a ["field middleware"](field_middlewares.md) can be used in the `@SourceField` "annotations" attribute.
+Any annotations described in the [Authentication and authorization page](authentication_authorization.mdx), or any annotation this is actually a ["field middleware"](field_middlewares.md) can be used in the `@SourceField` "annotations" attribute.
 
 <div class="alert alert--warning"><strong>Heads up!</strong> The "annotation" attribute in @SourceField and @MagicField is only available as a <strong>Doctrine annotations</strong>. You cannot use it in PHP 8 attributes (because PHP 8 attributes cannot be nested)</div>
 

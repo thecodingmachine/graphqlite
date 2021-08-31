@@ -120,4 +120,4 @@ from using input types. Put your controllers in another namespace. We advise usi
 </div>
 
 The Symfony bundle come with a set of advanced features that are not described in this install documentation (like providing a login/logout mutation out of the box).
-Jump to the ["Symfony specific features"](symfony-bundle-advanced.md) documentation of GraphQLite if you want to learn more.
+Jump to the ["Symfony specific features"](symfony-bundle-advanced.mdx) documentation of GraphQLite if you want to learn more.

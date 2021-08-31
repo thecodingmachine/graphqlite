@@ -4,6 +4,9 @@ title: Queries
 sidebar_label: Queries
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 In GraphQLite, GraphQL queries are created by writing methods in *controller* classes.
 
 Those classes must be in the controllers namespaces which has been defined when you configured GraphQLite.
@@ -21,7 +24,6 @@ In a controller class, each query method must be annotated with the `@Query` ann
   ]}>
   <TabItem value="php8">
 
-
 ```php
 namespace App\Controller;
 
@@ -37,10 +39,8 @@ class MyController
 }
 ```
 
-
   </TabItem>
   <TabItem value="php7">
-
 
 ```php
 namespace App\Controller;
@@ -58,7 +58,6 @@ class MyController
     }
 }
 ```
-
 
   </TabItem>
 </Tabs>

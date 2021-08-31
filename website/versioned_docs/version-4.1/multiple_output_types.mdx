@@ -4,6 +4,10 @@ title: Mapping multiple output types for the same class
 sidebar_label: Class with multiple output types
 original_id: multiple_output_types
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 <small>Available in GraphQLite 4.0+</small>
 
 In most cases, you have one PHP class and you want to map it to one GraphQL output type.
@@ -121,7 +125,7 @@ class LimitedProductType
 
 
 
-The `LimitedProductType` also declares an ["external" type](external_type_declaration.md) mapping the `Product` class.
+The `LimitedProductType` also declares an ["external" type](external_type_declaration.mdx) mapping the `Product` class.
 But pay special attention to the `@Type` annotation.
 
 First of all, we specify `name="LimitedProduct"`. This is useful to avoid having colliding names with the "Product" GraphQL output type

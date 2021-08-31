@@ -5,7 +5,7 @@ sidebar_label: Fine grained security
 original_id: fine-grained-security
 ---
 
-If the [`@Logged` and `@Right` annotations](authentication_authorization.md#logged-and-right-annotations) are not
+If the [`@Logged` and `@Right` annotations](authentication_authorization.mdx#logged-and-right-annotations) are not
 granular enough for your needs, you can use the advanced `@Security` annotation.
 
 Using the `@Security` annotation, you can write an *expression* that can contain custom logic. For instance:
@@ -124,7 +124,7 @@ public function getMargin(): float
 }
 ```
 
-The `failWith` attribute behaves just like the [`@FailWith` annotation](authentication_authorization.md#not-throwing-errors)
+The `failWith` attribute behaves just like the [`@FailWith` annotation](authentication_authorization.mdx#not-throwing-errors)
 but for a given `@Security` annotation.
 
 You cannot use the `failWith` attribute along `statusCode` or `message` attributes.

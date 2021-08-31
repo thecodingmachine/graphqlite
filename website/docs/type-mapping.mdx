@@ -4,7 +4,10 @@ title: Type mapping
 sidebar_label: Type mapping
 ---
 
-As explained in the [queries](queries.md) section, the job of GraphQLite is to create GraphQL types from PHP types.
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+As explained in the [queries](queries.mdx) section, the job of GraphQLite is to create GraphQL types from PHP types.
 
 ## Scalar mapping
 
@@ -254,7 +257,7 @@ public function getId(): string
 
 Using the `outputType` attribute of the `@Field` annotation, you can force the output type to `ID`.
 
-You can learn more about forcing output types in the [custom types section](custom-types.md).
+You can learn more about forcing output types in the [custom types section](custom-types.mdx).
 
 ### ID class
 

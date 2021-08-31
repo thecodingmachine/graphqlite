@@ -92,7 +92,7 @@ GraphQLite provide 3 default implementations:
 
  - `CompositeTypeMapper`: a type mapper that delegates mapping to other type mappers using the Composite Design Pattern.
  - `GlobTypeMapper`: scans classes in a directory for the `@Type` or `@ExtendType` annotation and maps those to GraphQL types
- - `PorpaginasTypeMapper`: maps and class implementing the Porpaginas `Result` interface to a [special paginated type](pagination.md).
+ - `PorpaginasTypeMapper`: maps and class implementing the Porpaginas `Result` interface to a [special paginated type](pagination.mdx).
 
 ### Registering a type mapper in Symfony
 
@@ -129,7 +129,7 @@ Let's have a look at a simple query:
 public function products(ResolveInfo $info): array
 ```
 
-As you may know, [the `ResolveInfo` object injected in this query comes from Webonyx/GraphQL-PHP library](query_plan.md).
+As you may know, [the `ResolveInfo` object injected in this query comes from Webonyx/GraphQL-PHP library](query_plan.mdx).
 GraphQLite knows that is must inject a `ResolveInfo` instance because it comes with a [`ResolveInfoParameterHandler`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ResolveInfoParameterHandler.php) class
 that implements the [`ParameterMiddlewareInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ParameterMiddlewareInterface.php)).
 

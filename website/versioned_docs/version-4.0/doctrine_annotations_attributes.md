@@ -70,7 +70,7 @@ A few notable differences:
 - PHP 8 attributes do not support nested attributes (unlike Doctrine annotations). This means there is no equivalent to the `annotations` attribute of `@MagicField` and `@SourceField`.
 - PHP 8 attributes can be written at the parameter level. Any attribute targeting a "parameter" must be written at the parameter level.
 
-Let's take an example with the [`#Autowire` attribute](autowiring.md):
+Let's take an example with the [`#Autowire` attribute](autowiring.mdx):
 
 **PHP 7+**
 ```

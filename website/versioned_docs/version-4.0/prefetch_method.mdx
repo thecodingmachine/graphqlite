@@ -29,12 +29,12 @@ A naive implementation will do this:
 
 Assuming we have "N" posts, we will make "N+1" queries.
 
-There are several ways to fix this problem. 
-Assuming you are using a relational database, one solution is to try to look 
+There are several ways to fix this problem.
+Assuming you are using a relational database, one solution is to try to look
 ahead and perform only one query with a JOIN between "posts" and "users".
-This method is described in the ["analyzing the query plan" documentation](query_plan.md).
+This method is described in the ["analyzing the query plan" documentation](query_plan.mdx).
 
-But this can be difficult to implement. This is also only useful for relational databases. If your data comes from a 
+But this can be difficult to implement. This is also only useful for relational databases. If your data comes from a
 NoSQL database or from the cache, this will not help.
 
 Instead, GraphQLite offers an easier to implement solution: the ability to fetch all fields from a given type at once.
@@ -105,7 +105,7 @@ class PostType {
      */
     public function prefetchComments(iterable $posts, bool $hideSpam, int $filterByScore)
     {
-        // Parameters passed after the first parameter (hideSpam, filterByScore...) are automatically exposed 
+        // Parameters passed after the first parameter (hideSpam, filterByScore...) are automatically exposed
         // as GraphQL arguments for the "comments" field.
     }
 }

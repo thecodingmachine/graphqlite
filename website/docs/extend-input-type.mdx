@@ -3,13 +3,17 @@ id: extend-input-type
 title: Extending an input type
 sidebar_label: Extending an input type
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 <small>Available in GraphQLite 4.0+</small>
 
 <div class="alert alert--info">If you are not familiar with the <code>@Factory</code> tag, <a href="input-types">read first the "input types" guide</a>.</div>
 
 Fields exposed in a GraphQL input type do not need to be all part of the factory method.
 
-Just like with output type (that can be [extended using the `ExtendType` annotation](extend-type.md)), you can extend/modify
+Just like with output type (that can be [extended using the `ExtendType` annotation](extend-type.mdx)), you can extend/modify
 an input type using the `@Decorate` annotation.
 
 Use the `@Decorate` annotation to add additional fields to an input type that is already declared by a `@Factory` annotation,
@@ -122,8 +126,11 @@ A few things to notice:
   PHP class + "Input" (for instance: "Filter" => "FilterInput")
 
 
-<div class="alert alert--warning"><strong>Heads up!</strong> The <code>MyDecorator</code> class must exist in the container of your
-application and the container identifier MUST be the fully qualified class name.<br/><br/>
-If you are using the Symfony bundle (or a framework with autowiring like Laravel), this
-is usually not an issue as the container will automatically create the controller entry if you do not explicitly
-declare it.</div>
+<div class="alert alert--warning">
+  <strong>Heads up!</strong> The <code>MyDecorator</code> class must exist in the container of your
+  application and the container identifier MUST be the fully qualified class name.
+  <br /><br />
+  If you are using the Symfony bundle (or a framework with autowiring like Laravel), this is usually
+  not an issue as the container will automatically create the controller entry if you do not explicitly
+  declare it.
+</div>

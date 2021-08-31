@@ -16,7 +16,7 @@ To do so, you need to create 2 output types for the same PHP class. You typicall
 ## Example
 
 Here is an example. Say we are manipulating products. When I query a `Product` details, I want to have access to all fields.
-But for some reason, I don't want to expose the price field of a product if I query the list of all products.  
+But for some reason, I don't want to expose the price field of a product if I query the list of all products.
 
 ```php
 /**
@@ -66,7 +66,7 @@ class LimitedProductType
 ```
 
 
-The `LimitedProductType` also declares a ["external" type](external_type_declaration.md) mapping the `Product` class.
+The `LimitedProductType` also declares a ["external" type](external_type_declaration.mdx) mapping the `Product` class.
 But pay special attention to the `@Type` annotation.
 
 First of all, we specify `name="LimitedProduct"`. This is useful to avoid having colliding names with the "Product" GraphQL output type
@@ -85,17 +85,17 @@ class ProductController
      *
      * @Field
      */
-    public function getProduct(int $id): Product { /* ... */ } 
-    
+    public function getProduct(int $id): Product { /* ... */ }
+
     /**
      * Because we use the "outputType" attribute, this field will use the other type.
      *
      * @Field(outputType="[LimitedProduct!]!")
      * @return Product[]
      */
-    public function getProducts(): array { /* ... */ } 
+    public function getProducts(): array { /* ... */ }
 }
-``` 
+```
 
 Notice how the "outputType" attribute is used in the `@Field` annotation to force the output type.
 

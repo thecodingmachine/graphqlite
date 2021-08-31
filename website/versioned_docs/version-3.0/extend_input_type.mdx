@@ -3,13 +3,17 @@ id: extend_input_type
 title: Extending an input type
 sidebar_label: Extending an input type
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 <small>Available in GraphQLite 4.0+</small>
 
 <div class="alert alert--info">If you are not familiar with the <code>@Factory</code> tag, <a href="input-types">read first the "input types" guide</a>.</div>
 
 Fields exposed in a GraphQL input type do not need to be all part of the factory method.
 
-Just like with output type (that can be [extended using the `ExtendType` annotation](extend_type.md)), you can extend/modify
+Just like with output type (that can be [extended using the `ExtendType` annotation](extend_type.mdx)), you can extend/modify
 an input type using the `@Decorate` annotation.
 
 Use the `@Decorate` annotation to add additional fields to an input type that is already declared by a `@Factory` annotation,

@@ -4,6 +4,9 @@ title: Prefetching records
 sidebar_label: Prefetching records
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 ## The problem
 
 GraphQL naive implementations often suffer from the "N+1" problem.
@@ -31,7 +34,7 @@ Assuming we have "N" posts, we will make "N+1" queries.
 There are several ways to fix this problem.
 Assuming you are using a relational database, one solution is to try to look
 ahead and perform only one query with a JOIN between "posts" and "users".
-This method is described in the ["analyzing the query plan" documentation](query_plan.md).
+This method is described in the ["analyzing the query plan" documentation](query_plan.mdx).
 
 But this can be difficult to implement. This is also only useful for relational databases. If your data comes from a
 NoSQL database or from the cache, this will not help.

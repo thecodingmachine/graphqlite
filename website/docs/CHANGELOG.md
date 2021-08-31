@@ -37,7 +37,7 @@ public function toGraphQLInputType(Type $type, ?InputType $subType, string $argu
 
 New features:
 
-- [@Input](annotations-reference.md#input-annotation) annotation is introduced as an alternative to `@Factory`. Now GraphQL input type can be created in the same manner as `@Type` in combination with `@Field` - [example](input-types.md#input-annotation).
+- [@Input](annotations-reference.md#input-annotation) annotation is introduced as an alternative to `@Factory`. Now GraphQL input type can be created in the same manner as `@Type` in combination with `@Field` - [example](input-types.mdx#input-annotation).
 - New attributes has been added to [@Field](annotations-reference.md#field-annotation) annotation: `for`, `inputType` and `description`.
 - The following annotations now can be applied to class properties directly: `@Field`, `@Logged`, `@Right`, `@FailWith`, `@HideIfUnauthorized` and `@Security`.
 
@@ -74,21 +74,21 @@ changed.
 
 New features:
 
-- You can directly [annotate a PHP interface with `@Type` to make it a GraphQL interface](inheritance-interfaces.md#mapping-interfaces)
+- You can directly [annotate a PHP interface with `@Type` to make it a GraphQL interface](inheritance-interfaces.mdx#mapping-interfaces)
 - You can autowire services in resolvers, thanks to the new `@Autowire` annotation
-- Added [user input validation](validation.md) (using the Symfony Validator or the Laravel validator or a custom `@Assertion` annotation
+- Added [user input validation](validation.mdx) (using the Symfony Validator or the Laravel validator or a custom `@Assertion` annotation
 - Improved security handling:
   - Unauthorized access to fields can now generate GraphQL errors (rather that schema errors in GraphQLite v3)
-  - Added fine-grained security using the `@Security` annotation. A field can now be [marked accessible or not depending on the context](fine-grained-security.md).
+  - Added fine-grained security using the `@Security` annotation. A field can now be [marked accessible or not depending on the context](fine-grained-security.mdx).
     For instance, you can restrict access to the field "viewsCount" of the type `BlogPost` only for post that the current user wrote.
   - You can now inject the current logged user in any query / mutation / field using the `@InjectUser` annotation
 - Performance:
-  - You can inject the [Webonyx query plan in a parameter from a resolver](query-plan.md)
-  - You can use the [dataloader pattern to improve performance drastically via the "prefetchMethod" attribute](prefetch-method.md)
+  - You can inject the [Webonyx query plan in a parameter from a resolver](query-plan.mdx)
+  - You can use the [dataloader pattern to improve performance drastically via the "prefetchMethod" attribute](prefetch-method.mdx)
 - Customizable error handling has been added:
-  - You can throw [many errors in one exception](error-handling.md#many-errors-for-one-exception) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException`
+  - You can throw [many errors in one exception](error-handling.mdx#many-errors-for-one-exception) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException`
 - You can force input types using `@UseInputType(for="$id", inputType="ID!")`
-- You can extend an input types (just like you could extend an output type in v3) using [the new `@Decorate` annotation](extend-input-type.md)
+- You can extend an input types (just like you could extend an output type in v3) using [the new `@Decorate` annotation](extend-input-type.mdx)
 - In a factory, you can [exclude some optional parameters from the GraphQL schema](input-types#ignoring-some-parameters)
 
 
@@ -106,7 +106,7 @@ Symfony:
 
 Laravel:
 
-- [Native integration with the Laravel paginator](laravel-package-advanced.md#support-for-pagination) has been added
+- [Native integration with the Laravel paginator](laravel-package-advanced.mdx#support-for-pagination) has been added
 
 Internals:
 
