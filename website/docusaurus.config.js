@@ -20,8 +20,8 @@ module.exports={
         "docs": {
           "showLastUpdateAuthor": true,
           "showLastUpdateTime": true,
-          "editUrl": "https://github.com/thecodingmachine/graphqlite/edit/master/docs/",
-          "path": "../docs",
+          "editUrl": "https://github.com/thecodingmachine/graphqlite/edit/master/website/docs/",
+          "path": "../website/docs",
           "remarkPlugins": [
             require('mdx-mermaid'),
             {
