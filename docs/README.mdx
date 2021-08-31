@@ -5,6 +5,9 @@ slug: /
 sidebar_label: GraphQLite
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 <p align="center">
     <img src="https://graphqlite.thecodingmachine.io/img/logo.svg" alt="GraphQLite logo" width="250" height="250" />
 </p>
@@ -22,8 +25,14 @@ A PHP library that allows you to write your GraphQL queries in simple-to-write c
 
 First, declare a query in your controller:
 
-<!--DOCUSAURUS_CODE_TABS-->
-<!--PHP 8+-->
+<Tabs
+  defaultValue="php8"
+  values={[
+    {label: 'PHP 8', value: 'php8'},
+    {label: 'PHP 7', value: 'php7'},
+  ]}>
+  <TabItem value="php8">
+
 ```php
 class ProductController
 {
@@ -34,7 +43,10 @@ class ProductController
     }
 }
 ```
-<!--PHP 7+-->
+
+  </TabItem>
+  <TabItem value="php7">
+
 ```php
 class ProductController
 {
@@ -47,7 +59,9 @@ class ProductController
     }
 }
 ```
-<!--END_DOCUSAURUS_CODE_TABS-->
+
+  </TabItem>
+</Tabs>
 
 Then, annotate the `Product` class to declare what fields are exposed to the GraphQL API:
 
@@ -86,7 +100,7 @@ class Product
 
 That's it, you're good to go! Query and enjoy!
 
-```grapql
+```graphql
 {
   product(id: 42) {
     name
