@@ -1,5 +1,5 @@
 ---
-id: version-3.0-migrating
+id: migrating
 title: Release notes
 sidebar_label: Release notes
 original_id: migrating

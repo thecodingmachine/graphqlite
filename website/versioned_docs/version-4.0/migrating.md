@@ -1,5 +1,5 @@
 ---
-id: version-4.0-migrating
+id: migrating
 title: Migrating
 sidebar_label: Migrating
 original_id: migrating

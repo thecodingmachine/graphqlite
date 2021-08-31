@@ -1,5 +1,6 @@
 ---
-id: version-4.0-features
+id: features
+slug: /
 title: GraphQLite
 sidebar_label: GraphQLite
 original_id: features

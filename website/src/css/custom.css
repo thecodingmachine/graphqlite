@@ -1,0 +1,61 @@
+/* ----- THEME VARS ----- */
+:root{
+    --ifm-color-primary: #ef4136;
+    --ifm-color-primary-dark: #ED271B;
+    --ifm-color-primary-darker: #E71F12;
+    --ifm-color-primary-darkest: #BE1A0F;
+    --ifm-color-primary-light: #F15B51;
+    --ifm-color-primary-lighter: #F2675F;
+    --ifm-color-primary-lightest: #F58E87;
+}
+
+@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+}
+
+@media only screen and (min-width: 1024px) {
+}
+
+@media only screen and (max-width: 1023px) {
+}
+
+@media only screen and (min-width: 1400px) {
+}
+
+@media only screen and (min-width: 1500px) {
+}
+
+/* ----- HEADER/NAVBAR ----- */
+nav.navbar {
+    background-color: #ee4036;
+}
+
+.navbar__logo {
+    margin-right: 1rem;
+}
+
+.navbar__title {
+    font-size: 1.5rem;
+}
+
+.navbar__link:hover, .navbar__link--active {
+    color: #FFF;
+    text-decoration: underline;
+}
+
+html[data-theme="light"] ul.dropdown__menu li a.navbar__link:hover,
+html[data-theme="light"] ul.dropdown__menu li a.navbar__link--active {
+    color: #1c1e21;
+    font-weight: bold;
+}
+
+/* ----- BODY ----- */
+.alert {
+    margin-top: 1rem;
+    margin-bottom: 2rem !important;
+}
+
+/* ----- FOOTER ----- */
+.footer__logo {
+    width: 7rem;
+    filter: brightness(55%) saturate(1000%) invert(15%) sepia(30%) hue-rotate(215deg) contrast(88%);
+}

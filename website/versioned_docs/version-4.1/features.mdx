@@ -1,0 +1,121 @@
+---
+id: features
+slug: /
+title: GraphQLite
+sidebar_label: GraphQLite
+original_id: features
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<p align="center">
+    <img src="https://graphqlite.thecodingmachine.io/img/logo.svg" alt="GraphQLite logo" width="250" height="250" />
+</p>
+
+
+A PHP library that allows you to write your GraphQL queries in simple-to-write controllers.
+
+## Features
+
+* Create a complete GraphQL API by simply annotating your PHP classes
+* Framework agnostic, but Symfony, Laravel and PSR-15 bindings available!
+* Comes with batteries included: queries, mutations, mapping of arrays / iterators, file uploads, security, validation, extendable types and more!
+
+## Basic example
+
+First, declare a query in your controller:
+
+<Tabs
+  defaultValue="php8"
+  values={[
+    {label: 'PHP 8', value: 'php8'},
+    {label: 'PHP 7', value: 'php7'},
+  ]}>
+  <TabItem value="php8">
+
+```php
+class ProductController
+{
+    #[Query]
+    public function product(string $id): Product
+    {
+        // Some code that looks for a product and returns it.
+    }
+}
+```
+
+  </TabItem>
+  <TabItem value="php7">
+
+```php
+class ProductController
+{
+    /**
+     * @Query()
+     */
+    public function product(string $id): Product
+    {
+        // Some code that looks for a product and returns it.
+    }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+Then, annotate the `Product` class to declare what fields are exposed to the GraphQL API:
+
+<Tabs
+  defaultValue="php8"
+  values={[
+    {label: 'PHP 8', value: 'php8'},
+    {label: 'PHP 7', value: 'php7'},
+  ]}>
+  <TabItem value="php8">
+
+```php
+#[Type]
+class Product
+{
+    #[Field]
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    // ...
+}
+```
+
+  </TabItem>
+  <TabItem value="php7">
+
+```php
+/**
+ * @Type()
+ */
+class Product
+{
+    /**
+     * @Field()
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    // ...
+}
+```
+
+  </TabItem>
+</Tabs>
+
+That's it, you're good to go! Query and enjoy!
+
+```grapql
+{
+  product(id: 42) {
+    name
+  }
+}
+```

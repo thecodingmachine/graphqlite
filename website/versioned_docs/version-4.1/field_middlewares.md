@@ -1,5 +1,5 @@
 ---
-id: version-4.1-field-middlewares
+id: field-middlewares
 title: Adding custom annotations with Field middlewares
 sidebar_label: Custom annotations
 original_id: field-middlewares
@@ -9,7 +9,7 @@ original_id: field-middlewares
 Just like the `@Logged` or `@Right` annotation, you can develop your own annotation that extends/modifies the behaviour
 of a field/query/mutation.
 
-<div class="alert alert-warning">If you want to create an annotation that targets a single argument (like <code>@AutoWire(for="$service")</code>),
+<div class="alert alert--warning">If you want to create an annotation that targets a single argument (like <code>@AutoWire(for="$service")</code>),
 you should rather check the documentation about <a href="argument-resolving">custom argument resolving</a></div>
 
 ## Field middlewares
@@ -17,7 +17,7 @@ you should rather check the documentation about <a href="argument-resolving">cus
 GraphQLite is based on the Webonyx/Graphql-PHP library. In Webonyx, fields are represented by the `FieldDefinition` class.
 In order to create a `FieldDefinition` instance for your field, GraphQLite goes through a series of "middlewares".
 
-![](assets/field_middleware.svg)
+![](/img/field_middleware.svg)
 
 Each middleware is passed a `TheCodingMachine\GraphQLite\QueryFieldDescriptor` instance. This object contains all the
 parameters used to initialize the field (like the return type, the list of arguments, the resolver to be used, etc...)
@@ -71,7 +71,7 @@ Take a look at the `QueryFieldDescriptor::getMiddlewareAnnotations()`.
 
 It returns the list of annotations applied to your field that implements the `MiddlewareAnnotationInterface`.
 
-Let's imagine you want to add a `@OnlyDebug` annotation that displays a field/query/mutation only in debug mode (and 
+Let's imagine you want to add a `@OnlyDebug` annotation that displays a field/query/mutation only in debug mode (and
 hides the field in production). That could be useful, right?
 
 First, we have to define the annotation. Annotations are handled by the great [doctrine/annotations](https://www.doctrine-project.org/projects/doctrine-annotations/en/1.6/index.html) library (for PHP 7+) and/or by PHP 8 attributes.
@@ -94,7 +94,7 @@ class OnlyDebug implements MiddlewareAnnotationInterface
 ```
 
 Apart from being a classical annotation/attribute, this class implements the `MiddlewareAnnotationInterface`. This interface
-is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this annotation 
+is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this annotation
 is to be used by middlewares.
 
 Now, we can write a middleware that will act upon this annotation.

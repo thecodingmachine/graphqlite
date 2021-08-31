@@ -1,5 +1,5 @@
 ---
-id: version-3.0-troubleshooting
+id: troubleshooting
 title: Troubleshooting
 sidebar_label: Troubleshooting
 original_id: troubleshooting

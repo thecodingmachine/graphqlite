@@ -1,5 +1,5 @@
 ---
-id: version-4.0-annotations_reference
+id: annotations_reference
 title: Annotations reference
 sidebar_label: Annotations reference
 original_id: annotations_reference
@@ -14,7 +14,7 @@ The `@Query` annotation is used to declare a GraphQL query.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the query. If skipped, the name of the method is used instead.
-[outputType](custom_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](custom_types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @Mutation annotation
 
@@ -25,7 +25,7 @@ The `@Mutation` annotation is used to declare a GraphQL mutation.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the mutation. If skipped, the name of the method is used instead.
-[outputType](custom_types.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](custom_types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @Type annotation
 
@@ -35,10 +35,10 @@ The `@Type` annotation is used to declare a GraphQL object type.
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-class          | *no*       | string | The targeted class. If no class is passed, the type applies to the current class. The current class is assumed to be an entity. If the "class" attribute is passed, [the class annotated with `@Type` is a service](external_type_declaration.md).
+class          | *no*       | string | The targeted class. If no class is passed, the type applies to the current class. The current class is assumed to be an entity. If the "class" attribute is passed, [the class annotated with `@Type` is a service](external_type_declaration.mdx).
 name           | *no*       | string | The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with "Type", the "Type" suffix is removed
 default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
-external       | *no*       | bool   | Whether this is an [external type declaration](external_type_declaration.md) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
+external       | *no*       | bool   | Whether this is an [external type declaration](external_type_declaration.mdx) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
 
 ## @ExtendType annotation
 
@@ -48,7 +48,7 @@ The `@ExtendType` annotation is used to add fields to an existing GraphQL object
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-class          | see below  | string | The targeted class. [The class annotated with `@ExtendType` is a service](extend_type.md).
+class          | see below  | string | The targeted class. [The class annotated with `@ExtendType` is a service](extend_type.mdx).
 name           | see below  | string | The targeted GraphQL output type.
 
 One and only one of "class" and "name" parameter can be passed at the same time.
@@ -62,7 +62,7 @@ The `@Field` annotation is used to declare a GraphQL field.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the field. If skipped, the name of the method is used instead.
-[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of a query.
+[outputType](type_mapping.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
 
 ## @SourceField annotation
 
@@ -73,9 +73,9 @@ The `@SourceField` annotation is used to declare a GraphQL field.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
-[outputType](type_mapping.md)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
+[outputType](type_mapping.mdx)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 phpType        | *no*       | string | The PHP type of the field (as you would write it in a Docblock)
-annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+annotations    | *no*       | array\<Annotations\>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
 **Note**: `outputType` and `phpType` are mutually exclusive.
 
@@ -88,9 +88,9 @@ The `@MagicField` annotation is used to declare a GraphQL field that originates 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the field.
-[outputType](type_mapping.md)  | *no*(*)       | string | The GraphQL output type of the field.
+[outputType](type_mapping.mdx)  | *no*(*)       | string | The GraphQL output type of the field.
 phpType     | *no*(*)       | string | The PHP type of the field (as you would write it in a Docblock)
-annotations    | *no*       | array<Annotations>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
+annotations    | *no*       | array\<Annotations\>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here.
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
@@ -134,7 +134,7 @@ to access it (according to the `@Logged` and `@Right` annotations).
 
 ## @InjectUser annotation
 
-Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your 
+Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your
 query / mutation / field.
 
 **Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
@@ -148,7 +148,7 @@ Attribute      | Compulsory | Type   | Definition
 The `@Security` annotation can be used to check fin-grained access rights.
 It is very flexible: it allows you to pass an expression that can contains custom logic.
 
-See [the fine grained security page](fine-grained-security.md) for more details.
+See [the fine grained security page](fine-grained-security.mdx) for more details.
 
 **Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
 
@@ -180,7 +180,7 @@ Attribute      | Compulsory | Type | Definition
 
 ## @Decorate annotation
 
-The `@Decorate` annotation is used [to extend/modify/decorate an input type declared with the `@Factory` annotation](extend_input_type.md).
+The `@Decorate` annotation is used [to extend/modify/decorate an input type declared with the `@Factory` annotation](extend_input_type.mdx).
 
 **Applies on**: methods from classes in the "types" namespace.
 
@@ -190,7 +190,7 @@ name           | *yes*      | string | The GraphQL input type name extended by t
 
 ## @Autowire annotation
 
-[Resolves a PHP parameter from the container](autowiring.md).
+[Resolves a PHP parameter from the container](autowiring.mdx).
 
 Useful to inject services directly into `@Field` method arguments.
 
@@ -203,7 +203,7 @@ Attribute      | Compulsory | Type | Definition
 
 ## @HideParameter annotation
 
-Removes [an argument from the GraphQL schema](input_types.md#ignoring_some_parameters).
+Removes [an argument from the GraphQL schema](input_types.mdx#ignoring_some_parameters).
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
@@ -212,9 +212,9 @@ Attribute      | Compulsory | Type | Definition
 
 ## @Validate annotation
 
-<div class="alert alert-info">This annotation is only available in the GraphQLite Laravel package</div>
+<div class="alert alert--info">This annotation is only available in the GraphQLite Laravel package</div>
 
-[Validates a user input in Laravel](laravel-package-advanced.md).
+[Validates a user input in Laravel](laravel-package-advanced.mdx).
 
 **Applies on**: methods annotated with `@Query`, `@Mutation`, `@Field`, `@Factory` or `@Decorator` annotation.
 
@@ -231,7 +231,7 @@ Sample:
 
 ## @Assertion annotation
 
-[Validates a user input](validation.md).
+[Validates a user input](validation.mdx).
 
 The `@Assertion` annotation  is available in the *thecodingmachine/graphqlite-symfony-validator-bridge* third party package.
 It is available out of the box if you use the Symfony bundle.

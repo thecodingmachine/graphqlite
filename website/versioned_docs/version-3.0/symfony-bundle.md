@@ -1,5 +1,5 @@
 ---
-id: version-3.0-symfony-bundle
+id: symfony-bundle
 title: Getting started with Symfony
 sidebar_label: Symfony bundle
 original_id: symfony-bundle
@@ -7,7 +7,7 @@ original_id: symfony-bundle
 
 The GraphQLite bundle is compatible with **Symfony 4.x**.
 
-<div class="alert alert-warning">
+<div class="alert alert--warning">
     The Symfony Flex recipe is not yet available.
 </div>
 
@@ -57,7 +57,7 @@ graphqlite:
       controllers: App\Controller\
       # The namespace(s) that will store your GraphQL types and factories.
       # It accept either a string or a list of strings.
-      types: 
+      types:
       - App\Types\
       - App\Entity\
     debug:
@@ -67,7 +67,7 @@ graphqlite:
       INCLUDE_TRACE: false
       # Exceptions are not caught by the engine and propagated to Symfony.
       RETHROW_INTERNAL_EXCEPTIONS: false
-      # Exceptions that do not implement ClientAware interface are 
+      # Exceptions that do not implement ClientAware interface are
       # not caught by the engine and propagated to Symfony.
       RETHROW_UNSAFE_EXCEPTIONS: true
 ```
