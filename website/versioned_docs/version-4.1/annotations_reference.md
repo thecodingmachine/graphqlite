@@ -206,7 +206,7 @@ Attribute      | Compulsory | Type | Definition
 
 ## @HideParameter annotation
 
-Removes [an argument from the GraphQL schema](input_types.mdx#ignoring_some_parameters).
+Removes [an argument from the GraphQL schema](input-types.mdx#ignoring_some_parameters).
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------

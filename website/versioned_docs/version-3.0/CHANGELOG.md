@@ -8,7 +8,7 @@ sidebar_label: Changelog
 
 New features:
 
-- [@Input](annotations_reference.md#input-annotation) annotation is introduced as an alternative to `@Factory`. Now GraphQL input type can be created in the same manner as `@Type` in combination with `@Field` - [example](input_types.mdx#input-annotation).
+- [@Input](annotations_reference.md#input-annotation) annotation is introduced as an alternative to `@Factory`. Now GraphQL input type can be created in the same manner as `@Type` in combination with `@Field` - [example](input-types.mdx#input-annotation).
 - New attributes has been added to [@Field](annotations_reference.md#field-annotation) annotation: `for`, `inputType` and `description`.
 - The following annotations now can be applied to class properties directly: `@Field`, `@Logged`, `@Right`, `@FailWith`, `@HideIfUnauthorized` and `@Security`.
 
@@ -60,10 +60,10 @@ New features:
   - You can throw [GraphQL errors](error_handling.mdx) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLException`
   - You can specify the HTTP response code to send with a given error, and the errors "extensions" section
   - You can throw [many errors in one exception](error_handling.mdx#many-errors-for-one-exception) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException`
-- You can map [a given PHP class to several PHP input types](input_types.mdx#declaring-several-input-types-for-the-same-php-class) (a PHP class can have several `@Factory` annotations)
+- You can map [a given PHP class to several PHP input types](input-types.mdx#declaring-several-input-types-for-the-same-php-class) (a PHP class can have several `@Factory` annotations)
 - You can force input types using `@UseInputType(for="$id", inputType="ID!")`
 - You can extend an input types (just like you could extend an output type in v3) using [the new `@Decorate` annotation](extend_input_type.mdx)
-- In a factory, you can [exclude some optional parameters from the GraphQL schema](input_types#ignoring-some-parameters)
+- In a factory, you can [exclude some optional parameters from the GraphQL schema](input-types#ignoring-some-parameters)
 
 
 Many extension points have been added

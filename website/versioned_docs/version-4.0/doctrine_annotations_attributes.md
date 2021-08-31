@@ -36,9 +36,9 @@ Please note that:
 Some IDEs provide support for Doctrine annotations:
 
 <ul>
-<li>PhpStorm via the <a href="PHP Annotations Plugin">https://plugins.jetbrains.com/plugin/7320-php-annotations</a></li>
-<li>Eclipse via the <a href="Symfony2 Plugin">https://marketplace.eclipse.org/content/symfony-plugin</a></li>
-<li>Netbeans has native support</li>
+    <li>PhpStorm via the <a href="https://plugins.jetbrains.com/plugin/7320-php-annotations">PHP Annotations Plugin</a></li>
+    <li>Eclipse via the <a href="https://marketplace.eclipse.org/content/symfony-plugin">Symfony 2 Plugin</a></li>
+    <li>Netbeans has native support</li>
 </ul>
 
 We strongly recommend using an IDE that has Doctrine annotations support.
