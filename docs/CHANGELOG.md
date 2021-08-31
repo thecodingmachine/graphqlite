@@ -4,7 +4,36 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 4.3
+
+Breaking change:
+
+- The method `setAnnotationCacheDir($directory)` has been removed from the `SchemaFactory`.  The annotation
+  cache will use your `Psr\SimpleCache\CacheInterface` compliant cache handler set through the `SchemaFactory`
+  constructor.
+
+Minor changes:
+
+- Removed dependency for doctrine/cache and unified some of the cache layers following a PSR interface.
+- Cleaned up some of the documentation in an attempt to get things accurate with versioned releases.
+
 ## 4.2
+
+Breaking change:
+
+The method signature for `toGraphQLOutputType` and `toGraphQLInputType` have been changed to the following:
+
+```php
+/**
+ * @param \ReflectionMethod|\ReflectionProperty $reflector
+ */
+public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType;
+
+/**
+ * @param \ReflectionMethod|\ReflectionProperty $reflector
+ */
+public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType;
+```
 
 New features:
 
@@ -57,10 +86,7 @@ New features:
   - You can inject the [Webonyx query plan in a parameter from a resolver](query-plan.md)
   - You can use the [dataloader pattern to improve performance drastically via the "prefetchMethod" attribute](prefetch-method.md)
 - Customizable error handling has been added:
-  - You can throw [GraphQL errors](error-handling.md) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLException`
-  - You can specify the HTTP response code to send with a given error, and the errors "extensions" section
   - You can throw [many errors in one exception](error-handling.md#many-errors-for-one-exception) with `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException`
-- You can map [a given PHP class to several PHP input types](input-types.md#declaring-several-input-types-for-the-same-php-class) (a PHP class can have several `@Factory` annotations)
 - You can force input types using `@UseInputType(for="$id", inputType="ID!")`
 - You can extend an input types (just like you could extend an output type in v3) using [the new `@Decorate` annotation](extend-input-type.md)
 - In a factory, you can [exclude some optional parameters from the GraphQL schema](input-types#ignoring-some-parameters)
