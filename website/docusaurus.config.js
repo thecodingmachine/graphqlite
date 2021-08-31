@@ -48,7 +48,8 @@ module.exports={
     "navbar": {
       "title": "GraphQLite",
       "logo": {
-        "src": "/img/graphqlite.svg"
+        "src": "/img/graphqlite.svg",
+        "href": "/"
       },
       "style": "dark",
       "items": [
@@ -58,30 +59,10 @@ module.exports={
           "position": "right"
         },
         {
-          "label": "Version",
-          "to": "docs",
+          "type": 'docsVersionDropdown',
           "position": "right",
-          "items": [
-            {
-              "label": "4.1",
-              "to": "docs/",
-              "activeBaseRegex": "docs/(?!3.0|4.0|4.1|next)"
-            },
-            {
-              "label": "4.0",
-              "to": "docs/4.0/"
-            },
-            {
-              "label": "3.0",
-              "to": "docs/3.0/"
-            },
-            {
-              "label": "Main/Unreleased",
-              "to": "docs/next/",
-              "activeBaseRegex": "docs/next/(?!support|team|resources)"
-            }
-          ]
-        }
+          "dropdownActiveClassDisabled": true
+        },
       ]
     },
     "prism": {
