@@ -3,20 +3,21 @@ id: field-middlewares
 title: Adding custom annotations with Field middlewares
 sidebar_label: Custom annotations
 ---
+
 <small>Available in GraphQLite 4.0+</small>
 
-Just like the `@Logged` or `@Right` annotation, you can develop your own annotation that extends/modifies the behaviour
-of a field/query/mutation.
+Just like the `@Logged` or `@Right` annotation, you can develop your own annotation that extends/modifies the behaviour of a field/query/mutation.
 
-<div class="alert alert--warning">If you want to create an annotation that targets a single argument (like <code>@AutoWire(for="$service")</code>),
-you should rather check the documentation about <a href="argument-resolving">custom argument resolving</a></div>
+<div class="alert alert--warning">
+    If you want to create an annotation that targets a single argument (like <code>@AutoWire(for="$service")</code>), you should rather check the documentation about <a href="argument-resolving">custom argument resolving</a>
+</div>
 
 ## Field middlewares
 
 GraphQLite is based on the Webonyx/Graphql-PHP library. In Webonyx, fields are represented by the `FieldDefinition` class.
 In order to create a `FieldDefinition` instance for your field, GraphQLite goes through a series of "middlewares".
 
-![](assets/field_middleware.svg)
+![](/img/field_middleware.svg)
 
 Each middleware is passed a `TheCodingMachine\GraphQLite\QueryFieldDescriptor` instance. This object contains all the
 parameters used to initialize the field (like the return type, the list of arguments, the resolver to be used, etc...)

@@ -20,7 +20,7 @@ module.exports={
         "docs": {
           "showLastUpdateAuthor": true,
           "showLastUpdateTime": true,
-          "editUrl": "https://github.com/thecodingmachine/graphqlite/edit/master/website/docs/",
+          "editUrl": "https://github.com/thecodingmachine/graphqlite/edit/master/website/",
           "path": "../website/docs",
           "remarkPlugins": [
             require('mdx-mermaid'),
@@ -48,7 +48,7 @@ module.exports={
     "navbar": {
       "title": "GraphQLite",
       "logo": {
-        "src": "img/graphqlite.svg"
+        "src": "/img/graphqlite.svg"
       },
       "style": "dark",
       "items": [
@@ -88,11 +88,11 @@ module.exports={
       "theme": require('prism-react-renderer/themes/oceanicNext'),
       "additionalLanguages": ['php']
     },
-    "image": "img/graphqlite.svg",
+    "image": "/img/graphqlite.svg",
     "footer": {
       "links": [],
       "logo": {
-        "src": "img/graphqlite.svg",
+        "src": "/img/graphqlite.svg",
         "href": 'https://github.com/thecodingmachine/graphqlite',
       }
     },

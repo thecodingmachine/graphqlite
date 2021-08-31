@@ -30,7 +30,7 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
 
 **Parameter middlewares**
 
-![](assets/parameter_middleware.svg)
+<img src="/img/parameter_middleware.svg" width="70%" />
 
 Each middleware is passed number of objects describing the parameter:
 

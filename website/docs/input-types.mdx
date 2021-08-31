@@ -125,7 +125,7 @@ Here is an example of factory:
   ]}>
   <TabItem value="php8">
 
-```
+```php
 class MyFactory
 {
     /**
@@ -142,7 +142,7 @@ class MyFactory
   </TabItem>
   <TabItem value="php7">
 
-```
+```php
 class MyFactory
 {
     /**
@@ -162,7 +162,7 @@ class MyFactory
 
 and now, you can run query like this:
 
-```
+```graphql
 query {
   getCities(location: {
               latitude: 45.0,
@@ -199,7 +199,7 @@ Given the factory below, the return type is "Location", therefore, the GraphQL i
   ]}>
   <TabItem value="php8">
 
-```
+```php
 #[Factory]
 public function createLocation(float $latitude, float $longitude): Location
 {
@@ -210,7 +210,7 @@ public function createLocation(float $latitude, float $longitude): Location
   </TabItem>
   <TabItem value="php7">
 
-```
+```php
 /**
  * @Factory()
  */
@@ -225,7 +225,7 @@ public function createLocation(float $latitude, float $longitude): Location
 
 In case you want to override the input type name, you can use the "name" attribute of the @Factory annotation:
 
-```
+```php
 /**
  * @Factory(name="MyNewInputName", default=true)
  */

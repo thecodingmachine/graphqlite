@@ -7,7 +7,7 @@ sidebar_label: Fine grained security
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-If the [`@Logged` and `@Right` annotations](authentication-authorization.md#logged-and-right-annotations) are not
+If the [`@Logged` and `@Right` annotations](authentication-authorization.mdxx#logged-and-right-annotations) are not
 granular enough for your needs, you can use the advanced `@Security` annotation.
 
 Using the `@Security` annotation, you can write an *expression* that can contain custom logic. For instance:
@@ -172,7 +172,6 @@ All parameters passed to the method can be accessed in the `@Security` expressio
   ]}>
   <TabItem value="php8">
 
-**PHP 7**
 ```php
 #[Query]
 #[Security(expression: "startDate < endDate", statusCode: 400, message: "End date must be after start date")]
@@ -283,7 +282,7 @@ public function getMargin(): float
   </TabItem>
 </Tabs>
 
-The `failWith` attribute behaves just like the [`@FailWith` annotation](authentication-authorization.md#not-throwing-errors)
+The `failWith` attribute behaves just like the [`@FailWith` annotation](authentication-authorization.mdxx#not-throwing-errors)
 but for a given `@Security` annotation.
 
 You cannot use the `failWith` attribute along `statusCode` or `message` attributes.

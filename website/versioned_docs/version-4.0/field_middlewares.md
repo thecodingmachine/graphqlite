@@ -17,7 +17,7 @@ you should rather check the documentation about <a href="argument-resolving">cus
 GraphQLite is based on the Webonyx/Graphql-PHP library. In Webonyx, fields are represented by the `FieldDefinition` class.
 In order to create a `FieldDefinition` instance for your field, GraphQLite goes through a series of "middlewares".
 
-![](assets/field_middleware.svg)
+![](/img/field_middleware.svg)
 
 Each middleware is passed a `TheCodingMachine\GraphQLite\QueryFieldDescriptor` instance. This object contains all the
 parameters used to initialize the field (like the return type, the list of arguments, the resolver to be used, etc...)

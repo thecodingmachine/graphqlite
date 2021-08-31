@@ -84,7 +84,7 @@ Of course, you need to use a GraphQL client that is compatible with multipart re
 
 The GraphQL client must send the file using the Upload type.
 
-```
+```graphql
 mutation upload($file: Upload!) {
     upload(file: $file)
 }

@@ -4,22 +4,22 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
-## 4.3
+## 4.3.0
 
-Breaking change:
+#### Breaking change:
 
 - The method `setAnnotationCacheDir($directory)` has been removed from the `SchemaFactory`.  The annotation
   cache will use your `Psr\SimpleCache\CacheInterface` compliant cache handler set through the `SchemaFactory`
   constructor.
 
-Minor changes:
+#### Minor changes:
 
 - Removed dependency for doctrine/cache and unified some of the cache layers following a PSR interface.
 - Cleaned up some of the documentation in an attempt to get things accurate with versioned releases.
 
-## 4.2
+## 4.2.0
 
-Breaking change:
+#### Breaking change:
 
 The method signature for `toGraphQLOutputType` and `toGraphQLInputType` have been changed to the following:
 
@@ -35,44 +35,44 @@ public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector
 public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType;
 ```
 
-New features:
+#### New features:
 
 - [@Input](annotations-reference.md#input-annotation) annotation is introduced as an alternative to `@Factory`. Now GraphQL input type can be created in the same manner as `@Type` in combination with `@Field` - [example](input-types.mdx#input-annotation).
 - New attributes has been added to [@Field](annotations-reference.md#field-annotation) annotation: `for`, `inputType` and `description`.
 - The following annotations now can be applied to class properties directly: `@Field`, `@Logged`, `@Right`, `@FailWith`, `@HideIfUnauthorized` and `@Security`.
 
-## 4.1
+## 4.1.0
 
-Breaking change:
+#### Breaking change:
 
 There is one breaking change introduced in the minor version (this was important to allow PHP 8 compatibility).
 
 - The **ecodev/graphql-upload** package (used to get support for file uploads in GraphQL input types) is now a "recommended" dependency only.
   If you are using GraphQL file uploads, you need to add `ecodev/graphql-upload` to your `composer.json`.
 
-New features:
+#### New features:
 
 - All annotations can now be accessed as PHP 8 attributes
 - The `@deprecated` annotation in your PHP code translates into deprecated fields in your GraphQL schema
 - You can now specify the GraphQL name of the Enum types you define
 - Added the possibility to inject pure Webonyx objects in GraphQLite schema
 
-Minor changes:
+#### Minor changes:
 
 - Migrated from `zend/diactoros` to `laminas/diactoros`
 - Making the annotation cache directory configurable
 
-Miscellaneous:
+#### Miscellaneous:
 
 - Migrated from Travis to Github actions
 
 
-## 4.0
+## 4.0.0
 
 This is a complete refactoring from 3.x. While existing annotations are kept compatible, the internals have completely
 changed.
 
-New features:
+#### New features:
 
 - You can directly [annotate a PHP interface with `@Type` to make it a GraphQL interface](inheritance-interfaces.mdx#mapping-interfaces)
 - You can autowire services in resolvers, thanks to the new `@Autowire` annotation
@@ -100,15 +100,15 @@ Many extension points have been added
 
 New framework specific features:
 
-Symfony:
+#### Symfony:
 
 - The Symfony bundle now provides a "login" and a "logout" mutation (and also a "me" query)
 
-Laravel:
+#### Laravel:
 
 - [Native integration with the Laravel paginator](laravel-package-advanced.mdx#support-for-pagination) has been added
 
-Internals:
+#### Internals:
 
 - The `FieldsBuilder` class has been split in many different services (`FieldsBuilder`, `TypeHandler`, and a
   chain of *root type mappers*)

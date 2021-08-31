@@ -13,6 +13,7 @@ or if you want to alter the way input types are imported (for instance if you wa
 As an example, GraphQLite uses *parameter middlewares* internally to:
 
 - Inject the Webonyx GraphQL resolution object when you type-hint on the `ResolveInfo` object. For instance:
+
   ```php
   /**
    * @return Product[]
@@ -20,6 +21,7 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
   #[Query]
   public function products(ResolveInfo $info): array
   ```
+  
   In the query above, the `$info` argument is filled with the Webonyx `ResolveInfo` class thanks to the
   [`ResolveInfoParameterHandler parameter middleware`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ResolveInfoParameterHandler.php)
 - Inject a service from the container when you use the `@Autowire` annotation
@@ -29,7 +31,7 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
 
 **Parameter middlewares**
 
-![](assets/parameter_middleware.svg)
+<img src="/img/parameter_middleware.svg" width="70%" />
 
 Each middleware is passed number of objects describing the parameter:
 

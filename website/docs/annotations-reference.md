@@ -5,7 +5,7 @@ sidebar_label: Annotations reference
 ---
 
 Note: all annotations are available both in a Doctrine annotation format (`@Query`) and in PHP 8 attribute format (`#[Query]`).
-See [Doctrine annotations vs PHP 8 attributes](doctrine-annotations-attributes.md) for more details.
+See [Doctrine annotations vs PHP 8 attributes](doctrine-annotations-attributes.mdx) for more details.
 
 ## @Query annotation
 
@@ -246,7 +246,7 @@ Attribute      | Compulsory | Type | Definition
 
 Sample:
 
-```
+```php
 @Validate(for="$email", rule="email|unique:users")
 ```
 

@@ -47,7 +47,7 @@ interface AuthorizationServiceInterface
 ```
 
 You need to write classes that implement these interfaces. Then, you must register those classes with GraphQLite.
-It you are [using the `SchemaFactory`](other-frameworks.md), you can register your classes using:
+It you are [using the `SchemaFactory`](other-frameworks.mdx), you can register your classes using:
 
 ```php
 // Configure an authentication service (to resolve the @Logged annotations).

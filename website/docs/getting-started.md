@@ -13,4 +13,4 @@ with container-interop/service-provider.
 - [Get started with Symfony](symfony-bundle.md)
 - [Get started with Laravel](laravel-package.md)
 - [Get started with a framework compatible with container-interop/service-provider](universal-service-providers.md)
-- [Get started with another framework (or no framework)](other-frameworks.md)
+- [Get started with another framework (or no framework)](other-frameworks.mdx)

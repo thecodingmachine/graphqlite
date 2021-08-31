@@ -4,14 +4,18 @@ title: Doctrine annotations VS PHP8 attributes
 sidebar_label: Annotations VS Attributes
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 GraphQLite is heavily relying on the concept of annotations (also called attributes in PHP 8+).
 
 ## Doctrine annotations
 
-<div class="alert alert--warning"><strong>Deprecated!</strong> Doctrine annotations are deprecated in favor of native PHP 8 attributes. Support will be dropped in GraphQLite 5.0</div>
+<div class="alert alert--warning">
+    <strong>Deprecated!</strong> Doctrine annotations are deprecated in favor of native PHP 8 attributes. Support will be dropped in a future release.
+</div>
 
-Historically, attributes were not available in PHP and PHP developers had to "trick" PHP to get annotation support.
-This was the purpose of the [doctrine/annotation](https://www.doctrine-project.org/projects/doctrine-annotations/en/latest/index.html) library.
+Historically, attributes were not available in PHP and PHP developers had to "trick" PHP to get annotation support.  This was the purpose of the [doctrine/annotation](https://www.doctrine-project.org/projects/doctrine-annotations/en/latest/index.html) library.
 
 Using Doctrine annotations, you write annotations in your docblocks:
 
@@ -32,16 +36,16 @@ Please note that:
 - The `Type` part is actually a class. It must be declared in the `use` statements at the top of your file.
 
 
-<div class="alert alert--info"><strong>Heads up!</strong>
-Some IDEs provide support for Doctrine annotations:
+<div class="alert alert--info">
+    <strong>Heads up!</strong>
+    <p>Some IDEs provide support for Doctrine annotations:</p>
+    <ul>
+        <li>PhpStorm via the <a href="PHP Annotations Plugin">https://plugins.jetbrains.com/plugin/7320-php-annotations</a></li>
+        <li>Eclipse via the <a href="Symfony2 Plugin">https://marketplace.eclipse.org/content/symfony-plugin</a></li>
+        <li>Netbeans has native support</li>
+    </ul>
 
-<ul>
-<li>PhpStorm via the <a href="PHP Annotations Plugin">https://plugins.jetbrains.com/plugin/7320-php-annotations</a></li>
-<li>Eclipse via the <a href="Symfony2 Plugin">https://marketplace.eclipse.org/content/symfony-plugin</a></li>
-<li>Netbeans has native support</li>
-</ul>
-
-We strongly recommend using an IDE that has Doctrine annotations support.
+    We strongly recommend using an IDE that has Doctrine annotations support.
 </div>
 
 ## PHP 8 attributes
@@ -72,8 +76,25 @@ A few notable differences:
 
 Let's take an example with the [`#Autowire` attribute](autowiring.mdx):
 
-**PHP 7+**
+<Tabs
+  defaultValue="php8"
+  values={[
+    {label: 'PHP 8', value: 'php8'},
+    {label: 'PHP 7', value: 'php7'},
+  ]}>
+  <TabItem value="php8">
+
+```php
+#[Field]
+public function getProduct(#[Autowire] ProductRepository $productRepository) : Product {
+    //...
+}
 ```
+
+  </TabItem>
+  <TabItem value="php7">
+
+```php
 /**
  * @Field
  * @Autowire(for="$productRepository")
@@ -83,10 +104,5 @@ public function getProduct(ProductRepository $productRepository) : Product {
 }
 ```
 
-**PHP 8**
-```
-#[Field]
-public function getProduct(#[Autowire] ProductRepository $productRepository) : Product {
-    //...
-}
-```
+  </TabItem>
+</Tabs>

@@ -145,7 +145,7 @@ Notice that:
 
 Once this is done, you can get plenty of useful information about this page:
 
-```
+```graphql
 products {
     items {      # The items for the selected page
         id
@@ -294,35 +294,35 @@ In short:
 <div class="alert alert--danger">
     This does not work:
 
-    ```php
-        class User extends Model
-        {
-            /**
-            * @Field
-            */
-            public function phone()
-            {
-                return $this->hasOne('App\Phone');
-            }
-        }
-    ```
+```php
+class User extends Model
+{
+    /**
+    * @Field
+    */
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}
+```
 
 </div>
 
 <div class="alert alert--success">
     This works:
 
-    ```php
-        /**
-        * @MagicField(name="phone", phpType="App\\Phone")
-        */
-        class User extends Model
-        {
-            public function phone()
-            {
-                return $this->hasOne('App\Phone');
-            }
-        }
-    ```
+```php
+/**
+ * @MagicField(name="phone", phpType="App\\Phone")
+ */
+class User extends Model
+{
+    public function phone()
+    {
+        return $this->hasOne('App\Phone');
+    }
+}
+```
 
 </div>

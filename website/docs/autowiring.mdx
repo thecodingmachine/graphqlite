@@ -101,7 +101,8 @@ with a particular service implementation. This makes your code tightly coupled a
 <div class="alert alert--danger">
 Please don't do that:
 
-<pre><code>    #[Field]
+<pre><code>
+    #[Field]
     public function getName(#[Autowire] MyTranslator $translator): string
     {
         // Your domain is suddenly tightly coupled to the MyTranslator class.
@@ -114,7 +115,8 @@ Instead, be sure to type-hint against an interface.
 <div class="alert alert--success">
 Do this instead:
 
-<pre><code>    #[Field]
+<pre><code>
+    #[Field]
     public function getName(#[Autowire] TranslatorInterface $translator): string
     {
         // Good. You can switch translator implementation any time.
