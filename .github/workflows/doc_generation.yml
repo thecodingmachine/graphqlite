@@ -2,6 +2,7 @@
 name: "Doc generation on master"
 
 on:
+  pull_request: ~
   push:
     branches:
       - master
