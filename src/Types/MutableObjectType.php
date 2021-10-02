@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ObjectType;
 
 /**
@@ -23,5 +24,20 @@ class MutableObjectType extends ObjectType implements MutableInterface
 
         parent::__construct($config);
         $this->className = $className;
+    }
+
+    public function findField(string $name): ?FieldDefinition
+    {
+        $field = parent::findField($name);
+        if ($field) {
+            return $field;
+        }
+
+        $fields = $this->getFields();
+        if (! isset($fields[$name])) {
+            return null;
+        }
+
+        return $fields[$name];
     }
 }
