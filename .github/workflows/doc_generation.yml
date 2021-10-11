@@ -1,5 +1,5 @@
 # Generate the complete documentation then upload to the website under the master section
-name: "Doc generation on master"
+name: "Doc generation"
 
 on:
   pull_request: ~
@@ -35,6 +35,7 @@ jobs:
         working-directory: "website"
 
       - name: "Deploy website"
+        if: "${{ github.event_name == 'push' || github.event_name == 'release' }}"
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
