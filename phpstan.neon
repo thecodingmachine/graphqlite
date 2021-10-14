@@ -24,9 +24,6 @@ parameters:
            message: '#Method TheCodingMachine\\GraphQLite\\Mappers\\StaticTypeMapper::castOutputTypeToMutable\(\) should return TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableInterfaceTypeAdapter\|TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\MutableObjectTypeAdapter but returns GraphQL\\Type\\Definition\\InterfaceType|GraphQL\\Type\\Definition\\ObjectType.#'
            path: src/Mappers/StaticTypeMapper.php
         -
-           message: '#Unreachable statement - code above always terminates.#'
-           path: src/Http/WebonyxGraphqlMiddleware.php
-        -
            message: '#Property TheCodingMachine\\GraphQLite\\Annotations\\Type::\$class \(class-string<object>\\|null\) does not accept string.#'
            path: src/Annotations/Type.php
         -
