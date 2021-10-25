@@ -1,7 +1,8 @@
 # Generate the complete documentation then upload to the website under the master section
-name: "Doc generation on master"
+name: "Doc generation"
 
 on:
+  pull_request: ~
   push:
     branches:
       - master
@@ -23,27 +24,21 @@ jobs:
       - name: "Setup NodeJS"
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
-
-#      - name: "Update git config"
-#        run: git config --global user.name "${GH_NAME}" && git config --global user.email "${GH_EMAIL}" && echo "machine github.com login ${GH_NAME} password ${GITHUB_TOKEN}" > ~/.netrc
+          node-version: '14.x'
 
       - name: "Yarn install"
         run: yarn install
         working-directory: "website"
-
-#      - name: "Push the new doc"
-#        run: GIT_USER="${{ github.actor }}" yarn run publish-gh-pages
-#        working-directory: "website"
 
       - name: "Yarn build"
         run: yarn run build
         working-directory: "website"
 
       - name: "Deploy website"
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        if: "${{ github.event_name == 'push' || github.event_name == 'release' }}"
+        uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: website/build/graphqlite # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages # The branch the action should deploy to.
+          folder: website/build # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch

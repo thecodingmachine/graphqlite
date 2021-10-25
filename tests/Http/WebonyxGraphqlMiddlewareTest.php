@@ -9,12 +9,11 @@ use GraphQL\Executor\Promise\Promise;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
-use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Response\TextResponse;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequest;
@@ -53,7 +52,7 @@ class WebonyxGraphqlMiddlewareTest extends TestCase
             /**
              * @return ExecutionResult|ExecutionResult[]|Promise
              */
-            public function executePsrRequest(ServerRequestInterface $request)
+            public function executePsrRequest( RequestInterface $request)
             {
                 return $this->executionResult;
             }

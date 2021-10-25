@@ -11,6 +11,7 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Upload\UploadType;
@@ -119,7 +120,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
      * Casts a Type to a GraphQL type.
      * Does not deal with nullable.
      *
-     * @return BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|null
+     * @return BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|ScalarType|null
      */
     private function mapBaseType(Type $type)
     {

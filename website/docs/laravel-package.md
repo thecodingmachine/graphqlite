@@ -21,7 +21,7 @@ $ composer require thecodingmachine/graphqlite-laravel
 If you want to publish the configuration (in order to edit it), run:
 
 ```console
-$ php artisan vendor:publish --provider=TheCodingMachine\GraphQLite\Laravel\Providers\GraphQLiteServiceProvider
+$ php artisan vendor:publish --provider="TheCodingMachine\GraphQLite\Laravel\Providers\GraphQLiteServiceProvider"
 ```
 
 You can then configure the library by editing `config/graphqlite.php`.

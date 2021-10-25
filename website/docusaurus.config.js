@@ -1,3 +1,6 @@
+const lightCodeTheme = require('prism-react-renderer/themes/github');
+const darkCodeTheme = require('prism-react-renderer/themes/oceanicNext');
+
 module.exports={
   "title": "GraphQLite",
   "tagline": "GraphQL in PHP made easy",
@@ -67,7 +70,8 @@ module.exports={
       ]
     },
     "prism": {
-      "theme": require('prism-react-renderer/themes/oceanicNext'),
+      "theme": lightCodeTheme,
+      "darkTheme": darkCodeTheme,
       "additionalLanguages": ['php']
     },
     "image": "/img/graphqlite.svg",
