@@ -1,0 +1,208 @@
+{
+  "version-5.0/docs": [
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Introduction",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/index"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Installation",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/getting-started"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/symfony-bundle"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/laravel-package"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/universal-service-providers"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/other-frameworks"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Usage",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/queries"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/mutations"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/type-mapping"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/autowiring"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/extend-type"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/external-type-declaration"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/input-types"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/inheritance-interfaces"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/error-handling"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/validation"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Security",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/authentication-authorization"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/fine-grained-security"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/implementing-security"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Performance",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/query-plan"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/prefetch-method"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Advanced",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/file-uploads"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/pagination"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/custom-types"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/field-middlewares"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/argument-resolving"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/extend-input-type"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/multiple-output-types"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/symfony-bundle-advanced"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/laravel-package-advanced"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/internals"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/troubleshooting"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/migrating"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "collapsed": true,
+      "collapsible": true,
+      "label": "Reference",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-5.0/doctrine-annotations-attributes"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/annotations-reference"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/semver"
+        },
+        {
+          "type": "doc",
+          "id": "version-5.0/changelog"
+        }
+      ]
+    }
+  ]
+}
