@@ -4,6 +4,12 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 5.0.0
+
+#### Dependencies:
+
+- Upgraded to using version 14.9 of [webonyx/graphal-php](https://github.com/webonyx/graphql-php)
+
 ## 4.3.0
 
 #### Breaking change:
