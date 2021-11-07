@@ -581,7 +581,7 @@ class FieldsBuilder
 
             if (! $sourceField->shouldFetchFromMagicProperty()) {
                 try {
-                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
+                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getSourceName() ?? $sourceField->getName());
                 } catch (FieldNotFoundException $e) {
                     throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
                 }
@@ -613,7 +613,7 @@ class FieldsBuilder
                     $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
             } else {
-                $fieldDescriptor->setMagicProperty($sourceField->getName());
+                $fieldDescriptor->setMagicProperty($sourceField->getSourceName() ?? $sourceField->getName());
                 $fieldDescriptor->setComment($sourceField->getDescription());
 
                 $outputType = $sourceField->getOutputType();

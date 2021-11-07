@@ -37,6 +37,9 @@ class MagicField implements SourceFieldInterface
     /** @var string|null */
     private $description;
 
+    /** @var string|null */
+    private $sourceName;
+
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
 
@@ -46,12 +49,13 @@ class MagicField implements SourceFieldInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null, ?string $description = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null, ?string $description = null, ?string $sourceName = null)
     {
         $this->name = $attributes['name'] ?? $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
         $this->phpType = $attributes['phpType'] ?? $phpType ?? null;
         $this->description = $attributes['description'] ?? $description ?? null;
+        $this->sourceName = $attributes['sourceName'] ?? $sourceName ?? null;
 
         if (! $this->name || (! $this->outputType && ! $this->phpType)) {
             throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type or a php type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
@@ -112,6 +116,14 @@ class MagicField implements SourceFieldInterface
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /**
+     * Returns the property name in the source class
+     */
+    public function getSourceName(): ?string
+    {
+        return $this->sourceName;
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

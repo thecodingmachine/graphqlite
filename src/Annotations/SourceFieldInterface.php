@@ -31,6 +31,11 @@ interface SourceFieldInterface
      */
     public function getDescription(): ?string;
 
+    /**
+     * Returns the property name in the source class
+     */
+    public function getSourceName(): ?string;
+
     public function getMiddlewareAnnotations(): MiddlewareAnnotations;
 
     /**

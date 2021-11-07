@@ -54,6 +54,8 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -805,5 +807,27 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));
 
         $this->assertSame('foo', $result);
+    }
+
+    public function testSourceNameInSourceAndMagicFields(): void
+    {
+        $controller = new TestSourceNameType();
+        $queryProvider = $this->buildFieldsBuilder();
+        $fields = $queryProvider->getFields($controller);
+        $source = new TestSourceName('foo value', 'bar value');
+
+        $this->assertCount(2, $fields);
+
+        $query = $fields['foo2'];
+        $this->assertSame('foo2', $query->name);
+        $resolve = $query->resolveFn;
+        $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
+        $this->assertSame('foo value', $result);
+
+        $query = $fields['bar2'];
+        $this->assertSame('bar2', $query->name);
+        $resolve = $query->resolveFn;
+        $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
+        $this->assertSame('bar value', $result);
     }
 }
