@@ -50,6 +50,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
@@ -785,5 +786,22 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(MissingMagicGetException::class);
         $this->expectExceptionMessage('You cannot use a @MagicField annotation on an object that does not implement the __get() magic method. The class stdClass must implement a __get() method.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
+    }
+
+    public function testProxyClassWithMagicPropertyOfPhpType(): void
+    {
+        $controller = new TestTypeWithMagicPropertyType();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getFields($controller);
+
+        $query = $fields['foo'];
+        $this->assertSame('foo', $query->name);
+
+        $resolve = $query->resolveFn;
+        $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));
+
+        $this->assertSame('foo', $result);
     }
 }
