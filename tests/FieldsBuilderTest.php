@@ -253,6 +253,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $fields['sibling']->getType()->getWrappedType());
         $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
         $this->assertSame('This is a test summary', $fields['test']->description);
+        $this->assertSame('Test SourceField description', $fields['sibling']->description);
     }
 
     public function testSourceFieldOnSelfType(): void
@@ -777,6 +778,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(1, $fields);
         $query = $fields['foo'];
         $this->assertSame('foo', $query->name);
+        $this->assertSame('Test MagicField description', $query->description);
 
         $resolve = $query->resolveFn;
         $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));

@@ -34,6 +34,9 @@ class SourceField implements SourceFieldInterface
     /** @var string|null */
     private $phpType;
 
+    /** @var string|null */
+    private $description;
+
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
 
@@ -43,7 +46,7 @@ class SourceField implements SourceFieldInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null, ?string $description = null)
     {
         $name = $name ?? $attributes['name'] ?? null;
         if ($name === null) {
@@ -53,6 +56,8 @@ class SourceField implements SourceFieldInterface
 
         $this->outputType = $outputType ?? $attributes['outputType'] ?? null;
         $this->phpType = $phpType ?? $attributes['phpType'] ?? null;
+        $this->description = $description ?? $attributes['description'] ?? null;
+
         if ($this->outputType && $this->phpType) {
             throw new BadMethodCallException('In a @SourceField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@SourceField(name=\'phone\', outputType=\'String!\')" or "@SourceField(name=\'phone\', phpType=\'string\')"');
         }
@@ -97,6 +102,14 @@ class SourceField implements SourceFieldInterface
     public function getPhpType(): ?string
     {
         return $this->phpType;
+    }
+
+    /**
+     * Returns the description of the GraphQL query/mutation/field.
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

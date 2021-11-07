@@ -597,7 +597,8 @@ class FieldsBuilder
                     $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
                 }
 
-                $fieldDescriptor->setComment($docBlockComment);
+                $description = $sourceField->getDescription() ?? $docBlockComment;
+                $fieldDescriptor->setComment($description);
                 $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
 
                 $fieldDescriptor->setParameters($args);
@@ -613,6 +614,8 @@ class FieldsBuilder
                 }
             } else {
                 $fieldDescriptor->setMagicProperty($sourceField->getName());
+                $fieldDescriptor->setComment($sourceField->getDescription());
+
                 $outputType = $sourceField->getOutputType();
                 if ($outputType !== null) {
                     $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
