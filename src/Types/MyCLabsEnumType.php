@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Type\Definition\EnumType;
 use InvalidArgumentException;
 use MyCLabs\Enum\Enum;
+use UnexpectedValueException;
 
 /**
  * An extension of the EnumType to support Myclabs enum.
@@ -16,6 +17,9 @@ use MyCLabs\Enum\Enum;
  */
 class MyCLabsEnumType extends EnumType
 {
+    /** @var string|Enum $enumClassName */
+    private $enumClassName;
+
     public function __construct(string $enumClassName, string $typeName)
     {
         $consts         = $enumClassName::toArray();
@@ -23,6 +27,8 @@ class MyCLabsEnumType extends EnumType
         foreach ($consts as $key => $value) {
             $constInstances[$key] = ['value' => $enumClassName::$key()];
         }
+
+        $this->enumClassName = $enumClassName;
 
         parent::__construct([
             'name' => $typeName,
@@ -38,8 +44,14 @@ class MyCLabsEnumType extends EnumType
     public function serialize($value)
     {
         if (! $value instanceof Enum) {
-            throw new InvalidArgumentException('Expected a Myclabs Enum instance');
+            try {
+                $enumClassName = $this->enumClassName;
+                $value = new $enumClassName($value);
+            } catch (UnexpectedValueException $exception) {
+                throw new InvalidArgumentException('Expected a Myclabs Enum instance', 0, $exception);
+            }
         }
+
         return $value->getKey();
     }
 }

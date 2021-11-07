@@ -11,6 +11,9 @@ use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Utils\Utils;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use Throwable;
+
+use function is_string;
 
 class DateTimeType extends ScalarType
 {
@@ -28,10 +31,10 @@ class DateTimeType extends ScalarType
         if (is_string($value)) {
             try {
                 $value = new DateTimeImmutable($value);
-            } catch (\Throwable $throwable) {
+            } catch (Throwable $throwable) {
                 throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value), 0, $throwable);
             }
-        } else if (! $value instanceof DateTimeImmutable) {
+        } elseif (! $value instanceof DateTimeImmutable) {
             throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value));
         }
 
