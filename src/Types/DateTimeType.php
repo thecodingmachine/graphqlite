@@ -25,7 +25,13 @@ class DateTimeType extends ScalarType
      */
     public function serialize($value): string
     {
-        if (! $value instanceof DateTimeImmutable) {
+        if (is_string($value)) {
+            try {
+                $value = new DateTimeImmutable($value);
+            } catch (\Throwable $throwable) {
+                throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value), 0, $throwable);
+            }
+        } else if (! $value instanceof DateTimeImmutable) {
             throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value));
         }
 

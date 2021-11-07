@@ -16,6 +16,7 @@ class DateTimeTypeTest extends TestCase
         $dateTimeType = new DateTimeType();
 
         $this->assertSame('2019-05-05T10:10:10+00:00', $dateTimeType->serialize(new DateTimeImmutable('2019-05-05T10:10:10+00:00')));
+        $this->assertSame('2021-11-01T10:00:00+00:00', $dateTimeType->serialize('2021-11-01 10:00:00'));
 
         $this->expectException(InvariantViolation::class);
         $dateTimeType->serialize('foo');
