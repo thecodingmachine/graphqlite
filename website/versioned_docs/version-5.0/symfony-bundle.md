@@ -66,7 +66,7 @@ Now, enable the "graphql/" route by editing the `config/routes.yaml` file:
 ```yaml title="config/routes.yaml"
 # Add these 2 lines to config/routes.yaml
 graphqlite_bundle:
-  resource: '@GraphqliteBundle/Resources/config/routes.xml'
+  resource: '@GraphQLiteBundle/Resources/config/routes.xml'
 ```
 
 Last but not least, create the configuration file at `config/packages/graphqlite.yaml`:
