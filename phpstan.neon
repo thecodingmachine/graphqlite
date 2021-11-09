@@ -6,6 +6,7 @@ parameters:
         - src
     level: max
     checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
         - "#Parameter .* of class ReflectionMethod constructor expects string(\\|null)?, object\\|string given.#"
