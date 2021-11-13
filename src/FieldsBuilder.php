@@ -581,7 +581,7 @@ class FieldsBuilder
 
             if (! $sourceField->shouldFetchFromMagicProperty()) {
                 try {
-                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
+                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getSourceName() ?? $sourceField->getName());
                 } catch (FieldNotFoundException $e) {
                     throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
                 }
@@ -597,7 +597,8 @@ class FieldsBuilder
                     $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
                 }
 
-                $fieldDescriptor->setComment($docBlockComment);
+                $description = $sourceField->getDescription() ?? $docBlockComment;
+                $fieldDescriptor->setComment($description);
                 $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
 
                 $fieldDescriptor->setParameters($args);
@@ -612,7 +613,9 @@ class FieldsBuilder
                     $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
             } else {
-                $fieldDescriptor->setMagicProperty($sourceField->getName());
+                $fieldDescriptor->setMagicProperty($sourceField->getSourceName() ?? $sourceField->getName());
+                $fieldDescriptor->setComment($sourceField->getDescription());
+
                 $outputType = $sourceField->getOutputType();
                 if ($outputType !== null) {
                     $type = $this->resolveOutputType($outputType, $refClass, $sourceField);

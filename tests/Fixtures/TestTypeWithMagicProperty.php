@@ -11,7 +11,7 @@ use TheCodingMachine\GraphQLite\FromSourceFieldsInterface;
 
 /**
  * @Type()
- * @MagicField(name="foo", outputType="String!")
+ * @MagicField(name="foo", outputType="String!", description="Test MagicField description")
  */
 class TestTypeWithMagicProperty
 {

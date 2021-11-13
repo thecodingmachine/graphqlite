@@ -96,6 +96,8 @@ Attribute      | Compulsory | Type | Definition
 name           | *yes*       | string | The name of the field.
 [outputType](custom-types.mdx)     | *no*       | string | Forces the GraphQL output type of the field. Otherwise, return type is used.
 phpType        | *no*       | string | The PHP type of the field (as you would write it in a Docblock)
+description    | *no*       | string | Field description displayed in the GraphQL docs. If it's empty PHP doc comment of the method in the source class is used instead.
+sourceName     | *no*       | string | The name of the property in the source class. If not set, the `name` will be used to get property value.
 annotations    | *no*       | array\<Annotations\>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here. Available in Doctrine annotations only (not available in the #SourceField PHP 8 attribute)
 
 **Note**: `outputType` and `phpType` are mutually exclusive.
@@ -111,6 +113,8 @@ Attribute      | Compulsory | Type | Definition
 name           | *yes*       | string | The name of the field.
 [outputType](custom-types.mdx)  | *no*(*)       | string | The GraphQL output type of the field.
 phpType     | *no*(*)       | string | The PHP type of the field (as you would write it in a Docblock)
+description    | *no*       | string | Field description displayed in the GraphQL docs. If not set, no description will be shown.
+sourceName     | *no*       | string | The name of the property in the source class. If not set, the `name` will be used to get property value.
 annotations    | *no*       | array\<Annotations\>  | A set of annotations that apply to this field. You would typically used a "@Logged" or "@Right" annotation here. Available in Doctrine annotations only (not available in the #MagicField PHP 8 attribute)
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
