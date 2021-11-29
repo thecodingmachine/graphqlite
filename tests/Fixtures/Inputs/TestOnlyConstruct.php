@@ -24,10 +24,17 @@ class TestOnlyConstruct
      */
     private $bar;
 
-    public function __construct(string $foo, int $bar = 100)
+    /**
+     * @Field()
+     * @var bool
+     */
+    private $baz;
+
+    public function __construct(string $foo, bool  $baz, int $bar = 100)
     {
         $this->foo = $foo;
         $this->bar = $bar;
+        $this->baz = $baz;
     }
 
     public function setFoo(string $foo): void
@@ -36,6 +43,11 @@ class TestOnlyConstruct
     }
 
     public function setBar(int $bar): void
+    {
+        throw new Exception('This should not be called!');
+    }
+    
+    public function setBaz(bool $baz): void
     {
         throw new Exception('This should not be called!');
     }
@@ -48,5 +60,10 @@ class TestOnlyConstruct
     public function getBar(): int
     {
         return $this->bar;
+    }
+
+    public function getBaz(): bool
+    {
+        return $this->baz;
     }
 }
