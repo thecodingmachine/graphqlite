@@ -121,6 +121,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $input = new InputType(TestOnlyConstruct::class, 'TestOnlyConstructInput', null, false, $this->getFieldsBuilder());
 
         $args = [
+            'baz' => false,
             'foo' => 'Foo',
             'bar' => 200,
         ];
@@ -130,6 +131,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         /** @var TestOnlyConstruct $result */
         $result = $input->resolve(null, $args, [], $resolveInfo);
 
+        $this->assertEquals(false, $result->getBaz());
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
     }
