@@ -50,9 +50,12 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -252,6 +255,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $fields['sibling']->getType()->getWrappedType());
         $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
         $this->assertSame('This is a test summary', $fields['test']->description);
+        $this->assertSame('Test SourceField description', $fields['sibling']->description);
     }
 
     public function testSourceFieldOnSelfType(): void
@@ -776,6 +780,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(1, $fields);
         $query = $fields['foo'];
         $this->assertSame('foo', $query->name);
+        $this->assertSame('Test MagicField description', $query->description);
 
         $resolve = $query->resolveFn;
         $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));
@@ -785,5 +790,44 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(MissingMagicGetException::class);
         $this->expectExceptionMessage('You cannot use a @MagicField annotation on an object that does not implement the __get() magic method. The class stdClass must implement a __get() method.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
+    }
+
+    public function testProxyClassWithMagicPropertyOfPhpType(): void
+    {
+        $controller = new TestTypeWithMagicPropertyType();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getFields($controller);
+
+        $query = $fields['foo'];
+        $this->assertSame('foo', $query->name);
+
+        $resolve = $query->resolveFn;
+        $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));
+
+        $this->assertSame('foo', $result);
+    }
+
+    public function testSourceNameInSourceAndMagicFields(): void
+    {
+        $controller = new TestSourceNameType();
+        $queryProvider = $this->buildFieldsBuilder();
+        $fields = $queryProvider->getFields($controller);
+        $source = new TestSourceName('foo value', 'bar value');
+
+        $this->assertCount(2, $fields);
+
+        $query = $fields['foo2'];
+        $this->assertSame('foo2', $query->name);
+        $resolve = $query->resolveFn;
+        $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
+        $this->assertSame('foo value', $result);
+
+        $query = $fields['bar2'];
+        $this->assertSame('bar2', $query->name);
+        $resolve = $query->resolveFn;
+        $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
+        $this->assertSame('bar value', $result);
     }
 }

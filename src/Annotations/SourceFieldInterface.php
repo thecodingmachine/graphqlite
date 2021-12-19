@@ -26,6 +26,16 @@ interface SourceFieldInterface
      */
     public function getPhpType(): ?string;
 
+    /**
+     * Returns the description of the GraphQL query/mutation/field.
+     */
+    public function getDescription(): ?string;
+
+    /**
+     * Returns the property name in the source class
+     */
+    public function getSourceName(): ?string;
+
     public function getMiddlewareAnnotations(): MiddlewareAnnotations;
 
     /**

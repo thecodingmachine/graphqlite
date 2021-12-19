@@ -8,7 +8,7 @@ sidebar_label: Changelog
 
 #### Dependencies:
 
-- Upgraded to using version 14.9 of [webonyx/graphal-php](https://github.com/webonyx/graphql-php)
+- Upgraded to using version 14.9 of [webonyx/graphql-php](https://github.com/webonyx/graphql-php)
 
 ## 4.3.0
 

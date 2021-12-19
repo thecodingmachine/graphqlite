@@ -134,6 +134,8 @@ By doing so, you let GraphQLite know that the type exposes the `getName` method 
 
 Internally, GraphQLite will look for methods named `name()`, `getName()` and `isName()`).
 
+You can set different name to look for with `sourceName` attribute.
+
 ## `@MagicField` annotation
 
 If your object has no getters, but instead uses magic properties (using the magic `__get` method), you should use the `@MagicField` annotation:
@@ -187,6 +189,8 @@ class ProductType
 </Tabs>
 
 By doing so, you let GraphQLite know that the type exposes "name" and the "price" magic properties of the underlying `Product` object.
+
+You can set different name to look for with `sourceName` attribute.
 
 This is particularly useful in frameworks like Laravel, where Eloquent is making a very wide use of such properties.
 

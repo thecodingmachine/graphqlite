@@ -32,6 +32,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -580,7 +581,7 @@ class FieldsBuilder
 
             if (! $sourceField->shouldFetchFromMagicProperty()) {
                 try {
-                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getName());
+                    $refMethod = $this->getMethodFromPropertyName($objectRefClass, $sourceField->getSourceName() ?? $sourceField->getName());
                 } catch (FieldNotFoundException $e) {
                     throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
                 }
@@ -596,7 +597,8 @@ class FieldsBuilder
                     $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
                 }
 
-                $fieldDescriptor->setComment($docBlockComment);
+                $description = $sourceField->getDescription() ?? $docBlockComment;
+                $fieldDescriptor->setComment($description);
                 $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
 
                 $fieldDescriptor->setParameters($args);
@@ -611,15 +613,18 @@ class FieldsBuilder
                     $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
             } else {
-                $fieldDescriptor->setMagicProperty($sourceField->getName());
+                $fieldDescriptor->setMagicProperty($sourceField->getSourceName() ?? $sourceField->getName());
+                $fieldDescriptor->setComment($sourceField->getDescription());
+
                 $outputType = $sourceField->getOutputType();
                 if ($outputType !== null) {
                     $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
                 } else {
                     $phpTypeStr = $sourceField->getPhpType();
                     Assert::notNull($phpTypeStr);
-                    $refMethod = $refClass->getMethod('__get');
-                    $type = $this->resolvePhpType($phpTypeStr, $refClass, $refMethod);
+                    $magicGefRefMethod = $this->getMagicGetMethodFromSourceClassOrProxy($refClass);
+
+                    $type = $this->resolvePhpType($phpTypeStr, $refClass, $magicGefRefMethod);
                 }
             }
 
@@ -642,6 +647,32 @@ class FieldsBuilder
         }
 
         return $queryList;
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws MissingAnnotationException
+     * @throws MissingMagicGetException
+     */
+    private function getMagicGetMethodFromSourceClassOrProxy(ReflectionClass $proxyRefClass): ReflectionMethod
+    {
+        $magicGet = '__get';
+        if ($proxyRefClass->hasMethod($magicGet)) {
+            return $proxyRefClass->getMethod($magicGet);
+        }
+
+        $typeField = $this->annotationReader->getTypeAnnotation($proxyRefClass);
+        if ($typeField === null) {
+            throw MissingAnnotationException::missingTypeException($proxyRefClass->getName());
+        }
+
+        $sourceClassName = $typeField->getClass();
+        $sourceRefClass = new ReflectionClass($sourceClassName);
+        if (! $sourceRefClass->hasMethod($magicGet)) {
+            throw MissingMagicGetException::cannotFindMagicGet($sourceClassName);
+        }
+
+        return $sourceRefClass->getMethod($magicGet);
     }
 
     /**

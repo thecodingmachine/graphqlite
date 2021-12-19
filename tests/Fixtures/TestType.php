@@ -15,7 +15,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  * @SourceField(name="test")
  * @SourceField(name="testBool", annotations={@Logged, @HideIfUnauthorized})
  * @SourceField(name="testRight", annotations={@Right(name="FOOBAR"), @HideIfUnauthorized})
- * @SourceField(name="sibling")
+ * @SourceField(name="sibling", description="Test SourceField description")
  */
 class TestType
 {
