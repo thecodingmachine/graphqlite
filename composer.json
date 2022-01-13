@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.4",
         "ext-json": "*",
         "doctrine/annotations": "^1.13",
         "composer/package-versions-deprecated": "^1.8",
@@ -66,6 +66,13 @@
     "extra": {
         "branch-alias": {
             "dev-master": "5.0.x-dev"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
         }
     }
 }
