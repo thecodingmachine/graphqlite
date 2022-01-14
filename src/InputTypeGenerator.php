@@ -9,6 +9,7 @@ use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Types\InputType;
+use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use Webmozart\Assert\Assert;
@@ -28,13 +29,17 @@ class InputTypeGenerator
     private $inputTypeUtils;
     /** @var FieldsBuilder */
     private $fieldsBuilder;
+    /** @var InputTypeValidatorInterface|null */
+    private $inputTypeValidator;
 
     public function __construct(
         InputTypeUtils $inputTypeUtils,
-        FieldsBuilder $fieldsBuilder
+        FieldsBuilder $fieldsBuilder,
+        ?InputTypeValidatorInterface $inputTypeValidator = null
     ) {
         $this->inputTypeUtils = $inputTypeUtils;
         $this->fieldsBuilder  = $fieldsBuilder;
+        $this->inputTypeValidator = $inputTypeValidator;
     }
 
     public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): ResolvableMutableInputObjectType
@@ -63,7 +68,14 @@ class InputTypeGenerator
     public function mapInput(string $className, string $inputName, ?string $description, bool $isUpdate): InputType
     {
         if (! isset($this->inputCache[$inputName])) {
-            $this->inputCache[$inputName] = new InputType($className, $inputName, $description, $isUpdate, $this->fieldsBuilder);
+            $this->inputCache[$inputName] = new InputType(
+                $className,
+                $inputName,
+                $description,
+                $isUpdate,
+                $this->fieldsBuilder,
+                $this->inputTypeValidator
+            );
         }
 
         return $this->inputCache[$inputName];

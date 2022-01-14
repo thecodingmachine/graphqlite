@@ -47,6 +47,7 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
@@ -63,48 +64,61 @@ use function substr;
  */
 class SchemaFactory
 {
+
     public const GLOB_CACHE_SECONDS = 2;
 
+
     /** @var string[] */
-    private $controllerNamespaces = [];
+    private array $controllerNamespaces = [];
+
     /** @var string[] */
-    private $typeNamespaces = [];
+    private array $typeNamespaces = [];
+
     /** @var QueryProviderInterface[] */
-    private $queryProviders = [];
+    private array $queryProviders = [];
+
     /** @var QueryProviderFactoryInterface[] */
-    private $queryProviderFactories = [];
+    private array $queryProviderFactories = [];
+
     /** @var RootTypeMapperFactoryInterface[] */
-    private $rootTypeMapperFactories = [];
+    private array $rootTypeMapperFactories = [];
+
     /** @var TypeMapperInterface[] */
-    private $typeMappers = [];
+    private array $typeMappers = [];
+
     /** @var TypeMapperFactoryInterface[] */
-    private $typeMapperFactories = [];
+    private array $typeMapperFactories = [];
+
     /** @var ParameterMiddlewareInterface[] */
-    private $parameterMiddlewares = [];
-    /** @var Reader */
-    private $doctrineAnnotationReader;
-    /** @var AuthenticationServiceInterface|null */
-    private $authenticationService;
-    /** @var AuthorizationServiceInterface|null */
-    private $authorizationService;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var NamingStrategyInterface|null */
-    private $namingStrategy;
-    /** @var ContainerInterface */
-    private $container;
-    /** @var ClassNameMapper */
-    private $classNameMapper;
-    /** @var SchemaConfig */
-    private $schemaConfig;
-    /** @var int|null */
-    private $globTTL = self::GLOB_CACHE_SECONDS;
+    private array $parameterMiddlewares = [];
+
+    private ?Reader $doctrineAnnotationReader = null;
+
+    private ?AuthenticationServiceInterface $authenticationService = null;
+
+    private ?AuthorizationServiceInterface $authorizationService = null;
+
+    private ?InputTypeValidatorInterface $inputTypeValidator = null;
+
+    private CacheInterface $cache;
+
+    private ?NamingStrategyInterface $namingStrategy = null;
+
+    private ContainerInterface $container;
+
+    private ?ClassNameMapper $classNameMapper = null;
+
+    private ?SchemaConfig $schemaConfig = null;
+
+    private ?int $globTTL = self::GLOB_CACHE_SECONDS;
+
     /** @var array<int, FieldMiddlewareInterface> */
-    private $fieldMiddlewares = [];
-    /** @var ExpressionLanguage|null */
-    private $expressionLanguage;
-    /** @var string */
-    private $cacheNamespace;
+    private array $fieldMiddlewares = [];
+
+    private ?ExpressionLanguage $expressionLanguage = null;
+
+    private string $cacheNamespace;
+
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -229,6 +243,14 @@ class SchemaFactory
         return $this;
     }
 
+    public function setInputTypeValidator(?InputTypeValidatorInterface $inputTypeValidator): self
+    {
+        $this->inputTypeValidator = $inputTypeValidator;
+
+        return $this;
+    }
+
+
     public function setNamingStrategy(NamingStrategyInterface $namingStrategy): self
     {
         $this->namingStrategy = $namingStrategy;
@@ -305,20 +327,21 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $symfonyCache          = new Psr16Adapter($this->cache, $this->cacheNamespace);
-        $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
-        $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
-        $authorizationService  = $this->authorizationService ?: new FailAuthorizationService();
-        $typeResolver          = new TypeResolver();
-        $namespacedCache       = new NamespacedCache($this->cache);
-        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
-        $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
-        $typeRegistry          = new TypeRegistry();
+        $symfonyCache           = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $annotationReader       = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
+        $authenticationService  = $this->authenticationService ?: new FailAuthenticationService();
+        $authorizationService   = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver           = new TypeResolver();
+        $namespacedCache        = new NamespacedCache($this->cache);
+        $cachedDocBlockFactory  = new CachedDocBlockFactory($namespacedCache);
+        $namingStrategy         = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry           = new TypeRegistry();
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
-        $nsList = array_map(static function (string $namespace) use ($namespaceFactory) {
-            return $namespaceFactory->createNamespace($namespace);
-        }, $this->typeNamespaces);
+        $nsList = array_map(
+            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
+            $this->typeNamespaces
+        );
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
@@ -389,7 +412,7 @@ class SchemaFactory
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
         $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
         if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
             throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
@@ -406,6 +429,7 @@ class SchemaFactory
                 $namingStrategy,
                 $recursiveTypeMapper,
                 $namespacedCache,
+                $this->inputTypeValidator,
                 $this->globTTL
             ));
         }
@@ -426,6 +450,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
+                $this->inputTypeValidator,
                 $this->globTTL
             );
         }
