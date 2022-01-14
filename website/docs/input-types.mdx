@@ -204,7 +204,8 @@ There are some important things to notice:
   - Via constructor if corresponding properties are mentioned as parameters with the same names - exactly as in the example above.
   - If properties are public, they will be just set without any additional effort - no constructor required.
   - For private or protected properties implemented, a public setter is required (if they are not set via the constructor). For example `setLatitude(float $latitude)`.
-  - For validation of these Input Types, see the [Custom InputType Validation section](validation#custom-inputtype-validation).
+- For validation of these Input Types, see the [Custom InputType Validation section](validation#custom-inputtype-validation).
+- We advise using the `#[Input]` attribute on DTO style input type objects and not directly on your model objects.  Using it on your model objects can cause coupling in undesirable ways.
 
 ### Multiple Input Types from the same class
 
