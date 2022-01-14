@@ -40,7 +40,7 @@
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^0.12.94",
         "phpstan/phpstan-webmozart-assert": "^0.12.15",
-        "phpunit/phpunit": "^9.3",
+        "phpunit/phpunit": "^8.5.19||^9.5.8",
         "thecodingmachine/phpstan-strict-rules": "^0.12.1"
     },
     "suggest": {
