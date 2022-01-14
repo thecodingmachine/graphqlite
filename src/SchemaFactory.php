@@ -429,7 +429,6 @@ class SchemaFactory
                 $namingStrategy,
                 $recursiveTypeMapper,
                 $namespacedCache,
-                $this->inputTypeValidator,
                 $this->globTTL
             ));
         }
