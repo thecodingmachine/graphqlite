@@ -280,7 +280,7 @@ interface InputTypeValidatorInterface
 
 The interface is quite simple.  Handle all of your own validation logic in the `validate` method.  For example, you might use Symfony's annotation based validation in addition to some other custom validation logic.  It's really up to you on how you wish to handle your own validation.  The `validate` method will receive the input type object populated with the user input.
 
-You'll notice that the `validate` method has a `void` return.  The purpose here is to encourage you to throw an Exception or handle validation output however you best see fit.  GraphQLite does it's best to stay out of your way and doesn't make attempts to handle validation output.  You can, however, throw an instance of `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` or `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` as usual (see [Error Handling](error-handling) for more details).
+You'll notice that the `validate` method has a `void` return.  The purpose here is to encourage you to throw an Exception or handle validation output however you best see fit.  GraphQLite does it's best to stay out of your way and doesn't make attempts to handle validation output.  You can, however, throw an instance of `TheCodingMachine\GraphQLite\Exceptions\GraphQLException` or `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` as usual (see [Error Handling](error-handling) for more details).
 
 Also available is the `isEnabled` method.  This method is checked before executing validation on an InputType being resolved.  You can work out your own logic to selectively enable or disable validation through this method.  In most cases, you can simply return `true` to keep it always enabled.
 
