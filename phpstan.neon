@@ -4,6 +4,10 @@ parameters:
     tmpDir: .phpstan-cache
     paths:
         - src
+    excludePaths:
+         # TODO: exlude only for PHP < 8.1
+        - src/Mappers/Root/EnumTypeMapper.php
+        - src/Types/EnumType.php
     level: max
     checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: false
