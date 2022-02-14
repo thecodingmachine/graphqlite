@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         install-args: ['', '--prefer-lowest']
-        php-version: ['7.2', '7.3', '7.4', '8.0']
+        php-version: ['7.2', '7.3', '7.4', '8.0', '8.1']
       fail-fast: false
 
     steps:
