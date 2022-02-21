@@ -36,7 +36,7 @@ jobs:
 
       - name: "Deploy website"
         if: "${{ github.event_name == 'push' || github.event_name == 'release' }}"
-        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages # The branch the action should deploy to.
