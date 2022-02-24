@@ -45,11 +45,14 @@ class Type
      */
     private $selfType = false;
 
+    /** @var bool */
+    private $useEnumValues = false;
+
     /**
      * @param mixed[] $attributes
      * @param class-string<object>|null $class
      */
-    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?bool $external = null)
+    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?bool $external = null, ?bool $useEnumValues = null)
     {
         $external = $external ?? $attributes['external'] ?? null;
         $class = $class ?? $attributes['class'] ?? null;
@@ -69,6 +72,8 @@ class Type
         }
 
         $this->selfType = ! $external;
+
+        $this->useEnumValues = $useEnumValues ?? $attributes['useEnumValues'] ?? false;
     }
 
     /**
@@ -122,5 +127,13 @@ class Type
     public function isDefault(): bool
     {
         return $this->default;
+    }
+
+    /**
+     * Returns true if this enum type
+     */
+    public function useEnumValues(): bool
+    {
+        return $this->useEnumValues;
     }
 }

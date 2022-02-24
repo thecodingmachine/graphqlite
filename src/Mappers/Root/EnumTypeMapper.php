@@ -122,12 +122,12 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
         $reflectionEnum = new ReflectionEnum($enumClass);
 
-        $typeAnnotation = $this->annotationReader->getEnumTypeAnnotation($reflectionEnum);
+        $typeAnnotation = $this->annotationReader->getTypeAnnotation($reflectionEnum);
         $typeName = ($typeAnnotation !== null ? $typeAnnotation->getName() : null) ?? $reflectionEnum->getShortName();
 
         // Expose values instead of names if specifically configured to and if enum is string-backed
         $useValues = $typeAnnotation !== null &&
-            $typeAnnotation->useValues() &&
+            $typeAnnotation->useEnumValues() &&
             $reflectionEnum->isBacked() &&
             (string) $reflectionEnum->getBackingType() === 'string';
 
@@ -138,7 +138,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
     private function getTypeName(ReflectionClass $reflectionClass): string
     {
-        $typeAnnotation = $this->annotationReader->getEnumTypeAnnotation($reflectionClass);
+        $typeAnnotation = $this->annotationReader->getTypeAnnotation($reflectionClass);
 
         return ($typeAnnotation !== null ? $typeAnnotation->getName() : null) ?? $reflectionClass->getShortName();
     }
