@@ -70,6 +70,7 @@ final class NS
                     // Symfony DebugAutoLoader is installed. (see https://github.com/thecodingmachine/graphqlite/issues/216)
                     require_once $phpFile;
                     // Does it exists now?
+                    // @phpstan-ignore-next-line
                     if (! class_exists($className, false) && ! interface_exists($className, false)) {
                         continue;
                     }

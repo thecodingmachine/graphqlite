@@ -6,6 +6,8 @@
     <arg name="cache" value=".php_cs/cache"/>
     <arg name="colors"/>
 
+    <config name="installed_paths" value="../../doctrine/coding-standard/lib,../../slevomat/coding-standard" />
+
     <!-- Ignore warnings, show progress of the run and show sniff names -->
     <arg value="nps"/>
 

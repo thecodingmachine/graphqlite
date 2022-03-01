@@ -71,7 +71,7 @@ class SourceField implements SourceFieldInterface
         if (! is_array($annotations)) {
             $annotations = [$annotations];
         }
-        foreach ($annotations ?? [] as $annotation) {
+        foreach ($annotations as $annotation) {
             if ($annotation instanceof MiddlewareAnnotationInterface) {
                 $middlewareAnnotations[] = $annotation;
             } elseif ($annotation instanceof ParameterAnnotationInterface) {

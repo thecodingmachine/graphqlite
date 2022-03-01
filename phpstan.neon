@@ -1,10 +1,10 @@
-#includes:
+includes:
 #	- vendor/phpstan/phpstan/conf/bleedingEdge.neon TODO: Try to add this
 parameters:
     tmpDir: .phpstan-cache
     paths:
         - src
-    level: max
+    level: 8
     checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:

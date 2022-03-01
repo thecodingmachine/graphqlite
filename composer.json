@@ -38,10 +38,10 @@
         "myclabs/php-enum": "^1.6.6",
         "php-coveralls/php-coveralls": "^2.1",
         "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan": "^0.12.94",
-        "phpstan/phpstan-webmozart-assert": "^0.12.15",
+        "phpstan/phpstan": "^1.0",
+        "phpstan/phpstan-webmozart-assert": "^1.0",
         "phpunit/phpunit": "^8.5.19||^9.5.8",
-        "thecodingmachine/phpstan-strict-rules": "^0.12.1"
+        "thecodingmachine/phpstan-strict-rules": "^1.0"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types",

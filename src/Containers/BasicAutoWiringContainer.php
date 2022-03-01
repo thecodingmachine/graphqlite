@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Containers;
 
-use GraphQL\Type\Definition\ObjectType;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -20,7 +19,7 @@ class BasicAutoWiringContainer implements ContainerInterface
 {
     /** @var ContainerInterface */
     private $container;
-    /** @var ObjectType[] */
+    /** @var mixed[] */
     private $values = [];
 
     /**
