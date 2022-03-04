@@ -8,11 +8,12 @@ use Exception;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\FieldDefinition;
 use RuntimeException;
-use Webmozart\Assert\Assert;
 
 use function array_keys;
 use function array_merge;
 use function array_unique;
+use function assert;
+use function is_array;
 
 trait MutableTrait
 {
@@ -86,7 +87,7 @@ trait MutableTrait
     public function getFields(): array
     {
         $this->initializeFields();
-        Assert::isArray($this->fields);
+        assert(is_array($this->fields));
 
         return array_merge(parent::getFields(), $this->fields);
     }
@@ -97,7 +98,7 @@ trait MutableTrait
     public function getFieldNames(): array
     {
         $this->initializeFields();
-        Assert::isArray($this->fields);
+        assert(is_array($this->fields));
 
         return array_unique(array_merge(parent::getFieldNames(), array_keys($this->fields)));
     }

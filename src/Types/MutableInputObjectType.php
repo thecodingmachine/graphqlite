@@ -9,7 +9,9 @@ use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;
 use RuntimeException;
-use Webmozart\Assert\Assert;
+
+use function assert;
+use function is_string;
 
 /**
  * An input object type built from the Factory annotation.
@@ -91,7 +93,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
                     if ($fieldDefinition instanceof Type) {
                         $fieldDefinition = ['type' => $fieldDefinition];
                     }
-                    Assert::string($name);
+                    assert(is_string($name));
                     $this->finalFields[$name] = new InputObjectField($fieldDefinition + ['name' => $name]);
                 }
             }
