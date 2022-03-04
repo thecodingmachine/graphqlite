@@ -303,6 +303,7 @@ class AnnotationReader
      * @return T|null
      *
      * @throws AnnotationException
+     * @throws ClassNotFoundException
      *
      * @template T of object
      */

@@ -4,7 +4,7 @@ parameters:
     tmpDir: .phpstan-cache
     paths:
         - src
-    level: max
+    level: 8
     checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:

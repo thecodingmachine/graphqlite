@@ -12,6 +12,8 @@ use RuntimeException;
 use function array_keys;
 use function array_merge;
 use function array_unique;
+use function assert;
+use function is_array;
 
 trait MutableTrait
 {
@@ -21,7 +23,7 @@ trait MutableTrait
     /** @var array<callable> */
     private $fieldsCallables = [];
 
-    /** @var FieldDefinition[] */
+    /** @var FieldDefinition[]|null */
     private $fields;
     /** @var class-string<object>|null */
     private $className;
@@ -85,6 +87,7 @@ trait MutableTrait
     public function getFields(): array
     {
         $this->initializeFields();
+        assert(is_array($this->fields));
 
         return array_merge(parent::getFields(), $this->fields);
     }
@@ -95,6 +98,7 @@ trait MutableTrait
     public function getFieldNames(): array
     {
         $this->initializeFields();
+        assert(is_array($this->fields));
 
         return array_unique(array_merge(parent::getFieldNames(), array_keys($this->fields)));
     }

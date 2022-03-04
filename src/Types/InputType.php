@@ -118,11 +118,15 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         $parameters = [];
         foreach ($constructorParameters as $parameter) {
             $name = $parameter->getName();
-            if (! $parameter->isDefaultValueAvailable() && empty($values[$name])) {
-                throw FailedResolvingInputType::createForMissingConstructorParameter($refClass->getName(), $name);
+            if (! array_key_exists($name, $values)) {
+                if (! $parameter->isDefaultValueAvailable()) {
+                    throw FailedResolvingInputType::createForMissingConstructorParameter($refClass->getName(), $name);
+                }
+
+                $values[$name] = $parameter->getDefaultValue();
             }
 
-            $parameters[] = $values[$name] ?? $parameter->getDefaultValue();
+            $parameters[] = $values[$name];
         }
 
         return $refClass->newInstanceArgs($parameters);
