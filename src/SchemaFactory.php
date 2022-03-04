@@ -406,12 +406,6 @@ class SchemaFactory
             ));
         }
 
-        $typeMappers = [];
-        foreach ($this->typeMappers as $typeMapper) {
-            $compositeTypeMapper->addTypeMapper($typeMapper);
-            $typeMappers[] = $typeMapper;
-        }
-
         if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
             $context = new FactoryContext(
                 $annotationReader,
@@ -429,13 +423,15 @@ class SchemaFactory
         }
 
         foreach ($this->typeMapperFactories as $typeMapperFactory) {
-            $typeMapper = $typeMapperFactory->create($context);
-            $compositeTypeMapper->addTypeMapper($typeMapper);
-            $typeMappers[] = $typeMapper;
+            $this->typeMappers[] = $typeMapperFactory->create($context);
         }
 
-        if (empty($this->typeNamespaces) && empty($typeMappers)) {
+        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
             throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
+        }
+
+        foreach ($this->typeMappers as $typeMapper) {
+            $compositeTypeMapper->addTypeMapper($typeMapper);
         }
 
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
