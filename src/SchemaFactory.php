@@ -391,10 +391,6 @@ class SchemaFactory
         $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
 
-        if (empty($this->typeNamespaces) && empty($this->typeMappers) && empty($this->typeMapperFactories)) {
-            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
-        }
-
         foreach ($nsList as $ns) {
             $compositeTypeMapper->addTypeMapper(new GlobTypeMapper(
                 $ns,
@@ -410,8 +406,10 @@ class SchemaFactory
             ));
         }
 
+        $typeMappers = [];
         foreach ($this->typeMappers as $typeMapper) {
             $compositeTypeMapper->addTypeMapper($typeMapper);
+            $typeMappers[] = $typeMapper;
         }
 
         if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
@@ -431,7 +429,13 @@ class SchemaFactory
         }
 
         foreach ($this->typeMapperFactories as $typeMapperFactory) {
-            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($context));
+            $typeMapper = $typeMapperFactory->create($context);
+            $compositeTypeMapper->addTypeMapper($typeMapper);
+            $typeMappers[] = $typeMapper;
+        }
+
+        if (empty($this->typeNamespaces) && empty($typeMappers)) {
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
         }
 
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));

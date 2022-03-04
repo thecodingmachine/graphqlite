@@ -19,7 +19,7 @@ class BasicAutoWiringContainer implements ContainerInterface
 {
     /** @var ContainerInterface */
     private $container;
-    /** @var mixed[] */
+    /** @var object[] */
     private $values = [];
 
     /**
