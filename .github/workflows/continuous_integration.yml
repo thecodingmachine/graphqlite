@@ -85,7 +85,7 @@ jobs:
         if: ${{ matrix.php-version == '7.2' }} # Do not suggest using features after 7.2
 
       - name: "Archive code coverage results"
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: "codeCoverage"
           path: "build"
