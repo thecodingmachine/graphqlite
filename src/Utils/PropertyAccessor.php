@@ -31,6 +31,10 @@ class PropertyAccessor
             }
         }
 
+        if (method_exists($class, '__call')) {
+            return 'get' . $name;
+        }
+
         return null;
     }
 
@@ -42,7 +46,7 @@ class PropertyAccessor
         $name = ucfirst($propertyName);
 
         $methodName = 'set' . $name;
-        if (self::isPublicMethod($class, $methodName)) {
+        if (self::isPublicMethod($class, $methodName) || method_exists($class, '__call')) {
             return $methodName;
         }
 
@@ -105,6 +109,8 @@ class PropertyAccessor
     private static function isPublicMethod(string $class, string $methodName): bool
     {
         if (! method_exists($class, $methodName)) {
+            // If the class uses this overloading method, assume it wants to handle methods
+            // that don't exist
             return false;
         }
 
