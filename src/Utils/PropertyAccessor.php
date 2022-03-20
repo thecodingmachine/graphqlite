@@ -109,8 +109,6 @@ class PropertyAccessor
     private static function isPublicMethod(string $class, string $methodName): bool
     {
         if (! method_exists($class, $methodName)) {
-            // If the class uses this overloading method, assume it wants to handle methods
-            // that don't exist
             return false;
         }
 
