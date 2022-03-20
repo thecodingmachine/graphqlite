@@ -31,6 +31,10 @@ class PropertyAccessor
             }
         }
 
+        if (method_exists($class, '__call')) {
+            return 'get' . $name;
+        }
+
         return null;
     }
 
@@ -42,7 +46,7 @@ class PropertyAccessor
         $name = ucfirst($propertyName);
 
         $methodName = 'set' . $name;
-        if (self::isPublicMethod($class, $methodName)) {
+        if (self::isPublicMethod($class, $methodName) || method_exists($class, '__call')) {
             return $methodName;
         }
 
