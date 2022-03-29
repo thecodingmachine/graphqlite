@@ -357,6 +357,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
     /**
      * @param array<string,int> $supportedClasses A list of classes or interfaces that will map to a type
+     * @phpstan-param class-string<object> $className
      */
     private function getMappedClass(string $className, array $supportedClasses): MappedClass
     {
@@ -364,6 +365,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $mappedClass = new MappedClass(/*$className*/);
             $this->mappedClasses[$className] = $mappedClass;
             $parentClassName = $className;
+            /** @phpstan-var class-string<object> $interfaceName */
             foreach (class_implements($className) ?: [] as $interfaceName) {
                 if (! isset($supportedClasses[$interfaceName])) {
                     continue;
@@ -500,6 +502,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         if ($this->typeMapper->canMapNameToType($typeName)) {
             $type = $this->typeMapper->mapNameToType($typeName);
 
+            // @phpstan-ignore-next-line - no idea why this line is here (maybe mapNameToType can register type to TypeRegistry?)
             if ($this->typeRegistry->hasType($typeName)) {
                 $cachedType = $this->typeRegistry->getType($typeName);
                 if ($cachedType !== $type) {
@@ -510,9 +513,8 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 }
             }
 
-            if (! $this->typeRegistry->hasType($typeName)) {
-                $this->typeRegistry->registerType($type);
-            }
+            $this->typeRegistry->registerType($type);
+
             if ($type instanceof MutableObjectType) {
                 if ($this->typeMapper->canExtendTypeForName($typeName, $type)) {
                     $this->typeMapper->extendTypeForName($typeName, $type);

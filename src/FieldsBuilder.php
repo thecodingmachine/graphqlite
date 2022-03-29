@@ -741,12 +741,10 @@ class FieldsBuilder
         $additionalParameterAnnotations = $sourceField !== null ? $sourceField->getParameterAnnotations() : [];
 
         $docBlockTypes = [];
-        if (! empty($refParameters)) {
-            /** @var DocBlock\Tags\Param[] $paramTags */
-            $paramTags = $docBlock->getTagsByName('param');
-            foreach ($paramTags as $paramTag) {
-                $docBlockTypes[$paramTag->getVariableName()] = $paramTag->getType();
-            }
+        /** @var DocBlock\Tags\Param[] $paramTags */
+        $paramTags = $docBlock->getTagsByName('param');
+        foreach ($paramTags as $paramTag) {
+            $docBlockTypes[$paramTag->getVariableName()] = $paramTag->getType();
         }
 
         $parameterAnnotationsPerParameter = $this->annotationReader->getParameterAnnotationsPerParameter($refParameters);

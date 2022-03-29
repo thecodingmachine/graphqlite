@@ -2,11 +2,10 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 
 class FactoryContextTest extends AbstractQueryProviderTest
 {
@@ -17,6 +16,7 @@ class FactoryContextTest extends AbstractQueryProviderTest
         $namingStrategy = new NamingStrategy();
         $container = new EmptyContainer();
         $arrayCache = new Psr16Cache(new ArrayAdapter());
+        $validator = new Validator();
 
         $context = new FactoryContext(
             $this->getAnnotationReader(),
@@ -29,6 +29,7 @@ class FactoryContextTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $container,
             $arrayCache,
+            $validator,
             self::GLOB_TTL_SECONDS
         );
 
@@ -42,6 +43,7 @@ class FactoryContextTest extends AbstractQueryProviderTest
         $this->assertSame($this->getTypeMapper(), $context->getRecursiveTypeMapper());
         $this->assertSame($container, $context->getContainer());
         $this->assertSame($arrayCache, $context->getCache());
+        $this->assertSame($validator, $context->getInputTypeValidator());
         $this->assertSame(self::GLOB_TTL_SECONDS, $context->getGlobTTL());
         $this->assertNull($context->getMapTTL());
     }

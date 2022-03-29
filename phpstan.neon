@@ -8,7 +8,7 @@ parameters:
          # TODO: exlude only for PHP < 8.1
         - src/Mappers/Root/EnumTypeMapper.php
         - src/Types/EnumType.php
-    level: max
+    level: 8
     checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:

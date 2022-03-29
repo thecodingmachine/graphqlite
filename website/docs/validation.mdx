@@ -39,7 +39,8 @@ using the `Validator` object.
   values={[
     {label: 'PHP 8', value: 'php8'},
     {label: 'PHP 7', value: 'php7'},
-  ]}>
+  ]}
+>
   <TabItem value="php8">
 
 ```php title="UserController.php"
@@ -117,7 +118,8 @@ Validation rules are added directly to the object in the domain model:
   values={[
     {label: 'PHP 8', value: 'php8'},
     {label: 'PHP 7', value: 'php7'},
-  ]}>
+  ]}
+>
   <TabItem value="php8">
 
 ```php title="User.php"
@@ -183,16 +185,16 @@ If a validation fails, GraphQLite will return the failed validations in the "err
 
 ```json
 {
-  "errors": [
-    {
-      "message": "The email '\"foo@thisdomaindoesnotexistatall.com\"' is not a valid email.",
-      "extensions": {
-        "code": "bf447c1c-0266-4e10-9c6c-573df282e413",
-        "field": "email",
-        "category": "Validate"
-      }
-    }
-  ]
+    "errors": [
+        {
+            "message": "The email '\"foo@thisdomaindoesnotexistatall.com\"' is not a valid email.",
+            "extensions": {
+                "code": "bf447c1c-0266-4e10-9c6c-573df282e413",
+                "field": "email",
+                "category": "Validate"
+            }
+        }
+    ]
 }
 ```
 
@@ -204,9 +206,11 @@ the last chapter. It is a best practice to put your validation layer as close as
 
 If the data entered by the user is **not** mapped to an object, you can directly annotate your query, mutation, factory...
 
-<div class="alert alert--warning">You generally don't want to do this. It is a best practice to put your validation constraints
+<div class="alert alert--warning">
+    You generally don't want to do this. It is a best practice to put your validation constraints
 on your domain objects. Only use this technique if you want to validate user input and user input will not be stored
-in a domain object.</div>
+in a domain object.
+</div>
 
 Use the `@Assertion` annotation to validate directly the user input.
 
@@ -233,3 +237,51 @@ You can also pass an array to the `constraint` parameter:
 ```
 
 <div class="alert alert--warning"><strong>Heads up!</strong> The "@Assertion" annotation is only available as a <strong>Doctrine annotations</strong>. You cannot use it as a PHP 8 attributes</div>
+
+## Custom InputType Validation
+
+GraphQLite also supports a fully custom validation implementation for all input types defined with an `@Input` annotation or PHP8 `#[Input]` attribute.  This offers a way to validate input types before they're available as a method parameter of your query and mutation controllers.  This way, when you're using your query or mutation controllers, you can feel confident that your input type objects have already been validated.
+
+<div class="alert alert--warning">
+  <p>It's important to note that this validation implementation does not validate input types created with a factory.  If you are creating an input type with a factory, or using primitive parameters in your query/mutation controllers, you should be sure to validate these independently.  This is strictly for input type objects.</p>
+
+  <p>You can use one of the framework validation libraries listed above or implement your own validation for these cases.  If you're using input type objects for most all of your query and mutation controllers, then there is little additional validation concerns with regards to user input.  There are many reasons why you should consider defaulting to an InputType object, as opposed to individual arguments, for your queries and mutations.  This is just one additional perk.</p>
+</div>
+
+To get started with validation on input types defined by an `@Input` annotation, you'll first need to register your validator with the `SchemaFactory`.
+
+```php
+$factory = new SchemaFactory($cache, $this->container);
+$factory->addControllerNamespace('App\\Controllers');
+$factory->addTypeNamespace('App');
+// Register your validator
+$factory->setInputTypeValidator($this->container->get('your_validator'));
+$factory->createSchema();
+```
+
+Your input type validator must implement the `TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface`, as shown below:
+
+```php
+interface InputTypeValidatorInterface
+{
+    /**
+     * Checks to see if the Validator is currently enabled.
+     */
+    public function isEnabled(): bool;
+
+    /**
+     * Performs the validation of the InputType.
+     *
+     * @param object $input     The input type object to validate
+     */
+    public function validate(object $input): void;
+}
+```
+
+The interface is quite simple.  Handle all of your own validation logic in the `validate` method.  For example, you might use Symfony's annotation based validation in addition to some other custom validation logic.  It's really up to you on how you wish to handle your own validation.  The `validate` method will receive the input type object populated with the user input.
+
+You'll notice that the `validate` method has a `void` return.  The purpose here is to encourage you to throw an Exception or handle validation output however you best see fit.  GraphQLite does it's best to stay out of your way and doesn't make attempts to handle validation output.  You can, however, throw an instance of `TheCodingMachine\GraphQLite\Exceptions\GraphQLException` or `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` as usual (see [Error Handling](error-handling) for more details).
+
+Also available is the `isEnabled` method.  This method is checked before executing validation on an InputType being resolved.  You can work out your own logic to selectively enable or disable validation through this method.  In most cases, you can simply return `true` to keep it always enabled.
+
+And that's it, now, anytime an input type is resolved, the validator will be executed on that input type immediately after it has been hydrated with user input.

@@ -13,6 +13,13 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers\ContactController;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactFactory;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactOtherType;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
@@ -88,6 +95,30 @@ class SchemaFactoryTest extends TestCase
                 ->setClassNameMapper(ClassNameMapper::createFromComposerFile(null, null, true))
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+
+        $schema = $factory->createSchema();
+
+        $this->doTestSchema($schema);
+    }
+
+    public function testCreateSchemaOnlyWithFactories(): void
+    {
+        $container = new BasicAutoWiringContainer(new EmptyContainer());
+        $cache = new Psr16Cache(new ArrayAdapter());
+
+        $factory = new SchemaFactory($cache, $container);
+        $factory->setAuthenticationService(new VoidAuthenticationService());
+        $factory->setAuthorizationService(new VoidAuthorizationService());
+
+        $factory->addTypeMapperFactory(new StaticClassListTypeMapperFactory([
+            Contact::class,
+            ContactFactory::class,
+            ContactOtherType::class,
+            ContactType::class,
+            ExtendedContactType::class,
+            User::class,
+        ]));
+        $factory->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([ContactController::class], $container));
 
         $schema = $factory->createSchema();
 

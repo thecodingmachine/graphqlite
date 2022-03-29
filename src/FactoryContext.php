@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 /**
@@ -36,6 +37,8 @@ final class FactoryContext
     private $container;
     /** @var CacheInterface */
     private $cache;
+    /** @var InputTypeValidatorInterface|null */
+    private $inputTypeValidator;
     /** @var int|null */
     private $globTTL;
     /** @var int|null */
@@ -52,6 +55,7 @@ final class FactoryContext
         RecursiveTypeMapperInterface $recursiveTypeMapper,
         ContainerInterface $container,
         CacheInterface $cache,
+        ?InputTypeValidatorInterface $inputTypeValidator,
         ?int $globTTL,
         ?int $mapTTL = null
     ) {
@@ -65,6 +69,7 @@ final class FactoryContext
         $this->recursiveTypeMapper = $recursiveTypeMapper;
         $this->container = $container;
         $this->cache = $cache;
+        $this->inputTypeValidator = $inputTypeValidator;
         $this->globTTL = $globTTL;
         $this->mapTTL = $mapTTL;
     }
@@ -117,6 +122,11 @@ final class FactoryContext
     public function getCache(): CacheInterface
     {
         return $this->cache;
+    }
+
+    public function getInputTypeValidator(): ?InputTypeValidatorInterface
+    {
+        return $this->inputTypeValidator;
     }
 
     public function getGlobTTL(): ?int

@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         install-args: ['', '--prefer-lowest']
-        php-version: ['7.2', '7.3', '7.4', '8.0', '8.1']
+        php-version: ['7.4', '8.0', '8.1']
       fail-fast: false
 
     steps:
@@ -29,7 +29,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: "Checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v3"
 
       - name: "Install PHP with extensions"
         uses: "shivammathur/setup-php@v2"
@@ -44,7 +44,7 @@ jobs:
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: composer-cache
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composercache.outputs.dir }}
           key: composer-${{ hashFiles('**/composer.json') }}-${{ matrix.install-args }}
@@ -67,7 +67,7 @@ jobs:
         run: "vendor/bin/phpunit"
 
       - name: phpstan-cache
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           key: phpstan-${{ matrix.php-version }}-${{ matrix.install-args }}-${{ github.ref }}-${{ github.sha }}
           path: .phpstan-cache
@@ -85,7 +85,7 @@ jobs:
         if: ${{ matrix.php-version == '7.2' }} # Do not suggest using features after 7.2
 
       - name: "Archive code coverage results"
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: "codeCoverage"
           path: "build"

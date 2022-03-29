@@ -59,7 +59,7 @@ class QueryFieldDescriptor
     private $refMethod;
     /** @var ReflectionProperty */
     private $refProperty;
-    /** @var ResolverInterface */
+    /** @var ResolverInterface|null */
     private $originalResolver;
     /** @var callable */
     private $resolver;

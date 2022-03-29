@@ -22,16 +22,24 @@ use function array_key_exists;
 class InputType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
     /** @var InputTypeProperty[] */
-    private $fields;
+    private array $fields;
 
     /** @var class-string<object> */
     private $className;
 
+    private ?InputTypeValidatorInterface $inputTypeValidator;
+
     /**
      * @param class-string<object> $className
      */
-    public function __construct(string $className, string $inputName, ?string $description, bool $isUpdate, FieldsBuilder $fieldsBuilder)
-    {
+    public function __construct(
+        string $className,
+        string $inputName,
+        ?string $description,
+        bool $isUpdate,
+        FieldsBuilder $fieldsBuilder,
+        ?InputTypeValidatorInterface $inputTypeValidator = null
+    ) {
         $reflection = new ReflectionClass($className);
         if (! $reflection->isInstantiable()) {
             throw FailedResolvingInputType::createForNotInstantiableClass($className);
@@ -71,6 +79,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
         parent::__construct($config);
         $this->className = $className;
+        $this->inputTypeValidator = $inputTypeValidator;
     }
 
     /**
@@ -96,6 +105,10 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             PropertyAccessor::setValue($instance, $property, $value);
         }
 
+        if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
+            $this->inputTypeValidator->validate($instance);
+        }
+
         return $instance;
     }
 
@@ -118,11 +131,15 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         $parameters = [];
         foreach ($constructorParameters as $parameter) {
             $name = $parameter->getName();
-            if (! $parameter->isDefaultValueAvailable() && empty($values[$name])) {
-                throw FailedResolvingInputType::createForMissingConstructorParameter($refClass->getName(), $name);
+            if (! array_key_exists($name, $values)) {
+                if (! $parameter->isDefaultValueAvailable()) {
+                    throw FailedResolvingInputType::createForMissingConstructorParameter($refClass->getName(), $name);
+                }
+
+                $values[$name] = $parameter->getDefaultValue();
             }
 
-            $parameters[] = $values[$name] ?? $parameter->getDefaultValue();
+            $parameters[] = $values[$name];
         }
 
         return $refClass->newInstanceArgs($parameters);

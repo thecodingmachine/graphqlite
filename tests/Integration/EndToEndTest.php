@@ -53,6 +53,8 @@ use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\ValidationException;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
@@ -834,7 +836,6 @@ class EndToEndTest extends TestCase
                 }
                 count
             }
-
             products {
                 items {
                     name
@@ -1997,6 +1998,50 @@ class EndToEndTest extends TestCase
 
         $this->expectException(AccessPropertyException::class);
         $this->expectExceptionMessage("Could not set value for property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post::inaccessible'. Either make the property public or add a public setter for it like this: 'setInaccessible'");
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    public function testEndToEndInputTypeValidation(): void
+    {
+        $validator = new Validator();
+
+        $container = $this->createContainer([
+            InputTypeGenerator::class => function (ContainerInterface $container) use ($validator) {
+                return new InputTypeGenerator(
+                    $container->get(InputTypeUtils::class),
+                    $container->get(FieldsBuilder::class),
+                    $validator
+                );
+            },
+        ]);
+
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types');
+        $schemaFactory->setAuthenticationService($container->get(AuthenticationServiceInterface::class));
+        $schemaFactory->setAuthorizationService($container->get(AuthorizationServiceInterface::class));
+        $schemaFactory->setInputTypeValidator($validator);
+
+        $schema = $schemaFactory->createSchema();
+
+        // Test any mutation, we just need a trigger an InputType to be resolved
+        $queryString = '
+            mutation {
+                createArticle(
+                    article: {
+                        title: "Old Man and the Sea"
+                    }
+                ) {
+                    title
+                }
+            }
+        ';
+
+        $this->expectException(ValidationException::class);
+        $result = GraphQL::executeQuery($schema, $queryString);
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 }
