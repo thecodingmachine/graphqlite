@@ -31,6 +31,8 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use Webmozart\Assert\Assert;
 
+use function interface_exists;
+
 /**
  * Analyzes classes and uses the @Type annotation to find the types automatically.
  *
@@ -139,6 +141,14 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         $classes = $this->getClassList();
 
         foreach ($classes as $className => $refClass) {
+            // Enum's are processed through the EnumTypeMapper.  It may make more sense to handle
+            // this through the individual type mappers implemeenting this abstract.
+            if (interface_exists(UnitEnum::class)) {
+                if ($refClass->isEnum()) {
+                    continue;
+                }
+            }
+
             $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
                 $annotationsCache = new GlobAnnotationsCache();
 
