@@ -76,6 +76,13 @@ final class NS
                 }
 
                 $refClass = new ReflectionClass($className);
+                // Enum's are not classes
+                if (interface_exists(\UnitEnum::class)) {
+                    if ($refClass->isEnum()) {
+                        continue;
+                    }
+                }
+
                 $this->classes[$className] = $refClass;
             }
         }
