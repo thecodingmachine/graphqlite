@@ -47,8 +47,12 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /**
      * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
      */
-    public function __construct(RootTypeMapperInterface $next, AnnotationReader $annotationReader, CacheInterface $cacheService, array $namespaces)
-    {
+    public function __construct(
+        RootTypeMapperInterface $next,
+        AnnotationReader $annotationReader,
+        CacheInterface $cacheService,
+        array $namespaces
+    ) {
         $this->next = $next;
         $this->annotationReader = $annotationReader;
         $this->cacheService = $cacheService;
@@ -61,8 +65,12 @@ class EnumTypeMapper implements RootTypeMapperInterface
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
-    {
+    public function toGraphQLOutputType(
+        Type $type,
+        ?OutputType $subType,
+        $reflector,
+        DocBlock $docBlockObj
+    ): OutputType {
         $result = $this->map($type);
         if ($result === null) {
             return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
@@ -72,12 +80,20 @@ class EnumTypeMapper implements RootTypeMapperInterface
     }
 
     /**
-     * @param (InputType&GraphQLType)|null $subType
+     * Maps into the appropriate InputType
+     *
+     * @param InputType|GraphQLType|null $subType
      * @param ReflectionMethod|ReflectionProperty $reflector
      *
-     * @return InputType&GraphQLType
+     * @return InputType|GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(
+        Type $type,
+        ?InputType $subType,
+        string $argumentName,
+        $reflector,
+        DocBlock $docBlockObj
+    ): InputType
     {
         $result = $this->map($type);
         if ($result === null) {
