@@ -31,8 +31,6 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use Webmozart\Assert\Assert;
 
-use function interface_exists;
-
 /**
  * Analyzes classes and uses the @Type annotation to find the types automatically.
  *
