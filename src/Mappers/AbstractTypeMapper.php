@@ -143,7 +143,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         foreach ($classes as $className => $refClass) {
             // Enum's are processed through the EnumTypeMapper.  It may make more sense to handle
             // this through the individual type mappers implemeenting this abstract.
-            if (interface_exists(UnitEnum::class)) {
+            if (interface_exists(\UnitEnum::class)) {
                 if ($refClass->isEnum()) {
                     continue;
                 }
