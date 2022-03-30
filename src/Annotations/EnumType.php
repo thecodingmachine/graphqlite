@@ -9,6 +9,8 @@ use Attribute;
 /**
  * The EnumType annotation is useful to change the name of the generated "enum" type.
  *
+ * @deprecated Use @Type on a native PHP 8.1 Enum instead. Support will be removed in future release.
+ *
  * @Annotation
  * @Target({"CLASS"})
  * @Attributes({

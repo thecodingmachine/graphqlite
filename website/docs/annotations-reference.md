@@ -31,7 +31,8 @@ name           | *no*       | string | The name of the mutation. If skipped, the
 
 ## @Type annotation
 
-The `@Type` annotation is used to declare a GraphQL object type.
+The `@Type` annotation is used to declare a GraphQL object type.  This is used with standard output
+types, as well as enum types.  For input types, use the [@Input annotation](#input-annotation) directly on the input type or a [@Factory annoation](#factory-annotation) to make/return an input type.
 
 **Applies on**: classes.
 
@@ -268,7 +269,9 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *constraint*   | *yes       | annotation | One (or many) Symfony validation annotations.
 
-## @EnumType annotation
+## ~~@EnumType annotation~~
+
+*Deprecated: Use [PHP 8.1's native Enums](https://www.php.net/manual/en/language.types.enumerations.php) instead with a [@Type](#type-annotation).*
 
 The `@EnumType` annotation is used to change the name of a "Enum" type.
 Note that if you do not want to change the name, the annotation is optionnal. Any object extending `MyCLabs\Enum\Enum`
