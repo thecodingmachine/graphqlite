@@ -6,9 +6,10 @@ namespace TheCodingMachine\GraphQLite\Fixtures81\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type(useEnumValues=true)
- */
+#[Type(
+    name: 'Color',
+    useEnumValues: true,
+)]
 enum Color: string
 {
     case Green = 'green';

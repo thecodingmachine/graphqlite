@@ -1222,7 +1222,7 @@ class EndToEndTest extends TestCase
 
         $gql = '
             query {
-                button(color: Red, size: M, state: Off) {
+                button(color: red, size: M, state: Off) {
                     color
                     size
                     state
@@ -1237,7 +1237,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'button' => [
-                'color' => 'Red',
+                'color' => 'red',
                 'size' => 'M',
                 'state' => 'Off',
             ]

@@ -52,8 +52,14 @@ class Type
      * @param mixed[] $attributes
      * @param class-string<object>|null $class
      */
-    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null, ?bool $default = null, ?bool $external = null, ?bool $useEnumValues = null)
-    {
+    public function __construct(
+        array $attributes = [],
+        ?string $class = null,
+        ?string $name = null,
+        ?bool $default = null,
+        ?bool $external = null,
+        ?bool $useEnumValues = null
+    ) {
         $external = $external ?? $attributes['external'] ?? null;
         $class = $class ?? $attributes['class'] ?? null;
         if ($class !== null) {
@@ -66,14 +72,13 @@ class Type
 
         // If no value is passed for default, "default" = true
         $this->default = $default ?? $attributes['default'] ?? true;
+        $this->useEnumValues = $useEnumValues ?? $attributes['useEnumValues'] ?? false;
 
         if ($external === null) {
             return;
         }
 
         $this->selfType = ! $external;
-
-        $this->useEnumValues = $useEnumValues ?? $attributes['useEnumValues'] ?? false;
     }
 
     /**
