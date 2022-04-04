@@ -457,9 +457,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
             $types[$supportedClass] = $type;
 
-
-
-
             if (isset($typeNames[$type->name])) {
                 throw DuplicateMappingException::createForTypeName($type->name, $typeNames[$type->name], $supportedClass);
             }
