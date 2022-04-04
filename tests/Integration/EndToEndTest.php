@@ -1210,6 +1210,8 @@ class EndToEndTest extends TestCase
 
     /**
      * @requires PHP >= 8.1
+     *
+     * @group test-only
      */
     public function testEndToEndNativeEnums(): void
     {
@@ -1220,7 +1222,7 @@ class EndToEndTest extends TestCase
 
         $gql = '
             query {
-                button(color: red, size: M, state: Off) {
+                button(color: Red, size: M, state: Off) {
                     color
                     size
                     state
@@ -1235,7 +1237,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'button' => [
-                'color' => 'red',
+                'color' => 'Red',
                 'size' => 'M',
                 'state' => 'Off',
             ]
