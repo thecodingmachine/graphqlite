@@ -225,11 +225,29 @@ public function createLocation(float $latitude, float $longitude): Location
 
 In case you want to override the input type name, you can use the "name" attribute of the @Factory annotation:
 
+<Tabs
+  defaultValue="php8"
+  values={[
+    {label: 'PHP 8', value: 'php8'},
+    {label: 'PHP 7', value: 'php7'},
+  ]}>
+  <TabItem value="php8">
+
+```php
+#[Factory(name: 'MyNewInputName', default: true)]
+```
+
+  </TabItem>
+  <TabItem value="php7">
+
 ```php
 /**
  * @Factory(name="MyNewInputName", default=true)
  */
 ```
+
+  </TabItem>
+</Tabs>
 
 Note that you need to add the "default" attribute is you want your factory to be used by default (more on this in
 the next chapter).
