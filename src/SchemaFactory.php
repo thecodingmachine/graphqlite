@@ -28,6 +28,7 @@ use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
@@ -51,10 +52,12 @@ use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use UnitEnum;
 
 use function array_map;
 use function array_reverse;
 use function class_exists;
+use function interface_exists;
 use function md5;
 use function substr;
 
@@ -361,6 +364,11 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
+
+        if (interface_exists(UnitEnum::class)) {
+            $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        }
+
         if (class_exists(Enum::class)) {
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
         }

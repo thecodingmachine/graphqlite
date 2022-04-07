@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\Reader;
 use InvalidArgumentException;
-use MyCLabs\Enum\Enum;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -568,9 +567,6 @@ class AnnotationReader
         return $toAddAnnotations;
     }
 
-    /**
-     * @param ReflectionClass<Enum> $refClass
-     */
     public function getEnumTypeAnnotation(ReflectionClass $refClass): ?EnumType
     {
         return $this->getClassAnnotation($refClass, EnumType::class);

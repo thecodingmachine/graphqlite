@@ -31,13 +31,14 @@ name           | *no*       | string | The name of the mutation. If skipped, the
 
 ## @Type annotation
 
-The `@Type` annotation is used to declare a GraphQL object type.
+The `@Type` annotation is used to declare a GraphQL object type.  This is used with standard output
+types, as well as enum types.  For input types, use the [@Input annotation](#input-annotation) directly on the input type or a [@Factory annoation](#factory-annotation) to make/return an input type.
 
 **Applies on**: classes.
 
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
-class          | *no*       | string | The targeted class. If no class is passed, the type applies to the current class. The current class is assumed to be an entity. If the "class" attribute is passed, [the class annotated with `@Type` is a service](external-type-declaration.mdx).
+class          | *no*       | string | The targeted class/enum for the actual type. If no "class" attribute is passed, the type applies to the current class/enum. The current class/enum is assumed to be an entity (not service). If the "class" attribute *is passed*, [the class/enum annotated with `@Type` becomes a service](external-type-declaration.mdx).
 name           | *no*       | string | The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with "Type", the "Type" suffix is removed
 default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
 external       | *no*       | bool   | Whether this is an [external type declaration](external-type-declaration.mdx) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
@@ -268,7 +269,9 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *constraint*   | *yes       | annotation | One (or many) Symfony validation annotations.
 
-## @EnumType annotation
+## ~~@EnumType annotation~~
+
+*Deprecated: Use [PHP 8.1's native Enums](https://www.php.net/manual/en/language.types.enumerations.php) instead with a [@Type](#type-annotation).*
 
 The `@EnumType` annotation is used to change the name of a "Enum" type.
 Note that if you do not want to change the name, the annotation is optionnal. Any object extending `MyCLabs\Enum\Enum`

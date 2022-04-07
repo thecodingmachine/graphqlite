@@ -14,6 +14,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
@@ -34,6 +35,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
@@ -68,6 +70,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use UnitEnum;
 use function json_encode;
 use const JSON_PRETTY_PRINT;
 
@@ -93,8 +96,27 @@ class EndToEndTest extends TestCase
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), $container->get(RootTypeMapperInterface::class));
             },
             QueryProviderInterface::class => function(ContainerInterface $container) {
-                return new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers', $container->get(FieldsBuilder::class),
-                    $container->get(BasicAutoWiringContainer::class), $container->get(AnnotationReader::class), new Psr16Cache(new ArrayAdapter()));
+                $queryProvider = new GlobControllerQueryProvider(
+                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers',
+                    $container->get(FieldsBuilder::class),
+                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(AnnotationReader::class),
+                    new Psr16Cache(new ArrayAdapter())
+                );
+
+                if (interface_exists(UnitEnum::class)) {
+                    $queryProvider = new AggregateQueryProvider([
+                        $queryProvider,
+                        new GlobControllerQueryProvider(
+                            'TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Controllers',
+                            $container->get(FieldsBuilder::class),
+                            $container->get(BasicAutoWiringContainer::class),
+                            $container->get(AnnotationReader::class),
+                            new Psr16Cache(new ArrayAdapter())
+                        )
+                    ]);
+                }
+                return $queryProvider;
             },
             FieldsBuilder::class => function(ContainerInterface $container) {
                 return new FieldsBuilder(
@@ -175,6 +197,7 @@ class EndToEndTest extends TestCase
                     new Psr16Cache($arrayAdapter)
                 );
             },
+            // We use a second type mapper here so we can target the Models dir
             GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
@@ -191,6 +214,17 @@ class EndToEndTest extends TestCase
             },
             PorpaginasTypeMapper::class => function(ContainerInterface $container) {
                 return new PorpaginasTypeMapper($container->get(RecursiveTypeMapperInterface::class));
+            },
+            EnumTypeMapper::class => function(ContainerInterface $container) {
+                return new EnumTypeMapper(
+                    $container->get(RootTypeMapperInterface::class),
+                    $container->get(AnnotationReader::class),
+                    new ArrayAdapter(),
+                    [
+                        $container->get(NamespaceFactory::class)
+                            ->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models')
+                    ]
+                );
             },
             TypeGenerator::class => function(ContainerInterface $container) {
                 return new TypeGenerator(
@@ -232,9 +266,13 @@ class EndToEndTest extends TestCase
                 return new NullableTypeMapperAdapter();
             },
             'rootTypeMapper' => function(ContainerInterface $container) {
+                // These are in reverse order of execution
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
                 $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models') ]);
+                if (interface_exists(UnitEnum::class)) {
+                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models') ]);
+                }
                 $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
                 return $rootTypeMapper;
@@ -261,10 +299,33 @@ class EndToEndTest extends TestCase
                 return $parameterMiddlewarePipe;
             }
         ];
+
+        if (interface_exists(UnitEnum::class)) {
+            // Register another instance of GlobTypeMapper to process our PHP 8.1 enums and/or other
+            // 8.1 supported features.
+            $services[GlobTypeMapper::class.'3'] = function(ContainerInterface $container) {
+                $arrayAdapter = new ArrayAdapter();
+                $arrayAdapter->setLogger(new ExceptionLogger());
+                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models'),
+                    $container->get(TypeGenerator::class),
+                    $container->get(InputTypeGenerator::class),
+                    $container->get(InputTypeUtils::class),
+                    $container->get(BasicAutoWiringContainer::class),
+                    $container->get(AnnotationReader::class),
+                    $container->get(NamingStrategyInterface::class),
+                    $container->get(RecursiveTypeMapperInterface::class),
+                    new Psr16Cache($arrayAdapter)
+                );
+            };
+        }
+
         $container = new Picotainer($overloadedServices + $services);
         $container->get(TypeResolver::class)->registerSchema($container->get(Schema::class));
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class));
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'2'));
+        if (interface_exists(UnitEnum::class)) {
+            $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'3'));
+        }
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
 
         $container->get(RootTypeMapperInterface::class)->setNext($container->get('rootTypeMapper'));
@@ -1144,6 +1205,42 @@ class EndToEndTest extends TestCase
 
         $this->assertSame([
             'echoProductType' => 'NON_FOOD'
+        ], $this->getSuccessResult($result));
+    }
+
+    /**
+     * @requires PHP >= 8.1
+     *
+     * @group test-only
+     */
+    public function testEndToEndNativeEnums(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $gql = '
+            query {
+                button(color: red, size: M, state: Off) {
+                    color
+                    size
+                    state
+                }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql
+        );
+
+        $this->assertSame([
+            'button' => [
+                'color' => 'red',
+                'size' => 'M',
+                'state' => 'Off',
+            ]
         ], $this->getSuccessResult($result));
     }
 

@@ -35,6 +35,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
@@ -60,6 +61,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
+use UnitEnum;
 use function array_reverse;
 
 abstract class AbstractQueryProviderTest extends TestCase
@@ -335,6 +337,9 @@ abstract class AbstractQueryProviderTest extends TestCase
         $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
         $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $this->getAnnotationReader(), $arrayAdapter, []);
+        if (interface_exists(UnitEnum::class)) {
+            $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $this->getAnnotationReader(), $arrayAdapter, []);
+        }
         $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 

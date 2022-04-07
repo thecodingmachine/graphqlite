@@ -114,6 +114,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         if ($closestClassName === null) {
             throw CannotMapTypeException::createForType($className);
         }
+
         $type = $this->typeMapper->mapClassToType($closestClassName, $subType);
 
         // In the event this type was already part of cache, let's not extend it.
@@ -452,8 +453,10 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         $types     = [];
         $typeNames = [];
         foreach ($this->typeMapper->getSupportedClasses() as $supportedClass) {
-            $type                   = $this->mapClassToType($supportedClass, null);
+            $type = $this->mapClassToType($supportedClass, null);
+
             $types[$supportedClass] = $type;
+
             if (isset($typeNames[$type->name])) {
                 throw DuplicateMappingException::createForTypeName($type->name, $typeNames[$type->name], $supportedClass);
             }
