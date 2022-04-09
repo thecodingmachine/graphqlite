@@ -18,7 +18,7 @@ use Attribute;
  *   @Attribute("inputType", type = "string"),
  * })
  */
-#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 class Field extends AbstractRequest
 {
     /** @var string|null */
