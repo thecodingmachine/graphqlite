@@ -16,6 +16,9 @@ interface TypeInterface
 
     public function setClass(string $className): void;
 
+    /**
+     * @return class-string<object>
+     */
     public function getClass(): string;
 
     public function isDefault(): bool;

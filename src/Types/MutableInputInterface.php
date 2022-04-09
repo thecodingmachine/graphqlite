@@ -8,6 +8,8 @@ use GraphQL\Type\Definition\InputType;
 
 /**
  * An input object type to which we can add fields after instantiation.
+ *
+ * @property string $name
  */
 interface MutableInputInterface extends InputType
 {

@@ -276,6 +276,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
     {
+        /** @var class-string<object>|null $inputTypeClassName */
         $inputTypeClassName = $this->getMaps()->getInputByObjectClass($className)
             ? $this->getMaps()->getInputByObjectClass($className)[0]
             : null;
@@ -314,8 +315,6 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL input type.
      *
      * @param class-string<object> $className
-     *
-     * @return ResolvableMutableInputInterface&InputObjectType
      *
      * @throws CannotMapTypeException
      */

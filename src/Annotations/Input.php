@@ -23,20 +23,16 @@ use RuntimeException;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class Input implements TypeInterface
 {
-    /** @var string|null */
-    private $class;
+    /** @var class-string<object>|null */
+    private ?string $class = null;
 
-    /** @var string|null */
-    private $name;
+    private ?string $name = null;
 
-    /** @var bool */
-    private $default;
+    private bool $default;
 
-    /** @var string|null */
-    private $description;
+    private ?string $description = null;
 
-    /** @var bool */
-    private $update;
+    private bool $update;
 
     /**
      * @param mixed[] $attributes
@@ -51,6 +47,8 @@ class Input implements TypeInterface
 
     /**
      * Returns the fully qualified class name of the targeted class.
+     *
+     * @return class-string<object>
      */
     public function getClass(): string
     {
@@ -61,6 +59,9 @@ class Input implements TypeInterface
         return $this->class;
     }
 
+    /**
+     * @param class-string<object> $class
+     */
     public function setClass(string $class): void
     {
         $this->class = $class;
