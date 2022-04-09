@@ -21,10 +21,11 @@ graph TD;
   classDef custom fill:#cfc,stroke:#7a7,stroke-width:2px,stroke-dasharray: 5, 5;
   subgraph RootTypeMapperInterface
     NullableTypeMapperAdapter-->CompoundTypeMapper
-    CompoundTypeMapper-->IteratorTypeMapper
     IteratorTypeMapper-->YourCustomRootTypeMapper
+    CompoundTypeMapper-->IteratorTypeMapper
     YourCustomRootTypeMapper-->MyCLabsEnumTypeMapper
-    MyCLabsEnumTypeMapper-->BaseTypeMapper
+    MyCLabsEnumTypeMapper-->EnumTypeMapper
+    EnumTypeMapper-->BaseTypeMapper
     BaseTypeMapper-->FinalRootTypeMapper
   end
   subgraph RecursiveTypeMapperInterface
@@ -46,23 +47,24 @@ These type mappers are the first type mappers called.
 
 They are responsible for:
 
- - mapping scalar types (for instance mapping the "int" PHP type to GraphQL Integer type)
- - detecting nullable/non-nullable types (for instance interpreting "?int" or "int|null")
- - mapping list types (mapping a PHP array to a GraphQL list)
- - mapping union types
- - mapping enums
+- mapping scalar types (for instance mapping the "int" PHP type to GraphQL Integer type)
+- detecting nullable/non-nullable types (for instance interpreting "?int" or "int|null")
+- mapping list types (mapping a PHP array to a GraphQL list)
+- mapping union types
+- mapping enums
 
 Root type mappers have access to the *context* of a type: they can access the PHP DocBlock and read annotations.
 If you want to write a custom type mapper that needs access to annotations, it needs to be a "root type mapper".
 
 GraphQLite provides 6 classes implementing `RootTypeMapperInterface`:
 
- - `NullableTypeMapperAdapter`: a type mapper in charge of making GraphQL types non-nullable if the PHP type is non-nullable
- - `CompoundTypeMapper`: a type mapper in charge of union types
- - `IteratorTypeMapper`: a type mapper in charge of iterable types (for instance: `MyIterator|User[]`)
- - `MyCLabsEnumTypeMapper`: maps MyCLabs/enum types to GraphQL enum types
- - `BaseTypeMapper`: maps scalar types and lists. Passes the control to the "recursive type mappers" if an object is encountered.
- - `FinalRootTypeMapper`: the last type mapper of the chain, used to throw error if no other type mapper managed to handle the type.
+- `NullableTypeMapperAdapter`: a type mapper in charge of making GraphQL types non-nullable if the PHP type is non-nullable
+- `IteratorTypeMapper`: a type mapper in charge of iterable types (for instance: `MyIterator|User[]`)
+- `CompoundTypeMapper`: a type mapper in charge of union types
+- `MyCLabsEnumTypeMapper`: maps MyCLabs/enum types to GraphQL enum types (Deprecated: use native enums)
+- `EnumTypeMapper`: maps PHP enums to GraphQL enum types
+- `BaseTypeMapper`: maps scalar types and lists. Passes the control to the "recursive type mappers" if an object is encountered.
+- `FinalRootTypeMapper`: the last type mapper of the chain, used to throw error if no other type mapper managed to handle the type.
 
 Type mappers are organized in a chain; each type-mapper is responsible for calling the next type mapper.
 
@@ -74,12 +76,12 @@ graph TD;
     CompoundTypeMapper-->IteratorTypeMapper
     IteratorTypeMapper-->YourCustomRootTypeMapper
     YourCustomRootTypeMapper-->MyCLabsEnumTypeMapper
-    MyCLabsEnumTypeMapper-->BaseTypeMapper
+    MyCLabsEnumTypeMapper-->EnumTypeMapper
+    EnumTypeMapper-->BaseTypeMapper
     BaseTypeMapper-->FinalRootTypeMapper
   end
   class YourCustomRootTypeMapper custom;
 ```
-
 
 ## Class type mappers
 
@@ -89,9 +91,9 @@ Class type mappers are mapping PHP classes to GraphQL object types.
 
 GraphQLite provide 3 default implementations:
 
- - `CompositeTypeMapper`: a type mapper that delegates mapping to other type mappers using the Composite Design Pattern.
- - `GlobTypeMapper`: scans classes in a directory for the `@Type` or `@ExtendType` annotation and maps those to GraphQL types
- - `PorpaginasTypeMapper`: maps and class implementing the Porpaginas `Result` interface to a [special paginated type](pagination.mdx).
+- `CompositeTypeMapper`: a type mapper that delegates mapping to other type mappers using the Composite Design Pattern.
+- `GlobTypeMapper`: scans classes in a directory for the `@Type` or `@ExtendType` annotation and maps those to GraphQL types
+- `PorpaginasTypeMapper`: maps and class implementing the Porpaginas `Result` interface to a [special paginated type](pagination.mdx).
 
 ### Registering a type mapper in Symfony
 
@@ -135,5 +137,6 @@ that implements the [`ParameterMiddlewareInterface`](https://github.com/thecodin
 You can register your own parameter middlewares using the `SchemaFactory::addParameterMiddleware()` method, or by tagging the
 service as "graphql.parameter_middleware" if you are using the Symfony bundle.
 
-<div class="alert alert--info">Use a parameter middleware if you want to inject an argument in a method and if this argument
-is not a GraphQL input type or if you want to alter the way input types are imported (for instance if you want to add a validation step)</div>
+<div class="alert alert--info">
+  Use a parameter middleware if you want to inject an argument in a method and if this argument is not a GraphQL input type or if you want to alter the way input types are imported (for instance if you want to add a validation step)
+</div>
