@@ -44,7 +44,7 @@ class Input implements TypeInterface
     public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null, ?string $description = null, ?bool $update = null)
     {
         $this->name = $name ?? $attributes['name'] ?? null;
-        $this->default = $default ?? $attributes['default'] ?? $this->name === null;
+        $this->default = $default ?? $attributes['default'] ?? true;
         $this->description = $description ?? $attributes['description'] ?? null;
         $this->update = $update ?? $attributes['update'] ?? false;
     }
