@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use function array_flip;
+use function array_reverse;
+use function class_implements;
+use function get_parent_class;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -19,16 +23,12 @@ use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
+
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ObjectFromInterfaceType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TypeError;
 use Webmozart\Assert\Assert;
-
-use function array_flip;
-use function array_reverse;
-use function class_implements;
-use function get_parent_class;
 
 /**
  * This class wraps a TypeMapperInterface into a RecursiveTypeMapperInterface.
