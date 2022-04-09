@@ -43,7 +43,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @var array<class-string<object>,MappedClass>|null
      */
-    private array $mappedClasses;
+    private ?array $mappedClasses = null;
 
     /**
      * An array of interfaces OR object types if no interface matching.
@@ -65,7 +65,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     private ?int $ttl = null;
 
     /** @var array<string, class-string<object>> An array mapping a GraphQL interface name to the PHP class name that triggered its generation. */
-    private array $interfaceToClassNameMap;
+    private ?array $interfaceToClassNameMap = null;
 
     private TypeRegistry $typeRegistry;
 
