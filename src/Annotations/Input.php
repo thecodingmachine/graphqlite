@@ -21,7 +21,7 @@ use RuntimeException;
  * })
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-class Input
+class Input implements TypeInterface
 {
     /** @var string|null */
     private $class;
@@ -97,5 +97,14 @@ class Input
     public function isUpdate(): bool
     {
         return $this->update;
+    }
+
+    /**
+     * By default there isn't support for defining the type outside
+     * This is used by the @Type annotation with the "external" attribute.
+     */
+    public function isSelfType(): bool
+    {
+        return true;
     }
 }

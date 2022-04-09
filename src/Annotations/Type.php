@@ -27,7 +27,7 @@ use function ltrim;
  * })
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class Type
+class Type implements TypeInterface
 {
     /** @var class-string<object>|null */
     private $class;
