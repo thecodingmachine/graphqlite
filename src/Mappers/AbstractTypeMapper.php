@@ -262,7 +262,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToType(string $className): bool
     {
-        return $this->getMaps()->getTypeByObjectClass($className) !== null;
+        return $this->getMaps()->getTypeByObjectClass($className) !== null
+            || $this->getMaps()->getInputByObjectClass($className) !== null;
     }
 
     /**
@@ -275,8 +276,11 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
     {
-        $typeClassName = $this->getMaps()->getTypeByObjectClass($className);
+        $inputTypeClassName = $this->getMaps()->getInputByObjectClass($className)
+            ? $this->getMaps()->getInputByObjectClass($className)[0]
+            : null;
 
+        $typeClassName = $this->getMaps()->getTypeByObjectClass($className) ?: $inputTypeClassName;
         if ($typeClassName === null) {
             throw CannotMapTypeException::createForType($className);
         }

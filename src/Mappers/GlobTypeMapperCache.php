@@ -44,7 +44,7 @@ class GlobTypeMapperCache
             }
 
             if ($globAnnotationsCache->isDefault()) {
-                $objectClassName                             = $typeClassName;
+                $objectClassName = $typeClassName;
                 $this->mapClassToTypeArray[$objectClassName] = $className;
             }
 
@@ -75,7 +75,7 @@ class GlobTypeMapperCache
                     throw DuplicateMappingException::createForDefaultInput($refClass->getName());
                 }
 
-                $this->mapClassToInput[$inputClassName] = [$inputName, $description, $isUpdate];
+                $this->mapClassToInput[$inputClassName] = [$className, $description, $isUpdate];
             }
 
             $this->mapNameToInput[$inputName] = [$inputClassName, $description, $isUpdate];
