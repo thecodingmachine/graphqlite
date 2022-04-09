@@ -37,10 +37,15 @@ class Input implements TypeInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null, ?string $description = null, ?bool $update = null)
-    {
+    public function __construct(
+        array $attributes = [],
+        ?string $name = null,
+        ?bool $default = null,
+        ?string $description = null,
+        ?bool $update = null
+    ) {
         $this->name = $name ?? $attributes['name'] ?? null;
-        $this->default = $default ?? $attributes['default'] ?? true;
+        $this->default = $default ?? $attributes['default'] ?? $this->name === null;
         $this->description = $description ?? $attributes['description'] ?? null;
         $this->update = $update ?? $attributes['update'] ?? false;
     }

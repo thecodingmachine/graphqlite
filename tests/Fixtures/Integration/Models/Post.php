@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 /**
  * @Type()
  * @Input(name="PostInput", default=true)
- * @Input(name="UpdatePostInput", default=false, update=true)
+ * @Input(name="UpdatePostInput", update=true)
  */
 class Post
 {
