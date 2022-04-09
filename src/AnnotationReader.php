@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 use Webmozart\Assert\Assert;
 
 use function array_diff_key;
@@ -262,7 +263,7 @@ class AnnotationReader
      *
      * @template T of object
      */
-    public function getTypeAnnotation(ReflectionClass $refClass): ?Type
+    public function getTypeAnnotation(ReflectionClass $refClass): ?TypeInterface
     {
         try {
             $type = $this->getClassAnnotation($refClass, Type::class)
