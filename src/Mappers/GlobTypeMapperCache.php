@@ -75,7 +75,7 @@ class GlobTypeMapperCache
                     throw DuplicateMappingException::createForDefaultInput($refClass->getName());
                 }
 
-                $this->mapClassToInput[$inputClassName] = [$className, $description, $isUpdate];
+                $this->mapClassToInput[$inputClassName] = [$className, $inputName, $description, $isUpdate];
             }
 
             $this->mapNameToInput[$inputName] = [$inputClassName, $description, $isUpdate];

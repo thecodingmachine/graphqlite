@@ -329,7 +329,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         $input = $this->getMaps()->getInputByObjectClass($className);
         if ($input !== null) {
-            [$typeName, $description, $isUpdate] = $input;
+            [$className, $typeName, $description, $isUpdate] = $input;
             return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
         }
 
