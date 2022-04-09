@@ -15,4 +15,10 @@ interface TypeInterface
     public function isSelfType(): bool;
 
     public function setClass(string $className): void;
+
+    public function getClass(): string;
+
+    public function isDefault(): bool;
+
+    public function getName(): ?string;
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
 use function lcfirst;
 use function str_replace;
@@ -36,7 +36,7 @@ class NamingStrategy implements NamingStrategyInterface
     /**
      * Returns the GraphQL output object type name based on the type className and the Type annotation.
      */
-    public function getOutputTypeName(string $typeClassName, Type $type): string
+    public function getOutputTypeName(string $typeClassName, TypeInterface $type): string
     {
         $name = $type->getName();
         if ($name !== null) {
