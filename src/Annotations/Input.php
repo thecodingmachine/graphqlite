@@ -45,7 +45,7 @@ class Input implements TypeInterface
         ?bool $update = null
     ) {
         $this->name = $name ?? $attributes['name'] ?? null;
-        $this->default = $default ?? $attributes['default'] ?? $this->name === null;
+        $this->default = $default ?? $attributes['default'] ?? true;
         $this->description = $description ?? $attributes['description'] ?? null;
         $this->update = $update ?? $attributes['update'] ?? false;
     }
