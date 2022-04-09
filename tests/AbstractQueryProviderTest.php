@@ -242,7 +242,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     throw CannotMapTypeException::createForDecorateName($typeName, $type);
                 }
 
-            }, new NamingStrategy(), new Psr16Cache($arrayAdapter), $this->getTypeRegistry());
+            }, new NamingStrategy(), new Psr16Cache($arrayAdapter), $this->getTypeRegistry(), $this->getAnnotationReader());
         }
         return $this->typeMapper;
     }
