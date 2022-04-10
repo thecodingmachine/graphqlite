@@ -1211,8 +1211,6 @@ class EndToEndTest extends TestCase
 
     /**
      * @requires PHP >= 8.1
-     *
-     * @group test-only
      */
     public function testEndToEndNativeEnums(): void
     {
