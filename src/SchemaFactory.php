@@ -358,7 +358,7 @@ class SchemaFactory
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         $compositeTypeMapper = new CompositeTypeMapper();
-        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry);
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry, $annotationReader);
 
         $topRootTypeMapper = new NullableTypeMapperAdapter();
 

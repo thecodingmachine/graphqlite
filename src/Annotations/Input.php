@@ -21,28 +21,29 @@ use RuntimeException;
  * })
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-class Input
+class Input implements TypeInterface
 {
-    /** @var string|null */
-    private $class;
+    /** @var class-string<object>|null */
+    private ?string $class = null;
 
-    /** @var string|null */
-    private $name;
+    private ?string $name = null;
 
-    /** @var bool */
-    private $default;
+    private bool $default;
 
-    /** @var string|null */
-    private $description;
+    private ?string $description = null;
 
-    /** @var bool */
-    private $update;
+    private bool $update;
 
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null, ?string $description = null, ?bool $update = null)
-    {
+    public function __construct(
+        array $attributes = [],
+        ?string $name = null,
+        ?bool $default = null,
+        ?string $description = null,
+        ?bool $update = null
+    ) {
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->default = $default ?? $attributes['default'] ?? $this->name === null;
         $this->description = $description ?? $attributes['description'] ?? null;
@@ -51,6 +52,8 @@ class Input
 
     /**
      * Returns the fully qualified class name of the targeted class.
+     *
+     * @return class-string<object>
      */
     public function getClass(): string
     {
@@ -61,6 +64,9 @@ class Input
         return $this->class;
     }
 
+    /**
+     * @param class-string<object> $class
+     */
     public function setClass(string $class): void
     {
         $this->class = $class;
@@ -97,5 +103,14 @@ class Input
     public function isUpdate(): bool
     {
         return $this->update;
+    }
+
+    /**
+     * By default there isn't support for defining the type outside
+     * This is used by the @Type annotation with the "external" attribute.
+     */
+    public function isSelfType(): bool
+    {
+        return true;
     }
 }

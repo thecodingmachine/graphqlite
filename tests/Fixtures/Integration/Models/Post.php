@@ -9,7 +9,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @Type()
- * @Input()
+ * @Input(name="PostInput", default=true)
  * @Input(name="UpdatePostInput", update=true)
  */
 class Post
@@ -29,7 +29,7 @@ class Post
 
     /**
      * @Field(for={"Post", "PostInput"})
-     * @Field(for="PostUpdateInput", inputType="DateTime")
+     * @Field(for="UpdatePostInput", inputType="DateTime")
      * @var DateTimeInterface
      */
     public $publishedAt;

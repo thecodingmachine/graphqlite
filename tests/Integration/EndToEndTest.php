@@ -172,7 +172,8 @@ class EndToEndTest extends TestCase
                     $container->get(TypeMapperInterface::class),
                     $container->get(NamingStrategyInterface::class),
                     new Psr16Cache($arrayAdapter),
-                    $container->get(TypeRegistry::class)
+                    $container->get(TypeRegistry::class),
+                    $container->get(AnnotationReader::class)
                 );
             },
             TypeMapperInterface::class => function(ContainerInterface $container) {
@@ -1210,8 +1211,6 @@ class EndToEndTest extends TestCase
 
     /**
      * @requires PHP >= 8.1
-     *
-     * @group test-only
      */
     public function testEndToEndNativeEnums(): void
     {

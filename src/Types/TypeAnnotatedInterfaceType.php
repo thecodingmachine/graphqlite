@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
-use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
-use function array_merge;
+
 use function get_class;
 use function gettype;
 use function is_object;

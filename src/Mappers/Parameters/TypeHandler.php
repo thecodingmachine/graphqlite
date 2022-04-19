@@ -93,7 +93,14 @@ class TypeHandler implements ParameterHandlerInterface
         $docBlockReturnType = $this->getDocBlocReturnType($docBlockObj, $refMethod);
 
         try {
-            $type = $this->mapType($phpdocType, $docBlockReturnType, $returnType ? $returnType->allowsNull() : false, false, $refMethod, $docBlockObj);
+            $type = $this->mapType(
+                $phpdocType,
+                $docBlockReturnType,
+                $returnType ? $returnType->allowsNull() : false,
+                false,
+                $refMethod,
+                $docBlockObj
+            );
             assert($type instanceof GraphQLType && $type instanceof OutputType);
         } catch (CannotMapTypeExceptionInterface $e) {
             $e->addReturnInfo($refMethod);
@@ -173,7 +180,15 @@ class TypeHandler implements ParameterHandlerInterface
             try {
                 $declaringFunction = $parameter->getDeclaringFunction();
                 Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
-                $type = $this->mapType($phpdocType, $paramTagType, $allowsNull || $parameter->isDefaultValueAvailable(), true, $declaringFunction, $docBlock, $parameter->getName());
+                $type = $this->mapType(
+                    $phpdocType,
+                    $paramTagType,
+                    $allowsNull || $parameter->isDefaultValueAvailable(),
+                    true,
+                    $declaringFunction,
+                    $docBlock,
+                    $parameter->getName()
+                );
                 Assert::isInstanceOf($type, InputType::class);
             } catch (CannotMapTypeExceptionInterface $e) {
                 $e->addParamInfo($parameter);
@@ -201,7 +216,13 @@ class TypeHandler implements ParameterHandlerInterface
      *
      * @throws CannotMapTypeException
      */
-    public function mapPropertyType(ReflectionProperty $refProperty, DocBlock $docBlock, bool $toInput, ?string $argumentName = null, ?bool $isNullable = null): GraphQLType
+    public function mapPropertyType(
+        ReflectionProperty $refProperty,
+        DocBlock $docBlock,
+        bool $toInput,
+        ?string $argumentName = null,
+        ?bool $isNullable = null
+    ): GraphQLType
     {
         $propertyType = null;
 
@@ -223,7 +244,15 @@ class TypeHandler implements ParameterHandlerInterface
             $isNullable = $propertyType ? $propertyType->allowsNull() : false;
         }
 
-        return $this->mapType($phpdocType, $docBlockPropertyType, $isNullable, $toInput, $refProperty, $docBlock, $argumentName);
+        return $this->mapType(
+            $phpdocType,
+            $docBlockPropertyType,
+            $isNullable,
+            $toInput,
+            $refProperty,
+            $docBlock,
+            $argumentName
+        );
     }
 
     /**
@@ -233,7 +262,14 @@ class TypeHandler implements ParameterHandlerInterface
      *
      * @throws CannotMapTypeException
      */
-    public function mapInputProperty(ReflectionProperty $refProperty, DocBlock $docBlock, ?string $argumentName = null, ?string $inputTypeName = null, $defaultValue = null, ?bool $isNullable = null): InputTypeProperty
+    public function mapInputProperty(
+        ReflectionProperty $refProperty,
+        DocBlock $docBlock,
+        ?string $argumentName = null,
+        ?string $inputTypeName = null,
+        $defaultValue = null,
+        ?bool $isNullable = null
+    ): InputTypeProperty
     {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
@@ -285,7 +321,15 @@ class TypeHandler implements ParameterHandlerInterface
      *
      * @throws CannotMapTypeException
      */
-    private function mapType(Type $type, ?Type $docBlockType, bool $isNullable, bool $mapToInputType, $reflector, DocBlock $docBlockObj, ?string $argumentName = null): GraphQLType
+    private function mapType(
+        Type $type,
+        ?Type $docBlockType,
+        bool $isNullable,
+        bool $mapToInputType,
+        $reflector,
+        DocBlock $docBlockObj,
+        ?string $argumentName = null
+    ): GraphQLType
     {
         $graphQlType = null;
         if ($isNullable && ! $type instanceof Nullable) {

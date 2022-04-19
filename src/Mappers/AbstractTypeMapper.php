@@ -262,7 +262,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToType(string $className): bool
     {
-        return $this->getMaps()->getTypeByObjectClass($className) !== null;
+        return $this->getMaps()->getTypeByObjectClass($className) !== null
+            || $this->getMaps()->getInputByObjectClass($className) !== null;
     }
 
     /**
@@ -275,8 +276,12 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
     {
-        $typeClassName = $this->getMaps()->getTypeByObjectClass($className);
+        /** @var class-string<object>|null $inputTypeClassName */
+        $inputTypeClassName = $this->getMaps()->getInputByObjectClass($className)
+            ? $this->getMaps()->getInputByObjectClass($className)[0]
+            : null;
 
+        $typeClassName = $this->getMaps()->getTypeByObjectClass($className) ?: $inputTypeClassName;
         if ($typeClassName === null) {
             throw CannotMapTypeException::createForType($className);
         }
@@ -311,8 +316,6 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      *
      * @param class-string<object> $className
      *
-     * @return ResolvableMutableInputInterface&InputObjectType
-     *
      * @throws CannotMapTypeException
      */
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface
@@ -325,7 +328,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         $input = $this->getMaps()->getInputByObjectClass($className);
         if ($input !== null) {
-            [$typeName, $description, $isUpdate] = $input;
+            [$className, $typeName, $description, $isUpdate] = $input;
             return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
         }
 

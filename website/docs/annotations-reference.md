@@ -7,7 +7,7 @@ sidebar_label: Annotations reference
 Note: all annotations are available both in a Doctrine annotation format (`@Query`) and in PHP 8 attribute format (`#[Query]`).
 See [Doctrine annotations vs PHP 8 attributes](doctrine-annotations-attributes.mdx) for more details.
 
-## @Query annotation
+## @Query
 
 The `@Query` annotation is used to declare a GraphQL query.
 
@@ -18,7 +18,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *no*       | string | The name of the query. If skipped, the name of the method is used instead.
 [outputType](custom-types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
 
-## @Mutation annotation
+## @Mutation
 
 The `@Mutation` annotation is used to declare a GraphQL mutation.
 
@@ -29,7 +29,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *no*       | string | The name of the mutation. If skipped, the name of the method is used instead.
 [outputType](custom-types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
 
-## @Type annotation
+## @Type
 
 The `@Type` annotation is used to declare a GraphQL object type.  This is used with standard output
 types, as well as enum types.  For input types, use the [@Input annotation](#input-annotation) directly on the input type or a [@Factory annoation](#factory-annotation) to make/return an input type.
@@ -43,7 +43,7 @@ name           | *no*       | string | The name of the GraphQL type generated. I
 default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
 external       | *no*       | bool   | Whether this is an [external type declaration](external-type-declaration.mdx) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
 
-## @ExtendType annotation
+## @ExtendType
 
 The `@ExtendType` annotation is used to add fields to an existing GraphQL object type.
 
@@ -56,7 +56,7 @@ name           | see below  | string | The targeted GraphQL output type.
 
 One and only one of "class" and "name" parameter can be passed at the same time.
 
-## @Input annotation
+## @Input
 
 The `@Input` annotation is used to declare a GraphQL input type.
 
@@ -66,11 +66,10 @@ Attribute      | Compulsory | Type   | Definition
 ---------------|------------|--------|--------
 name           | *no*       | string | The name of the GraphQL input type generated. If not passed, the name of the class with suffix "Input" is used. If the class ends with "Input", the "Input" suffix is not added.
 description    | *no*       | string | Description of the input type in the documentation. If not passed, PHP doc comment is used.
-default        | *no*       | bool   | Defaults to *true* if name is not specified. Whether the annotated PHP class should be mapped by default to this type.
-update         | *no*       | bool   | Determines if the the input represents a partial update. When set to *true* all input fields will become optional and won't have default values thus won't be set on resolve if they are not specified in the query/mutation.
+default        | *no*       | bool   | Name of the input type represented in your GraphQL schema. Defaults to `true` *only if* the name is not specified. If `name` is specified, this will default to `false`, so must also be included for `true` when `name` is used.
+update         | *no*       | bool   | Determines if the the input represents a partial update. When set to `true` all input fields will become optional and won't have default values thus won't be set on resolve if they are not specified in the query/mutation.  This primarily applies to nullable fields.
 
-
-## @Field annotation
+## @Field
 
 The `@Field` annotation is used to declare a GraphQL field.
 
@@ -86,7 +85,7 @@ description                   | *no*       | string        | Field description d
 [outputType](custom-types.mdx) | *no*       | string        | Forces the GraphQL output type of a query.
 [inputType](input-types.mdx)   | *no*       | string        | Forces the GraphQL input type of a query.
 
-## @SourceField annotation
+## @SourceField
 
 The `@SourceField` annotation is used to declare a GraphQL field.
 
@@ -103,7 +102,7 @@ annotations    | *no*       | array\<Annotations\>  | A set of annotations that 
 
 **Note**: `outputType` and `phpType` are mutually exclusive.
 
-## @MagicField annotation
+## @MagicField
 
 The `@MagicField` annotation is used to declare a GraphQL field that originates from a PHP magic property (using `__get` magic method).
 
@@ -120,7 +119,7 @@ annotations    | *no*       | array\<Annotations\>  | A set of annotations that 
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
-## @Logged annotation
+## @Logged
 
 The `@Logged` annotation is used to declare a Query/Mutation/Field is only visible to logged users.
 
@@ -128,7 +127,7 @@ The `@Logged` annotation is used to declare a Query/Mutation/Field is only visib
 
 This annotation allows no attributes.
 
-## @Right annotation
+## @Right
 
 The `@Right` annotation is used to declare a Query/Mutation/Field is only visible to users with a specific right.
 
@@ -138,7 +137,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*       | string | The name of the right.
 
-## @FailWith annotation
+## @FailWith
 
 The `@FailWith` annotation is used to declare a default value to return in the user is not authorized to see a specific
 query / mutation / field (according to the `@Logged` and `@Right` annotations).
@@ -149,7 +148,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 value          | *yes*       | mixed | The value to return if the user is not authorized.
 
-## @HideIfUnauthorized annotation
+## @HideIfUnauthorized
 
 The `@HideIfUnauthorized` annotation is used to completely hide the query / mutation / field if the user is not authorized
 to access it (according to the `@Logged` and `@Right` annotations).
@@ -158,7 +157,7 @@ to access it (according to the `@Logged` and `@Right` annotations).
 
 `@HideIfUnauthorized` and `@FailWith` are mutually exclusive.
 
-## @InjectUser annotation
+## @InjectUser
 
 Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your
 query / mutation / field.
@@ -169,7 +168,7 @@ Attribute      | Compulsory | Type   | Definition
 ---------------|------------|--------|--------
 *for*          | *yes*      | string | The name of the PHP parameter
 
-## @Security annotation
+## @Security
 
 The `@Security` annotation can be used to check fin-grained access rights.
 It is very flexible: it allows you to pass an expression that can contains custom logic.
@@ -182,7 +181,7 @@ Attribute      | Compulsory | Type   | Definition
 ---------------|------------|--------|--------
 *default*      | *yes*      | string | The security expression
 
-## @Factory annotation
+## @Factory
 
 The `@Factory` annotation is used to declare a factory that turns GraphQL input types into objects.
 
@@ -193,7 +192,7 @@ Attribute      | Compulsory | Type | Definition
 name           | *no*       | string | The name of the input type. If skipped, the name of class returned by the factory is used instead.
 default        | *no*       | bool | If `true`, this factory will be used by default for its PHP return type. If set to `false`, you must explicitly [reference this factory using the `@Parameter` annotation](input-types.mdx#declaring-several-input-types-for-the-same-php-class).
 
-## @UseInputType annotation
+## @UseInputType
 
 Used to override the GraphQL input type of a PHP parameter.
 
@@ -204,7 +203,7 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *inputType*    | *yes*      | string | The GraphQL input type to force for this input field
 
-## @Decorate annotation
+## @Decorate
 
 The `@Decorate` annotation is used [to extend/modify/decorate an input type declared with the `@Factory` annotation](extend-input-type.mdx).
 
@@ -214,7 +213,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *yes*      | string | The GraphQL input type name extended by this decorator.
 
-## @Autowire annotation
+## @Autowire
 
 [Resolves a PHP parameter from the container](autowiring.mdx).
 
@@ -227,7 +226,7 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *identifier*   | *no*       | string | The identifier of the service to fetch. This is optional. Please avoid using this attribute as this leads to a "service locator" anti-pattern.
 
-## @HideParameter annotation
+## @HideParameter
 
 Removes [an argument from the GraphQL schema](input-types.mdx#ignoring-some-parameters).
 
@@ -235,8 +234,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *for*          | *yes*      | string | The name of the PHP parameter to hide
 
-
-## @Validate annotation
+## @Validate
 
 <div class="alert alert--info">This annotation is only available in the GraphQLite Laravel package</div>
 
@@ -255,7 +253,7 @@ Sample:
 @Validate(for="$email", rule="email|unique:users")
 ```
 
-## @Assertion annotation
+## @Assertion
 
 [Validates a user input](validation.mdx).
 
@@ -269,7 +267,7 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *constraint*   | *yes       | annotation | One (or many) Symfony validation annotations.
 
-## ~~@EnumType annotation~~
+## ~~@EnumType~~
 
 *Deprecated: Use [PHP 8.1's native Enums](https://www.php.net/manual/en/language.types.enumerations.php) instead with a [@Type](#type-annotation).*
 

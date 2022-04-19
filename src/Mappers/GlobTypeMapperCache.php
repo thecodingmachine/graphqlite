@@ -23,7 +23,7 @@ class GlobTypeMapperCache
     private $mapInputNameToFactory = [];
     /** @var array<string,array<int, array{0: class-string<object>, 1: string}>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private $mapInputNameToDecorator = [];
-    /** @var array<class-string<object>,array{0: string, 1: string|null, 2: bool}> Maps a domain class to the input */
+    /** @var array<class-string<object>,array{0: class-string<object>, 1: string, 2: string|null, 3: bool}> Maps a domain class to the input */
     private $mapClassToInput = [];
     /** @var array<string,array{0: class-string<object>, 1: string|null, 2: bool}> Maps a GraphQL type name to the input */
     private $mapNameToInput = [];
@@ -44,7 +44,7 @@ class GlobTypeMapperCache
             }
 
             if ($globAnnotationsCache->isDefault()) {
-                $objectClassName                             = $typeClassName;
+                $objectClassName = $typeClassName;
                 $this->mapClassToTypeArray[$objectClassName] = $className;
             }
 
@@ -75,7 +75,7 @@ class GlobTypeMapperCache
                     throw DuplicateMappingException::createForDefaultInput($refClass->getName());
                 }
 
-                $this->mapClassToInput[$inputClassName] = [$inputName, $description, $isUpdate];
+                $this->mapClassToInput[$inputClassName] = [$className, $inputName, $description, $isUpdate];
             }
 
             $this->mapNameToInput[$inputName] = [$inputClassName, $description, $isUpdate];
@@ -145,7 +145,7 @@ class GlobTypeMapperCache
     }
 
     /**
-     * @return array{0: string, 1: string|null, 2: bool}|null
+     * @return array{0: class-string<object>, 1: string, 2: string|null, 3: bool}|null
      */
     public function getInputByObjectClass(string $className): ?array
     {
