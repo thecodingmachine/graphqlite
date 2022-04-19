@@ -10,6 +10,7 @@ use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
@@ -145,5 +146,23 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->expectExceptionMessage("Parameter 'foo' is missing for class 'TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar' constructor. It should be mapped as required field.");
 
         $input->resolve(null, $args, [], $resolveInfo);
+    }
+
+    public function testSimpleSetterAnnotated(): void
+    {
+        $input = new InputType(InputWithSetter::class, 'InputWithSetterInput', null, false, $this->getFieldsBuilder());
+
+        $args = [
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        /** @var TestOnlyConstruct $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals('Foo', $result->getFoo());
+        $this->assertEquals(200, $result->getBar());
     }
 }

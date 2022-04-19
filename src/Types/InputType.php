@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Error\ClientAware;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeMethod;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
+use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
 use function array_diff_key;
@@ -171,5 +175,32 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         }
 
         return $names;
+    }
+
+    /**
+     * Casts parameters array into an array of arguments ready to be passed to the resolver.
+     *
+     * @param ParameterInterface[] $parameters
+     * @param array<string, mixed> $args
+     * @param mixed $context
+     *
+     * @return array<int, mixed>
+     */
+    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
+    {
+        $toPassArgs = [];
+        $exceptions = [];
+        foreach ($parameters as $parameterName => $parameter) {
+            try {
+                $toPassArgs[$parameterName] = $parameter->resolve($source, $args, $context, $info);
+            } catch (MissingArgumentException $e) {
+                throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
+            } catch (ClientAware $e) {
+                $exceptions[] = $e;
+            }
+        }
+        GraphQLAggregateException::throwExceptions($exceptions);
+
+        return $toPassArgs;
     }
 }
