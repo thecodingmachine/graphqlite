@@ -24,7 +24,6 @@ class TrickyProduct
     /**
      * @var float
      * @Field()
-     * @Field(for="CreateTrickyProductInput", inputType="Float!")
      * @Field(for="UpdateTrickyProductInput", inputType="Float")
      */
     private $price;
