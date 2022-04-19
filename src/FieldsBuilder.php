@@ -378,6 +378,7 @@ class FieldsBuilder
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlockObj));
 
             $methodName = $refMethod->getName();
+            if (strpos($methodName, 'set') === 0) continue;
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
             if (! $description) {
