@@ -4,6 +4,7 @@
 /src/Tests/
 /phpunit.xml
 /.php_cs/cache
+/.idea
 
 node_modules
 
