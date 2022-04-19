@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeMethod;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
@@ -94,15 +95,22 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             if (! array_key_exists($name, $args)) {
                 continue;
             }
-
-            $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
+            if ($field instanceof InputTypeMethod) {
+                $mappedValues[$field->getMethodName()] = $this->paramsToArguments($field->getParameters(), $source, $args, $context, $resolveInfo, [$field, "resolve"]);
+            } else {
+                $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
+            }
         }
 
         $instance = $this->createInstance($mappedValues);
         $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
 
         foreach ($values as $property => $value) {
-            PropertyAccessor::setValue($instance, $property, $value);
+            if (is_array($value)) {
+                $instance->{$property}(...$value);
+            } else {
+                PropertyAccessor::setValue($instance, $property, $value);
+            }
         }
 
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {

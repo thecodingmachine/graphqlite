@@ -33,6 +33,8 @@ use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeMethod;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -160,43 +162,60 @@ class FieldsBuilder
      */
     public function getInputFields(string $className, string $inputName, bool $isUpdate = false): array
     {
+
         $refClass = new ReflectionClass($className);
-        $reflectors = $refClass->getProperties();
 
-        $fields = [];
+        /** @var ReflectionMethod[]|ReflectionProperty[] $reflectorByFields */
+        $reflectorByFields = [];
+
+        $inputFields = [];
         $defaultProperties = $refClass->getDefaultProperties();
+
+        $closestMatchingTypeClass = null;
+        $parent = get_parent_class($refClass->getName());
+        if ($parent !== false) {
+            $closestMatchingTypeClass = $this->recursiveTypeMapper->findClosestMatchingParent($parent);
+        }
+
+        /** @var ReflectionProperty[]|ReflectionMethod[] $reflectors */
+        $reflectors = array_merge($refClass->getProperties(), $refClass->getMethods(ReflectionMethod::IS_PUBLIC));
         foreach ($reflectors as $reflector) {
-
-            /** @var Annotations\Field[] $annotations */
-            $annotations = $this->annotationReader->getPropertyAnnotations($reflector, Annotations\Field::class);
-            $docBlock = $this->cachedDocBlockFactory->getDocBlock($reflector);
-
-            foreach ($annotations as $annotation) {
-                $for = $annotation->getFor();
-                if ($for && ! in_array($inputName, $for)) {
-                    continue;
-                }
-
-                $name = $annotation->getName() ?: $reflector->getName();
-
-                $field = $this->typeMapper->mapInputProperty($reflector, $docBlock, $name, $annotation->getInputType(), $defaultProperties[$reflector->getName()] ?? null, $isUpdate ? true : null);
-                $description = $annotation->getDescription();
-                if ($description) {
-                    $field->setDescription($description);
-                }
-
-                $fields[$name] = $field;
+            if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $reflector->getDeclaringClass()->getName()) {
+                // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
+                // We will merge the fields anyway.
+                continue;
             }
+
+            if ($reflector instanceof ReflectionMethod) {
+                $fields = $this->getInputFieldsByMethodAnnotations($className, $refClass, $reflector, Field::class, true, $defaultProperties, $inputName, $isUpdate);
+            } else {
+                $fields = $this->getInputFieldsByPropertyAnnotations($className, $refClass, $reflector, Field::class, $defaultProperties, $inputName, $isUpdate);
+            }
+
+
+            $duplicates = array_intersect_key($reflectorByFields, $fields);
+            if ($duplicates) {
+                $name = key($duplicates);
+                assert(is_string($name));
+                throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
+            }
+
+            $reflectorByFields = array_merge(
+                $reflectorByFields,
+                array_fill_keys(array_keys($fields), $reflector)
+            );
+
+            $inputFields = array_merge($inputFields, $fields);
         }
 
         // Make sure @Field annotations applied to parent's private properties are taken into account as well.
         $parent = $refClass->getParentClass();
         if ($parent) {
             $parentFields = $this->getInputFields($parent->getName(), $inputName, $isUpdate);
-            $fields = array_merge($fields, array_diff_key($parentFields, $fields));
+            $inputFields = array_merge($inputFields, array_diff_key($parentFields, $inputFields));
         }
 
-        return $fields;
+        return $inputFields;
     }
 
     /**
@@ -823,5 +842,104 @@ class FieldsBuilder
         }
 
         return [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod];
+    }
+
+    /**
+     * Gets input fields by class method annotations.
+     *
+     * @param string|object $controller
+     * @param class-string<AbstractRequest> $annotationName
+     *
+     * @return array<string, InputTypeParameterInterface>
+     *
+     * @throws AnnotationException
+     */
+    private function getInputFieldsByMethodAnnotations($controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
+    {
+        $fields = [];
+
+        $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
+        foreach ($annotations as $fieldAnnotations) {
+            $description = null;
+            if ($fieldAnnotations instanceof Field) {
+                $for = $fieldAnnotations->getFor();
+                if ($typeName && $for && !in_array($typeName, $for)) {
+                    continue;
+                }
+                $description = $fieldAnnotations->getDescription();
+            }
+            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+            $methodName = $refMethod->getName();
+            if (strpos($methodName, 'set') !== 0) continue;
+            $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
+            if (!$description) {
+                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+            }
+            $parameters = $refMethod->getParameters();
+            $args = $this->mapParameters($parameters, $docBlockObj);
+            $type = $args[$name]->getType();
+
+            $inputParameter = $args[$name];
+            $field = new InputTypeMethod($methodName, $inputParameter->getName(), $inputParameter->getType(), $inputParameter->hasDefaultValue(), $inputParameter->getDefaultValue());
+            $field->setDescription(trim($description));
+            $field->setParameters($args);
+            if ($field === null) {
+                continue;
+            }
+
+            if (isset($fields[$name])) {
+                throw DuplicateMappingException::createForQueryInOneMethod($name, $refMethod);
+            }
+            $fields[$name] = $field;
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Gets input fields by class property annotations.
+     *
+     * @param string|object $controller
+     * @param class-string<AbstractRequest> $annotationName
+     *
+     * @return array<string, InputTypeProperty>
+     *
+     * @throws AnnotationException
+     */
+    private function getInputFieldsByPropertyAnnotations($controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
+    {
+        $fields = [];
+
+        $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
+        $docBlock = $this->cachedDocBlockFactory->getDocBlock($refProperty);
+        foreach ($annotations as $annotation) {
+            $description = null;
+
+            if ($annotation instanceof Field) {
+                $for = $annotation->getFor();
+                if ($typeName && $for && !in_array($typeName, $for)) {
+                    continue;
+                }
+
+                $description = $annotation->getDescription();
+            }
+
+            $name = $annotation->getName() ?: $refProperty->getName();
+            $field = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $annotation->getInputType(), $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
+            if ($description) {
+                $field->setDescription($description);
+            }
+
+            if ($field === null) {
+                continue;
+            }
+
+            if (isset($fields[$name])) {
+                throw DuplicateMappingException::createForQueryInOneProperty($name, $refProperty);
+            }
+            $fields[$name] = $field;
+        }
+
+        return $fields;
     }
 }
