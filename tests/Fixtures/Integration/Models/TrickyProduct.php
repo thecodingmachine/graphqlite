@@ -24,11 +24,20 @@ class TrickyProduct
     /**
      * @var float
      * @Field()
-     * @Field(for={CreateTrickyProductInput}, inputType="CreateTrickyProductInput!")
-     * @Field(for={UpdateTrickyProductInput}, inputType="UpdateTrickyProductInput")
+     * @Field(for="CreateTrickyProductInput", inputType="Float!")
+     * @Field(for="UpdateTrickyProductInput", inputType="Float")
      */
     private $price;
 
+    /**
+     * @param string $name
+     * @param float $price
+     */
+    public function __construct(string $name, float $price)
+    {
+        $this->name = $name;
+        $this->price = $price;
+    }
 
     /**
      * @Field()
@@ -37,6 +46,14 @@ class TrickyProduct
     public function getName(): string
     {
         return $this->name;
+    }
+
+     /**
+     * @return float
+     */
+    public function getPrice(): float
+    {
+        return $this->price;
     }
 
     /**
