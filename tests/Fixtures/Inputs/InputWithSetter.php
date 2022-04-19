@@ -5,11 +5,15 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 
-#[Input]
+/**
+ * @Input()
+ */
 class InputWithSetter
 {
 
-    #[Field]
+    /**
+     * @Field()
+     */
     private string $foo;
 
 
@@ -20,7 +24,9 @@ class InputWithSetter
         $this->foo = $foo;
     }
 
-    #[Field]
+    /**
+     * @Field()
+     */
     public function setBar(int $bar): void {
         $this->bar = $bar;
     }

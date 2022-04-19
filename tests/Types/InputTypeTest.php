@@ -6,6 +6,7 @@ use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
@@ -16,7 +17,6 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
 class InputTypeTest extends AbstractQueryProviderTest
 {
-
     public function testInputConfiguredCorrectly(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', 'Test', false, $this->getFieldsBuilder());
