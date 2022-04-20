@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\Input;
@@ -24,15 +25,14 @@ class TrickyProduct
     /**
      * @var float
      * @Field()
-     * @Field(for="UpdateTrickyProductInput", inputType="Float")
      */
-    private $price;
+    public $price;
 
     /**
      * @param string $name
      * @param float $price
      */
-    public function __construct(string $name, float $price)
+    public function __construct($name, $price)
     {
         $this->name = $name;
         $this->price = $price;
@@ -57,11 +57,14 @@ class TrickyProduct
 
     /**
      * @Field()
+     * @Autowire(for="testService", identifier="testService")
+     * @param string $name
+     * @param string $testService
      * @return void
      */
-    public function setName(string $name): void
+    public function setName(string $name, string $testService): void
     {
-        $this->name = $name;
+        $this->name = $name . " " .$testService;
     }
 
 }
