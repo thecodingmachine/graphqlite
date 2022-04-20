@@ -2045,4 +2045,74 @@ class EndToEndTest extends TestCase
         $result = GraphQL::executeQuery($schema, $queryString);
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
+
+    public function testEndToEndSetterWithAutowire() {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+        $queryString = '
+        mutation {
+            createTrickyProduct(
+                product: {
+                    name: "Special"
+                    price: 11.99
+                }
+            ) {
+                name
+                price
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Special foo', $data['createTrickyProduct']['name']);
+        $this->assertSame(11.99, $data['createTrickyProduct']['price']);
+
+        $queryString = '
+        query {
+            trickyProduct {
+                name
+                price
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Special box', $data['trickyProduct']['name']);
+        $this->assertSame(11.99, $data['trickyProduct']['price']);
+
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "Not so special"
+                    price: 10.99
+                }
+            ) {
+                name
+                price
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Not so special foo', $data['updateTrickyProduct']['name']);
+        $this->assertSame(10.99, $data['updateTrickyProduct']['price']);
+    }
 }
