@@ -94,13 +94,16 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
         $mappedValues = [];
+        $mappedMethodValues = [];
         foreach ($this->fields as $field) {
             $name = $field->getName();
             if (! array_key_exists($name, $args)) {
                 continue;
             }
             if ($field instanceof InputTypeMethod) {
-                $mappedValues[$field->getMethodName()] = $this->paramsToArguments($field->getParameters(), $source, $args, $context, $resolveInfo, [$field, "resolve"]);
+                $args = $this->paramsToArguments($field->getParameters(), $source, $args, $context, $resolveInfo, [$field, "resolve"]);
+                $mappedMethodValues[$field->getMethodName()] = $args;
+                $mappedValues[$name] = $args[$name];
             } else {
                 $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
             }
@@ -110,11 +113,10 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
 
         foreach ($values as $property => $value) {
-            if (is_array($value)) {
-                $instance->{$property}(...$value);
-            } else {
-                PropertyAccessor::setValue($instance, $property, $value);
-            }
+            PropertyAccessor::setValue($instance, $property, $value);
+        }
+        foreach ($mappedMethodValues as  $methodName => $args) {
+            $instance->{$methodName}(...$args);
         }
 
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
