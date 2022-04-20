@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use Porpaginas\Arrays\ArrayResult;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\ProductTypeEnum;
@@ -89,8 +90,9 @@ class ProductController
 
     /**
      * @Mutation()
-     * @param TrickyProduct $product
+     * @UseInputType(for="$product", inputType="CreateTrickyProductInput!")
      *
+     * @param TrickyProduct $product
      * @return TrickyProduct
      */
     public function createTrickyProduct(TrickyProduct $product): TrickyProduct
@@ -103,18 +105,19 @@ class ProductController
      *
      * @return TrickyProduct
      */
-    public function getTrickyProduct() {
+    public function getTrickyProduct(): TrickyProduct {
         return new TrickyProduct('Special box', 11.99);
     }
 
     /**
      * @Mutation()
-     * @param TrickyProduct $product
+     * @UseInputType(for="$product", inputType="UpdateTrickyProductInput!")
      *
+     * @param TrickyProduct $product
      * @return TrickyProduct
      */
     public function updateTrickyProduct(TrickyProduct $product): TrickyProduct
     {
-        return new TrickyProduct($product->getName(), $product->getPrice());
+        return $product;
     }
 }
