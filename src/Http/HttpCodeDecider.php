@@ -14,7 +14,7 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
     /**
      * Decides the HTTP status code based on the answer.
      *
-     * @see https://github.com/APIs-guru/graphql-over-http#status-codes
+     * @see https://github.com/graphql/graphql-over-http/blob/main/spec/GraphQLOverHTTP.md#status-codes
      */
     public function decideHttpStatusCode(ExecutionResult $result): int
     {
