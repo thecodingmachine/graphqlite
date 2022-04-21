@@ -151,14 +151,12 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testSimpleSetterAnnotated(): void
     {
         $input = new InputType(InputWithSetter::class, 'InputWithSetterInput', null, false, $this->getFieldsBuilder());
-
         $args = [
             'foo' => 'Foo',
             'bar' => 200,
         ];
 
         $resolveInfo = $this->createMock(ResolveInfo::class);
-
         /** @var TestOnlyConstruct $result */
         $result = $input->resolve(null, $args, [], $resolveInfo);
 

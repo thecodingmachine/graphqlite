@@ -28,15 +28,6 @@ class TrickyProduct
      */
     public $price;
 
-    /**
-     * @param string $name
-     * @param float $price
-     */
-    public function __construct($name, $price)
-    {
-        $this->name = $name;
-        $this->price = $price;
-    }
 
     /**
      * @Field()

@@ -16,8 +16,6 @@ use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\InputField;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeMethod;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
@@ -60,30 +58,6 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         foreach($this->inputFields as $field){
             $fieldConfigs[] = $field->config;
         }
-//dump($this->fields);
-//        $fields = function () use ($isUpdate) {
-//            $fields = [];
-//            foreach ($this->fields as $name => $field) {
-//                $type = $field->getType();
-//
-//                if ($isUpdate && $type instanceof NonNull) {
-//                    $type = $type->getWrappedType();
-//                }
-//
-//                $fields[$name] = [
-//                    'type' => $type,
-//                    'description' => $field->getDescription(),
-//                ];
-//
-//                if (! $field->hasDefaultValue() || $isUpdate) {
-//                    continue;
-//                }
-//
-//                $fields[$name]['defaultValue'] = $field->getDefaultValue();
-//            }
-//
-//            return $fields;
-//        };
 
         $config = [
             'name' => $inputName,
@@ -102,44 +76,16 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
-        $mappedValues = [];
-        $mappedMethodValues = [];
-
-        foreach ($this->finalFields as $finalField) {
-            dump("final: ",$finalField);
-//            $resolve = $field->getResolve();
-//            dump($source, $args, $context, $resolveInfo);
-//            $resolvedField = $resolve($source, $args, $context, $resolveInfo);
-//            $name = $field->getName();
-//            if (! array_key_exists($name, $args)) {
-//                continue;
-//            }
-//            if ($field instanceof InputTypeMethod) {
-//                $args = $this->paramsToArguments($field->getParameters(), $source, $args, $context, $resolveInfo, [$field, "resolve"]);
-//                $mappedMethodValues[$field->getMethodName()] = $args;
-//                $mappedValues[$name] = $args[$name];
-//            } else {
-//                $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
-//            }
-        }
-
         $instance = $this->createInstance($args);
-//        $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
-
-
-        foreach ($this->inputFields as $inputFields) {
-            $resolve = $inputFields->getResolve();
-            $resolvedField = $resolve($instance,$args, $context, $resolveInfo);
-//            dump($resolvedField);
+        $countructerParams = $this->getClassConstructParameterNames();
+        foreach ($this->inputFields as $inputField) {
+            $name = $inputField->name;
+            if (!array_key_exists($name, $args) || in_array($name, $countructerParams)) {
+                continue;
+            }
+            $resolve = $inputField->getResolve();
+            $resolve($instance,$args, $context, $resolveInfo);
         }
-
-//        foreach ($values as $property => $value) {
-//            PropertyAccessor::setValue($instance, $property, $value);
-//        }
-//        foreach ($mappedMethodValues as  $methodName => $args) {
-//            $instance->{$methodName}(...$args);
-//        }
-
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);
         }
@@ -198,32 +144,5 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         }
 
         return $names;
-    }
-
-    /**
-     * Casts parameters array into an array of arguments ready to be passed to the resolver.
-     *
-     * @param ParameterInterface[] $parameters
-     * @param array<string, mixed> $args
-     * @param mixed $context
-     *
-     * @return array<int, mixed>
-     */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
-    {
-        $toPassArgs = [];
-        $exceptions = [];
-        foreach ($parameters as $parameterName => $parameter) {
-            try {
-                $toPassArgs[$parameterName] = $parameter->resolve($source, $args, $context, $info);
-            } catch (MissingArgumentException $e) {
-                throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
-            } catch (ClientAware $e) {
-                $exceptions[] = $e;
-            }
-        }
-        GraphQLAggregateException::throwExceptions($exceptions);
-
-        return $toPassArgs;
     }
 }

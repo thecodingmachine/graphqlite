@@ -44,37 +44,30 @@ class InputField extends InputObjectField
      * @param mixed|null $defaultValue the default value set for this field
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, InputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?bool $isUpdate,?bool $hasDefaultValue, $defaultValue, array $additionalConfig = [])
+    public function __construct(string $name, InputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, bool $isUpdate,bool $hasDefaultValue, $defaultValue, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
             'type' => $type,
-//            'args' => InputTypeUtils::getInputTypeArgs($prefetchArgs + $arguments),
+            'description' => $comment
         ];
-        if ($comment) {
-            $config['description'] = $comment;
-        }
-        if ($hasDefaultValue && !$isUpdate) {
+
+        if (!(!$hasDefaultValue || $isUpdate)) {
             $config['defaultValue'] = $defaultValue;
         }
 
-            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver, $hasDefaultValue, $defaultValue) {
                 if ($originalResolver instanceof SourceResolverInterface) {
                     $originalResolver->setObject($source);
                 }
-
                 $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
-
                 $result = $resolver(...$toPassArgs);
+
+
 
                 try {
                     $this->assertInputType($result);
                 } catch (TypeMismatchRuntimeException $e) {
-//                    $class = $originalResolver->getObject();
-//                    if (is_object($class)) {
-//                        $class = get_class($class);
-//                    }
-
                     $e->addInfo($this->name, $originalResolver->toString());
                     throw $e;
                 }

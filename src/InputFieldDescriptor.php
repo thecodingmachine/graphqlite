@@ -10,9 +10,11 @@ use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
+use TheCodingMachine\GraphQLite\Middlewares\MagicInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
@@ -64,25 +66,25 @@ class InputFieldDescriptor
     private $originalResolver;
     /** @var callable */
     private $resolver;
-    /** @var bool|null */
+    /** @var bool */
     private $isUpdate;
-    /** @var bool|null */
+    /** @var bool */
     private $hasDefaultValue;
     /** @var mixed|null */
     private $defaultValue;
 
     /**
-     * @return bool|null
+     * @return bool
      */
-    public function isUpdate(): ?bool
+    public function isUpdate(): bool
     {
         return $this->isUpdate;
     }
 
     /**
-     * @param bool|null $isUpdate
+     * @param bool $isUpdate
      */
-    public function setIsUpdate(?bool $isUpdate): void
+    public function setIsUpdate(bool $isUpdate): void
     {
         $this->isUpdate = $isUpdate;
     }
@@ -90,17 +92,17 @@ class InputFieldDescriptor
 
 
     /**
-     * @return bool|null
+     * @return bool
      */
-    public function hasDefaultValue(): ?bool
+    public function hasDefaultValue(): bool
     {
         return $this->hasDefaultValue;
     }
 
     /**
-     * @param bool|null $hasDefaultValue
+     * @param bool $hasDefaultValue
      */
-    public function setHasDefaultValue(?bool $hasDefaultValue): void
+    public function setHasDefaultValue(bool $hasDefaultValue): void
     {
         $this->hasDefaultValue = $hasDefaultValue;
     }
@@ -316,9 +318,9 @@ class InputFieldDescriptor
         } elseif ($this->targetMethodOnSource !== null) {
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
-            $this->originalResolver = new SourcePropertyResolver($this->targetPropertyOnSource);
+            $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
         } elseif ($this->magicProperty !== null) {
-            $this->originalResolver = new MagicPropertyResolver($this->magicProperty);
+            $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
         } else {
             throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource) or a magic property (via setMagicProperty).');
         }

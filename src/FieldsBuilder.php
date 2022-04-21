@@ -8,6 +8,7 @@ use Doctrine\Common\Annotations\AnnotationException;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\DocBlock;
@@ -37,9 +38,6 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeMethod;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
@@ -394,7 +392,7 @@ class FieldsBuilder
             }
 
             $fieldDescriptor->setName($name);
-            $fieldDescriptor->setComment($description);
+            $fieldDescriptor->setComment(trim($description));
 
             [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod] = $this->getPrefetchMethodInfo($refClass, $refMethod, $queryAnnotation);
             if ($prefetchMethodName) {
@@ -507,7 +505,7 @@ class FieldsBuilder
             }
 
             $fieldDescriptor->setName($name);
-            $fieldDescriptor->setComment($description);
+            $fieldDescriptor->setComment(trim($description));
 
             [$prefetchMethodName, $prefetchArgs] = $this->getPrefetchMethodInfo($refClass, $refProperty, $queryAnnotation);
             if ($prefetchMethodName) {
@@ -897,9 +895,9 @@ class FieldsBuilder
 
             $inputFieldDescriptor = new InputFieldDescriptor();
             $inputFieldDescriptor->setRefMethod($refMethod);
-
+            $inputFieldDescriptor->setIsUpdate($isUpdate);
             $inputFieldDescriptor->setName($name);
-            $inputFieldDescriptor->setComment($description);
+            $inputFieldDescriptor->setComment(trim($description));
 
 //            [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod] = $this->getPrefetchMethodInfo($refClass, $refMethod, $queryAnnotation);
 //            if ($prefetchMethodName) {
@@ -934,6 +932,12 @@ class FieldsBuilder
                 $type = $args[$name]->getType();
 //                $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
+            if ($isUpdate && $type instanceof NonNull) {
+                $type = $type->getWrappedType();
+            }
+
+            $inputFieldDescriptor->setHasDefaultValue($isUpdate);
+            $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
             if (is_string($controller)) {
                 $inputFieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
@@ -1003,23 +1007,21 @@ class FieldsBuilder
 //            if ($description) {
 //                $field->setDescription($description);
 //            }
+            $inputType = $annotation->getInputType();
+            $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
 
             $inputFieldDescriptor = new InputFieldDescriptor();
             $inputFieldDescriptor->setRefProperty($refProperty);
+            $inputFieldDescriptor->setIsUpdate($isUpdate);
+            $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
+            $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
 
             if (! $description) {
-                $description = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
-
-                /** @var Var_[] $varTags */
-                $varTags = $docBlock->getTagsByName('var');
-                $varTag = reset($varTags);
-                if ($varTag) {
-                    $description .= PHP_EOL . $varTag->getDescription();
-                }
+                $description = $inputProperty->getDescription();
             }
 
-            $inputFieldDescriptor->setName($name);
-            $inputFieldDescriptor->setComment($description);
+            $inputFieldDescriptor->setName($inputProperty->getName());
+            $inputFieldDescriptor->setComment(trim($description));
 
 //            [$prefetchMethodName, $prefetchArgs] = $this->getPrefetchMethodInfo($refClass, $refProperty, $annotation);
 //            if ($prefetchMethodName) {
@@ -1027,24 +1029,32 @@ class FieldsBuilder
 //                $inputFieldDescriptor->setPrefetchParameters($prefetchArgs);
 //            }
 
-            $inputType = $annotation->getInputType();
-            if ($inputType) {
-                $type = $this->typeResolver->mapNameToInputType($inputType);
-            } else {
-                $type = $this->typeMapper->mapPropertyType($refProperty, $docBlock, true,$name,$isUpdate ? true : null);
-                assert($type instanceof InputType);
+
+//            if ($inputType) {
+//                $type = $this->typeResolver->mapNameToInputType($inputType);
+//            } else {
+//                $type = $this->typeMapper->mapPropertyType($refProperty, $docBlock, true,$name,$isUpdate ? true : null);
+//                assert($type instanceof InputType);
+//            }
+
+//            $inputProperty = new InputTypeProperty($refProperty->getName(), $name, $type, $isUpdate, $defaultProperties[$refProperty->getName()] ?? null, $this->argumentResolver);
+            $inputFieldDescriptor->setParameters([$name => $inputProperty]);
+
+            $type = $inputProperty->getType();
+            if ($isUpdate && $type instanceof NonNull) {
+                $type = $type->getWrappedType();
             }
 
             $inputFieldDescriptor->setType($type);
             $inputFieldDescriptor->setInjectSource(false);
 
-            if (is_string($controller)) {
+//            if (is_string($controller)) {
                 $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
-            } else {
-                $inputFieldDescriptor->setCallable(static function () use ($controller, $refProperty) {
-                    return PropertyAccessor::getValue($controller, $refProperty->getName());
-                });
-            }
+//            } else {
+//                $inputFieldDescriptor->setCallable(static function () use ($controller, $refProperty) {
+//                    return PropertyAccessor::getValue($controller, $refProperty->getName());
+//                });
+//            }
 
             $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 

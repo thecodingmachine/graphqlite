@@ -97,7 +97,7 @@ class ProductController
      */
     public function createTrickyProduct(TrickyProduct $product): TrickyProduct
     {
-        return new TrickyProduct($product->getName(), $product->getPrice());
+        return $product;
     }
 
     /**
@@ -106,7 +106,10 @@ class ProductController
      * @return TrickyProduct
      */
     public function getTrickyProduct(): TrickyProduct {
-        return new TrickyProduct('Special box', 11.99);
+        $product = new TrickyProduct();
+        $product->setName("Special","box");
+        $product->price = 11.99;
+        return $product;
     }
 
     /**
