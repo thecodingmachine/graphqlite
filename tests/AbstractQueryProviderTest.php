@@ -48,6 +48,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
@@ -303,6 +304,8 @@ abstract class AbstractQueryProviderTest extends TestCase
         $expressionLanguage = new ExpressionLanguage(new Psr16Adapter($psr16Cache), [new SecurityExpressionLanguageProvider()]);
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, new VoidAuthenticationService(), new VoidAuthorizationService()));
 
+        $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
+
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
 
@@ -315,7 +318,8 @@ abstract class AbstractQueryProviderTest extends TestCase
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $inputFieldMiddlewarePipe
         );
     }
 

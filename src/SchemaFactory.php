@@ -40,6 +40,8 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -117,6 +119,9 @@ class SchemaFactory
 
     /** @var array<int, FieldMiddlewareInterface> */
     private array $fieldMiddlewares = [];
+
+    /** @var array<int, InputFieldMiddlewareInterface> */
+    private array $inputFieldMiddlewares = [];
 
     private ?ExpressionLanguage $expressionLanguage = null;
 
@@ -318,6 +323,16 @@ class SchemaFactory
     }
 
     /**
+     * Registers a input field middleware (used to parse custom annotations that modify the GraphQLite behaviour in Fields/Queries/Mutations.
+     */
+    public function addInputFieldMiddleware(InputFieldMiddlewareInterface $inputFieldMiddleware): self
+    {
+        $this->inputFieldMiddlewares[] = $inputFieldMiddleware;
+
+        return $this;
+    }
+
+    /**
      * Sets a custom expression language to use.
      * ExpressionLanguage is used to evaluate expressions in the "Security" tag.
      */
@@ -356,6 +371,14 @@ class SchemaFactory
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
+
+        $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
+        foreach ($this->inputFieldMiddlewares as $inputFieldMiddleware) {
+            $inputFieldMiddlewarePipe->pipe($inputFieldMiddleware);
+        }
+        // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
+//        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
+//        $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry, $annotationReader);
@@ -415,7 +438,8 @@ class SchemaFactory
             $namingStrategy,
             $topRootTypeMapper,
             $parameterMiddlewarePipe,
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $inputFieldMiddlewarePipe,
         );
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);

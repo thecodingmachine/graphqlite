@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\ClientAware;
+use GraphQL\Error\InvariantViolation;
+use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
 use ReflectionClass;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeMethod;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -26,8 +31,8 @@ use function array_key_exists;
  */
 class InputType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
-    /** @var InputTypeProperty[] */
-    private array $fields;
+    /** @var InputField[] */
+    private $inputFields;
 
     /** @var class-string<object> */
     private $className;
@@ -50,36 +55,40 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             throw FailedResolvingInputType::createForNotInstantiableClass($className);
         }
 
-        $this->fields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
-
-        $fields = function () use ($isUpdate) {
-            $fields = [];
-            foreach ($this->fields as $name => $field) {
-                $type = $field->getType();
-
-                if ($isUpdate && $type instanceof NonNull) {
-                    $type = $type->getWrappedType();
-                }
-
-                $fields[$name] = [
-                    'type' => $type,
-                    'description' => $field->getDescription(),
-                ];
-
-                if (! $field->hasDefaultValue() || $isUpdate) {
-                    continue;
-                }
-
-                $fields[$name]['defaultValue'] = $field->getDefaultValue();
-            }
-
-            return $fields;
-        };
+        $this->inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
+        $fieldConfigs = [];
+        foreach($this->inputFields as $field){
+            $fieldConfigs[] = $field->config;
+        }
+//dump($this->fields);
+//        $fields = function () use ($isUpdate) {
+//            $fields = [];
+//            foreach ($this->fields as $name => $field) {
+//                $type = $field->getType();
+//
+//                if ($isUpdate && $type instanceof NonNull) {
+//                    $type = $type->getWrappedType();
+//                }
+//
+//                $fields[$name] = [
+//                    'type' => $type,
+//                    'description' => $field->getDescription(),
+//                ];
+//
+//                if (! $field->hasDefaultValue() || $isUpdate) {
+//                    continue;
+//                }
+//
+//                $fields[$name]['defaultValue'] = $field->getDefaultValue();
+//            }
+//
+//            return $fields;
+//        };
 
         $config = [
             'name' => $inputName,
             'description' => $description,
-            'fields' => $fields,
+            'fields' => $fieldConfigs,
         ];
 
         parent::__construct($config);
@@ -95,29 +104,41 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     {
         $mappedValues = [];
         $mappedMethodValues = [];
-        foreach ($this->fields as $field) {
-            $name = $field->getName();
-            if (! array_key_exists($name, $args)) {
-                continue;
-            }
-            if ($field instanceof InputTypeMethod) {
-                $args = $this->paramsToArguments($field->getParameters(), $source, $args, $context, $resolveInfo, [$field, "resolve"]);
-                $mappedMethodValues[$field->getMethodName()] = $args;
-                $mappedValues[$name] = $args[$name];
-            } else {
-                $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
-            }
+
+        foreach ($this->finalFields as $finalField) {
+            dump("final: ",$finalField);
+//            $resolve = $field->getResolve();
+//            dump($source, $args, $context, $resolveInfo);
+//            $resolvedField = $resolve($source, $args, $context, $resolveInfo);
+//            $name = $field->getName();
+//            if (! array_key_exists($name, $args)) {
+//                continue;
+//            }
+//            if ($field instanceof InputTypeMethod) {
+//                $args = $this->paramsToArguments($field->getParameters(), $source, $args, $context, $resolveInfo, [$field, "resolve"]);
+//                $mappedMethodValues[$field->getMethodName()] = $args;
+//                $mappedValues[$name] = $args[$name];
+//            } else {
+//                $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
+//            }
         }
 
-        $instance = $this->createInstance($mappedValues);
-        $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
+        $instance = $this->createInstance($args);
+//        $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
 
-        foreach ($values as $property => $value) {
-            PropertyAccessor::setValue($instance, $property, $value);
+
+        foreach ($this->inputFields as $inputFields) {
+            $resolve = $inputFields->getResolve();
+            $resolvedField = $resolve($instance,$args, $context, $resolveInfo);
+//            dump($resolvedField);
         }
-        foreach ($mappedMethodValues as  $methodName => $args) {
-            $instance->{$methodName}(...$args);
-        }
+
+//        foreach ($values as $property => $value) {
+//            PropertyAccessor::setValue($instance, $property, $value);
+//        }
+//        foreach ($mappedMethodValues as  $methodName => $args) {
+//            $instance->{$methodName}(...$args);
+//        }
 
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);

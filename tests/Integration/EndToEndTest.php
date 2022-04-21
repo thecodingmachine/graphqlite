@@ -45,6 +45,8 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
@@ -128,13 +130,20 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(ParameterMiddlewareInterface::class),
-                    $container->get(FieldMiddlewareInterface::class)
+                    $container->get(FieldMiddlewareInterface::class),
+                    $container->get(InputFieldMiddlewareInterface::class)
                 );
             },
             FieldMiddlewareInterface::class => function(ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
                 $pipe->pipe($container->get(SecurityFieldMiddleware::class));
+                return $pipe;
+            },
+            InputFieldMiddlewareInterface::class => function(ContainerInterface $container) {
+                $pipe = new InputFieldMiddlewarePipe();
+//                $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
+//                $pipe->pipe($container->get(SecurityFieldMiddleware::class));
                 return $pipe;
             },
             AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
