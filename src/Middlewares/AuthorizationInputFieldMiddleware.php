@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -59,7 +60,6 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
 //            Assert::isInstanceOf($type, OutputType::class);
 //            $inputFieldDescriptor->setType($type);
 //        }
-
         if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
             return $inputFieldHandler->handle($inputFieldDescriptor);
         }
@@ -80,8 +80,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         if ($hideIfUnauthorized !== null) {
             return null;
         }
-
-        throw MissingAuthorizationException::forbidden();
+        return InputField::unauthorizedError($inputFieldDescriptor, $loggedAnnotation !== null && ! $this->authenticationService->isLogged());
     }
 
     /**
