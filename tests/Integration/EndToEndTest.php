@@ -43,6 +43,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
@@ -50,6 +51,7 @@ use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
@@ -142,9 +144,22 @@ class EndToEndTest extends TestCase
             },
             InputFieldMiddlewareInterface::class => function(ContainerInterface $container) {
                 $pipe = new InputFieldMiddlewarePipe();
-//                $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
-//                $pipe->pipe($container->get(SecurityFieldMiddleware::class));
+                $pipe->pipe($container->get(AuthorizationInputFieldMiddleware::class));
+                $pipe->pipe($container->get(SecurityInputFieldMiddleware::class));
                 return $pipe;
+            },
+            AuthorizationInputFieldMiddleware::class => function(ContainerInterface $container) {
+                return new AuthorizationInputFieldMiddleware(
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
+                );
+            },
+            SecurityInputFieldMiddleware::class => function(ContainerInterface $container) {
+                return new SecurityInputFieldMiddleware(
+                    new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
+                );
             },
             AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
                 return new AuthorizationFieldMiddleware(
@@ -2123,5 +2138,52 @@ class EndToEndTest extends TestCase
         $data = $this->getSuccessResult($result);
         $this->assertSame('Not so special foo', $data['updateTrickyProduct']['name']);
         $this->assertSame(10.99, $data['updateTrickyProduct']['price']);
+    }
+
+    public function testEndToEndSetterWithSecurity() {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        query {
+            trickyProduct {
+                conditionalSecret(key: 1234)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('preset{secret}', $data['trickyProduct']['conditionalSecret']);
+
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "secret product"
+                    price: 12.22
+                    secret: "123"
+                    conditionalSecret: "actually{secret}"
+                }
+            ) {
+                conditionalSecret(key: 1234)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        dump($data);
+        $this->assertSame('actually{secret}', $data['updateTrickyProduct']['conditionalSecret']);
     }
 }
