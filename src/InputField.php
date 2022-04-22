@@ -29,7 +29,7 @@ class InputField extends InputObjectField
     /** @var Callable */
     private $resolve;
     /**
-     * @param InputType&Type $type
+     * @param InputType|(NullableType&Type) $type
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
      * @param callable $resolver The resolver actually called
