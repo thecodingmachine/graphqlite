@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\NullableType;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
@@ -30,7 +30,7 @@ class InputFieldDescriptor
 {
     /** @var string */
     private $name;
-    /** @var InputType&Type|Type */
+    /** @var InputType|NullableType&Type */
     private $type;
     /** @var array<string, ParameterInterface> */
     private $parameters = [];
@@ -136,7 +136,7 @@ class InputFieldDescriptor
     }
 
     /**
-     * @return InputType&Type|Type
+     * @return InputType|NullableType&Type
      */
     public function getType()
     {
@@ -144,7 +144,7 @@ class InputFieldDescriptor
     }
 
     /**
-     * @param InputType&Type|Type $type
+     * @param InputType|NullableType&Type $type
      */
     public function setType($type): void
     {
