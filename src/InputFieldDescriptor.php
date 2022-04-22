@@ -51,7 +51,7 @@ class InputFieldDescriptor
      *
      * @var bool
      */
-    private $injectSource;
+    private $injectSource = false;
     /** @var string|null */
     private $comment;
 //    /** @var string|null */
@@ -67,9 +67,9 @@ class InputFieldDescriptor
     /** @var callable */
     private $resolver;
     /** @var bool */
-    private $isUpdate;
+    private $isUpdate = false;
     /** @var bool */
-    private $hasDefaultValue;
+    private $hasDefaultValue = false;
     /** @var mixed|null */
     private $defaultValue;
 
@@ -322,7 +322,7 @@ class InputFieldDescriptor
         } elseif ($this->magicProperty !== null) {
             $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
         } else {
-            throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource) or a magic property (via setMagicProperty).');
+            throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource) or a magic property (via setMagicProperty).');
         }
 
         return $this->originalResolver;

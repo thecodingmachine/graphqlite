@@ -2,10 +2,10 @@
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
+use TheCodingMachine\GraphQLite\InputField;
 
 class InputFieldMiddlewarePipeTest extends TestCase
 {
@@ -13,25 +13,29 @@ class InputFieldMiddlewarePipeTest extends TestCase
     public function testHandle(): void
     {
         $finalHandler = new class implements InputFieldHandlerInterface {
-            public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
+            public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
             {
-                return new InputObjectField(['name'=>'foo', 'type'=>Type::string()]);
+                return InputField::fromFieldDescriptor($inputFieldDescriptor);
             }
         };
 
         $middlewarePipe = new InputFieldMiddlewarePipe();
-
-        $definition = $middlewarePipe->process(new InputFieldDescriptor(), $finalHandler);
+        $inputFieldDescriptor = new InputFieldDescriptor();
+        $inputFieldDescriptor->setMagicProperty("foo");
+        $inputFieldDescriptor->setName("foo");
+        $inputFieldDescriptor->setType(Type::string());
+        $definition = $middlewarePipe->process($inputFieldDescriptor, $finalHandler);
         $this->assertSame('foo', $definition->name);
 
         $middlewarePipe->pipe(new class implements InputFieldMiddlewareInterface {
-            public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputObjectField
+            public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
             {
-                return new InputObjectField(['name'=>'bar', 'type'=>Type::string()]);
+                $inputFieldDescriptor->setName("bar");
+                return InputField::fromFieldDescriptor($inputFieldDescriptor);
             }
         });
 
-        $definition = $middlewarePipe->process(new InputFieldDescriptor(), $finalHandler);
+        $definition = $middlewarePipe->process($inputFieldDescriptor, $finalHandler);
         $this->assertSame('bar', $definition->name);
     }
 }
