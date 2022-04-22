@@ -33,7 +33,7 @@ class TrickyProduct
     /**
      * @var string
      */
-    private $secret;
+    private $secret = "hello";
 
     /**
      * @var string
@@ -92,6 +92,7 @@ class TrickyProduct
     /**
      * @Field()
      * @Security("conditionalSecret == 'actually{secret}'")
+     * @Security("user && user.bar == 42")
      * @param string $conditionalSecret
      */
     public function setConditionalSecret(string $conditionalSecret): void
