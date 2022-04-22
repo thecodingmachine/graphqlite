@@ -17,7 +17,7 @@ class BadExpressionInSecurityException extends Exception
     /**
      * @param Throwable $e
      * @param QueryFieldDescriptor|InputFieldDescriptor $fieldDescriptor
-     * @return static
+     * @return self
      */
     public static function wrapException(Throwable $e, $fieldDescriptor): self
     {

@@ -144,7 +144,7 @@ class InputFieldDescriptor
     }
 
     /**
-     * @param InputType&Type
+     * @param InputType&Type $type
      */
     public function setType($type): void
     {

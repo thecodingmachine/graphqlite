@@ -38,6 +38,7 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
@@ -161,7 +162,7 @@ class FieldsBuilder
     /**
      * @param class-string<object> $className
      *
-     * @return array<InputObjectField>
+     * @return array<InputField>
      *
      * @throws AnnotationException
      * @throws ReflectionException
@@ -855,8 +856,9 @@ class FieldsBuilder
      *
      * @param string|object $controller
      * @param class-string<AbstractRequest> $annotationName
+     * @param array<mixed> $defaultProperties
      *
-     * @return array<string, InputObjectField>
+     * @return array<string, InputField>
      *
      * @throws AnnotationException
      */
@@ -873,102 +875,83 @@ class FieldsBuilder
                     continue;
                 }
                 $description = $fieldAnnotations->getDescription();
-            }
-            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-            $methodName = $refMethod->getName();
-            if (strpos($methodName, 'set') !== 0) continue;
-            $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
-            if (!$description) {
-                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
-            }
 
-            //TODO: remove
-//            $parameters = $refMethod->getParameters();
-//            $args = $this->mapParameters($parameters, $docBlockObj);
-//            $type = $args[$name]->getType();
-//
-//            $inputParameter = $args[$name];
-//            $field = new InputTypeMethod($methodName, $inputParameter->getName(), $inputParameter->getType(), $inputParameter->hasDefaultValue(), $inputParameter->getDefaultValue());
-//            $field->setDescription(trim($description));
-//            $field->setParameters($args);
-            //TODO: remove end
-
-            $inputFieldDescriptor = new InputFieldDescriptor();
-            $inputFieldDescriptor->setRefMethod($refMethod);
-            $inputFieldDescriptor->setIsUpdate($isUpdate);
-            $inputFieldDescriptor->setName($name);
-            $inputFieldDescriptor->setComment(trim($description));
-
-//            [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod] = $this->getPrefetchMethodInfo($refClass, $refMethod, $queryAnnotation);
-//            if ($prefetchMethodName) {
-//                $inputFieldDescriptor->setPrefetchMethodName($prefetchMethodName);
-//                $inputFieldDescriptor->setPrefetchParameters($prefetchArgs);
-//            }
-            $parameters = $refMethod->getParameters();
-            if ($injectSource === true) {
-                $firstParameter = array_shift($parameters);
-                // TODO: check that $first_parameter type is correct.
-            }
-//            if ($prefetchMethodName !== null && $prefetchRefMethod !== null) {
-//                $secondParameter = array_shift($parameters);
-//                if ($secondParameter === null) {
-//                    throw InvalidPrefetchMethodRuntimeException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
-//                }
-//            }
-
-            $args = $this->mapParameters($parameters, $docBlockObj);
-
-            $inputFieldDescriptor->setParameters($args);
-
-            $inputType = $fieldAnnotations->getInputType();
-            if ($inputType) {
-                try {
-                    $type = $this->typeResolver->mapNameToInputType($inputType);
-                } catch (CannotMapTypeExceptionInterface $e) {
-                    $e->addReturnInfo($refMethod);
-                    throw $e;
+                $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+                $methodName = $refMethod->getName();
+                if (strpos($methodName, 'set') !== 0) continue;
+                $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
+                if (!$description) {
+                    $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
                 }
-            } else {
-                $type = $args[$name]->getType();
-//                $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
-            }
-            if ($isUpdate && $type instanceof NonNull) {
-                $type = $type->getWrappedType();
-            }
 
-            $inputFieldDescriptor->setHasDefaultValue($isUpdate);
-            $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
-            if (is_string($controller)) {
-                $inputFieldDescriptor->setTargetMethodOnSource($methodName);
-            } else {
-                $callable = [$controller, $methodName];
-                Assert::isCallable($callable);
-                $inputFieldDescriptor->setCallable($callable);
-            }
 
-            $inputFieldDescriptor->setType($type);
-            $inputFieldDescriptor->setInjectSource($injectSource);
+                $inputFieldDescriptor = new InputFieldDescriptor();
+                $inputFieldDescriptor->setRefMethod($refMethod);
+                $inputFieldDescriptor->setIsUpdate($isUpdate);
+                $inputFieldDescriptor->setName($name);
+                $inputFieldDescriptor->setComment(trim($description));
 
-            $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
-
-            $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
-                {
-                    return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                $parameters = $refMethod->getParameters();
+                if ($injectSource === true) {
+                    $firstParameter = array_shift($parameters);
+                    // TODO: check that $first_parameter type is correct.
                 }
-            });
+
+                /** @var array<string, InputTypeParameterInterface> $args */
+                $args = $this->mapParameters($parameters, $docBlockObj);
+
+                $inputFieldDescriptor->setParameters($args);
+
+                $inputType = $fieldAnnotations->getInputType();
+                if ($inputType) {
+                    try {
+                        $type = $this->typeResolver->mapNameToInputType($inputType);
+                    } catch (CannotMapTypeExceptionInterface $e) {
+                        $e->addReturnInfo($refMethod);
+                        throw $e;
+                    }
+                } else {
+                    $type = $args[$name]->getType();
+    //                $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
+                }
+                if ($isUpdate && $type instanceof NonNull) {
+                    $type = $type->getWrappedType();
+                }
+
+                $inputFieldDescriptor->setHasDefaultValue($isUpdate);
+                $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
+                if (is_string($controller)) {
+                    $inputFieldDescriptor->setTargetMethodOnSource($methodName);
+                } else {
+                    $callable = [$controller, $methodName];
+                    Assert::isCallable($callable);
+                    $inputFieldDescriptor->setCallable($callable);
+                }
+
+                $inputFieldDescriptor->setType($type);
+                $inputFieldDescriptor->setInjectSource($injectSource);
+
+                $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
+
+                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
+                    {
+                        return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                    }
+                });
 
 
 
 
-            if ($field === null) {
-                continue;
+                if ($field === null) {
+                    continue;
+                }
+
+                if (isset($fields[$name])) {
+                    throw DuplicateMappingException::createForQueryInOneMethod($name, $refMethod);
+                }
+                $fields[$name] = $field;
             }
-
-            if (isset($fields[$name])) {
-                throw DuplicateMappingException::createForQueryInOneMethod($name, $refMethod);
-            }
-            $fields[$name] = $field;
         }
 
         return $fields;
@@ -979,8 +962,9 @@ class FieldsBuilder
      *
      * @param string|object $controller
      * @param class-string<AbstractRequest> $annotationName
+     * @param array<mixed> $defaultProperties
      *
-     * @return array<string, InputObjectField>
+     * @return array<string, InputField>
      *
      * @throws AnnotationException
      */
@@ -1000,79 +984,56 @@ class FieldsBuilder
                 }
 
                 $description = $annotation->getDescription();
-            }
-
-            $name = $annotation->getName() ?: $refProperty->getName();
-//            $field = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $annotation->getInputType(), $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
-//            if ($description) {
-//                $field->setDescription($description);
-//            }
-            $inputType = $annotation->getInputType();
-            $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
-
-            $inputFieldDescriptor = new InputFieldDescriptor();
-            $inputFieldDescriptor->setRefProperty($refProperty);
-            $inputFieldDescriptor->setIsUpdate($isUpdate);
-            $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
-            $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
-
-            if (! $description) {
-                $description = $inputProperty->getDescription();
-            }
-
-            $inputFieldDescriptor->setName($inputProperty->getName());
-            $inputFieldDescriptor->setComment(trim($description));
-
-//            [$prefetchMethodName, $prefetchArgs] = $this->getPrefetchMethodInfo($refClass, $refProperty, $annotation);
-//            if ($prefetchMethodName) {
-//                $inputFieldDescriptor->setPrefetchMethodName($prefetchMethodName);
-//                $inputFieldDescriptor->setPrefetchParameters($prefetchArgs);
-//            }
 
 
-//            if ($inputType) {
-//                $type = $this->typeResolver->mapNameToInputType($inputType);
-//            } else {
-//                $type = $this->typeMapper->mapPropertyType($refProperty, $docBlock, true,$name,$isUpdate ? true : null);
-//                assert($type instanceof InputType);
-//            }
+                $name = $annotation->getName() ?: $refProperty->getName();
 
-//            $inputProperty = new InputTypeProperty($refProperty->getName(), $name, $type, $isUpdate, $defaultProperties[$refProperty->getName()] ?? null, $this->argumentResolver);
-            $inputFieldDescriptor->setParameters([$name => $inputProperty]);
+                $inputType = $annotation->getInputType();
+                $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
 
-            $type = $inputProperty->getType();
-            if ($isUpdate && $type instanceof NonNull) {
-                $type = $type->getWrappedType();
-            }
+                $inputFieldDescriptor = new InputFieldDescriptor();
+                $inputFieldDescriptor->setRefProperty($refProperty);
+                $inputFieldDescriptor->setIsUpdate($isUpdate);
+                $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
+                $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
 
-            $inputFieldDescriptor->setType($type);
-            $inputFieldDescriptor->setInjectSource(false);
-
-//            if (is_string($controller)) {
-                $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
-//            } else {
-//                $inputFieldDescriptor->setCallable(static function () use ($controller, $refProperty) {
-//                    return PropertyAccessor::getValue($controller, $refProperty->getName());
-//                });
-//            }
-
-            $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
-
-            $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
-                {
-                    return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                if (! $description) {
+                    $description = $inputProperty->getDescription();
                 }
-            });
 
-            if ($field === null) {
-                continue;
-            }
+                $inputFieldDescriptor->setName($inputProperty->getName());
+                $inputFieldDescriptor->setComment(trim($description));
 
-            if (isset($fields[$name])) {
-                throw DuplicateMappingException::createForQueryInOneProperty($name, $refProperty);
+                $inputFieldDescriptor->setParameters([$name => $inputProperty]);
+
+                $type = $inputProperty->getType();
+                if ($isUpdate && $type instanceof NonNull) {
+                    $type = $type->getWrappedType();
+                }
+
+                $inputFieldDescriptor->setType($type);
+                $inputFieldDescriptor->setInjectSource(false);
+
+                $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
+
+                $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
+
+                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
+                    {
+                        return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                    }
+                });
+
+                if ($field === null) {
+                    continue;
+                }
+
+                if (isset($fields[$name])) {
+                    throw DuplicateMappingException::createForQueryInOneProperty($name, $refProperty);
+                }
+                $fields[$name] = $field;
             }
-            $fields[$name] = $field;
         }
 
         return $fields;

@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use GraphQL\Error\ClientAware;
-use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\InputObjectField;
-use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
 use ReflectionClass;
-use RuntimeException;
-use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\InputField;
-use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
-use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
-use function array_diff_key;
-use function array_flip;
+use TheCodingMachine\GraphQLite\InputField;
 use function array_key_exists;
 
 /**
