@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use GraphQL\Type\Definition\InputObjectField;
+use TheCodingMachine\GraphQLite\InputField;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -17,7 +17,6 @@ use Webmozart\Assert\Assert;
 
 use function array_combine;
 use function array_keys;
-use function assert;
 
 /**
  * A field input middleware that reads "Security" Symfony annotations.
@@ -42,7 +41,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         /*$this->logger = $logger;*/
     }
 
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputObjectField
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
     {
         $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
         /** @var Security[] $securityAnnotations */

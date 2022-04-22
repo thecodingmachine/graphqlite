@@ -912,7 +912,6 @@ class FieldsBuilder
                     }
                 } else {
                     $type = $args[$name]->getType();
-    //                $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
                 if ($isUpdate && $type instanceof NonNull) {
                     $type = $type->getWrappedType();
@@ -934,7 +933,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
                 $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
+                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
                     {
                         return InputField::fromFieldDescriptor($inputFieldDescriptor);
                     }
@@ -1019,7 +1018,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
                 $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
+                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
                     {
                         return InputField::fromFieldDescriptor($inputFieldDescriptor);
                     }

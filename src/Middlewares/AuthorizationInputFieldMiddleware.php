@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use GraphQL\Type\Definition\InputObjectField;
-use GraphQL\Type\Definition\NonNull;
-use GraphQL\Type\Definition\OutputType;
-use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
-use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
@@ -16,7 +11,6 @@ use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
-use Webmozart\Assert\Assert;
 
 use function assert;
 
@@ -41,7 +35,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
     /**
      * @throws MissingAuthorizationException
      */
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputObjectField
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
     {
         $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
 

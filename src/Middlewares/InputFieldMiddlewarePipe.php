@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use SplQueue;
-use GraphQL\Type\Definition\InputObjectField;
+use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
 final class InputFieldMiddlewarePipe implements InputFieldMiddlewareInterface
@@ -27,7 +27,7 @@ final class InputFieldMiddlewarePipe implements InputFieldMiddlewareInterface
      * Executes the internal pipeline, passing $handler as the "final
      * handler" in cases when the pipeline exhausts itself.
      */
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputObjectField
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
     {
         return (new InputNext($this->pipeline, $inputFieldHandler))->handle($inputFieldDescriptor);
     }

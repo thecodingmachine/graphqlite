@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use GraphQL\Type\Definition\InputObjectField;
+use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
 /**
@@ -14,5 +14,5 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
  */
 interface InputFieldMiddlewareInterface
 {
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputObjectField;
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField;
 }

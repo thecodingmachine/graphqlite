@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use SplQueue;
-use GraphQL\Type\Definition\InputObjectField;
+use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
 /**
@@ -31,7 +31,7 @@ final class InputNext implements InputFieldHandlerInterface
         $this->fallbackHandler = $fallbackHandler;
     }
 
-    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputObjectField
+    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
     {
         if ($this->queue->isEmpty()) {
             return $this->fallbackHandler->handle($inputFieldDescriptor);
