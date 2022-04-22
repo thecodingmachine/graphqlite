@@ -30,7 +30,7 @@ class InputFieldDescriptor
 {
     /** @var string */
     private $name;
-    /** @var InputType&NullableType&Type */
+    /** @var InputType|(NullableType&Type) */
     private $type;
     /** @var array<string, ParameterInterface> */
     private $parameters = [];
@@ -136,7 +136,7 @@ class InputFieldDescriptor
     }
 
     /**
-     * @return InputType&NullableType&Type
+     * @return InputType|(NullableType&Type)
      */
     public function getType()
     {
@@ -144,7 +144,7 @@ class InputFieldDescriptor
     }
 
     /**
-     * @param InputType&NullableType&Type $type
+     * @param InputType|(NullableType&Type) $type
      */
     public function setType($type): void
     {
