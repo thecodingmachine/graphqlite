@@ -43,15 +43,21 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         }
 
         $this->inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
-        $fieldConfigs = [];
-        foreach($this->inputFields as $field){
-            $fieldConfigs[] = $field->config;
-        }
+        $fields = function () {
+            $fieldConfigs = [];
+            foreach($this->inputFields as $field){
+                $fieldConfigs[] = $field->config;
+            }
+
+            return $fieldConfigs;
+        };
+
+
 
         $config = [
             'name' => $inputName,
             'description' => $description,
-            'fields' => $fieldConfigs,
+            'fields' => $fields,
         ];
 
         parent::__construct($config);
