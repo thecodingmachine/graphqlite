@@ -33,6 +33,16 @@ class IteratorTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(IntType::class, $result->getWrappedType()->getWrappedType());
     }
 
+    public function testOutputGenericNullableValueIterator(): void
+    {
+        $typeMapper = $this->getRootTypeMapper();
+
+        $result = $typeMapper->toGraphQLOutputType($this->resolveType('ArrayObject<?int>'), null, new ReflectionMethod(__CLASS__, 'testInputIterator'), new DocBlock());
+        $this->assertInstanceOf(NonNull::class, $result);
+        $this->assertInstanceOf(ListOfType::class, $result->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $result->getWrappedType()->getWrappedType());
+    }
+
     public function testMixIterableWithNonArrayType(): void
     {
         $typeMapper = $this->getRootTypeMapper();

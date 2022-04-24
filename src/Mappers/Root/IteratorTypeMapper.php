@@ -16,6 +16,7 @@ use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Collection;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
@@ -54,7 +55,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
     {
-        if (! $type instanceof Compound) {
+        if (! $type instanceof Compound && ! $type instanceof Collection) {
             try {
                 return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
             } catch (CannotMapTypeException $e) {
@@ -71,6 +72,20 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 }
                 throw $e;
             }
+        }
+
+        if ($type instanceof Collection) {
+            $result = $this->toGraphQLTypeFromCollection($type, function (Type $type, ?OutputType $subType) use ($reflector, $docBlockObj) {
+                return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
+            }, true);
+
+            if ($result === null) {
+                return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
+            }
+            Assert::isInstanceOf($result, OutputType::class);
+            Assert::notInstanceOf($result, NonNull::class);
+
+            return $result;
         }
 
         $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($reflector, $docBlockObj) {
@@ -220,6 +235,35 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         }
 
         return $graphQlType;
+    }
+
+    /**
+     * @param Collection $type
+     *
+     * @return (OutputType&GraphQLType)|(InputType&GraphQLType)|null
+     */
+    private function toGraphQLTypeFromCollection(Collection $type, Closure $topToGraphQLType, bool $isOutputType)
+    {
+        $singleDocBlockType = $type->getValueType();
+
+        $subGraphQlType = $valueType = $topToGraphQLType($singleDocBlockType, null);
+        if ($valueType !== null && $isOutputType) {
+            $subGraphQlType = new ListOfType($valueType);
+        }
+        //$subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
+
+        // By convention, we trim the NonNull part of the "$subGraphQlType"
+        if ($subGraphQlType instanceof NonNull) {
+            $subGraphQlType = $subGraphQlType->getWrappedType();
+            assert($subGraphQlType instanceof OutputType && $subGraphQlType instanceof GraphQLType);
+        }
+
+        $graphQlType = $topToGraphQLType($singleDocBlockType, $subGraphQlType);
+        if ($graphQlType instanceof NonNull) {
+            $graphQlType = $graphQlType->getWrappedType();
+        }
+
+        return new ListOfType($graphQlType);
     }
 
     /**
