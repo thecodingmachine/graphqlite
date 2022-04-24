@@ -27,6 +27,7 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
 use ReflectionType;
+use ReflectionUnionType;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
@@ -42,6 +43,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 
+use function array_map;
 use function array_merge;
 use function array_unique;
 use function assert;
@@ -408,17 +410,35 @@ class TypeHandler implements ParameterHandlerInterface
      */
     private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
-        assert($type instanceof ReflectionNamedType);
-        $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
-        Assert::notNull($phpdocType);
+        assert($type instanceof ReflectionNamedType || $type instanceof ReflectionUnionType);
+        if ($type instanceof ReflectionNamedType) {
+            $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
+            Assert::notNull($phpdocType);
 
-        $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
+            $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
 
-        if ($type->allowsNull()) {
-            $phpdocType = new Nullable($phpdocType);
+            if ($type->allowsNull()) {
+                $phpdocType = new Nullable($phpdocType);
+            }
+
+            return $phpdocType;
         }
+        return new Compound(
+            array_map(
+                function (ReflectionNamedType $namedType) use ($reflectionClass): Type {
+                    $phpdocType = $this->phpDocumentorTypeResolver->resolve($namedType->getName());
+                    Assert::notNull($phpdocType);
 
-        return $phpdocType;
+                    $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
+
+                    if ($namedType->allowsNull()) {
+                        $phpdocType = new Nullable($phpdocType);
+                    }
+                    return $phpdocType;
+                },
+                $type->getTypes()
+            )
+        );
     }
 
     /**
