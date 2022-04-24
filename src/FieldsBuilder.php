@@ -912,9 +912,9 @@ class FieldsBuilder
                     }
                 } else {
                     $type = $args[$name]->getType();
-                }
-                if ($isUpdate && $type instanceof NonNull) {
-                    $type = $type->getWrappedType();
+                    if ($isUpdate && $type instanceof NonNull) {
+                        $type = $type->getWrappedType();
+                    }
                 }
 
                 $inputFieldDescriptor->setHasDefaultValue($isUpdate);
@@ -1006,7 +1006,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setParameters([$name => $inputProperty]);
 
                 $type = $inputProperty->getType();
-                if ($isUpdate && $type instanceof NonNull) {
+                if (!$inputType && $isUpdate && $type instanceof NonNull) {
                     $type = $type->getWrappedType();
                 }
 

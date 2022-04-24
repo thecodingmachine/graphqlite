@@ -7,6 +7,7 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
 
 /**
  * @Input()
+ * @Input(name="ForcedTypeInput", update=true)
  */
 class InputWithSetter
 {
@@ -25,7 +26,8 @@ class InputWithSetter
     }
 
     /**
-     * @Field()
+     * @Field(for="InputWithSetterInput")
+     * @Field(for="ForcedTypeInput", inputType="Int!")
      */
     public function setBar(int $bar): void {
         $this->bar = $bar;

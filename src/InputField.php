@@ -49,24 +49,24 @@ class InputField extends InputObjectField
             $config['defaultValue'] = $defaultValue;
         }
 
-            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
-                if ($originalResolver instanceof SourceResolverInterface) {
-                    $originalResolver->setObject($source);
-                }
-                $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
-                $result = $resolver(...$toPassArgs);
+        $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+            if ($originalResolver instanceof SourceResolverInterface) {
+                $originalResolver->setObject($source);
+            }
+            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
+            $result = $resolver(...$toPassArgs);
 
 
 
-                try {
-                    $this->assertInputType($result);
-                } catch (TypeMismatchRuntimeException $e) {
-                    $e->addInfo($this->name, $originalResolver->toString());
-                    throw $e;
-                }
+            try {
+                $this->assertInputType($result);
+            } catch (TypeMismatchRuntimeException $e) {
+                $e->addInfo($this->name, $originalResolver->toString());
+                throw $e;
+            }
 
-                return $result;
-            };
+            return $result;
+        };
 
         $config += $additionalConfig;
         parent::__construct($config);

@@ -163,4 +163,13 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
     }
+
+    public function testForceInputTypeWithUpdate(): void
+    {
+        $input = new InputType(InputWithSetter::class, 'ForcedTypeInput', null, true, $this->getFieldsBuilder());
+        $input->freeze();
+
+        $fields = $input->getFields();
+        $this->assertInstanceOf(NonNull::class, $fields['bar']->getType());
+    }
 }
