@@ -21,7 +21,9 @@ class InputFieldMiddlewarePipeTest extends TestCase
 
         $middlewarePipe = new InputFieldMiddlewarePipe();
         $inputFieldDescriptor = new InputFieldDescriptor();
-        $inputFieldDescriptor->setMagicProperty("foo");
+        $inputFieldDescriptor->setCallable(static function (){
+            return null;
+        });
         $inputFieldDescriptor->setName("foo");
         $inputFieldDescriptor->setType(Type::string());
         $definition = $middlewarePipe->process($inputFieldDescriptor, $finalHandler);

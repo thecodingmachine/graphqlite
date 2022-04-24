@@ -10,12 +10,9 @@ use GraphQL\Type\Definition\NullableType;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
-use TheCodingMachine\GraphQLite\Middlewares\MagicInputPropertyResolver;
-use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
-use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -44,8 +41,8 @@ class InputFieldDescriptor
     private $targetMethodOnSource;
     /** @var string|null */
     private $targetPropertyOnSource;
-    /** @var string|null */
-    private $magicProperty;
+//    /** @var string|null */
+//    private $magicProperty;
     /**
      * Whether we should inject the source as the first parameter or not.
      *
@@ -206,7 +203,7 @@ class InputFieldDescriptor
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
         $this->targetPropertyOnSource = null;
-        $this->magicProperty = null;
+//        $this->magicProperty = null;
     }
 
     public function setTargetMethodOnSource(string $targetMethodOnSource): void
@@ -217,7 +214,7 @@ class InputFieldDescriptor
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
         $this->targetPropertyOnSource = null;
-        $this->magicProperty = null;
+//        $this->magicProperty = null;
     }
 
     public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
@@ -228,19 +225,19 @@ class InputFieldDescriptor
         $this->callable = null;
         $this->targetMethodOnSource = null;
         $this->targetPropertyOnSource = $targetPropertyOnSource;
-        $this->magicProperty = null;
+//        $this->magicProperty = null;
     }
 
-    public function setMagicProperty(string $magicProperty): void
-    {
-        if ($this->originalResolver !== null) {
-            throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
-        }
-        $this->callable = null;
-        $this->targetMethodOnSource = null;
-        $this->targetPropertyOnSource = null;
-        $this->magicProperty = $magicProperty;
-    }
+//    public function setMagicProperty(string $magicProperty): void
+//    {
+//        if ($this->originalResolver !== null) {
+//            throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
+//        }
+//        $this->callable = null;
+//        $this->targetMethodOnSource = null;
+//        $this->targetPropertyOnSource = null;
+//        $this->magicProperty = $magicProperty;
+//    }
 
     public function isInjectSource(): bool
     {
@@ -311,7 +308,7 @@ class InputFieldDescriptor
             return $this->originalResolver;
         }
 
-        if (is_array($this->callable)) {
+        if (is_callable($this->callable)) {
             /** @var callable&array{0:object, 1:string} $callable */
             $callable = $this->callable;
             $this->originalResolver = new ServiceResolver($callable);
@@ -319,10 +316,10 @@ class InputFieldDescriptor
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
             $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
-        } elseif ($this->magicProperty !== null) {
-            $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
+//        } elseif ($this->magicProperty !== null) {
+//            $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
         } else {
-            throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource) or a magic property (via setMagicProperty).');
+            throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
         }
 
         return $this->originalResolver;
