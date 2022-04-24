@@ -368,8 +368,10 @@ class FieldsBuilder
         $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
         foreach ($annotations as $queryAnnotation) {
             $description = null;
+            $methodName = $refMethod->getName();
 
             if ($queryAnnotation instanceof Field) {
+                if (strpos($methodName, 'set') === 0) continue;
                 $for = $queryAnnotation->getFor();
                 if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
@@ -384,8 +386,7 @@ class FieldsBuilder
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlockObj));
 
-            $methodName = $refMethod->getName();
-            if (strpos($methodName, 'set') === 0) continue;
+
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
             if (! $description) {
