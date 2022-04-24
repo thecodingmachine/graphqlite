@@ -33,7 +33,6 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\AbstractListTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
@@ -341,7 +340,6 @@ abstract class AbstractQueryProviderTest extends TestCase
         if (interface_exists(UnitEnum::class)) {
             $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $this->getAnnotationReader(), $arrayAdapter, []);
         }
-        $rootTypeMapper = new AbstractListTypeMapper($rootTypeMapper, $topRootTypeMapper);
         $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 

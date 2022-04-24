@@ -2,6 +2,9 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
+use GraphQL\Type\Definition\IntType;
+use GraphQL\Type\Definition\ListOfType;
+use GraphQL\Type\Definition\NonNull;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Array_;
@@ -10,11 +13,19 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Resource_;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class BaseTypeMapperTest extends AbstractQueryProviderTest
 {
+    public function testOutputNullableValueIterator(): void
+    {
+        $typeMapper = $this->getRootTypeMapper();
+
+        $result = $typeMapper->toGraphQLOutputType($this->resolveType('ArrayObject<?int>'), null, new ReflectionMethod(__CLASS__, 'testOutputNullableValueIterator'), new DocBlock());
+        $this->assertInstanceOf(NonNull::class, $result);
+        $this->assertInstanceOf(ListOfType::class, $result->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $result->getWrappedType()->getWrappedType());
+    }
 
     public function testNullableToGraphQLInputType(): void
     {

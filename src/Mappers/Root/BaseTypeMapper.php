@@ -17,6 +17,7 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Upload\UploadType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
+use phpDocumentor\Reflection\Types\AbstractList;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Float_;
@@ -70,7 +71,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return $mappedType;
         }
 
-        if ($type instanceof Array_) {
+        if ($type instanceof AbstractList) {
             $innerType = $this->topRootTypeMapper->toGraphQLOutputType($type->getValueType(), $subType, $reflector, $docBlockObj);
             /*if ($innerType === null) {
                 return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
