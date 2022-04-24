@@ -2381,4 +2381,18 @@ class EndToEndTest extends TestCase
         );
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
+
+    public function testCurcularInput(): void
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Controllers');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Types');
+
+        $schema = $schemaFactory->createSchema();
+
+        $errors = $schema->validate();
+        $this->assertSame([], $errors);
+    }
 }

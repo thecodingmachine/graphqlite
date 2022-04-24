@@ -9,6 +9,8 @@ use GraphQL\Type\Definition\StringType;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputA;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputB;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
@@ -105,7 +107,8 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testResolvesCorrectlyWithRequiredConstructParam(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
-
+        $input->freeze();
+        $fields = $input->getFields();
         $args = ['foo' => 'Foo'];
         $resolveInfo = $this->createMock(ResolveInfo::class);
         $result = $input->resolve(null, $args, [], $resolveInfo);
@@ -120,7 +123,8 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testResolvesCorrectlyWithOnlyConstruct(): void
     {
         $input = new InputType(TestOnlyConstruct::class, 'TestOnlyConstructInput', null, false, $this->getFieldsBuilder());
-
+        $input->freeze();
+        $fields = $input->getFields();
         $args = [
             'foo' => 'Foo',
             'bar' => 200,
@@ -138,7 +142,8 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testFailsResolvingFieldWithoutRequiredConstructParam(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
-
+        $input->freeze();
+        $fields = $input->getFields();
         $args = ['bar' => 'Bar'];
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
@@ -151,6 +156,8 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testSimpleSetterAnnotated(): void
     {
         $input = new InputType(InputWithSetter::class, 'InputWithSetterInput', null, false, $this->getFieldsBuilder());
+        $input->freeze();
+        $fields = $input->getFields();
         $args = [
             'foo' => 'Foo',
             'bar' => 200,
@@ -172,4 +179,5 @@ class InputTypeTest extends AbstractQueryProviderTest
         $fields = $input->getFields();
         $this->assertInstanceOf(NonNull::class, $fields['bar']->getType());
     }
+
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use Closure;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
@@ -42,17 +43,19 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             throw FailedResolvingInputType::createForNotInstantiableClass($className);
         }
 
-        $this->inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
-        $fields = function () {
+
+        $fields = function () use ($isUpdate, $inputName, $className, $fieldsBuilder) {
+            $inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
+
             $fieldConfigs = [];
-            foreach($this->inputFields as $field){
+            foreach($inputFields as $field){
                 $fieldConfigs[] = $field->config;
             }
-
+            $this->inputFields = $inputFields;
             return $fieldConfigs;
         };
 
-
+        $fields = $fields->bindTo($this);
 
         $config = [
             'name' => $inputName,
@@ -73,6 +76,8 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     {
         $instance = $this->createInstance($args);
         $countructerParams = $this->getClassConstructParameterNames();
+//        $fields = $this->getFields();
+//        dump($fields);
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
             if (!array_key_exists($name, $args) || in_array($name, $countructerParams)) {
