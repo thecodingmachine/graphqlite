@@ -76,8 +76,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     {
         $instance = $this->createInstance($args);
         $countructerParams = $this->getClassConstructParameterNames();
-//        $fields = $this->getFields();
-//        dump($fields);
+
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
             if (!array_key_exists($name, $args) || in_array($name, $countructerParams)) {
