@@ -61,13 +61,10 @@ class TypeHandler implements ParameterHandlerInterface
 {
     /** @var PhpDocumentorTypeResolver */
     private $phpDocumentorTypeResolver;
-
     /** @var ArgumentResolver */
     private $argumentResolver;
-
     /** @var RootTypeMapperInterface */
     private $rootTypeMapper;
-
     /** @var TypeResolver */
     private $typeResolver;
 
@@ -76,10 +73,10 @@ class TypeHandler implements ParameterHandlerInterface
         RootTypeMapperInterface $rootTypeMapper,
         TypeResolver $typeResolver
     ) {
-        $this->argumentResolver = $argumentResolver;
-        $this->rootTypeMapper = $rootTypeMapper;
+        $this->argumentResolver          = $argumentResolver;
+        $this->rootTypeMapper            = $rootTypeMapper;
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
-        $this->typeResolver = $typeResolver;
+        $this->typeResolver              = $typeResolver;
     }
 
     /**
@@ -137,7 +134,7 @@ class TypeHandler implements ParameterHandlerInterface
         /** @var Var_[] $varTags */
         $varTags = $docBlock->getTagsByName('var');
 
-        if (!$varTags) {
+        if (! $varTags) {
             return null;
         }
 
@@ -148,12 +145,8 @@ class TypeHandler implements ParameterHandlerInterface
         return reset($varTags)->getType();
     }
 
-    public function mapParameter(
-        ReflectionParameter $parameter,
-        DocBlock $docBlock,
-        ?Type $paramTagType,
-        ParameterAnnotations $parameterAnnotations
-    ): ParameterInterface {
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
+    {
         $hideParameter = $parameterAnnotations->getAnnotationByType(HideParameter::class);
         if ($hideParameter) {
             if ($parameter->isDefaultValueAvailable() === false) {
@@ -173,7 +166,7 @@ class TypeHandler implements ParameterHandlerInterface
             }
         } else {
             $parameterType = $parameter->getType();
-            $allowsNull = $parameterType === null ? true : $parameterType->allowsNull();
+            $allowsNull    = $parameterType === null ? true : $parameterType->allowsNull();
 
             if ($parameterType === null) {
                 $phpdocType = new Mixed_();
@@ -187,11 +180,7 @@ class TypeHandler implements ParameterHandlerInterface
 
             try {
                 $declaringFunction = $parameter->getDeclaringFunction();
-                Assert::isInstanceOf(
-                    $declaringFunction,
-                    ReflectionMethod::class,
-                    'Parameter of a function passed. Only parameters of methods are supported.'
-                );
+                Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
                 $type = $this->mapType(
                     $phpdocType,
                     $paramTagType,
@@ -209,22 +198,16 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         $hasDefaultValue = false;
-        $defaultValue = null;
+        $defaultValue    = null;
         if ($parameter->allowsNull()) {
             $hasDefaultValue = true;
         }
         if ($parameter->isDefaultValueAvailable()) {
             $hasDefaultValue = true;
-            $defaultValue = $parameter->getDefaultValue();
+            $defaultValue    = $parameter->getDefaultValue();
         }
 
-        return new InputTypeParameter(
-            $parameter->getName(),
-            $type,
-            $hasDefaultValue,
-            $defaultValue,
-            $this->argumentResolver
-        );
+        return new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
     }
 
     /**
@@ -240,7 +223,8 @@ class TypeHandler implements ParameterHandlerInterface
         bool $toInput,
         ?string $argumentName = null,
         ?bool $isNullable = null
-    ): GraphQLType {
+    ): GraphQLType
+    {
         $propertyType = null;
 
         // getType function on property reflection is available only since PHP 7.4
@@ -275,7 +259,7 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Maps class property into input property.
      *
-     * @param mixed $defaultValue
+     * @param mixed              $defaultValue
      *
      * @throws CannotMapTypeException
      */
@@ -286,7 +270,8 @@ class TypeHandler implements ParameterHandlerInterface
         ?string $inputTypeName = null,
         $defaultValue = null,
         ?bool $isNullable = null
-    ): InputTypeProperty {
+    ): InputTypeProperty
+    {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
         /** @var Var_[] $varTags */
@@ -298,7 +283,7 @@ class TypeHandler implements ParameterHandlerInterface
             if ($isNullable === null) {
                 $varType = $varTag->getType();
                 if ($varType !== null) {
-                    $isNullable = in_array('null', explode('|', (string)$varType));
+                    $isNullable = in_array('null', explode('|', (string) $varType));
                 }
             }
         }
@@ -324,14 +309,7 @@ class TypeHandler implements ParameterHandlerInterface
         $hasDefault = $defaultValue !== null || $isNullable;
         $fieldName = $argumentName ?? $refProperty->getName();
 
-        $inputProperty = new InputTypeProperty(
-            $refProperty->getName(),
-            $fieldName,
-            $inputType,
-            $hasDefault,
-            $defaultValue,
-            $this->argumentResolver
-        );
+        $inputProperty = new InputTypeProperty($refProperty->getName(), $fieldName, $inputType, $hasDefault, $defaultValue, $this->argumentResolver);
         $inputProperty->setDescription(trim($docBlockComment));
 
         return $inputProperty;
@@ -352,9 +330,10 @@ class TypeHandler implements ParameterHandlerInterface
         $reflector,
         DocBlock $docBlockObj,
         ?string $argumentName = null
-    ): GraphQLType {
+    ): GraphQLType
+    {
         $graphQlType = null;
-        if ($isNullable && !$type instanceof Nullable) {
+        if ($isNullable && ! $type instanceof Nullable) {
             // In case a parameter has a default value, let's wrap the main type in a nullable
             $type = new Nullable($type);
         }
@@ -377,39 +356,17 @@ class TypeHandler implements ParameterHandlerInterface
             }
             if ($mapToInputType === true) {
                 Assert::notNull($argumentName);
-                $graphQlType = $this->rootTypeMapper->toGraphQLInputType(
-                    $docBlockType,
-                    null,
-                    $argumentName,
-                    $reflector,
-                    $docBlockObj
-                );
+                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($docBlockType, null, $argumentName, $reflector, $docBlockObj);
             } else {
-                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType(
-                    $docBlockType,
-                    null,
-                    $reflector,
-                    $docBlockObj
-                );
+                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($docBlockType, null, $reflector, $docBlockObj);
             }
         } else {
             $completeType = $this->appendTypes($type, $docBlockType);
             if ($mapToInputType === true) {
                 Assert::notNull($argumentName);
-                $graphQlType = $this->rootTypeMapper->toGraphQLInputType(
-                    $completeType,
-                    null,
-                    $argumentName,
-                    $reflector,
-                    $docBlockObj
-                );
+                $graphQlType = $this->rootTypeMapper->toGraphQLInputType($completeType, null, $argumentName, $reflector, $docBlockObj);
             } else {
-                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType(
-                    $completeType,
-                    null,
-                    $reflector,
-                    $docBlockObj
-                );
+                $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($completeType, null, $reflector, $docBlockObj);
             }
         }
 
