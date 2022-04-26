@@ -109,6 +109,7 @@ class ProductController
         $product = new TrickyProduct();
         $product->setName("Special","box");
         $product->price = 11.99;
+        $product->multi = 11.11;
         return $product;
     }
 

@@ -947,9 +947,6 @@ class FieldsBuilder
                     continue;
                 }
 
-                if (isset($fields[$name])) {
-                    throw DuplicateMappingException::createForQueryInOneMethod($name, $refMethod);
-                }
                 $fields[$name] = $field;
             }
         }
@@ -1029,9 +1026,6 @@ class FieldsBuilder
                     continue;
                 }
 
-                if (isset($fields[$name])) {
-                    throw DuplicateMappingException::createForQueryInOneProperty($name, $refProperty);
-                }
                 $fields[$name] = $field;
             }
         }

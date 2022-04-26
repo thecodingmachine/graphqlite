@@ -31,6 +31,14 @@ class TrickyProduct
     public $price;
 
     /**
+     * @var float
+     * @Field()
+     * @Field(for="CreateTrickyProductInput", inputType="Float")
+     * @Field(for="UpdateTrickyProductInput", inputType="Int!")
+     */
+    public $multi;
+
+    /**
      * @var string
      */
     private $secret = "hello";

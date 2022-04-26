@@ -2129,12 +2129,14 @@ class EndToEndTest extends TestCase
                 product: {
                     name: "secret product"
                     price: 12.22
+                    multi: 11
                     secret: "123"
                     conditionalSecret: "actually{secret}"
                 }
             ) {
                 name
                 price
+                multi
                 conditionalSecret(key: 1234)
             }
         }
@@ -2149,12 +2151,14 @@ class EndToEndTest extends TestCase
         $this->assertSame('actually{secret}', $data['updateTrickyProduct']['conditionalSecret']);
         $this->assertSame('secret product foo', $data['updateTrickyProduct']['name']);
         $this->assertSame(12.22, $data['updateTrickyProduct']['price']);
+        $this->assertSame(11.0, $data['updateTrickyProduct']['multi']);
 
         $queryString = '
         query {
             trickyProduct {
                 name
                 price
+                multi
                 secret
             }
         }
@@ -2169,6 +2173,7 @@ class EndToEndTest extends TestCase
         $this->assertSame('Special box', $data['trickyProduct']['name']);
         $this->assertSame(11.99, $data['trickyProduct']['price']);
         $this->assertSame("hello", $data['trickyProduct']['secret']);
+        $this->assertSame(11.11, $data['trickyProduct']['multi']);
 
         $queryString = '
         mutation {
@@ -2254,6 +2259,7 @@ class EndToEndTest extends TestCase
                 product: {
                     name: "secret product"
                     price: 12.22
+                    multi: 11
                     secret: "123"
                     conditionalSecret: "actually{notsosecret}"
                 }
@@ -2328,6 +2334,7 @@ class EndToEndTest extends TestCase
                 product: {
                     name: "secret product"
                     price: 12.22
+                    multi: 11
                     secret: "123"
                     conditionalSecret: "actually{secret}"
                 }
