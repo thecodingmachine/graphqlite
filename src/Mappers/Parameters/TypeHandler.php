@@ -360,7 +360,17 @@ class TypeHandler implements ParameterHandlerInterface
         }
         $innerType = $type instanceof Nullable ? $type->getActualType() : $type;
 
-        if ($innerType instanceof Array_ || $innerType instanceof Iterable_ || $innerType instanceof Mixed_) {
+        if (
+            $innerType instanceof Array_
+            || $innerType instanceof Iterable_
+            || $innerType instanceof Mixed_
+            // Try to match generic phpdoc-provided iterables with non-generic return-type-provided iterables
+            // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
+            || ($innerType instanceof Object_
+                && $docBlockType instanceof Collection
+                && (string)$innerType->getFqsen() === (string)$docBlockType->getFqsen()
+            )
+        ) {
             // We need to use the docBlockType
             if ($docBlockType === null) {
                 throw CannotMapTypeException::createForMissingPhpDoc($innerType, $reflector, $argumentName);
@@ -420,16 +430,6 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         $types = [$type];
-
-        // Try to match generic phpdoc-provided iterables with non-generic return-type-provided iterables
-        // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
-        if ($docBlockType instanceof Collection
-            && $type instanceof Object_
-            && (string)$type->getFqsen() === (string)$docBlockType->getFqsen()
-        ) {
-            $types = [];
-        }
-
         if ($docBlockType instanceof Compound) {
             $docBlockTypes = iterator_to_array($docBlockType);
             $types = array_merge($types, $docBlockTypes);
