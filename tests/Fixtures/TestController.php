@@ -95,6 +95,15 @@ class TestController
     }
 
     /**
+     * @Query(name="arrayObjectGeneric")
+     * @return ArrayObject<TestObject>
+     */
+    public function testArrayObjectGeneric(): ArrayObject
+    {
+        return new ArrayObject([]);
+    }
+
+    /**
      * @Query(name="iterable")
      * @return iterable|TestObject[]
      */
