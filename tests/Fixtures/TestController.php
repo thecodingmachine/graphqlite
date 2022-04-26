@@ -104,6 +104,15 @@ class TestController
     }
 
     /**
+     * @Query(name="iterableGeneric")
+     * @return iterable<TestObject>
+     */
+    public function testIterableGeneric(): iterable
+    {
+        return array();
+    }
+
+    /**
      * @Query(name="union")
      * @return TestObject|TestObject2
      */
