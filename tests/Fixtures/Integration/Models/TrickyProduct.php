@@ -39,7 +39,7 @@ class TrickyProduct
     public $multi;
 
     /**
-     * @var string[]
+     * @var string[]|null
      * @Field()
      */
     public $list;

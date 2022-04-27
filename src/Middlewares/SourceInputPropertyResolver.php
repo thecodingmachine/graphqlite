@@ -53,7 +53,7 @@ class SourceInputPropertyResolver implements SourceResolverInterface
             throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
         }
         PropertyAccessor::setValue($this->object, $this->propertyName, ...$args);
-        return $this->object;
+        return $args[0];
     }
 
     public function toString(): string

@@ -2132,7 +2132,6 @@ class EndToEndTest extends TestCase
                     multi: 11
                     secret: "123"
                     conditionalSecret: "actually{secret}"
-                    list: ["graph", "ql"]
                 }
             ) {
                 name
@@ -2153,7 +2152,6 @@ class EndToEndTest extends TestCase
         $this->assertSame('secret product foo', $data['updateTrickyProduct']['name']);
         $this->assertSame(12.22, $data['updateTrickyProduct']['price']);
         $this->assertSame(11.0, $data['updateTrickyProduct']['multi']);
-        $this->assertSame(["graph", "ql"], $data['updateTrickyProduct']['list']);
 
         $queryString = '
         query {
@@ -2403,5 +2401,65 @@ class EndToEndTest extends TestCase
 
         $errors = $schema->validate();
         $this->assertSame([], $errors);
+    }
+
+    public function testArrayInput(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+
+        ]);
+
+        $schema = $container->get(Schema::class);
+
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "fooby"
+                    price: 12.22
+                    multi: 11
+                    secret: "123"
+                    conditionalSecret: "actually{secret}"
+                    list: ["graph", "ql"]
+                }
+            ) {
+                list
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(["graph", "ql"], $data['updateTrickyProduct']['list']);
     }
 }

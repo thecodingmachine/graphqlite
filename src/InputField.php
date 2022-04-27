@@ -56,8 +56,6 @@ class InputField extends InputObjectField
             $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
             $result = $resolver(...$toPassArgs);
 
-
-
             try {
                 $this->assertInputType($result);
             } catch (TypeMismatchRuntimeException $e) {
