@@ -121,7 +121,17 @@ class FieldsBuilder
      */
     public function getMutations(object $controller): array
     {
-        return $this->getFieldsByAnnotations($controller, Mutation::class, false);
+//        return $this->getFieldsByAnnotations($controller, Mutation::class, false);
+        $refClass = new ReflectionClass($controller);
+        $namespace = $this->annotationReader->getNamespaceAnnotation($refClass);
+        if(!$namespace){
+            return $this->getFieldsByAnnotations($controller, Mutation::class, false);
+        } else {
+            dump($namespace);
+            $muatations = $this->getFieldsByAnnotations($controller, Mutation::class, false);
+            dump($muatations);
+            return $muatations;
+        }
     }
 
     /**

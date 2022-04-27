@@ -6,6 +6,7 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
+use GraphQL\Utils\SchemaPrinter;
 use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -2044,5 +2045,20 @@ class EndToEndTest extends TestCase
         $this->expectException(ValidationException::class);
         $result = GraphQL::executeQuery($schema, $queryString);
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    public function testMuatationNamespaces(): void
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\MutationNamespaces\\Controllers');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types');
+
+        $schema = $schemaFactory->createSchema();
+        $schemaExport = SchemaPrinter::doPrint($schema);
+        dump($schemaExport);
+        $errors = $schema->validate();
+        $this->assertSame([], $errors);
     }
 }
