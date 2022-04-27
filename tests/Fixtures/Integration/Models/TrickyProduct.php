@@ -39,6 +39,12 @@ class TrickyProduct
     public $multi;
 
     /**
+     * @var string[]
+     * @Field()
+     */
+    public $list;
+
+    /**
      * @var string
      */
     private $secret = "hello";

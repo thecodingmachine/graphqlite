@@ -2132,6 +2132,7 @@ class EndToEndTest extends TestCase
                     multi: 11
                     secret: "123"
                     conditionalSecret: "actually{secret}"
+                    list: ["graph", "ql"]
                 }
             ) {
                 name
@@ -2152,6 +2153,7 @@ class EndToEndTest extends TestCase
         $this->assertSame('secret product foo', $data['updateTrickyProduct']['name']);
         $this->assertSame(12.22, $data['updateTrickyProduct']['price']);
         $this->assertSame(11.0, $data['updateTrickyProduct']['multi']);
+        $this->assertSame(["graph", "ql"], $data['updateTrickyProduct']['list']);
 
         $queryString = '
         query {
@@ -2389,7 +2391,7 @@ class EndToEndTest extends TestCase
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
-    public function testCurcularInput(): void
+    public function testCircularInput(): void
     {
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
