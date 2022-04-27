@@ -121,17 +121,27 @@ class FieldsBuilder
      */
     public function getMutations(object $controller): array
     {
-//        return $this->getFieldsByAnnotations($controller, Mutation::class, false);
         $refClass = new ReflectionClass($controller);
-        $namespace = $this->annotationReader->getNamespaceAnnotation($refClass);
-        if(!$namespace){
+        $namespaceAnnotation = $this->annotationReader->getNamespaceAnnotation($refClass);
+        if(!$namespaceAnnotation){
             return $this->getFieldsByAnnotations($controller, Mutation::class, false);
-        } else {
-            dump($namespace);
-            $muatations = $this->getFieldsByAnnotations($controller, Mutation::class, false);
-            dump($muatations);
-            return $muatations;
         }
+
+        $namespaceFieldName = str_replace("Controller", "", $refClass->getShortName());
+        $namespaceName = $namespaceAnnotation->getName() ?? $namespaceFieldName."Mutations";
+
+        $namespaceType = new MutableObjectType([
+            'name' => $namespaceName,
+            'fields' => function () use ($controller) {
+                return $this->getFieldsByAnnotations($controller, Mutation::class, false);
+            }
+        ]);
+        $namespaceType->freeze();
+        $namespaceField = FieldDefinition::create([
+            'name' => strtolower($namespaceFieldName),
+            'type' => $namespaceType
+        ]);
+        return [$namespaceFieldName => $namespaceField];
     }
 
     /**
@@ -372,7 +382,7 @@ class FieldsBuilder
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
             if (! $description) {
-                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+                $description = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
             }
 
             $fieldDescriptor->setName($name);

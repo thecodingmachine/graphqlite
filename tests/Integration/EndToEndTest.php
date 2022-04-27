@@ -2056,9 +2056,12 @@ class EndToEndTest extends TestCase
         $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types');
 
         $schema = $schemaFactory->createSchema();
-        $schemaExport = SchemaPrinter::doPrint($schema);
-        dump($schemaExport);
+//        $schemaExport = SchemaPrinter::doPrint($schema);
         $errors = $schema->validate();
         $this->assertSame([], $errors);
+        $this->assertSame("UserMutations",$schema->getMutationType()->getField("user")->getType()->name);
+        $this->assertCount(3, $schema->getMutationType()->getField("user")->getType()->config["fields"]());
+        $this->assertSame("CustomNS",$schema->getMutationType()->getField("rename")->getType()->name);
+        $this->assertCount(3, $schema->getMutationType()->getField("rename")->getType()->config["fields"]());
     }
 }
