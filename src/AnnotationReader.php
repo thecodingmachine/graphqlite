@@ -22,7 +22,7 @@ use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
-use TheCodingMachine\GraphQLite\Annotations\MuatationNamespace;
+use TheCodingMachine\GraphQLite\Annotations\MutationNamespace;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
@@ -285,9 +285,9 @@ class AnnotationReader
      *
      * @template T of object
      */
-    public function getNamespaceAnnotation(ReflectionClass $refClass): ?MuatationNamespace
+    public function getNamespaceAnnotation(ReflectionClass $refClass): ?MutationNamespace
     {
-        return $this->getClassAnnotation($refClass, MuatationNamespace::class);
+        return $this->getClassAnnotation($refClass, MutationNamespace::class);
     }
 
     /**

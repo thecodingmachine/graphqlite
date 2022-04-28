@@ -4,14 +4,14 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\MutationNamespaces\Controllers;
 
 
-use TheCodingMachine\GraphQLite\Annotations\MuatationNamespace;
+use TheCodingMachine\GraphQLite\Annotations\MutationNamespace;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Types\ID;
 
 
 /**
- * @MuatationNamespace()
+ * @MutationNamespace()
  */
 class UserController
 {

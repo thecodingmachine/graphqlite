@@ -2047,7 +2047,7 @@ class EndToEndTest extends TestCase
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
-    public function testMuatationNamespaces(): void
+    public function testMutationNamespaces(): void
     {
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
