@@ -96,7 +96,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     {
         if (! $type instanceof Compound) {
             //try {
-                return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
+            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
 
             /*} catch (CannotMapTypeException $e) {
                 $this->throwIterableMissingTypeHintException($e, $type);

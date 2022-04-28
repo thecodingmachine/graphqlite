@@ -39,7 +39,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
         $globControllerQueryProvider = new GlobControllerQueryProvider('TheCodingMachine\\GraphQLite\\Fixtures', $this->getFieldsBuilder(), $container, $this->getAnnotationReader(), new Psr16Cache(new NullAdapter()), null, false, false);
 
         $queries = $globControllerQueryProvider->getQueries();
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
 
         $mutations = $globControllerQueryProvider->getMutations();
         $this->assertCount(1, $mutations);

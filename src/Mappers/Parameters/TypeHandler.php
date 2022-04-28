@@ -14,6 +14,7 @@ use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Collection;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
@@ -338,7 +339,17 @@ class TypeHandler implements ParameterHandlerInterface
         }
         $innerType = $type instanceof Nullable ? $type->getActualType() : $type;
 
-        if ($innerType instanceof Array_ || $innerType instanceof Iterable_ || $innerType instanceof Mixed_) {
+        if (
+            $innerType instanceof Array_
+            || $innerType instanceof Iterable_
+            || $innerType instanceof Mixed_
+            // Try to match generic phpdoc-provided iterables with non-generic return-type-provided iterables
+            // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
+            || ($innerType instanceof Object_
+                && $docBlockType instanceof Collection
+                && (string)$innerType->getFqsen() === (string)$docBlockType->getFqsen()
+            )
+        ) {
             // We need to use the docBlockType
             if ($docBlockType === null) {
                 throw CannotMapTypeException::createForMissingPhpDoc($innerType, $reflector, $argumentName);
