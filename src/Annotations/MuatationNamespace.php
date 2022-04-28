@@ -14,7 +14,7 @@ use Attribute;
  * })
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class MuatationNamespace
+class MutationNamespace
 {
 
     /** @var string|null */
