@@ -41,7 +41,7 @@ class TestConstructorAndProperties
 
     public function setFoo(string $foo): void
     {
-        throw new Exception('This should not be called!');
+        $this->foo = $foo;
     }
 
     public function getFoo(): string
@@ -51,7 +51,7 @@ class TestConstructorAndProperties
 
     public function setBar(int $bar): void
     {
-        throw new Exception('This should not be called!');
+        $this->bar = $bar;
     }
 
     public function getBar(): int
