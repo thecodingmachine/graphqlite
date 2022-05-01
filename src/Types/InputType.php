@@ -20,7 +20,7 @@ use function array_key_exists;
 class InputType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
     /** @var InputField[] */
-    private $inputFields;
+    private $inputFields = [];
 
     /** @var class-string<object> */
     private $className;
