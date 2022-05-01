@@ -152,6 +152,8 @@ class InputTypeTest extends AbstractQueryProviderTest
             false,
             $this->getFieldsBuilder(),
         );
+        $input->freeze();
+        $fields = $input->getFields();
 
         $date = new \DateTimeImmutable();
 
