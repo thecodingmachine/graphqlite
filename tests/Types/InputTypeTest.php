@@ -14,6 +14,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputB;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndProperties;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
@@ -135,6 +136,37 @@ class InputTypeTest extends AbstractQueryProviderTest
         /** @var TestOnlyConstruct $result */
         $result = $input->resolve(null, $args, [], $resolveInfo);
 
+        $this->assertEquals('Foo', $result->getFoo());
+        $this->assertEquals(200, $result->getBar());
+    }
+
+    /**
+     * @group PR-466
+     */
+    public function testResolvesCorrectlyWithConstructorAndProperties(): void
+    {
+        $input = new InputType(
+            TestConstructorAndProperties::class,
+            'TestConstructorAndPropertiesInput',
+            null,
+            false,
+            $this->getFieldsBuilder(),
+        );
+
+        $date = new \DateTimeImmutable();
+
+        $args = [
+            'date' => $date,
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        /** @var TestConstructorAndProperties $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals($date, $result->getDate());
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
     }
