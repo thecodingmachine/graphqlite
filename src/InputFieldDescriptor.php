@@ -61,7 +61,7 @@ class InputFieldDescriptor
     private $refProperty;
     /** @var ResolverInterface|null */
     private $originalResolver;
-    /** @var callable */
+    /** @var callable|null */
     private $resolver;
     /** @var bool */
     private $isUpdate = false;
@@ -302,7 +302,7 @@ class InputFieldDescriptor
     /**
      * Returns the original callable that will be used to resolve the field.
      */
-    public function getOriginalResolver(): ResolverInterface
+    public function getOriginalResolver(): ?ResolverInterface
     {
         if (isset($this->originalResolver)) {
             return $this->originalResolver;
@@ -318,8 +318,8 @@ class InputFieldDescriptor
             $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
 //        } elseif ($this->magicProperty !== null) {
 //            $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
-        } else {
-            throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
+//        } else {
+//            throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
         }
 
         return $this->originalResolver;
@@ -329,7 +329,7 @@ class InputFieldDescriptor
      * Returns the callable that will be used to evaluate the field. This callable might have been modified to wrap
      * the original callable.
      */
-    public function getResolver(): callable
+    public function getResolver(): ?callable
     {
         if ($this->resolver === null) {
             $this->resolver = $this->getOriginalResolver();

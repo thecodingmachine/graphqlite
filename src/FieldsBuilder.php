@@ -920,12 +920,9 @@ class FieldsBuilder
 
                 $inputFieldDescriptor->setHasDefaultValue($isUpdate);
                 $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
-                if (is_string($controller)) {
+                $constructerParameters = $this->getClassConstructParameterNames($refClass);
+                if(!in_array($name, $constructerParameters)) {
                     $inputFieldDescriptor->setTargetMethodOnSource($methodName);
-                } else {
-                    $callable = [$controller, $methodName];
-                    Assert::isCallable($callable);
-                    $inputFieldDescriptor->setCallable($callable);
                 }
 
                 $inputFieldDescriptor->setType($type);
@@ -1001,7 +998,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setName($inputProperty->getName());
                 $inputFieldDescriptor->setComment(trim($description));
 
-                $inputFieldDescriptor->setParameters([$name => $inputProperty]);
+                $inputFieldDescriptor->setParameters([$inputProperty->getName() => $inputProperty]);
 
                 $type = $inputProperty->getType();
                 if (!$inputType && $isUpdate && $type instanceof NonNull) {
@@ -1011,7 +1008,11 @@ class FieldsBuilder
                 $inputFieldDescriptor->setType($type);
                 $inputFieldDescriptor->setInjectSource(false);
 
-                $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
+                $constructerParameters = $this->getClassConstructParameterNames($refClass);
+                if(!in_array($inputProperty->getName(), $constructerParameters)) {
+                    $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
+                }
+
 
                 $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
@@ -1031,5 +1032,25 @@ class FieldsBuilder
         }
 
         return $fields;
+    }
+
+
+    /**
+     * @return string[]
+     */
+    private function getClassConstructParameterNames(ReflectionClass $refClass): array
+    {
+        $constructor = $refClass->getConstructor();
+
+        if (! $constructor) {
+            return [];
+        }
+
+        $names = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            $names[] = $parameter->getName();
+        }
+
+        return $names;
     }
 }

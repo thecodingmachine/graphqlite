@@ -37,7 +37,7 @@ class InputField extends InputObjectField
      * @param mixed|null $defaultValue the default value set for this field
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, bool $isUpdate,bool $hasDefaultValue, $defaultValue, array $additionalConfig = [])
+    public function __construct(string $name, $type, array $arguments, ?ResolverInterface $originalResolver, ?callable $resolver, ?string $comment, bool $isUpdate,bool $hasDefaultValue, $defaultValue, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
@@ -54,7 +54,11 @@ class InputField extends InputObjectField
                 $originalResolver->setObject($source);
             }
             $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
-            $result = $resolver(...$toPassArgs);
+            if($resolver){
+                $result = $resolver(...$toPassArgs);
+            } else {
+                $result = $toPassArgs[0];
+            }
 
             try {
                 $this->assertInputType($result);
@@ -174,7 +178,7 @@ class InputField extends InputObjectField
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
+    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, ?callable $resolve): array
     {
         $toPassArgs = [];
         $exceptions = [];

@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use DateTime;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -155,7 +156,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $input->freeze();
         $fields = $input->getFields();
 
-        $date = new \DateTimeImmutable();
+        $date = "2022-05-02T04:42:30Z";
 
         $args = [
             'date' => $date,
@@ -168,7 +169,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         /** @var TestConstructorAndProperties $result */
         $result = $input->resolve(null, $args, [], $resolveInfo);
 
-        $this->assertEquals($date, $result->getDate());
+        $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
     }

@@ -74,8 +74,19 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
-        $instance = $this->createInstance($args);
         $countructerParams = $this->getClassConstructParameterNames();
+        $constructorArgs = [];
+        foreach ($this->inputFields as $inputField) {
+            $name = $inputField->name;
+            $resolve = $inputField->getResolve();
+
+            if(!array_key_exists($name, $args) || !in_array($name, $countructerParams)) {
+                continue;
+            }
+            $constructorArgs[$name] = $resolve(null,$args, $context, $resolveInfo);
+        }
+        $instance = $this->createInstance($constructorArgs);
+
 
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
@@ -88,7 +99,6 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);
         }
-
         return $instance;
     }
 

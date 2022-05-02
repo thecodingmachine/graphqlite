@@ -29,9 +29,10 @@ class TestConstructorAndProperties
      */
     private $bar;
 
-    public function __construct(\DateTimeImmutable $date)
+    public function __construct(\DateTimeImmutable $date, string $foo)
     {
         $this->date = $date;
+        $this->foo = $foo;
     }
 
     public function getDate(): \DateTimeImmutable
@@ -41,7 +42,7 @@ class TestConstructorAndProperties
 
     public function setFoo(string $foo): void
     {
-        $this->foo = $foo;
+        throw new \RuntimeException("This should not be called");
     }
 
     public function getFoo(): string
