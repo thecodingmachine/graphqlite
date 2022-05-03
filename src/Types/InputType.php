@@ -140,24 +140,4 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
         return $refClass->newInstanceArgs($parameters);
     }
-
-    /**
-     * @return string[]
-     */
-    private function getClassConstructParameterNames(): array
-    {
-        $refClass = new ReflectionClass($this->className);
-        $constructor = $refClass->getConstructor();
-
-        if (! $constructor) {
-            return [];
-        }
-
-        $names = [];
-        foreach ($constructor->getParameters() as $parameter) {
-            $names[] = $parameter->getName();
-        }
-
-        return $names;
-    }
 }
