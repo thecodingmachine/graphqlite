@@ -20,8 +20,10 @@ use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -885,7 +887,6 @@ class FieldsBuilder
                     $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
                 }
 
-
                 $inputFieldDescriptor = new InputFieldDescriptor();
                 $inputFieldDescriptor->setRefMethod($refMethod);
                 $inputFieldDescriptor->setIsUpdate($isUpdate);
@@ -983,45 +984,60 @@ class FieldsBuilder
                 $name = $annotation->getName() ?: $refProperty->getName();
 
                 $inputType = $annotation->getInputType();
+                $constructerParameters = $this->getClassConstructParameterNames($refClass);
                 $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
-
-                $inputFieldDescriptor = new InputFieldDescriptor();
-                $inputFieldDescriptor->setRefProperty($refProperty);
-                $inputFieldDescriptor->setIsUpdate($isUpdate);
-                $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
-                $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
 
                 if (! $description) {
                     $description = $inputProperty->getDescription();
                 }
 
-                $inputFieldDescriptor->setName($inputProperty->getName());
-                $inputFieldDescriptor->setComment(trim($description));
-
-                $inputFieldDescriptor->setParameters([$inputProperty->getName() => $inputProperty]);
-
-                $type = $inputProperty->getType();
-                if (!$inputType && $isUpdate && $type instanceof NonNull) {
-                    $type = $type->getWrappedType();
-                }
-
-                $inputFieldDescriptor->setType($type);
-                $inputFieldDescriptor->setInjectSource(false);
-
-                $constructerParameters = $this->getClassConstructParameterNames($refClass);
-                if(!in_array($inputProperty->getName(), $constructerParameters)) {
-                    $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
-                }
-
-
-                $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
-
-                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
-                    {
-                        return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                if(in_array($name, $constructerParameters)) {
+                    $middlewareAnnotations = $this->annotationReader->getPropertyAnnotations($refProperty, MiddlewareAnnotationInterface::class);
+                    if($middlewareAnnotations !== []){
+                        throw IncompatibleAnnotationsException::middlewareAnnotationsUnsupported();
                     }
-                });
+                    // constructor hydrated
+                    $field = new InputField(
+                        $name,
+                        $inputProperty->getType(),
+                        [$inputProperty->getName() => $inputProperty],
+                        null,
+                        null,
+                        trim($description),
+                        $isUpdate,
+                        $inputProperty->hasDefaultValue(),
+                        $inputProperty->getDefaultValue()
+                    );
+                } else {
+                    // setters and properties
+                    $inputFieldDescriptor = new InputFieldDescriptor();
+                    $inputFieldDescriptor->setRefProperty($refProperty);
+                    $inputFieldDescriptor->setIsUpdate($isUpdate);
+                    $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
+                    $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
+
+                    $inputFieldDescriptor->setName($inputProperty->getName());
+                    $inputFieldDescriptor->setComment(trim($description));
+
+                    $inputFieldDescriptor->setParameters([$inputProperty->getName() => $inputProperty]);
+
+                    $type = $inputProperty->getType();
+                    if (!$inputType && $isUpdate && $type instanceof NonNull) {
+                        $type = $type->getWrappedType();
+                    }
+
+                    $inputFieldDescriptor->setType($type);
+                    $inputFieldDescriptor->setInjectSource(false);
+                    $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
+                    $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
+
+                    $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                        public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
+                        {
+                            return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                        }
+                    });
+                }
 
                 if ($field === null) {
                     continue;

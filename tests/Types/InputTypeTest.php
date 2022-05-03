@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputA;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputB;
@@ -16,6 +17,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndProperties;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndPropertiesInvalid;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
@@ -172,6 +174,24 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
+    }
+
+    /**
+     * @group PR-466
+     */
+    public function testConstructorHydrationFailingWithMiddlewareAnnotations(): void
+    {
+        $this->expectException(IncompatibleAnnotationsException::class);
+
+        $input = new InputType(
+            TestConstructorAndPropertiesInvalid::class,
+            'TestConstructorAndPropertiesInvalidInput',
+            null,
+            false,
+            $this->getFieldsBuilder(),
+        );
+        $input->freeze();
+        $fields = $input->getFields();
     }
 
     public function testFailsResolvingFieldWithoutRequiredConstructParam(): void

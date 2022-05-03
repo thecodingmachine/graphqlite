@@ -16,6 +16,8 @@ use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
@@ -29,6 +31,10 @@ class InputField extends InputObjectField
 {
     /** @var Callable */
     private $resolve;
+
+    /** @var bool */
+    private $forConstructorHydration = false;
+
     /**
      * @param InputType|(NullableType&Type) $type
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
@@ -49,26 +55,32 @@ class InputField extends InputObjectField
             $config['defaultValue'] = $defaultValue;
         }
 
-        $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
-            if ($originalResolver instanceof SourceResolverInterface) {
-                $originalResolver->setObject($source);
-            }
-            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
-            if($resolver){
+        if($originalResolver !== null && $resolver !== null){
+            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+                if ($originalResolver instanceof SourceResolverInterface) {
+                    $originalResolver->setObject($source);
+                }
+                $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
                 $result = $resolver(...$toPassArgs);
-            } else {
-                $result = $toPassArgs[0];
-            }
 
-            try {
+                try {
+                    $this->assertInputType($result);
+                } catch (TypeMismatchRuntimeException $e) {
+                    $e->addInfo($this->name, $originalResolver->toString());
+                    throw $e;
+                }
+
+                return $result;
+            };
+        } else {
+            $this->forConstructorHydration = true;
+            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments) {
+                $result = $arguments[$this->name]->resolve($source, $args, $context, $info);
                 $this->assertInputType($result);
-            } catch (TypeMismatchRuntimeException $e) {
-                $e->addInfo($this->name, $originalResolver->toString());
-                throw $e;
-            }
+                return $result;
+            };
+        }
 
-            return $result;
-        };
 
         $config += $additionalConfig;
         parent::__construct($config);
@@ -103,6 +115,11 @@ class InputField extends InputObjectField
         }
 
         return $type;
+    }
+
+    public function forConstructorHydration(): bool
+    {
+        return $this->forConstructorHydration;
     }
 
 //    /**

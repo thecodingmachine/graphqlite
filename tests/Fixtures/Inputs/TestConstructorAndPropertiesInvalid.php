@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\Annotations\Right;
 /**
  * @Input()
  */
-class TestConstructorAndProperties
+class TestConstructorAndPropertiesInvalid
 {
 
     /**
@@ -20,6 +20,7 @@ class TestConstructorAndProperties
 
     /**
      * @Field()
+     * @Right("INVALID_MIDDLEWARE")
      * @var string
      */
     private $foo;

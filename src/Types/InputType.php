@@ -20,6 +20,8 @@ use function array_key_exists;
 class InputType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
     /** @var InputField[] */
+    private $constructorInputFields = [];
+    /** @var InputField[] */
     private $inputFields = [];
 
     /** @var class-string<object> */
@@ -49,9 +51,14 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
             $fieldConfigs = [];
             foreach($inputFields as $field){
+                if($field->forConstructorHydration()){
+                    $this->constructorInputFields[] = $field;
+                } else {
+                    $this->inputFields[] = $field;
+                }
+
                 $fieldConfigs[] = $field->config;
             }
-            $this->inputFields = $inputFields;
             return $fieldConfigs;
         };
 
@@ -74,13 +81,11 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
-        $countructerParams = $this->getClassConstructParameterNames();
         $constructorArgs = [];
-        foreach ($this->inputFields as $inputField) {
-            $name = $inputField->name;
-            $resolve = $inputField->getResolve();
-
-            if(!array_key_exists($name, $args) || !in_array($name, $countructerParams)) {
+        foreach ($this->constructorInputFields as $constructorInputField) {
+            $name = $constructorInputField->name;
+            $resolve = $constructorInputField->getResolve();
+            if(!array_key_exists($name, $args)) {
                 continue;
             }
             $constructorArgs[$name] = $resolve(null,$args, $context, $resolveInfo);
@@ -90,12 +95,13 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
-            if (!array_key_exists($name, $args) || in_array($name, $countructerParams)) {
+            if (!array_key_exists($name, $args)) {
                 continue;
             }
             $resolve = $inputField->getResolve();
             $resolve($instance,$args, $context, $resolveInfo);
         }
+
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);
         }
