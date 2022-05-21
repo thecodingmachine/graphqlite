@@ -425,7 +425,8 @@ class TypeHandler implements ParameterHandlerInterface
         }
         return new Compound(
             array_map(
-                function (ReflectionNamedType $namedType) use ($reflectionClass): Type {
+                function ($namedType) use ($reflectionClass): Type {
+                    \assert($namedType instanceof ReflectionNamedType);
                     $phpdocType = $this->phpDocumentorTypeResolver->resolve($namedType->getName());
                     Assert::notNull($phpdocType);
 

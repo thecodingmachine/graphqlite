@@ -12,8 +12,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Fixtures80\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
@@ -38,13 +37,16 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testMapObjectUnionWorks(): void
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
 
-        $refMethod = new ReflectionMethod($this, 'objectUnion');
+        $refMethod = new ReflectionMethod(UnionOutputType::class, 'objectUnion');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
@@ -99,10 +101,6 @@ class TypeMapperTest extends AbstractQueryProviderTest
      */
     private function dummy() {
 
-    }
-
-    private function objectUnion(): TestObject|TestObject2 {
-        return new TestObject((''));
     }
 
     /**
