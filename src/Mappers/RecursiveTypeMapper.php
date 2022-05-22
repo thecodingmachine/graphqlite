@@ -23,7 +23,6 @@ use TheCodingMachine\GraphQLite\Types\InterfaceFromObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
-
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ObjectFromInterfaceType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;

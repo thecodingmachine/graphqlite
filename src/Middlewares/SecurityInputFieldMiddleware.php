@@ -51,31 +51,6 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
             return $inputFieldHandler->handle($inputFieldDescriptor);
         }
 
-//        $failWith = $annotations->getAnnotationByType(FailWith::class);
-//        assert($failWith instanceof FailWith || $failWith === null);
-//
-//        // If the failWith value is null and the return type is non nullable, we must set it to nullable.
-//        $makeReturnTypeNullable = false;
-//        $type = $inputFieldDescriptor->getType();
-//        if ($type instanceof NonNull) {
-//            if ($failWith !== null && $failWith->getValue() === null) {
-//                $makeReturnTypeNullable = true;
-//            } else {
-//                foreach ($securityAnnotations as $annotation) {
-//                    if (! $annotation->isFailWithSet() || $annotation->getFailWith() !== null) {
-//                        continue;
-//                    }
-//
-//                    $makeReturnTypeNullable = true;
-//                }
-//            }
-//            if ($makeReturnTypeNullable) {
-//                $type = $type->getWrappedType();
-//                Assert::isInstanceOf($type, OutputType::class);
-//                $inputFieldDescriptor->setType($type);
-//            }
-//        }
-
         $resolver = $inputFieldDescriptor->getResolver();
         $originalResolver = $inputFieldDescriptor->getOriginalResolver();
 
@@ -121,23 +96,6 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
         Assert::isArray($argsByName);
-
-        /*if ($diff = array_intersect(array_keys($variables), array_keys($argsName))) {
-            foreach ($diff as $key => $variableName) {
-                if ($variables[$variableName] !== $argsByName[$variableName]) {
-                    continue;
-                }
-
-                unset($diff[$key]);
-            }
-
-            if ($diff) {
-                $singular = count($diff) === 1;
-                if ($this->logger !== null) {
-                    $this->logger->warning(sprintf('Controller argument%s "%s" collided with the built-in security expression variables. The built-in value%s are being used for the @Security expression.', $singular ? '' : 's', implode('", "', $diff), $singular ? 's' : ''));
-                }
-            }
-        }*/
 
         return $variables + $argsByName;
     }

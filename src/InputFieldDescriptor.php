@@ -31,10 +31,6 @@ class InputFieldDescriptor
     private $type;
     /** @var array<string, ParameterInterface> */
     private $parameters = [];
-//    /** @var array<string, ParameterInterface> */
-//    private $prefetchParameters = [];
-//    /** @var string|null */
-//    private $prefetchMethodName;
     /** @var callable|null */
     private $callable;
     /** @var string|null */
@@ -51,8 +47,6 @@ class InputFieldDescriptor
     private $injectSource = false;
     /** @var string|null */
     private $comment;
-//    /** @var string|null */
-//    private $deprecationReason;
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
     /** @var ReflectionMethod */
@@ -120,8 +114,6 @@ class InputFieldDescriptor
         $this->defaultValue = $defaultValue;
     }
 
-
-
     public function getName(): string
     {
         return $this->name;
@@ -163,32 +155,6 @@ class InputFieldDescriptor
     {
         $this->parameters = $parameters;
     }
-
-//    /**
-//     * @return array<string, ParameterInterface>
-//     */
-//    public function getPrefetchParameters(): array
-//    {
-//        return $this->prefetchParameters;
-//    }
-//
-//    /**
-//     * @param array<string, ParameterInterface> $prefetchParameters
-//     */
-//    public function setPrefetchParameters(array $prefetchParameters): void
-//    {
-//        $this->prefetchParameters = $prefetchParameters;
-//    }
-//
-//    public function getPrefetchMethodName(): ?string
-//    {
-//        return $this->prefetchMethodName;
-//    }
-//
-//    public function setPrefetchMethodName(?string $prefetchMethodName): void
-//    {
-//        $this->prefetchMethodName = $prefetchMethodName;
-//    }
 
     /**
      * Sets the callable targeting the resolver function if the resolver function is part of a service.
@@ -258,16 +224,6 @@ class InputFieldDescriptor
     {
         $this->comment = $comment;
     }
-
-//    public function getDeprecationReason(): ?string
-//    {
-//        return $this->deprecationReason;
-//    }
-//
-//    public function setDeprecationReason(?string $deprecationReason): void
-//    {
-//        $this->deprecationReason = $deprecationReason;
-//    }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations
     {

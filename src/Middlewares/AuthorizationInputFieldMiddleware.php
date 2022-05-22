@@ -44,32 +44,12 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
         assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
-//        $failWith = $annotations->getAnnotationByType(FailWith::class);
-//        assert($failWith === null || $failWith instanceof FailWith);
-
-        // If the failWith value is null and the return type is non nullable, we must set it to nullable.
-//        $type = $inputFieldDescriptor->getType();
-//        if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
-//            $type = $type->getWrappedType();
-//            Assert::isInstanceOf($type, OutputType::class);
-//            $inputFieldDescriptor->setType($type);
-//        }
         if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
             return $inputFieldHandler->handle($inputFieldDescriptor);
         }
 
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
         assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
-
-//        if ($failWith !== null && $hideIfUnauthorized !== null) {
-//            throw IncompatibleAnnotationsException::cannotUseFailWithAndHide();
-//        }
-//
-//        if ($failWith !== null) {
-//            $failWithValue = $failWith->getValue();
-//
-//            return InputField::alwaysReturn($inputFieldDescriptor, $failWithValue);
-//        }
 
         if ($hideIfUnauthorized !== null) {
             return null;

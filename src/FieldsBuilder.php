@@ -373,7 +373,9 @@ class FieldsBuilder
             $methodName = $refMethod->getName();
 
             if ($queryAnnotation instanceof Field) {
-                if (strpos($methodName, 'set') === 0) continue;
+                if (strpos($methodName, 'set') === 0) {
+                    continue;
+                }
                 $for = $queryAnnotation->getFor();
                 if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
@@ -881,7 +883,9 @@ class FieldsBuilder
 
                 $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
                 $methodName = $refMethod->getName();
-                if (strpos($methodName, 'set') !== 0) continue;
+                if (strpos($methodName, 'set') !== 0) {
+                    continue;
+                }
                 $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
                 if (!$description) {
                     $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
@@ -922,7 +926,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setHasDefaultValue($isUpdate);
                 $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
                 $constructerParameters = $this->getClassConstructParameterNames($refClass);
-                if(!in_array($name, $constructerParameters)) {
+                if (!in_array($name, $constructerParameters)) {
                     $inputFieldDescriptor->setTargetMethodOnSource($methodName);
                 }
 
@@ -937,9 +941,6 @@ class FieldsBuilder
                         return InputField::fromFieldDescriptor($inputFieldDescriptor);
                     }
                 });
-
-
-
 
                 if ($field === null) {
                     continue;
@@ -979,10 +980,7 @@ class FieldsBuilder
                 }
 
                 $description = $annotation->getDescription();
-
-
                 $name = $annotation->getName() ?: $refProperty->getName();
-
                 $inputType = $annotation->getInputType();
                 $constructerParameters = $this->getClassConstructParameterNames($refClass);
                 $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
@@ -991,9 +989,9 @@ class FieldsBuilder
                     $description = $inputProperty->getDescription();
                 }
 
-                if(in_array($name, $constructerParameters)) {
+                if (in_array($name, $constructerParameters)) {
                     $middlewareAnnotations = $this->annotationReader->getPropertyAnnotations($refProperty, MiddlewareAnnotationInterface::class);
-                    if($middlewareAnnotations !== []){
+                    if ($middlewareAnnotations !== []){
                         throw IncompatibleAnnotationsException::middlewareAnnotationsUnsupported();
                     }
                     // constructor hydrated

@@ -50,8 +50,8 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             $inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
 
             $fieldConfigs = [];
-            foreach($inputFields as $field){
-                if($field->forConstructorHydration()){
+            foreach ($inputFields as $field){
+                if ($field->forConstructorHydration()){
                     $this->constructorInputFields[] = $field;
                 } else {
                     $this->inputFields[] = $field;
@@ -85,7 +85,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         foreach ($this->constructorInputFields as $constructorInputField) {
             $name = $constructorInputField->name;
             $resolve = $constructorInputField->getResolve();
-            if(!array_key_exists($name, $args)) {
+            if (!array_key_exists($name, $args)) {
                 continue;
             }
             $constructorArgs[$name] = $resolve(null,$args, $context, $resolveInfo);

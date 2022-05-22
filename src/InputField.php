@@ -55,7 +55,7 @@ class InputField extends InputObjectField
             $config['defaultValue'] = $defaultValue;
         }
 
-        if($originalResolver !== null && $resolver !== null){
+        if ($originalResolver !== null && $resolver !== null){
             $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
                 if ($originalResolver instanceof SourceResolverInterface) {
                     $originalResolver->setObject($source);
@@ -122,22 +122,6 @@ class InputField extends InputObjectField
         return $this->forConstructorHydration;
     }
 
-//    /**
-//     * @param mixed $value A value that will always be returned by this field.
-//     *
-//     * @return InputField
-//     */
-//    public static function alwaysReturn(InputFieldDescriptor $fieldDescriptor, $value): self
-//    {
-//        $callable = static function () use ($value) {
-//            return $value;
-//        };
-//
-//        $fieldDescriptor->setResolver($callable);
-//
-//        return self::fromDescriptor($fieldDescriptor);
-//    }
-
     /**
      * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
      *
@@ -175,9 +159,6 @@ class InputField extends InputObjectField
     public static function fromFieldDescriptor(InputFieldDescriptor $fieldDescriptor): self
     {
         $arguments = $fieldDescriptor->getParameters();
-//        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
-//            $arguments = ['__graphqlite_prefectData' => new PrefetchDataParameter()] + $arguments;
-//        }
         if ($fieldDescriptor->isInjectSource() === true) {
             $arguments = ['__graphqlite_source' => new SourceParameter()] + $arguments;
         }

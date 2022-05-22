@@ -17,7 +17,6 @@ class CircularInputB
      */
     private $circularInputA;
 
-
     private int $bar = 10;
 
     /** @param CircularInputA $circularInputA */
