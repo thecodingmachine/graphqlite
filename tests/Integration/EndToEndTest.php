@@ -2002,6 +2002,46 @@ class EndToEndTest extends TestCase
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
+    public function testEndToEndInputEmptyValues(): void
+    {
+        /**
+         * @var Schema $schema
+         */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $queryString = '
+        mutation {
+            updatePreferences(
+                preferences: {
+                    id: 0,
+                    options: [],
+                    enabled: false,
+                    name: ""
+                }
+            ) {
+                id
+                options
+                enabled
+                name
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame([
+            'updatePreferences' => [
+                'id' => 0,
+                'options' => [],
+                'enabled' => false,
+                'name' => '',
+            ],
+        ], $this->getSuccessResult($result));
+    }
+
     public function testEndToEndInputTypeValidation(): void
     {
         $validator = new Validator();
