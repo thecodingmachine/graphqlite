@@ -9,8 +9,6 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
 /**
  * A middleware use to process annotations when evaluating a input field
- *
- * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
 interface InputFieldMiddlewareInterface
 {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\NullableType;
+use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
@@ -15,8 +15,6 @@ use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-
-use function is_array;
 
 /**
  * A class that describes a field to be created.
@@ -169,7 +167,9 @@ class InputFieldDescriptor
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
         $this->targetPropertyOnSource = null;
-//        $this->magicProperty = null;
+
+        // To be enabled in a future PR
+        // $this->magicProperty = null;
     }
 
     public function setTargetMethodOnSource(string $targetMethodOnSource): void
@@ -180,7 +180,9 @@ class InputFieldDescriptor
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
         $this->targetPropertyOnSource = null;
-//        $this->magicProperty = null;
+
+        // To be enabled in a future PR
+        // $this->magicProperty = null;
     }
 
     public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
@@ -191,9 +193,16 @@ class InputFieldDescriptor
         $this->callable = null;
         $this->targetMethodOnSource = null;
         $this->targetPropertyOnSource = $targetPropertyOnSource;
-//        $this->magicProperty = null;
+
+            // To be enabled in a future PR
+            // $this->magicProperty = null;
     }
 
+    /**
+     * Set the magic property
+     *
+     * @todo enable this in a future PR
+     */
 //    public function setMagicProperty(string $magicProperty): void
 //    {
 //        if ($this->originalResolver !== null) {
@@ -272,8 +281,9 @@ class InputFieldDescriptor
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
             $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
-//        } elseif ($this->magicProperty !== null) {
-//            $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
+        // } elseif ($this->magicProperty !== null) {
+            // Enable magic properties in a future PR
+            // $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
         } else {
             throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
         }

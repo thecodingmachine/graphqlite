@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use TheCodingMachine\GraphQLite\InputField;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Annotations\Security;
-use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
+use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use Throwable;
@@ -28,17 +27,14 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
     private $language;
     /** @var AuthenticationServiceInterface */
     private $authenticationService;
-    /** @var LoggerInterface|null */
-    /*private $logger;*/
     /** @var AuthorizationServiceInterface */
     private $authorizationService;
 
-    public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
+    public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService)
     {
         $this->language = $language;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
-        /*$this->logger = $logger;*/
     }
 
     public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField

@@ -7,9 +7,6 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
-/**
- * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
- */
 interface InputFieldHandlerInterface
 {
     /**
