@@ -42,9 +42,10 @@ First, declare a query in your controller:
 class ProductController
 {
     #[Query]
-    public function product(string $id): Product
+    public function updateProduct(Product $product): Product
     {
-        // Some code that looks for a product and returns it.
+        // Some code that gets and updates a Product
+        return $product;
     }
 }
 ```
@@ -53,12 +54,19 @@ Then, annotate the `Product` class to declare what fields are exposed to the Gra
 
 ```php
 #[Type]
+#[Input(update: true)]
 class Product
 {
     #[Field]
     public function getName(): string
     {
         return $this->name;
+    }
+    
+    #[Field]
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
     
     // ...
@@ -69,7 +77,9 @@ That's it, you're good to go :tada: Query and enjoy!
 
 ```graphql
 {
-  product(id: 42) {
+  updateProduct(product: {
+    name: 'John Doe'
+  }) {
     name
   }
 }
