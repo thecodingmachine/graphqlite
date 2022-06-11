@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
-use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
+use TheCodingMachine\GraphQLite\InputField;
 
-use function array_diff_key;
-use function array_flip;
 use function array_key_exists;
 
 /**
@@ -21,8 +17,10 @@ use function array_key_exists;
  */
 class InputType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
-    /** @var InputTypeProperty[] */
-    private array $fields;
+    /** @var InputField[] */
+    private $constructorInputFields = [];
+    /** @var InputField[] */
+    private $inputFields = [];
 
     /** @var class-string<object> */
     private $className;
@@ -45,31 +43,24 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             throw FailedResolvingInputType::createForNotInstantiableClass($className);
         }
 
-        $this->fields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
 
-        $fields = function () use ($isUpdate) {
-            $fields = [];
-            foreach ($this->fields as $name => $field) {
-                $type = $field->getType();
+        $fields = function () use ($isUpdate, $inputName, $className, $fieldsBuilder) {
+            $inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
 
-                if ($isUpdate && $type instanceof NonNull) {
-                    $type = $type->getWrappedType();
+            $fieldConfigs = [];
+            foreach ($inputFields as $field) {
+                if ($field->forConstructorHydration()) {
+                    $this->constructorInputFields[] = $field;
+                } else {
+                    $this->inputFields[] = $field;
                 }
 
-                $fields[$name] = [
-                    'type' => $type,
-                    'description' => $field->getDescription(),
-                ];
-
-                if (! $field->hasDefaultValue() || $isUpdate) {
-                    continue;
-                }
-
-                $fields[$name]['defaultValue'] = $field->getDefaultValue();
+                $fieldConfigs[] = $field->config;
             }
-
-            return $fields;
+            return $fieldConfigs;
         };
+
+        $fields = $fields->bindTo($this);
 
         $config = [
             'name' => $inputName,
@@ -88,27 +79,34 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
      */
     public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
     {
-        $mappedValues = [];
-        foreach ($this->fields as $field) {
-            $name = $field->getName();
-            if (! array_key_exists($name, $args)) {
+        $constructorArgs = [];
+        foreach ($this->constructorInputFields as $constructorInputField) {
+            $name = $constructorInputField->name;
+            $resolve = $constructorInputField->getResolve();
+
+            if (!array_key_exists($name, $args)) {
                 continue;
             }
 
-            $mappedValues[$field->getPropertyName()] = $field->resolve($source, $args, $context, $resolveInfo);
+            $constructorArgs[$name] = $resolve(null, $args, $context, $resolveInfo);
         }
 
-        $instance = $this->createInstance($mappedValues);
-        $values = array_diff_key($mappedValues, array_flip($this->getClassConstructParameterNames()));
+        $instance = $this->createInstance($constructorArgs);
 
-        foreach ($values as $property => $value) {
-            PropertyAccessor::setValue($instance, $property, $value);
+        foreach ($this->inputFields as $inputField) {
+            $name = $inputField->name;
+            if (!array_key_exists($name, $args)) {
+                continue;
+            }
+
+            $resolve = $inputField->getResolve();
+            $resolve($instance, $args, $context, $resolveInfo);
         }
 
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);
         }
-
+        
         return $instance;
     }
 
@@ -143,25 +141,5 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         }
 
         return $refClass->newInstanceArgs($parameters);
-    }
-
-    /**
-     * @return string[]
-     */
-    private function getClassConstructParameterNames(): array
-    {
-        $refClass = new ReflectionClass($this->className);
-        $constructor = $refClass->getConstructor();
-
-        if (! $constructor) {
-            return [];
-        }
-
-        $names = [];
-        foreach ($constructor->getParameters() as $parameter) {
-            $names[] = $parameter->getName();
-        }
-
-        return $names;
     }
 }

@@ -30,6 +30,8 @@ class NamingStrategyTest extends TestCase
         $this->assertSame('name', $namingStrategy->getFieldNameFromMethodName('isName'));
         $this->assertSame('is', $namingStrategy->getFieldNameFromMethodName('is'));
         $this->assertSame('foo', $namingStrategy->getFieldNameFromMethodName('foo'));
+        $this->assertSame('name', $namingStrategy->getInputFieldNameFromMethodName('setName'));
+        $this->assertSame('set', $namingStrategy->getInputFieldNameFromMethodName('set'));
     }
 
     public function testGetFieldNameFromTypeAnnotation(): void

@@ -60,6 +60,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -297,7 +298,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 $authenticationService,
                 new VoidAuthorizationService()
-            )
+            ),
+            new InputFieldMiddlewarePipe()
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -328,7 +330,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 $authorizationService
-            )
+            ),
+            new InputFieldMiddlewarePipe()
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -389,7 +392,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService()
-            )
+            ),
+            new InputFieldMiddlewarePipe()
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);

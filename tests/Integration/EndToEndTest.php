@@ -43,11 +43,15 @@ use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
@@ -128,7 +132,8 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(ParameterMiddlewareInterface::class),
-                    $container->get(FieldMiddlewareInterface::class)
+                    $container->get(FieldMiddlewareInterface::class),
+                    $container->get(InputFieldMiddlewareInterface::class)
                 );
             },
             FieldMiddlewareInterface::class => function(ContainerInterface $container) {
@@ -136,6 +141,25 @@ class EndToEndTest extends TestCase
                 $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
                 $pipe->pipe($container->get(SecurityFieldMiddleware::class));
                 return $pipe;
+            },
+            InputFieldMiddlewareInterface::class => function(ContainerInterface $container) {
+                $pipe = new InputFieldMiddlewarePipe();
+                $pipe->pipe($container->get(AuthorizationInputFieldMiddleware::class));
+                $pipe->pipe($container->get(SecurityInputFieldMiddleware::class));
+                return $pipe;
+            },
+            AuthorizationInputFieldMiddleware::class => function(ContainerInterface $container) {
+                return new AuthorizationInputFieldMiddleware(
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
+                );
+            },
+            SecurityInputFieldMiddleware::class => function(ContainerInterface $container) {
+                return new SecurityInputFieldMiddleware(
+                    new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
+                    $container->get(AuthenticationServiceInterface::class),
+                    $container->get(AuthorizationServiceInterface::class)
+                );
             },
             AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
                 return new AuthorizationFieldMiddleware(
@@ -2084,5 +2108,398 @@ class EndToEndTest extends TestCase
         $this->expectException(ValidationException::class);
         $result = GraphQL::executeQuery($schema, $queryString);
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+
+    public function testEndToEndSetterWithSecurity() {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+
+        ]);
+
+        /**
+         * @var Schema $schema
+         */
+        $schema = $container->get(Schema::class);
+
+        $queryString = '
+        query {
+            trickyProduct {
+                conditionalSecret(key: 1234)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('preset{secret}', $data['trickyProduct']['conditionalSecret']);
+//
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "secret product"
+                    price: 12.22
+                    multi: 11
+                    secret: "123"
+                    conditionalSecret: "actually{secret}"
+                }
+            ) {
+                name
+                price
+                multi
+                conditionalSecret(key: 1234)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('actually{secret}', $data['updateTrickyProduct']['conditionalSecret']);
+        $this->assertSame('secret product foo', $data['updateTrickyProduct']['name']);
+        $this->assertSame(12.22, $data['updateTrickyProduct']['price']);
+        $this->assertSame(11.0, $data['updateTrickyProduct']['multi']);
+
+        $queryString = '
+        query {
+            trickyProduct {
+                name
+                price
+                multi
+                secret
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Special box', $data['trickyProduct']['name']);
+        $this->assertSame(11.99, $data['trickyProduct']['price']);
+        $this->assertSame("hello", $data['trickyProduct']['secret']);
+        $this->assertSame(11.11, $data['trickyProduct']['multi']);
+
+        $queryString = '
+        mutation {
+            createTrickyProduct(
+                product: {
+                    name: "Special"
+                    price: 11.99
+                    secret: "1234"
+                    conditionalSecret: "actually{secret}"
+                }
+            ) {
+                name
+                price
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Special foo', $data['createTrickyProduct']['name']);
+        $this->assertSame(11.99, $data['createTrickyProduct']['price']);
+    }
+
+    public function testEndToEndSetterWithSecurityError() {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+
+        ]);
+        /**
+         * @var Schema $schema
+         */
+        $schema = $container->get(Schema::class);
+
+        // try getConditionalSecret with wrong key
+        $queryString = '
+        query {
+            trickyProduct {
+                conditionalSecret(key: 12345)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        // try setConditionalSecret with wrong secret
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "secret product"
+                    price: 12.22
+                    multi: 11
+                    secret: "123"
+                    conditionalSecret: "actually{notsosecret}"
+                }
+            ) {
+                name
+                price
+                conditionalSecret(key: 1234)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        return false;
+                    }
+                };
+            },
+
+        ]);
+        /**
+         * @var Schema $schema
+         */
+        $schema = $container->get(Schema::class);
+
+        // try getSecret with sufficient rights
+        $queryString = '
+        query {
+            trickyProduct {
+                name
+                price
+                secret
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        // try setSecret with sufficient rights
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "secret product"
+                    price: 12.22
+                    multi: 11
+                    secret: "123"
+                    conditionalSecret: "actually{secret}"
+                }
+            ) {
+                name
+                price
+                conditionalSecret(key: 1234)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+        $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 43;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+        ]);
+        $schema = $container->get(Schema::class);
+
+        // set conditionalSecret with wrong user
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testCircularInput(): void
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Controllers');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Types');
+
+        $schema = $schemaFactory->createSchema();
+
+        $errors = $schema->validate();
+        $this->assertSame([], $errors);
+    }
+
+    public function testArrayInput(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function() {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): ?object
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function() {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+            },
+
+        ]);
+
+        $schema = $container->get(Schema::class);
+
+        $queryString = '
+        mutation {
+            updateTrickyProduct(
+                product: {
+                    name: "fooby"
+                    price: 12.22
+                    multi: 11
+                    secret: "123"
+                    conditionalSecret: "actually{secret}"
+                    list: ["graph", "ql"]
+                }
+            ) {
+                list
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(["graph", "ql"], $data['updateTrickyProduct']['list']);
     }
 }

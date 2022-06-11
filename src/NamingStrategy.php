@@ -97,4 +97,16 @@ class NamingStrategy implements NamingStrategyInterface
 
         return $methodName;
     }
+
+    /**
+     * Returns the name of a GraphQL input field from the name of the annotated method.
+     */
+    public function getInputFieldNameFromMethodName(string $methodName): string
+    {
+        if (strpos($methodName, 'set') === 0 && strlen($methodName) > 3) {
+            return lcfirst(substr($methodName, 3));
+        }
+
+        return $methodName;
+    }
 }

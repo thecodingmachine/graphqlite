@@ -27,6 +27,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
@@ -48,6 +49,7 @@ class SchemaFactoryTest extends TestCase
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $factory->addQueryProvider(new AggregateQueryProvider([]));
         $factory->addFieldMiddleware(new FieldMiddlewarePipe());
+        $factory->addInputFieldMiddleware(new InputFieldMiddlewarePipe());
 
         $schema = $factory->createSchema();
 

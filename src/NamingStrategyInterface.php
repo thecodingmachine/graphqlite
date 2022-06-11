@@ -42,4 +42,9 @@ interface NamingStrategyInterface
      * Returns the name of a GraphQL field from the name of the annotated method.
      */
     public function getFieldNameFromMethodName(string $methodName): string;
+
+    /**
+     * Returns the name of a GraphQL input field from the name of the annotated method.
+     */
+    public function getInputFieldNameFromMethodName(string $methodName): string;
 }

@@ -2,20 +2,27 @@
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use DateTime;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputA;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputB;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndProperties;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndPropertiesInvalid;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
 class InputTypeTest extends AbstractQueryProviderTest
 {
-
     public function testInputConfiguredCorrectly(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', 'Test', false, $this->getFieldsBuilder());
@@ -104,7 +111,8 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testResolvesCorrectlyWithRequiredConstructParam(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
-
+        $input->freeze();
+        $fields = $input->getFields();
         $args = ['foo' => 'Foo'];
         $resolveInfo = $this->createMock(ResolveInfo::class);
         $result = $input->resolve(null, $args, [], $resolveInfo);
@@ -119,7 +127,8 @@ class InputTypeTest extends AbstractQueryProviderTest
     public function testResolvesCorrectlyWithOnlyConstruct(): void
     {
         $input = new InputType(TestOnlyConstruct::class, 'TestOnlyConstructInput', null, false, $this->getFieldsBuilder());
-
+        $input->freeze();
+        $fields = $input->getFields();
         $args = [
             'baz' => false,
             'foo' => 'Foo',
@@ -136,10 +145,62 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals(200, $result->getBar());
     }
 
+    /**
+     * @group PR-466
+     */
+    public function testResolvesCorrectlyWithConstructorAndProperties(): void
+    {
+        $input = new InputType(
+            TestConstructorAndProperties::class,
+            'TestConstructorAndPropertiesInput',
+            null,
+            false,
+            $this->getFieldsBuilder(),
+        );
+        $input->freeze();
+        $fields = $input->getFields();
+
+        $date = "2022-05-02T04:42:30Z";
+
+        $args = [
+            'date' => $date,
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        /** @var TestConstructorAndProperties $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
+        $this->assertEquals('Foo', $result->getFoo());
+        $this->assertEquals(200, $result->getBar());
+    }
+
+    /**
+     * @group PR-466
+     */
+    public function testConstructorHydrationFailingWithMiddlewareAnnotations(): void
+    {
+        $this->expectException(IncompatibleAnnotationsException::class);
+
+        $input = new InputType(
+            TestConstructorAndPropertiesInvalid::class,
+            'TestConstructorAndPropertiesInvalidInput',
+            null,
+            false,
+            $this->getFieldsBuilder(),
+        );
+        $input->freeze();
+        $fields = $input->getFields();
+    }
+
     public function testFailsResolvingFieldWithoutRequiredConstructParam(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
-
+        $input->freeze();
+        $fields = $input->getFields();
         $args = ['bar' => 'Bar'];
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
@@ -148,4 +209,32 @@ class InputTypeTest extends AbstractQueryProviderTest
 
         $input->resolve(null, $args, [], $resolveInfo);
     }
+
+    public function testSimpleSetterAnnotated(): void
+    {
+        $input = new InputType(InputWithSetter::class, 'InputWithSetterInput', null, false, $this->getFieldsBuilder());
+        $input->freeze();
+        $fields = $input->getFields();
+        $args = [
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+        /** @var TestOnlyConstruct $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals('Foo', $result->getFoo());
+        $this->assertEquals(200, $result->getBar());
+    }
+
+    public function testForceInputTypeWithUpdate(): void
+    {
+        $input = new InputType(InputWithSetter::class, 'ForcedTypeInput', null, true, $this->getFieldsBuilder());
+        $input->freeze();
+
+        $fields = $input->getFields();
+        $this->assertInstanceOf(NonNull::class, $fields['bar']->getType());
+    }
+
 }

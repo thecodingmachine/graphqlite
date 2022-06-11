@@ -97,7 +97,6 @@ class TypeRegistry
             && ! $type instanceof MutableInputInterface
             || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)
         ) {
-            // dump($type);
             throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
         }
 
