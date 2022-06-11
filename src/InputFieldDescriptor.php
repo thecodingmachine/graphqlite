@@ -35,8 +35,14 @@ class InputFieldDescriptor
     private $targetMethodOnSource;
     /** @var string|null */
     private $targetPropertyOnSource;
-//    /** @var string|null */
-//    private $magicProperty;
+
+    /**
+     * Implement in future PR
+     *
+     * @var string|null
+     */
+    // private $magicProperty;
+
     /**
      * Whether we should inject the source as the first parameter or not.
      *
@@ -77,8 +83,6 @@ class InputFieldDescriptor
     {
         $this->isUpdate = $isUpdate;
     }
-
-
 
     /**
      * @return bool
@@ -164,6 +168,7 @@ class InputFieldDescriptor
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the callable via setCallable because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
+
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
         $this->targetPropertyOnSource = null;
@@ -177,6 +182,7 @@ class InputFieldDescriptor
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
+
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
         $this->targetPropertyOnSource = null;
@@ -190,12 +196,13 @@ class InputFieldDescriptor
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
+
         $this->callable = null;
         $this->targetMethodOnSource = null;
         $this->targetPropertyOnSource = $targetPropertyOnSource;
 
-            // To be enabled in a future PR
-            // $this->magicProperty = null;
+        // To be enabled in a future PR
+        // $this->magicProperty = null;
     }
 
     /**

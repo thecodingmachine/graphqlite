@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use Closure;
-use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-
 use TheCodingMachine\GraphQLite\InputField;
+
 use function array_key_exists;
 
 /**
@@ -50,8 +48,8 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             $inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
 
             $fieldConfigs = [];
-            foreach ($inputFields as $field){
-                if ($field->forConstructorHydration()){
+            foreach ($inputFields as $field) {
+                if ($field->forConstructorHydration()) {
                     $this->constructorInputFields[] = $field;
                 } else {
                     $this->inputFields[] = $field;
@@ -85,26 +83,30 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         foreach ($this->constructorInputFields as $constructorInputField) {
             $name = $constructorInputField->name;
             $resolve = $constructorInputField->getResolve();
+
             if (!array_key_exists($name, $args)) {
                 continue;
             }
-            $constructorArgs[$name] = $resolve(null,$args, $context, $resolveInfo);
-        }
-        $instance = $this->createInstance($constructorArgs);
 
+            $constructorArgs[$name] = $resolve(null, $args, $context, $resolveInfo);
+        }
+
+        $instance = $this->createInstance($constructorArgs);
 
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
             if (!array_key_exists($name, $args)) {
                 continue;
             }
+
             $resolve = $inputField->getResolve();
-            $resolve($instance,$args, $context, $resolveInfo);
+            $resolve($instance, $args, $context, $resolveInfo);
         }
 
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);
         }
+        
         return $instance;
     }
 

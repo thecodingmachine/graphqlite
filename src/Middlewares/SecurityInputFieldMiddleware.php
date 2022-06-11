@@ -30,8 +30,11 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
     /** @var AuthorizationServiceInterface */
     private $authorizationService;
 
-    public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService)
-    {
+    public function __construct(
+        ExpressionLanguage $language,
+        AuthenticationServiceInterface $authenticationService,
+        AuthorizationServiceInterface $authorizationService
+    ) {
         $this->language = $language;
         $this->authenticationService = $authenticationService;
         $this->authorizationService = $authorizationService;
