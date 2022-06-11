@@ -282,7 +282,11 @@ abstract class AbstractQueryProviderTest extends TestCase
             new VoidAuthorizationService()
         ));
 
-        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter($psr16Cache), [new SecurityExpressionLanguageProvider()]);
+        $expressionLanguage = new ExpressionLanguage(
+            new Psr16Adapter($psr16Cache),
+            [new SecurityExpressionLanguageProvider()]
+        );
+        
         $fieldMiddlewarePipe->pipe(
             new SecurityFieldMiddleware($expressionLanguage,
             new VoidAuthenticationService(),
