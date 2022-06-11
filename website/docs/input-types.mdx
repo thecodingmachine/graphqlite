@@ -129,6 +129,9 @@ class Location
 {
 
     #[Field]
+    private ?string $name = null;
+
+    #[Field]
     private float $latitude;
 
     #[Field]
@@ -138,6 +141,11 @@ class Location
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 
     public function getLatitude(): float
@@ -164,6 +172,12 @@ class Location
 
     /**
      * @Field
+     * @var string|null
+     */
+    private ?string $name = null;
+
+    /**
+     * @Field
      * @var float
      */
     private $latitude;
@@ -178,6 +192,11 @@ class Location
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 
     public function getLatitude(): float
@@ -199,13 +218,13 @@ Now if you call the `getCities` query, from the controller in the first example,
 
 There are some important things to notice:
 
-- The `@Field` annotation is recognized only on properties for Input Type, not methods.
+- The `@Field` annotation is recognized on properties for Input Type, as well as setters.
 - There are 3 ways for fields to be resolved:
   - Via constructor if corresponding properties are mentioned as parameters with the same names - exactly as in the example above.
   - If properties are public, they will be just set without any additional effort - no constructor required.
-  - For private or protected properties implemented, a public setter is required (if they are not set via the constructor). For example `setLatitude(float $latitude)`.
+  - For private or protected properties implemented, a public setter is required (if they are not set via the constructor). For example `setLatitude(float $latitude)`.  You can also put the `@Field` annotation on the setter, instead of the property, allowing you to have use many other attributes (`Security`, `Right`, `Autowire`, etc.).
 - For validation of these Input Types, see the [Custom InputType Validation section](validation#custom-inputtype-validation).
-- We advise using the `#[Input]` attribute on DTO style input type objects and not directly on your model objects.  Using it on your model objects can cause coupling in undesirable ways.
+- It's advised to use the `#[Input]` attribute on DTO style input type objects and not directly on your model objects.  Using it on your model objects can cause coupling in undesirable ways.
 
 ### Multiple Input Types from the same class
 
@@ -239,8 +258,14 @@ class UserInput
     #[Field(for: 'UpdateUserInput', inputType: 'String')]
     public string $password;
 
+    protected ?int $age;
+
+
     #[Field]
-    public ?int $age;
+    public function setAge(?int $age): void
+    {
+        $this->age = $age;
+    }
 }
 ```
 
@@ -274,11 +299,17 @@ class UserInput
      */
     public $password;
 
+    /** @var int|null */
+    protected $age;
+
     /**
      * @Field()
-     * @var int|null
+     * @param int|null $age
      */
-    public $age;
+    public function setAge(?int $age): void
+    {
+        $this->age = $age;
+    }
 }
 ```
 
