@@ -36,7 +36,7 @@ A GraphQL library for PHP that allows you to use attributes (or annotations) to 
 
 ## Basic example
 
-First, declare a query in your controller:
+First, declare a mutation in your controller:
 
 ```php
 class ProductController
