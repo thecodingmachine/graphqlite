@@ -43,6 +43,9 @@ module.exports={
         "blog": {},
         "theme": {
           "customCss": "/src/css/custom.css"
+        },
+        "gtag": {
+          "trackingID": "UA-10196481-8"
         }
       }
     ]
@@ -82,13 +85,10 @@ module.exports={
         "href": 'https://github.com/thecodingmachine/graphqlite',
       }
     },
-    "algolia": {
-      "apiKey": "8fcce617e281864dc03c68d17f6206db",
-      "indexName": "graphqlite_thecodingmachine",
-      "algoliaOptions": {}
-    },
-    "gtag": {
-      "trackingID": "UA-10196481-8"
-    }
+    // "algolia": {
+    //   "apiKey": "8fcce617e281864dc03c68d17f6206db",
+    //   "indexName": "graphqlite_thecodingmachine",
+    //   "algoliaOptions": {}
+    // }
   }
 }
