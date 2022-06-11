@@ -41,7 +41,7 @@ First, declare a query in your controller:
 ```php
 class ProductController
 {
-    #[Query]
+    #[Mutation]
     public function updateProduct(Product $product): Product
     {
         // Some code that gets and updates a Product
