@@ -12,7 +12,7 @@
     "require": {
         "php": ">=7.4",
         "ext-json": "*",
-        "doctrine/annotations": "^1.13",
+        "doctrine/annotations": "1.13.2",
         "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
         "phpdocumentor/type-resolver": "^1.4",
