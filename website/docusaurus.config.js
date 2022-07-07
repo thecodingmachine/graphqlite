@@ -77,6 +77,11 @@ module.exports={
       "darkTheme": darkCodeTheme,
       "additionalLanguages": ['php']
     },
+    "algolia": {
+      "appId": "14EJC4HSQA",
+      "apiKey": "14e7cb570aceaf9dbcee76af8e701d1b",
+      "indexName": "graphqlite_thecodingmachine",
+    },
     "image": "/img/graphqlite.svg",
     "footer": {
       "links": [],
@@ -84,11 +89,6 @@ module.exports={
         "src": "/img/graphqlite.svg",
         "href": 'https://github.com/thecodingmachine/graphqlite',
       }
-    },
-    // "algolia": {
-    //   "apiKey": "8fcce617e281864dc03c68d17f6206db",
-    //   "indexName": "graphqlite_thecodingmachine",
-    //   "algoliaOptions": {}
-    // }
+    }
   }
 }
