@@ -10,39 +10,39 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
-        "webonyx/graphql-php": "^0.13.4",
-        "psr/container": "^1",
-        "doctrine/annotations": "^1.7.0",
-        "doctrine/cache": "^1.8",
-        "thecodingmachine/class-explorer": "^1.1.0",
-        "psr/simple-cache": "^1",
-        "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
-        "phpdocumentor/type-resolver": "^1.0.1",
-        "psr/http-message": "^1",
-        "webmozart/assert": "^1.4",
-        "symfony/cache": "^4.3 | ^5",
-        "thecodingmachine/cache-utils": "^1",
-        "ocramius/package-versions": "^1.4 || ^2",
-        "symfony/expression-language": "^4 | ^5",
+        "php": ">=7.4",
         "ext-json": "*",
+        "doctrine/annotations": "^1.13",
+        "composer/package-versions-deprecated": "^1.8",
+        "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
+        "phpdocumentor/type-resolver": "^1.4",
+        "psr/container": "^1",
+        "psr/http-factory": "^1",
+        "psr/http-message": "^1.0.1",
         "psr/http-server-handler": "^1",
         "psr/http-server-middleware": "^1",
-        "psr/http-factory": "^1"
+        "psr/simple-cache": "^1.0.1",
+        "symfony/cache": "^4.3 || ^5 || ^6",
+        "symfony/expression-language": "^4 || ^5 || ^6",
+        "thecodingmachine/cache-utils": "^1",
+        "thecodingmachine/class-explorer": "^1.1.0",
+        "webmozart/assert": "^1.10",
+        "webonyx/graphql-php": "^v14.9.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.2.4||^9.4",
-        "php-coveralls/php-coveralls": "^2.1",
-        "mouf/picotainer": "^1.1",
-        "phpstan/phpstan": "^0.12.25",
         "beberlei/porpaginas": "^1.2",
-        "myclabs/php-enum": "^1.6.6",
-        "doctrine/coding-standard": "^8.2",
-        "phpstan/phpstan-webmozart-assert": "^0.12",
-        "phpstan/extension-installer": "^1.0",
-        "thecodingmachine/phpstan-strict-rules": "^0.12",
+        "doctrine/coding-standard": "^9.0",
+        "ecodev/graphql-upload": "^6.1",
         "laminas/laminas-diactoros": "^2",
-        "ecodev/graphql-upload": "^4.0 || ^5.0 || ^6.0"
+        "mouf/picotainer": "^1.1",
+        "myclabs/php-enum": "^1.6.6",
+        "php-coveralls/php-coveralls": "^2.1",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan": "^1.0",
+        "phpstan/phpstan-webmozart-assert": "^1.0",
+        "phpunit/phpunit": "^8.5.19 || ^9.5.8",
+        "symfony/var-dumper": "^5.4 || ^6.0",
+        "thecodingmachine/phpstan-strict-rules": "^1.0"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types",
@@ -59,14 +59,21 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=8 --no-progress -vvv",
+        "phpstan": "phpstan analyse -c phpstan.neon --no-progress -vvv --memory-limit=1G",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": ["@cs-check", "@phpstan", "phpunit"]
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "4.1.x-dev"
+            "dev-master": "5.0.x-dev"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
         }
     }
 }

@@ -6,14 +6,13 @@ namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Cache\ApcuCache;
-use Doctrine\Common\Cache\PhpFileCache;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
 use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -29,6 +28,7 @@ use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
@@ -38,9 +38,13 @@ use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -48,18 +52,18 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
+use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use UnitEnum;
 
 use function array_map;
 use function array_reverse;
 use function class_exists;
-use function crc32;
-use function function_exists;
+use function interface_exists;
 use function md5;
 use function substr;
-use function sys_get_temp_dir;
 
 /**
  * A class to help getting started with GraphQLite.
@@ -67,50 +71,64 @@ use function sys_get_temp_dir;
  */
 class SchemaFactory
 {
+
     public const GLOB_CACHE_SECONDS = 2;
 
+
     /** @var string[] */
-    private $controllerNamespaces = [];
+    private array $controllerNamespaces = [];
+
     /** @var string[] */
-    private $typeNamespaces = [];
+    private array $typeNamespaces = [];
+
     /** @var QueryProviderInterface[] */
-    private $queryProviders = [];
+    private array $queryProviders = [];
+
     /** @var QueryProviderFactoryInterface[] */
-    private $queryProviderFactories = [];
+    private array $queryProviderFactories = [];
+
     /** @var RootTypeMapperFactoryInterface[] */
-    private $rootTypeMapperFactories = [];
+    private array $rootTypeMapperFactories = [];
+
     /** @var TypeMapperInterface[] */
-    private $typeMappers = [];
+    private array $typeMappers = [];
+
     /** @var TypeMapperFactoryInterface[] */
-    private $typeMapperFactories = [];
+    private array $typeMapperFactories = [];
+
     /** @var ParameterMiddlewareInterface[] */
-    private $parameterMiddlewares = [];
-    /** @var Reader */
-    private $doctrineAnnotationReader;
-    /** @var string */
-    private $annotationCacheDir;
-    /** @var AuthenticationServiceInterface|null */
-    private $authenticationService;
-    /** @var AuthorizationServiceInterface|null */
-    private $authorizationService;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var NamingStrategyInterface|null */
-    private $namingStrategy;
-    /** @var ContainerInterface */
-    private $container;
-    /** @var ClassNameMapper */
-    private $classNameMapper;
-    /** @var SchemaConfig */
-    private $schemaConfig;
-    /** @var int|null */
-    private $globTTL = self::GLOB_CACHE_SECONDS;
+    private array $parameterMiddlewares = [];
+
+    private ?Reader $doctrineAnnotationReader = null;
+
+    private ?AuthenticationServiceInterface $authenticationService = null;
+
+    private ?AuthorizationServiceInterface $authorizationService = null;
+
+    private ?InputTypeValidatorInterface $inputTypeValidator = null;
+
+    private CacheInterface $cache;
+
+    private ?NamingStrategyInterface $namingStrategy = null;
+
+    private ContainerInterface $container;
+
+    private ?ClassNameMapper $classNameMapper = null;
+
+    private ?SchemaConfig $schemaConfig = null;
+
+    private ?int $globTTL = self::GLOB_CACHE_SECONDS;
+
     /** @var array<int, FieldMiddlewareInterface> */
-    private $fieldMiddlewares = [];
-    /** @var ExpressionLanguage|null */
-    private $expressionLanguage;
-    /** @var string */
-    private $cacheNamespace;
+    private array $fieldMiddlewares = [];
+
+    /** @var array<int, InputFieldMiddlewareInterface> */
+    private array $inputFieldMiddlewares = [];
+
+    private ?ExpressionLanguage $expressionLanguage = null;
+
+    private string $cacheNamespace;
+
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -206,35 +224,16 @@ class SchemaFactory
         return $this;
     }
 
-    public function setAnnotationCacheDir(string $cacheDir): self
-    {
-        $this->annotationCacheDir = $cacheDir;
-
-        return $this;
-    }
-
     /**
      * Returns a cached Doctrine annotation reader.
      * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
      */
-    private function getDoctrineAnnotationReader(): Reader
+    private function getDoctrineAnnotationReader(CacheItemPoolInterface $cache): Reader
     {
         if ($this->doctrineAnnotationReader === null) {
             AnnotationRegistry::registerLoader('class_exists');
-            $doctrineAnnotationReader = new DoctrineAnnotationReader();
 
-            if (function_exists('apcu_enabled') && apcu_enabled()) {
-                $cache = new ApcuCache();
-            } else {
-                $cacheDir = $this->annotationCacheDir ?? sys_get_temp_dir();
-                $cache = new PhpFileCache($cacheDir . '/graphqlite.' . crc32(__DIR__));
-            }
-
-            $cache->setNamespace($this->cacheNamespace);
-
-            $doctrineAnnotationReader = new CachedReader($doctrineAnnotationReader, $cache, true);
-
-            return $doctrineAnnotationReader;
+            return new PsrCachedReader(new DoctrineAnnotationReader(), $cache, true);
         }
 
         return $this->doctrineAnnotationReader;
@@ -253,6 +252,14 @@ class SchemaFactory
 
         return $this;
     }
+
+    public function setInputTypeValidator(?InputTypeValidatorInterface $inputTypeValidator): self
+    {
+        $this->inputTypeValidator = $inputTypeValidator;
+
+        return $this;
+    }
+
 
     public function setNamingStrategy(NamingStrategyInterface $namingStrategy): self
     {
@@ -318,6 +325,16 @@ class SchemaFactory
     }
 
     /**
+     * Registers a input field middleware (used to parse custom annotations that modify the GraphQLite behaviour in Fields/Queries/Mutations.
+     */
+    public function addInputFieldMiddleware(InputFieldMiddlewareInterface $inputFieldMiddleware): self
+    {
+        $this->inputFieldMiddlewares[] = $inputFieldMiddleware;
+
+        return $this;
+    }
+
+    /**
      * Sets a custom expression language to use.
      * ExpressionLanguage is used to evaluate expressions in the "Security" tag.
      */
@@ -330,20 +347,21 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $annotationReader      = new AnnotationReader($this->getDoctrineAnnotationReader(), AnnotationReader::LAX_MODE);
-        $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
-        $authorizationService  = $this->authorizationService ?: new FailAuthorizationService();
-        $typeResolver          = new TypeResolver();
-        $namespacedCache       = new NamespacedCache($this->cache);
-        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
-        $namingStrategy        = $this->namingStrategy ?: new NamingStrategy();
-        $typeRegistry          = new TypeRegistry();
-        $symfonyCache          = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $symfonyCache           = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $annotationReader       = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
+        $authenticationService  = $this->authenticationService ?: new FailAuthenticationService();
+        $authorizationService   = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver           = new TypeResolver();
+        $namespacedCache        = new NamespacedCache($this->cache);
+        $cachedDocBlockFactory  = new CachedDocBlockFactory($namespacedCache);
+        $namingStrategy         = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry           = new TypeRegistry();
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
-        $nsList = array_map(static function (string $namespace) use ($namespaceFactory) {
-            return $namespaceFactory->createNamespace($namespace);
-        }, $this->typeNamespaces);
+        $nsList = array_map(
+            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
+            $this->typeNamespaces
+        );
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
@@ -356,13 +374,26 @@ class SchemaFactory
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
 
+        $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
+        foreach ($this->inputFieldMiddlewares as $inputFieldMiddleware) {
+            $inputFieldMiddlewarePipe->pipe($inputFieldMiddleware);
+        }
+        // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityInputFieldMiddleware)
+        $inputFieldMiddlewarePipe->pipe(new SecurityInputFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
+        $inputFieldMiddlewarePipe->pipe(new AuthorizationInputFieldMiddleware($authenticationService, $authorizationService));
+
         $compositeTypeMapper = new CompositeTypeMapper();
-        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry);
+        $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry, $annotationReader);
 
         $topRootTypeMapper = new NullableTypeMapperAdapter();
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
+
+        if (interface_exists(UnitEnum::class)) {
+            $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        }
+
         if (class_exists(Enum::class)) {
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
         }
@@ -409,16 +440,13 @@ class SchemaFactory
             $namingStrategy,
             $topRootTypeMapper,
             $parameterMiddlewarePipe,
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $inputFieldMiddlewarePipe,
         );
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
         $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder);
-
-        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
-            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
-        }
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
         foreach ($nsList as $ns) {
             $compositeTypeMapper->addTypeMapper(new GlobTypeMapper(
@@ -435,10 +463,6 @@ class SchemaFactory
             ));
         }
 
-        foreach ($this->typeMappers as $typeMapper) {
-            $compositeTypeMapper->addTypeMapper($typeMapper);
-        }
-
         if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
             $context = new FactoryContext(
                 $annotationReader,
@@ -451,12 +475,21 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
+                $this->inputTypeValidator,
                 $this->globTTL
             );
         }
 
         foreach ($this->typeMapperFactories as $typeMapperFactory) {
-            $compositeTypeMapper->addTypeMapper($typeMapperFactory->create($context));
+            $this->typeMappers[] = $typeMapperFactory->create($context);
+        }
+
+        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
+        }
+
+        foreach ($this->typeMappers as $typeMapper) {
+            $compositeTypeMapper->addTypeMapper($typeMapper);
         }
 
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));

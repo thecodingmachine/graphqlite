@@ -1,0 +1,17 @@
+version: 2
+updates:
+    - package-ecosystem: github-actions
+      directory: '/'
+      schedule:
+          interval: weekly
+      pull-request-branch-name:
+          separator: '-'
+    - package-ecosystem: composer
+      directory: '/'
+      versioning-strategy: widen
+      schedule:
+          interval: daily
+          time: "04:00"
+      pull-request-branch-name:
+          separator: '-'
+      open-pull-requests-limit: 10

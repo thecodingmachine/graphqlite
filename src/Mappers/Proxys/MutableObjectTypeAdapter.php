@@ -28,7 +28,7 @@ use function sprintf;
  */
 class MutableObjectTypeAdapter extends MutableObjectType implements MutableInterface
 {
-    /** @use MutableAdapterTrait<ObjectType> */
+    /** @use MutableAdapterTrait */
     use MutableAdapterTrait;
 
     public function __construct(ObjectType $type, ?string $className = null)
@@ -45,7 +45,7 @@ class MutableObjectTypeAdapter extends MutableObjectType implements MutableInter
     /**
      * @return InterfaceType[]
      */
-    public function getInterfaces()
+    public function getInterfaces(): array
     {
         $type = $this->type;
         assert($type instanceof ObjectType);
@@ -56,7 +56,7 @@ class MutableObjectTypeAdapter extends MutableObjectType implements MutableInter
      * @param mixed[]      $value
      * @param mixed[]|null $context
      *
-     * @return bool|null
+     * @return bool|\GraphQL\Deferred|null
      */
     public function isTypeOf($value, $context, ResolveInfo $info)
     {
@@ -70,7 +70,7 @@ class MutableObjectTypeAdapter extends MutableObjectType implements MutableInter
      *
      * @return bool
      */
-    public function implementsInterface($iface)
+    public function implementsInterface($iface): bool
     {
         $type = $this->type;
         assert($type instanceof ObjectType);

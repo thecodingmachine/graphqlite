@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
 use function lcfirst;
 use function str_replace;
@@ -37,7 +36,7 @@ class NamingStrategy implements NamingStrategyInterface
     /**
      * Returns the GraphQL output object type name based on the type className and the Type annotation.
      */
-    public function getOutputTypeName(string $typeClassName, Type $type): string
+    public function getOutputTypeName(string $typeClassName, TypeInterface $type): string
     {
         $name = $type->getName();
         if ($name !== null) {
@@ -62,15 +61,22 @@ class NamingStrategy implements NamingStrategyInterface
         return $typeClassName;
     }
 
-    public function getInputTypeName(string $className, Factory $factory): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getInputTypeName(string $className, $input): string
     {
-        $inputTypeName = $factory->getName();
+        $inputTypeName = $input->getName();
         if ($inputTypeName !== null) {
             return $inputTypeName;
         }
         $prevPos = strrpos($className, '\\');
         if ($prevPos) {
             $className = substr($className, $prevPos + 1);
+        }
+
+        if (substr($className, -5) === 'Input') {
+            return $className;
         }
 
         return $className . 'Input';
@@ -87,6 +93,18 @@ class NamingStrategy implements NamingStrategyInterface
         }
         if (strpos($methodName, 'is') === 0 && strlen($methodName) > 2) {
             return lcfirst(substr($methodName, 2));
+        }
+
+        return $methodName;
+    }
+
+    /**
+     * Returns the name of a GraphQL input field from the name of the annotated method.
+     */
+    public function getInputFieldNameFromMethodName(string $methodName): string
+    {
+        if (strpos($methodName, 'set') === 0 && strlen($methodName) > 3) {
+            return lcfirst(substr($methodName, 3));
         }
 
         return $methodName;

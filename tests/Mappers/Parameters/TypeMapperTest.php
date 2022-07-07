@@ -3,13 +3,16 @@
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use DateTimeImmutable;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
+use TheCodingMachine\GraphQLite\Fixtures80\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
@@ -32,6 +35,29 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: Int!, String!');
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
+    }
+
+    /**
+     * @requires PHP >= 8.0
+     */
+    public function testMapObjectUnionWorks(): void
+    {
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+
+        $refMethod = new ReflectionMethod(UnionOutputType::class, 'objectUnion');
+        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+
+        $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
+        $this->assertInstanceOf(NonNull::class, $gqType);
+        assert($gqType instanceof NonNull);
+        $memberType = $gqType->getOfType();
+        $this->assertInstanceOf(UnionType::class, $memberType);
+        assert($memberType instanceof UnionType);
+        $unionTypes = $memberType->getTypes();
+        $this->assertEquals('TestObject', $unionTypes[0]->name);
+        $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
 
     public function testHideParameter(): void

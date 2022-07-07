@@ -6,6 +6,8 @@
     <arg name="cache" value=".php_cs/cache"/>
     <arg name="colors"/>
 
+    <config name="installed_paths" value="../../doctrine/coding-standard/lib,../../slevomat/coding-standard" />
+
     <!-- Ignore warnings, show progress of the run and show sniff names -->
     <arg value="nps"/>
 
@@ -13,7 +15,6 @@
     <file>src</file>
     <!-- <file>tests</file> -->
 
-    <exclude-pattern>tests/dependencies/*</exclude-pattern>
     <exclude-pattern>src/Utils/NamespacedCache.php</exclude-pattern>
     <exclude-pattern>src/Types/TypeAnnotatedInterfaceType.php</exclude-pattern>
     <exclude-pattern>src/Mappers/Proxys/*</exclude-pattern>
@@ -27,6 +28,7 @@
         <exclude name="SlevomatCodingStandard.ControlStructures.RequireNullCoalesceEqualOperator"/>
         <exclude name="Squiz.Commenting.FunctionComment.InvalidNoReturn" />
         <exclude name="Generic.Formatting.MultipleStatementAlignment" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.NewlineBeforeOpenBrace" />
     </rule>
 
     <!-- Do not align assignments -->

@@ -34,6 +34,12 @@ class SourceField implements SourceFieldInterface
     /** @var string|null */
     private $phpType;
 
+    /** @var string|null */
+    private $description;
+
+    /** @var string */
+    private $sourceName;
+
     /** @var MiddlewareAnnotations */
     private $middlewareAnnotations;
 
@@ -43,7 +49,7 @@ class SourceField implements SourceFieldInterface
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null, ?string $description = null, ?string $sourceName = null)
     {
         $name = $name ?? $attributes['name'] ?? null;
         if ($name === null) {
@@ -53,6 +59,9 @@ class SourceField implements SourceFieldInterface
 
         $this->outputType = $outputType ?? $attributes['outputType'] ?? null;
         $this->phpType = $phpType ?? $attributes['phpType'] ?? null;
+        $this->description = $description ?? $attributes['description'] ?? null;
+        $this->sourceName = $sourceName ?? $attributes['sourceName'] ?? null;
+
         if ($this->outputType && $this->phpType) {
             throw new BadMethodCallException('In a @SourceField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@SourceField(name=\'phone\', outputType=\'String!\')" or "@SourceField(name=\'phone\', phpType=\'string\')"');
         }
@@ -62,7 +71,7 @@ class SourceField implements SourceFieldInterface
         if (! is_array($annotations)) {
             $annotations = [$annotations];
         }
-        foreach ($annotations ?? [] as $annotation) {
+        foreach ($annotations as $annotation) {
             if ($annotation instanceof MiddlewareAnnotationInterface) {
                 $middlewareAnnotations[] = $annotation;
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
@@ -97,6 +106,22 @@ class SourceField implements SourceFieldInterface
     public function getPhpType(): ?string
     {
         return $this->phpType;
+    }
+
+    /**
+     * Returns the description of the GraphQL query/mutation/field.
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * Returns the property name in the source class
+     */
+    public function getSourceName(): ?string
+    {
+        return $this->sourceName;
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

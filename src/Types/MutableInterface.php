@@ -9,6 +9,8 @@ use GraphQL\Type\Definition\FieldDefinition;
 
 /**
  * GraphQL objects or interfaces that can be muted.
+ *
+ * @property string $name
  */
 interface MutableInterface
 {

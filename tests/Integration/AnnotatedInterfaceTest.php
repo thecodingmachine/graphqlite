@@ -2,20 +2,11 @@
 
 namespace TheCodingMachine\GraphQLite\Integration;
 
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\NonNull;
-use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
-use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Schema;
@@ -68,7 +59,7 @@ class AnnotatedInterfaceTest extends TestCase
                 'grandFather' => 'grandFather',
                 'grandMother' => 'grandMother',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
 
     public function testAnnotatedInterfaceWithNotAnnotatedClass(): void
@@ -90,7 +81,7 @@ class AnnotatedInterfaceTest extends TestCase
             'qux' => [
                 'qux' => 'qux',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
 
     public function testAnnotatedInterfaceWithAnnotatedClass(): void
@@ -122,7 +113,7 @@ class AnnotatedInterfaceTest extends TestCase
                 'parentValue' => 'parent',
                 'classD' => 'classD',
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
 
 }

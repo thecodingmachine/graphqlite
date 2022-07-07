@@ -65,6 +65,7 @@ class CompositeTypeMapper implements TypeMapperInterface
                 return $typeMapper->mapClassToType($className, $subType);
             }
         }
+
         throw CannotMapTypeException::createForType($className);
     }
 

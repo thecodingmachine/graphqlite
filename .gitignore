@@ -1,10 +1,10 @@
+/build/
 /vendor/
-/mouf/
 /composer.lock
 /src/Tests/
-/build/
 /phpunit.xml
 /.php_cs/cache
+/.idea
 
 node_modules
 
@@ -14,12 +14,11 @@ lib/core/MetadataBlog.js
 website/translated_docs
 website/build/
 website/yarn.lock
+website/package-lock.json
 website/node_modules
 website/i18n/*
-
-/tests/dependencies/copy/
-/tests/dependencies/graphqlite-bundle/
-/tests/dependencies/graphqlite-laravel/
-/tests/dependencies/graphqlite-universal-service-provider/
+website/.docusaurus
+website/.cache-loader
 
 .phpunit.result.cache
+.phpstan-cache

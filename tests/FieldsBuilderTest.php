@@ -2,8 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use GraphQL\Deferred;
 use GraphQL\Type\Definition\BooleanType;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\FloatType;
@@ -20,7 +18,6 @@ use ReflectionMethod;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
@@ -30,22 +27,18 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamIterator;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestResolveInfo;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
@@ -57,18 +50,17 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
-use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -78,7 +70,6 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
-use function var_dump;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
 {
@@ -90,7 +81,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $usersQuery = $queries['test'];
         $this->assertSame('test', $usersQuery->name);
 
@@ -211,7 +202,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $fixedQuery = $queries['testFixReturnType'];
 
         $this->assertInstanceOf(IDType::class, $fixedQuery->getType());
@@ -225,7 +216,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $fixedQuery = $queries['testFixComplexReturnType'];
 
         $this->assertInstanceOf(NonNull::class, $fixedQuery->getType());
@@ -265,6 +256,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ObjectType::class, $fields['sibling']->getType()->getWrappedType());
         $this->assertSame('TestObject', $fields['sibling']->getType()->getWrappedType()->name);
         $this->assertSame('This is a test summary', $fields['test']->description);
+        $this->assertSame('Test SourceField description', $fields['sibling']->description);
     }
 
     public function testSourceFieldOnSelfType(): void
@@ -306,7 +298,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 $authenticationService,
                 new VoidAuthorizationService()
-            )
+            ),
+            new InputFieldMiddlewarePipe()
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -337,7 +330,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 $authorizationService
-            )
+            ),
+            new InputFieldMiddlewarePipe()
         );
 
         $fields = $queryProvider->getFields(new TestType(), true);
@@ -398,7 +392,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService()
-            )
+            ),
+            new InputFieldMiddlewarePipe()
         );
         $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
         $this->assertCount(1, $fields);
@@ -415,10 +410,29 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $iterableQuery = $queries['arrayObject'];
 
         $this->assertSame('arrayObject', $iterableQuery->name);
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(ObjectType::class, $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
+        $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
+    }
+
+    public function testQueryProviderWithIterableGenericClass(): void
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries($controller);
+
+        $this->assertCount(9, $queries);
+        $iterableQuery = $queries['arrayObjectGeneric'];
+
+        $this->assertSame('arrayObjectGeneric', $iterableQuery->name);
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
         $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
@@ -432,10 +446,27 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries(new TestController());
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $iterableQuery = $queries['iterable'];
 
         $this->assertSame('iterable', $iterableQuery->name);
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(ObjectType::class, $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType());
+        $this->assertSame('TestObject', $iterableQuery->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
+    }
+
+    public function testQueryProviderWithIterableGeneric(): void
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $queries = $queryProvider->getQueries(new TestController());
+
+        $this->assertCount(9, $queries);
+        $iterableQuery = $queries['iterableGeneric'];
+
+        $this->assertSame('iterableGeneric', $iterableQuery->name);
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType());
         $this->assertInstanceOf(ListOfType::class, $iterableQuery->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $iterableQuery->getType()->getWrappedType()->getWrappedType());
@@ -459,7 +490,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $unionQuery = $queries['union'];
 
         $this->assertInstanceOf(NonNull::class, $unionQuery->getType());
@@ -627,7 +658,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $queries = $queryProvider->getQueries($controller);
 
-        $this->assertCount(7, $queries);
+        $this->assertCount(9, $queries);
         $usersQuery = $queries['test'];
         $context = [];
 
@@ -718,9 +749,9 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(NonNull::class, $usersQuery->args[0]->getType());
         $this->assertInstanceOf(ListOfType::class, $usersQuery->args[0]->getType()->getWrappedType());
         $this->assertInstanceOf(IntType::class, $usersQuery->args[0]->getType()->getWrappedType()->getWrappedType());
-        $this->assertInstanceOf(NonNull::class, $usersQuery->type);
-        $this->assertInstanceOf(ListOfType::class, $usersQuery->type->getWrappedType());
-        $this->assertInstanceOf(IntType::class, $usersQuery->type->getWrappedType()->getWrappedType());
+        $this->assertInstanceOf(NonNull::class, $usersQuery->getType());
+        $this->assertInstanceOf(ListOfType::class, $usersQuery->getType()->getWrappedType());
+        $this->assertInstanceOf(IntType::class, $usersQuery->getType()->getWrappedType()->getWrappedType());
     }
 
     public function testQueryProviderWithParamDateTime(): void
@@ -789,6 +820,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(1, $fields);
         $query = $fields['foo'];
         $this->assertSame('foo', $query->name);
+        $this->assertSame('Test MagicField description', $query->description);
 
         $resolve = $query->resolveFn;
         $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));
@@ -798,5 +830,44 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->expectException(MissingMagicGetException::class);
         $this->expectExceptionMessage('You cannot use a @MagicField annotation on an object that does not implement the __get() magic method. The class stdClass must implement a __get() method.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
+    }
+
+    public function testProxyClassWithMagicPropertyOfPhpType(): void
+    {
+        $controller = new TestTypeWithMagicPropertyType();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getFields($controller);
+
+        $query = $fields['foo'];
+        $this->assertSame('foo', $query->name);
+
+        $resolve = $query->resolveFn;
+        $result = $resolve(new TestTypeWithMagicProperty(), [], null, $this->createMock(ResolveInfo::class));
+
+        $this->assertSame('foo', $result);
+    }
+
+    public function testSourceNameInSourceAndMagicFields(): void
+    {
+        $controller = new TestSourceNameType();
+        $queryProvider = $this->buildFieldsBuilder();
+        $fields = $queryProvider->getFields($controller);
+        $source = new TestSourceName('foo value', 'bar value');
+
+        $this->assertCount(2, $fields);
+
+        $query = $fields['foo2'];
+        $this->assertSame('foo2', $query->name);
+        $resolve = $query->resolveFn;
+        $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
+        $this->assertSame('foo value', $result);
+
+        $query = $fields['bar2'];
+        $this->assertSame('bar2', $query->name);
+        $resolve = $query->resolveFn;
+        $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
+        $this->assertSame('bar value', $result);
     }
 }

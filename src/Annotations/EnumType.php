@@ -9,6 +9,8 @@ use Attribute;
 /**
  * The EnumType annotation is useful to change the name of the generated "enum" type.
  *
+ * @deprecated Use @Type on a native PHP 8.1 Enum instead. Support will be removed in future release.
+ *
  * @Annotation
  * @Target({"CLASS"})
  * @Attributes({
@@ -21,12 +23,16 @@ class EnumType
     /** @var string|null */
     private $name;
 
+    /** @var bool */
+    private $useValues;
+
     /**
      * @param mixed[] $attributes
      */
-    public function __construct(array $attributes = [], ?string $name = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?bool $useValues = null)
     {
         $this->name = $name ?? $attributes['name'] ?? null;
+        $this->useValues = $useValues ?? $attributes['useValues'] ?? false;
     }
 
     /**
@@ -35,5 +41,13 @@ class EnumType
     public function getName(): ?string
     {
         return $this->name;
+    }
+
+    /**
+     * Returns true if the enum type should expose backed values instead of case names.
+     */
+    public function useValues(): bool
+    {
+        return $this->useValues;
     }
 }

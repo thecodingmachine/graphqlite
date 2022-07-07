@@ -72,11 +72,12 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      */
     private function getObjectType(OutputType $subType): MutableInterface
     {
-        if (! isset($subType->name)) {
+        /** @var mixed $name - invalid vendor mapping */
+        $name = $subType->name;
+
+        if ($name === null) {
             throw new RuntimeException('Cannot get name property from sub type ' . get_class($subType));
         }
-
-        $name = $subType->name;
 
         $typeName = 'PorpaginasResult_' . $name;
 

@@ -2,7 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
@@ -13,20 +13,21 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers\ContactController;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactFactory;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactOtherType;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
-use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
-use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
@@ -48,6 +49,7 @@ class SchemaFactoryTest extends TestCase
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $factory->addQueryProvider(new AggregateQueryProvider([]));
         $factory->addFieldMiddleware(new FieldMiddlewarePipe());
+        $factory->addInputFieldMiddleware(new InputFieldMiddlewarePipe());
 
         $schema = $factory->createSchema();
 
@@ -95,6 +97,30 @@ class SchemaFactoryTest extends TestCase
                 ->setClassNameMapper(ClassNameMapper::createFromComposerFile(null, null, true))
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+
+        $schema = $factory->createSchema();
+
+        $this->doTestSchema($schema);
+    }
+
+    public function testCreateSchemaOnlyWithFactories(): void
+    {
+        $container = new BasicAutoWiringContainer(new EmptyContainer());
+        $cache = new Psr16Cache(new ArrayAdapter());
+
+        $factory = new SchemaFactory($cache, $container);
+        $factory->setAuthenticationService(new VoidAuthenticationService());
+        $factory->setAuthorizationService(new VoidAuthorizationService());
+
+        $factory->addTypeMapperFactory(new StaticClassListTypeMapperFactory([
+            Contact::class,
+            ContactFactory::class,
+            ContactOtherType::class,
+            ContactType::class,
+            ExtendedContactType::class,
+            User::class,
+        ]));
+        $factory->addQueryProviderFactory(new AggregateControllerQueryProviderFactory([ContactController::class], $container));
 
         $schema = $factory->createSchema();
 
@@ -177,7 +203,7 @@ class SchemaFactoryTest extends TestCase
                 ]
 
             ]
-        ], $result->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 
     public function testDuplicateQueryException(): void

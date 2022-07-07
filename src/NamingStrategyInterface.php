@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Annotations\Input;
+use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
 /**
  * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
@@ -27,12 +28,23 @@ interface NamingStrategyInterface
     /**
      * Returns the GraphQL output object type name based on the type className and the Type annotation.
      */
-    public function getOutputTypeName(string $typeClassName, Type $type): string;
+    public function getOutputTypeName(string $typeClassName, TypeInterface $type): string;
 
-    public function getInputTypeName(string $className, Factory $factory): string;
+    /**
+     * Returns the GraphQL input object type name based on the type className and the Input annotation.
+     *
+     * @param class-string<object> $className
+     * @param Input|Factory        $input
+     */
+    public function getInputTypeName(string $className, $input): string;
 
     /**
      * Returns the name of a GraphQL field from the name of the annotated method.
      */
     public function getFieldNameFromMethodName(string $methodName): string;
+
+    /**
+     * Returns the name of a GraphQL input field from the name of the annotated method.
+     */
+    public function getInputFieldNameFromMethodName(string $methodName): string;
 }

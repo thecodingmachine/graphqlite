@@ -15,7 +15,9 @@ use phpDocumentor\Reflection\Type as PhpDocumentorType;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
+use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 
 use function array_map;
@@ -131,15 +133,18 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     }
 
     /**
-     * @param Array_|Iterable_|Mixed_ $type
+     * @param Array_|Iterable_|Object_|Mixed_             $type
+     * @param ReflectionMethod|ReflectionProperty $reflector
      */
-    public static function createForMissingPhpDoc(PhpDocumentorType $type, ReflectionMethod $refMethod, ?string $argumentName = null): self
+    public static function createForMissingPhpDoc(PhpDocumentorType $type, $reflector, ?string $argumentName = null): self
     {
         $typeStr = '';
         if ($type instanceof Array_) {
             $typeStr = 'array';
         } elseif ($type instanceof Iterable_) {
             $typeStr = 'iterable';
+        } elseif ($type instanceof Object_) {
+            $typeStr = \sprintf('object ("%s")', $type->getFqsen());
         } elseif ($type instanceof Mixed_) {
             $typeStr = 'mixed';
         }

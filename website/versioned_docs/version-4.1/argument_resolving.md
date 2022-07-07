@@ -1,5 +1,5 @@
 ---
-id: version-4.1-argument-resolving
+id: argument-resolving
 title: Extending argument resolving
 sidebar_label: Custom argument resolving
 original_id: argument-resolving
@@ -8,7 +8,7 @@ original_id: argument-resolving
 
 Using a **parameter middleware**, you can hook into the argument resolution of field/query/mutation/factory.
 
-<div class="alert alert-info">Use a parameter middleware if you want to alter the way arguments are injected  in a method 
+<div class="alert alert--info">Use a parameter middleware if you want to alter the way arguments are injected  in a method
 or if you want to alter the way input types are imported (for instance if you want to add a validation step)</div>
 
 As an example, GraphQLite uses *parameter middlewares* internally to:
@@ -19,9 +19,9 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
    * @return Product[]
    */
   #[Query]
-  public function products(ResolveInfo $info): array  
+  public function products(ResolveInfo $info): array
   ```
-  In the query above, the `$info` argument is filled with the Webonyx `ResolveInfo` class thanks to the 
+  In the query above, the `$info` argument is filled with the Webonyx `ResolveInfo` class thanks to the
   [`ResolveInfoParameterHandler parameter middleware`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ResolveInfoParameterHandler.php)
 - Inject a service from the container when you use the `@Autowire` annotation
 - Perform validation with the `@Validate` annotation (in Laravel package)
@@ -30,7 +30,7 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
 
 **Parameter middlewares**
 
-![](assets/parameter_middleware.svg)
+<img src="/img/parameter_middleware.svg" width="70%" />
 
 Each middleware is passed number of objects describing the parameter:
 
@@ -161,5 +161,5 @@ You can register your own parameter middlewares using the `SchemaFactory::addPar
 ```php
 $schemaFactory->addParameterMiddleware(new ContainerParameterHandler($container));
 ```
- 
+
 If you are using the Symfony bundle, you can tag the service as "graphql.parameter_middleware".

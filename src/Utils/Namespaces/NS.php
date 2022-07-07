@@ -70,12 +70,21 @@ final class NS
                     // Symfony DebugAutoLoader is installed. (see https://github.com/thecodingmachine/graphqlite/issues/216)
                     require_once $phpFile;
                     // Does it exists now?
+                    // @phpstan-ignore-next-line
                     if (! class_exists($className, false) && ! interface_exists($className, false)) {
                         continue;
                     }
                 }
 
                 $refClass = new ReflectionClass($className);
+                // Enum's are not classes
+                if (interface_exists(\UnitEnum::class)) {
+                    // @phpstan-ignore-next-line - Remove this after minimum supported PHP version is >= 8.1
+                    if ($refClass->isEnum()) {
+                        continue;
+                    }
+                }
+
                 $this->classes[$className] = $refClass;
             }
         }

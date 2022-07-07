@@ -1,18 +1,19 @@
+#includes:
+#	- vendor/phpstan/phpstan/conf/bleedingEdge.neon TODO: Try to add this
 parameters:
+    tmpDir: .phpstan-cache
+    paths:
+        - src
+    excludePaths:
+         # TODO: exlude only for PHP < 8.1
+        - src/Mappers/Root/EnumTypeMapper.php
+        - src/Types/EnumType.php
+    level: 8
     checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
-        #- "#Property TheCodingMachine\\\\GraphQLite\\\\Types\\\\ResolvableInputObjectType::\\$resolve \\(array<int, object\\|string>&callable\\) does not accept array<int,object\\|string>#"
-        - "#Variable \\$prefetchRefMethod might not be defined.#"
-        #- "#Parameter \\#2 \\$type of class TheCodingMachine\\\\GraphQLite\\\\Parameters\\\\InputTypeParameter constructor expects GraphQL\\\\Type\\\\Definition\\\\InputType&GraphQL\\\\Type\\\\Definition\\\\Type, GraphQL\\\\Type\\\\Definition\\\\InputType\\|GraphQL\\\\Type\\\\Definition\\\\Type given.#"
-        - "#Parameter .* of class ReflectionMethod constructor expects string, object\\|string given.#"
-        -
-           message: '#Method TheCodingMachine\\GraphQLite\\Types\\Mutable(Interface|Object)Type::getFields\(\) should return array<GraphQL\\Type\\Definition\\FieldDefinition> but returns array\|float\|int#'
-           path: src/Types/MutableTrait.php
-        -
-           message: '#Method TheCodingMachine\\GraphQLite\\Mappers\\Proxys\\Mutable(Interface|Object)TypeAdapter::getFields\(\) should return array<GraphQL\\Type\\Definition\\FieldDefinition> but returns array\|float\|int#'
-           path: src/Mappers/Proxys/MutableAdapterTrait.php
-        #- "#Parameter \\#2 \\$inputTypeNode of static method GraphQL\\\\Utils\\\\AST::typeFromAST() expects GraphQL\\\\Language\\\\AST\\\\ListTypeNode\\|GraphQL\\\\Language\\\\AST\\\\NamedTypeNode\\|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode, GraphQL\\\\Language\\\\AST\\\\ListTypeNode\\|GraphQL\\\\Language\\\\AST\\\\NameNode\\|GraphQL\\\\Language\\\\AST\\\\NonNullTypeNode given.#"
+        - "#Parameter .* of class ReflectionMethod constructor expects string(\\|null)?, object\\|string given.#"
         - "#PHPDoc tag @throws with type Psr\\\\SimpleCache\\\\InvalidArgumentException is not subtype of Throwable#"
         - '#Variable \$context might not be defined.#'
         -
@@ -34,13 +35,5 @@ parameters:
            message: '#Property TheCodingMachine\\GraphQLite\\Annotations\\Type::\$class \(class-string<object>\\|null\) does not accept string.#'
            path: src/Annotations/Type.php
         -
-           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::getMethodAnnotations\(\) should return array<int, T of object> but returns array<object>.#'
+           message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::(getMethodAnnotations|getPropertyAnnotations)\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
-        - '#Call to an undefined method GraphQL\\Error\\ClientAware::getMessage\(\)#'
-
-
-        #-
-        #  message: '#If condition is always true#'
-        #  path: src/Middlewares/SecurityFieldMiddleware.php
-#includes:
-#    - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon

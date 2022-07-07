@@ -1,0 +1,48 @@
+# GraphQLite Website
+
+The GraphQLite website is primarily a documentation site for GraphQLite.  It's built on the Docusaurus framework, and is hosted on [GitHub](https://graphqlite.thecodingmachine.io/).
+
+More details on using Docusaurus can be found in the [official documentation](https://docusaurus.io/docs/docs-introduction).
+
+*This documentation could use further updating.*
+
+## Developing and Testing
+
+All code changes, aside from errors in previous documentation, should be done in the `docs` directory.  The `package.json` file outlines available commands you can use for starting the server, building the docs, etc.
+
+- `npm run build`  *(Transpiles/builds `docs` into `build` directory)*
+- `npm run start`  *(Starts the local npm server)*
+
+## Versioning
+
+Firstly, doc versions are cached in the `versioned_docs` directory.  Meanwhile, the "Next" version, as represented on the website, is the current `master` branch of the `docs` dir.  A list of the versions available is actually managed by the `versions.json` file, regardless of the `versioned_docs` directory.
+
+The [versioning section of the Docusaurus documentation](https://docusaurus.io/docs/versioning) covers this is more detail, but the following is related to our specific implementation:
+
+### Steps to Create and Deploy a new Version
+
+*All command paths are relative to the `website` directory.  Ensure that you have `./node_modules/.bin` added to your path.*
+
+1. Firstly, you need to update the `docs/CHANGELOG.md` file with the updates for the release.  The best way to do this is to review all the `is:merged` PRs since the last release.  Here is an example entry format:
+
+```markdown
+#### Dependencies:
+https://github.com/thecodingmachine/graphqlite/pull/000 Upgraded to Symfony 69
+
+#### Breaking Change:
+https://github.com/thecodingmachine/graphqlite/pull/000 Dropped PHP support
+
+#### New Features:
+https://github.com/thecodingmachine/graphqlite/pull/000 Added support for the new GraphQL spec fork
+
+#### Miscellaneous:
+Added John Doe as a maintainer
+```
+
+2. Next, you'll need to tag a new version with Docusaurus, which will cache a copy of the documentation in the `versioned_docs` directory, update the `versioned_sidebars`, and update the `versions.json` file.
+
+    ```bash
+    $ docusaurus docs:version 1.1
+    ```
+    *Be sure to include the X.X in the version, not just X.*
+3. Technically, you're done, just commit these changes and the CI workflow will deploy when merged into `master`.

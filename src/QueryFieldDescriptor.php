@@ -7,12 +7,16 @@ namespace TheCodingMachine\GraphQLite;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use ReflectionMethod;
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+
+use function is_array;
 
 /**
  * A class that describes a field to be created.
@@ -31,10 +35,12 @@ class QueryFieldDescriptor
     private $prefetchParameters = [];
     /** @var string|null */
     private $prefetchMethodName;
-    /** @var (callable&array{0:object, 1:string})|null */
+    /** @var callable|null */
     private $callable;
     /** @var string|null */
     private $targetMethodOnSource;
+    /** @var string|null */
+    private $targetPropertyOnSource;
     /** @var string|null */
     private $magicProperty;
     /**
@@ -51,7 +57,9 @@ class QueryFieldDescriptor
     private $middlewareAnnotations;
     /** @var ReflectionMethod */
     private $refMethod;
-    /** @var ResolverInterface */
+    /** @var ReflectionProperty */
+    private $refProperty;
+    /** @var ResolverInterface|null */
     private $originalResolver;
     /** @var callable */
     private $resolver;
@@ -128,8 +136,6 @@ class QueryFieldDescriptor
      * Sets the callable targeting the resolver function if the resolver function is part of a service.
      * This should not be used in the context of a field middleware.
      * Use getResolver/setResolver if you want to wrap the resolver in another method.
-     *
-     * @param callable&array{0:object, 1:string}  $callable
      */
     public function setCallable(callable $callable): void
     {
@@ -138,6 +144,7 @@ class QueryFieldDescriptor
         }
         $this->callable = $callable;
         $this->targetMethodOnSource = null;
+        $this->targetPropertyOnSource = null;
         $this->magicProperty = null;
     }
 
@@ -148,6 +155,18 @@ class QueryFieldDescriptor
         }
         $this->callable = null;
         $this->targetMethodOnSource = $targetMethodOnSource;
+        $this->targetPropertyOnSource = null;
+        $this->magicProperty = null;
+    }
+
+    public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
+    {
+        if ($this->originalResolver !== null) {
+            throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
+        }
+        $this->callable = null;
+        $this->targetMethodOnSource = null;
+        $this->targetPropertyOnSource = $targetPropertyOnSource;
         $this->magicProperty = null;
     }
 
@@ -158,6 +177,7 @@ class QueryFieldDescriptor
         }
         $this->callable = null;
         $this->targetMethodOnSource = null;
+        $this->targetPropertyOnSource = null;
         $this->magicProperty = $magicProperty;
     }
 
@@ -211,6 +231,16 @@ class QueryFieldDescriptor
         $this->refMethod = $refMethod;
     }
 
+    public function getRefProperty(): ReflectionProperty
+    {
+        return $this->refProperty;
+    }
+
+    public function setRefProperty(ReflectionProperty $refProperty): void
+    {
+        $this->refProperty = $refProperty;
+    }
+
     /**
      * Returns the original callable that will be used to resolve the field.
      */
@@ -220,10 +250,14 @@ class QueryFieldDescriptor
             return $this->originalResolver;
         }
 
-        if ($this->callable !== null) {
-            $this->originalResolver = new ServiceResolver($this->callable);
+        if (is_array($this->callable)) {
+            /** @var callable&array{0:object, 1:string} $callable */
+            $callable = $this->callable;
+            $this->originalResolver = new ServiceResolver($callable);
         } elseif ($this->targetMethodOnSource !== null) {
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
+        } elseif ($this->targetPropertyOnSource !== null) {
+            $this->originalResolver = new SourcePropertyResolver($this->targetPropertyOnSource);
         } elseif ($this->magicProperty !== null) {
             $this->originalResolver = new MagicPropertyResolver($this->magicProperty);
         } else {

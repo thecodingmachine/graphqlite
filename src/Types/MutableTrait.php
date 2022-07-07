@@ -9,6 +9,12 @@ use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\FieldDefinition;
 use RuntimeException;
 
+use function array_keys;
+use function array_merge;
+use function array_unique;
+use function assert;
+use function is_array;
+
 trait MutableTrait
 {
     /** @var string */
@@ -18,7 +24,7 @@ trait MutableTrait
     private $fieldsCallables = [];
 
     /** @var FieldDefinition[]|null */
-    private $finalFields;
+    private $fields;
     /** @var class-string<object>|null */
     private $className;
 
@@ -47,13 +53,18 @@ trait MutableTrait
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function getField($name): FieldDefinition
+    public function getField(string $name): FieldDefinition
     {
-        if ($this->status === MutableInterface::STATUS_PENDING) {
-            throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
-        }
+        $this->initializeFields();
 
-        return parent::getField($name);
+        return $this->fields[$name] ?? parent::getField($name);
+    }
+
+    public function findField(string $name): ?FieldDefinition
+    {
+        $this->initializeFields();
+
+        return $this->fields[$name] ?? parent::findField($name);
     }
 
     /**
@@ -63,11 +74,9 @@ trait MutableTrait
      */
     public function hasField($name): bool
     {
-        if ($this->status === MutableInterface::STATUS_PENDING) {
-            throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
-        }
+        $this->initializeFields();
 
-        return parent::hasField($name);
+        return isset($this->fields[$name]) || parent::hasField($name);
     }
 
     /**
@@ -77,21 +86,21 @@ trait MutableTrait
      */
     public function getFields(): array
     {
-        if ($this->finalFields === null) {
-            if ($this->status === MutableInterface::STATUS_PENDING) {
-                throw new RuntimeException('You must freeze() a MutableObjectType before fetching its fields.');
-            }
+        $this->initializeFields();
+        assert(is_array($this->fields));
 
-            $this->finalFields = parent::getFields();
-            foreach ($this->fieldsCallables as $fieldsCallable) {
-                $this->finalFields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->finalFields;
-            }
-            if (empty($this->finalFields)) {
-                throw NoFieldsException::create($this->name);
-            }
-        }
+        return array_merge(parent::getFields(), $this->fields);
+    }
 
-        return $this->finalFields;
+    /**
+     * @return string[]
+     */
+    public function getFieldNames(): array
+    {
+        $this->initializeFields();
+        assert(is_array($this->fields));
+
+        return array_unique(array_merge(parent::getFieldNames(), array_keys($this->fields)));
     }
 
     /**
@@ -102,5 +111,27 @@ trait MutableTrait
     public function getMappedClassName(): ?string
     {
         return $this->className;
+    }
+
+    private function initializeFields(): void
+    {
+        if ($this->status === MutableInterface::STATUS_PENDING) {
+            throw new RuntimeException(
+                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.'
+            );
+        }
+
+        if (isset($this->fields)) {
+            return;
+        }
+
+        $this->fields = [];
+        foreach ($this->fieldsCallables as $fieldsCallable) {
+            $this->fields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->fields;
+        }
+
+        if (empty($this->fields) && empty(parent::getFieldNames())) {
+            throw NoFieldsException::create($this->name);
+        }
     }
 }

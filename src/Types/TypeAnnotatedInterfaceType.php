@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
-use ReflectionClass;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
-use function array_merge;
+
 use function get_class;
 use function gettype;
 use function is_object;
@@ -42,7 +38,7 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
     {
         return new self($className, [
             'name' => $typeName,
-            'fields' => static function () use ($annotatedObject, $className, $fieldsBuilder) {
+            'fields' => static function () use ($annotatedObject, $className, $fieldsBuilder, $typeName) {
                 // There is no need for an interface that extends another interface to get all its fields.
                 // Indeed, if the interface is used, the extended interfaces will be used too. Therefore, fetching the fields
                 // and putting them in the child interface is a waste of resources.
@@ -65,9 +61,9 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                 }*/
 
                 if ($annotatedObject !== null) {
-                    $fields = $fieldsBuilder->getFields($annotatedObject);
+                    $fields = $fieldsBuilder->getFields($annotatedObject, $typeName);
                 } else {
-                    $fields = $fieldsBuilder->getSelfFields($className);
+                    $fields = $fieldsBuilder->getSelfFields($className, $typeName);
                 }
 
                 //$fields += $interfaceFields;

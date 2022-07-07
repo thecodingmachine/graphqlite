@@ -10,6 +10,9 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;
 use RuntimeException;
 
+use function assert;
+use function is_string;
+
 /**
  * An input object type built from the Factory annotation.
  * It can be later extended with the "Decorate" annotation
@@ -21,13 +24,13 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     public const STATUS_FROZEN  = 'frozen';
 
     /** @var string */
-    private $status;
+    protected $status;
 
     /** @var array<callable> */
-    private $fieldsCallables = [];
+    protected $fieldsCallables = [];
 
     /** @var array<string, InputObjectField>|null */
-    private $finalFields;
+    protected $finalFields;
 
     /**
      * @param mixed[] $config
@@ -90,6 +93,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
                     if ($fieldDefinition instanceof Type) {
                         $fieldDefinition = ['type' => $fieldDefinition];
                     }
+                    assert(is_string($name));
                     $this->finalFields[$name] = new InputObjectField($fieldDefinition + ['name' => $name]);
                 }
             }

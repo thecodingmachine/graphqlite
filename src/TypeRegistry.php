@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Types\MutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -92,7 +93,10 @@ class TypeRegistry
     public function getMutableInterface(string $typeName): MutableInterface
     {
         $type = $this->getType($typeName);
-        if (! $type instanceof MutableInterface || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)) {
+        if (! $type instanceof MutableInterface
+            && ! $type instanceof MutableInputInterface
+            || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)
+        ) {
             throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
         }
 

@@ -14,7 +14,7 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
     /**
      * Decides the HTTP status code based on the answer.
      *
-     * @see https://github.com/APIs-guru/graphql-over-http#status-codes
+     * @see https://github.com/graphql/graphql-over-http/blob/main/spec/GraphQLOverHTTP.md#status-codes
      */
     public function decideHttpStatusCode(ExecutionResult $result): int
     {
@@ -28,7 +28,7 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
         foreach ($result->errors as $error) {
             $wrappedException = $error->getPrevious();
             if ($wrappedException !== null) {
-                $code = $wrappedException->getCode();
+                $code = (int) $wrappedException->getCode();
                 if ($code < 400 || $code >= 600) {
                     if (! ($wrappedException instanceof ClientAware) || $wrappedException->isClientSafe() !== true) {
                         // The exception code is not a valid HTTP code. Let's ignore it

@@ -3,50 +3,40 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
-use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use Mouf\Picotainer\Picotainer;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use SplFileInfo;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
-use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
@@ -56,11 +46,9 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
-use function array_reverse;
+use UnitEnum;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
@@ -144,14 +132,15 @@ abstract class AbstractQueryProviderTest extends TestCase
                 /**
                  * @var InputObjectType
                  */
-//                private $inputTestObjectType2;
 
-                public function __construct(ObjectType $testObjectType, ObjectType $testObjectType2, InputObjectType $inputTestObjectType/*, InputObjectType $inputTestObjectType2*/)
-                {
+                public function __construct(
+                    ObjectType $testObjectType,
+                    ObjectType $testObjectType2,
+                    InputObjectType $inputTestObjectType
+                ) {
                     $this->testObjectType = $testObjectType;
                     $this->testObjectType2 = $testObjectType2;
                     $this->inputTestObjectType = $inputTestObjectType;
-                    //$this->inputTestObjectType2 = $inputTestObjectType2;
                 }
 
                 public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
@@ -169,9 +158,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
-                    } /*elseif ($className === TestObjectWithRecursiveList::class) {
-                        return $this->inputTestObjectType2;
-                    } */else {
+                    } else {
                         throw CannotMapTypeException::createForInputType($className);
                     }
                 }
@@ -240,7 +227,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     throw CannotMapTypeException::createForDecorateName($typeName, $type);
                 }
 
-            }, new NamingStrategy(), new Psr16Cache($arrayAdapter), $this->getTypeRegistry());
+            }, new NamingStrategy(), new Psr16Cache($arrayAdapter), $this->getTypeRegistry(), $this->getAnnotationReader());
         }
         return $this->typeMapper;
     }
@@ -256,11 +243,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getRegistry()
     {
         if ($this->registry === null) {
-            $this->registry = $this->buildAutoWiringContainer(new Picotainer([
-                /*'customOutput' => function() {
-                    return new StringType();
-                }*/
-            ]));
+            $this->registry = $this->buildAutoWiringContainer(new Picotainer([]));
         }
         return $this->registry;
     }
@@ -298,8 +281,19 @@ abstract class AbstractQueryProviderTest extends TestCase
             new VoidAuthenticationService(),
             new VoidAuthorizationService()
         ));
-        $expressionLanguage = new ExpressionLanguage(new Psr16Adapter($psr16Cache), [new SecurityExpressionLanguageProvider()]);
-        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, new VoidAuthenticationService(), new VoidAuthorizationService()));
+
+        $expressionLanguage = new ExpressionLanguage(
+            new Psr16Adapter($psr16Cache),
+            [new SecurityExpressionLanguageProvider()]
+        );
+        
+        $fieldMiddlewarePipe->pipe(
+            new SecurityFieldMiddleware($expressionLanguage,
+            new VoidAuthenticationService(),
+            new VoidAuthorizationService())
+        );
+
+        $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
 
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
@@ -313,7 +307,8 @@ abstract class AbstractQueryProviderTest extends TestCase
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
-            $fieldMiddlewarePipe
+            $fieldMiddlewarePipe,
+            $inputFieldMiddlewarePipe
         );
     }
 
@@ -333,9 +328,35 @@ abstract class AbstractQueryProviderTest extends TestCase
         $topRootTypeMapper = new NullableTypeMapperAdapter();
 
         $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
-        $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $this->getTypeMapper(), $topRootTypeMapper);
-        $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $this->getAnnotationReader(), $arrayAdapter, []);
-        $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $topRootTypeMapper, $this->getTypeRegistry(), $this->getTypeMapper());
+        $rootTypeMapper = new BaseTypeMapper(
+            $errorRootTypeMapper,
+            $this->getTypeMapper(),
+            $topRootTypeMapper
+        );
+
+        $rootTypeMapper = new MyCLabsEnumTypeMapper(
+            $rootTypeMapper,
+            $this->getAnnotationReader(),
+            $arrayAdapter,
+            []
+        );
+
+        if (interface_exists(UnitEnum::class)) {
+            $rootTypeMapper = new EnumTypeMapper(
+                $rootTypeMapper,
+                $this->getAnnotationReader(),
+                $arrayAdapter,
+                []
+            );
+        }
+
+        $rootTypeMapper = new CompoundTypeMapper(
+            $rootTypeMapper,
+            $topRootTypeMapper,
+            $this->getTypeRegistry(),
+            $this->getTypeMapper()
+        );
+
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
         $topRootTypeMapper->setNext($rootTypeMapper);
@@ -355,7 +376,16 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->typeGenerator !== null) {
             return $this->typeGenerator;
         }
-        $this->typeGenerator = new TypeGenerator($this->getAnnotationReader(), new NamingStrategy(), $this->getTypeRegistry(), $this->getRegistry(), $this->getTypeMapper(), $this->getFieldsBuilder());
+
+        $this->typeGenerator = new TypeGenerator(
+            $this->getAnnotationReader(),
+            new NamingStrategy(),
+            $this->getTypeRegistry(),
+            $this->getRegistry(),
+            $this->getTypeMapper(),
+            $this->getFieldsBuilder()
+        );
+
         return $this->typeGenerator;
     }
 
@@ -364,14 +394,22 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->inputTypeGenerator !== null) {
             return $this->inputTypeGenerator;
         }
-        $this->inputTypeGenerator = new InputTypeGenerator($this->getInputTypeUtils(), $this->getFieldsBuilder());
+
+        $this->inputTypeGenerator = new InputTypeGenerator(
+            $this->getInputTypeUtils(),
+            $this->getFieldsBuilder()
+        );
+
         return $this->inputTypeGenerator;
     }
 
     protected function getInputTypeUtils(): InputTypeUtils
     {
         if ($this->inputTypeUtils === null) {
-            $this->inputTypeUtils = new InputTypeUtils($this->getAnnotationReader(), new NamingStrategy());
+            $this->inputTypeUtils = new InputTypeUtils(
+                $this->getAnnotationReader(),
+                new NamingStrategy()
+            );
         }
         return $this->inputTypeUtils;
     }

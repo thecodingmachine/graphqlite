@@ -21,8 +21,12 @@ class GlobTypeMapperCache
     private $mapClassToFactory = [];
     /** @var array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodName] */
     private $mapInputNameToFactory = [];
-    /** @var array<string,array<int, callable&array>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
+    /** @var array<string,array<int, array{0: class-string<object>, 1: string}>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private $mapInputNameToDecorator = [];
+    /** @var array<class-string<object>,array{0: class-string<object>, 1: string, 2: string|null, 3: bool}> Maps a domain class to the input */
+    private $mapClassToInput = [];
+    /** @var array<string,array{0: class-string<object>, 1: string|null, 2: bool}> Maps a GraphQL type name to the input */
+    private $mapNameToInput = [];
 
     /**
      * Merges annotations of a given class in the global cache.
@@ -40,7 +44,7 @@ class GlobTypeMapperCache
             }
 
             if ($globAnnotationsCache->isDefault()) {
-                $objectClassName                             = $typeClassName;
+                $objectClassName = $typeClassName;
                 $this->mapClassToTypeArray[$objectClassName] = $className;
             }
 
@@ -63,6 +67,18 @@ class GlobTypeMapperCache
                 $this->mapClassToFactory[$inputClassName] = $refArray;
             }
             $this->mapInputNameToFactory[$inputName] = $refArray;
+        }
+
+        foreach ($globAnnotationsCache->getInputs() as $inputName => [$inputClassName, $isDefault, $description, $isUpdate]) {
+            if ($isDefault) {
+                if (isset($this->mapClassToInput[$inputClassName])) {
+                    throw DuplicateMappingException::createForDefaultInput($refClass->getName());
+                }
+
+                $this->mapClassToInput[$inputClassName] = [$className, $inputName, $description, $isUpdate];
+            }
+
+            $this->mapNameToInput[$inputName] = [$inputClassName, $description, $isUpdate];
         }
 
         foreach ($globAnnotationsCache->getDecorators() as $methodName => [$inputName, $declaringClass]) {
@@ -118,5 +134,21 @@ class GlobTypeMapperCache
     public function getFactoryByObjectClass(string $className): ?array
     {
         return $this->mapClassToFactory[$className] ?? null;
+    }
+
+    /**
+     * @return array{0: class-string<object>, 1: string|null, 2: bool}|null
+     */
+    public function getInputByGraphQLInputTypeName(string $graphqlTypeName): ?array
+    {
+        return $this->mapNameToInput[$graphqlTypeName] ?? null;
+    }
+
+    /**
+     * @return array{0: class-string<object>, 1: string, 2: string|null, 3: bool}|null
+     */
+    public function getInputByObjectClass(string $className): ?array
+    {
+        return $this->mapClassToInput[$className] ?? null;
     }
 }
