@@ -70,6 +70,8 @@ $factory->addQueryProvider($queryProvider);
 // Add a query provider using a factory to create it.
 // Query provider factories are useful if you need to inject the "fields builder" into your query provider constructor.
 $factory->addQueryProviderFactory($queryProviderFactory);
+// Set a default InputType validator service to handle validation on all `Input` annotated types
+$factory->setInputTypeValidator($validator);
 // Add custom options to the Webonyx underlying Schema.
 $factory->setSchemaConfig($schemaConfig);
 // Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.
@@ -151,7 +153,12 @@ The builder offers a number of setters to modify its behaviour:
 
 ```php
 $builder->setUrl("/graphql"); // Modify the URL endpoint (defaults to /graphql)
-$config = $builder->getConfig(); // Returns a Webonyx ServerConfig object. Use this object to configure Webonyx in details.
+
+$config = $builder->getConfig(); // Returns a Webonyx ServerConfig object.
+// Define your own formatter and error handlers for Webonyx.
+$config->setErrorFormatter([ExceptionHandler::class, 'errorFormatter']);
+$config->setErrorsHandler([ExceptionHandler::class, 'errorHandler']);
+
 $builder->setConfig($config);
 
 $builder->setResponseFactory(new ResponseFactory()); // Set a PSR-18 ResponseFactory (not needed if you are using zend-framework/zend-diactoros ^2
