@@ -12,4 +12,7 @@ class UnionOutputType
     public function objectUnion(): TestObject|TestObject2 {
         return new TestObject((''));
     }
+    public function nullableObjectUnion(): TestObject|TestObject2|null {
+        return new TestObject((''));
+    }
 }

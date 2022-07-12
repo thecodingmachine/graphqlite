@@ -59,6 +59,28 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
+    public function testMapObjectNullableUnionWorks(): void
+    {
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+
+        $refMethod = new ReflectionMethod(UnionOutputType::class, 'nullableObjectUnion');
+        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+
+        $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
+        $this->assertNotInstanceOf(NonNull::class, $gqType);
+        assert(!($gqType instanceof NonNull));
+        $memberType = $gqType->getOfType();
+        $this->assertInstanceOf(UnionType::class, $memberType);
+        assert($memberType instanceof UnionType);
+        $unionTypes = $memberType->getTypes();
+
+        $this->assertEquals('TestObject', $unionTypes[0]->name);
+        $this->assertEquals('TestObject2', $unionTypes[1]->name);
+        $this->assertEquals('null', $unionTypes[2]->name);
+
+    }
 
     public function testHideParameter(): void
     {
