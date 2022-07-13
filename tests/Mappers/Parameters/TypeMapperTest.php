@@ -59,7 +59,9 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
-
+    /**
+     * @requires PHP >= 8.0
+     */
     public function testMapObjectNullableUnionWorks(): void
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
