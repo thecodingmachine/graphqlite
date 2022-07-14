@@ -15,6 +15,8 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
+use phpDocumentor\Reflection\Types\Null_;
+use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
 use ReflectionProperty;
 use RuntimeException;
@@ -74,6 +76,9 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             if ($singleDocBlockType instanceof Iterable_) {
                 $mustBeIterable = true;
+                continue;
+            }
+            if ($singleDocBlockType instanceof Nullable && $singleDocBlockType->getActualType() instanceof Null_) {
                 continue;
             }
             $unionTypes[] = $this->topRootTypeMapper->toGraphQLOutputType($singleDocBlockType, null, $reflector, $docBlockObj);

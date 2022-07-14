@@ -59,6 +59,29 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
+    /**
+     * @requires PHP >= 8.0
+     */
+    public function testMapObjectNullableUnionWorks(): void
+    {
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+
+        $refMethod = new ReflectionMethod(UnionOutputType::class, 'nullableObjectUnion');
+        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+
+        $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
+        $this->assertNotInstanceOf(NonNull::class, $gqType);
+        assert(!($gqType instanceof NonNull));
+        $this->assertInstanceOf(UnionType::class, $gqType);
+        assert($gqType instanceof UnionType);
+        $unionTypes = $gqType->getTypes();
+        $this->assertEquals(2, count($unionTypes));
+        $this->assertEquals('TestObject', $unionTypes[0]->name);
+        $this->assertEquals('TestObject2', $unionTypes[1]->name);
+
+    }
 
     public function testHideParameter(): void
     {
@@ -99,21 +122,24 @@ class TypeMapperTest extends AbstractQueryProviderTest
     /**
      * @return int|string
      */
-    private function dummy() {
+    private function dummy()
+    {
 
     }
 
     /**
      * @HideParameter(for="$foo")
      */
-    private function withDefaultValue($foo = 24) {
+    private function withDefaultValue($foo = 24)
+    {
 
     }
 
     /**
      * @HideParameter(for="$foo")
      */
-    private function withoutDefaultValue($foo) {
+    private function withoutDefaultValue($foo)
+    {
 
     }
 }
