@@ -31,7 +31,7 @@
     },
     "require-dev": {
         "beberlei/porpaginas": "^1.2",
-        "doctrine/coding-standard": "^9.0",
+        "doctrine/coding-standard": "^9.0 || ^10.0",
         "ecodev/graphql-upload": "^6.1",
         "laminas/laminas-diactoros": "^2",
         "mouf/picotainer": "^1.1",
