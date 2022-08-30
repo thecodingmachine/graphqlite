@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use Webmozart\Assert\Assert;
 
-use function get_class;
 use function is_object;
 
 /**
@@ -41,12 +40,7 @@ class SourceResolver implements SourceResolverInterface
         return $this->object;
     }
 
-    /**
-     * @param mixed $args
-     *
-     * @return mixed
-     */
-    public function __invoke(...$args)
+    public function __invoke(mixed ...$args): mixed
     {
         if ($this->object === null) {
             throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
@@ -61,7 +55,7 @@ class SourceResolver implements SourceResolverInterface
     {
         $class = $this->getObject();
         if (is_object($class)) {
-            $class = get_class($class);
+            $class = $class::class;
         }
 
         return $class . '::' . $this->methodName . '()';

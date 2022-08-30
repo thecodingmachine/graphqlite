@@ -8,7 +8,6 @@ use GraphQL\Type\Definition\ObjectType;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
-use function get_class;
 use function gettype;
 use function is_object;
 
@@ -34,7 +33,7 @@ class UnionType extends \GraphQL\Type\Definition\UnionType
                     throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
                 }
 
-                $className = get_class($value);
+                $className = $value::class;
 
                 return $typeMapper->mapClassToInterfaceOrType($className, null);
             },

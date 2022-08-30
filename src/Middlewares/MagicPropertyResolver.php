@@ -42,12 +42,7 @@ class MagicPropertyResolver implements SourceResolverInterface
         return $this->object;
     }
 
-    /**
-     * @param mixed $args
-     *
-     * @return mixed
-     */
-    public function __invoke(...$args)
+    public function __invoke(mixed ...$args): mixed
     {
         if ($this->object === null) {
             throw new GraphQLRuntimeException('You must call "setObject" on MagicPropertyResolver before invoking the object.');
@@ -63,7 +58,7 @@ class MagicPropertyResolver implements SourceResolverInterface
     {
         $class = $this->getObject();
         if (is_object($class)) {
-            $class = get_class($class);
+            $class = $class::class;
         }
 
         return $class . '::__get(\'' . $this->propertyName . '\')';

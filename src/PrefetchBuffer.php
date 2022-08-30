@@ -54,10 +54,9 @@ class PrefetchBuffer
     }
 
     /**
-     * @param mixed $result
      * @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field.
      */
-    public function storeResult($result, array $arguments): void
+    public function storeResult(mixed $result, array $arguments): void
     {
         $this->results[$this->computeHash($arguments)] = $result;
     }
@@ -72,10 +71,8 @@ class PrefetchBuffer
 
     /**
      * @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field.
-     *
-     * @return mixed
      */
-    public function getResult(array $arguments)
+    public function getResult(array $arguments): mixed
     {
         return $this->results[$this->computeHash($arguments)];
     }

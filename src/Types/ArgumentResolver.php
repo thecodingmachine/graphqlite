@@ -18,7 +18,6 @@ use RuntimeException;
 use Webmozart\Assert\Assert;
 
 use function array_map;
-use function get_class;
 use function is_array;
 
 /**
@@ -29,15 +28,11 @@ class ArgumentResolver
     /**
      * Casts a value received from GraphQL into an argument passed to a method.
      *
-     * @param mixed $val
-     * @param mixed $context
      * @param InputType&Type $type
-     *
-     * @return mixed
      *
      * @throws Error
      */
-    public function resolve(?object $source, $val, $context, ResolveInfo $resolveInfo, InputType $type)
+    public function resolve(?object $source, mixed $val, mixed $context, ResolveInfo $resolveInfo, InputType $type): mixed
     {
         $type = $this->stripNonNullType($type);
         if ($type instanceof ListOfType) {
@@ -71,7 +66,7 @@ class ArgumentResolver
             return $type->resolve($source, $val, $context, $resolveInfo);
         }
 
-        throw new RuntimeException('Unexpected type: ' . get_class($type));
+        throw new RuntimeException('Unexpected type: ' . $type::class);
     }
 
     private function stripNonNullType(Type $type): Type

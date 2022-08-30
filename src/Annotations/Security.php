@@ -40,11 +40,10 @@ class Security implements MiddlewareAnnotationInterface
 
     /**
      * @param array<string, mixed>|string $data  data array managed by the Doctrine Annotations library or the expression
-     * @param mixed $failWith
      *
      * @throws BadMethodCallException
      */
-    public function __construct($data = [], ?string $expression = null, $failWith = '__fail__with__magic__key__', ?string $message = null, ?int $statusCode = null)
+    public function __construct(array|string $data = [], ?string $expression = null, mixed $failWith = '__fail__with__magic__key__', ?string $message = null, ?int $statusCode = null)
     {
         if (is_string($data)) {
             $data = ['expression' => $data];
@@ -81,10 +80,7 @@ class Security implements MiddlewareAnnotationInterface
         return $this->failWithIsSet;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getFailWith()
+    public function getFailWith(): mixed
     {
         return $this->failWith;
     }

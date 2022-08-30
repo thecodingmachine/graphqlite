@@ -9,15 +9,13 @@ use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use GraphQL\Type\Definition\NullableType;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
@@ -43,19 +41,19 @@ class InputField extends InputObjectField
      * @param mixed|null $defaultValue the default value set for this field
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, $type, array $arguments, ?ResolverInterface $originalResolver, ?callable $resolver, ?string $comment, bool $isUpdate,bool $hasDefaultValue, $defaultValue, array $additionalConfig = [])
+    public function __construct(string $name, $type, array $arguments, ?ResolverInterface $originalResolver, ?callable $resolver, ?string $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
             'type' => $type,
-            'description' => $comment
+            'description' => $comment,
         ];
 
-        if (!(!$hasDefaultValue || $isUpdate)) {
+        if (! (! $hasDefaultValue || $isUpdate)) {
             $config['defaultValue'] = $defaultValue;
         }
 
-        if ($originalResolver !== null && $resolver !== null){
+        if ($originalResolver !== null && $resolver !== null) {
             $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
                 if ($originalResolver instanceof SourceResolverInterface) {
                     $originalResolver->setObject($source);
@@ -81,24 +79,16 @@ class InputField extends InputObjectField
             };
         }
 
-
         $config += $additionalConfig;
         parent::__construct($config);
     }
 
-    /**
-     * @return Callable
-     */
-    public function getResolve()
+    public function getResolve(): callable
     {
         return $this->resolve;
     }
 
-    /**
-     *
-     * @param mixed $input
-     */
-    private function assertInputType($input): void
+    private function assertInputType(mixed $input): void
     {
         $type = $this->removeNonNull($this->getType());
         if (! $type instanceof ListOfType) {
@@ -172,11 +162,10 @@ class InputField extends InputObjectField
      *
      * @param ParameterInterface[] $parameters
      * @param array<string, mixed> $args
-     * @param mixed $context
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
+    private function paramsToArguments(array $parameters, ?object $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
     {
         $toPassArgs = [];
         $exceptions = [];

@@ -31,7 +31,7 @@ class Autowire implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed>|string $identifier
      */
-    public function __construct($identifier = [])
+    public function __construct(array|string $identifier = [])
     {
         $values = $identifier;
         if (is_string($values)) {

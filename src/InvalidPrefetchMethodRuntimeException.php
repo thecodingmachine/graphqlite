@@ -11,10 +11,7 @@ use ReflectionProperty;
 
 class InvalidPrefetchMethodRuntimeException extends GraphQLRuntimeException
 {
-    /**
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     */
-    public static function methodNotFound($reflector, ReflectionClass $reflectionClass, string $methodName, ReflectionException $previous): self
+    public static function methodNotFound(ReflectionMethod|ReflectionProperty $reflector, ReflectionClass $reflectionClass, string $methodName, ReflectionException $previous): self
     {
         throw new self('The @Field annotation in ' . $reflector->getDeclaringClass()->getName() . '::' . $reflector->getName() . ' specifies a "prefetch method" that could not be found. Unable to find method ' . $reflectionClass->getName() . '::' . $methodName . '.', 0, $previous);
     }

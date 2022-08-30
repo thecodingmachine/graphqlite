@@ -261,8 +261,6 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Maps class property into input property.
      *
-     * @param mixed              $defaultValue
-     *
      * @throws CannotMapTypeException
      */
     public function mapInputProperty(
@@ -270,7 +268,7 @@ class TypeHandler implements ParameterHandlerInterface
         DocBlock $docBlock,
         ?string $argumentName = null,
         ?string $inputTypeName = null,
-        $defaultValue = null,
+        mixed $defaultValue = null,
         ?bool $isNullable = null
     ): InputTypeProperty
     {
@@ -318,8 +316,6 @@ class TypeHandler implements ParameterHandlerInterface
     }
 
     /**
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
      * @return (InputType&GraphQLType)|(OutputType&GraphQLType)
      *
      * @throws CannotMapTypeException
@@ -329,7 +325,7 @@ class TypeHandler implements ParameterHandlerInterface
         ?Type $docBlockType,
         bool $isNullable,
         bool $mapToInputType,
-        $reflector,
+        ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
         ?string $argumentName = null
     ): GraphQLType
@@ -349,7 +345,7 @@ class TypeHandler implements ParameterHandlerInterface
             // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
             || ($innerType instanceof Object_
                 && $docBlockType instanceof Collection
-                && (string)$innerType->getFqsen() === (string)$docBlockType->getFqsen()
+                && (string) $innerType->getFqsen() === (string) $docBlockType->getFqsen()
             )
         ) {
             // We need to use the docBlockType
@@ -437,7 +433,7 @@ class TypeHandler implements ParameterHandlerInterface
         return new Compound(
             array_map(
                 function ($namedType) use ($reflectionClass): Type {
-                    \assert($namedType instanceof ReflectionNamedType);
+                    assert($namedType instanceof ReflectionNamedType);
                     $phpdocType = $this->phpDocumentorTypeResolver->resolve($namedType->getName());
                     Assert::notNull($phpdocType);
 

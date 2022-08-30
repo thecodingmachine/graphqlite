@@ -7,8 +7,6 @@ namespace TheCodingMachine\GraphQLite\Types;
 /**
  * Used for validating InputTypes
  * An implementation of this interface can be registered with the SchemaFactory.
- *
- * @author Jacob Thomason <jacob@thomason.xxx>
  */
 interface InputTypeValidatorInterface
 {

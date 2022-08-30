@@ -25,11 +25,8 @@ class ContainerParameter implements ParameterInterface
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
-     *
-     * @return mixed
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         return $this->container->get($this->identifier);
     }

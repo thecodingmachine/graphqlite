@@ -8,6 +8,7 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use UnitEnum;
 
 use function class_exists;
 use function interface_exists;
@@ -78,7 +79,7 @@ final class NS
 
                 $refClass = new ReflectionClass($className);
                 // Enum's are not classes
-                if (interface_exists(\UnitEnum::class)) {
+                if (interface_exists(UnitEnum::class)) {
                     // @phpstan-ignore-next-line - Remove this after minimum supported PHP version is >= 8.1
                     if ($refClass->isEnum()) {
                         continue;

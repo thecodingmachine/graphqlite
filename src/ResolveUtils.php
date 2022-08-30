@@ -21,10 +21,7 @@ use function is_object;
  */
 class ResolveUtils
 {
-    /**
-     * @param mixed $result
-     */
-    public static function assertInnerReturnType($result, Type $type): void
+    public static function assertInnerReturnType(mixed $result, Type $type): void
     {
         if ($type instanceof NonNull && $result === null) {
             throw TypeMismatchRuntimeException::unexpectedNullValue();
@@ -56,10 +53,7 @@ class ResolveUtils
         // TODO: it would be great to check if this is the actual object type we were expecting
     }
 
-    /**
-     * @param mixed $input
-     */
-    public static function assertInnerInputType($input, Type $type): void
+    public static function assertInnerInputType(mixed $input, Type $type): void
     {
         if ($type instanceof NonNull && $input === null) {
             throw TypeMismatchRuntimeException::unexpectedNullValue();

@@ -16,7 +16,6 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
-use function get_class;
 use function is_a;
 use function strpos;
 use function substr;
@@ -76,7 +75,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
         $name = $subType->name;
 
         if ($name === null) {
-            throw new RuntimeException('Cannot get name property from sub type ' . get_class($subType));
+            throw new RuntimeException('Cannot get name property from sub type ' . $subType::class);
         }
 
         $typeName = 'PorpaginasResult_' . $name;

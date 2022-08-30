@@ -104,7 +104,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
      *
      * @return mixed[]
      */
-    private function processResult($result): array
+    private function processResult(ExecutionResult|array|Promise $result): array
     {
         if ($result instanceof ExecutionResult) {
             return $result->toArray($this->config->getDebugFlag());
@@ -126,7 +126,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     /**
      * @param ExecutionResult|ExecutionResult[]|Promise $result
      */
-    private function decideHttpCode($result): int
+    private function decideHttpCode(ExecutionResult|array|Promise $result): int
     {
         if ($result instanceof ExecutionResult) {
             return $this->httpCodeDecider->decideHttpStatusCode($result);

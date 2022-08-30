@@ -78,12 +78,7 @@ final class StaticTypeMapper implements TypeMapperInterface
         }, []);
     }
 
-    /**
-     * @param ObjectType|InterfaceType $type
-     *
-     * @return MutableObjectType|MutableInterfaceType
-     */
-    private function castOutputTypeToMutable($type)
+    private function castOutputTypeToMutable(ObjectType|InterfaceType $type): MutableObjectType|MutableInterfaceType
     {
         if ($type instanceof ObjectType && ! $type instanceof MutableObjectType) {
             return new MutableObjectTypeAdapter($type);

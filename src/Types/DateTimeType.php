@@ -20,10 +20,7 @@ class DateTimeType extends ScalarType
     /** @var string */
     public $description = 'The `DateTime` scalar type represents time data, represented as an ISO-8601 encoded UTC date string.';
 
-    /**
-     * @param mixed $value
-     */
-    public function serialize($value): string
+    public function serialize(mixed $value): string
     {
         if (! $value instanceof DateTimeImmutable) {
             throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value));
@@ -32,10 +29,7 @@ class DateTimeType extends ScalarType
         return $value->format(DateTime::ATOM);
     }
 
-    /**
-     * @param mixed $value
-     */
-    public function parseValue($value): ?DateTimeImmutable
+    public function parseValue(mixed $value): ?DateTimeImmutable
     {
         if ($value === null) {
             return null;
@@ -56,11 +50,9 @@ class DateTimeType extends ScalarType
      * @param mixed $valueNode
      * @param array<string, mixed>|null $variables
      *
-     * @return mixed
-     *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function parseLiteral($valueNode, ?array $variables = null)
+    public function parseLiteral($valueNode, ?array $variables = null): mixed
     {
         if ($valueNode instanceof StringValueNode) {
             return $valueNode->value;

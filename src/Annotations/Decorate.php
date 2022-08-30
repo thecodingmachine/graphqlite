@@ -30,7 +30,7 @@ class Decorate
      *
      * @throws BadMethodCallException
      */
-    public function __construct($inputTypeName = [])
+    public function __construct(array|string $inputTypeName = [])
     {
         $values = $inputTypeName;
         if (is_string($values)) {

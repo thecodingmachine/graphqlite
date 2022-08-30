@@ -27,9 +27,8 @@ class InputTypeParameter implements InputTypeParameterInterface
 
     /**
      * @param InputType&Type $type
-     * @param mixed $defaultValue
      */
-    public function __construct(string $name, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
+    public function __construct(string $name, InputType $type, bool $hasDefaultValue, mixed $defaultValue, ArgumentResolver $argumentResolver)
     {
         $this->name                 = $name;
         $this->type                 = $type;
@@ -40,11 +39,8 @@ class InputTypeParameter implements InputTypeParameterInterface
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
-     *
-     * @return mixed
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         if (isset($args[$this->name])) {
             return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);
@@ -78,10 +74,7 @@ class InputTypeParameter implements InputTypeParameterInterface
         return $this->doesHaveDefaultValue;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): mixed
     {
         return $this->defaultValue;
     }

@@ -15,9 +15,8 @@ class InputTypeProperty extends InputTypeParameter
 
     /**
      * @param InputType&Type $type
-     * @param mixed          $defaultValue
      */
-    public function __construct(string $propertyName, string $fieldName, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
+    public function __construct(string $propertyName, string $fieldName, InputType $type, bool $hasDefaultValue, mixed $defaultValue, ArgumentResolver $argumentResolver)
     {
         parent::__construct($fieldName, $type, $hasDefaultValue, $defaultValue, $argumentResolver);
         $this->propertyName = $propertyName;

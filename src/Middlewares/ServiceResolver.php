@@ -30,12 +30,7 @@ class ServiceResolver implements ResolverInterface
         return $this->callable[0];
     }
 
-    /**
-     * @param mixed $args
-     *
-     * @return mixed
-     */
-    public function __invoke(...$args)
+    public function __invoke(mixed ...$args): mixed
     {
         $callable = $this->callable;
 

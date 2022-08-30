@@ -16,8 +16,6 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 
-use function get_class;
-
 /**
  * A cache used to store already FULLY COMPUTED types.
  */
@@ -81,7 +79,7 @@ class TypeRegistry
     {
         $type = $this->getType($typeName);
         if (! $type instanceof MutableObjectType) {
-            throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be an MutableObjectType. Got a ' . get_class($type));
+            throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be an MutableObjectType. Got a ' . $type::class);
         }
 
         return $type;
@@ -93,11 +91,12 @@ class TypeRegistry
     public function getMutableInterface(string $typeName): MutableInterface
     {
         $type = $this->getType($typeName);
-        if (! $type instanceof MutableInterface
+        if (
+            ! $type instanceof MutableInterface
             && ! $type instanceof MutableInputInterface
             || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)
         ) {
-            throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . get_class($type));
+            throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . $type::class);
         }
 
         return $type;

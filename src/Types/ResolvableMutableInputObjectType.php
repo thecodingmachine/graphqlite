@@ -100,7 +100,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         $parameters = $this->getParameters();
 
         $toPassArgs = [];
-  
+
         $exceptions = [];
         foreach ($parameters as $parameter) {
             try {

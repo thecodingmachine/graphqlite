@@ -134,9 +134,8 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     /**
      * @param Array_|Iterable_|Object_|Mixed_             $type
-     * @param ReflectionMethod|ReflectionProperty $reflector
      */
-    public static function createForMissingPhpDoc(PhpDocumentorType $type, $reflector, ?string $argumentName = null): self
+    public static function createForMissingPhpDoc(PhpDocumentorType $type, ReflectionMethod|ReflectionProperty $reflector, ?string $argumentName = null): self
     {
         $typeStr = '';
         if ($type instanceof Array_) {
@@ -144,7 +143,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         } elseif ($type instanceof Iterable_) {
             $typeStr = 'iterable';
         } elseif ($type instanceof Object_) {
-            $typeStr = \sprintf('object ("%s")', $type->getFqsen());
+            $typeStr = sprintf('object ("%s")', $type->getFqsen());
         } elseif ($type instanceof Mixed_) {
             $typeStr = 'mixed';
         }
