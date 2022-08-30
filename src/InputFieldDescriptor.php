@@ -16,6 +16,8 @@ use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
+use function is_callable;
+
 /**
  * A class that describes a field to be created.
  * To contains getters and setters to alter the field behaviour.
@@ -23,95 +25,62 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
  */
 class InputFieldDescriptor
 {
-    /** @var string */
-    private $name;
+    private string $name;
     /** @var InputType|(NullableType&Type) */
     private $type;
     /** @var array<string, ParameterInterface> */
-    private $parameters = [];
+    private array $parameters = [];
     /** @var callable|null */
     private $callable;
-    /** @var string|null */
-    private $targetMethodOnSource;
-    /** @var string|null */
-    private $targetPropertyOnSource;
+    private ?string $targetMethodOnSource;
+    private ?string $targetPropertyOnSource;
 
     /**
      * Implement in future PR
-     *
-     * @var string|null
      */
-    // private $magicProperty;
+    // private ?string $magicProperty;
 
     /**
      * Whether we should inject the source as the first parameter or not.
-     *
-     * @var bool
      */
-    private $injectSource = false;
-    /** @var string|null */
-    private $comment;
-    /** @var MiddlewareAnnotations */
-    private $middlewareAnnotations;
-    /** @var ReflectionMethod */
-    private $refMethod;
-    /** @var ReflectionProperty */
-    private $refProperty;
-    /** @var ResolverInterface|null */
-    private $originalResolver;
+    private bool $injectSource = false;
+    private ?string $comment;
+    private MiddlewareAnnotations $middlewareAnnotations;
+    private ReflectionMethod $refMethod;
+    private ReflectionProperty $refProperty;
+    private ?ResolverInterface $originalResolver;
     /** @var callable */
     private $resolver;
-    /** @var bool */
-    private $isUpdate = false;
-    /** @var bool */
-    private $hasDefaultValue = false;
-    /** @var mixed|null */
-    private $defaultValue;
+    private bool $isUpdate = false;
+    private bool $hasDefaultValue = false;
+    private mixed $defaultValue;
 
-    /**
-     * @return bool
-     */
     public function isUpdate(): bool
     {
         return $this->isUpdate;
     }
 
-    /**
-     * @param bool $isUpdate
-     */
     public function setIsUpdate(bool $isUpdate): void
     {
         $this->isUpdate = $isUpdate;
     }
 
-    /**
-     * @return bool
-     */
     public function hasDefaultValue(): bool
     {
         return $this->hasDefaultValue;
     }
 
-    /**
-     * @param bool $hasDefaultValue
-     */
     public function setHasDefaultValue(bool $hasDefaultValue): void
     {
         $this->hasDefaultValue = $hasDefaultValue;
     }
 
-    /**
-     * @return mixed|null
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): mixed
     {
         return $this->defaultValue;
     }
 
-    /**
-     * @param mixed|null $defaultValue
-     */
-    public function setDefaultValue($defaultValue): void
+    public function setDefaultValue(mixed $defaultValue): void
     {
         $this->defaultValue = $defaultValue;
     }
@@ -205,22 +174,6 @@ class InputFieldDescriptor
         // $this->magicProperty = null;
     }
 
-    /**
-     * Set the magic property
-     *
-     * @todo enable this in a future PR
-     */
-//    public function setMagicProperty(string $magicProperty): void
-//    {
-//        if ($this->originalResolver !== null) {
-//            throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
-//        }
-//        $this->callable = null;
-//        $this->targetMethodOnSource = null;
-//        $this->targetPropertyOnSource = null;
-//        $this->magicProperty = $magicProperty;
-//    }
-
     public function isInjectSource(): bool
     {
         return $this->injectSource;
@@ -288,7 +241,7 @@ class InputFieldDescriptor
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
             $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
-        // } elseif ($this->magicProperty !== null) {
+            // } elseif ($this->magicProperty !== null) {
             // Enable magic properties in a future PR
             // $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
         } else {
@@ -315,4 +268,21 @@ class InputFieldDescriptor
     {
         $this->resolver = $resolver;
     }
+
+    /*
+    * Set the magic property
+    *
+    * @todo enable this in a future PR
+    *
+    * public function setMagicProperty(string $magicProperty): void
+    * {
+    * if ($this->originalResolver !== null) {
+    * throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
+    * }
+    * $this->callable = null;
+    * $this->targetMethodOnSource = null;
+    * $this->targetPropertyOnSource = null;
+    * $this->magicProperty = $magicProperty;
+    * }
+    */
 }
