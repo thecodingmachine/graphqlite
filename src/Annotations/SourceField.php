@@ -25,26 +25,20 @@ use function is_array;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class SourceField implements SourceFieldInterface
 {
-    /** @var string */
-    private $name;
+    private string $name;
 
-    /** @var string|null */
-    private $outputType;
+    private ?string $outputType = null;
 
-    /** @var string|null */
-    private $phpType;
+    private ?string $phpType = null;
 
-    /** @var string|null */
-    private $description;
+    private ?string $description = null;
 
-    /** @var string */
-    private $sourceName;
+    private ?string $sourceName;
 
-    /** @var MiddlewareAnnotations */
-    private $middlewareAnnotations;
+    private MiddlewareAnnotations $middlewareAnnotations;
 
     /** @var array<string, ParameterAnnotations> */
-    private $parameterAnnotations;
+    private array $parameterAnnotations;
 
     /**
      * @param mixed[] $attributes

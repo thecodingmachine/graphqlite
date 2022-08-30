@@ -8,16 +8,14 @@ use SplQueue;
 use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
+use function assert;
+
 /**
  * Iterate a queue of middlewares and execute them.
  */
 final class InputNext implements InputFieldHandlerInterface
 {
-    /** @var InputFieldHandlerInterface */
-    private $fallbackHandler;
-
-    /** @var SplQueue */
-    private $queue;
+    private SplQueue $queue;
 
     /**
      * Clones the queue provided to allow re-use.
@@ -25,10 +23,9 @@ final class InputNext implements InputFieldHandlerInterface
      * @param InputFieldHandlerInterface $fallbackHandler Fallback handler to
      *     invoke when the queue is exhausted.
      */
-    public function __construct(SplQueue $queue, InputFieldHandlerInterface $fallbackHandler)
+    public function __construct(SplQueue $queue, private InputFieldHandlerInterface $fallbackHandler)
     {
-        $this->queue           = clone $queue;
-        $this->fallbackHandler = $fallbackHandler;
+        $this->queue = clone $queue;
     }
 
     public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
@@ -38,7 +35,7 @@ final class InputNext implements InputFieldHandlerInterface
         }
 
         $middleware = $this->queue->dequeue();
-
+        assert($middleware instanceof InputFieldMiddlewareInterface);
         return $middleware->process($inputFieldDescriptor, $this);
     }
 }
