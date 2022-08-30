@@ -44,16 +44,16 @@ class InputFieldDescriptor
      * Whether we should inject the source as the first parameter or not.
      */
     private bool $injectSource = false;
-    private ?string $comment;
+    private ?string $comment = null;
     private MiddlewareAnnotations $middlewareAnnotations;
     private ReflectionMethod $refMethod;
     private ReflectionProperty $refProperty;
-    private ?ResolverInterface $originalResolver;
+    private ?ResolverInterface $originalResolver = null;
     /** @var callable */
     private $resolver;
     private bool $isUpdate = false;
     private bool $hasDefaultValue = false;
-    private mixed $defaultValue;
+    private mixed $defaultValue = null;
 
     public function isUpdate(): bool
     {

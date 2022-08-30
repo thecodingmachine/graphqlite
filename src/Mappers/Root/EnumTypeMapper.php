@@ -34,7 +34,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
     /** @var array<string, class-string<UnitEnum>> */
-    private array $nameToClassMapping;
+    private ?array $nameToClassMapping = null;
 
     /**
      * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
