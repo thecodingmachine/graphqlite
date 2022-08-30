@@ -14,7 +14,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 final class ParameterMiddlewarePipe implements ParameterMiddlewareInterface
 {
     /** @var SplQueue<ParameterMiddlewareInterface> */
-    private $pipeline;
+    private SplQueue $pipeline;
 
     /**
      * Initializes the queue.

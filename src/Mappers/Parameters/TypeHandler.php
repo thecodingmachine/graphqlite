@@ -158,7 +158,7 @@ class TypeHandler implements ParameterHandlerInterface
             }
         } else {
             $parameterType = $parameter->getType();
-            $allowsNull    = $parameterType === null ? true : $parameterType->allowsNull();
+            $allowsNull    = $parameterType === null || $parameterType->allowsNull();
 
             if ($parameterType === null) {
                 $phpdocType = new Mixed_();

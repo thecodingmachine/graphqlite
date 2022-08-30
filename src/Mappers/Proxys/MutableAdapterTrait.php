@@ -9,7 +9,6 @@ use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\NoFieldsException;
@@ -40,18 +39,13 @@ trait MutableAdapterTrait
         $this->type->assertValid();
     }
 
-    /**
-     * @return string
-     */
-    public function jsonSerialize()
+    public function jsonSerialize():string
     {
         return $this->type->jsonSerialize();
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+
+    public function toString():string
     {
         return $this->type->toString();
     }
@@ -66,13 +60,9 @@ trait MutableAdapterTrait
 
 
     /**
-     * @param string $name
-     *
-     * @return FieldDefinition
-     *
      * @throws Exception
      */
-    public function getField($name): FieldDefinition
+    public function getField(string $name): FieldDefinition
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a '.get_class($this).' before fetching its fields.');
