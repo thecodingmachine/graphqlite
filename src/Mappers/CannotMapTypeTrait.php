@@ -15,8 +15,7 @@ use function sprintf;
 
 trait CannotMapTypeTrait
 {
-    /** @var bool */
-    private $locationInfoAdded = false;
+    private bool $locationInfoAdded = false;
 
     public function addParamInfo(ReflectionParameter $parameter): void
     {
