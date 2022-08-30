@@ -20,23 +20,17 @@ use function get_class;
  */
 trait MutableAdapterTrait
 {
-    /**
-     * @var ObjectType|InterfaceType
-     */
-    private $type;
-    /**
-     * @var string|null
-     */
-    private $className;
 
-    /** @var string */
-    private $status = MutableInterface::STATUS_PENDING;
+    private ObjectType|InterfaceType $type;
+    private ?string $className =null;
+
+    private string $status = MutableInterface::STATUS_PENDING;
 
     /** @var array<callable> */
-    private $fieldsCallables = [];
+    private array $fieldsCallables = [];
 
     /** @var FieldDefinition[]|null */
-    private $finalFields;
+    private ?array $finalFields = null;
 
     /**
      * @throws InvariantViolation
