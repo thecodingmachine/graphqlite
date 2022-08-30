@@ -124,14 +124,14 @@ class BaseTypeMapper implements RootTypeMapperInterface
         if ($type instanceof Object_) {
             $fqcn = (string) $type->getFqsen();
             switch ($fqcn) {
-                case DateTimeImmutable::class:
-                case DateTimeInterface::class:
+                case '\\' . DateTimeImmutable::class:
+                case '\\' . DateTimeInterface::class:
                     return self::getDateTimeType();
 
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
 
-                case DateTime::class:
+                case '\\' . DateTime::class:
                     throw CannotMapTypeException::createForDateTime();
 
                 case '\\' . ID::class:
