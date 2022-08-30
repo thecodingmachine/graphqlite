@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "ext-json": "*",
         "doctrine/annotations": "^1.13",
         "composer/package-versions-deprecated": "^1.8",

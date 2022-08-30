@@ -15,7 +15,7 @@ use function iterator_to_array;
 class AggregateQueryProvider implements QueryProviderInterface
 {
     /** @var QueryProviderInterface[] */
-    private $queryProviders;
+    private array $queryProviders;
 
     /**
      * @param QueryProviderInterface[] $queryProviders

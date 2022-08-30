@@ -40,7 +40,8 @@ use function get_class;
 use function in_array;
 use function is_a;
 use function reset;
-use function strpos;
+use function str_contains;
+use function str_starts_with;
 use function strrpos;
 use function substr;
 
@@ -48,49 +49,30 @@ use const PHP_MAJOR_VERSION;
 
 class AnnotationReader
 {
-    /** @var Reader */
-    private $reader;
-
     // In this mode, no exceptions will be thrown for incorrect annotations (unless the name of the annotation we are looking for is part of the docblock)
     public const LAX_MODE = 'LAX_MODE';
     // In this mode, exceptions will be thrown for any incorrect annotations.
     public const STRICT_MODE = 'STRICT_MODE';
 
-    /**
-     * Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
-     *
-     * @var string[]
-     */
-    private $strictNamespaces;
-
-    /**
-     * If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
-     *
-     * @var string
-     */
-    private $mode;
 
     /** @var array<string, (object|null)> */
-    private $methodAnnotationCache = [];
+    private array $methodAnnotationCache = [];
 
     /** @var array<string, array<object>> */
-    private $methodAnnotationsCache = [];
+    private array $methodAnnotationsCache = [];
 
     /** @var array<string, array<object>> */
-    private $propertyAnnotationsCache = [];
+    private array $propertyAnnotationsCache = [];
 
     /**
-     * @param string   $mode             One of self::LAX_MODE or self::STRICT_MODE
-     * @param string[] $strictNamespaces
+     * @param string $mode One of self::LAX_MODE or self::STRICT_MODE. If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
+     * @param string[] $strictNamespaces Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
      */
-    public function __construct(Reader $reader, string $mode = self::STRICT_MODE, array $strictNamespaces = [])
+    public function __construct(private Reader $reader, private string $mode = self::STRICT_MODE, private array $strictNamespaces = [])
     {
-        $this->reader = $reader;
         if (! in_array($mode, [self::LAX_MODE, self::STRICT_MODE], true)) {
             throw new InvalidArgumentException('The mode passed must be one of AnnotationReader::LAX_MODE, AnnotationReader::STRICT_MODE');
         }
-        $this->mode             = $mode;
-        $this->strictNamespaces = $strictNamespaces;
     }
 
     /**
@@ -108,7 +90,6 @@ class AnnotationReader
      */
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
-        $type = null;
         try {
             // If attribute & annotation, let's prefer the PHP 8 attribute
             if (PHP_MAJOR_VERSION >= 8) {
@@ -123,6 +104,7 @@ class AnnotationReader
 
             $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
             assert($type === null || $type instanceof $annotationClass);
+            return $type;
         } catch (AnnotationException $e) {
             switch ($this->mode) {
                 case self::STRICT_MODE:
@@ -131,21 +113,22 @@ class AnnotationReader
                 case self::LAX_MODE:
                     if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
                         throw $e;
-                    } else {
-                        return null;
                     }
+
+                    return null;
+
                 default:
                     throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
             }
         }
-
-        return $type;
     }
 
     /**
      * Returns a method annotation and handles correctly errors.
      *
      * @param class-string<object> $annotationClass
+     *
+     * @throws AnnotationException
      */
     private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?object
     {
@@ -173,9 +156,10 @@ class AnnotationReader
                 case self::LAX_MODE:
                     if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
                         throw $e;
-                    } else {
-                        return null;
                     }
+
+                    return null;
+
                 default:
                     throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
             }
@@ -188,13 +172,13 @@ class AnnotationReader
     private function isErrorImportant(string $annotationClass, string $docComment, string $className): bool
     {
         foreach ($this->strictNamespaces as $strictNamespace) {
-            if (strpos($className, $strictNamespace) === 0) {
+            if (str_starts_with($className, $strictNamespace)) {
                 return true;
             }
         }
         $shortAnnotationClass = substr($annotationClass, strrpos($annotationClass, '\\') + 1);
 
-        return strpos($docComment, '@' . $shortAnnotationClass) !== false;
+        return str_contains($docComment, '@' . $shortAnnotationClass);
     }
 
     /**
@@ -212,13 +196,10 @@ class AnnotationReader
      */
     public function getClassAnnotations(ReflectionClass $refClass, string $annotationClass, bool $inherited = true): array
     {
-        /**
-         * @var array<array<A>>
-         */
         $toAddAnnotations = [];
         do {
             try {
-                $allAnnotations     = $this->reader->getClassAnnotations($refClass);
+                $allAnnotations = $this->reader->getClassAnnotations($refClass);
                 $toAddAnnotations[] = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
@@ -242,10 +223,11 @@ class AnnotationReader
                     throw $e;
                 }
 
-                if ($this->mode === self::LAX_MODE) {
-                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
-                        throw $e;
-                    }
+                if (
+                    ($this->mode === self::LAX_MODE)
+                    && $this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())
+                ) {
+                    throw $e;
                 }
             }
             $refClass = $refClass->getParentClass();
@@ -451,11 +433,9 @@ class AnnotationReader
     }
 
     /**
-     * @param ReflectionMethod|ReflectionProperty $reflection
-     *
      * @throws AnnotationException
      */
-    public function getMiddlewareAnnotations($reflection): MiddlewareAnnotations
+    public function getMiddlewareAnnotations(ReflectionMethod|ReflectionProperty $reflection): MiddlewareAnnotations
     {
         if ($reflection instanceof ReflectionMethod) {
             $middlewareAnnotations = $this->getMethodAnnotations($reflection, MiddlewareAnnotationInterface::class);
@@ -486,7 +466,7 @@ class AnnotationReader
 
         $toAddAnnotations = [];
         try {
-            $allAnnotations   = $this->reader->getMethodAnnotations($refMethod);
+            $allAnnotations = $this->reader->getMethodAnnotations($refMethod);
             $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });
@@ -542,7 +522,7 @@ class AnnotationReader
 
         $toAddAnnotations = [];
         try {
-            $allAnnotations   = $this->reader->getPropertyAnnotations($refProperty);
+            $allAnnotations = $this->reader->getPropertyAnnotations($refProperty);
             $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });

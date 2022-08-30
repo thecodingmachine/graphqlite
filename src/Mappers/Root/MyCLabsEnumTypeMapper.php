@@ -31,59 +31,37 @@ use function ltrim;
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<object>, EnumType> */
-    private $cache = [];
+    private array $cache = [];
     /** @var array<string, EnumType> */
-    private $cacheByName = [];
-    /** @var RootTypeMapperInterface */
-    private $next;
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var array|NS[] */
-    private $namespaces;
-    /** @var CacheInterface */
-    private $cacheService;
+    private array $cacheByName = [];
 
     /**
      * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
      */
-    public function __construct(RootTypeMapperInterface $next, AnnotationReader $annotationReader, CacheInterface $cacheService, array $namespaces)
+    public function __construct(private RootTypeMapperInterface $next, private AnnotationReader $annotationReader, private CacheInterface $cacheService, private array $namespaces)
     {
-        $this->next = $next;
-        $this->annotationReader = $annotationReader;
-        $this->cacheService = $cacheService;
-        $this->namespaces = $namespaces;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         $result = $this->map($type);
-        if ($result === null) {
-            return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
-        }
-
-        return $result;
+        return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
     /**
      * @param (InputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
     {
         $result = $this->map($type);
-        if ($result === null) {
-            return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
-        }
-
-        return $result;
+        return $result ?? $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
     }
 
     private function map(Type $type): ?EnumType
@@ -95,9 +73,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         if ($fqsen === null) {
             return null;
         }
-        /**
-         * @var class-string<object>
-         */
+
         $enumClass = (string) $fqsen;
 
         return $this->mapByClassName($enumClass);
