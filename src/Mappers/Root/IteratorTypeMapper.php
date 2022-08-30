@@ -39,11 +39,6 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     {
     }
 
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     *
-     * @return OutputType&GraphQLType
-     */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
@@ -78,12 +73,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         return $result;
     }
 
-    /**
-     * @param (InputType&GraphQLType)|null $subType*
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         if (! $type instanceof Compound) {
             //try {

@@ -42,23 +42,13 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     {
     }
 
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     *
-     * @return OutputType&GraphQLType
-     */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
-    /**
-     * @param (InputType&GraphQLType)|null $subType
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
@@ -73,7 +63,9 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         if ($fqsen === null) {
             return null;
         }
-
+        /**
+         * @var  class-string<object> $enumClass
+         */
         $enumClass = (string) $fqsen;
 
         return $this->mapByClassName($enumClass);
@@ -149,7 +141,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     }
 
     /** @var array<string, class-string<Enum>> */
-    private $nameToClassMapping;
+    private array|null $nameToClassMapping = null;
 
     /**
      * Go through all classes in the defined namespaces and loads the cache.

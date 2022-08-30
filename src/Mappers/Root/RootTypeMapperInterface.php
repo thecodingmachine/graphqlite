@@ -32,6 +32,11 @@ interface RootTypeMapperInterface
      */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType;
 
+    /**
+     * @param (InputType&GraphQLType)|null $subType
+     *
+     * @return InputType&GraphQLType
+     */
     public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType;
 
     /**
