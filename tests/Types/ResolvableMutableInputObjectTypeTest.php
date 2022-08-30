@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Types;
 
 use DateTimeImmutable;
@@ -11,24 +13,23 @@ use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithRecursiveList;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\HardCodedParameter;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 {
-
     public function testResolve(): void
     {
-        $inputType = new ResolvableMutableInputObjectType('InputObject',
+        $inputType = new ResolvableMutableInputObjectType(
+            'InputObject',
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myFactory',
             'my comment',
-            false);
+            false
+        );
 
         $this->assertSame('InputObject', $inputType->name);
         $inputType->freeze();
@@ -55,12 +56,14 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
     public function testDecoratorMissingArgumentException(): void
     {
         $testFactory = new TestFactory();
-        $inputType = new ResolvableMutableInputObjectType('InputObject',
+        $inputType = new ResolvableMutableInputObjectType(
+            'InputObject',
             $this->getFieldsBuilder(),
             $testFactory,
             'myFactory',
             'my comment',
-            true);
+            true
+        );
 
         $inputType->decorate([$testFactory, 'myDecorator']);
         $this->assertFalse($inputType->isInstantiableWithoutParameters());
@@ -75,12 +78,14 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
     public function testDecoratorDoesNotModifyInstantiableWithoutParameters(): void
     {
         $testFactory = new TestFactory();
-        $inputType = new ResolvableMutableInputObjectType('InputObject',
+        $inputType = new ResolvableMutableInputObjectType(
+            'InputObject',
             $this->getFieldsBuilder(),
             $testFactory,
             'myFactory',
             'my comment',
-            false);
+            false
+        );
 
         $inputType->decorate([$testFactory, 'myDecorator']);
         $this->assertFalse($inputType->isInstantiableWithoutParameters());
@@ -88,21 +93,24 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 
     public function testListResolve(): void
     {
-        $inputType = new ResolvableMutableInputObjectType('InputObject2',
+        $inputType = new ResolvableMutableInputObjectType(
+            'InputObject2',
             $this->getFieldsBuilder(),
             new TestFactory(),
             'myListFactory',
             null,
-            false);
+            false
+        );
 
-        $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
+        $obj = $inputType->resolve(new stdClass(), [
+            'date' => '2018-12-25',
+            'stringList' =>
             [
                 'foo',
-                'bar'
+                'bar',
             ],
-            'dateList' => [
-                '2018-12-25'
-            ]], null, $this->createMock(ResolveInfo::class));
+            'dateList' => ['2018-12-25'],
+        ], null, $this->createMock(ResolveInfo::class));
         $this->assertInstanceOf(TestObject2::class, $obj);
         $this->assertSame('2018-12-25-foo-bar-1', $obj->getTest2());
     }
@@ -113,35 +121,38 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 
         $fieldsBuilder->method('getParameters')->willReturn([
             new class implements ParameterInterface {
-                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
                 }
             },
             new class implements ParameterInterface {
-                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
                 }
-            }
+            },
         ]);
 
-        $inputType = new ResolvableMutableInputObjectType('InputObject2',
+        $inputType = new ResolvableMutableInputObjectType(
+            'InputObject2',
             $fieldsBuilder,
             new TestFactory(),
             'myListFactory',
             null,
-            false);
+            false
+        );
 
         $this->expectException(GraphQLAggregateException::class);
-        $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
+        $obj = $inputType->resolve(new stdClass(), [
+            'date' => '2018-12-25',
+            'stringList' =>
             [
                 'foo',
-                'bar'
+                'bar',
             ],
-            'dateList' => [
-                '2018-12-25'
-            ]], null, $this->createMock(ResolveInfo::class));
+            'dateList' => ['2018-12-25'],
+        ], null, $this->createMock(ResolveInfo::class));
     }
 
     public function testExceptionsInDecorator(): void
@@ -152,43 +163,44 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             new HardCodedParameter(new DateTimeImmutable('now')),
             new HardCodedParameter([]),
             new HardCodedParameter([]),
-            ]);
-
+        ]);
 
         $fieldsBuilder->method('getParametersForDecorator')->willReturn([
             new class implements ParameterInterface {
-                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
                 }
             },
             new class implements ParameterInterface {
-                public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+                public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
                 }
-            }
+            },
         ]);
 
         $testFactory = new TestFactory();
-        $inputType = new ResolvableMutableInputObjectType('InputObject2',
+        $inputType = new ResolvableMutableInputObjectType(
+            'InputObject2',
             $fieldsBuilder,
             $testFactory,
             'myListFactory',
             null,
-            false);
+            false
+        );
 
         $inputType->decorate([$testFactory, 'myDecorator']);
 
         $this->expectException(GraphQLAggregateException::class);
-        $obj = $inputType->resolve(new stdClass(), ['date' => '2018-12-25', 'stringList' =>
+        $obj = $inputType->resolve(new stdClass(), [
+            'date' => '2018-12-25',
+            'stringList' =>
             [
                 'foo',
-                'bar'
+                'bar',
             ],
-            'dateList' => [
-                '2018-12-25'
-            ]], null, $this->createMock(ResolveInfo::class));
+            'dateList' => ['2018-12-25'],
+        ], null, $this->createMock(ResolveInfo::class));
     }
-
 }

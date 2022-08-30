@@ -20,7 +20,7 @@ class HardCodedParameter implements ParameterInterface
         $this->value = $value;
     }
 
-    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args,mixed $context, ResolveInfo $info):mixed
     {
         return $this->value;
     }
