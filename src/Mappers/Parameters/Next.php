@@ -18,11 +18,7 @@ use function assert;
  */
 final class Next implements ParameterHandlerInterface
 {
-    /** @var ParameterHandlerInterface */
-    private $fallbackHandler;
-
-    /** @var SplQueue */
-    private $queue;
+    private SplQueue $queue;
 
     /**
      * Clones the queue provided to allow re-use.
@@ -30,10 +26,9 @@ final class Next implements ParameterHandlerInterface
      * @param ParameterHandlerInterface $fallbackHandler Fallback handler to
      *     invoke when the queue is exhausted.
      */
-    public function __construct(SplQueue $queue, ParameterHandlerInterface $fallbackHandler)
+    public function __construct(SplQueue $queue, protected ParameterHandlerInterface $fallbackHandler)
     {
         $this->queue           = clone $queue;
-        $this->fallbackHandler = $fallbackHandler;
     }
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface

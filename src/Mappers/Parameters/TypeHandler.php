@@ -61,24 +61,14 @@ use const SORT_REGULAR;
 
 class TypeHandler implements ParameterHandlerInterface
 {
-    /** @var PhpDocumentorTypeResolver */
-    private $phpDocumentorTypeResolver;
-    /** @var ArgumentResolver */
-    private $argumentResolver;
-    /** @var RootTypeMapperInterface */
-    private $rootTypeMapper;
-    /** @var TypeResolver */
-    private $typeResolver;
+    private PhpDocumentorTypeResolver $phpDocumentorTypeResolver;
 
     public function __construct(
-        ArgumentResolver $argumentResolver,
-        RootTypeMapperInterface $rootTypeMapper,
-        TypeResolver $typeResolver
+        private ArgumentResolver $argumentResolver,
+        private RootTypeMapperInterface $rootTypeMapper,
+        private TypeResolver $typeResolver
     ) {
-        $this->argumentResolver          = $argumentResolver;
-        $this->rootTypeMapper            = $rootTypeMapper;
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
-        $this->typeResolver              = $typeResolver;
     }
 
     /**
@@ -99,7 +89,7 @@ class TypeHandler implements ParameterHandlerInterface
             $type = $this->mapType(
                 $phpdocType,
                 $docBlockReturnType,
-                $returnType ? $returnType->allowsNull() : false,
+                $returnType && $returnType->allowsNull(),
                 false,
                 $refMethod,
                 $docBlockObj
