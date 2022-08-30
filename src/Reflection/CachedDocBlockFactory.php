@@ -16,7 +16,6 @@ use ReflectionProperty;
 use Webmozart\Assert\Assert;
 
 use function filemtime;
-use function get_class;
 use function md5;
 
 /**
@@ -24,23 +23,18 @@ use function md5;
  */
 class CachedDocBlockFactory
 {
-    /** @var CacheInterface */
-    private $cache;
-    /** @var DocBlockFactory */
-    private $docBlockFactory;
+    private DocBlockFactory $docBlockFactory;
     /** @var array<string, DocBlock> */
-    private $docBlockArrayCache = [];
+    private array $docBlockArrayCache = [];
     /** @var array<string, Context> */
-    private $contextArrayCache = [];
-    /** @var ContextFactory */
-    private $contextFactory;
+    private array $contextArrayCache = [];
+    private ContextFactory $contextFactory;
 
     /**
      * @param CacheInterface $cache The cache we fetch data from. Note this is a SAFE cache. It does not need to be purged.
      */
-    public function __construct(CacheInterface $cache, ?DocBlockFactory $docBlockFactory = null)
+    public function __construct(private CacheInterface $cache, ?DocBlockFactory $docBlockFactory = null)
     {
-        $this->cache           = $cache;
         $this->docBlockFactory = $docBlockFactory ?: DocBlockFactory::createInstance();
         $this->contextFactory  = new ContextFactory();
     }
@@ -48,13 +42,11 @@ class CachedDocBlockFactory
     /**
      * Fetches a DocBlock object from a ReflectionMethod
      *
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
      * @throws InvalidArgumentException
      */
-    public function getDocBlock($reflector): DocBlock
+    public function getDocBlock(ReflectionMethod|ReflectionProperty $reflector): DocBlock
     {
-        $key = 'docblock_' . md5($reflector->getDeclaringClass()->getName() . '::' . $reflector->getName() . '::' . get_class($reflector));
+        $key = 'docblock_' . md5($reflector->getDeclaringClass()->getName() . '::' . $reflector->getName() . '::' . $reflector::class);
         if (isset($this->docBlockArrayCache[$key])) {
             return $this->docBlockArrayCache[$key];
         }
@@ -87,10 +79,7 @@ class CachedDocBlockFactory
         return $docBlock;
     }
 
-    /**
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     */
-    private function doGetDocBlock($reflector): DocBlock
+    private function doGetDocBlock(ReflectionMethod|ReflectionProperty $reflector): DocBlock
     {
         $docComment = $reflector->getDocComment() ?: '/** */';
 

@@ -18,31 +18,25 @@ use function array_key_exists;
 class InputType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
     /** @var InputField[] */
-    private $constructorInputFields = [];
+    private array $constructorInputFields = [];
     /** @var InputField[] */
-    private $inputFields = [];
-
-    /** @var class-string<object> */
-    private $className;
-
-    private ?InputTypeValidatorInterface $inputTypeValidator;
+    private array $inputFields = [];
 
     /**
      * @param class-string<object> $className
      */
     public function __construct(
-        string $className,
+        private string $className,
         string $inputName,
         ?string $description,
         bool $isUpdate,
         FieldsBuilder $fieldsBuilder,
-        ?InputTypeValidatorInterface $inputTypeValidator = null
+        private ?InputTypeValidatorInterface $inputTypeValidator = null
     ) {
         $reflection = new ReflectionClass($className);
         if (! $reflection->isInstantiable()) {
             throw FailedResolvingInputType::createForNotInstantiableClass($className);
         }
-
 
         $fields = function () use ($isUpdate, $inputName, $className, $fieldsBuilder) {
             $inputFields = $fieldsBuilder->getInputFields($className, $inputName, $isUpdate);
@@ -69,22 +63,19 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         ];
 
         parent::__construct($config);
-        $this->className = $className;
-        $this->inputTypeValidator = $inputTypeValidator;
     }
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
     {
         $constructorArgs = [];
         foreach ($this->constructorInputFields as $constructorInputField) {
             $name = $constructorInputField->name;
             $resolve = $constructorInputField->getResolve();
 
-            if (!array_key_exists($name, $args)) {
+            if (! array_key_exists($name, $args)) {
                 continue;
             }
 
@@ -95,7 +86,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
-            if (!array_key_exists($name, $args)) {
+            if (! array_key_exists($name, $args)) {
                 continue;
             }
 
@@ -106,7 +97,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
             $this->inputTypeValidator->validate($instance);
         }
-        
+
         return $instance;
     }
 

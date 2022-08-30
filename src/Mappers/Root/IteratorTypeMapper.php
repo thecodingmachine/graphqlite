@@ -35,24 +35,16 @@ use function iterator_to_array;
  */
 class IteratorTypeMapper implements RootTypeMapperInterface
 {
-    /** @var RootTypeMapperInterface */
-    private $topRootTypeMapper;
-    /** @var RootTypeMapperInterface */
-    private $next;
-
-    public function __construct(RootTypeMapperInterface $next, RootTypeMapperInterface $topRootTypeMapper)
+    public function __construct(private RootTypeMapperInterface $next, private RootTypeMapperInterface $topRootTypeMapper)
     {
-        $this->topRootTypeMapper = $topRootTypeMapper;
-        $this->next = $next;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
             try {
@@ -87,12 +79,11 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     }
 
     /**
-     * @param (InputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
+     * @param (InputType&GraphQLType)|null $subType*
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
     {
         if (! $type instanceof Compound) {
             //try {
