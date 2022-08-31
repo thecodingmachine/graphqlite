@@ -64,10 +64,11 @@ class TypeHandler implements ParameterHandlerInterface
     private PhpDocumentorTypeResolver $phpDocumentorTypeResolver;
 
     public function __construct(
-        private ArgumentResolver $argumentResolver,
+        private ArgumentResolver        $argumentResolver,
         private RootTypeMapperInterface $rootTypeMapper,
-        private TypeResolver $typeResolver
-    ) {
+        private TypeResolver            $typeResolver
+    )
+    {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
     }
 
@@ -126,7 +127,7 @@ class TypeHandler implements ParameterHandlerInterface
         /** @var Var_[] $varTags */
         $varTags = $docBlock->getTagsByName('var');
 
-        if (! $varTags) {
+        if (!$varTags) {
             return null;
         }
 
@@ -158,7 +159,7 @@ class TypeHandler implements ParameterHandlerInterface
             }
         } else {
             $parameterType = $parameter->getType();
-            $allowsNull    = $parameterType === null || $parameterType->allowsNull();
+            $allowsNull = $parameterType === null || $parameterType->allowsNull();
 
             if ($parameterType === null) {
                 $phpdocType = new Mixed_();
@@ -190,13 +191,13 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         $hasDefaultValue = false;
-        $defaultValue    = null;
+        $defaultValue = null;
         if ($parameter->allowsNull()) {
             $hasDefaultValue = true;
         }
         if ($parameter->isDefaultValueAvailable()) {
             $hasDefaultValue = true;
-            $defaultValue    = $parameter->getDefaultValue();
+            $defaultValue = $parameter->getDefaultValue();
         }
 
         return new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
@@ -211,22 +212,16 @@ class TypeHandler implements ParameterHandlerInterface
      */
     public function mapPropertyType(
         ReflectionProperty $refProperty,
-        DocBlock $docBlock,
-        bool $toInput,
-        ?string $argumentName = null,
-        ?bool $isNullable = null
+        DocBlock           $docBlock,
+        bool               $toInput,
+        ?string            $argumentName = null,
+        ?bool              $isNullable = null
     ): GraphQLType
     {
-        $propertyType = null;
 
-        // getType function on property reflection is available only since PHP 7.4
-        if (method_exists($refProperty, 'getType')) {
-            $propertyType = $refProperty->getType();
-            if ($propertyType !== null) {
-                $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
-            } else {
-                $phpdocType = new Mixed_();
-            }
+        $propertyType = $refProperty->getType();
+        if ($propertyType !== null) {
+            $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
         } else {
             $phpdocType = new Mixed_();
         }
@@ -234,7 +229,7 @@ class TypeHandler implements ParameterHandlerInterface
         $docBlockPropertyType = $this->getDocBlockPropertyType($docBlock, $refProperty);
 
         if ($isNullable === null) {
-            $isNullable = $propertyType ? $propertyType->allowsNull() : false;
+            $isNullable = $propertyType && $propertyType->allowsNull();
         }
 
         return $this->mapType(
@@ -255,11 +250,11 @@ class TypeHandler implements ParameterHandlerInterface
      */
     public function mapInputProperty(
         ReflectionProperty $refProperty,
-        DocBlock $docBlock,
-        ?string $argumentName = null,
-        ?string $inputTypeName = null,
-        mixed $defaultValue = null,
-        ?bool $isNullable = null
+        DocBlock           $docBlock,
+        ?string            $argumentName = null,
+        ?string            $inputTypeName = null,
+        mixed              $defaultValue = null,
+        ?bool              $isNullable = null
     ): InputTypeProperty
     {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
@@ -273,7 +268,7 @@ class TypeHandler implements ParameterHandlerInterface
             if ($isNullable === null) {
                 $varType = $varTag->getType();
                 if ($varType !== null) {
-                    $isNullable = in_array('null', explode('|', (string) $varType));
+                    $isNullable = in_array('null', explode('|', (string)$varType), true);
                 }
             }
         }
@@ -311,17 +306,17 @@ class TypeHandler implements ParameterHandlerInterface
      * @throws CannotMapTypeException
      */
     private function mapType(
-        Type $type,
-        ?Type $docBlockType,
-        bool $isNullable,
-        bool $mapToInputType,
+        Type                                $type,
+        ?Type                               $docBlockType,
+        bool                                $isNullable,
+        bool                                $mapToInputType,
         ReflectionMethod|ReflectionProperty $reflector,
-        DocBlock $docBlockObj,
-        ?string $argumentName = null
+        DocBlock                            $docBlockObj,
+        ?string                             $argumentName = null
     ): GraphQLType
     {
         $graphQlType = null;
-        if ($isNullable && ! $type instanceof Nullable) {
+        if ($isNullable && !$type instanceof Nullable) {
             // In case a parameter has a default value, let's wrap the main type in a nullable
             $type = new Nullable($type);
         }
@@ -335,7 +330,7 @@ class TypeHandler implements ParameterHandlerInterface
             // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
             || ($innerType instanceof Object_
                 && $docBlockType instanceof Collection
-                && (string) $innerType->getFqsen() === (string) $docBlockType->getFqsen()
+                && (string)$innerType->getFqsen() === (string)$docBlockType->getFqsen()
             )
         ) {
             // We need to use the docBlockType
