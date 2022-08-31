@@ -76,6 +76,10 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
+    /**
+     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
+     */
     public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         $mappedType = $this->mapBaseType($type);
@@ -102,6 +106,8 @@ class BaseTypeMapper implements RootTypeMapperInterface
     /**
      * Casts a Type to a GraphQL type.
      * Does not deal with nullable.
+     *
+     * @throws CannotMapTypeException
      */
     private function mapBaseType(Type $type): BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|ScalarType|null
     {
@@ -145,8 +151,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return null;
     }
 
-    /** @var UploadType */
-    private static $uploadType;
+    private static ?UploadType $uploadType = null;
 
     private static function getUploadType(): UploadType
     {
@@ -157,8 +162,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return self::$uploadType;
     }
 
-    /** @var DateTimeType */
-    private static $dateTimeType;
+    private static ?DateTimeType $dateTimeType = null;
 
     private static function getDateTimeType(): DateTimeType
     {
