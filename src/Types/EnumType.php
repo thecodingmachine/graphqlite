@@ -17,16 +17,11 @@ use function is_string;
  */
 class EnumType extends BaseEnumType
 {
-    /** @var bool */
-    private $useValues;
-
     /**
      * @param class-string<UnitEnum> $enumName
      */
-    public function __construct(string $enumName, string $typeName, bool $useValues = false)
+    public function __construct(string $enumName, string $typeName, private bool $useValues = false)
     {
-        $this->useValues = $useValues;
-
         $values = [];
         foreach ($enumName::cases() as $case) {
             /** @var UnitEnum $case */

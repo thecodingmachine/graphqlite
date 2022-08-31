@@ -71,46 +71,23 @@ use const PHP_EOL;
  */
 class FieldsBuilder
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var CachedDocBlockFactory */
-    private $cachedDocBlockFactory;
-    /** @var TypeResolver */
-    private $typeResolver;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-    /** @var TypeHandler */
-    private $typeMapper;
-    /** @var ParameterMiddlewareInterface */
-    private $parameterMapper;
-    /** @var FieldMiddlewareInterface */
-    private $fieldMiddleware;
-    /** @var InputFieldMiddlewareInterface */
-    private $inputFieldMiddleware;
+    private RecursiveTypeMapperInterface $recursiveTypeMapper;
+    private TypeHandler $typeMapper;
 
     public function __construct(
-        AnnotationReader $annotationReader,
+        private AnnotationReader $annotationReader,
         RecursiveTypeMapperInterface $typeMapper,
-        ArgumentResolver $argumentResolver,
-        TypeResolver $typeResolver,
-        CachedDocBlockFactory $cachedDocBlockFactory,
-        NamingStrategyInterface $namingStrategy,
-        RootTypeMapperInterface $rootTypeMapper,
-        ParameterMiddlewareInterface $parameterMapper,
-        FieldMiddlewareInterface $fieldMiddleware,
-        InputFieldMiddlewareInterface $inputFieldMiddleware
+        private ArgumentResolver $argumentResolver,
+        private TypeResolver $typeResolver,
+        private CachedDocBlockFactory $cachedDocBlockFactory,
+        private NamingStrategyInterface $namingStrategy,
+        private RootTypeMapperInterface $rootTypeMapper,
+        private ParameterMiddlewareInterface $parameterMapper,
+        private FieldMiddlewareInterface $fieldMiddleware,
+        private InputFieldMiddlewareInterface $inputFieldMiddleware
     ) {
-        $this->annotationReader      = $annotationReader;
         $this->recursiveTypeMapper   = $typeMapper;
-        $this->typeResolver          = $typeResolver;
-        $this->cachedDocBlockFactory = $cachedDocBlockFactory;
-        $this->namingStrategy        = $namingStrategy;
-        $this->typeMapper            = new TypeHandler($argumentResolver, $rootTypeMapper, $typeResolver);
-        $this->parameterMapper       = $parameterMapper;
-        $this->fieldMiddleware = $fieldMiddleware;
-        $this->inputFieldMiddleware = $inputFieldMiddleware;
+        $this->typeMapper            = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
     }
 
     /**

@@ -17,61 +17,21 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 final class FactoryContext
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var TypeResolver */
-    private $typeResolver;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-    /** @var TypeRegistry */
-    private $typeRegistry;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
-    /** @var TypeGenerator */
-    private $typeGenerator;
-    /** @var InputTypeGenerator */
-    private $inputTypeGenerator;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var ContainerInterface */
-    private $container;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var InputTypeValidatorInterface|null */
-    private $inputTypeValidator;
-    /** @var int|null */
-    private $globTTL;
-    /** @var int|null */
-    private $mapTTL;
-
     public function __construct(
-        AnnotationReader $annotationReader,
-        TypeResolver $typeResolver,
-        NamingStrategyInterface $namingStrategy,
-        TypeRegistry $typeRegistry,
-        FieldsBuilder $fieldsBuilder,
-        TypeGenerator $typeGenerator,
-        InputTypeGenerator $inputTypeGenerator,
-        RecursiveTypeMapperInterface $recursiveTypeMapper,
-        ContainerInterface $container,
-        CacheInterface $cache,
-        ?InputTypeValidatorInterface $inputTypeValidator,
-        ?int $globTTL,
-        ?int $mapTTL = null
+        private AnnotationReader $annotationReader,
+        private TypeResolver $typeResolver,
+        private NamingStrategyInterface $namingStrategy,
+        private TypeRegistry $typeRegistry,
+        private FieldsBuilder $fieldsBuilder,
+        private TypeGenerator $typeGenerator,
+        private InputTypeGenerator $inputTypeGenerator,
+        private RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private ContainerInterface $container,
+        private CacheInterface $cache,
+        private ?InputTypeValidatorInterface $inputTypeValidator,
+        private ?int $globTTL,
+        private ?int $mapTTL = null
     ) {
-        $this->annotationReader = $annotationReader;
-        $this->typeResolver = $typeResolver;
-        $this->namingStrategy = $namingStrategy;
-        $this->typeRegistry = $typeRegistry;
-        $this->fieldsBuilder = $fieldsBuilder;
-        $this->typeGenerator = $typeGenerator;
-        $this->inputTypeGenerator = $inputTypeGenerator;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
-        $this->container = $container;
-        $this->cache = $cache;
-        $this->inputTypeValidator = $inputTypeValidator;
-        $this->globTTL = $globTTL;
-        $this->mapTTL = $mapTTL;
     }
 
     public function getAnnotationReader(): AnnotationReader

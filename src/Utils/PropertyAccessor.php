@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Utils;
 
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -92,9 +93,7 @@ class PropertyAccessor
             return false;
         }
 
-        $reflection = new ReflectionProperty($class, $propertyName);
-
-        return $reflection->isPublic();
+        return (new ReflectionProperty($class, $propertyName))->isPublic();
     }
 
     private static function isPublicMethod(string $class, string $methodName): bool
@@ -103,11 +102,12 @@ class PropertyAccessor
             return false;
         }
 
-        $reflection = new ReflectionMethod($class, $methodName);
-
-        return $reflection->isPublic();
+        return (new ReflectionMethod($class, $methodName))->isPublic();
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private static function isValidGetter(string $class, string $methodName): bool
     {
         $reflection = new ReflectionMethod($class, $methodName);

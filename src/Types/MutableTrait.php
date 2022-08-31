@@ -14,19 +14,19 @@ use function array_merge;
 use function array_unique;
 use function assert;
 use function is_array;
+use function is_string;
 
 trait MutableTrait
 {
-    /** @var string */
-    private $status;
+    private ?string $status = null;
 
     /** @var array<callable> */
-    private $fieldsCallables = [];
+    private array $fieldsCallables = [];
 
     /** @var FieldDefinition[]|null */
-    private $fields;
+    private ?array $fields = null;
     /** @var class-string<object>|null */
-    private $className;
+    private ?string $className  = null;
 
     public function freeze(): void
     {
@@ -35,6 +35,7 @@ trait MutableTrait
 
     public function getStatus(): string
     {
+        assert(is_string($this->status));
         return $this->status;
     }
 
@@ -67,12 +68,7 @@ trait MutableTrait
         return $this->fields[$name] ?? parent::findField($name);
     }
 
-    /**
-     * @param string $name
-     *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
-     */
-    public function hasField($name): bool
+    public function hasField(string $name): bool
     {
         $this->initializeFields();
 

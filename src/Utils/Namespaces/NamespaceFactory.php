@@ -14,18 +14,11 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class NamespaceFactory
 {
-    /** @var ClassNameMapper */
-    private $classNameMapper;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var int|null */
-    private $globTTL;
+    private ClassNameMapper $classNameMapper;
 
-    public function __construct(CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $globTTL = 2)
+    public function __construct(private CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, private ?int $globTTL = 2)
     {
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
-        $this->cache = $cache;
-        $this->globTTL = $globTTL;
     }
 
     /**
