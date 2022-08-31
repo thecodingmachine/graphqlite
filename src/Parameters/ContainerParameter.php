@@ -12,15 +12,8 @@ use Psr\Container\ContainerInterface;
  */
 class ContainerParameter implements ParameterInterface
 {
-    /** @var ContainerInterface */
-    private $container;
-    /** @var string */
-    private $identifier;
-
-    public function __construct(ContainerInterface $container, string $identifier)
+    public function __construct(private ContainerInterface $container, private string $identifier)
     {
-        $this->container = $container;
-        $this->identifier = $identifier;
     }
 
     /**

@@ -11,12 +11,8 @@ use GraphQL\Type\Definition\ResolveInfo;
  */
 class DefaultValueParameter implements ParameterInterface
 {
-    /** @var mixed */
-    private $defaultValue;
-
-    public function __construct(mixed $defaultValue)
+    public function __construct(private mixed $defaultValue)
     {
-        $this->defaultValue         = $defaultValue;
     }
 
     /**

@@ -12,12 +12,8 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
  */
 class InjectUserParameter implements ParameterInterface
 {
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-
-    public function __construct(AuthenticationServiceInterface $authenticationService)
+    public function __construct(private AuthenticationServiceInterface $authenticationService)
     {
-        $this->authenticationService = $authenticationService;
     }
 
     /**
