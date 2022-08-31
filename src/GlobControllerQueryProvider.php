@@ -29,45 +29,30 @@ use function str_replace;
  */
 final class GlobControllerQueryProvider implements QueryProviderInterface
 {
-    /** @var string */
-    private $namespace;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var int|null */
-    private $cacheTtl;
     /** @var array<string,string>|null */
-    private $instancesList;
-    /** @var ContainerInterface */
-    private $container;
-    /** @var ClassNameMapper */
-    private $classNameMapper;
-    /** @var AggregateControllerQueryProvider */
-    private $aggregateControllerQueryProvider;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
-    /** @var bool */
-    private $recursive;
-    /** @var CacheContractInterface */
-    private $cacheContract;
-    /** @var AnnotationReader */
-    private $annotationReader;
+    private ?array $instancesList = null;
+    private ClassNameMapper $classNameMapper;
+    private ?AggregateControllerQueryProvider $aggregateControllerQueryProvider = null;
+    private CacheContractInterface $cacheContract;
 
     /**
-     * @param string             $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
+     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
-     * @param bool               $recursive Whether subnamespaces of $namespace must be analyzed.
+     * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
      */
-    public function __construct(string $namespace, FieldsBuilder $fieldsBuilder, ContainerInterface $container, AnnotationReader $annotationReader, CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, ?int $cacheTtl = null, bool $recursive = true)
+    public function __construct(
+        private string $namespace,
+        private FieldsBuilder $fieldsBuilder,
+        private ContainerInterface $container,
+        private AnnotationReader $annotationReader,
+        private CacheInterface $cache,
+        ?ClassNameMapper $classNameMapper = null,
+        private ?int $cacheTtl = null,
+        private bool $recursive = true
+    )
     {
-        $this->namespace       = $namespace;
-        $this->container       = $container;
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
-        $this->cache           = $cache;
-        $this->cacheContract   = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
-        $this->cacheTtl        = $cacheTtl;
-        $this->fieldsBuilder   = $fieldsBuilder;
-        $this->recursive       = $recursive;
-        $this->annotationReader = $annotationReader;
+        $this->cacheContract = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
@@ -101,8 +86,8 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function buildInstancesList(): array
     {
-        $explorer  = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, $this->classNameMapper, $this->recursive);
-        $classes   = $explorer->getClasses();
+        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, $this->classNameMapper, $this->recursive);
+        $classes = $explorer->getClasses();
         $instances = [];
         foreach ($classes as $className) {
             if (! class_exists($className) && ! interface_exists($className)) {

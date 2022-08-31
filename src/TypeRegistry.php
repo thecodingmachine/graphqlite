@@ -22,7 +22,7 @@ use TheCodingMachine\GraphQLite\Types\UnionType;
 class TypeRegistry
 {
     /** @var array<string,NamedType&Type&(MutableObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))> */
-    private $types = [];
+    private array $types = [];
 
     /**
      * Registers a type.

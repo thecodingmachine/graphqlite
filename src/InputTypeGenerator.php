@@ -22,24 +22,15 @@ use function array_shift;
 class InputTypeGenerator
 {
     /** @var array<string, ResolvableMutableInputObjectType> */
-    private $factoryCache = [];
+    private array $factoryCache = [];
     /** @var array<string, InputType> */
-    private $inputCache = [];
-    /** @var InputTypeUtils */
-    private $inputTypeUtils;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
-    /** @var InputTypeValidatorInterface|null */
-    private $inputTypeValidator;
+    private array $inputCache = [];
 
     public function __construct(
-        InputTypeUtils $inputTypeUtils,
-        FieldsBuilder $fieldsBuilder,
-        ?InputTypeValidatorInterface $inputTypeValidator = null
+        private InputTypeUtils $inputTypeUtils,
+        private FieldsBuilder $fieldsBuilder,
+        private ?InputTypeValidatorInterface $inputTypeValidator = null
     ) {
-        $this->inputTypeUtils = $inputTypeUtils;
-        $this->fieldsBuilder  = $fieldsBuilder;
-        $this->inputTypeValidator = $inputTypeValidator;
     }
 
     public function mapFactoryMethod(string $factory, string $methodName, ContainerInterface $container): ResolvableMutableInputObjectType

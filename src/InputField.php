@@ -27,11 +27,10 @@ use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
  */
 class InputField extends InputObjectField
 {
-    /** @var Callable */
+    /** @var callable */
     private $resolve;
 
-    /** @var bool */
-    private $forConstructorHydration = false;
+    private bool $forConstructorHydration = false;
 
     /**
      * @param InputType|(NullableType&Type) $type
