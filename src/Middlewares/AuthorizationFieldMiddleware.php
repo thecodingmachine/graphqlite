@@ -25,17 +25,10 @@ use function assert;
  */
 class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 {
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-    /** @var AuthorizationServiceInterface */
-    private $authorizationService;
-
     public function __construct(
-        AuthenticationServiceInterface $authenticationService,
-        AuthorizationServiceInterface $authorizationService
+        private AuthenticationServiceInterface $authenticationService,
+        private AuthorizationServiceInterface $authorizationService
     ) {
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService = $authorizationService;
     }
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition

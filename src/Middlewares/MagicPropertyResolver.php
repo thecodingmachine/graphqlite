@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
-use Webmozart\Assert\Assert;
 
+use function assert;
 use function get_class;
-use function is_object;
 use function method_exists;
 
 /**
@@ -19,15 +18,10 @@ use function method_exists;
  */
 class MagicPropertyResolver implements SourceResolverInterface
 {
-    /** @var string */
-    private $propertyName;
+    private object|null $object = null;
 
-    /** @var object|null */
-    private $object;
-
-    public function __construct(string $propertyName)
+    public function __construct(private string $propertyName)
     {
-        $this->propertyName = $propertyName;
     }
 
     public function setObject(object $object): void
@@ -37,7 +31,7 @@ class MagicPropertyResolver implements SourceResolverInterface
 
     public function getObject(): object
     {
-        Assert::notNull($this->object);
+        assert($this->object !== null);
 
         return $this->object;
     }
@@ -56,11 +50,7 @@ class MagicPropertyResolver implements SourceResolverInterface
 
     public function toString(): string
     {
-        $class = $this->getObject();
-        if (is_object($class)) {
-            $class = $class::class;
-        }
-
+        $class = $this->getObject()::class;
         return $class . '::__get(\'' . $this->propertyName . '\')';
     }
 }

@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -27,20 +26,8 @@ use function assert;
  */
 class SecurityFieldMiddleware implements FieldMiddlewareInterface
 {
-    /** @var ExpressionLanguage */
-    private $language;
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-    /** @var LoggerInterface|null */
-    /*private $logger;*/
-    /** @var AuthorizationServiceInterface */
-    private $authorizationService;
-
-    public function __construct(ExpressionLanguage $language, AuthenticationServiceInterface $authenticationService, AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
+    public function __construct(private ExpressionLanguage $language, private AuthenticationServiceInterface $authenticationService, private AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
     {
-        $this->language = $language;
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService = $authorizationService;
         /*$this->logger = $logger;*/
     }
 

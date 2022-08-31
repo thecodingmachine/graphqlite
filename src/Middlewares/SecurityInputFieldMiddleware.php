@@ -23,21 +23,11 @@ use function array_keys;
  */
 class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 {
-    /** @var ExpressionLanguage */
-    private $language;
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-    /** @var AuthorizationServiceInterface */
-    private $authorizationService;
-
     public function __construct(
-        ExpressionLanguage $language,
-        AuthenticationServiceInterface $authenticationService,
-        AuthorizationServiceInterface $authorizationService
+        private ExpressionLanguage $language,
+        private AuthenticationServiceInterface $authenticationService,
+        private AuthorizationServiceInterface $authorizationService
     ) {
-        $this->language = $language;
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService = $authorizationService;
     }
 
     public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField

@@ -17,7 +17,7 @@ class MappedClass
     //private $parent;
 
     /** @var MappedClass[] */
-    private $children = [];
+    private array $children = [];
 
     /*public function __construct(string $className)
     {

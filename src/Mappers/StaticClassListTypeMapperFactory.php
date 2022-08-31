@@ -12,18 +12,14 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
  */
 final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterface
 {
-    /** @var array<int, string> The list of classes to be scanned. */
-    private $classList;
-
     /**
      * StaticClassListTypeMapperFactory constructor.
      *
-     * @param array<int, string> $classList
+     * @param array<int, string> $classList The list of classes to be scanned.
      */
     public function __construct(
-        array $classList
+        private array $classList
     ) {
-        $this->classList           = $classList;
     }
 
     public function create(FactoryContext $context): TypeMapperInterface

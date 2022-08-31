@@ -7,8 +7,6 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use Webmozart\Assert\Assert;
 
-use function is_object;
-
 /**
  * A class that represents a callable on an object.
  * The object can be modified after class invocation.
@@ -17,15 +15,10 @@ use function is_object;
  */
 class SourceResolver implements SourceResolverInterface
 {
-    /** @var string */
-    private $methodName;
+    private ?object $object = null;
 
-    /** @var object|null */
-    private $object;
-
-    public function __construct(string $methodName)
+    public function __construct(private string $methodName)
     {
-        $this->methodName = $methodName;
     }
 
     public function setObject(object $object): void
@@ -53,11 +46,7 @@ class SourceResolver implements SourceResolverInterface
 
     public function toString(): string
     {
-        $class = $this->getObject();
-        if (is_object($class)) {
-            $class = $class::class;
-        }
-
+        $class = $this->getObject()::class;
         return $class . '::' . $this->methodName . '()';
     }
 }

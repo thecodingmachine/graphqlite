@@ -23,13 +23,10 @@ use function substr;
 class PorpaginasTypeMapper implements TypeMapperInterface
 {
     /** @var array<string, MutableInterface&(MutableObjectType|MutableInterfaceType)> */
-    private $cache = [];
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
+    private array $cache = [];
 
-    public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(private RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     /**

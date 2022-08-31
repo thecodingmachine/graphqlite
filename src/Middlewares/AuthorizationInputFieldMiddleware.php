@@ -19,17 +19,11 @@ use function assert;
  */
 class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
 {
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-    /** @var AuthorizationServiceInterface */
-    private $authorizationService;
-
     public function __construct(
-        AuthenticationServiceInterface $authenticationService,
-        AuthorizationServiceInterface $authorizationService
-    ) {
-        $this->authenticationService = $authenticationService;
-        $this->authorizationService = $authorizationService;
+        private AuthenticationServiceInterface $authenticationService,
+        private AuthorizationServiceInterface $authorizationService
+    )
+    {
     }
 
     /**
