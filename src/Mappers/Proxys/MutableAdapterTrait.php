@@ -28,7 +28,7 @@ trait MutableAdapterTrait
     /** @var array<callable> */
     private array $fieldsCallables = [];
 
-    /** @var FieldDefinition[]|null */
+    /** @var array<string,FieldDefinition>|null */
     private ?array $finalFields = null;
 
     /**
@@ -76,7 +76,7 @@ trait MutableAdapterTrait
      *
      * @return bool
      */
-    public function hasField($name): bool
+    public function hasField(string $name): bool
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a '.get_class($this).' before fetching its fields.');
@@ -86,7 +86,7 @@ trait MutableAdapterTrait
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      *
      * @throws InvariantViolation
      */

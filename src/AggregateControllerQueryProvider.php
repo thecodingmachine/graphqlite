@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 
 use function array_filter;
@@ -34,7 +37,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      */
     public function getQueries(): array
     {
@@ -49,7 +52,11 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public function getMutations(): array
     {

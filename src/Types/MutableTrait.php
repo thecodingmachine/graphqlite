@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\FieldDefinition;
 use RuntimeException;
 
 use function array_keys;
+use function array_merge;
 use function array_unique;
 use function assert;
 use function is_array;
@@ -22,7 +23,7 @@ trait MutableTrait
     /** @var array<callable> */
     private array $fieldsCallables = [];
 
-    /** @var FieldDefinition[]|null */
+    /** @var array<string,FieldDefinition>|null */
     private ?array $fields = null;
     /** @var class-string<object>|null */
     private ?string $className  = null;
@@ -75,7 +76,7 @@ trait MutableTrait
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      *
      * @throws InvariantViolation
      */
@@ -83,8 +84,7 @@ trait MutableTrait
     {
         $this->initializeFields();
         assert(is_array($this->fields));
-
-        return [...parent::getFields(), ...$this->fields];
+        return array_merge(parent::getFields(), $this->fields);
     }
 
     /**
