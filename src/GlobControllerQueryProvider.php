@@ -141,10 +141,6 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
 
     /**
      * @return array<string,FieldDefinition>
-     *
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
      */
     public function getMutations(): array
     {
