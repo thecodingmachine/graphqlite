@@ -45,7 +45,6 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use Webmozart\Assert\Assert;
 
 use function array_map;
-use function array_merge;
 use function array_unique;
 use function assert;
 use function count;
@@ -371,7 +370,7 @@ class TypeHandler implements ParameterHandlerInterface
         $types = [$type];
         if ($docBlockType instanceof Compound) {
             $docBlockTypes = iterator_to_array($docBlockType);
-            $types = array_merge($types, $docBlockTypes);
+            $types = [...$types, ...$docBlockTypes];
         } else {
             $types[] = $docBlockType;
         }

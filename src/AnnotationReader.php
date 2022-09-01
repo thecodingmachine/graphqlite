@@ -415,14 +415,17 @@ class AnnotationReader
             foreach ($refParameters as $refParameter) {
                 Assert::methodExists($refParameter, 'getAttributes');
                 $attributes = $refParameter->getAttributes();
-                $parameterAnnotationsPerParameter[$refParameter->getName()] = array_merge($parameterAnnotationsPerParameter[$refParameter->getName()] ?? [], array_map(
-                    static function ($attribute) {
-                        return $attribute->newInstance();
-                    },
-                    array_filter($attributes, static function ($annotation): bool {
-                        return is_a($annotation->getName(), ParameterAnnotationInterface::class, true);
-                    })
-                ));
+                $parameterAnnotationsPerParameter[$refParameter->getName()] = [...$parameterAnnotationsPerParameter[$refParameter->getName()] ??
+                [],
+                    ...array_map(
+                        static function ($attribute) {
+                            return $attribute->newInstance();
+                        },
+                        array_filter($attributes, static function ($annotation): bool {
+                            return is_a($annotation->getName(), ParameterAnnotationInterface::class, true);
+                        })
+                    ),
+                ];
             }
         }
 
@@ -473,14 +476,17 @@ class AnnotationReader
             if (PHP_MAJOR_VERSION >= 8) {
                 Assert::methodExists($refMethod, 'getAttributes');
                 $attributes = $refMethod->getAttributes();
-                $toAddAnnotations = array_merge($toAddAnnotations, array_map(
-                    static function ($attribute) {
-                        return $attribute->newInstance();
-                    },
-                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
-                        return is_a($annotation->getName(), $annotationClass, true);
-                    })
-                ));
+                $toAddAnnotations = [
+                    ...$toAddAnnotations,
+                    ...array_map(
+                        static function ($attribute) {
+                            return $attribute->newInstance();
+                        },
+                        array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                            return is_a($annotation->getName(), $annotationClass, true);
+                        })
+                    ),
+                ];
             }
         } catch (AnnotationException $e) {
             if ($this->mode === self::STRICT_MODE) {
@@ -529,14 +535,17 @@ class AnnotationReader
             if (PHP_MAJOR_VERSION >= 8) {
                 Assert::methodExists($refProperty, 'getAttributes');
                 $attributes = $refProperty->getAttributes();
-                $toAddAnnotations = array_merge($toAddAnnotations, array_map(
-                    static function ($attribute) {
-                        return $attribute->newInstance();
-                    },
-                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
-                        return is_a($annotation->getName(), $annotationClass, true);
-                    })
-                ));
+                $toAddAnnotations = [
+                    ...$toAddAnnotations,
+                    ...array_map(
+                        static function ($attribute) {
+                            return $attribute->newInstance();
+                        },
+                        array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                            return is_a($annotation->getName(), $annotationClass, true);
+                        })
+                    ),
+                ];
             }
         } catch (AnnotationException $e) {
             if ($this->mode === self::STRICT_MODE) {

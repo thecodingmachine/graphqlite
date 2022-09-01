@@ -51,7 +51,6 @@ use function array_diff_key;
 use function array_fill_keys;
 use function array_intersect_key;
 use function array_keys;
-use function array_merge;
 use function array_shift;
 use function assert;
 use function count;
@@ -123,7 +122,7 @@ class FieldsBuilder
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         if ($controller instanceof FromSourceFieldsInterface) {
-            $sourceFields = array_merge($sourceFields, $controller->getSourceFields());
+            $sourceFields = [...$sourceFields, ...$controller->getSourceFields()];
         }
 
         $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
@@ -161,7 +160,7 @@ class FieldsBuilder
         }
 
         /** @var ReflectionProperty[]|ReflectionMethod[] $reflectors */
-        $reflectors = array_merge($refClass->getProperties(), $refClass->getMethods(ReflectionMethod::IS_PUBLIC));
+        $reflectors = [...$refClass->getProperties(), ...$refClass->getMethods(ReflectionMethod::IS_PUBLIC)];
         foreach ($reflectors as $reflector) {
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $reflector->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
@@ -182,19 +181,19 @@ class FieldsBuilder
                 throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
             }
 
-            $reflectorByFields = array_merge(
-                $reflectorByFields,
-                array_fill_keys(array_keys($fields), $reflector)
-            );
+            $reflectorByFields = [
+                ...$reflectorByFields,
+                ...array_fill_keys(array_keys($fields), $reflector),
+            ];
 
-            $inputFields = array_merge($inputFields, $fields);
+            $inputFields = [...$inputFields, ...$fields];
         }
 
         // Make sure @Field annotations applied to parent's private properties are taken into account as well.
         $parent = $refClass->getParentClass();
         if ($parent) {
             $parentFields = $this->getInputFields($parent->getName(), $inputName, $isUpdate);
-            $inputFields = array_merge($inputFields, array_diff_key($parentFields, $inputFields));
+            $inputFields = [...$inputFields, ...array_diff_key($parentFields, $inputFields)];
         }
 
         return $inputFields;
@@ -294,7 +293,7 @@ class FieldsBuilder
         }
 
         /** @var ReflectionProperty[]|ReflectionMethod[] $reflectors */
-        $reflectors = array_merge($refClass->getProperties(), $refClass->getMethods(ReflectionMethod::IS_PUBLIC));
+        $reflectors = [...$refClass->getProperties(), ...$refClass->getMethods(ReflectionMethod::IS_PUBLIC)];
         foreach ($reflectors as $reflector) {
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $reflector->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
@@ -315,12 +314,12 @@ class FieldsBuilder
                 throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
             }
 
-            $reflectorByFields = array_merge(
-                $reflectorByFields,
-                array_fill_keys(array_keys($fields), $reflector)
-            );
+            $reflectorByFields = [
+                ...$reflectorByFields,
+                ...array_fill_keys(array_keys($fields), $reflector),
+            ];
 
-            $queryList = array_merge($queryList, $fields);
+            $queryList = [...$queryList, ...$fields];
         }
 
         return $queryList;

@@ -10,7 +10,6 @@ use GraphQL\Type\Definition\FieldDefinition;
 use RuntimeException;
 
 use function array_keys;
-use function array_merge;
 use function array_unique;
 use function assert;
 use function is_array;
@@ -85,7 +84,7 @@ trait MutableTrait
         $this->initializeFields();
         assert(is_array($this->fields));
 
-        return array_merge(parent::getFields(), $this->fields);
+        return [...parent::getFields(), ...$this->fields];
     }
 
     /**
@@ -96,7 +95,7 @@ trait MutableTrait
         $this->initializeFields();
         assert(is_array($this->fields));
 
-        return array_unique(array_merge(parent::getFieldNames(), array_keys($this->fields)));
+        return array_unique([...parent::getFieldNames(), ...array_keys($this->fields)]);
     }
 
     /**
