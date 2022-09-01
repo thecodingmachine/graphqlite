@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
+use InvalidArgumentException;
 use Mouf\Composer\ClassNameMapper;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -15,10 +16,10 @@ use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use Webmozart\Assert\Assert;
 
 use function class_exists;
 use function interface_exists;
+use function is_array;
 use function str_replace;
 
 /**
@@ -75,7 +76,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             $this->instancesList = $this->cacheContract->get('globQueryProvider', function () {
                 return $this->buildInstancesList();
             });
-            Assert::isArray($this->instancesList, 'The instance list returned is not an array. There might be an issue with your PSR-16 cache implementation.');
+            if (! is_array($this->instancesList)) {
+                throw new InvalidArgumentException('The instance list returned is not an array. There might be an issue with your PSR-16 cache implementation.');
+            }
         }
 
         return $this->instancesList;

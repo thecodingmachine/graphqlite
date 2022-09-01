@@ -15,9 +15,9 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
-use Webmozart\Assert\Assert;
 
 use function array_map;
+use function assert;
 use function is_array;
 
 /**
@@ -42,8 +42,7 @@ class ArgumentResolver
 
             return array_map(function ($item) use ($type, $source, $context, $resolveInfo) {
                 $wrappedType = $type->getWrappedType();
-                Assert::isInstanceOf($wrappedType, InputType::class);
-
+                assert($wrappedType instanceof InputType);
                 return $this->resolve($source, $item, $context, $resolveInfo, $wrappedType);
             }, $val);
         }

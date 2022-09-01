@@ -12,10 +12,11 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use Throwable;
-use Webmozart\Assert\Assert;
 
 use function array_combine;
 use function array_keys;
+use function assert;
+use function is_array;
 
 /**
  * A field input middleware that reads "Security" Symfony annotations.
@@ -84,7 +85,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
-        Assert::isArray($argsByName);
+        assert(is_array($argsByName));
 
         return $variables + $argsByName;
     }

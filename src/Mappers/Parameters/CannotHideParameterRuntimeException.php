@@ -7,15 +7,15 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
-use Webmozart\Assert\Assert;
+
+use function assert;
 
 class CannotHideParameterRuntimeException extends GraphQLRuntimeException
 {
     public static function needDefaultValue(ReflectionParameter $parameter): self
     {
         $method = $parameter->getDeclaringFunction();
-        Assert::isInstanceOf($method, ReflectionMethod::class);
-
+        assert($method instanceof ReflectionMethod);
         return new self('For parameter $' . $parameter->getName() . ' of method ' . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '(), cannot use the @HideParameter annotation. The parameter needs to provide a default value.');
     }
 }

@@ -29,7 +29,8 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-use Webmozart\Assert\Assert;
+
+use function assert;
 
 /**
  * Analyzes classes and uses the @Type annotation to find the types automatically.
@@ -202,7 +203,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                         $typeName = $targetType->name;
                     } else {
                         $typeName = $extendType->getName();
-                        Assert::notNull($typeName);
+                        assert($typeName !== null);
                         $targetType = $this->recursiveTypeMapper->mapNameToType($typeName);
                         if (! $targetType instanceof MutableObjectType) {
                             throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendType);

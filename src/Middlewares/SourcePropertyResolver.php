@@ -6,7 +6,8 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
-use Webmozart\Assert\Assert;
+
+use function assert;
 
 /**
  * A class that represents a callable on an object to resolve property value.
@@ -29,9 +30,10 @@ class SourcePropertyResolver implements SourceResolverInterface
 
     public function getObject(): object
     {
-        Assert::notNull($this->object);
+        $object = $this->object;
+        assert($object !== null);
 
-        return $this->object;
+        return $object;
     }
 
     public function __invoke(mixed ...$args): mixed

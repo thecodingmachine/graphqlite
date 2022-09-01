@@ -27,7 +27,6 @@ use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
-use Webmozart\Assert\Assert;
 
 use function array_diff_key;
 use function array_filter;
@@ -345,7 +344,7 @@ class AnnotationReader
     public function getParameterAnnotations(ReflectionParameter $refParameter): ParameterAnnotations
     {
         $method = $refParameter->getDeclaringFunction();
-        Assert::isInstanceOf($method, ReflectionMethod::class);
+        assert($method instanceof ReflectionMethod);
         /** @var ParameterAnnotationInterface[] $parameterAnnotations */
         $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
         $name = $refParameter->getName();
@@ -378,7 +377,7 @@ class AnnotationReader
         $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
 
         /**
-         * @var array<string, array<int, ParameterAnnotations>>
+         * @var array<string, ParameterAnnotations[]> $parameterAnnotationsPerParameter
          */
         $parameterAnnotationsPerParameter = [];
         foreach ($parameterAnnotations as $parameterAnnotation) {
@@ -412,10 +411,15 @@ class AnnotationReader
             ];
         }
 
-        return array_map(static function (array $parameterAnnotations) {
-            Assert::allIsInstanceOf($parameterAnnotations, ParameterAnnotationInterface::class);
-            return new ParameterAnnotations($parameterAnnotations);
-        }, $parameterAnnotationsPerParameter);
+        return array_map(
+            static function (array $parameterAnnotations): ParameterAnnotations {
+                /**
+                 * @var ParameterAnnotationInterface[] $parameterAnnotations
+                 */
+                return new ParameterAnnotations($parameterAnnotations);
+            },
+            $parameterAnnotationsPerParameter
+        );
     }
 
     /**

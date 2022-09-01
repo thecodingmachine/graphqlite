@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
-use Webmozart\Assert\Assert;
 
 use function sprintf;
 
@@ -20,8 +20,10 @@ trait CannotMapTypeTrait
     public function addParamInfo(ReflectionParameter $parameter): void
     {
         $declaringClass = $parameter->getDeclaringClass();
-        Assert::notNull($declaringClass, 'Parameter passed must be a parameter of a method, not a parameter of a function.');
 
+        if ($declaringClass === null) {
+            throw new InvalidArgumentException('Parameter passed must be a parameter of a method, not a parameter of a function.');
+        }
         if ($this->locationInfoAdded !== false) {
             return;
         }

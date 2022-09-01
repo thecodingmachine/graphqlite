@@ -45,7 +45,6 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
-use Webmozart\Assert\Assert;
 
 use function array_diff_key;
 use function array_fill_keys;
@@ -57,6 +56,7 @@ use function assert;
 use function count;
 use function get_parent_class;
 use function in_array;
+use function is_callable;
 use function is_string;
 use function key;
 use function reset;
@@ -406,7 +406,7 @@ class FieldsBuilder
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
                 $callable = [$controller, $methodName];
-                Assert::isCallable($callable);
+                assert(is_callable($callable));
                 $fieldDescriptor->setCallable($callable);
             }
 
@@ -554,7 +554,7 @@ class FieldsBuilder
             if ($objectClass === null) {
                 // We need to be able to fetch the mapped PHP class from the object type!
                 $typeName = $extendTypeField->getName();
-                Assert::notNull($typeName);
+                assert($typeName !== null);
                 $targetedType = $this->recursiveTypeMapper->mapNameToType($typeName);
                 if (! $targetedType instanceof MutableObjectType) {
                     throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendTypeField);
@@ -620,7 +620,7 @@ class FieldsBuilder
                     $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
                 } else {
                     $phpTypeStr = $sourceField->getPhpType();
-                    Assert::notNull($phpTypeStr);
+                    assert($phpTypeStr !== null);
                     $magicGefRefMethod = $this->getMagicGetMethodFromSourceClassOrProxy($refClass);
 
                     $type = $this->resolvePhpType($phpTypeStr, $refClass, $magicGefRefMethod);
@@ -700,7 +700,7 @@ class FieldsBuilder
 
         $context = $this->cachedDocBlockFactory->getContextFromClass($refClass);
         $phpdocType = $typeResolver->resolve($phpTypeStr, $context);
-        Assert::notNull($phpdocType);
+        assert($phpdocType !== null);
 
         $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $context);
         return $this->typeMapper->mapReturnType($refMethod, $fakeDocBlock);

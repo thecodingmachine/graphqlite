@@ -12,9 +12,10 @@ use TheCodingMachine\GraphQLite\Types\InputType;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
-use Webmozart\Assert\Assert;
 
 use function array_shift;
+use function assert;
+use function is_callable;
 
 /**
  * This class is in charge of creating Webonyx InputTypes from Factory annotations.
@@ -109,7 +110,7 @@ class InputTypeGenerator
         }
 
         $callable = [$object, $methodName];
-        Assert::isCallable($callable);
+        assert(is_callable($callable));
         $inputType->decorate($callable);
     }
 }

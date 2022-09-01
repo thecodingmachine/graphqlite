@@ -24,10 +24,10 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ObjectFromInterfaceType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TypeError;
-use Webmozart\Assert\Assert;
 
 use function array_flip;
 use function array_reverse;
+use function assert;
 use function class_implements;
 use function get_parent_class;
 
@@ -268,7 +268,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
             $interfaceType = $this->typeMapper->mapClassToType($interface, null);
 
-            Assert::isInstanceOf($interfaceType, MutableInterfaceType::class);
+            assert($interfaceType instanceof MutableInterfaceType);
             $interfaces[] = $interfaceType;
         }
 
@@ -388,7 +388,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 $this->interfaces[$cacheKey] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
                 $this->typeRegistry->registerType($this->interfaces[$cacheKey]);
             } else {
-                //Assert::isInstanceOf($objectType, ObjectType::class);
                 $this->interfaces[$cacheKey] = $objectType;
             }
         }
