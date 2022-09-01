@@ -139,7 +139,7 @@ class FieldsBuilder
     /**
      * @param class-string<object> $className
      *
-     * @return array<InputField>
+     * @return array<string,InputField>
      *
      * @throws AnnotationException
      * @throws ReflectionException
@@ -187,14 +187,14 @@ class FieldsBuilder
                 array_fill_keys(array_keys($fields), $reflector),
             );
 
-            $inputFields = [...$inputFields, ...$fields];
+            $inputFields = array_merge($inputFields, $fields);
         }
 
         // Make sure @Field annotations applied to parent's private properties are taken into account as well.
         $parent = $refClass->getParentClass();
         if ($parent) {
             $parentFields = $this->getInputFields($parent->getName(), $inputName, $isUpdate);
-            $inputFields = [...$inputFields, ...array_diff_key($parentFields, $inputFields)];
+            $inputFields = array_merge($inputFields, array_diff_key($parentFields, $inputFields));
         }
 
         return $inputFields;
