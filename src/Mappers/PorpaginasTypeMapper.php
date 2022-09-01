@@ -17,7 +17,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 use function is_a;
-use function strpos;
+use function str_starts_with;
 use function substr;
 
 class PorpaginasTypeMapper implements TypeMapperInterface
@@ -125,7 +125,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      */
     public function canMapNameToType(string $typeName): bool
     {
-        return strpos($typeName, 'PorpaginasResult_') === 0;
+        return str_starts_with($typeName, 'PorpaginasResult_');
     }
 
     /**

@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\ClientAware;
 use GraphQL\Type\Definition\ResolveInfo;
+use ReflectionException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
@@ -68,6 +69,8 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 
     /**
      * @return ParameterInterface[]
+     *
+     * @throws ReflectionException
      */
     private function getParameters(): array
     {

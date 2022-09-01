@@ -18,16 +18,12 @@ use function is_object;
  */
 class TypeAnnotatedInterfaceType extends MutableInterfaceType
 {
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-
     /**
      * @param class-string<object> $className
      * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      */
-    public function __construct(string $className, array $config, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(string $className, array $config,private RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
         parent::__construct($config, $className);
     }
 
