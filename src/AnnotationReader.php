@@ -46,8 +46,6 @@ use function str_starts_with;
 use function strrpos;
 use function substr;
 
-use const PHP_MAJOR_VERSION;
-
 class AnnotationReader
 {
     // In this mode, no exceptions will be thrown for incorrect annotations (unless the name of the annotation we are looking for is part of the docblock)
@@ -92,17 +90,12 @@ class AnnotationReader
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
     {
         try {
-            // If attribute & annotation, let's prefer the PHP 8 attribute
-            if (PHP_MAJOR_VERSION >= 8) {
-                Assert::methodExists($refClass, 'getAttributes');
-                $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
-                if ($attribute) {
-                    $instance = $attribute->newInstance();
-                    assert($instance instanceof $annotationClass);
-                    return $instance;
-                }
+            $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
+            if ($attribute) {
+                $instance = $attribute->newInstance();
+                assert($instance instanceof $annotationClass);
+                return $instance;
             }
-
             $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
             assert($type === null || $type instanceof $annotationClass);
             return $type;
@@ -139,13 +132,9 @@ class AnnotationReader
         }
 
         try {
-            // If attribute & annotation, let's prefer the PHP 8 attribute
-            if (PHP_MAJOR_VERSION >= 8) {
-                Assert::methodExists($refMethod, 'getAttributes');
-                $attribute = $refMethod->getAttributes($annotationClass)[0] ?? null;
-                if ($attribute) {
-                    return $this->methodAnnotationCache[$cacheKey] = $attribute->newInstance();
-                }
+            $attribute = $refMethod->getAttributes($annotationClass)[0] ?? null;
+            if ($attribute) {
+                return $this->methodAnnotationCache[$cacheKey] = $attribute->newInstance();
             }
 
             return $this->methodAnnotationCache[$cacheKey] = $this->reader->getMethodAnnotation($refMethod, $annotationClass);
@@ -204,21 +193,18 @@ class AnnotationReader
                 $toAddAnnotations[] = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                     return $annotation instanceof $annotationClass;
                 });
-                if (PHP_MAJOR_VERSION >= 8) {
-                    Assert::methodExists($refClass, 'getAttributes');
 
-                    /** @var A[] $attributes */
-                    $attributes = array_map(
-                        static function ($attribute) {
-                            return $attribute->newInstance();
-                        },
-                        array_filter($refClass->getAttributes(), static function ($annotation) use ($annotationClass): bool {
-                            return is_a($annotation->getName(), $annotationClass, true);
-                        })
-                    );
+                /** @var A[] $attributes */
+                $attributes = array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($refClass->getAttributes(), static function ($annotation) use ($annotationClass): bool {
+                        return is_a($annotation->getName(), $annotationClass, true);
+                    })
+                );
 
-                    $toAddAnnotations[] = $attributes;
-                }
+                $toAddAnnotations[] = $attributes;
             } catch (AnnotationException $e) {
                 if ($this->mode === self::STRICT_MODE) {
                     throw $e;
@@ -386,7 +372,7 @@ class AnnotationReader
         $firstParam = reset($refParameters);
 
         $method = $firstParam->getDeclaringFunction();
-        Assert::isInstanceOf($method, ReflectionMethod::class);
+        assert($method instanceof ReflectionMethod);
 
         /** @var ParameterAnnotationInterface[] $parameterAnnotations */
         $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
@@ -412,7 +398,6 @@ class AnnotationReader
         }
 
         foreach ($refParameters as $refParameter) {
-            Assert::methodExists($refParameter, 'getAttributes');
             $attributes = $refParameter->getAttributes();
             $parameterAnnotationsPerParameter[$refParameter->getName()] = [...$parameterAnnotationsPerParameter[$refParameter->getName()] ??
                 [],
@@ -471,21 +456,18 @@ class AnnotationReader
             $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });
-            if (PHP_MAJOR_VERSION >= 8) {
-                Assert::methodExists($refMethod, 'getAttributes');
-                $attributes = $refMethod->getAttributes();
-                $toAddAnnotations = [
-                    ...$toAddAnnotations,
-                    ...array_map(
-                        static function ($attribute) {
-                            return $attribute->newInstance();
-                        },
-                        array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
-                            return is_a($annotation->getName(), $annotationClass, true);
-                        })
-                    ),
-                ];
-            }
+            $attributes = $refMethod->getAttributes();
+            $toAddAnnotations = [
+                ...$toAddAnnotations,
+                ...array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                        return is_a($annotation->getName(), $annotationClass, true);
+                    })
+                ),
+            ];
         } catch (AnnotationException $e) {
             if ($this->mode === self::STRICT_MODE) {
                 throw $e;
@@ -530,21 +512,18 @@ class AnnotationReader
             $toAddAnnotations = array_filter($allAnnotations, static function ($annotation) use ($annotationClass): bool {
                 return $annotation instanceof $annotationClass;
             });
-            if (PHP_MAJOR_VERSION >= 8) {
-                Assert::methodExists($refProperty, 'getAttributes');
-                $attributes = $refProperty->getAttributes();
-                $toAddAnnotations = [
-                    ...$toAddAnnotations,
-                    ...array_map(
-                        static function ($attribute) {
-                            return $attribute->newInstance();
-                        },
-                        array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
-                            return is_a($annotation->getName(), $annotationClass, true);
-                        })
-                    ),
-                ];
-            }
+            $attributes = $refProperty->getAttributes();
+            $toAddAnnotations = [
+                ...$toAddAnnotations,
+                ...array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
+                        return is_a($annotation->getName(), $annotationClass, true);
+                    })
+                ),
+            ];
         } catch (AnnotationException $e) {
             if ($this->mode === self::STRICT_MODE) {
                 throw $e;
