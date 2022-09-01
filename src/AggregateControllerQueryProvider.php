@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 
 use function array_filter;
