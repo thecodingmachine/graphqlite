@@ -25,17 +25,11 @@ use function ltrim;
 
 class InputTypeUtils
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-
     public function __construct(
-        AnnotationReader $annotationReader,
-        NamingStrategyInterface $namingStrategy
-    ) {
-        $this->annotationReader = $annotationReader;
-        $this->namingStrategy   = $namingStrategy;
+        private AnnotationReader $annotationReader,
+        private NamingStrategyInterface $namingStrategy
+    )
+    {
     }
 
     /**
@@ -48,7 +42,7 @@ class InputTypeUtils
         /**
          * @var class-string<object>
          */
-        $fqsen   = ltrim((string) $this->validateReturnType($method), '\\');
+        $fqsen = ltrim((string) $this->validateReturnType($method), '\\');
         $factory = $this->annotationReader->getFactoryAnnotation($method);
         if ($factory === null) {
             throw new RuntimeException($method->getDeclaringClass()->getName() . '::' . $method->getName() . ' has no @Factory annotation.');

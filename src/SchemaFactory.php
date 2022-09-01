@@ -71,7 +71,6 @@ use function substr;
  */
 class SchemaFactory
 {
-
     public const GLOB_CACHE_SECONDS = 2;
 
 
@@ -128,7 +127,6 @@ class SchemaFactory
     private ?ExpressionLanguage $expressionLanguage = null;
 
     private string $cacheNamespace;
-
 
     public function __construct(CacheInterface $cache, ContainerInterface $container)
     {
@@ -259,7 +257,6 @@ class SchemaFactory
 
         return $this;
     }
-
 
     public function setNamingStrategy(NamingStrategyInterface $namingStrategy): self
     {

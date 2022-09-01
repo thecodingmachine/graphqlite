@@ -8,6 +8,7 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use UnitEnum;
 
 use function class_exists;
 use function interface_exists;
@@ -19,8 +20,6 @@ use function interface_exists;
  */
 final class NS
 {
-    /** @var string */
-    private $namespace;
     /**
      * The array of globbed classes.
      * Only instantiable classes are returned.
@@ -28,26 +27,13 @@ final class NS
      *
      * @var array<string,ReflectionClass<object>>
      */
-    private $classes;
-    /** @var bool */
-    private $recursive;
-    /** @var ClassNameMapper */
-    private $classNameMapper;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var int|null */
-    private $globTTL;
+    private ?array $classes = null;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(string $namespace, CacheInterface $cache, ClassNameMapper $classNameMapper, ?int $globTTL, bool $recursive)
+    public function __construct(private string $namespace, private CacheInterface $cache, private ClassNameMapper $classNameMapper, private ?int $globTTL, private bool $recursive)
     {
-        $this->namespace           = $namespace;
-        $this->recursive           = $recursive;
-        $this->cache = $cache;
-        $this->classNameMapper = $classNameMapper;
-        $this->globTTL = $globTTL;
     }
 
     /**
@@ -78,7 +64,7 @@ final class NS
 
                 $refClass = new ReflectionClass($className);
                 // Enum's are not classes
-                if (interface_exists(\UnitEnum::class)) {
+                if (interface_exists(UnitEnum::class)) {
                     // @phpstan-ignore-next-line - Remove this after minimum supported PHP version is >= 8.1
                     if ($refClass->isEnum()) {
                         continue;

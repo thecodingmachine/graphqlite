@@ -9,7 +9,6 @@ use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\NoFieldsException;
@@ -20,23 +19,17 @@ use function get_class;
  */
 trait MutableAdapterTrait
 {
-    /**
-     * @var ObjectType|InterfaceType
-     */
-    private $type;
-    /**
-     * @var string|null
-     */
-    private $className;
 
-    /** @var string */
-    private $status = MutableInterface::STATUS_PENDING;
+    private ObjectType|InterfaceType $type;
+    private ?string $className =null;
+
+    private string $status = MutableInterface::STATUS_PENDING;
 
     /** @var array<callable> */
-    private $fieldsCallables = [];
+    private array $fieldsCallables = [];
 
-    /** @var FieldDefinition[]|null */
-    private $finalFields;
+    /** @var array<string,FieldDefinition>|null */
+    private ?array $finalFields = null;
 
     /**
      * @throws InvariantViolation
@@ -46,18 +39,13 @@ trait MutableAdapterTrait
         $this->type->assertValid();
     }
 
-    /**
-     * @return string
-     */
-    public function jsonSerialize()
+    public function jsonSerialize():string
     {
         return $this->type->jsonSerialize();
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+
+    public function toString():string
     {
         return $this->type->toString();
     }
@@ -72,13 +60,9 @@ trait MutableAdapterTrait
 
 
     /**
-     * @param string $name
-     *
-     * @return FieldDefinition
-     *
      * @throws Exception
      */
-    public function getField($name): FieldDefinition
+    public function getField(string $name): FieldDefinition
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a '.get_class($this).' before fetching its fields.');
@@ -92,7 +76,7 @@ trait MutableAdapterTrait
      *
      * @return bool
      */
-    public function hasField($name): bool
+    public function hasField(string $name): bool
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException('You must freeze() a '.get_class($this).' before fetching its fields.');
@@ -102,7 +86,7 @@ trait MutableAdapterTrait
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      *
      * @throws InvariantViolation
      */

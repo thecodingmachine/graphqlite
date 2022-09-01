@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Utils;
 
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 
-use function get_class;
 use function method_exists;
 use function property_exists;
 use function ucfirst;
@@ -53,14 +53,9 @@ class PropertyAccessor
         return null;
     }
 
-    /**
-     * @param mixed  ...$args
-     *
-     * @return mixed
-     */
-    public static function getValue(object $object, string $propertyName, ...$args)
+    public static function getValue(object $object, string $propertyName, mixed ...$args): mixed
     {
-        $class = get_class($object);
+        $class = $object::class;
 
         $method = self::findGetter($class, $propertyName);
         if ($method && self::isValidGetter($class, $method)) {
@@ -74,12 +69,9 @@ class PropertyAccessor
         throw AccessPropertyException::createForUnreadableProperty($class, $propertyName);
     }
 
-    /**
-     * @param mixed  $value
-     */
-    public static function setValue(object $instance, string $propertyName, $value): void
+    public static function setValue(object $instance, string $propertyName, mixed $value): void
     {
-        $class = get_class($instance);
+        $class = $instance::class;
 
         $setter = self::findSetter($class, $propertyName);
         if ($setter) {
@@ -101,9 +93,7 @@ class PropertyAccessor
             return false;
         }
 
-        $reflection = new ReflectionProperty($class, $propertyName);
-
-        return $reflection->isPublic();
+        return (new ReflectionProperty($class, $propertyName))->isPublic();
     }
 
     private static function isPublicMethod(string $class, string $methodName): bool
@@ -112,11 +102,12 @@ class PropertyAccessor
             return false;
         }
 
-        $reflection = new ReflectionMethod($class, $methodName);
-
-        return $reflection->isPublic();
+        return (new ReflectionMethod($class, $methodName))->isPublic();
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private static function isValidGetter(string $class, string $methodName): bool
     {
         $reflection = new ReflectionMethod($class, $methodName);

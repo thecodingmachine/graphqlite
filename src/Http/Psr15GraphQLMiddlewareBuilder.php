@@ -23,19 +23,14 @@ use function class_exists;
  */
 class Psr15GraphQLMiddlewareBuilder
 {
-    /** @var string */
-    private $url = '/graphql';
-    /** @var ServerConfig */
-    private $config;
+    private string $url = '/graphql';
+    private ServerConfig $config;
 
-    /** @var ResponseFactoryInterface|null */
-    private $responseFactory;
+    private ?ResponseFactoryInterface $responseFactory = null;
 
-    /** @var StreamFactoryInterface|null */
-    private $streamFactory;
+    private ?StreamFactoryInterface $streamFactory = null;
 
-    /** @var HttpCodeDeciderInterface */
-    private $httpCodeDecider;
+    private HttpCodeDeciderInterface $httpCodeDecider;
 
     public function __construct(Schema $schema)
     {

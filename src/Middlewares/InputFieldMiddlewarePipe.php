@@ -10,8 +10,7 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
 final class InputFieldMiddlewarePipe implements InputFieldMiddlewareInterface
 {
-    /** @var SplQueue */
-    private $pipeline;
+    private SplQueue $pipeline;
 
     /**
      * Initializes the queue.

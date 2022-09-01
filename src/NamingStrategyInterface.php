@@ -34,9 +34,8 @@ interface NamingStrategyInterface
      * Returns the GraphQL input object type name based on the type className and the Input annotation.
      *
      * @param class-string<object> $className
-     * @param Input|Factory        $input
      */
-    public function getInputTypeName(string $className, $input): string;
+    public function getInputTypeName(string $className, Input|Factory $input): string;
 
     /**
      * Returns the name of a GraphQL field from the name of the annotated method.

@@ -33,12 +33,9 @@ class DuplicateMappingException extends RuntimeException
     }
 
     /**
-     * @param ReflectionMethod|ReflectionProperty $firstReflector
-     * @param ReflectionMethod|ReflectionProperty $secondReflector
-     *
      * @return static
      */
-    public static function createForQuery(string $sourceClass, string $queryName, $firstReflector, $secondReflector): self
+    public static function createForQuery(string $sourceClass, string $queryName, ReflectionMethod|ReflectionProperty $firstReflector, ReflectionMethod|ReflectionProperty $secondReflector): self
     {
         $firstName = sprintf('%s::%s', $firstReflector->getDeclaringClass()->getName(), $firstReflector->getName());
         if ($firstReflector instanceof ReflectionMethod) {

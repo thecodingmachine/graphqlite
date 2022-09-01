@@ -13,8 +13,7 @@ use TheCodingMachine\GraphQLite\QueryField;
  */
 class Context implements ContextInterface, ResetableContextInterface
 {
-    /** @var SplObjectStorage */
-    private $prefetchBuffers;
+    private SplObjectStorage $prefetchBuffers;
 
     public function __construct()
     {

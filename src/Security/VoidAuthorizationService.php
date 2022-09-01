@@ -14,7 +14,7 @@ class VoidAuthorizationService implements AuthorizationServiceInterface
      *
      * @param mixed $subject The scope this right applies on. $subject is typically an object or a FQCN. Set $subject to "null" if the right is global.
      */
-    public function isAllowed(string $right, $subject = null): bool
+    public function isAllowed(string $right, mixed $subject = null): bool
     {
         return false;
     }

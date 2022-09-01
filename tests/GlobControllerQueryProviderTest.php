@@ -25,12 +25,12 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
                 $this->controllers = $controllers;
             }
 
-            public function get($id)
+            public function get($id):mixed
             {
                 return $this->controllers[$id];
             }
 
-            public function has($id)
+            public function has($id):bool
             {
                 return isset($this->controllers[$id]);
             }

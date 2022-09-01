@@ -12,21 +12,14 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
  */
 class InjectUserParameter implements ParameterInterface
 {
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-
-    public function __construct(AuthenticationServiceInterface $authenticationService)
+    public function __construct(private AuthenticationServiceInterface $authenticationService)
     {
-        $this->authenticationService = $authenticationService;
     }
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
-     *
-     * @return mixed
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         return $this->authenticationService->getUser();
     }

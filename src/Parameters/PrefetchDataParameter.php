@@ -11,25 +11,18 @@ use GraphQL\Type\Definition\ResolveInfo;
  */
 class PrefetchDataParameter implements ParameterInterface
 {
-    /** @var mixed */
-    private $prefetchedData;
+    private mixed $prefetchedData;
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
-     *
-     * @return mixed
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         // Note: data cannot be known at build time.
         return $this->prefetchedData;
     }
 
-    /**
-     * @param mixed $prefetchedData
-     */
-    public function setPrefetchedData($prefetchedData): void
+    public function setPrefetchedData(mixed $prefetchedData): void
     {
         $this->prefetchedData = $prefetchedData;
     }

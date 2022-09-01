@@ -15,10 +15,5 @@ interface ResolverInterface
 
     public function toString(): string;
 
-    /**
-     * @param mixed $args
-     *
-     * @return mixed
-     */
-    public function __invoke(...$args);
+    public function __invoke(mixed ...$args): mixed;
 }

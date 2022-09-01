@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use GraphQL\Type\Definition\BooleanType;
 use GraphQL\Type\Definition\FloatType;
 use GraphQL\Type\Definition\IDType;
@@ -42,29 +45,14 @@ use function ltrim;
  */
 class BaseTypeMapper implements RootTypeMapperInterface
 {
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var RootTypeMapperInterface */
-    private $topRootTypeMapper;
-    /** @var RootTypeMapperInterface */
-    private $next;
-
-    public function __construct(RootTypeMapperInterface $next, RecursiveTypeMapperInterface $recursiveTypeMapper, RootTypeMapperInterface $topRootTypeMapper)
+    public function __construct(private RootTypeMapperInterface $next, private RecursiveTypeMapperInterface $recursiveTypeMapper, private RootTypeMapperInterface $topRootTypeMapper)
     {
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
-        $this->topRootTypeMapper = $topRootTypeMapper;
-        $this->next = $next;
     }
 
     /**
-     * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return OutputType&GraphQLType
-     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {
@@ -89,12 +77,10 @@ class BaseTypeMapper implements RootTypeMapperInterface
     }
 
     /**
-     * @param (InputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return InputType&GraphQLType
+     * @throws CannotMapTypeException
+     * @throws CannotMapTypeExceptionInterface
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {
@@ -121,9 +107,9 @@ class BaseTypeMapper implements RootTypeMapperInterface
      * Casts a Type to a GraphQL type.
      * Does not deal with nullable.
      *
-     * @return BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|ScalarType|null
+     * @throws CannotMapTypeException
      */
-    private function mapBaseType(Type $type)
+    private function mapBaseType(Type $type): BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|ScalarType|null
     {
         if ($type instanceof Integer) {
             return GraphQLType::int();
@@ -144,14 +130,14 @@ class BaseTypeMapper implements RootTypeMapperInterface
         if ($type instanceof Object_) {
             $fqcn = (string) $type->getFqsen();
             switch ($fqcn) {
-                case '\\DateTimeImmutable':
-                case '\\DateTimeInterface':
+                case '\\' . DateTimeImmutable::class:
+                case '\\' . DateTimeInterface::class:
                     return self::getDateTimeType();
 
                 case '\\' . UploadedFileInterface::class:
                     return self::getUploadType();
 
-                case '\\DateTime':
+                case '\\' . DateTime::class:
                     throw CannotMapTypeException::createForDateTime();
 
                 case '\\' . ID::class:
@@ -165,8 +151,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return null;
     }
 
-    /** @var UploadType */
-    private static $uploadType;
+    private static ?UploadType $uploadType = null;
 
     private static function getUploadType(): UploadType
     {
@@ -177,8 +162,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return self::$uploadType;
     }
 
-    /** @var DateTimeType */
-    private static $dateTimeType;
+    private static ?DateTimeType $dateTimeType = null;
 
     private static function getDateTimeType(): DateTimeType
     {

@@ -18,45 +18,17 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 final class RootTypeMapperFactoryContext
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var TypeResolver */
-    private $typeResolver;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-    /** @var TypeRegistry */
-    private $typeRegistry;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var ContainerInterface */
-    private $container;
-    /** @var CacheInterface */
-    private $cache;
-    /** @var int|null */
-    private $globTTL;
-    /** @var int|null */
-    private $mapTTL;
-
     public function __construct(
-        AnnotationReader $annotationReader,
-        TypeResolver $typeResolver,
-        NamingStrategyInterface $namingStrategy,
-        TypeRegistry $typeRegistry,
-        RecursiveTypeMapperInterface $recursiveTypeMapper,
-        ContainerInterface $container,
-        CacheInterface $cache,
-        ?int $globTTL,
-        ?int $mapTTL = null
+        private AnnotationReader $annotationReader,
+        private TypeResolver $typeResolver,
+        private NamingStrategyInterface $namingStrategy,
+        private TypeRegistry $typeRegistry,
+        private RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private ContainerInterface $container,
+        private CacheInterface $cache,
+        private ?int $globTTL,
+        private ?int $mapTTL = null
     ) {
-        $this->annotationReader = $annotationReader;
-        $this->typeResolver = $typeResolver;
-        $this->namingStrategy = $namingStrategy;
-        $this->typeRegistry = $typeRegistry;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
-        $this->container = $container;
-        $this->cache = $cache;
-        $this->globTTL = $globTTL;
-        $this->mapTTL = $mapTTL;
     }
 
     public function getAnnotationReader(): AnnotationReader

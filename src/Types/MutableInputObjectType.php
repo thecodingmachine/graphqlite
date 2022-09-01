@@ -23,14 +23,13 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     public const STATUS_PENDING = 'pending';
     public const STATUS_FROZEN  = 'frozen';
 
-    /** @var string */
-    protected $status;
+    protected string $status;
 
     /** @var array<callable> */
-    protected $fieldsCallables = [];
+    protected array $fieldsCallables = [];
 
     /** @var array<string, InputObjectField>|null */
-    protected $finalFields;
+    protected ?array $finalFields = null;
 
     /**
      * @param mixed[] $config

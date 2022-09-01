@@ -14,19 +14,19 @@ use function array_merge;
 use function array_unique;
 use function assert;
 use function is_array;
+use function is_string;
 
 trait MutableTrait
 {
-    /** @var string */
-    private $status;
+    private ?string $status = null;
 
     /** @var array<callable> */
-    private $fieldsCallables = [];
+    private array $fieldsCallables = [];
 
-    /** @var FieldDefinition[]|null */
-    private $fields;
+    /** @var array<string,FieldDefinition>|null */
+    private ?array $fields = null;
     /** @var class-string<object>|null */
-    private $className;
+    private ?string $className  = null;
 
     public function freeze(): void
     {
@@ -35,6 +35,7 @@ trait MutableTrait
 
     public function getStatus(): string
     {
+        assert(is_string($this->status));
         return $this->status;
     }
 
@@ -67,12 +68,7 @@ trait MutableTrait
         return $this->fields[$name] ?? parent::findField($name);
     }
 
-    /**
-     * @param string $name
-     *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
-     */
-    public function hasField($name): bool
+    public function hasField(string $name): bool
     {
         $this->initializeFields();
 
@@ -80,7 +76,7 @@ trait MutableTrait
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      *
      * @throws InvariantViolation
      */
@@ -88,7 +84,6 @@ trait MutableTrait
     {
         $this->initializeFields();
         assert(is_array($this->fields));
-
         return array_merge(parent::getFields(), $this->fields);
     }
 
@@ -100,7 +95,7 @@ trait MutableTrait
         $this->initializeFields();
         assert(is_array($this->fields));
 
-        return array_unique(array_merge(parent::getFieldNames(), array_keys($this->fields)));
+        return array_unique([...parent::getFieldNames(), ...array_keys($this->fields)]);
     }
 
     /**

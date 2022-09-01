@@ -29,12 +29,9 @@ class FailWith implements MiddlewareAnnotationInterface
     private $value;
 
     /**
-     * @param array<string, mixed>|mixed $values
-     * @param mixed $value
-     *
      * @throws BadMethodCallException
      */
-    public function __construct($values = [], $value = '__fail__with__magic__key__')
+    public function __construct(mixed $values = [], mixed $value = '__fail__with__magic__key__')
     {
         if ($value !== '__fail__with__magic__key__') {
             $this->value = $value;
@@ -47,10 +44,8 @@ class FailWith implements MiddlewareAnnotationInterface
 
     /**
      * Returns the default value to use if the right is not enforced.
-     *
-     * @return mixed
      */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->value;
     }

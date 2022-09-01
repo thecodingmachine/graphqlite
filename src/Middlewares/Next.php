@@ -13,11 +13,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
  */
 final class Next implements FieldHandlerInterface
 {
-    /** @var FieldHandlerInterface */
-    private $fallbackHandler;
-
-    /** @var SplQueue */
-    private $queue;
+    private SplQueue $queue;
 
     /**
      * Clones the queue provided to allow re-use.
@@ -25,10 +21,9 @@ final class Next implements FieldHandlerInterface
      * @param FieldHandlerInterface $fallbackHandler Fallback handler to
      *     invoke when the queue is exhausted.
      */
-    public function __construct(SplQueue $queue, FieldHandlerInterface $fallbackHandler)
+    public function __construct(SplQueue $queue, private FieldHandlerInterface $fallbackHandler)
     {
         $this->queue           = clone $queue;
-        $this->fallbackHandler = $fallbackHandler;
     }
 
     public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
@@ -37,8 +32,6 @@ final class Next implements FieldHandlerInterface
             return $this->fallbackHandler->handle($fieldDescriptor);
         }
 
-        $middleware = $this->queue->dequeue();
-
-        return $middleware->process($fieldDescriptor, $this);
+        return $this->queue->dequeue()->process($fieldDescriptor, $this);
     }
 }

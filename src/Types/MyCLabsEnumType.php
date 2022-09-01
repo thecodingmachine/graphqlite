@@ -30,12 +30,7 @@ class MyCLabsEnumType extends EnumType
         ]);
     }
 
-    /**
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public function serialize($value)
+    public function serialize(mixed $value): mixed
     {
         if (! $value instanceof Enum) {
             throw new InvalidArgumentException('Expected a Myclabs Enum instance');

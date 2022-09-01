@@ -38,30 +38,11 @@ use function iterator_to_array;
  */
 class CompoundTypeMapper implements RootTypeMapperInterface
 {
-    /** @var RootTypeMapperInterface */
-    private $topRootTypeMapper;
-    /** @var TypeRegistry */
-    private $typeRegistry;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var RootTypeMapperInterface */
-    private $next;
-
-    public function __construct(RootTypeMapperInterface $next, RootTypeMapperInterface $topRootTypeMapper, TypeRegistry $typeRegistry, RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(private RootTypeMapperInterface $next, private RootTypeMapperInterface $topRootTypeMapper, private TypeRegistry $typeRegistry, private RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
-        $this->topRootTypeMapper = $topRootTypeMapper;
-        $this->typeRegistry = $typeRegistry;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
-        $this->next = $next;
     }
 
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return OutputType&GraphQLType
-     */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
             return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
@@ -99,13 +80,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         return $return;
     }
 
-    /**
-     * @param (InputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         if (! $type instanceof Compound) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);

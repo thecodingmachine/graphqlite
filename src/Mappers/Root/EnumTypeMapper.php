@@ -30,70 +30,48 @@ use function enum_exists;
 class EnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<UnitEnum>, EnumType> */
-    private $cache = [];
+    private array $cache = [];
     /** @var array<string, EnumType> */
-    private $cacheByName = [];
+    private array $cacheByName = [];
     /** @var array<string, class-string<UnitEnum>> */
-    private $nameToClassMapping;
-    /** @var RootTypeMapperInterface */
-    private $next;
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var array|NS[] */
-    private $namespaces;
-    /** @var CacheInterface */
-    private $cacheService;
+    private ?array $nameToClassMapping = null;
 
     /**
      * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
      */
     public function __construct(
-        RootTypeMapperInterface $next,
-        AnnotationReader $annotationReader,
-        CacheInterface $cacheService,
-        array $namespaces
+        private RootTypeMapperInterface $next,
+        private AnnotationReader $annotationReader,
+        private CacheInterface $cacheService,
+        private array $namespaces
     ) {
-        $this->next = $next;
-        $this->annotationReader = $annotationReader;
-        $this->cacheService = $cacheService;
-        $this->namespaces = $namespaces;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
      */
     public function toGraphQLOutputType(
         Type $type,
         ?OutputType $subType,
-        $reflector,
+        ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj
     ): OutputType {
         $result = $this->map($type);
-        if ($result === null) {
-            return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
-        }
-
-        return $result;
+        return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
     /**
      * Maps into the appropriate InputType
-     *
-     * @param InputType|GraphQLType|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return InputType|GraphQLType
      */
     public function toGraphQLInputType(
         Type $type,
-        ?InputType $subType,
+        null|InputType|GraphQLType $subType,
         string $argumentName,
-        $reflector,
+        ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj
-    ): InputType
+    ): InputType|GraphQLType
     {
         $result = $this->map($type);
         if ($result === null) {

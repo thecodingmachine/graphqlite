@@ -25,7 +25,7 @@ interface MutableInterface
     public function addFields(callable $fields): void;
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      *
      * @throws InvariantViolation
      */

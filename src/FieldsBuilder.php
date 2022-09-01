@@ -6,8 +6,6 @@ namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use GraphQL\Type\Definition\FieldDefinition;
-use GraphQL\Type\Definition\InputObjectField;
-use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
@@ -57,13 +55,13 @@ use function array_merge;
 use function array_shift;
 use function assert;
 use function count;
-use function get_class;
 use function get_parent_class;
 use function in_array;
 use function is_string;
 use function key;
 use function reset;
 use function rtrim;
+use function strpos;
 use function trim;
 
 use const PHP_EOL;
@@ -73,46 +71,23 @@ use const PHP_EOL;
  */
 class FieldsBuilder
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var CachedDocBlockFactory */
-    private $cachedDocBlockFactory;
-    /** @var TypeResolver */
-    private $typeResolver;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-    /** @var TypeHandler */
-    private $typeMapper;
-    /** @var ParameterMiddlewareInterface */
-    private $parameterMapper;
-    /** @var FieldMiddlewareInterface */
-    private $fieldMiddleware;
-    /** @var InputFieldMiddlewareInterface */
-    private $inputFieldMiddleware;
+    private RecursiveTypeMapperInterface $recursiveTypeMapper;
+    private TypeHandler $typeMapper;
 
     public function __construct(
-        AnnotationReader $annotationReader,
+        private AnnotationReader $annotationReader,
         RecursiveTypeMapperInterface $typeMapper,
-        ArgumentResolver $argumentResolver,
-        TypeResolver $typeResolver,
-        CachedDocBlockFactory $cachedDocBlockFactory,
-        NamingStrategyInterface $namingStrategy,
-        RootTypeMapperInterface $rootTypeMapper,
-        ParameterMiddlewareInterface $parameterMapper,
-        FieldMiddlewareInterface $fieldMiddleware,
-        InputFieldMiddlewareInterface $inputFieldMiddleware
+        private ArgumentResolver $argumentResolver,
+        private TypeResolver $typeResolver,
+        private CachedDocBlockFactory $cachedDocBlockFactory,
+        private NamingStrategyInterface $namingStrategy,
+        private RootTypeMapperInterface $rootTypeMapper,
+        private ParameterMiddlewareInterface $parameterMapper,
+        private FieldMiddlewareInterface $fieldMiddleware,
+        private InputFieldMiddlewareInterface $inputFieldMiddleware
     ) {
-        $this->annotationReader      = $annotationReader;
         $this->recursiveTypeMapper   = $typeMapper;
-        $this->typeResolver          = $typeResolver;
-        $this->cachedDocBlockFactory = $cachedDocBlockFactory;
-        $this->namingStrategy        = $namingStrategy;
-        $this->typeMapper            = new TypeHandler($argumentResolver, $rootTypeMapper, $typeResolver);
-        $this->parameterMapper       = $parameterMapper;
-        $this->fieldMiddleware = $fieldMiddleware;
-        $this->inputFieldMiddleware = $inputFieldMiddleware;
+        $this->typeMapper            = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
     }
 
     /**
@@ -148,7 +123,7 @@ class FieldsBuilder
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         if ($controller instanceof FromSourceFieldsInterface) {
-            $sourceFields = array_merge($sourceFields, $controller->getSourceFields());
+            $sourceFields = [...$sourceFields, ...$controller->getSourceFields()];
         }
 
         $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
@@ -164,14 +139,13 @@ class FieldsBuilder
     /**
      * @param class-string<object> $className
      *
-     * @return array<InputField>
+     * @return array<string,InputField>
      *
      * @throws AnnotationException
      * @throws ReflectionException
      */
     public function getInputFields(string $className, string $inputName, bool $isUpdate = false): array
     {
-
         $refClass = new ReflectionClass($className);
 
         /** @var ReflectionMethod[]|ReflectionProperty[] $reflectorByFields */
@@ -187,7 +161,7 @@ class FieldsBuilder
         }
 
         /** @var ReflectionProperty[]|ReflectionMethod[] $reflectors */
-        $reflectors = array_merge($refClass->getProperties(), $refClass->getMethods(ReflectionMethod::IS_PUBLIC));
+        $reflectors = [...$refClass->getProperties(), ...$refClass->getMethods(ReflectionMethod::IS_PUBLIC)];
         foreach ($reflectors as $reflector) {
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $reflector->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
@@ -201,7 +175,6 @@ class FieldsBuilder
                 $fields = $this->getInputFieldsByPropertyAnnotations($className, $refClass, $reflector, Field::class, $defaultProperties, $inputName, $isUpdate);
             }
 
-
             $duplicates = array_intersect_key($reflectorByFields, $fields);
             if ($duplicates) {
                 $name = key($duplicates);
@@ -211,7 +184,7 @@ class FieldsBuilder
 
             $reflectorByFields = array_merge(
                 $reflectorByFields,
-                array_fill_keys(array_keys($fields), $reflector)
+                array_fill_keys(array_keys($fields), $reflector),
             );
 
             $inputFields = array_merge($inputFields, $fields);
@@ -321,7 +294,7 @@ class FieldsBuilder
         }
 
         /** @var ReflectionProperty[]|ReflectionMethod[] $reflectors */
-        $reflectors = array_merge($refClass->getProperties(), $refClass->getMethods(ReflectionMethod::IS_PUBLIC));
+        $reflectors = [...$refClass->getProperties(), ...$refClass->getMethods(ReflectionMethod::IS_PUBLIC)];
         foreach ($reflectors as $reflector) {
             if ($closestMatchingTypeClass !== null && $closestMatchingTypeClass === $reflector->getDeclaringClass()->getName()) {
                 // Optimisation: no need to fetch annotations from parent classes that are ALREADY GraphQL types.
@@ -344,7 +317,7 @@ class FieldsBuilder
 
             $reflectorByFields = array_merge(
                 $reflectorByFields,
-                array_fill_keys(array_keys($fields), $reflector)
+                array_fill_keys(array_keys($fields), $reflector),
             );
 
             $queryList = array_merge($queryList, $fields);
@@ -356,14 +329,13 @@ class FieldsBuilder
     /**
      * Gets fields by class method annotations.
      *
-     * @param string|object                 $controller
      * @param class-string<AbstractRequest> $annotationName
      *
      * @return array<string, FieldDefinition>
      *
      * @throws AnnotationException
      */
-    private function getFieldsByMethodAnnotations($controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, ?string $typeName = null): array
+    private function getFieldsByMethodAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, ?string $typeName = null): array
     {
         $fields = [];
 
@@ -389,7 +361,6 @@ class FieldsBuilder
 
             $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlockObj));
-
 
             $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
@@ -469,14 +440,13 @@ class FieldsBuilder
     /**
      * Gets fields by class property annotations.
      *
-     * @param string|object                 $controller
      * @param class-string<AbstractRequest> $annotationName
      *
      * @return array<string, FieldDefinition>
      *
      * @throws AnnotationException
      */
-    private function getFieldsByPropertyAnnotations($controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, ?string $typeName = null): array
+    private function getFieldsByPropertyAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, ?string $typeName = null): array
     {
         $fields = [];
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
@@ -800,7 +770,7 @@ class FieldsBuilder
                 foreach ($parameterAnnotations->getAllAnnotations() as $annotation) {
                     $refMethod = $refParameter->getDeclaringFunction();
                     assert($refMethod instanceof ReflectionMethod);
-                    throw InvalidParameterException::parameterNotFoundFromSourceField($refParameter->getName(), get_class($annotation), $refMethod);
+                    throw InvalidParameterException::parameterNotFoundFromSourceField($refParameter->getName(), $annotation::class, $refMethod);
                 }
             }
         }
@@ -824,13 +794,11 @@ class FieldsBuilder
     /**
      * Extracts prefetch method info from annotation.
      *
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
      * @return array{0: string|null, 1: array<mixed>, 2: ReflectionMethod|null}
      *
      * @throws InvalidArgumentException
      */
-    private function getPrefetchMethodInfo(ReflectionClass $refClass, $reflector, object $annotation): array
+    private function getPrefetchMethodInfo(ReflectionClass $refClass, ReflectionMethod|ReflectionProperty $reflector, object $annotation): array
     {
         $prefetchMethodName = null;
         $prefetchArgs = [];
@@ -859,7 +827,6 @@ class FieldsBuilder
     /**
      * Gets input fields by class method annotations.
      *
-     * @param string|object $controller
      * @param class-string<AbstractRequest> $annotationName
      * @param array<mixed> $defaultProperties
      *
@@ -867,87 +834,89 @@ class FieldsBuilder
      *
      * @throws AnnotationException
      */
-    private function getInputFieldsByMethodAnnotations($controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
+    private function getInputFieldsByMethodAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
     {
         $fields = [];
 
         $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
         foreach ($annotations as $fieldAnnotations) {
             $description = null;
-            if ($fieldAnnotations instanceof Field) {
-                $for = $fieldAnnotations->getFor();
-                if ($typeName && $for && !in_array($typeName, $for)) {
-                    continue;
-                }
-                $description = $fieldAnnotations->getDescription();
-
-                $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-                $methodName = $refMethod->getName();
-                if (strpos($methodName, 'set') !== 0) {
-                    continue;
-                }
-                $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
-                if (!$description) {
-                    $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
-                }
-
-                $inputFieldDescriptor = new InputFieldDescriptor();
-                $inputFieldDescriptor->setRefMethod($refMethod);
-                $inputFieldDescriptor->setIsUpdate($isUpdate);
-                $inputFieldDescriptor->setName($name);
-                $inputFieldDescriptor->setComment(trim($description));
-
-                $parameters = $refMethod->getParameters();
-                if ($injectSource === true) {
-                    $firstParameter = array_shift($parameters);
-                    // TODO: check that $first_parameter type is correct.
-                }
-
-                /** @var array<string, InputTypeParameterInterface> $args */
-                $args = $this->mapParameters($parameters, $docBlockObj);
-
-                $inputFieldDescriptor->setParameters($args);
-
-                $inputType = $fieldAnnotations->getInputType();
-                if ($inputType) {
-                    try {
-                        $type = $this->typeResolver->mapNameToInputType($inputType);
-                    } catch (CannotMapTypeExceptionInterface $e) {
-                        $e->addReturnInfo($refMethod);
-                        throw $e;
-                    }
-                } else {
-                    $type = $args[$name]->getType();
-                    if ($isUpdate && $type instanceof NonNull) {
-                        $type = $type->getWrappedType();
-                    }
-                }
-
-                $inputFieldDescriptor->setHasDefaultValue($isUpdate);
-                $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
-                $constructerParameters = $this->getClassConstructParameterNames($refClass);
-                if (!in_array($name, $constructerParameters)) {
-                    $inputFieldDescriptor->setTargetMethodOnSource($methodName);
-                }
-
-                $inputFieldDescriptor->setType($type);
-                $inputFieldDescriptor->setInjectSource($injectSource);
-
-                $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
-
-                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
-                    {
-                        return InputField::fromFieldDescriptor($inputFieldDescriptor);
-                    }
-                });
-
-                if ($field === null) {
-                    continue;
-                }
-
-                $fields[$name] = $field;
+            if (! ($fieldAnnotations instanceof Field)) {
+                continue;
             }
+
+            $for = $fieldAnnotations->getFor();
+            if ($typeName && $for && ! in_array($typeName, $for)) {
+                continue;
+            }
+            $description = $fieldAnnotations->getDescription();
+
+            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+            $methodName = $refMethod->getName();
+            if (strpos($methodName, 'set') !== 0) {
+                continue;
+            }
+            $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
+            if (! $description) {
+                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
+            }
+
+            $inputFieldDescriptor = new InputFieldDescriptor();
+            $inputFieldDescriptor->setRefMethod($refMethod);
+            $inputFieldDescriptor->setIsUpdate($isUpdate);
+            $inputFieldDescriptor->setName($name);
+            $inputFieldDescriptor->setComment(trim($description));
+
+            $parameters = $refMethod->getParameters();
+            if ($injectSource === true) {
+                $firstParameter = array_shift($parameters);
+                // TODO: check that $first_parameter type is correct.
+            }
+
+            /** @var array<string, InputTypeParameterInterface> $args */
+            $args = $this->mapParameters($parameters, $docBlockObj);
+
+            $inputFieldDescriptor->setParameters($args);
+
+            $inputType = $fieldAnnotations->getInputType();
+            if ($inputType) {
+                try {
+                    $type = $this->typeResolver->mapNameToInputType($inputType);
+                } catch (CannotMapTypeExceptionInterface $e) {
+                    $e->addReturnInfo($refMethod);
+                    throw $e;
+                }
+            } else {
+                $type = $args[$name]->getType();
+                if ($isUpdate && $type instanceof NonNull) {
+                    $type = $type->getWrappedType();
+                }
+            }
+
+            $inputFieldDescriptor->setHasDefaultValue($isUpdate);
+            $inputFieldDescriptor->setDefaultValue($args[$name]->getDefaultValue());
+            $constructerParameters = $this->getClassConstructParameterNames($refClass);
+            if (! in_array($name, $constructerParameters)) {
+                $inputFieldDescriptor->setTargetMethodOnSource($methodName);
+            }
+
+            $inputFieldDescriptor->setType($type);
+            $inputFieldDescriptor->setInjectSource($injectSource);
+
+            $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
+
+            $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
+                {
+                    return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                }
+            });
+
+            if ($field === null) {
+                continue;
+            }
+
+            $fields[$name] = $field;
         }
 
         return $fields;
@@ -956,7 +925,6 @@ class FieldsBuilder
     /**
      * Gets input fields by class property annotations.
      *
-     * @param string|object $controller
      * @param class-string<AbstractRequest> $annotationName
      * @param array<mixed> $defaultProperties
      *
@@ -964,7 +932,7 @@ class FieldsBuilder
      *
      * @throws AnnotationException
      */
-    private function getInputFieldsByPropertyAnnotations($controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
+    private function getInputFieldsByPropertyAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
     {
         $fields = [];
 
@@ -973,81 +941,82 @@ class FieldsBuilder
         foreach ($annotations as $annotation) {
             $description = null;
 
-            if ($annotation instanceof Field) {
-                $for = $annotation->getFor();
-                if ($typeName && $for && !in_array($typeName, $for)) {
-                    continue;
-                }
-
-                $description = $annotation->getDescription();
-                $name = $annotation->getName() ?: $refProperty->getName();
-                $inputType = $annotation->getInputType();
-                $constructerParameters = $this->getClassConstructParameterNames($refClass);
-                $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
-
-                if (! $description) {
-                    $description = $inputProperty->getDescription();
-                }
-
-                if (in_array($name, $constructerParameters)) {
-                    $middlewareAnnotations = $this->annotationReader->getPropertyAnnotations($refProperty, MiddlewareAnnotationInterface::class);
-                    if ($middlewareAnnotations !== []){
-                        throw IncompatibleAnnotationsException::middlewareAnnotationsUnsupported();
-                    }
-                    // constructor hydrated
-                    $field = new InputField(
-                        $name,
-                        $inputProperty->getType(),
-                        [$inputProperty->getName() => $inputProperty],
-                        null,
-                        null,
-                        trim($description),
-                        $isUpdate,
-                        $inputProperty->hasDefaultValue(),
-                        $inputProperty->getDefaultValue()
-                    );
-                } else {
-                    // setters and properties
-                    $inputFieldDescriptor = new InputFieldDescriptor();
-                    $inputFieldDescriptor->setRefProperty($refProperty);
-                    $inputFieldDescriptor->setIsUpdate($isUpdate);
-                    $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
-                    $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
-
-                    $inputFieldDescriptor->setName($inputProperty->getName());
-                    $inputFieldDescriptor->setComment(trim($description));
-
-                    $inputFieldDescriptor->setParameters([$inputProperty->getName() => $inputProperty]);
-
-                    $type = $inputProperty->getType();
-                    if (!$inputType && $isUpdate && $type instanceof NonNull) {
-                        $type = $type->getWrappedType();
-                    }
-
-                    $inputFieldDescriptor->setType($type);
-                    $inputFieldDescriptor->setInjectSource(false);
-                    $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
-                    $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
-
-                    $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                        public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
-                        {
-                            return InputField::fromFieldDescriptor($inputFieldDescriptor);
-                        }
-                    });
-                }
-
-                if ($field === null) {
-                    continue;
-                }
-
-                $fields[$name] = $field;
+            if (! ($annotation instanceof Field)) {
+                continue;
             }
+
+            $for = $annotation->getFor();
+            if ($typeName && $for && ! in_array($typeName, $for)) {
+                continue;
+            }
+
+            $description = $annotation->getDescription();
+            $name = $annotation->getName() ?: $refProperty->getName();
+            $inputType = $annotation->getInputType();
+            $constructerParameters = $this->getClassConstructParameterNames($refClass);
+            $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
+
+            if (! $description) {
+                $description = $inputProperty->getDescription();
+            }
+
+            if (in_array($name, $constructerParameters)) {
+                $middlewareAnnotations = $this->annotationReader->getPropertyAnnotations($refProperty, MiddlewareAnnotationInterface::class);
+                if ($middlewareAnnotations !== []) {
+                    throw IncompatibleAnnotationsException::middlewareAnnotationsUnsupported();
+                }
+                // constructor hydrated
+                $field = new InputField(
+                    $name,
+                    $inputProperty->getType(),
+                    [$inputProperty->getName() => $inputProperty],
+                    null,
+                    null,
+                    trim($description),
+                    $isUpdate,
+                    $inputProperty->hasDefaultValue(),
+                    $inputProperty->getDefaultValue()
+                );
+            } else {
+                // setters and properties
+                $inputFieldDescriptor = new InputFieldDescriptor();
+                $inputFieldDescriptor->setRefProperty($refProperty);
+                $inputFieldDescriptor->setIsUpdate($isUpdate);
+                $inputFieldDescriptor->setHasDefaultValue($inputProperty->hasDefaultValue());
+                $inputFieldDescriptor->setDefaultValue($inputProperty->getDefaultValue());
+
+                $inputFieldDescriptor->setName($inputProperty->getName());
+                $inputFieldDescriptor->setComment(trim($description));
+
+                $inputFieldDescriptor->setParameters([$inputProperty->getName() => $inputProperty]);
+
+                $type = $inputProperty->getType();
+                if (! $inputType && $isUpdate && $type instanceof NonNull) {
+                    $type = $type->getWrappedType();
+                }
+
+                $inputFieldDescriptor->setType($type);
+                $inputFieldDescriptor->setInjectSource(false);
+                $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
+                $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
+
+                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
+                    {
+                        return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                    }
+                });
+            }
+
+            if ($field === null) {
+                continue;
+            }
+
+            $fields[$name] = $field;
         }
 
         return $fields;
     }
-
 
     /**
      * @return string[]

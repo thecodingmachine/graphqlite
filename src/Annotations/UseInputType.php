@@ -33,7 +33,7 @@ class UseInputType implements ParameterAnnotationInterface
      *
      * @throws BadMethodCallException
      */
-    public function __construct($inputType = [])
+    public function __construct(array|string $inputType = [])
     {
         $values = $inputType;
         if (is_string($values)) {

@@ -38,62 +38,36 @@ use Webmozart\Assert\Assert;
  */
 abstract class AbstractTypeMapper implements TypeMapperInterface
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var CacheInterface */
-    protected $cache;
-    /** @var int|null */
-    protected $globTTL;
-
     /**
      * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
-     *
-     * @var ClassBoundCacheContractInterface
      */
-    private $mapClassToAnnotationsCache;
+    private ClassBoundCacheContractInterface $mapClassToAnnotationsCache;
     /**
      * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
-     *
-     * @var ClassBoundCacheContractInterface
      */
-    private $mapClassToExtendAnnotationsCache;
+    private ClassBoundCacheContractInterface $mapClassToExtendAnnotationsCache;
 
-    /** @var ContainerInterface */
-    private $container;
-    /** @var TypeGenerator */
-    private $typeGenerator;
-    /** @var int|null */
-    private $mapTTL;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-    /** @var InputTypeGenerator */
-    private $inputTypeGenerator;
-    /** @var InputTypeUtils */
-    private $inputTypeUtils;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-    /** @var CacheContractInterface */
-    private $cacheContract;
-    /** @var GlobTypeMapperCache */
-    private $globTypeMapperCache;
-    /** @var GlobExtendTypeMapperCache */
-    private $globExtendTypeMapperCache;
+    private CacheContractInterface $cacheContract;
+    private ?GlobTypeMapperCache $globTypeMapperCache = null;
+    private ?GlobExtendTypeMapperCache $globExtendTypeMapperCache = null;
     /** @var array<string, class-string<object>> */
-    private $registeredInputs;
+    private array $registeredInputs;
 
-    public function __construct(string $cachePrefix, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
+    public function __construct(
+        string $cachePrefix,
+        private TypeGenerator $typeGenerator,
+        private InputTypeGenerator $inputTypeGenerator,
+        private InputTypeUtils $inputTypeUtils,
+        private ContainerInterface $container,
+        private AnnotationReader $annotationReader,
+        private NamingStrategyInterface $namingStrategy,
+        private RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private CacheInterface $cache,
+        protected ?int $globTTL = 2,
+        private ?int $mapTTL = null
+    )
     {
-        $this->typeGenerator       = $typeGenerator;
-        $this->container           = $container;
-        $this->annotationReader    = $annotationReader;
-        $this->namingStrategy      = $namingStrategy;
-        $this->cache               = $cache;
-        $this->globTTL             = $globTTL;
-        $this->cacheContract       = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
-        $this->mapTTL              = $mapTTL;
-        $this->inputTypeGenerator  = $inputTypeGenerator;
-        $this->inputTypeUtils      = $inputTypeUtils;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
+        $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
         $this->mapClassToAnnotationsCache = new ClassBoundCacheContract(new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'classToAnnotations_' . $cachePrefix))));
         $this->mapClassToExtendAnnotationsCache = new ClassBoundCacheContract(new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'classToExtendAnnotations_' . $cachePrefix))));
     }
@@ -225,7 +199,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                             $e->addExtendTypeInfo($refClass, $extendType);
                             throw $e;
                         }
-                        $typeName   = $targetType->name;
+                        $typeName = $targetType->name;
                     } else {
                         $typeName = $extendType->getName();
                         Assert::notNull($typeName);

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use TheCodingMachine\GraphQLite\Annotations\Factory;
+use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
 use function lcfirst;
+use function str_ends_with;
 use function str_replace;
+use function str_starts_with;
 use function strlen;
-use function strpos;
 use function strrpos;
 use function substr;
 
@@ -48,7 +51,7 @@ class NamingStrategy implements NamingStrategyInterface
             $typeClassName = substr($typeClassName, $prevPos + 1);
         }
         // By default, if the class name ends with Type, let's take the name of the class for the type
-        if (! $type->isSelfType() && substr($typeClassName, -4) === 'Type') {
+        if (! $type->isSelfType() && str_ends_with($typeClassName, 'Type')) {
             return substr($typeClassName, 0, -4);
         }
         // Else, let's take the name of the targeted class
@@ -61,10 +64,7 @@ class NamingStrategy implements NamingStrategyInterface
         return $typeClassName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getInputTypeName(string $className, $input): string
+    public function getInputTypeName(string $className, Input|Factory $input): string
     {
         $inputTypeName = $input->getName();
         if ($inputTypeName !== null) {
@@ -75,7 +75,7 @@ class NamingStrategy implements NamingStrategyInterface
             $className = substr($className, $prevPos + 1);
         }
 
-        if (substr($className, -5) === 'Input') {
+        if (str_ends_with($className, 'Input')) {
             return $className;
         }
 
@@ -88,10 +88,10 @@ class NamingStrategy implements NamingStrategyInterface
     public function getFieldNameFromMethodName(string $methodName): string
     {
         // Let's remove any "get" or "is".
-        if (strpos($methodName, 'get') === 0 && strlen($methodName) > 3) {
+        if (str_starts_with($methodName, 'get') && strlen($methodName) > 3) {
             return lcfirst(substr($methodName, 3));
         }
-        if (strpos($methodName, 'is') === 0 && strlen($methodName) > 2) {
+        if (str_starts_with($methodName, 'is') && strlen($methodName) > 2) {
             return lcfirst(substr($methodName, 2));
         }
 
@@ -103,7 +103,7 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getInputFieldNameFromMethodName(string $methodName): string
     {
-        if (strpos($methodName, 'set') === 0 && strlen($methodName) > 3) {
+        if (str_starts_with($methodName, 'set') && strlen($methodName) > 3) {
             return lcfirst(substr($methodName, 3));
         }
 

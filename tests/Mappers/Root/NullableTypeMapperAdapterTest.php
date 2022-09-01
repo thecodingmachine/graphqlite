@@ -55,7 +55,7 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
                 return new NonNull(new StringType());
             }
 
-            public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+            public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
             {
                 throw new \RuntimeException('Not implemented');
             }

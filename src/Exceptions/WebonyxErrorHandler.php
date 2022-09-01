@@ -9,7 +9,6 @@ use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 
 use function array_map;
-use function array_merge;
 
 /**
  * A custom error handler and error formatter for Webonyx that can read the GraphQLAggregateExceptionInterface
@@ -52,7 +51,7 @@ final class WebonyxErrorHandler
 
                 $formattedInnerErrors = self::errorHandler($innerErrors, $formatter);
 
-                $formattedErrors = array_merge($formattedErrors, $formattedInnerErrors);
+                $formattedErrors = [...$formattedErrors, ...$formattedInnerErrors];
             } else {
                 $formattedErrors[] = $formatter($error);
             }

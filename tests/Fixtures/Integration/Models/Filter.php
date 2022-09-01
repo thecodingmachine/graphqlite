@@ -1,26 +1,18 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
-
-use function array_merge;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 
 class Filter
 {
     /**
-     * @var string[]|int[]
-     */
-    private $values;
-
-    /**
-     * Filter constructor.
      * @param string[]|int[] $values
      */
-    public function __construct(array $values)
+    public function __construct(private array $values)
     {
-        $this->values = $values;
     }
 
     /**
@@ -31,14 +23,18 @@ class Filter
         return $this->values;
     }
 
-    public function mergeValues(array $values)
+    /**
+     * @param string[]|int[] $values
+     */
+    public function mergeValues(array $values): void
     {
-        $this->values = array_merge($this->values, $values);
+        $this->values = [...$this->values, ...$values];
     }
 
     /**
-     * @Factory()
      * @param string[] $values
+     *
+     * @Factory()
      */
     public static function create(array $values = []): self
     {

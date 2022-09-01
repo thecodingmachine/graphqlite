@@ -23,32 +23,26 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
  */
 final class FinalRootTypeMapper implements RootTypeMapperInterface
 {
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-
-    public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(private RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     /**
      * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
      *
      * @return OutputType&GraphQLType
+     *
+     * @throws CannotMapTypeException
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         throw CannotMapTypeException::createForPhpDocType($type);
     }
 
     /**
-     * @param (InputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return InputType&GraphQLType
+     * @throws CannotMapTypeException
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         throw CannotMapTypeException::createForPhpDocType($type);
     }

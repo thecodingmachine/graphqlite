@@ -32,21 +32,14 @@ use function iterator_to_array;
  */
 class NullableTypeMapperAdapter implements RootTypeMapperInterface
 {
-    /** @var RootTypeMapperInterface */
-    private $next;
+    private RootTypeMapperInterface $next;
 
     public function setNext(RootTypeMapperInterface $next): void
     {
         $this->next = $next;
     }
 
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return OutputType&GraphQLType
-     */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|GraphQLType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
@@ -72,13 +65,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         return $graphQlType;
     }
 
-    /**
-     * @param (InputType&GraphQLType)|null $subType
-     * @param ReflectionMethod|ReflectionProperty $reflector
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
@@ -93,8 +80,8 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
 
         $graphQlType = $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
 
-        // The type is non nullable if the PHP argument is non nullable
-        // There is an exception: if the PHP argument is non nullable but points to a factory that can called without passing any argument,
+        // The type is non-nullable if the PHP argument is non-nullable
+        // There is an exception: if the PHP argument is non-nullable but points to a factory that can called without passing any argument,
         // then, the input type is nullable (and we can still create an empty object).
         if (! $isNullable && $graphQlType instanceof NullableType) {
             if (! ($graphQlType instanceof ResolvableMutableInputObjectType) || $graphQlType->isInstantiableWithoutParameters() !== true) {

@@ -13,15 +13,11 @@ use function count;
  */
 class MiddlewareAnnotations
 {
-    /** @var array<int, MiddlewareAnnotationInterface> */
-    private $annotations;
-
     /**
      * @param array<int, MiddlewareAnnotationInterface> $annotations
      */
-    public function __construct(array $annotations)
+    public function __construct(private array $annotations)
     {
-        $this->annotations = $annotations;
     }
 
     /**

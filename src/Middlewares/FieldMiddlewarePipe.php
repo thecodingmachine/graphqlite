@@ -10,8 +10,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 final class FieldMiddlewarePipe implements FieldMiddlewareInterface
 {
-    /** @var SplQueue */
-    private $pipeline;
+    private SplQueue $pipeline;
 
     /**
      * Initializes the queue.

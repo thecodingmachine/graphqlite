@@ -32,43 +32,25 @@ use const JSON_ERROR_NONE;
 
 final class WebonyxGraphqlMiddleware implements MiddlewareInterface
 {
-    /** @var StandardServer */
-    private $standardServer;
-    /** @var string */
-    private $graphqlUri;
+    private StandardServer $standardServer;
     /** @var string[] */
-    private $graphqlHeaderList = ['application/graphql'];
+    private array $graphqlHeaderList = ['application/graphql'];
     /** @var string[] */
-    private $allowedMethods = [
+    private array $allowedMethods = [
         'GET',
         'POST',
     ];
 
-    /** @var bool|int */
-    //private $debug;
-    /** @var ResponseFactoryInterface */
-    private $responseFactory;
-    /** @var StreamFactoryInterface */
-    private $streamFactory;
-    /** @var HttpCodeDeciderInterface */
-    private $httpCodeDecider;
-    /** @var ServerConfig */
-    private $config;
-
     public function __construct(
-        ServerConfig $config,
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        HttpCodeDeciderInterface $httpCodeDecider,
-        string $graphqlUri = '/graphql',
+        private ServerConfig $config,
+        private ResponseFactoryInterface $responseFactory,
+        private StreamFactoryInterface $streamFactory,
+        private HttpCodeDeciderInterface $httpCodeDecider,
+        private string $graphqlUri = '/graphql',
         ?StandardServer $handler = null
-    ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->graphqlUri      = $graphqlUri;
-        $this->httpCodeDecider = $httpCodeDecider;
-        $this->config = $config;
-        $this->standardServer  = $handler ?: new StandardServer($config);
+    )
+    {
+        $this->standardServer = $handler ?? new StandardServer($config);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -104,7 +86,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
      *
      * @return mixed[]
      */
-    private function processResult($result): array
+    private function processResult(ExecutionResult|array|Promise $result): array
     {
         if ($result instanceof ExecutionResult) {
             return $result->toArray($this->config->getDebugFlag());
@@ -126,7 +108,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     /**
      * @param ExecutionResult|ExecutionResult[]|Promise $result
      */
-    private function decideHttpCode($result): int
+    private function decideHttpCode(ExecutionResult|array|Promise $result): int
     {
         if ($result instanceof ExecutionResult) {
             return $this->httpCodeDecider->decideHttpStatusCode($result);
@@ -190,17 +172,15 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     private function getJsonResponse(array $array, int $statusCode): ResponseInterface
     {
         $response = $this->responseFactory->createResponse();
-        $data     = json_encode($array);
+        $data = json_encode($array);
 
         if ($data === false || json_last_error() !== JSON_ERROR_NONE) {
             throw new InvalidArgumentException(json_last_error_msg()); // @codeCoverageIgnore
         }
 
-        $stream   = $this->streamFactory->createStream($data);
-        $response = $response->withBody($stream)
+        $stream = $this->streamFactory->createStream($data);
+        return $response->withBody($stream)
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($statusCode);
-
-        return $response;
     }
 }

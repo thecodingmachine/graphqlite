@@ -12,39 +12,21 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class InputTypeParameter implements InputTypeParameterInterface
 {
-    /** @var string */
-    private $name;
-    /** @var InputType&Type */
-    private $type;
-    /** @var bool */
-    private $doesHaveDefaultValue;
-    /** @var mixed */
-    private $defaultValue;
-    /** @var ArgumentResolver */
-    private $argumentResolver;
-    /** @var string */
-    private $description;
+    private bool $doesHaveDefaultValue;
+    private ?string $description = null;
 
     /**
      * @param InputType&Type $type
-     * @param mixed $defaultValue
      */
-    public function __construct(string $name, InputType $type, bool $hasDefaultValue, $defaultValue, ArgumentResolver $argumentResolver)
+    public function __construct(private string $name, private InputType $type, bool $hasDefaultValue, private mixed $defaultValue, private ArgumentResolver $argumentResolver)
     {
-        $this->name                 = $name;
-        $this->type                 = $type;
         $this->doesHaveDefaultValue = $hasDefaultValue;
-        $this->defaultValue         = $defaultValue;
-        $this->argumentResolver     = $argumentResolver;
     }
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
-     *
-     * @return mixed
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $info)
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         if (isset($args[$this->name])) {
             return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);
@@ -78,17 +60,14 @@ class InputTypeParameter implements InputTypeParameterInterface
         return $this->doesHaveDefaultValue;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): mixed
     {
         return $this->defaultValue;
     }
 
     public function getDescription(): string
     {
-        return $this->description;
+        return $this->description ?? '';
     }
 
     public function setDescription(string $description): void

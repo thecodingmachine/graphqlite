@@ -26,15 +26,11 @@ use function str_replace;
  */
 final class GlobTypeMapper extends AbstractTypeMapper
 {
-    /** @var NS */
-    private $namespace;
-
     /**
      * @param NS $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      */
-    public function __construct(NS $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
+    public function __construct(private NS $namespace, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
     {
-        $this->namespace           = $namespace;
         $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace->getNamespace());
         parent::__construct($cachePrefix, $typeGenerator, $inputTypeGenerator, $inputTypeUtils, $container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $cache, $globTTL, $mapTTL);
     }

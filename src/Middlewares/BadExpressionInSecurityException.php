@@ -14,12 +14,7 @@ use Throwable;
  */
 class BadExpressionInSecurityException extends Exception
 {
-    /**
-     * @param Throwable $e
-     * @param QueryFieldDescriptor|InputFieldDescriptor $fieldDescriptor
-     * @return self
-     */
-    public static function wrapException(Throwable $e, $fieldDescriptor): self
+    public static function wrapException(Throwable $e, QueryFieldDescriptor|InputFieldDescriptor $fieldDescriptor): self
     {
         $refMethod = $fieldDescriptor->getRefMethod();
         $message = 'An error occurred while evaluating expression in @Security annotation of method "' . $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '": ' . $e->getMessage();

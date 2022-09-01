@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use function array_filter;
-use function array_merge;
 use function array_pop;
 use function count;
 
@@ -14,15 +13,11 @@ use function count;
  */
 class ParameterAnnotations
 {
-    /** @var array<int, ParameterAnnotationInterface> */
-    private $annotations;
-
     /**
      * @param array<int, ParameterAnnotationInterface> $annotations
      */
-    public function __construct(array $annotations)
+    public function __construct(private array $annotations)
     {
-        $this->annotations = $annotations;
     }
 
     /**
@@ -75,6 +70,6 @@ class ParameterAnnotations
 
     public function merge(ParameterAnnotations $parameterAnnotations): void
     {
-        $this->annotations = array_merge($this->annotations, $parameterAnnotations->annotations);
+        $this->annotations = [...$this->annotations, ...$parameterAnnotations->annotations];
     }
 }

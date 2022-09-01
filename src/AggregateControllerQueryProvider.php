@@ -25,26 +25,16 @@ use function sort;
  */
 class AggregateControllerQueryProvider implements QueryProviderInterface
 {
-    /** @var iterable<string> */
-    private $controllers;
-    /** @var ContainerInterface */
-    private $controllersContainer;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
-
     /**
      * @param iterable<string>   $controllers          A list of controllers name in the container.
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(iterable $controllers, FieldsBuilder $fieldsBuilder, ContainerInterface $controllersContainer)
+    public function __construct(private iterable $controllers, private FieldsBuilder $fieldsBuilder, private ContainerInterface $controllersContainer)
     {
-        $this->controllers          = $controllers;
-        $this->fieldsBuilder        = $fieldsBuilder;
-        $this->controllersContainer = $controllersContainer;
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string,FieldDefinition>
      */
     public function getQueries(): array
     {
@@ -59,7 +49,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return FieldDefinition[]
+     * @return array<string, FieldDefinition>
      */
     public function getMutations(): array
     {

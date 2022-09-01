@@ -12,9 +12,9 @@ use ReflectionClass;
 class GlobExtendTypeMapperCache
 {
     /** @var array<string,array<string,string>> Maps a domain class to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN */
-    private $mapClassToExtendTypeArray = [];
+    private array $mapClassToExtendTypeArray = [];
     /** @var array<string,array<string,string>> Maps a GraphQL type name to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN */
-    private $mapNameToExtendType = [];
+    private array $mapNameToExtendType = [];
 
     /**
      * Merges annotations of a given class in the global cache.

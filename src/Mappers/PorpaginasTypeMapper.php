@@ -16,21 +16,17 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
-use function get_class;
 use function is_a;
-use function strpos;
+use function str_starts_with;
 use function substr;
 
 class PorpaginasTypeMapper implements TypeMapperInterface
 {
     /** @var array<string, MutableInterface&(MutableObjectType|MutableInterfaceType)> */
-    private $cache = [];
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
+    private array $cache = [];
 
-    public function __construct(RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(private RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
     }
 
     /**
@@ -76,7 +72,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
         $name = $subType->name;
 
         if ($name === null) {
-            throw new RuntimeException('Cannot get name property from sub type ' . get_class($subType));
+            throw new RuntimeException('Cannot get name property from sub type ' . $subType::class);
         }
 
         $typeName = 'PorpaginasResult_' . $name;
@@ -129,7 +125,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      */
     public function canMapNameToType(string $typeName): bool
     {
-        return strpos($typeName, 'PorpaginasResult_') === 0;
+        return str_starts_with($typeName, 'PorpaginasResult_');
     }
 
     /**

@@ -22,33 +22,15 @@ use function interface_exists;
  */
 class TypeGenerator
 {
-    /** @var AnnotationReader */
-    private $annotationReader;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
-    /** @var NamingStrategyInterface */
-    private $namingStrategy;
-    /** @var TypeRegistry */
-    private $typeRegistry;
-    /** @var ContainerInterface */
-    private $container;
-    /** @var RecursiveTypeMapperInterface */
-    private $recursiveTypeMapper;
-
     public function __construct(
-        AnnotationReader $annotationReader,
-        NamingStrategyInterface $namingStrategy,
-        TypeRegistry $typeRegistry,
-        ContainerInterface $container,
-        RecursiveTypeMapperInterface $recursiveTypeMapper,
-        FieldsBuilder $fieldsBuilder
-    ) {
-        $this->annotationReader    = $annotationReader;
-        $this->namingStrategy      = $namingStrategy;
-        $this->typeRegistry        = $typeRegistry;
-        $this->container           = $container;
-        $this->recursiveTypeMapper = $recursiveTypeMapper;
-        $this->fieldsBuilder       = $fieldsBuilder;
+        private AnnotationReader $annotationReader,
+        private NamingStrategyInterface $namingStrategy,
+        private TypeRegistry $typeRegistry,
+        private ContainerInterface $container,
+        private RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private FieldsBuilder $fieldsBuilder
+    )
+    {
     }
 
     /**
@@ -140,18 +122,18 @@ class TypeGenerator
         */
 
         $type->addFields(function () use ($annotatedObject, $typeName) {
-                /*$parentClass = get_parent_class($extendTypeAnnotation->getClass());
-                $parentType = null;
-                if ($parentClass !== false) {
-                    if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
-                        $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
-                    }
-                }*/
-                return $this->fieldsBuilder->getFields($annotatedObject, $typeName);
+            /*$parentClass = get_parent_class($extendTypeAnnotation->getClass());
+            $parentType = null;
+            if ($parentClass !== false) {
+                if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
+                    $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
+                }
+            }*/
+            return $this->fieldsBuilder->getFields($annotatedObject, $typeName);
 
-                /*if ($parentType !== null) {
-                    $fields = $parentType->getFields() + $fields;
-                }*/
+            /*if ($parentType !== null) {
+                $fields = $parentType->getFields() + $fields;
+            }*/
         });
     }
 }

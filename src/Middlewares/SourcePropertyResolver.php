@@ -8,9 +8,6 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use Webmozart\Assert\Assert;
 
-use function get_class;
-use function is_object;
-
 /**
  * A class that represents a callable on an object to resolve property value.
  * The object can be modified after class invocation.
@@ -19,15 +16,10 @@ use function is_object;
  */
 class SourcePropertyResolver implements SourceResolverInterface
 {
-    /** @var string */
-    private $propertyName;
+    private ?object $object = null;
 
-    /** @var object|null */
-    private $object;
-
-    public function __construct(string $propertyName)
+    public function __construct(private string $propertyName)
     {
-        $this->propertyName = $propertyName;
     }
 
     public function setObject(object $object): void
@@ -42,12 +34,7 @@ class SourcePropertyResolver implements SourceResolverInterface
         return $this->object;
     }
 
-    /**
-     * @param mixed $args
-     *
-     * @return mixed
-     */
-    public function __invoke(...$args)
+    public function __invoke(mixed ...$args): mixed
     {
         if ($this->object === null) {
             throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
@@ -58,11 +45,7 @@ class SourcePropertyResolver implements SourceResolverInterface
 
     public function toString(): string
     {
-        $class = $this->getObject();
-        if (is_object($class)) {
-            $class = get_class($class);
-        }
-
+        $class = $this->getObject()::class;
         return $class . '::' . $this->propertyName;
     }
 }

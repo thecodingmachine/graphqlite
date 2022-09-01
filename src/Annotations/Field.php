@@ -41,7 +41,7 @@ class Field extends AbstractRequest
      * @param mixed[] $attributes
      * @param string|string[] $for
      */
-    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $prefetchMethod = null, $for = null, ?string $description = null, ?string $inputType = null)
+    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $prefetchMethod = null, string|array|null $for = null, ?string $description = null, ?string $inputType = null)
     {
         parent::__construct($attributes, $name, $outputType);
         $this->prefetchMethod = $prefetchMethod ?? $attributes['prefetchMethod'] ?? null;

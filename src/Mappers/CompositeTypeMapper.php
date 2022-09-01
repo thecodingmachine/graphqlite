@@ -20,14 +20,14 @@ use function array_unique;
 class CompositeTypeMapper implements TypeMapperInterface
 {
     /** @var TypeMapperInterface[] */
-    private $typeMappers = [];
+    private array $typeMappers = [];
 
     /**
      * The cache of supported classes.
      *
      * @var string[]
      */
-    private $supportedClasses;
+    private ?array $supportedClasses = null;
 
     public function addTypeMapper(TypeMapperInterface $typeMapper): void
     {

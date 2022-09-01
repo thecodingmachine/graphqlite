@@ -42,7 +42,7 @@ class VoidRootTypeMapper implements RootTypeMapperInterface
      *
      * @return InputType&GraphQLType
      */
-    public function toGraphQLInputType(Type $type, ?InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
     }

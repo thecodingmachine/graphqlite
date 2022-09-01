@@ -17,15 +17,11 @@ use function substr;
  */
 class NamespacedCache implements CacheInterface
 {
-    /** @var CacheInterface */
-    private $cache;
 
-    /** @var string */
-    private $namespace;
+    private string $namespace;
 
-    public function __construct(CacheInterface $cache)
+    public function __construct(private CacheInterface $cache)
     {
-        $this->cache = $cache;
         $this->namespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
     }
 
@@ -39,7 +35,7 @@ class NamespacedCache implements CacheInterface
      *
      * @throws InvalidArgumentException MUST be thrown if the $key string is not a legal value.
      */
-    public function get($key, $default = null)
+    public function get($key, $default = null):mixed
     {
         return $this->cache->get($this->namespace . $key, $default);
     }
@@ -168,7 +164,7 @@ class NamespacedCache implements CacheInterface
      *
      * @return string[]
      */
-    private function namespacedKeys($keys): array
+    private function namespacedKeys(iterable $keys): array
     {
         $namespacedKeys = [];
         foreach ($keys as $key) {

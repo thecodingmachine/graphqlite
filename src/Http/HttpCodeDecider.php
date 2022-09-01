@@ -22,13 +22,12 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
         if ($result->data !== null && empty($result->errors)) {
             return 200;
         }
-
         $status = 0;
         // There might be many errors. Let's return the highest code we encounter.
         foreach ($result->errors as $error) {
             $wrappedException = $error->getPrevious();
             if ($wrappedException !== null) {
-                $code = (int) $wrappedException->getCode();
+                $code = $wrappedException->getCode();
                 if ($code < 400 || $code >= 600) {
                     if (! ($wrappedException instanceof ClientAware) || $wrappedException->isClientSafe() !== true) {
                         // The exception code is not a valid HTTP code. Let's ignore it
@@ -43,10 +42,10 @@ class HttpCodeDecider implements HttpCodeDeciderInterface
             } else {
                 $code = 400;
             }
-            $status = max($status, $code);
+            $status = (int) max($status, $code);
         }
 
-        // If exceptions have been thrown and they have not a "HTTP like code", let's throw a 500.
+        // If exceptions have been thrown, and they have not an "HTTP like code", let's throw a 500.
         if ($status < 200) {
             $status = 500;
         }

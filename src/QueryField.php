@@ -24,7 +24,6 @@ use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use Webmozart\Assert\Assert;
 
 use function array_unshift;
-use function get_class;
 use function is_object;
 
 /**
@@ -78,7 +77,7 @@ class QueryField extends FieldDefinition
             } catch (TypeMismatchRuntimeException $e) {
                 $class = $originalResolver->getObject();
                 if (is_object($class)) {
-                    $class = get_class($class);
+                    $class = $class::class;
                 }
 
                 $e->addInfo($this->name, $originalResolver->toString());
@@ -146,10 +145,8 @@ class QueryField extends FieldDefinition
      * This method checks the returned value of the resolver to be sure it matches the documented return type.
      * We are sure the returned value is of the correct type... except if the return type is type-hinted as an array.
      * In this case, PHP does nothing for us and we should check the user returned what he documented.
-     *
-     * @param mixed $result
      */
-    private function assertReturnType($result): void
+    private function assertReturnType(mixed $result): void
     {
         $type = $this->removeNonNull($this->getType());
         if (! $type instanceof ListOfType) {
@@ -173,7 +170,7 @@ class QueryField extends FieldDefinition
      *
      * @return QueryField
      */
-    public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, $value): self
+    public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, mixed $value): self
     {
         $callable = static function () use ($value) {
             return $value;
@@ -237,11 +234,10 @@ class QueryField extends FieldDefinition
      *
      * @param ParameterInterface[] $parameters
      * @param array<string, mixed> $args
-     * @param mixed $context
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, $context, ResolveInfo $info, callable $resolve): array
+    private function paramsToArguments(array $parameters, ?object $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
     {
         $toPassArgs = [];
         $exceptions = [];

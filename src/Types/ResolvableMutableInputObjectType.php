@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\ClientAware;
 use GraphQL\Type\Definition\ResolveInfo;
+use ReflectionException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
@@ -25,36 +26,30 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 {
     /** @var callable&array{object|string, string} */
     private $resolve;
-    /** @var ParameterInterface[] */
-    private $parameters;
-    /** @var FieldsBuilder */
-    private $fieldsBuilder;
+    /** @var ParameterInterface[]|null */
+    private ?array $parameters = null;
     /**
      * The list of decorator callables to be applied.
      *
      * @var array<int, callable&array<int, object|string>>
      */
-    private $decorators = [];
+    private array $decorators = [];
     /**
      * The list of decorator parameters to be applied.
      * The key matches the key of $this->decorators
      *
      * @var array<int, ParameterInterface[]>
      */
-    private $decoratorsParameters = [];
-    /** @var bool */
-    private $canBeInstantiatedWithoutParameters;
+    private array $decoratorsParameters = [];
 
     /**
-     * @param object|string       $factory
      * @param array<string,mixed> $additionalConfig
      */
-    public function __construct(string $name, FieldsBuilder $fieldsBuilder, $factory, string $methodName, ?string $comment, bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
+    public function __construct(string $name, private FieldsBuilder $fieldsBuilder, object|string $factory, string $methodName, ?string $comment, private bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
         $resolve = [$factory, $methodName];
         Assert::isCallable($resolve);
         $this->resolve       = $resolve;
-        $this->fieldsBuilder = $fieldsBuilder;
 
         $fields = function () {
             return InputTypeUtils::getInputTypeArgs($this->getParameters());
@@ -70,11 +65,12 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 
         $config += $additionalConfig;
         parent::__construct($config);
-        $this->canBeInstantiatedWithoutParameters = $canBeInstantiatedWithoutParameters;
     }
 
     /**
      * @return ParameterInterface[]
+     *
+     * @throws ReflectionException
      */
     private function getParameters(): array
     {
@@ -101,13 +97,13 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 
     /**
      * @param array<string, mixed> $args
-     * @param mixed                $context
      */
-    public function resolve(?object $source, array $args, $context, ResolveInfo $resolveInfo): object
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
     {
         $parameters = $this->getParameters();
 
         $toPassArgs = [];
+
         $exceptions = [];
         foreach ($parameters as $parameter) {
             try {

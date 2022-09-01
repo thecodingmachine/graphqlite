@@ -17,7 +17,7 @@ use function reset;
 class GraphQLAggregateException extends Exception implements GraphQLAggregateExceptionInterface
 {
     /** @var (ClientAware&Throwable)[] */
-    private $exceptions = [];
+    private array $exceptions = [];
 
     /**
      * @param (ClientAware&Throwable)[] $exceptions

@@ -24,22 +24,19 @@ use function str_replace;
  */
 final class StaticClassListTypeMapper extends AbstractTypeMapper
 {
-    /** @var array<int, string> The list of classes to be scanned. */
-    private $classList;
     /**
      * The array of classes.
      * Key: fully qualified class name
      *
      * @var array<string,ReflectionClass<object>>
      */
-    private $classes;
+    private ?array $classes = null;
 
     /**
      * @param array<int, string> $classList The list of classes to analyze.
      */
-    public function __construct(array $classList, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
+    public function __construct(private array $classList, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, ?int $globTTL = 2, ?int $mapTTL = null)
     {
-        $this->classList = $classList;
         $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', implode('_', $classList));
         parent::__construct($cachePrefix, $typeGenerator, $inputTypeGenerator, $inputTypeUtils, $container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $cache, $globTTL, $mapTTL);
     }

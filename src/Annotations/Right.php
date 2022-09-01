@@ -27,7 +27,7 @@ class Right implements MiddlewareAnnotationInterface
      *
      * @throws BadMethodCallException
      */
-    public function __construct($name = [])
+    public function __construct(array|string $name = [])
     {
         $data = $name;
         if (is_string($data)) {

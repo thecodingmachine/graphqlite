@@ -28,7 +28,7 @@ use function array_reduce;
 final class StaticTypeMapper implements TypeMapperInterface
 {
     /** @var array<string,MutableObjectType|MutableInterfaceType> */
-    private $types = [];
+    private array $types = [];
 
     /**
      * An array mapping a fully qualified class name to the matching TypeInterface
@@ -44,7 +44,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /** @var array<string,ResolvableMutableInputInterface&InputObjectType> */
-    private $inputTypes = [];
+    private array $inputTypes = [];
 
     /**
      * An array mapping a fully qualified class name to the matching InputTypeInterface
@@ -57,7 +57,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /** @var array<string,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> */
-    private $notMappedTypes = [];
+    private array $notMappedTypes = [];
 
     /**
      * An array containing ObjectType or ResolvableMutableInputInterface instances that are not mapped by default to any class.
@@ -78,12 +78,7 @@ final class StaticTypeMapper implements TypeMapperInterface
         }, []);
     }
 
-    /**
-     * @param ObjectType|InterfaceType $type
-     *
-     * @return MutableObjectType|MutableInterfaceType
-     */
-    private function castOutputTypeToMutable($type)
+    private function castOutputTypeToMutable(ObjectType|InterfaceType $type): MutableObjectType|MutableInterfaceType
     {
         if ($type instanceof ObjectType && ! $type instanceof MutableObjectType) {
             return new MutableObjectTypeAdapter($type);

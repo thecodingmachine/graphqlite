@@ -26,8 +26,7 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
  */
 class TypeResolver
 {
-    /** @var Schema */
-    private $schema;
+    private ?Schema $schema = null;
 
     public function registerSchema(Schema $schema): void
     {
