@@ -40,7 +40,7 @@ class UseInputType implements ParameterAnnotationInterface
             $values = ['inputType' => $values];
         }
         if (! isset($values['inputType'])) {
-            throw new BadMethodCallException('The @UseInputType annotation must be passed an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")" in PHP 7+ or #[UseInputType("MyInputType")] in PHP 8+');
+            throw new BadMethodCallException('The @UseInputType annotation must be passed an input type. For instance: #[UseInputType("MyInputType")]');
         }
         $this->inputType = $values['inputType'];
         if (! isset($values['for'])) {
@@ -53,7 +53,7 @@ class UseInputType implements ParameterAnnotationInterface
     public function getTarget(): string
     {
         if ($this->for === null) {
-            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: "@UseInputType(for="$input", inputType="MyInputType")" in PHP 7+ or #[UseInputType("MyInputType")] in PHP 8+');
+            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: #[UseInputType("MyInputType")]+');
         }
         return $this->for;
     }
