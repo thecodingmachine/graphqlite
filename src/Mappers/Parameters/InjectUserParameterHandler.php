@@ -18,12 +18,8 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
  */
 class InjectUserParameterHandler implements ParameterMiddlewareInterface
 {
-    /** @var AuthenticationServiceInterface */
-    private $authenticationService;
-
-    public function __construct(AuthenticationServiceInterface $authenticationService)
+    public function __construct(private AuthenticationServiceInterface $authenticationService)
     {
-        $this->authenticationService = $authenticationService;
     }
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface

@@ -7,6 +7,8 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use Webmozart\Assert\Assert;
 
+use function assert;
+
 /**
  * A class that represents a callable on an object.
  * The object can be modified after class invocation.
@@ -28,8 +30,7 @@ class SourceResolver implements SourceResolverInterface
 
     public function getObject(): object
     {
-        Assert::notNull($this->object);
-
+        assert($this->object !== null);
         return $this->object;
     }
 

@@ -36,6 +36,7 @@ use function array_map;
 use function array_merge;
 use function array_values;
 use function assert;
+use function count;
 use function get_class;
 use function in_array;
 use function is_a;
@@ -404,29 +405,26 @@ class AnnotationReader
             $parametersByKey[$refParameter->getName()] = true;
         }
         $diff = array_diff_key($parameterAnnotationsPerParameter, $parametersByKey);
-        if (! empty($diff)) {
+        if (count($diff) > 0) {
             foreach ($diff as $parameterName => $parameterAnnotations) {
                 throw InvalidParameterException::parameterNotFound($parameterName, get_class($parameterAnnotations[0]), $method);
             }
         }
 
-        // Now, let's add PHP 8 parameter attributes
-        if (PHP_MAJOR_VERSION >= 8) {
-            foreach ($refParameters as $refParameter) {
-                Assert::methodExists($refParameter, 'getAttributes');
-                $attributes = $refParameter->getAttributes();
-                $parameterAnnotationsPerParameter[$refParameter->getName()] = [...$parameterAnnotationsPerParameter[$refParameter->getName()] ??
+        foreach ($refParameters as $refParameter) {
+            Assert::methodExists($refParameter, 'getAttributes');
+            $attributes = $refParameter->getAttributes();
+            $parameterAnnotationsPerParameter[$refParameter->getName()] = [...$parameterAnnotationsPerParameter[$refParameter->getName()] ??
                 [],
-                    ...array_map(
-                        static function ($attribute) {
-                            return $attribute->newInstance();
-                        },
-                        array_filter($attributes, static function ($annotation): bool {
-                            return is_a($annotation->getName(), ParameterAnnotationInterface::class, true);
-                        })
-                    ),
-                ];
-            }
+                ...array_map(
+                    static function ($attribute) {
+                        return $attribute->newInstance();
+                    },
+                    array_filter($attributes, static function ($annotation): bool {
+                        return is_a($annotation->getName(), ParameterAnnotationInterface::class, true);
+                    })
+                ),
+            ];
         }
 
         return array_map(static function (array $parameterAnnotations) {

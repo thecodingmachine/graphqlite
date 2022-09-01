@@ -14,7 +14,7 @@ class ResolveInfoParameter implements ParameterInterface
     /**
      * @param array<string, mixed> $args
      */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): ResolveInfo
     {
         return $info;
     }
