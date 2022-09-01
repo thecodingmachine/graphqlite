@@ -17,17 +17,14 @@ use function class_exists;
  */
 class BasicAutoWiringContainer implements ContainerInterface
 {
-    /** @var ContainerInterface */
-    private $container;
     /** @var object[] */
-    private $values = [];
+    private array $values = [];
 
     /**
      * @param ContainerInterface $container The proxied container.
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(private ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
     /**
@@ -42,7 +39,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function get($id): mixed
+    public function get(string $id): mixed
     {
         if (isset($this->values[$id])) {
             return $this->values[$id];
@@ -76,7 +73,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function has($id): bool
+    public function has(string $id): bool
     {
         if (isset($this->values[$id])) {
             return true;

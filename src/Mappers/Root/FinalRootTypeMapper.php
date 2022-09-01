@@ -31,6 +31,7 @@ final class FinalRootTypeMapper implements RootTypeMapperInterface
      * @param (OutputType&GraphQLType)|null $subType
      *
      * @return OutputType&GraphQLType
+     *
      * @throws CannotMapTypeException
      */
     public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType

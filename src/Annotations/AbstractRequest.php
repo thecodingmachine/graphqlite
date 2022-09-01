@@ -6,11 +6,9 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 abstract class AbstractRequest
 {
-    /** @var string|null */
-    private $outputType;
+    private ?string $outputType;
 
-    /** @var string|null */
-    private $name;
+    private ?string $name;
 
     /**
      * @param mixed[] $attributes

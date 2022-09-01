@@ -14,15 +14,11 @@ use function count;
  */
 class ParameterAnnotations
 {
-    /** @var array<int, ParameterAnnotationInterface> */
-    private $annotations;
-
     /**
      * @param array<int, ParameterAnnotationInterface> $annotations
      */
-    public function __construct(array $annotations)
+    public function __construct(private array $annotations)
     {
-        $this->annotations = $annotations;
     }
 
     /**
