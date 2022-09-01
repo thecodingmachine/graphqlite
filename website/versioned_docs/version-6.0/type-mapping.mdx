@@ -383,7 +383,7 @@ in the **ISO8601** format (aka ATOM format).
 
 ## Union types
 
-You can create a GraphQL union type *on the fly* using the pipe `|` operator in the PHPDoc:
+Union types for return are supported in GraphQLite as of version 6.0:
 
 <Tabs
   defaultValue="php8"
@@ -394,11 +394,8 @@ You can create a GraphQL union type *on the fly* using the pipe `|` operator in 
   <TabItem value="php8">
 
 ```php
-/**
- * @return Company|Contact <== can return a company OR a contact.
- */
 #[Query]
-public function companyOrContact(int $id)
+public function companyOrContact(int $id): Company|Contact
 {
     // Some code that returns a company or a contact.
 }
@@ -410,7 +407,7 @@ public function companyOrContact(int $id)
 ```php
 /**
  * @Query
- * @return Company|Contact <== can return a company OR a contact.
+ * @return Company|Contact
  */
 public function companyOrContact(int $id)
 {
