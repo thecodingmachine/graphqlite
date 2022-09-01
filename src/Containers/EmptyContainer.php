@@ -16,7 +16,7 @@ class EmptyContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function get(string $id): void
+    public function get($id): void
     {
         throw NotFoundException::notFound($id);
     }
@@ -26,7 +26,7 @@ class EmptyContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function has(string $id): bool
+    public function has($id)
     {
         return false;
     }
