@@ -24,6 +24,7 @@ use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use Webmozart\Assert\Assert;
 
 use function array_unshift;
+use function assert;
 use function is_object;
 
 /**
@@ -202,9 +203,11 @@ class QueryField extends FieldDefinition
 
     private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
+        $type = $fieldDescriptor->getType();
+        assert($type !== null);
         return new self(
             $fieldDescriptor->getName(),
-            $fieldDescriptor->getType(),
+            $type,
             $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),

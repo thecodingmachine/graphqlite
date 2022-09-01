@@ -25,42 +25,29 @@ use function is_array;
  */
 class QueryFieldDescriptor
 {
-    /** @var string */
-    private $name;
-    /** @var OutputType&Type */
-    private $type;
+    private string $name;
+    /** @var (OutputType&Type)|null */
+    private ?Type $type  = null;
     /** @var array<string, ParameterInterface> */
-    private $parameters = [];
+    private array $parameters = [];
     /** @var array<string, ParameterInterface> */
-    private $prefetchParameters = [];
-    /** @var string|null */
-    private $prefetchMethodName;
+    private array $prefetchParameters = [];
+    private ?string $prefetchMethodName = null;
     /** @var callable|null */
     private $callable;
-    /** @var string|null */
-    private $targetMethodOnSource;
-    /** @var string|null */
-    private $targetPropertyOnSource;
-    /** @var string|null */
-    private $magicProperty;
+    private ?string $targetMethodOnSource = null;
+    private ?string $targetPropertyOnSource = null;
+    private ?string $magicProperty = null;
     /**
      * Whether we should inject the source as the first parameter or not.
-     *
-     * @var bool
      */
-    private $injectSource;
-    /** @var string|null */
-    private $comment;
-    /** @var string|null */
-    private $deprecationReason;
-    /** @var MiddlewareAnnotations */
-    private $middlewareAnnotations;
-    /** @var ReflectionMethod */
-    private $refMethod;
-    /** @var ReflectionProperty */
-    private $refProperty;
-    /** @var ResolverInterface|null */
-    private $originalResolver;
+    private bool $injectSource;
+    private ?string $comment = null;
+    private ?string $deprecationReason = null;
+    private MiddlewareAnnotations $middlewareAnnotations;
+    private ReflectionMethod $refMethod;
+    private ReflectionProperty $refProperty;
+    private ?ResolverInterface $originalResolver = null;
     /** @var callable */
     private $resolver;
 
@@ -75,9 +62,9 @@ class QueryFieldDescriptor
     }
 
     /**
-     * @return OutputType&Type
+     * @return (OutputType&Type)|null
      */
-    public function getType()
+    public function getType(): ?Type
     {
         return $this->type;
     }
@@ -85,7 +72,7 @@ class QueryFieldDescriptor
     /**
      * @param OutputType&Type $type
      */
-    public function setType($type): void
+    public function setType(Type $type): void
     {
         $this->type = $type;
     }

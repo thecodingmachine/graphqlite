@@ -53,7 +53,7 @@ class UseInputType implements ParameterAnnotationInterface
     public function getTarget(): string
     {
         if ($this->for === null) {
-            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: #[UseInputType("MyInputType")]+');
+            throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: #[UseInputType("MyInputType")]');
         }
         return $this->for;
     }
