@@ -51,6 +51,7 @@ use function array_diff_key;
 use function array_fill_keys;
 use function array_intersect_key;
 use function array_keys;
+use function array_merge;
 use function array_shift;
 use function assert;
 use function count;
@@ -181,10 +182,10 @@ class FieldsBuilder
                 throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
             }
 
-            $reflectorByFields = [
-                ...$reflectorByFields,
-                ...array_fill_keys(array_keys($fields), $reflector),
-            ];
+            $reflectorByFields = array_merge(
+                $reflectorByFields,
+                array_fill_keys(array_keys($fields), $reflector),
+            );
 
             $inputFields = [...$inputFields, ...$fields];
         }
@@ -314,10 +315,10 @@ class FieldsBuilder
                 throw DuplicateMappingException::createForQuery($refClass->getName(), $name, $reflectorByFields[$name], $reflector);
             }
 
-            $reflectorByFields = [
-                ...$reflectorByFields,
-                ...array_fill_keys(array_keys($fields), $reflector),
-            ];
+            $reflectorByFields = array_merge(
+                $reflectorByFields,
+                array_fill_keys(array_keys($fields), $reflector),
+            );
 
             $queryList = [...$queryList, ...$fields];
         }

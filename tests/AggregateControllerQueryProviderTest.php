@@ -19,22 +19,16 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $container = new class([ 'controller' => $controller ]) implements ContainerInterface {
 
-            /**
-             * @var array
-             */
-            private $controllers;
-
-            public function __construct(array $controllers)
+            public function __construct(private array $controllers)
             {
-                $this->controllers = $controllers;
             }
 
-            public function get($id)
+            public function get($id):mixed
             {
                 return $this->controllers[$id];
             }
 
-            public function has($id)
+            public function has($id):bool
             {
                 return isset($this->controllers[$id]);
             }

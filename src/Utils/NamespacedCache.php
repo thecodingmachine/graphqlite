@@ -35,7 +35,7 @@ class NamespacedCache implements CacheInterface
      *
      * @throws InvalidArgumentException MUST be thrown if the $key string is not a legal value.
      */
-    public function get($key, $default = null)
+    public function get($key, $default = null):mixed
     {
         return $this->cache->get($this->namespace . $key, $default);
     }

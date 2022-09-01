@@ -26,7 +26,7 @@ class EmptyContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function has($id)
+    public function has($id): bool
     {
         return false;
     }

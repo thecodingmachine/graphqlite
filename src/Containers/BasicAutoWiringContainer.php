@@ -39,7 +39,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function get($id)
+    public function get($id): mixed
     {
         if (isset($this->values[$id])) {
             return $this->values[$id];
@@ -73,7 +73,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function has($id)
+    public function has($id): bool
     {
         if (isset($this->values[$id])) {
             return true;

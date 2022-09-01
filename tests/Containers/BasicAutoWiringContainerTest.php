@@ -1,25 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Containers;
 
-use GraphQL\Type\Definition\ObjectType;
-use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
-use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
 class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
 {
     private function getContainer(): ContainerInterface
     {
         return new class implements ContainerInterface {
-            public function get($id)
+            public function get($id):string
             {
                 return 'foo';
             }
 
-            public function has($id)
+            public function has($id): bool
             {
                 return $id === 'foo';
             }
