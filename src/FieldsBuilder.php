@@ -320,7 +320,7 @@ class FieldsBuilder
                 array_fill_keys(array_keys($fields), $reflector),
             );
 
-            $queryList = [...$queryList, ...$fields];
+            $queryList = array_merge($queryList, $fields);
         }
 
         return $queryList;
