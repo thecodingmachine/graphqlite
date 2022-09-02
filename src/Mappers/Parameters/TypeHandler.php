@@ -105,7 +105,7 @@ class TypeHandler implements ParameterHandlerInterface
 
     private function getDocBlocReturnType(DocBlock $docBlock, ReflectionMethod $refMethod): ?Type
     {
-        /** @var Return_[] $returnTypeTags */
+        /** @var array<int,Return_> $returnTypeTags */
         $returnTypeTags = $docBlock->getTagsByName('return');
         if (count($returnTypeTags) > 1) {
             throw InvalidDocBlockRuntimeException::tooManyReturnTags($refMethod);

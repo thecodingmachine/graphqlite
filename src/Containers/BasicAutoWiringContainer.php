@@ -17,7 +17,7 @@ use function class_exists;
  */
 class BasicAutoWiringContainer implements ContainerInterface
 {
-    /** @var object[] */
+    /** @var array<string|int,object> */
     private array $values = [];
 
     /**

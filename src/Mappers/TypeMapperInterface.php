@@ -58,7 +58,7 @@ interface TypeMapperInterface
     /**
      * Returns the list of classes that have matching GraphQL types.
      *
-     * @return class-string<object>[]
+     * @return array<int,class-string<object>>
      */
     public function getSupportedClasses(): array;
 

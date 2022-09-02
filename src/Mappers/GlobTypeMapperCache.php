@@ -19,7 +19,7 @@ class GlobTypeMapperCache
     private array $mapNameToType = [];
     /** @var array<class-string<object>,array{0: class-string<object>, 1: string}> Maps a domain class to the factory method that creates the input type in the form [classname, methodName] */
     private array $mapClassToFactory = [];
-    /** @var array<string,string[]> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodName] */
+    /** @var array<string,array<int,string>> Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodName] */
     private array $mapInputNameToFactory = [];
     /** @var array<string,array<int, array{0: class-string<object>, 1: string}>> Maps a GraphQL type name to one or many decorators (with the @Decorator annotation) */
     private array $mapInputNameToDecorator = [];
@@ -113,7 +113,7 @@ class GlobTypeMapperCache
     }
 
     /**
-     * @return string[] Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname]
+     * @return array<int,string>|null Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname]
      */
     public function getFactoryByGraphQLInputTypeName(string $graphqlTypeName): ?array
     {

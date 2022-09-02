@@ -64,7 +64,7 @@ class AnnotationReader
 
     /**
      * @param string $mode One of self::LAX_MODE or self::STRICT_MODE. If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
-     * @param string[] $strictNamespaces Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
+     * @param array<int,string> $strictNamespaces Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
      */
     public function __construct(private Reader $reader, private string $mode = self::STRICT_MODE, private array $strictNamespaces = [])
     {
@@ -250,7 +250,7 @@ class AnnotationReader
     /**
      * @param ReflectionClass<T> $refClass
      *
-     * @return Input[]
+     * @return array<int,Input>
      *
      * @throws AnnotationException
      *
@@ -259,7 +259,7 @@ class AnnotationReader
     public function getInputAnnotations(ReflectionClass $refClass): array
     {
         try {
-            /** @var Input[] $inputs */
+            /** @var array<int,Input> $inputs */
             $inputs = $this->getClassAnnotations($refClass, Input::class, false);
             foreach ($inputs as $input) {
                 $input->setClass($refClass->getName());
@@ -377,7 +377,7 @@ class AnnotationReader
         $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
 
         /**
-         * @var array<string, ParameterAnnotations[]> $parameterAnnotationsPerParameter
+         * @var array<string, array<int,ParameterAnnotations>> $parameterAnnotationsPerParameter
          */
         $parameterAnnotationsPerParameter = [];
         foreach ($parameterAnnotations as $parameterAnnotation) {

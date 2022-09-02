@@ -267,7 +267,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /**
      * Returns the list of classes that have matching input GraphQL types.
      *
-     * @return string[]
+     * @return array<int,string>
      */
     public function getSupportedClasses(): array
     {

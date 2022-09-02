@@ -33,9 +33,9 @@ use const JSON_ERROR_NONE;
 final class WebonyxGraphqlMiddleware implements MiddlewareInterface
 {
     private StandardServer $standardServer;
-    /** @var string[] */
+    /** @var array<int,string> */
     private array $graphqlHeaderList = ['application/graphql'];
-    /** @var string[] */
+    /** @var array<int,string> */
     private array $allowedMethods = [
         'GET',
         'POST',
@@ -82,7 +82,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param ExecutionResult|ExecutionResult[]|Promise $result
+     * @param ExecutionResult|array<int,ExecutionResult>|Promise $result
      *
      * @return mixed[]
      */
@@ -106,7 +106,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param ExecutionResult|ExecutionResult[]|Promise $result
+     * @param ExecutionResult|array<int,ExecutionResult>|Promise $result
      */
     private function decideHttpCode(ExecutionResult|array|Promise $result): int
     {

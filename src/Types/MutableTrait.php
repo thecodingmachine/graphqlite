@@ -18,7 +18,7 @@ trait MutableTrait
 {
     private ?string $status = null;
 
-    /** @var array<callable> */
+    /** @var array<int,callable> */
     private array $fieldsCallables = [];
 
     /** @var array<string,FieldDefinition>|null */
@@ -86,7 +86,7 @@ trait MutableTrait
     }
 
     /**
-     * @return string[]
+     * @return array<int,string>
      */
     public function getFieldNames(): array
     {

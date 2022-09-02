@@ -19,13 +19,13 @@ use function array_unique;
 
 class CompositeTypeMapper implements TypeMapperInterface
 {
-    /** @var TypeMapperInterface[] */
+    /** @var array<int,TypeMapperInterface> */
     private array $typeMappers = [];
 
     /**
      * The cache of supported classes.
      *
-     * @var string[]
+     * @var array<int,string>
      */
     private ?array $supportedClasses = null;
 
@@ -72,7 +72,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     /**
      * Returns the list of classes that have matching input GraphQL types.
      *
-     * @return string[]
+     * @return array<int,string>
      */
     public function getSupportedClasses(): array
     {

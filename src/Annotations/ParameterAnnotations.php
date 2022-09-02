@@ -14,7 +14,7 @@ use function count;
 class ParameterAnnotations
 {
     /**
-     * @param ParameterAnnotationInterface[] $annotations
+     * @param array<int,ParameterAnnotationInterface> $annotations
      */
     public function __construct(private array $annotations)
     {
@@ -25,7 +25,7 @@ class ParameterAnnotations
      *
      * @param class-string<T> $className
      *
-     * @return T[]
+     * @return array<int,T>
      *
      * @template T of ParameterAnnotationInterface
      */
@@ -61,7 +61,7 @@ class ParameterAnnotations
     }
 
     /**
-     * @return ParameterAnnotationInterface[]
+     * @return array<int,ParameterAnnotationInterface>
      */
     public function getAllAnnotations(): array
     {

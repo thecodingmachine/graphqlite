@@ -68,7 +68,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     /**
      * Returns an array of fully qualified class names.
      *
-     * @return string[]
+     * @return array<int,string>
      */
     private function getInstancesList(): array
     {
@@ -85,7 +85,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     }
 
     /**
-     * @return string[]
+     * @return array<int,string>
      */
     private function buildInstancesList(): array
     {
