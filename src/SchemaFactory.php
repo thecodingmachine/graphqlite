@@ -74,10 +74,10 @@ class SchemaFactory
     public const GLOB_CACHE_SECONDS = 2;
 
 
-    /** @var string[] */
+    /** @var array<int,string> */
     private array $controllerNamespaces = [];
 
-    /** @var string[] */
+    /** @var array<int,string> */
     private array $typeNamespaces = [];
 
     /** @var QueryProviderInterface[] */

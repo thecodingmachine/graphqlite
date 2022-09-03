@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
-use Webmozart\Assert\Assert;
+
+use function assert;
+use function is_callable;
 
 /**
  * A class that represents a callable on an object.
@@ -28,8 +30,7 @@ class SourceResolver implements SourceResolverInterface
 
     public function getObject(): object
     {
-        Assert::notNull($this->object);
-
+        assert($this->object !== null);
         return $this->object;
     }
 
@@ -39,7 +40,7 @@ class SourceResolver implements SourceResolverInterface
             throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
         }
         $callable = [$this->object, $this->methodName];
-        Assert::isCallable($callable);
+        assert(is_callable($callable));
 
         return $callable(...$args);
     }

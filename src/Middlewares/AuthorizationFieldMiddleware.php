@@ -16,7 +16,6 @@ use TheCodingMachine\GraphQLite\QueryField;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
-use Webmozart\Assert\Assert;
 
 use function assert;
 
@@ -43,11 +42,11 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         $failWith = $annotations->getAnnotationByType(FailWith::class);
         assert($failWith === null || $failWith instanceof FailWith);
 
-        // If the failWith value is null and the return type is non nullable, we must set it to nullable.
+        // If the failWith value is null and the return type is non-nullable, we must set it to nullable.
         $type = $queryFieldDescriptor->getType();
         if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
             $type = $type->getWrappedType();
-            Assert::isInstanceOf($type, OutputType::class);
+            assert($type instanceof OutputType);
             $queryFieldDescriptor->setType($type);
         }
 

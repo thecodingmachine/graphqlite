@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
@@ -42,7 +43,6 @@ use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use Webmozart\Assert\Assert;
 
 use function array_map;
 use function array_unique;
@@ -105,7 +105,7 @@ class TypeHandler implements ParameterHandlerInterface
 
     private function getDocBlocReturnType(DocBlock $docBlock, ReflectionMethod $refMethod): ?Type
     {
-        /** @var Return_[] $returnTypeTags */
+        /** @var array<int,Return_> $returnTypeTags */
         $returnTypeTags = $docBlock->getTagsByName('return');
         if (count($returnTypeTags) > 1) {
             throw InvalidDocBlockRuntimeException::tooManyReturnTags($refMethod);
@@ -166,13 +166,15 @@ class TypeHandler implements ParameterHandlerInterface
                 //throw MissingTypeHintException::missingTypeHint($parameter);
             } else {
                 $declaringClass = $parameter->getDeclaringClass();
-                Assert::notNull($declaringClass);
+                assert($declaringClass !== null);
                 $phpdocType = $this->reflectionTypeToPhpDocType($parameterType, $declaringClass);
             }
 
             try {
                 $declaringFunction = $parameter->getDeclaringFunction();
-                Assert::isInstanceOf($declaringFunction, ReflectionMethod::class, 'Parameter of a function passed. Only parameters of methods are supported.');
+                if (! $declaringFunction instanceof ReflectionMethod) {
+                    throw new InvalidArgumentException('Parameter of a function passed. Only parameters of methods are supported.');
+                }
                 $type = $this->mapType(
                     $phpdocType,
                     $paramTagType,
@@ -182,7 +184,7 @@ class TypeHandler implements ParameterHandlerInterface
                     $docBlock,
                     $parameter->getName()
                 );
-                Assert::isInstanceOf($type, InputType::class);
+                assert($type instanceof InputType);
             } catch (CannotMapTypeExceptionInterface $e) {
                 $e->addParamInfo($parameter);
                 throw $e;
@@ -336,7 +338,7 @@ class TypeHandler implements ParameterHandlerInterface
                 throw CannotMapTypeException::createForMissingPhpDoc($innerType, $reflector, $argumentName);
             }
             if ($mapToInputType === true) {
-                Assert::notNull($argumentName);
+                assert($argumentName !== null);
                 $graphQlType = $this->rootTypeMapper->toGraphQLInputType($docBlockType, null, $argumentName, $reflector, $docBlockObj);
             } else {
                 $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($docBlockType, null, $reflector, $docBlockObj);
@@ -344,7 +346,7 @@ class TypeHandler implements ParameterHandlerInterface
         } else {
             $completeType = $this->appendTypes($type, $docBlockType);
             if ($mapToInputType === true) {
-                Assert::notNull($argumentName);
+                assert($argumentName !== null);
                 $graphQlType = $this->rootTypeMapper->toGraphQLInputType($completeType, null, $argumentName, $reflector, $docBlockObj);
             } else {
                 $graphQlType = $this->rootTypeMapper->toGraphQLOutputType($completeType, null, $reflector, $docBlockObj);
@@ -403,7 +405,7 @@ class TypeHandler implements ParameterHandlerInterface
         assert($type instanceof ReflectionNamedType || $type instanceof ReflectionUnionType);
         if ($type instanceof ReflectionNamedType) {
             $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
-            Assert::notNull($phpdocType);
+            assert($phpdocType !== null);
 
             $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
 
@@ -418,7 +420,7 @@ class TypeHandler implements ParameterHandlerInterface
                 function ($namedType) use ($reflectionClass): Type {
                     assert($namedType instanceof ReflectionNamedType);
                     $phpdocType = $this->phpDocumentorTypeResolver->resolve($namedType->getName());
-                    Assert::notNull($phpdocType);
+                    assert($phpdocType !== null);
 
                     $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
 

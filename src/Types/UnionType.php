@@ -14,7 +14,7 @@ use function is_object;
 class UnionType extends \GraphQL\Type\Definition\UnionType
 {
     /**
-     * @param ObjectType[] $types
+     * @param array<int,ObjectType> $types
      */
     public function __construct(array $types, RecursiveTypeMapperInterface $typeMapper)
     {

@@ -10,7 +10,6 @@ use GraphQL\Type\SchemaConfig;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use Webmozart\Assert\Assert;
 
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
@@ -24,13 +23,6 @@ class Schema extends \GraphQL\Type\Schema
         if ($config === null) {
             $config = SchemaConfig::create();
         }
-
-        // TODO: change parameter order, drop compatibility with 3.0
-        Assert::notNull($rootTypeMapper);
-        /*if ($rootTypeMapper === null) {
-            // For compatibility reasons with 3.0, the $rootTypeMapper parameter is optional.
-            $rootTypeMapper = new BaseTypeMapper($recursiveTypeMapper);
-        }*/
 
         $query    = new ObjectType([
             'name' => 'Query',

@@ -1,26 +1,19 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
-
 
 use GraphQL\Type\Definition\ResolveInfo;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 class HardCodedParameter implements ParameterInterface
 {
-    private $value;
-
-    /**
-     * @param mixed $value
-     */
-    public function __construct($value)
+    public function __construct(private mixed $value)
     {
-
-        $this->value = $value;
     }
 
-    public function resolve(?object $source, array $args,mixed $context, ResolveInfo $info):mixed
+    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         return $this->value;
     }

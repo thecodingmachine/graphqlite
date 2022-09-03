@@ -27,7 +27,7 @@ class SecurityExpressionLanguageProvider implements ExpressionFunctionProviderIn
             }),
 
             new ExpressionFunction('is_logged', static function (): string {
-                return sprintf('$authenticationService->isLogged()');
+                return '$authenticationService->isLogged()';
             }, static function (array $variables): bool {
                 return $variables['authenticationService']->isLogged();
             }),

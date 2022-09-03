@@ -23,7 +23,6 @@ use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use Webmozart\Assert\Assert;
 
 use function assert;
 use function count;
@@ -67,8 +66,8 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         if ($result === null) {
             return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }
-        Assert::isInstanceOf($result, OutputType::class);
-        Assert::notInstanceOf($result, NonNull::class);
+        assert($result instanceof OutputType);
+        assert(! $result instanceof NonNull);
 
         return $result;
     }
@@ -94,8 +93,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         if ($result === null) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }
-        Assert::isInstanceOf($result, InputType::class);
-
+        assert($result instanceof InputType);
         return $result;
     }
 
@@ -194,7 +192,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 // This clearly cannot work. We are only gathering types from arrays and we cannot join arrays (I think)
                 $graphQlType = new UnionType($unionTypes, $this->recursiveTypeMapper);
                 $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
-                Assert::isInstanceOf($graphQlType, OutputType::class);*/
+                assert(($graphQlType instanceof OutputType))*/
         } else {
             // There are no union input types. Something went wrong.
             $graphQlType = null;

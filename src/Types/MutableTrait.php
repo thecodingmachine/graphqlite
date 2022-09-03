@@ -13,14 +13,12 @@ use function array_keys;
 use function array_merge;
 use function array_unique;
 use function assert;
-use function is_array;
-use function is_string;
 
 trait MutableTrait
 {
     private ?string $status = null;
 
-    /** @var array<callable> */
+    /** @var array<int,callable> */
     private array $fieldsCallables = [];
 
     /** @var array<string,FieldDefinition>|null */
@@ -35,7 +33,7 @@ trait MutableTrait
 
     public function getStatus(): string
     {
-        assert(is_string($this->status));
+        assert($this->status !== null);
         return $this->status;
     }
 
@@ -83,17 +81,17 @@ trait MutableTrait
     public function getFields(): array
     {
         $this->initializeFields();
-        assert(is_array($this->fields));
+        assert($this->fields !== null);
         return array_merge(parent::getFields(), $this->fields);
     }
 
     /**
-     * @return string[]
+     * @return array<int,string>
      */
     public function getFieldNames(): array
     {
         $this->initializeFields();
-        assert(is_array($this->fields));
+        assert($this->fields !== null);
 
         return array_unique([...parent::getFieldNames(), ...array_keys($this->fields)]);
     }

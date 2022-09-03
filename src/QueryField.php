@@ -21,9 +21,10 @@ use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
-use Webmozart\Assert\Assert;
 
 use function array_unshift;
+use function assert;
+use function is_callable;
 use function is_object;
 
 /**
@@ -63,7 +64,6 @@ class QueryField extends FieldDefinition
                 $method = $resolve;
             } elseif ($targetMethodOnSource !== null) {
                 $method = [$source, $targetMethodOnSource];
-                Assert::isCallable($method);
             } else {
                 throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
             }*/
@@ -113,11 +113,11 @@ class QueryField extends FieldDefinition
 
                         $sources = $prefetchBuffer->getObjectsByArguments($args);
 
-                        Assert::isCallable($prefetchCallable);
+                        assert(is_callable($prefetchCallable));
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
-                        Assert::isCallable($prefetchCallable);
+                        assert(is_callable($prefetchCallable));
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
                         $prefetchBuffer->storeResult($prefetchResult, $args);
                     } else {
@@ -202,9 +202,11 @@ class QueryField extends FieldDefinition
 
     private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
+        $type = $fieldDescriptor->getType();
+        assert($type !== null);
         return new self(
             $fieldDescriptor->getName(),
-            $fieldDescriptor->getType(),
+            $type,
             $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),

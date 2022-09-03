@@ -14,10 +14,11 @@ use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use Webmozart\Assert\Assert;
 
+use function assert;
 use function count;
 use function is_array;
+use function is_callable;
 
 /**
  * A GraphQL input object that can be resolved using a factory
@@ -48,7 +49,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     public function __construct(string $name, private FieldsBuilder $fieldsBuilder, object|string $factory, string $methodName, ?string $comment, private bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
         $resolve = [$factory, $methodName];
-        Assert::isCallable($resolve);
+        assert(is_callable($resolve));
         $this->resolve       = $resolve;
 
         $fields = function () {

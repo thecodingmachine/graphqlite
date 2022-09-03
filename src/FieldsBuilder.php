@@ -45,7 +45,6 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
-use Webmozart\Assert\Assert;
 
 use function array_diff_key;
 use function array_fill_keys;
@@ -57,6 +56,7 @@ use function assert;
 use function count;
 use function get_parent_class;
 use function in_array;
+use function is_callable;
 use function is_string;
 use function key;
 use function reset;
@@ -71,12 +71,11 @@ use const PHP_EOL;
  */
 class FieldsBuilder
 {
-    private RecursiveTypeMapperInterface $recursiveTypeMapper;
     private TypeHandler $typeMapper;
 
     public function __construct(
         private AnnotationReader $annotationReader,
-        RecursiveTypeMapperInterface $typeMapper,
+        private RecursiveTypeMapperInterface $recursiveTypeMapper,
         private ArgumentResolver $argumentResolver,
         private TypeResolver $typeResolver,
         private CachedDocBlockFactory $cachedDocBlockFactory,
@@ -85,9 +84,9 @@ class FieldsBuilder
         private ParameterMiddlewareInterface $parameterMapper,
         private FieldMiddlewareInterface $fieldMiddleware,
         private InputFieldMiddlewareInterface $inputFieldMiddleware
-    ) {
-        $this->recursiveTypeMapper   = $typeMapper;
-        $this->typeMapper            = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
+    )
+    {
+        $this->typeMapper = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
     }
 
     /**
@@ -119,7 +118,6 @@ class FieldsBuilder
 
         $refClass = new ReflectionClass($controller);
 
-        /** @var SourceFieldInterface[] $sourceFields */
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         if ($controller instanceof FromSourceFieldsInterface) {
@@ -283,7 +281,7 @@ class FieldsBuilder
         $reflectorByFields = [];
 
         $oldDeclaringClass = null;
-        $context           = null;
+        $context = null;
 
         $closestMatchingTypeClass = null;
         if ($annotationName === Field::class) {
@@ -359,10 +357,10 @@ class FieldsBuilder
             $fieldDescriptor = new QueryFieldDescriptor();
             $fieldDescriptor->setRefMethod($refMethod);
 
-            $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlockObj));
 
-            $name       = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
+            $name = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
             if (! $description) {
                 $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
@@ -408,7 +406,7 @@ class FieldsBuilder
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
             } else {
                 $callable = [$controller, $methodName];
-                Assert::isCallable($callable);
+                assert(is_callable($callable));
                 $fieldDescriptor->setCallable($callable);
             }
 
@@ -465,7 +463,7 @@ class FieldsBuilder
             $fieldDescriptor = new QueryFieldDescriptor();
             $fieldDescriptor->setRefProperty($refProperty);
 
-            $docBlock        = $this->cachedDocBlockFactory->getDocBlock($refProperty);
+            $docBlock = $this->cachedDocBlockFactory->getDocBlock($refProperty);
             $fieldDescriptor->setDeprecationReason($this->getDeprecationReason($docBlock));
             $name = $queryAnnotation->getName() ?: $refProperty->getName();
 
@@ -546,7 +544,7 @@ class FieldsBuilder
             return [];
         }
 
-        $typeField       = $this->annotationReader->getTypeAnnotation($refClass);
+        $typeField = $this->annotationReader->getTypeAnnotation($refClass);
         $extendTypeField = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
         if ($typeField !== null) {
@@ -556,7 +554,7 @@ class FieldsBuilder
             if ($objectClass === null) {
                 // We need to be able to fetch the mapped PHP class from the object type!
                 $typeName = $extendTypeField->getName();
-                Assert::notNull($typeName);
+                assert($typeName !== null);
                 $targetedType = $this->recursiveTypeMapper->mapNameToType($typeName);
                 if (! $targetedType instanceof MutableObjectType) {
                     throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendTypeField);
@@ -573,8 +571,8 @@ class FieldsBuilder
         $objectRefClass = new ReflectionClass($objectClass);
 
         $oldDeclaringClass = null;
-        $context           = null;
-        $queryList         = [];
+        $context = null;
+        $queryList = [];
 
         foreach ($sourceFields as $sourceField) {
             $fieldDescriptor = new QueryFieldDescriptor();
@@ -590,10 +588,10 @@ class FieldsBuilder
                 $methodName = $refMethod->getName();
                 $fieldDescriptor->setTargetMethodOnSource($methodName);
 
-                $docBlockObj     = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+                $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
                 $docBlockComment = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
 
-                $deprecated      = $docBlockObj->getTagsByName('deprecated');
+                $deprecated = $docBlockObj->getTagsByName('deprecated');
                 if (count($deprecated) >= 1) {
                     $fieldDescriptor->setDeprecationReason(trim((string) $deprecated[0]));
                 }
@@ -622,7 +620,7 @@ class FieldsBuilder
                     $type = $this->resolveOutputType($outputType, $refClass, $sourceField);
                 } else {
                     $phpTypeStr = $sourceField->getPhpType();
-                    Assert::notNull($phpTypeStr);
+                    assert($phpTypeStr !== null);
                     $magicGefRefMethod = $this->getMagicGetMethodFromSourceClassOrProxy($refClass);
 
                     $type = $this->resolvePhpType($phpTypeStr, $refClass, $magicGefRefMethod);
@@ -702,7 +700,7 @@ class FieldsBuilder
 
         $context = $this->cachedDocBlockFactory->getContextFromClass($refClass);
         $phpdocType = $typeResolver->resolve($phpTypeStr, $context);
-        Assert::notNull($phpdocType);
+        assert($phpdocType !== null);
 
         $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $context);
         return $this->typeMapper->mapReturnType($refMethod, $fakeDocBlock);

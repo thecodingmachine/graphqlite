@@ -13,9 +13,10 @@ use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use Webmozart\Assert\Assert;
 
+use function assert;
 use function filemtime;
+use function is_string;
 use function md5;
 
 /**
@@ -52,7 +53,7 @@ class CachedDocBlockFactory
         }
 
         $fileName = $reflector->getDeclaringClass()->getFileName();
-        Assert::string($fileName);
+        assert(is_string($fileName));
 
         $cacheItem = $this->cache->get($key);
         if ($cacheItem !== null) {
@@ -106,7 +107,7 @@ class CachedDocBlockFactory
         $key = 'docblockcontext_' . md5($className);
 
         $fileName = $reflectionClass->getFileName();
-        Assert::string($fileName);
+        assert(is_string($fileName));
 
         $cacheItem = $this->cache->get($key);
         if ($cacheItem !== null) {

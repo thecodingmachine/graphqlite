@@ -162,7 +162,7 @@ class NamespacedCache implements CacheInterface
     /**
      * @param iterable<int|string, string> $keys
      *
-     * @return string[]
+     * @return array<int,string>
      */
     private function namespacedKeys(iterable $keys): array
     {

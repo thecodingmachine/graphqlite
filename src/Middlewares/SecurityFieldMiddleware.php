@@ -15,11 +15,11 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use Throwable;
-use Webmozart\Assert\Assert;
 
 use function array_combine;
 use function array_keys;
 use function assert;
+use function is_array;
 
 /**
  * A field middleware that reads "Security" Symfony annotations.
@@ -61,7 +61,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             }
             if ($makeReturnTypeNullable) {
                 $type = $type->getWrappedType();
-                Assert::isInstanceOf($type, OutputType::class);
+                assert($type instanceof OutputType);
                 $queryFieldDescriptor->setType($type);
             }
         }
@@ -117,7 +117,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
-        Assert::isArray($argsByName);
+        assert(is_array($argsByName));
 
         /*if ($diff = array_intersect(array_keys($variables), array_keys($argsName))) {
             foreach ($diff as $key => $variableName) {

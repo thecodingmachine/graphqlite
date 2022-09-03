@@ -26,7 +26,6 @@
         "symfony/expression-language": "^4 || ^5 || ^6",
         "thecodingmachine/cache-utils": "^1",
         "thecodingmachine/class-explorer": "^1.1.0",
-        "webmozart/assert": "^1.10",
         "webonyx/graphql-php": "^v14.9.0"
     },
     "require-dev": {
@@ -39,7 +38,6 @@
         "php-coveralls/php-coveralls": "^2.1",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^1.0",
-        "phpstan/phpstan-webmozart-assert": "^1.0",
         "phpunit/phpunit": "^8.5.19 || ^9.5.8",
         "symfony/var-dumper": "^5.4 || ^6.0",
         "thecodingmachine/phpstan-strict-rules": "^1.0"
