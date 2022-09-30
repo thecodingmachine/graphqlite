@@ -31,7 +31,7 @@ A GraphQL library for PHP that allows you to use attributes (or annotations) to 
 ## Features
 
 * Create a complete GraphQL API by simply annotating your PHP classes
-* Framework agnostic, but with [Symfony](https://github.com/thecodingmachine/graphqlite-bundle) and [Laravel](https://github.com/thecodingmachine/graphqlite-laravel) integrations available!
+* Framework agnostic, but with [Symfony](https://github.com/thecodingmachine/graphqlite-bundle), [Laravel](https://github.com/thecodingmachine/graphqlite-laravel), and [CakePHP](https://github.com/interweberde/cakephp-graphql) integrations available!
 * Comes with batteries included :battery:: queries, mutations, mapping of arrays/iterators, file uploads, extendable types and more!
 
 ## Basic example
