@@ -46,10 +46,8 @@ class MagicField implements SourceFieldInterface
     /** @var array<string, ParameterAnnotations> */
     private $parameterAnnotations;
 
-    /**
-     * @param mixed[] $attributes
-     */
-    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null, ?string $description = null, ?string $sourceName = null)
+    /** @param mixed[] $attributes */
+    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null)
     {
         $this->name = $attributes['name'] ?? $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
@@ -96,7 +94,7 @@ class MagicField implements SourceFieldInterface
      * Returns the GraphQL return type of the property (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType(): ?string
+    public function getOutputType(): string|null
     {
         return $this->outputType;
     }
@@ -105,7 +103,7 @@ class MagicField implements SourceFieldInterface
      * Returns the PHP return type of the property (as a string).
      * The string is the PHPDoc for the PHP type.
      */
-    public function getPhpType(): ?string
+    public function getPhpType(): string|null
     {
         return $this->phpType;
     }
@@ -113,7 +111,7 @@ class MagicField implements SourceFieldInterface
     /**
      * Returns the description of the GraphQL query/mutation/field.
      */
-    public function getDescription(): ?string
+    public function getDescription(): string|null
     {
         return $this->description;
     }
@@ -121,7 +119,7 @@ class MagicField implements SourceFieldInterface
     /**
      * Returns the property name in the source class
      */
-    public function getSourceName(): ?string
+    public function getSourceName(): string|null
     {
         return $this->sourceName;
     }
@@ -131,9 +129,7 @@ class MagicField implements SourceFieldInterface
         return $this->middlewareAnnotations;
     }
 
-    /**
-     * @return array<string, ParameterAnnotations> Key: the name of the attribute
-     */
+    /** @return array<string, ParameterAnnotations> Key: the name of the attribute */
     public function getParameterAnnotations(): array
     {
         return $this->parameterAnnotations;

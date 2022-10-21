@@ -26,7 +26,7 @@ final class FieldMiddlewarePipe implements FieldMiddlewareInterface
      * Executes the internal pipeline, passing $handler as the "final
      * handler" in cases when the pipeline exhausts itself.
      */
-    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
+    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
         return (new Next($this->pipeline, $fieldHandler))->handle($queryFieldDescriptor);
     }

@@ -28,9 +28,7 @@ class FailWith implements MiddlewareAnnotationInterface
      */
     private $value;
 
-    /**
-     * @throws BadMethodCallException
-     */
+    /** @throws BadMethodCallException */
     public function __construct(mixed $values = [], mixed $value = '__fail__with__magic__key__')
     {
         if ($value !== '__fail__with__magic__key__') {

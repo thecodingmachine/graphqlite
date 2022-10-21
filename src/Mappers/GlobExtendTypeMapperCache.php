@@ -34,18 +34,14 @@ class GlobExtendTypeMapperCache
         $this->mapNameToExtendType[$typeName][$className] = $className;
     }
 
-    /**
-     * @return array<string,string>|null An array of classes with the @ExtendType annotation (key and value = FQCN)
-     */
-    public function getExtendTypesByObjectClass(string $className): ?array
+    /** @return array<string,string>|null An array of classes with the @ExtendType annotation (key and value = FQCN) */
+    public function getExtendTypesByObjectClass(string $className): array|null
     {
         return $this->mapClassToExtendTypeArray[$className] ?? null;
     }
 
-    /**
-     * @return array<string,string>|null An array of classes with the @ExtendType annotation (key and value = FQCN)
-     */
-    public function getExtendTypesByGraphQLTypeName(string $graphqlTypeName): ?array
+    /** @return array<string,string>|null An array of classes with the @ExtendType annotation (key and value = FQCN) */
+    public function getExtendTypesByGraphQLTypeName(string $graphqlTypeName): array|null
     {
         return $this->mapNameToExtendType[$graphqlTypeName] ?? null;
     }

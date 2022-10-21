@@ -26,11 +26,11 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 {
     public function __construct(
         private AuthenticationServiceInterface $authenticationService,
-        private AuthorizationServiceInterface $authorizationService
+        private AuthorizationServiceInterface $authorizationService,
     ) {
     }
 
-    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
+    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
@@ -77,7 +77,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
     /**
      * Checks the @Logged and @Right annotations.
      */
-    private function isAuthorized(?Logged $loggedAnnotation, ?Right $rightAnnotation): bool
+    private function isAuthorized(Logged|null $loggedAnnotation, Right|null $rightAnnotation): bool
     {
         if ($loggedAnnotation !== null && ! $this->authenticationService->isLogged()) {
             return false;

@@ -42,7 +42,7 @@ class QueryField extends FieldDefinition
      * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, ?string $comment, ?string $deprecationReason, ?string $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
+    public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, string|null $comment, string|null $deprecationReason, string|null $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
@@ -213,7 +213,7 @@ class QueryField extends FieldDefinition
             $fieldDescriptor->getComment(),
             $fieldDescriptor->getDeprecationReason(),
             $fieldDescriptor->getPrefetchMethodName(),
-            $fieldDescriptor->getPrefetchParameters()
+            $fieldDescriptor->getPrefetchParameters(),
         );
     }
 
@@ -239,7 +239,7 @@ class QueryField extends FieldDefinition
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
+    private function paramsToArguments(array $parameters, object|null $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
     {
         $toPassArgs = [];
         $exceptions = [];

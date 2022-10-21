@@ -47,7 +47,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         private StreamFactoryInterface $streamFactory,
         private HttpCodeDeciderInterface $httpCodeDecider,
         private string $graphqlUri = '/graphql',
-        ?StandardServer $handler = null
+        StandardServer|null $handler = null,
     )
     {
         $this->standardServer = $handler ?? new StandardServer($config);
@@ -105,9 +105,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         throw new RuntimeException('Unexpected response from StandardServer::executePsrRequest'); // @codeCoverageIgnore
     }
 
-    /**
-     * @param ExecutionResult|array<int,ExecutionResult>|Promise $result
-     */
+    /** @param ExecutionResult|array<int,ExecutionResult>|Promise $result */
     private function decideHttpCode(ExecutionResult|array|Promise $result): int
     {
         if ($result instanceof ExecutionResult) {
@@ -166,9 +164,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         return false;
     }
 
-    /**
-     * @param mixed[] $array
-     */
+    /** @param mixed[] $array */
     private function getJsonResponse(array $array, int $statusCode): ResponseInterface
     {
         $response = $this->responseFactory->createResponse();

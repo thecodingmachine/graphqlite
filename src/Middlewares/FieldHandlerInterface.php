@@ -7,9 +7,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use GraphQL\Type\Definition\FieldDefinition;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
-/**
- * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
- */
+/** @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html */
 interface FieldHandlerInterface
 {
     /**
@@ -17,5 +15,5 @@ interface FieldHandlerInterface
      *
      * May call other collaborating code to generate the field.
      */
-    public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition;
+    public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null;
 }

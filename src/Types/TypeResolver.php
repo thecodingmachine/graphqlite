@@ -26,16 +26,14 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
  */
 class TypeResolver
 {
-    private ?Schema $schema = null;
+    private Schema|null $schema = null;
 
     public function registerSchema(Schema $schema): void
     {
         $this->schema = $schema;
     }
 
-    /**
-     * @throws CannotMapTypeExceptionInterface
-     */
+    /** @throws CannotMapTypeExceptionInterface */
     public function mapNameToType(string $typeName): Type
     {
         if ($this->schema === null) {
@@ -43,9 +41,7 @@ class TypeResolver
         }
 
         try {
-            /**
-             * @var ListTypeNode|NamedTypeNode|NonNullTypeNode
-             */
+            /** @var ListTypeNode|NamedTypeNode|NonNullTypeNode */
             $parsedOutputType = Parser::parseType($typeName);
             $type             = AST::typeFromAST($this->schema, $parsedOutputType);
         } catch (Error $e) {
@@ -59,9 +55,7 @@ class TypeResolver
         return $type;
     }
 
-    /**
-     * @return OutputType&Type
-     */
+    /** @return OutputType&Type */
     public function mapNameToOutputType(string $typeName): OutputType
     {
         $type = $this->mapNameToType($typeName);
@@ -72,9 +66,7 @@ class TypeResolver
         return $type;
     }
 
-    /**
-     * @return InputType&Type
-     */
+    /** @return InputType&Type */
     public function mapNameToInputType(string $typeName): InputType
     {
         $type = $this->mapNameToType($typeName);

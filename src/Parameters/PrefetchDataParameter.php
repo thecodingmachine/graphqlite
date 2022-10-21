@@ -13,10 +13,8 @@ class PrefetchDataParameter implements ParameterInterface
 {
     private mixed $prefetchedData;
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         // Note: data cannot be known at build time.
         return $this->prefetchedData;

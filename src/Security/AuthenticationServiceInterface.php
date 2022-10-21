@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Security;
 
-/**
- * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
- */
+/** @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html */
 interface AuthenticationServiceInterface
 {
     /**
@@ -18,5 +16,5 @@ interface AuthenticationServiceInterface
      * Returns an object representing the current logged user.
      * Can return null if the user is not logged.
      */
-    public function getUser(): ?object;
+    public function getUser(): object|null;
 }

@@ -29,11 +29,9 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     protected array $fieldsCallables = [];
 
     /** @var array<string, InputObjectField>|null */
-    protected ?array $finalFields = null;
+    protected array|null $finalFields = null;
 
-    /**
-     * @param mixed[] $config
-     */
+    /** @param mixed[] $config */
     public function __construct(array $config)
     {
         $this->status = self::STATUS_PENDING;

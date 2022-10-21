@@ -27,11 +27,11 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
     public function __construct(
         private ExpressionLanguage $language,
         private AuthenticationServiceInterface $authenticationService,
-        private AuthorizationServiceInterface $authorizationService
+        private AuthorizationServiceInterface $authorizationService,
     ) {
     }
 
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null
     {
         $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
         /** @var Security[] $securityAnnotations */

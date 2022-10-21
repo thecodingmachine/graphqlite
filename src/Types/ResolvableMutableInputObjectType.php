@@ -28,7 +28,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     /** @var callable&array{object|string, string} */
     private $resolve;
     /** @var ParameterInterface[]|null */
-    private ?array $parameters = null;
+    private array|null $parameters = null;
     /**
      * The list of decorator callables to be applied.
      *
@@ -43,10 +43,8 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      */
     private array $decoratorsParameters = [];
 
-    /**
-     * @param array<string,mixed> $additionalConfig
-     */
-    public function __construct(string $name, private FieldsBuilder $fieldsBuilder, object|string $factory, string $methodName, ?string $comment, private bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
+    /** @param array<string,mixed> $additionalConfig */
+    public function __construct(string $name, private FieldsBuilder $fieldsBuilder, object|string $factory, string $methodName, string|null $comment, private bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
         $resolve = [$factory, $methodName];
         assert(is_callable($resolve));
@@ -83,9 +81,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         return $this->parameters;
     }
 
-    /**
-     * @return ParameterInterface[]
-     */
+    /** @return ParameterInterface[] */
     private function getParametersForDecorator(int $key): array
     {
         if (! isset($this->decoratorsParameters[$key])) {
@@ -96,10 +92,8 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         return $this->decoratorsParameters[$key];
     }
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
     {
         $parameters = $this->getParameters();
 
@@ -142,9 +136,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         return $object;
     }
 
-    /**
-     * @param callable&array<int, object|string> $decorator
-     */
+    /** @param callable&array<int, object|string> $decorator */
     public function decorate(callable $decorator): void
     {
         $this->decorators[] = $decorator;

@@ -33,9 +33,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
     {
     }
 
-    /**
-     * @return array<string,FieldDefinition>
-     */
+    /** @return array<string,FieldDefinition> */
     public function getQueries(): array
     {
         $queryList = [];
@@ -48,9 +46,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         return $this->flattenList($queryList);
     }
 
-    /**
-     * @return array<string, FieldDefinition>
-     */
+    /** @return array<string, FieldDefinition> */
     public function getMutations(): array
     {
         $mutationList = [];

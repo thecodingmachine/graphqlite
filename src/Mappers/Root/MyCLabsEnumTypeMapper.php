@@ -35,26 +35,24 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
 
-    /**
-     * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
-     */
+    /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(private RootTypeMapperInterface $next, private AnnotationReader $annotationReader, private CacheInterface $cacheService, private array $namespaces)
     {
     }
 
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
-    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
     }
 
-    private function map(Type $type): ?EnumType
+    private function map(Type $type): EnumType|null
     {
         if (! $type instanceof Object_) {
             return null;
@@ -63,25 +61,19 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         if ($fqsen === null) {
             return null;
         }
-        /**
-         * @var  class-string<object> $enumClass
-         */
+        /** @var  class-string<object> $enumClass */
         $enumClass = (string) $fqsen;
 
         return $this->mapByClassName($enumClass);
     }
 
-    /**
-     * @param class-string<object> $enumClass
-     */
-    private function mapByClassName(string $enumClass): ?EnumType
+    /** @param class-string<object> $enumClass */
+    private function mapByClassName(string $enumClass): EnumType|null
     {
         if (! is_a($enumClass, Enum::class, true)) {
             return null;
         }
-        /**
-         * @var class-string<Enum>
-         */
+        /** @var class-string<Enum> $enumClass */
         $enumClass = ltrim($enumClass, '\\');
         if (isset($this->cache[$enumClass])) {
             return $this->cache[$enumClass];

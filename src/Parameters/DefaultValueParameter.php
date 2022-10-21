@@ -15,10 +15,8 @@ class DefaultValueParameter implements ParameterInterface
     {
     }
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         return $this->defaultValue;
     }

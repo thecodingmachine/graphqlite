@@ -30,7 +30,7 @@ class InputTypeGenerator
     public function __construct(
         private InputTypeUtils $inputTypeUtils,
         private FieldsBuilder $fieldsBuilder,
-        private ?InputTypeValidatorInterface $inputTypeValidator = null
+        private InputTypeValidatorInterface|null $inputTypeValidator = null,
     ) {
     }
 
@@ -54,10 +54,8 @@ class InputTypeGenerator
         return $this->factoryCache[$inputName];
     }
 
-    /**
-     * @param class-string<object> $className
-     */
-    public function mapInput(string $className, string $inputName, ?string $description, bool $isUpdate): InputType
+    /** @param class-string<object> $className */
+    public function mapInput(string $className, string $inputName, string|null $description, bool $isUpdate): InputType
     {
         if (! isset($this->inputCache[$inputName])) {
             $this->inputCache[$inputName] = new InputType(
@@ -66,7 +64,7 @@ class InputTypeGenerator
                 $description,
                 $isUpdate,
                 $this->fieldsBuilder,
-                $this->inputTypeValidator
+                $this->inputTypeValidator,
             );
         }
 
@@ -96,9 +94,7 @@ class InputTypeGenerator
         return true;
     }
 
-    /**
-     * @param ResolvableMutableInputInterface&InputObjectType $inputType
-     */
+    /** @param ResolvableMutableInputInterface&InputObjectType $inputType */
     public function decorateInputType(string $className, string $methodName, ResolvableMutableInputInterface $inputType, ContainerInterface $container): void
     {
         $method = new ReflectionMethod($className, $methodName);

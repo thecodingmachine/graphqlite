@@ -12,5 +12,5 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
  */
 interface InputFieldMiddlewareInterface
 {
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField;
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null;
 }

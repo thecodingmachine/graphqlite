@@ -14,5 +14,5 @@ interface InputFieldHandlerInterface
      *
      * May call other collaborating code to generate the field.
      */
-    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField;
+    public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null;
 }

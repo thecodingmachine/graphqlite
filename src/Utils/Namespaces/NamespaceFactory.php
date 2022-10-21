@@ -16,14 +16,12 @@ final class NamespaceFactory
 {
     private ClassNameMapper $classNameMapper;
 
-    public function __construct(private CacheInterface $cache, ?ClassNameMapper $classNameMapper = null, private ?int $globTTL = 2)
+    public function __construct(private CacheInterface $cache, ClassNameMapper|null $classNameMapper = null, private int|null $globTTL = 2)
     {
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
     }
 
-    /**
-     * @param string $namespace A PHP namespace
-     */
+    /** @param string $namespace A PHP namespace */
     public function createNamespace(string $namespace, bool $recursive = true): NS
     {
         return new NS($namespace, $this->cache, $this->classNameMapper, $this->globTTL, $recursive);

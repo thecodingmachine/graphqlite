@@ -26,7 +26,7 @@ final class InputFieldMiddlewarePipe implements InputFieldMiddlewareInterface
      * Executes the internal pipeline, passing $handler as the "final
      * handler" in cases when the pipeline exhausts itself.
      */
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null
     {
         return (new InputNext($this->pipeline, $inputFieldHandler))->handle($inputFieldDescriptor);
     }

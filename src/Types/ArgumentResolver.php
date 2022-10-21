@@ -32,7 +32,7 @@ class ArgumentResolver
      *
      * @throws Error
      */
-    public function resolve(?object $source, mixed $val, mixed $context, ResolveInfo $resolveInfo, InputType $type): mixed
+    public function resolve(object|null $source, mixed $val, mixed $context, ResolveInfo $resolveInfo, InputType $type): mixed
     {
         $type = $this->stripNonNullType($type);
         if ($type instanceof ListOfType) {

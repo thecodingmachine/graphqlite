@@ -21,7 +21,7 @@ class FieldNotFoundException extends RuntimeException
             $className,
             ucfirst($fieldName),
             $className,
-            ucfirst($fieldName)
+            ucfirst($fieldName),
         ));
     }
 
@@ -30,7 +30,7 @@ class FieldNotFoundException extends RuntimeException
         throw new self(sprintf(
             'There is an issue with a @SourceField annotation in class "%s": %s',
             $className,
-            $e->getMessage()
+            $e->getMessage(),
         ), 0, $e);
     }
 }

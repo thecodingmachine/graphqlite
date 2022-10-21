@@ -21,15 +21,13 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
 {
     public function __construct(
         private AuthenticationServiceInterface $authenticationService,
-        private AuthorizationServiceInterface $authorizationService
+        private AuthorizationServiceInterface $authorizationService,
     )
     {
     }
 
-    /**
-     * @throws MissingAuthorizationException
-     */
-    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
+    /** @throws MissingAuthorizationException */
+    public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null
     {
         $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
 
@@ -54,7 +52,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
     /**
      * Checks the @Logged and @Right annotations.
      */
-    private function isAuthorized(?Logged $loggedAnnotation, ?Right $rightAnnotation): bool
+    private function isAuthorized(Logged|null $loggedAnnotation, Right|null $rightAnnotation): bool
     {
         if ($loggedAnnotation !== null && ! $this->authenticationService->isLogged()) {
             return false;

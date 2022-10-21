@@ -16,9 +16,7 @@ use function array_map;
  */
 final class WebonyxErrorHandler
 {
-    /**
-     * @return mixed[]
-     */
+    /** @return mixed[] */
     public static function errorFormatter(Error $error): array
     {
         $formattedError = FormattedError::createFromException($error);

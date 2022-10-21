@@ -17,7 +17,7 @@ use function assert;
  */
 class SourcePropertyResolver implements SourceResolverInterface
 {
-    private ?object $object = null;
+    private object|null $object = null;
 
     public function __construct(private string $propertyName)
     {

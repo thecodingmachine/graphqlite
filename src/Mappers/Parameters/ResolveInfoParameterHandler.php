@@ -17,7 +17,7 @@ use function assert;
 
 class ResolveInfoParameterHandler implements ParameterMiddlewareInterface
 {
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
     {
         $type = $parameter->getType();
         assert($type === null || $type instanceof ReflectionNamedType);

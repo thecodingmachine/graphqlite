@@ -8,9 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
-/**
- * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
- */
+/** @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html */
 interface NamingStrategyInterface
 {
     /**

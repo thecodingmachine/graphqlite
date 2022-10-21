@@ -27,7 +27,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @var array<int,string>
      */
-    private ?array $supportedClasses = null;
+    private array|null $supportedClasses = null;
 
     public function addTypeMapper(TypeMapperInterface $typeMapper): void
     {
@@ -58,7 +58,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
+    public function mapClassToType(string $className, OutputType|null $subType): MutableInterface
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapClassToType($className)) {

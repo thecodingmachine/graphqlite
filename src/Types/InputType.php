@@ -22,16 +22,14 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     /** @var InputField[] */
     private array $inputFields = [];
 
-    /**
-     * @param class-string<object> $className
-     */
+    /** @param class-string<object> $className */
     public function __construct(
         private string $className,
         string $inputName,
-        ?string $description,
+        string|null $description,
         bool $isUpdate,
         FieldsBuilder $fieldsBuilder,
-        private ?InputTypeValidatorInterface $inputTypeValidator = null
+        private InputTypeValidatorInterface|null $inputTypeValidator = null,
     ) {
         $reflection = new ReflectionClass($className);
         if (! $reflection->isInstantiable()) {
@@ -65,10 +63,8 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         parent::__construct($config);
     }
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
     {
         $constructorArgs = [];
         foreach ($this->constructorInputFields as $constructorInputField) {

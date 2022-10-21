@@ -38,16 +38,14 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     {
     }
 
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
             try {
                 return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
             } catch (CannotMapTypeException $e) {
                 if ($type instanceof Object_) {
-                    /**
-                     * @var class-string<object>
-                     */
+                    /** @var class-string<object> $fqcn */
                     $fqcn = (string) $type->getFqsen();
                     $refClass = new ReflectionClass($fqcn);
                     // Note : $refClass->isIterable() is only accessible in PHP 7.2
@@ -59,7 +57,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             }
         }
 
-        $result = $this->toGraphQLType($type, function (Type $type, ?OutputType $subType) use ($reflector, $docBlockObj) {
+        $result = $this->toGraphQLType($type, function (Type $type, OutputType|null $subType) use ($reflector, $docBlockObj) {
             return $this->topRootTypeMapper->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }, true);
 
@@ -72,7 +70,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         return $result;
     }
 
-    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         if (! $type instanceof Compound) {
             //try {
@@ -83,7 +81,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             }*/
         }
 
-        $result = $this->toGraphQLType($type, function (Type $type, ?InputType $subType) use ($reflector, $docBlockObj, $argumentName) {
+        $result = $this->toGraphQLType($type, function (Type $type, InputType|null $subType) use ($reflector, $docBlockObj, $argumentName) {
             $topType = $this->topRootTypeMapper->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
             if ($topType instanceof NonNull) {
                 $topType = $topType->getWrappedType();
@@ -113,7 +111,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     /**
      * Resolves a list type.
      */
-    private function getTypeInArray(Type $typeHint): ?Type
+    private function getTypeInArray(Type $typeHint): Type|null
     {
         if (! $typeHint instanceof Array_) {
             return null;
@@ -173,7 +171,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             // We have an issue, let's try without the subType
             try {
                 $result = $topToGraphQLType($iteratorType, null);
-            } catch (CannotMapTypeExceptionInterface $otherException) {
+            } catch (CannotMapTypeExceptionInterface) {
                 // Still an issue? Let's rethrow the previous exception.
                 throw $lastException;
             }
@@ -206,7 +204,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      *
      * @param Type[] $types
      */
-    private function splitIteratorFromOtherTypes(array &$types): ?Type
+    private function splitIteratorFromOtherTypes(array &$types): Type|null
     {
         $iteratorType = null;
         $key = null;
@@ -215,9 +213,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 continue;
             }
 
-            /**
-             * @var class-string<object>
-             */
+            /** @var class-string<object> */
             $fqcn     = (string) $singleDocBlockType->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2

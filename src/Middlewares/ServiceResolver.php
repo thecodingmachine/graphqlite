@@ -17,9 +17,7 @@ class ServiceResolver implements ResolverInterface
     /** @var callable&array{0:object, 1:string} */
     private $callable;
 
-    /**
-     * @param callable&array{0:object, 1:string} $callable
-     */
+    /** @param callable&array{0:object, 1:string} $callable */
     public function __construct(callable $callable)
     {
         $this->callable = $callable;

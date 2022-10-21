@@ -25,10 +25,8 @@ class Factory
     /** @var bool */
     private $default;
 
-    /**
-     * @param mixed[] $attributes
-     */
-    public function __construct(array $attributes = [], ?string $name = null, ?bool $default = null)
+    /** @param mixed[] $attributes */
+    public function __construct(array $attributes = [], string|null $name = null, bool|null $default = null)
     {
         $this->name = $name ?? $attributes['name'] ?? null;
         // This IS the default if no name is set and no "default" attribute is passed.
@@ -43,7 +41,7 @@ class Factory
      * Returns the name of the GraphQL input type.
      * If not specified, the name of the method should be used instead.
      */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }

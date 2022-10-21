@@ -26,7 +26,7 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
             '%s in GraphQL input type \'%s\' used in factory \'%s\'',
             $previous->getMessage(),
             $inputType,
-            self::toLocation($callable)
+            self::toLocation($callable),
         );
 
         return new self($message, 0, $previous);
@@ -38,7 +38,7 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
             '%s in GraphQL input type \'%s\' used in decorator \'%s\'',
             $previous->getMessage(),
             $inputType,
-            self::toLocation($callable)
+            self::toLocation($callable),
         );
 
         return new self($message, 0, $previous);
@@ -50,7 +50,7 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
             '%s in GraphQL query/mutation/field \'%s\' used in method \'%s\'',
             $previous->getMessage(),
             $name,
-            self::toLocation($callable)
+            self::toLocation($callable),
         );
 
         return new self($message, 0, $previous);

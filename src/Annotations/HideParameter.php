@@ -25,9 +25,7 @@ class HideParameter implements ParameterAnnotationInterface
     /** @var string */
     private $for;
 
-    /**
-     * @param array<string, mixed> $values
-     */
+    /** @param array<string, mixed> $values */
     public function __construct(array $values = [])
     {
         if (! isset($values['for'])) {

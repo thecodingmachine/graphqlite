@@ -15,5 +15,5 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
  */
 interface ParameterMiddlewareInterface
 {
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface;
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface;
 }

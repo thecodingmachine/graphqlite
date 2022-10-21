@@ -16,12 +16,10 @@ interface TypeInterface
 
     public function setClass(string $className): void;
 
-    /**
-     * @return class-string<object>
-     */
+    /** @return class-string<object> */
     public function getClass(): string;
 
     public function isDefault(): bool;
 
-    public function getName(): ?string;
+    public function getName(): string|null;
 }

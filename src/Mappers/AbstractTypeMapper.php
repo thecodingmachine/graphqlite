@@ -49,8 +49,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     private ClassBoundCacheContractInterface $mapClassToExtendAnnotationsCache;
 
     private CacheContractInterface $cacheContract;
-    private ?GlobTypeMapperCache $globTypeMapperCache = null;
-    private ?GlobExtendTypeMapperCache $globExtendTypeMapperCache = null;
+    private GlobTypeMapperCache|null $globTypeMapperCache = null;
+    private GlobExtendTypeMapperCache|null $globExtendTypeMapperCache = null;
     /** @var array<string, class-string<object>> */
     private array $registeredInputs;
 
@@ -64,8 +64,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         private NamingStrategyInterface $namingStrategy,
         private RecursiveTypeMapperInterface $recursiveTypeMapper,
         private CacheInterface $cache,
-        protected ?int $globTTL = 2,
-        private ?int $mapTTL = null
+        protected int|null $globTTL = 2,
+        private int|null $mapTTL = null,
     )
     {
         $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
@@ -249,7 +249,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
+    public function mapClassToType(string $className, OutputType|null $subType): MutableInterface
     {
         /** @var class-string<object>|null $inputTypeClassName */
         $inputTypeClassName = $this->getMaps()->getInputByObjectClass($className)

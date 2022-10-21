@@ -29,7 +29,7 @@ class DateTimeType extends ScalarType
         return $value->format(DateTime::ATOM);
     }
 
-    public function parseValue(mixed $value): ?DateTimeImmutable
+    public function parseValue(mixed $value): DateTimeImmutable|null
     {
         if ($value === null) {
             return null;
@@ -52,7 +52,7 @@ class DateTimeType extends ScalarType
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function parseLiteral($valueNode, ?array $variables = null): mixed
+    public function parseLiteral($valueNode, array|null $variables = null): mixed
     {
         if ($valueNode instanceof StringValueNode) {
             return $valueNode->value;

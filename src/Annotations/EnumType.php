@@ -26,10 +26,8 @@ class EnumType
     /** @var bool */
     private $useValues;
 
-    /**
-     * @param mixed[] $attributes
-     */
-    public function __construct(array $attributes = [], ?string $name = null, ?bool $useValues = null)
+    /** @param mixed[] $attributes */
+    public function __construct(array $attributes = [], string|null $name = null, bool|null $useValues = null)
     {
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->useValues = $useValues ?? $attributes['useValues'] ?? false;
@@ -38,7 +36,7 @@ class EnumType
     /**
      * Returns the GraphQL name for this type.
      */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }

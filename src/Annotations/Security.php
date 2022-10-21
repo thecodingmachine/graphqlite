@@ -43,7 +43,7 @@ class Security implements MiddlewareAnnotationInterface
      *
      * @throws BadMethodCallException
      */
-    public function __construct(array|string $data = [], ?string $expression = null, mixed $failWith = '__fail__with__magic__key__', ?string $message = null, ?int $statusCode = null)
+    public function __construct(array|string $data = [], string|null $expression = null, mixed $failWith = '__fail__with__magic__key__', string|null $message = null, int|null $statusCode = null)
     {
         if (is_string($data)) {
             $data = ['expression' => $data];

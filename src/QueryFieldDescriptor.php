@@ -27,27 +27,27 @@ class QueryFieldDescriptor
 {
     private string $name;
     /** @var (OutputType&Type)|null */
-    private ?Type $type  = null;
+    private Type|null $type  = null;
     /** @var array<string, ParameterInterface> */
     private array $parameters = [];
     /** @var array<string, ParameterInterface> */
     private array $prefetchParameters = [];
-    private ?string $prefetchMethodName = null;
+    private string|null $prefetchMethodName = null;
     /** @var callable|null */
     private $callable;
-    private ?string $targetMethodOnSource = null;
-    private ?string $targetPropertyOnSource = null;
-    private ?string $magicProperty = null;
+    private string|null $targetMethodOnSource = null;
+    private string|null $targetPropertyOnSource = null;
+    private string|null $magicProperty = null;
     /**
      * Whether we should inject the source as the first parameter or not.
      */
     private bool $injectSource;
-    private ?string $comment = null;
-    private ?string $deprecationReason = null;
+    private string|null $comment = null;
+    private string|null $deprecationReason = null;
     private MiddlewareAnnotations $middlewareAnnotations;
     private ReflectionMethod $refMethod;
     private ReflectionProperty $refProperty;
-    private ?ResolverInterface $originalResolver = null;
+    private ResolverInterface|null $originalResolver = null;
     /** @var callable */
     private $resolver;
 
@@ -61,60 +61,48 @@ class QueryFieldDescriptor
         $this->name = $name;
     }
 
-    /**
-     * @return (OutputType&Type)|null
-     */
-    public function getType(): ?Type
+    /** @return (OutputType&Type)|null */
+    public function getType(): Type|null
     {
         return $this->type;
     }
 
-    /**
-     * @param OutputType&Type $type
-     */
+    /** @param OutputType&Type $type */
     public function setType(Type $type): void
     {
         $this->type = $type;
     }
 
-    /**
-     * @return array<string, ParameterInterface>
-     */
+    /** @return array<string, ParameterInterface> */
     public function getParameters(): array
     {
         return $this->parameters;
     }
 
-    /**
-     * @param array<string, ParameterInterface> $parameters
-     */
+    /** @param array<string, ParameterInterface> $parameters */
     public function setParameters(array $parameters): void
     {
         $this->parameters = $parameters;
     }
 
-    /**
-     * @return array<string, ParameterInterface>
-     */
+    /** @return array<string, ParameterInterface> */
     public function getPrefetchParameters(): array
     {
         return $this->prefetchParameters;
     }
 
-    /**
-     * @param array<string, ParameterInterface> $prefetchParameters
-     */
+    /** @param array<string, ParameterInterface> $prefetchParameters */
     public function setPrefetchParameters(array $prefetchParameters): void
     {
         $this->prefetchParameters = $prefetchParameters;
     }
 
-    public function getPrefetchMethodName(): ?string
+    public function getPrefetchMethodName(): string|null
     {
         return $this->prefetchMethodName;
     }
 
-    public function setPrefetchMethodName(?string $prefetchMethodName): void
+    public function setPrefetchMethodName(string|null $prefetchMethodName): void
     {
         $this->prefetchMethodName = $prefetchMethodName;
     }
@@ -146,7 +134,7 @@ class QueryFieldDescriptor
         $this->magicProperty = null;
     }
 
-    public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
+    public function setTargetPropertyOnSource(string|null $targetPropertyOnSource): void
     {
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
@@ -178,22 +166,22 @@ class QueryFieldDescriptor
         $this->injectSource = $injectSource;
     }
 
-    public function getComment(): ?string
+    public function getComment(): string|null
     {
         return $this->comment;
     }
 
-    public function setComment(?string $comment): void
+    public function setComment(string|null $comment): void
     {
         $this->comment = $comment;
     }
 
-    public function getDeprecationReason(): ?string
+    public function getDeprecationReason(): string|null
     {
         return $this->deprecationReason;
     }
 
-    public function setDeprecationReason(?string $deprecationReason): void
+    public function setDeprecationReason(string|null $deprecationReason): void
     {
         $this->deprecationReason = $deprecationReason;
     }

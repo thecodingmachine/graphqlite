@@ -49,6 +49,7 @@ class AnnotationReader
 {
     // In this mode, no exceptions will be thrown for incorrect annotations (unless the name of the annotation we are looking for is part of the docblock)
     public const LAX_MODE = 'LAX_MODE';
+
     // In this mode, exceptions will be thrown for any incorrect annotations.
     public const STRICT_MODE = 'STRICT_MODE';
 
@@ -86,7 +87,7 @@ class AnnotationReader
      *
      * @template T of object
      */
-    private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): ?object
+    private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): object|null
     {
         try {
             $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
@@ -123,7 +124,7 @@ class AnnotationReader
      *
      * @throws AnnotationException
      */
-    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?object
+    private function getMethodAnnotation(ReflectionMethod $refMethod, string $annotationClass): object|null
     {
         $cacheKey = $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '_' . $annotationClass;
         if (array_key_exists($cacheKey, $this->methodAnnotationCache)) {
@@ -200,7 +201,7 @@ class AnnotationReader
                     },
                     array_filter($refClass->getAttributes(), static function ($annotation) use ($annotationClass): bool {
                         return is_a($annotation->getName(), $annotationClass, true);
-                    })
+                    }),
                 );
 
                 $toAddAnnotations[] = $attributes;
@@ -231,7 +232,7 @@ class AnnotationReader
      *
      * @template T of object
      */
-    public function getTypeAnnotation(ReflectionClass $refClass): ?TypeInterface
+    public function getTypeAnnotation(ReflectionClass $refClass): TypeInterface|null
     {
         try {
             $type = $this->getClassAnnotation($refClass, Type::class)
@@ -276,7 +277,7 @@ class AnnotationReader
      *
      * @template T of object
      */
-    public function getExtendTypeAnnotation(ReflectionClass $refClass): ?ExtendType
+    public function getExtendTypeAnnotation(ReflectionClass $refClass): ExtendType|null
     {
         try {
             $extendType = $this->getClassAnnotation($refClass, ExtendType::class);
@@ -287,15 +288,13 @@ class AnnotationReader
         return $extendType;
     }
 
-    public function getEnumTypeAnnotation(ReflectionClass $refClass): ?EnumType
+    public function getEnumTypeAnnotation(ReflectionClass $refClass): EnumType|null
     {
         return $this->getClassAnnotation($refClass, EnumType::class);
     }
 
-    /**
-     * @param class-string<AbstractRequest> $annotationClass
-     */
-    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationClass): ?AbstractRequest
+    /** @param class-string<AbstractRequest> $annotationClass */
+    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationClass): AbstractRequest|null
     {
         $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationClass);
         assert($queryAnnotation instanceof AbstractRequest || $queryAnnotation === null);
@@ -318,7 +317,7 @@ class AnnotationReader
         return $sourceFields;
     }
 
-    public function getFactoryAnnotation(ReflectionMethod $refMethod): ?Factory
+    public function getFactoryAnnotation(ReflectionMethod $refMethod): Factory|null
     {
         $factoryAnnotation = $this->getMethodAnnotation($refMethod, Factory::class);
         assert($factoryAnnotation instanceof Factory || $factoryAnnotation === null);
@@ -326,7 +325,7 @@ class AnnotationReader
         return $factoryAnnotation;
     }
 
-    public function getDecorateAnnotation(ReflectionMethod $refMethod): ?Decorate
+    public function getDecorateAnnotation(ReflectionMethod $refMethod): Decorate|null
     {
         $decorateAnnotation = $this->getMethodAnnotation($refMethod, Decorate::class);
         assert($decorateAnnotation instanceof Decorate || $decorateAnnotation === null);
@@ -376,9 +375,7 @@ class AnnotationReader
         /** @var ParameterAnnotationInterface[] $parameterAnnotations */
         $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
 
-        /**
-         * @var array<string, array<int,ParameterAnnotations>> $parameterAnnotationsPerParameter
-         */
+        /** @var array<string, array<int,ParameterAnnotations>> $parameterAnnotationsPerParameter */
         $parameterAnnotationsPerParameter = [];
         foreach ($parameterAnnotations as $parameterAnnotation) {
             $parameterAnnotationsPerParameter[$parameterAnnotation->getTarget()][] = $parameterAnnotation;
@@ -406,25 +403,21 @@ class AnnotationReader
                     },
                     array_filter($attributes, static function ($annotation): bool {
                         return is_a($annotation->getName(), ParameterAnnotationInterface::class, true);
-                    })
+                    }),
                 ),
             ];
         }
 
         return array_map(
             static function (array $parameterAnnotations): ParameterAnnotations {
-                /**
-                 * @var ParameterAnnotationInterface[] $parameterAnnotations
-                 */
+                /** @var ParameterAnnotationInterface[] $parameterAnnotations */
                 return new ParameterAnnotations($parameterAnnotations);
             },
-            $parameterAnnotationsPerParameter
+            $parameterAnnotationsPerParameter,
         );
     }
 
-    /**
-     * @throws AnnotationException
-     */
+    /** @throws AnnotationException */
     public function getMiddlewareAnnotations(ReflectionMethod|ReflectionProperty $reflection): MiddlewareAnnotations
     {
         if ($reflection instanceof ReflectionMethod) {
@@ -469,7 +462,7 @@ class AnnotationReader
                     },
                     array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
                         return is_a($annotation->getName(), $annotationClass, true);
-                    })
+                    }),
                 ),
             ];
         } catch (AnnotationException $e) {
@@ -525,7 +518,7 @@ class AnnotationReader
                     },
                     array_filter($attributes, static function ($annotation) use ($annotationClass): bool {
                         return is_a($annotation->getName(), $annotationClass, true);
-                    })
+                    }),
                 ),
             ];
         } catch (AnnotationException $e) {

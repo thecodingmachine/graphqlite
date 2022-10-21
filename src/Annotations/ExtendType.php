@@ -30,10 +30,8 @@ class ExtendType
     /** @var string|null */
     private $name;
 
-    /**
-     * @param mixed[] $attributes
-     */
-    public function __construct(array $attributes = [], ?string $class = null, ?string $name = null)
+    /** @param mixed[] $attributes */
+    public function __construct(array $attributes = [], string|null $class = null, string|null $name = null)
     {
         $className = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
         $className = $className ?? $class;
@@ -53,12 +51,12 @@ class ExtendType
      *
      * @return class-string<object>|null
      */
-    public function getClass(): ?string
+    public function getClass(): string|null
     {
         return $this->class;
     }
 
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }

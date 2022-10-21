@@ -120,7 +120,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         return false;
     }
 
-    private function getNonNullable(Type $type): ?Type
+    private function getNonNullable(Type $type): Type|null
     {
         if ($type instanceof Null_) {
             return null;

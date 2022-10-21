@@ -19,9 +19,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     /** @var (ClientAware&Throwable)[] */
     private array $exceptions = [];
 
-    /**
-     * @param (ClientAware&Throwable)[] $exceptions
-     */
+    /** @param (ClientAware&Throwable)[] $exceptions */
     public function __construct(iterable $exceptions = [])
     {
         parent::__construct('Many exceptions have be thrown:');
@@ -30,9 +28,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
         }
     }
 
-    /**
-     * @param ClientAware&Throwable $exception
-     */
+    /** @param ClientAware&Throwable $exception */
     public function add(ClientAware $exception): void
     {
         $this->exceptions[] = $exception;
@@ -40,9 +36,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
         $this->updateCode();
     }
 
-    /**
-     * @return (ClientAware&Throwable)[]
-     */
+    /** @return (ClientAware&Throwable)[] */
     public function getExceptions(): array
     {
         return $this->exceptions;
