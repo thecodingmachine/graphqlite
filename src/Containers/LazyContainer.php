@@ -14,13 +14,6 @@ use Psr\Container\ContainerInterface;
 class LazyContainer implements ContainerInterface
 {
     /**
-     * The array of closures defining each entry of the container.
-     *
-     * @var array<string, Closure>
-     */
-    protected array $callbacks;
-
-    /**
      * The array of entries once they have been instantiated.
      *
      * @var array<string, mixed>
@@ -48,7 +41,7 @@ class LazyContainer implements ContainerInterface
             throw  throw NotFoundException::notFoundInContainer($id);
         }
 
-        return $this->objects[$id] = $this->callbacks[$id]($this->delegateLookupContainer);
+        return $this->objects[$id] = $this->entries[$id]($this->delegateLookupContainer);
     }
 
     public function has(string $id): bool

@@ -83,7 +83,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
 
     public function genericIterablesProvider(): iterable
     {
-        yield '\ArrayIterator with nullable int item' => ['\ArrayIterator<?int>', IntType::class];
+        yield '\ArrayIterator with nullable int item' => ['\ArrayIterator<int|null>', IntType::class];
         yield '\ArrayIterator with int item' => ['\ArrayIterator<int>', NonNull::class, IntType::class];
 
         // key information cannot be presented in GQL types for now

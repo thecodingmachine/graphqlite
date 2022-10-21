@@ -147,20 +147,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
-                    } elseif ($className === TestObject2::class) {
-                        return $this->testObjectType2;
-                    } else {
-                        throw CannotMapTypeException::createForType($className);
                     }
+
+                    if ($className === TestObject2::class) {
+                        return $this->testObjectType2;
+                    }
+
+                    throw CannotMapTypeException::createForType($className);
                 }
 
                 public function mapClassToInputType(string $className): ResolvableMutableInputInterface
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
-                    } else {
-                        throw CannotMapTypeException::createForInputType($className);
                     }
+
+                    throw CannotMapTypeException::createForInputType($className);
                 }
 
                 public function canMapClassToType(string $className): bool
@@ -180,16 +182,12 @@ abstract class AbstractQueryProviderTest extends TestCase
 
                 public function mapNameToType(string $typeName): Type
                 {
-                    switch ($typeName) {
-                        case 'TestObject':
-                            return $this->testObjectType;
-                        case 'TestObject2':
-                            return $this->testObjectType2;
-                        case 'TestObjectInput':
-                            return $this->inputTestObjectType;
-                        default:
-                            throw CannotMapTypeException::createForName($typeName);
-                    }
+                    return match ($typeName) {
+                        'TestObject' => $this->testObjectType,
+                        'TestObject2' => $this->testObjectType2,
+                        'TestObjectInput' => $this->inputTestObjectType,
+                        default => throw CannotMapTypeException::createForName($typeName),
+                    };
                 }
 
                 public function canMapNameToType(string $typeName): bool
