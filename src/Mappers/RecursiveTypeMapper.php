@@ -237,7 +237,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         $interfaces = [];
 
-        /** @var array<int, class-string<object>> */
+        /** @var array<int, class-string<object>> $implements */
         $implements = class_implements($className);
         foreach ($implements as $interface) {
             if (! $this->typeMapper->canMapClassToType($interface)) {

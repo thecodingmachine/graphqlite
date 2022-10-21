@@ -213,7 +213,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 continue;
             }
 
-            /** @var class-string<object> */
+            /** @var class-string<object> $fqcn */
             $fqcn     = (string) $singleDocBlockType->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2
