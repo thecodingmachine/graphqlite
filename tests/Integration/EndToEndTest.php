@@ -6,7 +6,6 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
-use Mouf\Picotainer\Picotainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
@@ -16,6 +15,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
@@ -80,10 +80,8 @@ use const JSON_PRETTY_PRINT;
 
 class EndToEndTest extends TestCase
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $mainContainer;
+
+    private ContainerInterface $mainContainer;
 
     public function setUp(): void
     {
@@ -344,7 +342,7 @@ class EndToEndTest extends TestCase
             };
         }
 
-        $container = new Picotainer($overloadedServices + $services);
+        $container = new LazyContainer($overloadedServices + $services);
         $container->get(TypeResolver::class)->registerSchema($container->get(Schema::class));
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class));
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'2'));

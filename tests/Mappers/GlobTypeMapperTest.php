@@ -4,15 +4,12 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Type\Definition\Type;
-use Mouf\Picotainer\Picotainer;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
-use Symfony\Component\Cache\Simple\NullCache;
-use Test;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType\BadExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2;
@@ -26,20 +23,16 @@ use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactoryNoType;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
-use TheCodingMachine\GraphQLite\TypeGenerator;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
-use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
-use function array_keys;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
 {
     public function testGlobTypeMapper(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             }
@@ -70,7 +63,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperDuplicateTypesException(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             TestType::class => function () {
                 return new TestType();
             }
@@ -86,7 +79,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperDuplicateInputsException(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             TestInput::class => function () {
                 return new TestInput();
             }
@@ -102,7 +95,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperDuplicateInputTypesException(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             /*TestType::class => function() {
                 return new TestType();
             }*/
@@ -129,7 +122,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperInheritedInputTypesException(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             ChildTestFactory::class => function() {
                 return new ChildTestFactory();
             }
@@ -147,7 +140,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperClassNotFoundException(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             TestType::class => function () {
                 return new TestType();
             }
@@ -164,7 +157,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperNameNotFoundException(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             }
@@ -180,7 +173,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperInputType(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             },
@@ -214,7 +207,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperExtend(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             },
@@ -249,7 +242,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testEmptyGlobTypeMapper(): void
     {
-        $container = new Picotainer([]);
+        $container = new LazyContainer([]);
 
         $typeGenerator = $this->getTypeGenerator();
         $inputTypeGenerator = $this->getInputTypeGenerator();
@@ -263,7 +256,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperDecorate(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FilterDecorator::class => function () {
                 return new FilterDecorator();
             }
@@ -289,7 +282,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testInvalidName(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             }
@@ -306,7 +299,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperExtendBadName(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             },
@@ -339,7 +332,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testGlobTypeMapperExtendBadClass(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             },
@@ -372,7 +365,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testNonInstantiableType(): void
     {
-        $container = new Picotainer([
+        $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
             }
@@ -392,7 +385,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
     public function testNonInstantiableInput(): void
     {
-        $container = new Picotainer([]);
+        $container = new LazyContainer([]);
 
         $typeGenerator = $this->getTypeGenerator();
         $inputTypeGenerator = $this->getInputTypeGenerator();
