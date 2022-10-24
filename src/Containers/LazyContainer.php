@@ -32,13 +32,13 @@ class LazyContainer implements ContainerInterface
         $this->delegateLookupContainer = $delegateLookupContainer ?: $this;
     }
 
-    public function get(string $id):mixed
+    public function get(string $id): mixed
     {
         if (isset($this->objects[$id])) {
             return $this->objects[$id];
         }
         if (! isset($this->entries[$id])) {
-            throw  throw NotFoundException::notFoundInContainer($id);
+            throw NotFoundException::notFoundInContainer($id);
         }
 
         return $this->objects[$id] = $this->entries[$id]($this->delegateLookupContainer);
