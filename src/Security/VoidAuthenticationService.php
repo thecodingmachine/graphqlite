@@ -21,7 +21,7 @@ class VoidAuthenticationService implements AuthenticationServiceInterface
      * Returns an object representing the current logged user.
      * Can return null if the user is not logged.
      */
-    public function getUser(): ?object
+    public function getUser(): object|null
     {
         return null;
     }

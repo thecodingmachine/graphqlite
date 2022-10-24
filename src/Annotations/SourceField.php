@@ -27,23 +27,21 @@ class SourceField implements SourceFieldInterface
 {
     private string $name;
 
-    private ?string $outputType = null;
+    private string|null $outputType = null;
 
-    private ?string $phpType = null;
+    private string|null $phpType = null;
 
-    private ?string $description = null;
+    private string|null $description = null;
 
-    private ?string $sourceName;
+    private string|null $sourceName;
 
     private MiddlewareAnnotations $middlewareAnnotations;
 
     /** @var array<string, ParameterAnnotations> */
     private array $parameterAnnotations;
 
-    /**
-     * @param mixed[] $attributes
-     */
-    public function __construct(array $attributes = [], ?string $name = null, ?string $outputType = null, ?string $phpType = null, ?string $description = null, ?string $sourceName = null)
+    /** @param mixed[] $attributes */
+    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null)
     {
         $name = $name ?? $attributes['name'] ?? null;
         if ($name === null) {
@@ -92,12 +90,12 @@ class SourceField implements SourceFieldInterface
      * Returns the GraphQL return type of the request (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType(): ?string
+    public function getOutputType(): string|null
     {
         return $this->outputType;
     }
 
-    public function getPhpType(): ?string
+    public function getPhpType(): string|null
     {
         return $this->phpType;
     }
@@ -105,7 +103,7 @@ class SourceField implements SourceFieldInterface
     /**
      * Returns the description of the GraphQL query/mutation/field.
      */
-    public function getDescription(): ?string
+    public function getDescription(): string|null
     {
         return $this->description;
     }
@@ -113,7 +111,7 @@ class SourceField implements SourceFieldInterface
     /**
      * Returns the property name in the source class
      */
-    public function getSourceName(): ?string
+    public function getSourceName(): string|null
     {
         return $this->sourceName;
     }
@@ -123,9 +121,7 @@ class SourceField implements SourceFieldInterface
         return $this->middlewareAnnotations;
     }
 
-    /**
-     * @return array<string, ParameterAnnotations> Key: the name of the attribute
-     */
+    /** @return array<string, ParameterAnnotations> Key: the name of the attribute */
     public function getParameterAnnotations(): array
     {
         return $this->parameterAnnotations;

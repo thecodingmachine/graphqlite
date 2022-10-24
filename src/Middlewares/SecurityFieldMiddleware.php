@@ -31,7 +31,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         /*$this->logger = $logger;*/
     }
 
-    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
+    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
         /** @var Security[] $securityAnnotations */

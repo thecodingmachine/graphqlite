@@ -16,10 +16,8 @@ class InjectUserParameter implements ParameterInterface
     {
     }
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): ?object
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): object|null
     {
         return $this->authenticationService->getUser();
     }

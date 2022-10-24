@@ -32,8 +32,8 @@ class InputFieldDescriptor
     private array $parameters = [];
     /** @var callable|null */
     private $callable;
-    private ?string $targetMethodOnSource;
-    private ?string $targetPropertyOnSource;
+    private string|null $targetMethodOnSource;
+    private string|null $targetPropertyOnSource;
 
     /**
      * Implement in future PR
@@ -44,11 +44,11 @@ class InputFieldDescriptor
      * Whether we should inject the source as the first parameter or not.
      */
     private bool $injectSource = false;
-    private ?string $comment = null;
+    private string|null $comment = null;
     private MiddlewareAnnotations $middlewareAnnotations;
     private ReflectionMethod $refMethod;
     private ReflectionProperty $refProperty;
-    private ?ResolverInterface $originalResolver = null;
+    private ResolverInterface|null $originalResolver = null;
     /** @var callable */
     private $resolver;
     private bool $isUpdate = false;
@@ -95,33 +95,25 @@ class InputFieldDescriptor
         $this->name = $name;
     }
 
-    /**
-     * @return InputType|(NullableType&Type)
-     */
+    /** @return InputType|(NullableType&Type) */
     public function getType()
     {
         return $this->type;
     }
 
-    /**
-     * @param InputType|(NullableType&Type) $type
-     */
+    /** @param InputType|(NullableType&Type) $type */
     public function setType($type): void
     {
         $this->type = $type;
     }
 
-    /**
-     * @return array<string, ParameterInterface>
-     */
+    /** @return array<string, ParameterInterface> */
     public function getParameters(): array
     {
         return $this->parameters;
     }
 
-    /**
-     * @param array<string, ParameterInterface> $parameters
-     */
+    /** @param array<string, ParameterInterface> $parameters */
     public function setParameters(array $parameters): void
     {
         $this->parameters = $parameters;
@@ -160,7 +152,7 @@ class InputFieldDescriptor
         // $this->magicProperty = null;
     }
 
-    public function setTargetPropertyOnSource(?string $targetPropertyOnSource): void
+    public function setTargetPropertyOnSource(string|null $targetPropertyOnSource): void
     {
         if ($this->originalResolver !== null) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
@@ -184,12 +176,12 @@ class InputFieldDescriptor
         $this->injectSource = $injectSource;
     }
 
-    public function getComment(): ?string
+    public function getComment(): string|null
     {
         return $this->comment;
     }
 
-    public function setComment(?string $comment): void
+    public function setComment(string|null $comment): void
     {
         $this->comment = $comment;
     }

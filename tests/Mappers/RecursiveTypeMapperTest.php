@@ -13,6 +13,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
 use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA;
 use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB;
@@ -125,7 +126,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
     protected function getTypeMapper()
     {
         if ($this->typeMapper === null) {
-            $container = new Picotainer([
+            $container = new LazyContainer([
                 ClassAType::class => function () {
                     return new ClassAType();
                 },

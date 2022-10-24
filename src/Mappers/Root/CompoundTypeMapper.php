@@ -42,7 +42,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
     {
     }
 
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         if (! $type instanceof Compound) {
             return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
@@ -81,7 +81,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         return $return;
     }
 
-    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         if (! $type instanceof Compound) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);

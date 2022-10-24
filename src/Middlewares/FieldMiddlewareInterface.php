@@ -14,5 +14,5 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
  */
 interface FieldMiddlewareInterface
 {
-    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition;
+    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null;
 }

@@ -40,7 +40,7 @@ class InputField extends InputObjectField
      * @param mixed|null $defaultValue the default value set for this field
      * @param array<string, mixed> $additionalConfig
      */
-    public function __construct(string $name, $type, array $arguments, ?ResolverInterface $originalResolver, ?callable $resolver, ?string $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array $additionalConfig = [])
+    public function __construct(string $name, $type, array $arguments, ResolverInterface|null $originalResolver, callable|null $resolver, string|null $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array $additionalConfig = [])
     {
         $config = [
             'name' => $name,
@@ -164,7 +164,7 @@ class InputField extends InputObjectField
      *
      * @return array<int, mixed>
      */
-    private function paramsToArguments(array $parameters, ?object $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
+    private function paramsToArguments(array $parameters, object|null $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
     {
         $toPassArgs = [];
         $exceptions = [];

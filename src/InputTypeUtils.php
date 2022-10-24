@@ -26,7 +26,7 @@ class InputTypeUtils
 {
     public function __construct(
         private AnnotationReader $annotationReader,
-        private NamingStrategyInterface $namingStrategy
+        private NamingStrategyInterface $namingStrategy,
     )
     {
     }
@@ -38,9 +38,7 @@ class InputTypeUtils
      */
     public function getInputTypeNameAndClassName(ReflectionMethod $method): array
     {
-        /**
-         * @var class-string<object>
-         */
+        /** @var class-string<object> $fqsen */
         $fqsen = ltrim((string) $this->validateReturnType($method), '\\');
         $factory = $this->annotationReader->getFactoryAnnotation($method);
         if ($factory === null) {

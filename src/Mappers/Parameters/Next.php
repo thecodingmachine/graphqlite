@@ -31,7 +31,7 @@ final class Next implements ParameterHandlerInterface
         $this->queue           = clone $queue;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
     {
         if ($this->queue->isEmpty()) {
             return $this->fallbackHandler->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);

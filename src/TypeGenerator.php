@@ -28,7 +28,7 @@ class TypeGenerator
         private TypeRegistry $typeRegistry,
         private ContainerInterface $container,
         private RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private FieldsBuilder $fieldsBuilder
+        private FieldsBuilder $fieldsBuilder,
     )
     {
     }

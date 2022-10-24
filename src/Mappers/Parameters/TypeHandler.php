@@ -65,15 +65,13 @@ class TypeHandler implements ParameterHandlerInterface
     public function __construct(
         private ArgumentResolver $argumentResolver,
         private RootTypeMapperInterface $rootTypeMapper,
-        private TypeResolver $typeResolver
+        private TypeResolver $typeResolver,
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
     }
 
-    /**
-     * @return GraphQLType&OutputType
-     */
+    /** @return GraphQLType&OutputType */
     public function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj): GraphQLType
     {
         $returnType = $refMethod->getReturnType();
@@ -92,7 +90,7 @@ class TypeHandler implements ParameterHandlerInterface
                 $returnType && $returnType->allowsNull(),
                 false,
                 $refMethod,
-                $docBlockObj
+                $docBlockObj,
             );
             assert($type instanceof GraphQLType && $type instanceof OutputType);
         } catch (CannotMapTypeExceptionInterface $e) {
@@ -103,7 +101,7 @@ class TypeHandler implements ParameterHandlerInterface
         return $type;
     }
 
-    private function getDocBlocReturnType(DocBlock $docBlock, ReflectionMethod $refMethod): ?Type
+    private function getDocBlocReturnType(DocBlock $docBlock, ReflectionMethod $refMethod): Type|null
     {
         /** @var array<int,Return_> $returnTypeTags */
         $returnTypeTags = $docBlock->getTagsByName('return');
@@ -121,7 +119,7 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Gets property type from its dock block.
      */
-    private function getDocBlockPropertyType(DocBlock $docBlock, ReflectionProperty $refProperty): ?Type
+    private function getDocBlockPropertyType(DocBlock $docBlock, ReflectionProperty $refProperty): Type|null
     {
         /** @var Var_[] $varTags */
         $varTags = $docBlock->getTagsByName('var');
@@ -137,7 +135,7 @@ class TypeHandler implements ParameterHandlerInterface
         return reset($varTags)->getType();
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
     {
         $hideParameter = $parameterAnnotations->getAnnotationByType(HideParameter::class);
         if ($hideParameter) {
@@ -182,7 +180,7 @@ class TypeHandler implements ParameterHandlerInterface
                     true,
                     $declaringFunction,
                     $docBlock,
-                    $parameter->getName()
+                    $parameter->getName(),
                 );
                 assert($type instanceof InputType);
             } catch (CannotMapTypeExceptionInterface $e) {
@@ -215,8 +213,8 @@ class TypeHandler implements ParameterHandlerInterface
         ReflectionProperty $refProperty,
         DocBlock $docBlock,
         bool $toInput,
-        ?string $argumentName = null,
-        ?bool $isNullable = null
+        string|null $argumentName = null,
+        bool|null $isNullable = null,
     ): GraphQLType
     {
         $propertyType = $refProperty->getType();
@@ -239,7 +237,7 @@ class TypeHandler implements ParameterHandlerInterface
             $toInput,
             $refProperty,
             $docBlock,
-            $argumentName
+            $argumentName,
         );
     }
 
@@ -251,10 +249,10 @@ class TypeHandler implements ParameterHandlerInterface
     public function mapInputProperty(
         ReflectionProperty $refProperty,
         DocBlock $docBlock,
-        ?string $argumentName = null,
-        ?string $inputTypeName = null,
+        string|null $argumentName = null,
+        string|null $inputTypeName = null,
         mixed $defaultValue = null,
-        ?bool $isNullable = null
+        bool|null $isNullable = null,
     ): InputTypeProperty
     {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
@@ -307,12 +305,12 @@ class TypeHandler implements ParameterHandlerInterface
      */
     private function mapType(
         Type $type,
-        ?Type $docBlockType,
+        Type|null $docBlockType,
         bool $isNullable,
         bool $mapToInputType,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-        ?string $argumentName = null
+        string|null $argumentName = null,
     ): GraphQLType
     {
         $graphQlType = null;
@@ -359,7 +357,7 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Appends types together, eventually creating a Compound type and removing duplicates if any.
      */
-    private function appendTypes(Type $type, ?Type $docBlockType): Type
+    private function appendTypes(Type $type, Type|null $docBlockType): Type
     {
         if ($docBlockType === null) {
             return $type;
@@ -397,9 +395,7 @@ class TypeHandler implements ParameterHandlerInterface
         return new Compound($types);
     }
 
-    /**
-     * @param ReflectionClass<object> $reflectionClass
-     */
+    /** @param ReflectionClass<object> $reflectionClass */
     private function reflectionTypeToPhpDocType(ReflectionType $type, ReflectionClass $reflectionClass): Type
     {
         assert($type instanceof ReflectionNamedType || $type instanceof ReflectionUnionType);
@@ -429,8 +425,8 @@ class TypeHandler implements ParameterHandlerInterface
                     }
                     return $phpdocType;
                 },
-                $type->getTypes()
-            )
+                $type->getTypes(),
+            ),
         );
     }
 

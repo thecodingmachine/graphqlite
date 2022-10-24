@@ -26,9 +26,9 @@ class Psr15GraphQLMiddlewareBuilder
     private string $url = '/graphql';
     private ServerConfig $config;
 
-    private ?ResponseFactoryInterface $responseFactory = null;
+    private ResponseFactoryInterface|null $responseFactory = null;
 
-    private ?StreamFactoryInterface $streamFactory = null;
+    private StreamFactoryInterface|null $streamFactory = null;
 
     private HttpCodeDeciderInterface $httpCodeDecider;
 

@@ -10,9 +10,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 class InputTypeProperty extends InputTypeParameter
 {
-    /**
-     * @param InputType&Type $type
-     */
+    /** @param InputType&Type $type */
     public function __construct(private string $propertyName, string $fieldName, InputType $type, bool $hasDefaultValue, mixed $defaultValue, ArgumentResolver $argumentResolver)
     {
         parent::__construct($fieldName, $type, $hasDefaultValue, $defaultValue, $argumentResolver);

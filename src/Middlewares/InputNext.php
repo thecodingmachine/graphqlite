@@ -28,7 +28,7 @@ final class InputNext implements InputFieldHandlerInterface
         $this->queue = clone $queue;
     }
 
-    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
+    public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
     {
         if ($this->queue->isEmpty()) {
             return $this->fallbackHandler->handle($inputFieldDescriptor);

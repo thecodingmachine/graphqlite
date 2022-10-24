@@ -11,17 +11,17 @@ namespace TheCodingMachine\GraphQLite\Mappers;
  */
 class GlobExtendAnnotationsCache
 {
-    private ?string $extendTypeClassName = null;
+    private string|null $extendTypeClassName = null;
 
     private string $extendTypeName;
 
-    public function setExtendType(?string $className, string $typeName): void
+    public function setExtendType(string|null $className, string $typeName): void
     {
         $this->extendTypeClassName = $className;
         $this->extendTypeName = $typeName;
     }
 
-    public function getExtendTypeClassName(): ?string
+    public function getExtendTypeClassName(): string|null
     {
         return $this->extendTypeClassName;
     }

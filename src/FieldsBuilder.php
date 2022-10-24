@@ -83,7 +83,7 @@ class FieldsBuilder
         private RootTypeMapperInterface $rootTypeMapper,
         private ParameterMiddlewareInterface $parameterMapper,
         private FieldMiddlewareInterface $fieldMiddleware,
-        private InputFieldMiddlewareInterface $inputFieldMiddleware
+        private InputFieldMiddlewareInterface $inputFieldMiddleware,
     )
     {
         $this->typeMapper = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
@@ -109,10 +109,8 @@ class FieldsBuilder
         return $this->getFieldsByAnnotations($controller, Mutation::class, false);
     }
 
-    /**
-     * @return array<string, FieldDefinition> QueryField indexed by name.
-     */
-    public function getFields(object $controller, ?string $typeName = null): array
+    /** @return array<string, FieldDefinition> QueryField indexed by name. */
+    public function getFields(object $controller, string|null $typeName = null): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true, $typeName);
 
@@ -205,7 +203,7 @@ class FieldsBuilder
      *
      * @return array<string, FieldDefinition> QueryField indexed by name.
      */
-    public function getSelfFields(string $className, ?string $typeName = null): array
+    public function getSelfFields(string $className, string|null $typeName = null): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations($className, Annotations\Field::class, false, $typeName);
 
@@ -271,7 +269,7 @@ class FieldsBuilder
      *
      * @throws ReflectionException
      */
-    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource, ?string $typeName = null): array
+    private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource, string|null $typeName = null): array
     {
         $refClass = new ReflectionClass($controller);
         /** @var array<string, FieldDefinition> $queryList */
@@ -333,7 +331,7 @@ class FieldsBuilder
      *
      * @throws AnnotationException
      */
-    private function getFieldsByMethodAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, ?string $typeName = null): array
+    private function getFieldsByMethodAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, string|null $typeName = null): array
     {
         $fields = [];
 
@@ -416,7 +414,7 @@ class FieldsBuilder
             $fieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
-                public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
+                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
@@ -444,7 +442,7 @@ class FieldsBuilder
      *
      * @throws AnnotationException
      */
-    private function getFieldsByPropertyAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, ?string $typeName = null): array
+    private function getFieldsByPropertyAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, string|null $typeName = null): array
     {
         $fields = [];
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
@@ -509,7 +507,7 @@ class FieldsBuilder
             $fieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
-                public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
+                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
@@ -632,7 +630,7 @@ class FieldsBuilder
             $fieldDescriptor->setMiddlewareAnnotations($sourceField->getMiddlewareAnnotations());
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
-                public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
+                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
@@ -732,12 +730,12 @@ class FieldsBuilder
      *
      * @return array<string, ParameterInterface>
      */
-    private function mapParameters(array $refParameters, DocBlock $docBlock, ?SourceFieldInterface $sourceField = null): array
+    private function mapParameters(array $refParameters, DocBlock $docBlock, SourceFieldInterface|null $sourceField = null): array
     {
         if (empty($refParameters)) {
             return [];
         }
-        $additionalParameterAnnotations = $sourceField !== null ? $sourceField->getParameterAnnotations() : [];
+        $additionalParameterAnnotations = $sourceField?->getParameterAnnotations() ?? [];
 
         $docBlockTypes = [];
         /** @var DocBlock\Tags\Param[] $paramTags */
@@ -779,7 +777,7 @@ class FieldsBuilder
     /**
      * Extracts deprecation reason from doc block.
      */
-    private function getDeprecationReason(DocBlock $docBlockObj): ?string
+    private function getDeprecationReason(DocBlock $docBlockObj): string|null
     {
         $deprecated = $docBlockObj->getTagsByName('deprecated');
         if (count($deprecated) >= 1) {
@@ -832,7 +830,7 @@ class FieldsBuilder
      *
      * @throws AnnotationException
      */
-    private function getInputFieldsByMethodAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
+    private function getInputFieldsByMethodAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionMethod $refMethod, string $annotationName, bool $injectSource, array $defaultProperties, string|null $typeName = null, bool $isUpdate = false): array
     {
         $fields = [];
 
@@ -904,7 +902,7 @@ class FieldsBuilder
             $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
             $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
+                public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
                 {
                     return InputField::fromFieldDescriptor($inputFieldDescriptor);
                 }
@@ -930,7 +928,7 @@ class FieldsBuilder
      *
      * @throws AnnotationException
      */
-    private function getInputFieldsByPropertyAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, array $defaultProperties, ?string $typeName = null, bool $isUpdate = false): array
+    private function getInputFieldsByPropertyAnnotations(string|object $controller, ReflectionClass $refClass, ReflectionProperty $refProperty, string $annotationName, array $defaultProperties, string|null $typeName = null, bool $isUpdate = false): array
     {
         $fields = [];
 
@@ -973,7 +971,7 @@ class FieldsBuilder
                     trim($description),
                     $isUpdate,
                     $inputProperty->hasDefaultValue(),
-                    $inputProperty->getDefaultValue()
+                    $inputProperty->getDefaultValue(),
                 );
             } else {
                 // setters and properties
@@ -999,7 +997,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
                 $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                    public function handle(InputFieldDescriptor $inputFieldDescriptor): ?InputField
+                    public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
                     {
                         return InputField::fromFieldDescriptor($inputFieldDescriptor);
                     }
@@ -1016,9 +1014,7 @@ class FieldsBuilder
         return $fields;
     }
 
-    /**
-     * @return string[]
-     */
+    /** @return string[] */
     private function getClassConstructParameterNames(ReflectionClass $refClass): array
     {
         $constructor = $refClass->getConstructor();

@@ -28,9 +28,9 @@ final class FactoryContext
         private RecursiveTypeMapperInterface $recursiveTypeMapper,
         private ContainerInterface $container,
         private CacheInterface $cache,
-        private ?InputTypeValidatorInterface $inputTypeValidator,
-        private ?int $globTTL,
-        private ?int $mapTTL = null
+        private InputTypeValidatorInterface|null $inputTypeValidator,
+        private int|null $globTTL,
+        private int|null $mapTTL = null,
     ) {
     }
 
@@ -84,17 +84,17 @@ final class FactoryContext
         return $this->cache;
     }
 
-    public function getInputTypeValidator(): ?InputTypeValidatorInterface
+    public function getInputTypeValidator(): InputTypeValidatorInterface|null
     {
         return $this->inputTypeValidator;
     }
 
-    public function getGlobTTL(): ?int
+    public function getGlobTTL(): int|null
     {
         return $this->globTTL;
     }
 
-    public function getMapTTL(): ?int
+    public function getMapTTL(): int|null
     {
         return $this->mapTTL;
     }

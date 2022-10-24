@@ -31,9 +31,9 @@ use function str_replace;
 final class GlobControllerQueryProvider implements QueryProviderInterface
 {
     /** @var array<string,string>|null */
-    private ?array $instancesList = null;
+    private array|null $instancesList = null;
     private ClassNameMapper $classNameMapper;
-    private ?AggregateControllerQueryProvider $aggregateControllerQueryProvider = null;
+    private AggregateControllerQueryProvider|null $aggregateControllerQueryProvider = null;
     private CacheContractInterface $cacheContract;
 
     /**
@@ -47,9 +47,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         private ContainerInterface $container,
         private AnnotationReader $annotationReader,
         private CacheInterface $cache,
-        ?ClassNameMapper $classNameMapper = null,
-        private ?int $cacheTtl = null,
-        private bool $recursive = true
+        ClassNameMapper|null $classNameMapper = null,
+        private int|null $cacheTtl = null,
+        private bool $recursive = true,
     )
     {
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
@@ -84,9 +84,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         return $this->instancesList;
     }
 
-    /**
-     * @return array<int,string>
-     */
+    /** @return array<int,string> */
     private function buildInstancesList(): array
     {
         $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, $this->classNameMapper, $this->recursive);
@@ -113,9 +111,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         return $instances;
     }
 
-    /**
-     * @param ReflectionClass<object> $reflectionClass
-     */
+    /** @param ReflectionClass<object> $reflectionClass */
     private function hasQueriesOrMutations(ReflectionClass $reflectionClass): bool
     {
         foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
@@ -131,17 +127,13 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         return false;
     }
 
-    /**
-     * @return array<string,FieldDefinition>
-     */
+    /** @return array<string,FieldDefinition> */
     public function getQueries(): array
     {
         return $this->getAggregateControllerQueryProvider()->getQueries();
     }
 
-    /**
-     * @return array<string,FieldDefinition>
-     */
+    /** @return array<string,FieldDefinition> */
     public function getMutations(): array
     {
         return $this->getAggregateControllerQueryProvider()->getMutations();

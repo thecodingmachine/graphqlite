@@ -104,7 +104,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeException
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
+    public function mapClassToType(string $className, OutputType|null $subType): MutableInterface
     {
         // TODO: add support for $subType
         if ($subType !== null) {

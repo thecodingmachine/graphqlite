@@ -18,29 +18,27 @@ interface SourceFieldInterface
      * Returns the GraphQL return type of the field (as a string).
      * The string is the GraphQL output type name.
      */
-    public function getOutputType(): ?string;
+    public function getOutputType(): string|null;
 
     /**
      * Returns the PHP return type of the field (as a string).
      * The string is the PHPDoc for the PHP type.
      */
-    public function getPhpType(): ?string;
+    public function getPhpType(): string|null;
 
     /**
      * Returns the description of the GraphQL query/mutation/field.
      */
-    public function getDescription(): ?string;
+    public function getDescription(): string|null;
 
     /**
      * Returns the property name in the source class
      */
-    public function getSourceName(): ?string;
+    public function getSourceName(): string|null;
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations;
 
-    /**
-     * @return array<string, ParameterAnnotations> Key: the name of the attribute
-     */
+    /** @return array<string, ParameterAnnotations> Key: the name of the attribute */
     public function getParameterAnnotations(): array;
 
     /**

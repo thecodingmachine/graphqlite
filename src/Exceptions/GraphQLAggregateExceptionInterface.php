@@ -13,8 +13,6 @@ use Throwable;
  */
 interface GraphQLAggregateExceptionInterface extends Throwable
 {
-    /**
-     * @return (ClientAware&Throwable)[]
-     */
+    /** @return (ClientAware&Throwable)[] */
     public function getExceptions(): array;
 }

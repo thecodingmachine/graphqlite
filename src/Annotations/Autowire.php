@@ -28,9 +28,7 @@ class Autowire implements ParameterAnnotationInterface
     /** @var string|null */
     private $identifier;
 
-    /**
-     * @param array<string, mixed>|string $identifier
-     */
+    /** @param array<string, mixed>|string $identifier */
     public function __construct(array|string $identifier = [])
     {
         $values = $identifier;
@@ -52,7 +50,7 @@ class Autowire implements ParameterAnnotationInterface
         return $this->for;
     }
 
-    public function getIdentifier(): ?string
+    public function getIdentifier(): string|null
     {
         return $this->identifier;
     }

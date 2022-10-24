@@ -14,9 +14,9 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
 final class GlobAnnotationsCache
 {
     /** @var class-string<object>|null */
-    private ?string $typeClassName = null;
+    private string|null $typeClassName = null;
 
-    private ?string $typeName = null;
+    private string|null $typeName = null;
 
     private bool $default;
 
@@ -29,9 +29,7 @@ final class GlobAnnotationsCache
     /** @var array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}> An array mapping an input type name to an input name / declaring class */
     private array $inputs = [];
 
-    /**
-     * @param class-string<object> $className
-     */
+    /** @param class-string<object> $className */
     public function setType(string $className, string $typeName, bool $isDefault): void
     {
         $this->typeClassName = $className;
@@ -39,15 +37,13 @@ final class GlobAnnotationsCache
         $this->default = $isDefault;
     }
 
-    /**
-     * @return class-string<object>|null
-     */
-    public function getTypeClassName(): ?string
+    /** @return class-string<object>|null */
+    public function getTypeClassName(): string|null
     {
         return $this->typeClassName;
     }
 
-    public function getTypeName(): ?string
+    public function getTypeName(): string|null
     {
         return $this->typeName;
     }
@@ -61,30 +57,24 @@ final class GlobAnnotationsCache
      * @param class-string<object>|null $className
      * @param class-string<object> $declaringClass
      */
-    public function registerFactory(string $methodName, string $inputName, ?string $className, bool $isDefault, string $declaringClass): void
+    public function registerFactory(string $methodName, string $inputName, string|null $className, bool $isDefault, string $declaringClass): void
     {
         $this->factories[$methodName] = [$inputName, $className, $isDefault, $declaringClass];
     }
 
-    /**
-     * @param class-string<object> $declaringClass
-     */
+    /** @param class-string<object> $declaringClass */
     public function registerDecorator(string $methodName, string $inputName, string $declaringClass): void
     {
         $this->decorators[$methodName] = [$inputName, $declaringClass];
     }
 
-    /**
-     * @return array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}>
-     */
+    /** @return array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> */
     public function getFactories(): array
     {
         return $this->factories;
     }
 
-    /**
-     * @return array<string, array{0: string, 1:class-string<object>}>
-     */
+    /** @return array<string, array{0: string, 1:class-string<object>}> */
     public function getDecorators(): array
     {
         return $this->decorators;

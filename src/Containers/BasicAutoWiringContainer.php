@@ -20,9 +20,7 @@ class BasicAutoWiringContainer implements ContainerInterface
     /** @var array<string|int,object> */
     private array $values = [];
 
-    /**
-     * @param ContainerInterface $container The proxied container.
-     */
+    /** @param ContainerInterface $container The proxied container. */
     public function __construct(private ContainerInterface $container)
     {
     }

@@ -54,11 +54,11 @@ class Type implements TypeInterface
      */
     public function __construct(
         array $attributes = [],
-        ?string $class = null,
-        ?string $name = null,
-        ?bool $default = null,
-        ?bool $external = null,
-        ?bool $useEnumValues = null
+        string|null $class = null,
+        string|null $name = null,
+        bool|null $default = null,
+        bool|null $external = null,
+        bool|null $useEnumValues = null,
     ) {
         $external = $external ?? $attributes['external'] ?? null;
         $class = $class ?? $attributes['class'] ?? null;
@@ -121,7 +121,7 @@ class Type implements TypeInterface
     /**
      * Returns the GraphQL output name for this type.
      */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }

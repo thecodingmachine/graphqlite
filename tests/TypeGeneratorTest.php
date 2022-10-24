@@ -2,18 +2,19 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use Mouf\Picotainer\Picotainer;
+use Psr\Container\ContainerInterface;
 use stdClass;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\TypeFoo;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeGeneratorTest extends AbstractQueryProviderTest
 {
-    private $container;
+    private ContainerInterface$container;
 
     public function setUp(): void
     {
-        $this->container = new Picotainer([
+        $this->container = new LazyContainer([
             TypeFoo::class => function() { return new TypeFoo(); },
             stdClass::class => function() { return new stdClass(); }
         ]);

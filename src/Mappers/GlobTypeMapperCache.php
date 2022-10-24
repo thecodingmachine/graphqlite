@@ -91,63 +91,49 @@ class GlobTypeMapperCache
      *
      * @return class-string<object>|null
      */
-    public function getTypeByObjectClass(string $className): ?string
+    public function getTypeByObjectClass(string $className): string|null
     {
         return $this->mapClassToTypeArray[$className] ?? null;
     }
 
-    /**
-     * @return class-string<object>[]
-     */
+    /** @return class-string<object>[] */
     public function getSupportedClasses(): array
     {
         return array_keys($this->mapClassToTypeArray);
     }
 
-    /**
-     * @return class-string<object>|null
-     */
-    public function getTypeByGraphQLTypeName(string $graphqlTypeName): ?string
+    /** @return class-string<object>|null */
+    public function getTypeByGraphQLTypeName(string $graphqlTypeName): string|null
     {
         return $this->mapNameToType[$graphqlTypeName] ?? null;
     }
 
-    /**
-     * @return array<int,string>|null Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname]
-     */
-    public function getFactoryByGraphQLInputTypeName(string $graphqlTypeName): ?array
+    /** @return array<int,string>|null Maps a GraphQL input type name to the factory method that creates the input type in the form [classname, methodname] */
+    public function getFactoryByGraphQLInputTypeName(string $graphqlTypeName): array|null
     {
         return $this->mapInputNameToFactory[$graphqlTypeName] ?? null;
     }
 
-    /**
-     * @return array<int, string[]>|null A pointer to the decorators methods [$className, $methodName] or null on cache miss
-     */
-    public function getDecorateByGraphQLInputTypeName(string $graphqlTypeName): ?array
+    /** @return array<int, string[]>|null A pointer to the decorators methods [$className, $methodName] or null on cache miss */
+    public function getDecorateByGraphQLInputTypeName(string $graphqlTypeName): array|null
     {
         return $this->mapInputNameToDecorator[$graphqlTypeName] ?? null;
     }
 
-    /**
-     * @return string[]|null A pointer to the factory [$className, $methodName] or null on cache miss
-     */
-    public function getFactoryByObjectClass(string $className): ?array
+    /** @return string[]|null A pointer to the factory [$className, $methodName] or null on cache miss */
+    public function getFactoryByObjectClass(string $className): array|null
     {
         return $this->mapClassToFactory[$className] ?? null;
     }
 
-    /**
-     * @return array{0: class-string<object>, 1: string|null, 2: bool}|null
-     */
-    public function getInputByGraphQLInputTypeName(string $graphqlTypeName): ?array
+    /** @return array{0: class-string<object>, 1: string|null, 2: bool}|null */
+    public function getInputByGraphQLInputTypeName(string $graphqlTypeName): array|null
     {
         return $this->mapNameToInput[$graphqlTypeName] ?? null;
     }
 
-    /**
-     * @return array{0: class-string<object>, 1: string, 2: string|null, 3: bool}|null
-     */
-    public function getInputByObjectClass(string $className): ?array
+    /** @return array{0: class-string<object>, 1: string, 2: string|null, 3: bool}|null */
+    public function getInputByObjectClass(string $className): array|null
     {
         return $this->mapClassToInput[$className] ?? null;
     }

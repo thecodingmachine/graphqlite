@@ -27,12 +27,10 @@ final class NS
      *
      * @var array<string,ReflectionClass<object>>
      */
-    private ?array $classes = null;
+    private array|null $classes = null;
 
-    /**
-     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
-     */
-    public function __construct(private string $namespace, private CacheInterface $cache, private ClassNameMapper $classNameMapper, private ?int $globTTL, private bool $recursive)
+    /** @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation) */
+    public function __construct(private string $namespace, private CacheInterface $cache, private ClassNameMapper $classNameMapper, private int|null $globTTL, private bool $recursive)
     {
     }
 

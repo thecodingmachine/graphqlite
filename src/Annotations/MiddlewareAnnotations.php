@@ -13,9 +13,7 @@ use function count;
  */
 class MiddlewareAnnotations
 {
-    /**
-     * @param array<int, MiddlewareAnnotationInterface> $annotations
-     */
+    /** @param array<int, MiddlewareAnnotationInterface> $annotations */
     public function __construct(private array $annotations)
     {
     }
@@ -35,7 +33,7 @@ class MiddlewareAnnotations
     /**
      * Returns at most 1 annotation of the $className type.
      */
-    public function getAnnotationByType(string $className): ?MiddlewareAnnotationInterface
+    public function getAnnotationByType(string $className): MiddlewareAnnotationInterface|null
     {
         $annotations = $this->getAnnotationsByType($className);
         $count = count($annotations);

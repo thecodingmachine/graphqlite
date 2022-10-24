@@ -26,8 +26,8 @@ final class RootTypeMapperFactoryContext
         private RecursiveTypeMapperInterface $recursiveTypeMapper,
         private ContainerInterface $container,
         private CacheInterface $cache,
-        private ?int $globTTL,
-        private ?int $mapTTL = null
+        private int|null $globTTL,
+        private int|null $mapTTL = null,
     ) {
     }
 
@@ -66,12 +66,12 @@ final class RootTypeMapperFactoryContext
         return $this->cache;
     }
 
-    public function getGlobTTL(): ?int
+    public function getGlobTTL(): int|null
     {
         return $this->globTTL;
     }
 
-    public function getMapTTL(): ?int
+    public function getMapTTL(): int|null
     {
         return $this->mapTTL;
     }

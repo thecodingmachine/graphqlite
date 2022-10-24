@@ -98,25 +98,21 @@ class SchemaFactory
     /** @var ParameterMiddlewareInterface[] */
     private array $parameterMiddlewares = [];
 
-    private ?Reader $doctrineAnnotationReader = null;
+    private Reader|null $doctrineAnnotationReader = null;
 
-    private ?AuthenticationServiceInterface $authenticationService = null;
+    private AuthenticationServiceInterface|null $authenticationService = null;
 
-    private ?AuthorizationServiceInterface $authorizationService = null;
+    private AuthorizationServiceInterface|null $authorizationService = null;
 
-    private ?InputTypeValidatorInterface $inputTypeValidator = null;
+    private InputTypeValidatorInterface|null $inputTypeValidator = null;
 
-    private CacheInterface $cache;
+    private NamingStrategyInterface|null $namingStrategy = null;
 
-    private ?NamingStrategyInterface $namingStrategy = null;
+    private ClassNameMapper|null $classNameMapper = null;
 
-    private ContainerInterface $container;
+    private SchemaConfig|null $schemaConfig = null;
 
-    private ?ClassNameMapper $classNameMapper = null;
-
-    private ?SchemaConfig $schemaConfig = null;
-
-    private ?int $globTTL = self::GLOB_CACHE_SECONDS;
+    private int|null $globTTL = self::GLOB_CACHE_SECONDS;
 
     /** @var array<int, FieldMiddlewareInterface> */
     private array $fieldMiddlewares = [];
@@ -124,15 +120,13 @@ class SchemaFactory
     /** @var array<int, InputFieldMiddlewareInterface> */
     private array $inputFieldMiddlewares = [];
 
-    private ?ExpressionLanguage $expressionLanguage = null;
+    private ExpressionLanguage|null $expressionLanguage = null;
 
     private string $cacheNamespace;
 
-    public function __construct(CacheInterface $cache, ContainerInterface $container)
+    public function __construct(private CacheInterface $cache, private ContainerInterface $container)
     {
         $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
-        $this->cache = $cache;
-        $this->container = $container;
     }
 
     /**
@@ -251,7 +245,7 @@ class SchemaFactory
         return $this;
     }
 
-    public function setInputTypeValidator(?InputTypeValidatorInterface $inputTypeValidator): self
+    public function setInputTypeValidator(InputTypeValidatorInterface|null $inputTypeValidator): self
     {
         $this->inputTypeValidator = $inputTypeValidator;
 
@@ -284,7 +278,7 @@ class SchemaFactory
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
      */
-    public function setGlobTTL(?int $globTTL): self
+    public function setGlobTTL(int|null $globTTL): self
     {
         $this->globTTL = $globTTL;
 
@@ -357,7 +351,7 @@ class SchemaFactory
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
             static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
-            $this->typeNamespaces
+            $this->typeNamespaces,
         );
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
@@ -404,7 +398,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
-                $this->globTTL
+                $this->globTTL,
             );
 
             $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
@@ -456,7 +450,7 @@ class SchemaFactory
                 $namingStrategy,
                 $recursiveTypeMapper,
                 $namespacedCache,
-                $this->globTTL
+                $this->globTTL,
             ));
         }
 
@@ -473,7 +467,7 @@ class SchemaFactory
                 $this->container,
                 $namespacedCache,
                 $this->inputTypeValidator,
-                $this->globTTL
+                $this->globTTL,
             );
         }
 
@@ -500,7 +494,7 @@ class SchemaFactory
                 $annotationReader,
                 $namespacedCache,
                 $this->classNameMapper,
-                $this->globTTL
+                $this->globTTL,
             );
         }
 

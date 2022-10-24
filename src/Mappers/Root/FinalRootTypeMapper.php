@@ -34,15 +34,13 @@ final class FinalRootTypeMapper implements RootTypeMapperInterface
      *
      * @throws CannotMapTypeException
      */
-    public function toGraphQLOutputType(Type $type, ?OutputType $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
     {
         throw CannotMapTypeException::createForPhpDocType($type);
     }
 
-    /**
-     * @throws CannotMapTypeException
-     */
-    public function toGraphQLInputType(Type $type, null|InputType|GraphQLType $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    /** @throws CannotMapTypeException */
+    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
     {
         throw CannotMapTypeException::createForPhpDocType($type);
     }

@@ -63,9 +63,7 @@ class TypeRegistry
         return isset($this->types[$typeName]);
     }
 
-    /**
-     * @return NamedType&Type&(ObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface))
-     */
+    /** @return NamedType&Type&(ObjectType|InterfaceType|UnionType|(InputObjectType&ResolvableMutableInputInterface)) */
     public function getType(string $typeName): NamedType
     {
         if (! isset($this->types[$typeName])) {
@@ -85,9 +83,7 @@ class TypeRegistry
         return $type;
     }
 
-    /**
-     * @return MutableInterface&(MutableObjectType|MutableInterfaceType)
-     */
+    /** @return MutableInterface&(MutableObjectType|MutableInterfaceType) */
     public function getMutableInterface(string $typeName): MutableInterface
     {
         $type = $this->getType($typeName);

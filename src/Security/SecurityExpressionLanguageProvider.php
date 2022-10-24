@@ -14,9 +14,7 @@ use function sprintf;
  */
 class SecurityExpressionLanguageProvider implements ExpressionFunctionProviderInterface
 {
-    /**
-     * @return ExpressionFunction[] An array of Function instances
-     */
+    /** @return ExpressionFunction[] An array of Function instances */
     public function getFunctions(): array
     {
         return [

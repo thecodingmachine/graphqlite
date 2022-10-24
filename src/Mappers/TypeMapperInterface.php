@@ -37,7 +37,7 @@ interface TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableInterface;
+    public function mapClassToType(string $className, OutputType|null $subType): MutableInterface;
 
     /**
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.

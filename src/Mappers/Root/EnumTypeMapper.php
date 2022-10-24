@@ -34,16 +34,14 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
     /** @var array<string, class-string<UnitEnum>> */
-    private ?array $nameToClassMapping = null;
+    private array|null $nameToClassMapping = null;
 
-    /**
-     * @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name.
-     */
+    /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
         private RootTypeMapperInterface $next,
         private AnnotationReader $annotationReader,
         private CacheInterface $cacheService,
-        private array $namespaces
+        private array $namespaces,
     ) {
     }
 
@@ -54,9 +52,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     public function toGraphQLOutputType(
         Type $type,
-        ?OutputType $subType,
+        OutputType|null $subType,
         ReflectionMethod|ReflectionProperty $reflector,
-        DocBlock $docBlockObj
+        DocBlock $docBlockObj,
     ): OutputType {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
@@ -67,10 +65,10 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     public function toGraphQLInputType(
         Type $type,
-        null|InputType|GraphQLType $subType,
+        InputType|GraphQLType|null $subType,
         string $argumentName,
         ReflectionMethod|ReflectionProperty $reflector,
-        DocBlock $docBlockObj
+        DocBlock $docBlockObj,
     ): InputType|GraphQLType
     {
         $result = $this->map($type);
@@ -81,7 +79,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         return $result;
     }
 
-    private function map(Type $type): ?EnumType
+    private function map(Type $type): EnumType|null
     {
         if (! $type instanceof Object_) {
             return null;
@@ -97,10 +95,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
         return $this->mapByClassName($enumClass);
     }
 
-    /**
-     * @param class-string $enumClass
-     */
-    private function mapByClassName(string $enumClass): ?EnumType
+    /** @param class-string $enumClass */
+    private function mapByClassName(string $enumClass): EnumType|null
     {
         if (isset($this->cache[$enumClass])) {
             return $this->cache[$enumClass];
@@ -117,7 +113,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         $reflectionEnum = new ReflectionEnum($enumClass);
 
         $typeAnnotation = $this->annotationReader->getTypeAnnotation($reflectionEnum);
-        $typeName = ($typeAnnotation !== null ? $typeAnnotation->getName() : null) ?? $reflectionEnum->getShortName();
+        $typeName = $typeAnnotation?->getName() ?? $reflectionEnum->getShortName();
 
         // Expose values instead of names if specifically configured to and if enum is string-backed
         $useValues = $typeAnnotation !== null &&
@@ -134,7 +130,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
     {
         $typeAnnotation = $this->annotationReader->getTypeAnnotation($reflectionClass);
 
-        return ($typeAnnotation !== null ? $typeAnnotation->getName() : null) ?? $reflectionClass->getShortName();
+        return $typeAnnotation?->getName() ?? $reflectionClass->getShortName();
     }
 
     /**

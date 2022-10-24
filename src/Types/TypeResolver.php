@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\Error;
-use GraphQL\Language\AST\ListTypeNode;
-use GraphQL\Language\AST\NamedTypeNode;
-use GraphQL\Language\AST\NonNullTypeNode;
 use GraphQL\Language\Parser;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\OutputType;
@@ -26,16 +23,14 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
  */
 class TypeResolver
 {
-    private ?Schema $schema = null;
+    private Schema|null $schema = null;
 
     public function registerSchema(Schema $schema): void
     {
         $this->schema = $schema;
     }
 
-    /**
-     * @throws CannotMapTypeExceptionInterface
-     */
+    /** @throws CannotMapTypeExceptionInterface */
     public function mapNameToType(string $typeName): Type
     {
         if ($this->schema === null) {
@@ -43,10 +38,8 @@ class TypeResolver
         }
 
         try {
-            /**
-             * @var ListTypeNode|NamedTypeNode|NonNullTypeNode
-             */
             $parsedOutputType = Parser::parseType($typeName);
+
             $type             = AST::typeFromAST($this->schema, $parsedOutputType);
         } catch (Error $e) {
             throw CannotMapTypeException::createForParseError($e);
@@ -59,9 +52,7 @@ class TypeResolver
         return $type;
     }
 
-    /**
-     * @return OutputType&Type
-     */
+    /** @return OutputType&Type */
     public function mapNameToOutputType(string $typeName): OutputType
     {
         $type = $this->mapNameToType($typeName);
@@ -72,9 +63,7 @@ class TypeResolver
         return $type;
     }
 
-    /**
-     * @return InputType&Type
-     */
+    /** @return InputType&Type */
     public function mapNameToInputType(string $typeName): InputType
     {
         $type = $this->mapNameToType($typeName);

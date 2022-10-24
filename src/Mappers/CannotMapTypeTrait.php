@@ -34,7 +34,7 @@ trait CannotMapTypeTrait
             $parameter->getName(),
             $declaringClass->getName(),
             $parameter->getDeclaringFunction()->getName(),
-            $this->message
+            $this->message,
         );
     }
 
@@ -49,13 +49,11 @@ trait CannotMapTypeTrait
             'For return type of %s::%s, %s',
             $method->getDeclaringClass()->getName(),
             $method->getName(),
-            $this->message
+            $this->message,
         );
     }
 
-    /**
-     * @param ReflectionClass<object> $class
-     */
+    /** @param ReflectionClass<object> $class */
     public function addSourceFieldInfo(ReflectionClass $class, SourceFieldInterface $sourceField): void
     {
         if ($this->locationInfoAdded !== false) {
@@ -67,13 +65,11 @@ trait CannotMapTypeTrait
             'For @SourceField "%s" declared in "%s", %s',
             $sourceField->getName(),
             $class->getName(),
-            $this->message
+            $this->message,
         );
     }
 
-    /**
-     * @param ReflectionClass<object> $class
-     */
+    /** @param ReflectionClass<object> $class */
     public function addExtendTypeInfo(ReflectionClass $class, ExtendType $extendType): void
     {
         if ($this->locationInfoAdded !== false) {

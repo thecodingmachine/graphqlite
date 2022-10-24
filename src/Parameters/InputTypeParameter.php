@@ -13,20 +13,16 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 class InputTypeParameter implements InputTypeParameterInterface
 {
     private bool $doesHaveDefaultValue;
-    private ?string $description = null;
+    private string|null $description = null;
 
-    /**
-     * @param InputType&Type $type
-     */
+    /** @param InputType&Type $type */
     public function __construct(private string $name, private InputType $type, bool $hasDefaultValue, private mixed $defaultValue, private ArgumentResolver $argumentResolver)
     {
         $this->doesHaveDefaultValue = $hasDefaultValue;
     }
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         if (isset($args[$this->name])) {
             return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);

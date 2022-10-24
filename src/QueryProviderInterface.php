@@ -9,13 +9,9 @@ namespace TheCodingMachine\GraphQLite;
  */
 interface QueryProviderInterface
 {
-    /**
-     * @return QueryField[]
-     */
+    /** @return QueryField[] */
     public function getQueries(): array;
 
-    /**
-     * @return QueryField[]
-     */
+    /** @return QueryField[] */
     public function getMutations(): array;
 }

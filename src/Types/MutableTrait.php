@@ -16,15 +16,15 @@ use function assert;
 
 trait MutableTrait
 {
-    private ?string $status = null;
+    private string|null $status = null;
 
     /** @var array<int,callable> */
     private array $fieldsCallables = [];
 
     /** @var array<string,FieldDefinition>|null */
-    private ?array $fields = null;
+    private array|null $fields = null;
     /** @var class-string<object>|null */
-    private ?string $className  = null;
+    private string|null $className  = null;
 
     public function freeze(): void
     {
@@ -59,7 +59,7 @@ trait MutableTrait
         return $this->fields[$name] ?? parent::getField($name);
     }
 
-    public function findField(string $name): ?FieldDefinition
+    public function findField(string $name): FieldDefinition|null
     {
         $this->initializeFields();
 
@@ -85,9 +85,7 @@ trait MutableTrait
         return array_merge(parent::getFields(), $this->fields);
     }
 
-    /**
-     * @return array<int,string>
-     */
+    /** @return array<int,string> */
     public function getFieldNames(): array
     {
         $this->initializeFields();
@@ -101,7 +99,7 @@ trait MutableTrait
      *
      * @return class-string<object>|null
      */
-    public function getMappedClassName(): ?string
+    public function getMappedClassName(): string|null
     {
         return $this->className;
     }
@@ -110,7 +108,7 @@ trait MutableTrait
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
             throw new RuntimeException(
-                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.'
+                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
             );
         }
 

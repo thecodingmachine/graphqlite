@@ -20,7 +20,7 @@ class PropertyAccessor
     /**
      * Finds a getter for a property.
      */
-    public static function findGetter(string $class, string $propertyName): ?string
+    public static function findGetter(string $class, string $propertyName): string|null
     {
         $name = ucfirst($propertyName);
 
@@ -41,7 +41,7 @@ class PropertyAccessor
     /**
      * Finds a setter for a property.
      */
-    public static function findSetter(string $class, string $propertyName): ?string
+    public static function findSetter(string $class, string $propertyName): string|null
     {
         $name = ucfirst($propertyName);
 
@@ -105,9 +105,7 @@ class PropertyAccessor
         return (new ReflectionMethod($class, $methodName))->isPublic();
     }
 
-    /**
-     * @throws ReflectionException
-     */
+    /** @throws ReflectionException */
     private static function isValidGetter(string $class, string $methodName): bool
     {
         $reflection = new ReflectionMethod($class, $methodName);

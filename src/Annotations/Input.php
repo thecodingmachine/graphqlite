@@ -24,25 +24,23 @@ use RuntimeException;
 class Input implements TypeInterface
 {
     /** @var class-string<object>|null */
-    private ?string $class = null;
+    private string|null $class = null;
 
-    private ?string $name = null;
+    private string|null $name = null;
 
     private bool $default;
 
-    private ?string $description = null;
+    private string|null $description = null;
 
     private bool $update;
 
-    /**
-     * @param mixed[] $attributes
-     */
+    /** @param mixed[] $attributes */
     public function __construct(
         array $attributes = [],
-        ?string $name = null,
-        ?bool $default = null,
-        ?string $description = null,
-        ?bool $update = null
+        string|null $name = null,
+        bool|null $default = null,
+        string|null $description = null,
+        bool|null $update = null,
     ) {
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->default = $default ?? $attributes['default'] ?? $this->name === null;
@@ -64,9 +62,7 @@ class Input implements TypeInterface
         return $this->class;
     }
 
-    /**
-     * @param class-string<object> $class
-     */
+    /** @param class-string<object> $class */
     public function setClass(string $class): void
     {
         $this->class = $class;
@@ -75,7 +71,7 @@ class Input implements TypeInterface
     /**
      * Returns the GraphQL input name for this type.
      */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }
@@ -91,7 +87,7 @@ class Input implements TypeInterface
     /**
      * Returns description about this input type.
      */
-    public function getDescription(): ?string
+    public function getDescription(): string|null
     {
         return $this->description;
     }

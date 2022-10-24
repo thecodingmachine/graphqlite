@@ -8,9 +8,7 @@ use GraphQL\Type\Definition\InterfaceType;
 
 class ObjectFromInterfaceType extends MutableObjectType
 {
-    /**
-     * @param string $name The name of the object type to create
-     */
+    /** @param string $name The name of the object type to create */
     public function __construct(string $name, InterfaceType $type)
     {
         parent::__construct([

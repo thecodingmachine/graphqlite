@@ -6,14 +6,10 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 
 class MappedClass
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     //private $className;
 
-    /**
-     * @var MappedClass|null
-     */
+    /** @var MappedClass|null */
     //private $parent;
 
     /** @var MappedClass[] */
@@ -24,33 +20,25 @@ class MappedClass
         $this->className = $className;
     }*/
 
-    /**
-     * @return string
-     */
+    /** @return string */
     /*public function getClassName(): string
     {
         return $this->className;
     }*/
 
-    /**
-     * @return MappedClass|null
-     */
+    /** @return MappedClass|null */
     /*public function getParent(): ?MappedClass
     {
         return $this->parent;
     }*/
 
-    /**
-     * @param MappedClass|null $parent
-     */
+    /** @param MappedClass|null $parent */
     /*public function setParent(?MappedClass $parent): void
     {
         $this->parent = $parent;
     }*/
 
-    /**
-     * @return MappedClass[]
-     */
+    /** @return MappedClass[] */
     public function getChildren(): array
     {
         return $this->children;

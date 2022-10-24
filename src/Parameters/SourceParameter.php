@@ -11,10 +11,8 @@ use GraphQL\Type\Definition\ResolveInfo;
  */
 class SourceParameter implements ParameterInterface
 {
-    /**
-     * @param array<string, mixed> $args
-     */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): ?object
+    /** @param array<string, mixed> $args */
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): object|null
     {
         return $source;
     }

@@ -8,7 +8,6 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use Mouf\Picotainer\Picotainer;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -16,6 +15,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -147,20 +147,22 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     if ($className === TestObject::class) {
                         return $this->testObjectType;
-                    } elseif ($className === TestObject2::class) {
-                        return $this->testObjectType2;
-                    } else {
-                        throw CannotMapTypeException::createForType($className);
                     }
+
+                    if ($className === TestObject2::class) {
+                        return $this->testObjectType2;
+                    }
+
+                    throw CannotMapTypeException::createForType($className);
                 }
 
                 public function mapClassToInputType(string $className): ResolvableMutableInputInterface
                 {
                     if ($className === TestObject::class) {
                         return $this->inputTestObjectType;
-                    } else {
-                        throw CannotMapTypeException::createForInputType($className);
                     }
+
+                    throw CannotMapTypeException::createForInputType($className);
                 }
 
                 public function canMapClassToType(string $className): bool
@@ -180,16 +182,12 @@ abstract class AbstractQueryProviderTest extends TestCase
 
                 public function mapNameToType(string $typeName): Type
                 {
-                    switch ($typeName) {
-                        case 'TestObject':
-                            return $this->testObjectType;
-                        case 'TestObject2':
-                            return $this->testObjectType2;
-                        case 'TestObjectInput':
-                            return $this->inputTestObjectType;
-                        default:
-                            throw CannotMapTypeException::createForName($typeName);
-                    }
+                    return match ($typeName) {
+                        'TestObject' => $this->testObjectType,
+                        'TestObject2' => $this->testObjectType2,
+                        'TestObjectInput' => $this->inputTestObjectType,
+                        default => throw CannotMapTypeException::createForName($typeName),
+                    };
                 }
 
                 public function canMapNameToType(string $typeName): bool
@@ -243,7 +241,7 @@ abstract class AbstractQueryProviderTest extends TestCase
     protected function getRegistry()
     {
         if ($this->registry === null) {
-            $this->registry = $this->buildAutoWiringContainer(new Picotainer([]));
+            $this->registry = $this->buildAutoWiringContainer(new LazyContainer([]));
         }
         return $this->registry;
     }

@@ -30,7 +30,7 @@ final class ParameterMiddlewarePipe implements ParameterMiddlewareInterface
      * Executes the internal pipeline, passing $handler as the "final
      * handler" in cases when the pipeline exhausts itself.
      */
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $parameterMapper): ParameterInterface
     {
         return (new Next($this->pipeline, $parameterMapper))->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
     }

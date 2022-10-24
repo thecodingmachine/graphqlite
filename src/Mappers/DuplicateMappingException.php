@@ -32,9 +32,7 @@ class DuplicateMappingException extends RuntimeException
         throw new self(sprintf("The type '%s' is created by 2 different classes: '%s' and '%s'", $type, $sourceClass1, $sourceClass2));
     }
 
-    /**
-     * @return static
-     */
+    /** @return static */
     public static function createForQuery(string $sourceClass, string $queryName, ReflectionMethod|ReflectionProperty $firstReflector, ReflectionMethod|ReflectionProperty $secondReflector): self
     {
         $firstName = sprintf('%s::%s', $firstReflector->getDeclaringClass()->getName(), $firstReflector->getName());
@@ -65,9 +63,7 @@ class DuplicateMappingException extends RuntimeException
         throw new self(sprintf("The query/mutation/field '%s' is declared twice in '%s::%s'", $queryName, $property->getDeclaringClass()->getName(), $property->getName()));
     }
 
-    /**
-     * @return static
-     */
+    /** @return static */
     public static function createForDefaultInput(string $sourceClass): self
     {
         throw new self(sprintf("The class '%s' should be mapped to only one GraphQL Input type as default. Two default inputs are declared as default via @Input annotation.", $sourceClass));

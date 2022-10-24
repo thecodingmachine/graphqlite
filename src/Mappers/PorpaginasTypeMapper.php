@@ -49,7 +49,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
+    public function mapClassToType(string $className, OutputType|null $subType): MutableInterface
     {
         if (! $this->canMapClassToType($className)) {
             throw CannotMapTypeException::createForType($className);

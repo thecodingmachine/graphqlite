@@ -26,7 +26,7 @@ final class Next implements FieldHandlerInterface
         $this->queue           = clone $queue;
     }
 
-    public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
+    public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
     {
         if ($this->queue->isEmpty()) {
             return $this->fallbackHandler->handle($fieldDescriptor);

@@ -17,7 +17,7 @@ use function is_callable;
  */
 class SourceResolver implements SourceResolverInterface
 {
-    private ?object $object = null;
+    private object|null $object = null;
 
     public function __construct(private string $methodName)
     {

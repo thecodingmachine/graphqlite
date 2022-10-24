@@ -18,7 +18,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, RootTypeMapperInterface $rootTypeMapper, ?SchemaConfig $config = null)
+    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, RootTypeMapperInterface $rootTypeMapper, SchemaConfig|null $config = null)
     {
         if ($config === null) {
             $config = SchemaConfig::create();

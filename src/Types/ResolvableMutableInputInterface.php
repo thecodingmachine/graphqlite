@@ -19,7 +19,7 @@ interface ResolvableMutableInputInterface extends MutableInputInterface
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function resolve(?object $source, array $args, mixed $context, ResolveInfo $resolveInfo): object;
+    public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $resolveInfo): object;
 
     /**
      * Decorates the call to the resolver with the $decorator.

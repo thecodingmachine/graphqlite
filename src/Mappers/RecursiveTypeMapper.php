@@ -38,14 +38,12 @@ use function get_parent_class;
  */
 class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 {
-    private TypeMapperInterface $typeMapper;
-
     /**
      * An array mapping a class name to the MappedClass instance (useful to know if the class has children)
      *
      * @var array<class-string<object>,MappedClass>|null
      */
-    private ?array $mappedClasses = null;
+    private array|null $mappedClasses = null;
 
     /**
      * An array of interfaces OR object types if no interface matching.
@@ -60,38 +58,20 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /** @var array<string,InputObjectType&ResolvableMutableInputInterface> Key: FQCN */
     private array $classToInputTypeCache = [];
 
-    private NamingStrategyInterface $namingStrategy;
-
-    private CacheInterface $cache;
-
-    private ?int $ttl = null;
-
     /** @var array<string, class-string<object>> An array mapping a GraphQL interface name to the PHP class name that triggered its generation. */
-    private ?array $interfaceToClassNameMap = null;
-
-    private TypeRegistry $typeRegistry;
-
-    private AnnotationReader $annotationReader;
+    private array|null $interfaceToClassNameMap = null;
 
     public function __construct(
-        TypeMapperInterface $typeMapper,
-        NamingStrategyInterface $namingStrategy,
-        CacheInterface $cache,
-        TypeRegistry $typeRegistry,
-        AnnotationReader $annotationReader,
-        ?int $ttl = null
+        private TypeMapperInterface $typeMapper,
+        private NamingStrategyInterface $namingStrategy,
+        private CacheInterface $cache,
+        private TypeRegistry $typeRegistry,
+        private AnnotationReader $annotationReader,
+        private int|null $ttl = null,
     ) {
-        $this->typeMapper = $typeMapper;
-        $this->namingStrategy = $namingStrategy;
-        $this->cache = $cache;
-        $this->ttl = $ttl;
-        $this->typeRegistry = $typeRegistry;
-        $this->annotationReader = $annotationReader;
     }
 
-    /**
-     * @return array<class-string<object>,MappedClass>
-     */
+    /** @return array<class-string<object>,MappedClass> */
     private function getClassTree(): array
     {
         if ($this->mappedClasses === null) {
@@ -230,7 +210,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @return class-string<object>|null
      */
-    public function findClosestMatchingParent(string $className): ?string
+    public function findClosestMatchingParent(string $className): string|null
     {
         do {
             if ($this->typeMapper->canMapClassToType($className)) {
@@ -238,7 +218,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             }
             try {
                 $className = get_parent_class($className);
-            } catch (TypeError $exception) {
+            } catch (TypeError) {
                 return null;
             }
         } while ($className);
@@ -257,9 +237,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         $interfaces = [];
 
-        /**
-         * @var array<int, class-string<object>>
-         */
+        /** @var array<int, class-string<object>> $implements */
         $implements = class_implements($className);
         foreach ($implements as $interface) {
             if (! $this->typeMapper->canMapClassToType($interface)) {
@@ -304,7 +282,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType
+    public function mapClassToType(string $className, OutputType|null $subType): MutableObjectType
     {
         $cacheKey = $className;
         if ($subType !== null) {
@@ -367,7 +345,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInterfaceOrType(string $className, ?OutputType $subType): OutputType
+    public function mapClassToInterfaceOrType(string $className, OutputType|null $subType): OutputType
     {
         $closestClassName = $this->findClosestMatchingParent($className);
         if ($closestClassName === null) {

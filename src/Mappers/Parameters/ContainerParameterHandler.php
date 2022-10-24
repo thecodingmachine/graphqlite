@@ -29,7 +29,7 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
         $this->container = $container;
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
     {
         $autowire = $parameterAnnotations->getAnnotationByType(Autowire::class);
 

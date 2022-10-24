@@ -31,10 +31,8 @@ class CachedDocBlockFactory
     private array $contextArrayCache = [];
     private ContextFactory $contextFactory;
 
-    /**
-     * @param CacheInterface $cache The cache we fetch data from. Note this is a SAFE cache. It does not need to be purged.
-     */
-    public function __construct(private CacheInterface $cache, ?DocBlockFactory $docBlockFactory = null)
+    /** @param CacheInterface $cache The cache we fetch data from. Note this is a SAFE cache. It does not need to be purged. */
+    public function __construct(private CacheInterface $cache, DocBlockFactory|null $docBlockFactory = null)
     {
         $this->docBlockFactory = $docBlockFactory ?: DocBlockFactory::createInstance();
         $this->contextFactory  = new ContextFactory();
@@ -94,9 +92,7 @@ class CachedDocBlockFactory
         return $this->docBlockFactory->create($docComment, $this->contextArrayCache[$refClassName]);
     }
 
-    /**
-     * @param ReflectionClass<object> $reflectionClass
-     */
+    /** @param ReflectionClass<object> $reflectionClass */
     public function getContextFromClass(ReflectionClass $reflectionClass): Context
     {
         $className = $reflectionClass->getName();

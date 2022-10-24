@@ -171,7 +171,6 @@ $builder->setHttpCodeDecider(new HttpCodeDecider()); // Set a class in charge of
 In this example, we will focus on getting a working version of GraphQLite using:
 
 - [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) as a PSR-15 server
-- `mouf/picotainer` (a micro-container) for the PSR-11 container
 - `symfony/cache ` for the PSR-16 cache
 
 The choice of the libraries is really up to you. You can adapt it based on your needs.
@@ -188,7 +187,6 @@ The choice of the libraries is really up to you. You can adapt it based on your 
     "zendframework/zend-diactoros": "^2",
     "zendframework/zend-stratigility": "^3",
     "zendframework/zend-httphandlerrunner": "^1.0",
-    "mouf/picotainer": "^1.1",
     "symfony/cache": "^4.2"
   },
   "minimum-stability": "dev",
@@ -235,16 +233,17 @@ This `MiddlewarePipe` comes from the container declared in the `config/container
 <?php
 
 use GraphQL\Type\Schema;
-use Mouf\Picotainer\Picotainer;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Simple\ApcuCache;
 use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\SchemaFactory;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
+
 use Zend\Stratigility\MiddlewarePipe;
 
-// Picotainer is a minimalist PSR-11 container.
-return new Picotainer([
+// LazyContainer is a minimalist PSR-11 container.
+return new LazyContainer([
     MiddlewarePipe::class => function(ContainerInterface $container) {
         $pipe = new MiddlewarePipe();
         $pipe->pipe($container->get(WebonyxGraphqlMiddleware::class));
@@ -325,7 +324,7 @@ class MyController
 ```php title="config/container.php"
 use App\Controllers\MyController;
 
-return new Picotainer([
+return new LazyContainer([
     // ...
 
     // We declare the controller in the container.

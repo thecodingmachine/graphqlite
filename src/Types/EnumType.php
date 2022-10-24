@@ -17,9 +17,7 @@ use function is_string;
  */
 class EnumType extends BaseEnumType
 {
-    /**
-     * @param class-string<UnitEnum> $enumName
-     */
+    /** @param class-string<UnitEnum> $enumName */
     public function __construct(string $enumName, string $typeName, private bool $useValues = false)
     {
         $values = [];
@@ -36,9 +34,7 @@ class EnumType extends BaseEnumType
 
     // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
 
-    /**
-     * @param mixed $value
-     */
+    /** @param mixed $value */
     public function serialize($value): string
     {
         if (! $value instanceof UnitEnum) {

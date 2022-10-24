@@ -37,7 +37,7 @@ interface RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToType(string $className, ?OutputType $subType): MutableObjectType;
+    public function mapClassToType(string $className, OutputType|null $subType): MutableObjectType;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
@@ -49,7 +49,7 @@ interface RecursiveTypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInterfaceOrType(string $className, ?OutputType $subType): OutputType;
+    public function mapClassToInterfaceOrType(string $className, OutputType|null $subType): OutputType;
 
     /**
      * Finds the list of interfaces returned by $className.
@@ -99,7 +99,7 @@ interface RecursiveTypeMapperInterface
     /**
      * Returns the closest parent that can be mapped, or null if nothing can be matched.
      */
-    public function findClosestMatchingParent(string $className): ?string;
+    public function findClosestMatchingParent(string $className): string|null;
 
     /**
      * Generates an object type from an interface type (in case no object type maps this interface)
