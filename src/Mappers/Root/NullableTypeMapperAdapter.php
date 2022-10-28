@@ -65,7 +65,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         return $graphQlType;
     }
 
-    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
