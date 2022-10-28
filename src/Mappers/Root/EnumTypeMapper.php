@@ -65,11 +65,11 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     public function toGraphQLInputType(
         Type $type,
-        InputType|GraphQLType|null $subType,
+        InputType|null $subType,
         string $argumentName,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-    ): InputType|GraphQLType
+    ): InputType
     {
         $result = $this->map($type);
         if ($result === null) {

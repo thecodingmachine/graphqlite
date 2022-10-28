@@ -78,7 +78,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
      * @throws CannotMapTypeException
      * @throws CannotMapTypeExceptionInterface
      */
-    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
     {
         $mappedType = $this->mapBaseType($type);
         if ($mappedType !== null) {

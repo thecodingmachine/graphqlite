@@ -40,7 +40,7 @@ final class FinalRootTypeMapper implements RootTypeMapperInterface
     }
 
     /** @throws CannotMapTypeException */
-    public function toGraphQLInputType(Type $type, InputType|GraphQLType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType|GraphQLType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
     {
         throw CannotMapTypeException::createForPhpDocType($type);
     }
