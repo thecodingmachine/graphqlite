@@ -2500,4 +2500,119 @@ class EndToEndTest extends TestCase
         $data = $this->getSuccessResult($result);
         $this->assertSame(["graph", "ql"], $data['updateTrickyProduct']['list']);
     }
+
+    public function testPrefetchingOfSameTypeInDifferentNestingLevels(): void
+    {
+        /** @var Schema $schema */
+        $schema = $this->mainContainer->get(Schema::class);
+
+        $schema->assertValid();
+
+        $queryString = '
+        query {
+            blogs {
+                id
+                subBlogs {
+                    id
+                    posts {
+                        title
+                        comments {
+                            text
+                        }
+                    }
+                }
+                posts {
+                    title
+                    comments {
+                        text
+                    }
+                }
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            new Context()
+        );
+
+        $this->assertSame([
+            'blogs' => [
+                [
+                    'id' => '1',
+                    'subBlogs' => [
+                        [
+                            'id' => '10',
+                            'posts' => [
+                                [
+                                    'title' => 'post-10.1',
+                                    'comments' => [
+                                        ['text' => 'comment for post-10.1'],
+                                    ],
+                                ],
+                                [
+                                    'title' => 'post-10.2',
+                                    'comments' => [
+                                        ['text' => 'comment for post-10.2'],
+                                    ],
+                                ]
+                            ]
+                        ]
+                    ],
+                    'posts' => [
+                        [
+                            'title' => 'post-1.1',
+                            'comments' => [
+                                ['text' => 'comment for post-1.1'],
+                            ],
+                        ],
+                        [
+                            'title' => 'post-1.2',
+                            'comments' => [
+                                ['text' => 'comment for post-1.2'],
+                            ],
+                        ]
+                    ]
+                ],
+                [
+                    'id' => '2',
+                    'subBlogs' => [
+                        [
+                            'id' => '20',
+                            'posts' => [
+                                [
+                                    'title' => 'post-20.1',
+                                    'comments' => [
+                                        ['text' => 'comment for post-20.1'],
+                                    ],
+                                ],
+                                [
+                                    'title' => 'post-20.2',
+                                    'comments' => [
+                                        ['text' => 'comment for post-20.2'],
+                                    ],
+                                ]
+                            ]
+                        ]
+                    ],
+                    'posts' => [
+                        [
+                            'title' => 'post-2.1',
+                            'comments' => [
+                                ['text' => 'comment for post-2.1'],
+                            ],
+                        ],
+                        [
+                            'title' => 'post-2.2',
+                            'comments' => [
+                                ['text' => 'comment for post-2.2'],
+                            ],
+                        ]
+                    ]
+                ],
+            ]
+        ], $this->getSuccessResult($result));
+    }
 }

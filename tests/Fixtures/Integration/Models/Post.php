@@ -98,6 +98,29 @@ class Post
     }
 
     /**
+     * @param Comment[][] $prefetchedComments
+     * @return Comment[]
+     */
+    #[Field(prefetchMethod: 'prefetchComments')]
+    public function getComments(array $prefetchedComments): array
+    {
+        return $prefetchedComments[$this->title] ?? [];
+    }
+
+    /**
+     * @param self[] $posts
+     * @return Comment[][]
+     */
+    public function prefetchComments(array $posts): array
+    {
+        $comments = [];
+        foreach ($posts as $post) {
+            $comments[$post->title][] = new Comment("comment for $post->title");
+        }
+        return $comments;
+    }
+
+    /**
      * @param string $inaccessible
      */
     private function setInaccessible(string $inaccessible): void

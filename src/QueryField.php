@@ -103,7 +103,8 @@ class QueryField extends FieldDefinition
                 $prefetchBuffer->register($source, $args);
 
                 return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $originalResolver) {
-                    if (! $prefetchBuffer->hasResult($args)) {
+                    $sources = $prefetchBuffer->getObjectsByArguments($args);
+                    if (! $prefetchBuffer->hasResult($sources)) {
                         if ($originalResolver instanceof SourceResolverInterface) {
                             $originalResolver->setObject($source);
                         }
@@ -111,17 +112,15 @@ class QueryField extends FieldDefinition
                         // TODO: originalPrefetchResolver and prefetchResolver needed!!!
                         $prefetchCallable = [$originalResolver->getObject(), $prefetchMethodName];
 
-                        $sources = $prefetchBuffer->getObjectsByArguments($args);
-
                         assert(is_callable($prefetchCallable));
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
 
                         array_unshift($toPassPrefetchArgs, $sources);
                         assert(is_callable($prefetchCallable));
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
-                        $prefetchBuffer->storeResult($prefetchResult, $args);
+                        $prefetchBuffer->storeResult($prefetchResult, $sources);
                     } else {
-                        $prefetchResult = $prefetchBuffer->getResult($args);
+                        $prefetchResult = $prefetchBuffer->getResult($sources);
                     }
 
                     foreach ($arguments as $argument) {
