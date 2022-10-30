@@ -22,7 +22,10 @@ class PrefetchBuffer
     /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function register(object $object, array $arguments): void
     {
-        $this->objects[$this->computeHash($arguments)][] = $object;
+        $hash = $this->computeHash($arguments);
+
+        $this->objects[$hash][] = $object;
+        unset($this->results[$hash]);
     }
 
     /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
@@ -44,7 +47,8 @@ class PrefetchBuffer
     /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function purge(array $arguments): void
     {
-        unset($this->objects[$this->computeHash($arguments)]);
+        $hash = $this->computeHash($arguments);
+        unset($this->objects[$hash], $this->results[$hash]);
     }
 
     /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
