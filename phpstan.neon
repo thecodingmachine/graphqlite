@@ -37,3 +37,6 @@ parameters:
         -
            message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::(getMethodAnnotations|getPropertyAnnotations)\(\) should return array<int, T of object> but returns array<object>.#'
            path: src/AnnotationReader.php
+        -
+           message: '#Call to an undefined method object::__toString\(\)#'
+           path : src/Types/ID.php
