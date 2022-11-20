@@ -44,6 +44,6 @@ class ID
             return (string) $this->value;
         }
 
-        return (string) $this->value->__toString();
+        return $this->value->__toString();
     }
 }
