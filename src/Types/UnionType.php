@@ -7,22 +7,31 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Type\Definition\ObjectType;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 
+use function array_map;
 use function gettype;
 use function is_object;
 
 class UnionType extends \GraphQL\Type\Definition\UnionType
 {
     /** @param array<int,ObjectType> $types */
-    public function __construct(array $types, RecursiveTypeMapperInterface $typeMapper)
+    public function __construct(
+        array $types,
+        RecursiveTypeMapperInterface $typeMapper,
+        NamingStrategyInterface $namingStrategy,
+    )
     {
-        $name = 'Union';
+        // Make sure all types are object types
         foreach ($types as $type) {
-            $name .= $type->name;
             if (! $type instanceof ObjectType) {
                 throw InvalidTypesInUnionException::notObjectType();
             }
         }
+
+        $typeNames = array_map(static fn (ObjectType $type) => $type->name, $types);
+        $name = $namingStrategy->getUnionTypeName($typeNames);
+
         parent::__construct([
             'name' => $name,
             'types' => $types,

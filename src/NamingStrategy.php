@@ -8,6 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
+use function implode;
 use function lcfirst;
 use function str_ends_with;
 use function str_replace;
@@ -108,5 +109,15 @@ class NamingStrategy implements NamingStrategyInterface
         }
 
         return $methodName;
+    }
+
+    /**
+     * Returns the name of a GraphQL union type based on the included types.
+     *
+     * @param string[] $typeNames The list of GraphQL type names
+     */
+    public function getUnionTypeName(array $typeNames): string
+    {
+        return 'Union' . implode('', $typeNames);
     }
 }

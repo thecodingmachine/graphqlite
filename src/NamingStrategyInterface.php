@@ -44,4 +44,11 @@ interface NamingStrategyInterface
      * Returns the name of a GraphQL input field from the name of the annotated method.
      */
     public function getInputFieldNameFromMethodName(string $methodName): string;
+
+    /**
+     * Returns the name of a GraphQL union type based on the included types.
+     *
+     * @param string[] $typeNames The list of GraphQL type names
+     */
+    public function getUnionTypeName(array $typeNames): string;
 }
