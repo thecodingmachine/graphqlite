@@ -11,6 +11,7 @@ use ReflectionMethod;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\NamingStrategy;
 
 class CompoundTypeMapperTest extends AbstractQueryProviderTest
 {
@@ -19,6 +20,7 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
         $compoundTypeMapper = new CompoundTypeMapper(
             new FinalRootTypeMapper($this->getTypeMapper()),
             new FinalRootTypeMapper($this->getTypeMapper()),
+            new NamingStrategy(),
             $this->getTypeRegistry(),
             $this->getTypeMapper()
         );
@@ -32,6 +34,7 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
         $compoundTypeMapper = new CompoundTypeMapper(
             new FinalRootTypeMapper($this->getTypeMapper()),
             new FinalRootTypeMapper($this->getTypeMapper()),
+            new NamingStrategy(),
             $this->getTypeRegistry(),
             $this->getTypeMapper()
         );

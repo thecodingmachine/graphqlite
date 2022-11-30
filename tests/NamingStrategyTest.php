@@ -9,7 +9,6 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 class NamingStrategyTest extends TestCase
 {
-
     public function testGetInputTypeName(): void
     {
         $namingStrategy = new NamingStrategy();
@@ -42,5 +41,14 @@ class NamingStrategyTest extends TestCase
 
         $name = $namingStrategy->getOutputTypeName(TestObject::class, $type);
         $this->assertSame('foo', $name);
+    }
+
+    public function testGetUnionTypeName(): void
+    {
+        $namingStrategy = new NamingStrategy();
+
+        $typeNames = ['Some', 'Arbitrary', 'Type', 'Names'];
+        $name = $namingStrategy->getUnionTypeName($typeNames);
+        $this->assertSame('UnionSomeArbitraryTypeNames', $name);
     }
 }

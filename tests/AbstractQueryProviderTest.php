@@ -351,6 +351,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         $rootTypeMapper = new CompoundTypeMapper(
             $rootTypeMapper,
             $topRootTypeMapper,
+            new NamingStrategy(),
             $this->getTypeRegistry(),
             $this->getTypeMapper()
         );

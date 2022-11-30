@@ -8,12 +8,13 @@ use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\NamingStrategy;
 
 class UnionTypeTest extends AbstractQueryProviderTest
 {
     public function testConstructor(): void
     {
-        $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper());
+        $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper(), new NamingStrategy());
         $resolveInfo = $this->getMockBuilder(ResolveInfo::class)->disableOriginalConstructor()->getMock();
         $type = $unionType->resolveType(new TestObject('foo'), null, $resolveInfo);
         $this->assertSame($this->getTestObjectType(), $type);
@@ -23,7 +24,7 @@ class UnionTypeTest extends AbstractQueryProviderTest
 
     public function testException(): void
     {
-        $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper());
+        $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper(), new NamingStrategy());
         $this->expectException(\InvalidArgumentException::class);
         $resolveInfo = $this->getMockBuilder(ResolveInfo::class)->disableOriginalConstructor()->getMock();
         $unionType->resolveType('foo', null, $resolveInfo);
@@ -32,6 +33,6 @@ class UnionTypeTest extends AbstractQueryProviderTest
     public function testException2(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new UnionType([new StringType()], $this->getTypeMapper());
+        new UnionType([new StringType()], $this->getTypeMapper(), new NamingStrategy());
     }
 }
