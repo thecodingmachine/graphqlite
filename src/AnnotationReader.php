@@ -235,8 +235,7 @@ class AnnotationReader
     public function getTypeAnnotation(ReflectionClass $refClass): TypeInterface|null
     {
         try {
-            $type = $this->getClassAnnotation($refClass, Type::class)
-                ?? $this->getClassAnnotation($refClass, Input::class);
+            $type = $this->getClassAnnotation($refClass, Type::class);
 
             if ($type !== null && $type->isSelfType()) {
                 $type->setClass($refClass->getName());
