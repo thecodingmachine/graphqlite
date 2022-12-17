@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use InvalidArgumentException;
 
+use function is_bool;
 use function is_object;
 use function is_scalar;
 use function method_exists;
@@ -35,6 +36,14 @@ class ID
 
     public function __toString(): string
     {
-        return (string) $this->value;
+        if (is_bool($this->value)) {
+            return $this->value === true ? '1' : '0';
+        }
+
+        if (is_scalar($this->value)) {
+            return (string) $this->value;
+        }
+
+        return $this->value->__toString();
     }
 }

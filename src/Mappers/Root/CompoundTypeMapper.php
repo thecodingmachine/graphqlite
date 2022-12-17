@@ -23,6 +23,7 @@ use ReflectionProperty;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\UnionType;
 
@@ -38,8 +39,13 @@ use function iterator_to_array;
  */
 class CompoundTypeMapper implements RootTypeMapperInterface
 {
-    public function __construct(private RootTypeMapperInterface $next, private RootTypeMapperInterface $topRootTypeMapper, private TypeRegistry $typeRegistry, private RecursiveTypeMapperInterface $recursiveTypeMapper)
-    {
+    public function __construct(
+        private RootTypeMapperInterface $next,
+        private RootTypeMapperInterface $topRootTypeMapper,
+        private NamingStrategyInterface $namingStrategy,
+        private TypeRegistry $typeRegistry,
+        private RecursiveTypeMapperInterface $recursiveTypeMapper,
+    ) {
     }
 
     public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
@@ -144,7 +150,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
                 throw CannotMapTypeException::createForBadTypeInUnion($unionTypes);
             }
 
-            $graphQlType = new UnionType($nonNullableUnionTypes, $this->recursiveTypeMapper);
+            $graphQlType = new UnionType($nonNullableUnionTypes, $this->recursiveTypeMapper, $this->namingStrategy);
             $graphQlType = $this->typeRegistry->getOrRegisterType($graphQlType);
             assert($graphQlType instanceof UnionType);
         }
