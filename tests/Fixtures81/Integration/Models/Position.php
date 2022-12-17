@@ -6,9 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures81\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type
- */
+#[Type]
 enum Position: int
 {
     case Off = 0;
