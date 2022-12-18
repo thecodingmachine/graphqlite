@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Integration;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
@@ -15,9 +17,16 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\ValidationException;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
+use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Color;
+use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Position;
+use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Size;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
@@ -29,6 +38,7 @@ use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -49,16 +59,11 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
-use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
-use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\ValidationException;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
@@ -75,12 +80,18 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use UnitEnum;
+
+use function array_filter;
+use function assert;
+use function count;
+use function in_array;
+use function interface_exists;
 use function json_encode;
+
 use const JSON_PRETTY_PRINT;
 
 class EndToEndTest extends TestCase
 {
-
     private ContainerInterface $mainContainer;
 
     public function setUp(): void
@@ -88,22 +99,20 @@ class EndToEndTest extends TestCase
         $this->mainContainer = $this->createContainer();
     }
 
-    /**
-     * @param array<string, callable> $overloadedServices
-     */
+    /** @param array<string, callable> $overloadedServices */
     public function createContainer(array $overloadedServices = []): ContainerInterface
     {
         $services = [
-            Schema::class => function(ContainerInterface $container) {
+            Schema::class => static function (ContainerInterface $container) {
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), $container->get(RootTypeMapperInterface::class));
             },
-            QueryProviderInterface::class => function(ContainerInterface $container) {
+            QueryProviderInterface::class => static function (ContainerInterface $container) {
                 $queryProvider = new GlobControllerQueryProvider(
                     'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers',
                     $container->get(FieldsBuilder::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
-                    new Psr16Cache(new ArrayAdapter())
+                    new Psr16Cache(new ArrayAdapter()),
                 );
 
                 if (interface_exists(UnitEnum::class)) {
@@ -114,13 +123,13 @@ class EndToEndTest extends TestCase
                             $container->get(FieldsBuilder::class),
                             $container->get(BasicAutoWiringContainer::class),
                             $container->get(AnnotationReader::class),
-                            new Psr16Cache(new ArrayAdapter())
-                        )
+                            new Psr16Cache(new ArrayAdapter()),
+                        ),
                     ]);
                 }
                 return $queryProvider;
             },
-            FieldsBuilder::class => function(ContainerInterface $container) {
+            FieldsBuilder::class => static function (ContainerInterface $container) {
                 return new FieldsBuilder(
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
@@ -131,63 +140,63 @@ class EndToEndTest extends TestCase
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(ParameterMiddlewareInterface::class),
                     $container->get(FieldMiddlewareInterface::class),
-                    $container->get(InputFieldMiddlewareInterface::class)
+                    $container->get(InputFieldMiddlewareInterface::class),
                 );
             },
-            FieldMiddlewareInterface::class => function(ContainerInterface $container) {
+            FieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
                 $pipe->pipe($container->get(SecurityFieldMiddleware::class));
                 return $pipe;
             },
-            InputFieldMiddlewareInterface::class => function(ContainerInterface $container) {
+            InputFieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new InputFieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationInputFieldMiddleware::class));
                 $pipe->pipe($container->get(SecurityInputFieldMiddleware::class));
                 return $pipe;
             },
-            AuthorizationInputFieldMiddleware::class => function(ContainerInterface $container) {
+            AuthorizationInputFieldMiddleware::class => static function (ContainerInterface $container) {
                 return new AuthorizationInputFieldMiddleware(
                     $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class)
+                    $container->get(AuthorizationServiceInterface::class),
                 );
             },
-            SecurityInputFieldMiddleware::class => function(ContainerInterface $container) {
+            SecurityInputFieldMiddleware::class => static function (ContainerInterface $container) {
                 return new SecurityInputFieldMiddleware(
                     new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
                     $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class)
+                    $container->get(AuthorizationServiceInterface::class),
                 );
             },
-            AuthorizationFieldMiddleware::class => function(ContainerInterface $container) {
+            AuthorizationFieldMiddleware::class => static function (ContainerInterface $container) {
                 return new AuthorizationFieldMiddleware(
                     $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class)
+                    $container->get(AuthorizationServiceInterface::class),
                 );
             },
-            SecurityFieldMiddleware::class => function(ContainerInterface $container) {
+            SecurityFieldMiddleware::class => static function (ContainerInterface $container) {
                 return new SecurityFieldMiddleware(
                     new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
                     $container->get(AuthenticationServiceInterface::class),
-                    $container->get(AuthorizationServiceInterface::class)
+                    $container->get(AuthorizationServiceInterface::class),
                 );
             },
-            ArgumentResolver::class => function(ContainerInterface $container) {
+            ArgumentResolver::class => static function (ContainerInterface $container) {
                 return new ArgumentResolver();
             },
-            TypeResolver::class => function(ContainerInterface $container) {
+            TypeResolver::class => static function (ContainerInterface $container) {
                 return new TypeResolver();
             },
-            BasicAutoWiringContainer::class => function(ContainerInterface $container) {
+            BasicAutoWiringContainer::class => static function (ContainerInterface $container) {
                 return new BasicAutoWiringContainer(new EmptyContainer());
             },
-            AuthorizationServiceInterface::class => function(ContainerInterface $container) {
+            AuthorizationServiceInterface::class => static function (ContainerInterface $container) {
                 return new VoidAuthorizationService();
             },
-            AuthenticationServiceInterface::class => function(ContainerInterface $container) {
+            AuthenticationServiceInterface::class => static function (ContainerInterface $container) {
                 return new VoidAuthenticationService();
             },
-            RecursiveTypeMapperInterface::class => function(ContainerInterface $container) {
+            RecursiveTypeMapperInterface::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
                 return new RecursiveTypeMapper(
@@ -195,21 +204,22 @@ class EndToEndTest extends TestCase
                     $container->get(NamingStrategyInterface::class),
                     new Psr16Cache($arrayAdapter),
                     $container->get(TypeRegistry::class),
-                    $container->get(AnnotationReader::class)
+                    $container->get(AnnotationReader::class),
                 );
             },
-            TypeMapperInterface::class => function(ContainerInterface $container) {
+            TypeMapperInterface::class => static function (ContainerInterface $container) {
                 return new CompositeTypeMapper();
             },
-            NamespaceFactory::class => function(ContainerInterface $container) {
+            NamespaceFactory::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
                 return new NamespaceFactory(new Psr16Cache($arrayAdapter));
             },
-            GlobTypeMapper::class => function(ContainerInterface $container) {
+            GlobTypeMapper::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types'),
+                return new GlobTypeMapper(
+                    $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -217,14 +227,15 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new Psr16Cache($arrayAdapter)
+                    new Psr16Cache($arrayAdapter),
                 );
             },
             // We use a second type mapper here so we can target the Models dir
-            GlobTypeMapper::class.'2' => function(ContainerInterface $container) {
+            GlobTypeMapper::class . '2' => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models'),
+                return new GlobTypeMapper(
+                    $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -232,63 +243,63 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new Psr16Cache($arrayAdapter)
+                    new Psr16Cache($arrayAdapter),
                 );
             },
-            PorpaginasTypeMapper::class => function(ContainerInterface $container) {
+            PorpaginasTypeMapper::class => static function (ContainerInterface $container) {
                 return new PorpaginasTypeMapper($container->get(RecursiveTypeMapperInterface::class));
             },
-            EnumTypeMapper::class => function(ContainerInterface $container) {
+            EnumTypeMapper::class => static function (ContainerInterface $container) {
                 return new EnumTypeMapper(
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(AnnotationReader::class),
                     new ArrayAdapter(),
                     [
                         $container->get(NamespaceFactory::class)
-                            ->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models')
-                    ]
+                            ->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models'),
+                    ],
                 );
             },
-            TypeGenerator::class => function(ContainerInterface $container) {
+            TypeGenerator::class => static function (ContainerInterface $container) {
                 return new TypeGenerator(
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(TypeRegistry::class),
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(FieldsBuilder::class)
+                    $container->get(FieldsBuilder::class),
                 );
             },
-            TypeRegistry::class => function() {
+            TypeRegistry::class => static function () {
                 return new TypeRegistry();
             },
-            InputTypeGenerator::class => function(ContainerInterface $container) {
+            InputTypeGenerator::class => static function (ContainerInterface $container) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
-                    $container->get(FieldsBuilder::class)
+                    $container->get(FieldsBuilder::class),
                 );
             },
-            InputTypeUtils::class => function(ContainerInterface $container) {
+            InputTypeUtils::class => static function (ContainerInterface $container) {
                 return new InputTypeUtils(
                     $container->get(AnnotationReader::class),
-                    $container->get(NamingStrategyInterface::class)
+                    $container->get(NamingStrategyInterface::class),
                 );
             },
-            AnnotationReader::class => function(ContainerInterface $container) {
+            AnnotationReader::class => static function (ContainerInterface $container) {
                 return new AnnotationReader(new DoctrineAnnotationReader());
             },
-            NamingStrategyInterface::class => function() {
+            NamingStrategyInterface::class => static function () {
                 return new NamingStrategy();
             },
-            CachedDocBlockFactory::class => function() {
+            CachedDocBlockFactory::class => static function () {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
                 return new CachedDocBlockFactory(new Psr16Cache($arrayAdapter));
             },
-            RootTypeMapperInterface::class => function(ContainerInterface $container) {
+            RootTypeMapperInterface::class => static function (ContainerInterface $container) {
                 return new NullableTypeMapperAdapter();
             },
-            'rootTypeMapper' => function(ContainerInterface $container) {
+            'rootTypeMapper' => static function (ContainerInterface $container) {
                 // These are in reverse order of execution
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
@@ -300,36 +311,37 @@ class EndToEndTest extends TestCase
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
                 return $rootTypeMapper;
             },
-            ContainerParameterHandler::class => function(ContainerInterface $container) {
+            ContainerParameterHandler::class => static function (ContainerInterface $container) {
                 return new ContainerParameterHandler($container, true, true);
             },
-            InjectUserParameterHandler::class => function(ContainerInterface $container) {
+            InjectUserParameterHandler::class => static function (ContainerInterface $container) {
                 return new InjectUserParameterHandler($container->get(AuthenticationServiceInterface::class));
             },
-            'testService' => function() {
+            'testService' => static function () {
                 return 'foo';
             },
-            stdClass::class => function() {
+            stdClass::class => static function () {
                 // Empty test service for autowiring
                 return new stdClass();
             },
-            ParameterMiddlewareInterface::class => function(ContainerInterface $container) {
+            ParameterMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
                 $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
                 $parameterMiddlewarePipe->pipe($container->get(ContainerParameterHandler::class));
                 $parameterMiddlewarePipe->pipe($container->get(InjectUserParameterHandler::class));
 
                 return $parameterMiddlewarePipe;
-            }
+            },
         ];
 
         if (interface_exists(UnitEnum::class)) {
             // Register another instance of GlobTypeMapper to process our PHP 8.1 enums and/or other
             // 8.1 supported features.
-            $services[GlobTypeMapper::class.'3'] = function(ContainerInterface $container) {
+            $services[GlobTypeMapper::class . '3'] = static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new GlobTypeMapper($container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models'),
+                return new GlobTypeMapper(
+                    $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models'),
                     $container->get(TypeGenerator::class),
                     $container->get(InputTypeGenerator::class),
                     $container->get(InputTypeUtils::class),
@@ -337,7 +349,7 @@ class EndToEndTest extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    new Psr16Cache($arrayAdapter)
+                    new Psr16Cache($arrayAdapter),
                 );
             };
         }
@@ -345,9 +357,9 @@ class EndToEndTest extends TestCase
         $container = new LazyContainer($overloadedServices + $services);
         $container->get(TypeResolver::class)->registerSchema($container->get(Schema::class));
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class));
-        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'2'));
+        $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class . '2'));
         if (interface_exists(UnitEnum::class)) {
-            $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class.'3'));
+            $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(GlobTypeMapper::class . '3'));
         }
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
 
@@ -361,23 +373,19 @@ class EndToEndTest extends TestCase
         return $container;
     }
 
-    /**
-     * @return mixed
-     */
-    private function getSuccessResult(ExecutionResult $result, int $debugFlag = DebugFlag::RETHROW_INTERNAL_EXCEPTIONS) {
+    private function getSuccessResult(ExecutionResult $result, int $debugFlag = DebugFlag::RETHROW_INTERNAL_EXCEPTIONS): mixed
+    {
         $array = $result->toArray($debugFlag);
-        if (isset($array['errors']) || !isset($array['data'])) {
-            $this->fail('Expected a successful answer. Got '.json_encode($array, JSON_PRETTY_PRINT));
+        if (isset($array['errors']) || ! isset($array['data'])) {
+            $this->fail('Expected a successful answer. Got ' . json_encode($array, JSON_PRETTY_PRINT));
         }
         return $array['data'];
     }
 
     public function testEndToEnd(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $schema->assertValid();
 
@@ -400,7 +408,7 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString,
             null,
-            new Context()
+            new Context(),
         );
 
         $this->assertSame([
@@ -418,10 +426,10 @@ class EndToEndTest extends TestCase
                     'uppercaseName' => 'BILL',
                     'repeatName' => 'fooBillbar',
                     'repeatInnerName' => 'Bill',
-                    'email' => 'bill@example.com'
-                ]
+                    'email' => 'bill@example.com',
+                ],
 
-            ]
+            ],
         ], $this->getSuccessResult($result));
 
         // Let's redo this to test cache.
@@ -429,7 +437,7 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString,
             null,
-            new Context()
+            new Context(),
         );
 
         $this->assertSame([
@@ -447,19 +455,17 @@ class EndToEndTest extends TestCase
                     'uppercaseName' => 'BILL',
                     'repeatName' => 'fooBillbar',
                     'repeatInnerName' => 'Bill',
-                    'email' => 'bill@example.com'
-                ]
+                    'email' => 'bill@example.com',
+                ],
 
-            ]
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testDeprecatedField(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $schema->assertValid();
 
@@ -478,7 +484,7 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString,
             null,
-            new Context()
+            new Context(),
         );
 
         $this->assertSame([
@@ -494,9 +500,9 @@ class EndToEndTest extends TestCase
                     'uppercaseName' => 'BILL',
                     'deprecatedUppercaseName' => 'BILL',
                     'deprecatedName' => 'Bill',
-                ]
+                ],
 
-            ]
+            ],
         ], $this->getSuccessResult($result));
 
         // Let's introspect to see if the field is marked as deprecated
@@ -517,15 +523,15 @@ class EndToEndTest extends TestCase
             $schema,
             $queryString,
             null,
-            new Context()
+            new Context(),
         );
 
         $fields = $this->getSuccessResult($result)['__type']['fields'];
         $deprecatedFields = [
             'deprecatedUppercaseName',
-            'deprecatedName'
+            'deprecatedName',
         ];
-        $fields = array_filter($fields, function($field) use ($deprecatedFields) {
+        $fields = array_filter($fields, static function ($field) use ($deprecatedFields) {
             if (in_array($field['name'], $deprecatedFields)) {
                 return true;
             }
@@ -534,27 +540,25 @@ class EndToEndTest extends TestCase
         $this->assertCount(
             count($deprecatedFields),
             $fields,
-            'Missing deprecated fields on GraphQL Schema'
+            'Missing deprecated fields on GraphQL Schema',
         );
         foreach ($fields as $field) {
             $this->assertTrue(
                 $field['isDeprecated'],
-                'Field ' . $field['name'] . ' must be marked deprecated, but is not'
+                'Field ' . $field['name'] . ' must be marked deprecated, but is not',
             );
             $this->assertStringContainsString(
                 'use field ',
                 $field['deprecationReason'],
-                'Field ' . $field['name'] . ' is misssing a deprecation reason'
+                'Field ' . $field['name'] . ' is misssing a deprecation reason',
             );
         }
     }
 
     public function testPrefetchException(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $schema->assertValid();
 
@@ -575,7 +579,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->expectException(GraphQLRuntimeException::class);
@@ -583,12 +587,10 @@ class EndToEndTest extends TestCase
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
-    public function testEndToEndInputTypeDate()
+    public function testEndToEndInputTypeDate(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
         $queryString = '
         mutation {
           saveBirthDate(birthDate: "1942-12-24T00:00:00+00:00")  {
@@ -600,23 +602,21 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
             'saveBirthDate' => [
                 'name' => 'Bill',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
-            ]
+            ],
         ], $this->getSuccessResult($result));
     }
 
-    public function testEndToEndInputTypeDateAsParam()
+    public function testEndToEndInputTypeDateAsParam(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
         $queryString = '
         mutation($birthDate: DateTime!) {
           saveBirthDate(birthDate: $birthDate) {
@@ -631,25 +631,21 @@ class EndToEndTest extends TestCase
             $queryString,
             null,
             null,
-            [
-                "birthDate" => "1942-12-24T00:00:00+00:00"
-            ]
+            ['birthDate' => '1942-12-24T00:00:00+00:00'],
         );
 
         $this->assertSame([
             'saveBirthDate' => [
                 'name' => 'Bill',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
-            ]
+            ],
         ], $this->getSuccessResult($result));
     }
 
-    public function testEndToEndInputType()
+    public function testEndToEndInputType(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
         $queryString = '
         mutation {
           saveContact(
@@ -674,7 +670,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -682,20 +678,16 @@ class EndToEndTest extends TestCase
                 'name' => 'foo',
                 'birthDate' => '1942-12-24T00:00:00+00:00',
                 'relations' => [
-                    [
-                        'name' => 'bar',
-                    ]
-                ]
-            ]
+                    ['name' => 'bar'],
+                ],
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndPorpaginas(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -714,7 +706,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -723,17 +715,17 @@ class EndToEndTest extends TestCase
                     [
                         'name' => 'Bill',
                         'uppercaseName' => 'BILL',
-                        'email' => 'bill@example.com'
-                    ]
+                        'email' => 'bill@example.com',
+                    ],
                 ],
-                'count' => 2
-            ]
+                'count' => 2,
+            ],
         ], $this->getSuccessResult($result));
 
         // Let's redo this to test cache.
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -742,11 +734,11 @@ class EndToEndTest extends TestCase
                     [
                         'name' => 'Bill',
                         'uppercaseName' => 'BILL',
-                        'email' => 'bill@example.com'
-                    ]
+                        'email' => 'bill@example.com',
+                    ],
                 ],
-                'count' => 2
-            ]
+                'count' => 2,
+            ],
         ], $this->getSuccessResult($result));
 
         // Let's run a query with no limit but an offset
@@ -766,11 +758,10 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $invalidQueryString
+            $invalidQueryString,
         );
 
         $this->assertSame('In the items field of a result set, you cannot add a "offset" without also adding a "limit"', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
-
 
         // Let's run a query with no limit offset
         $invalidQueryString = '
@@ -789,31 +780,27 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $invalidQueryString
+            $invalidQueryString,
         );
 
         $this->assertSame([
             'contactsIterator' => [
                 'items' => [
-                    [
-                        'name' => 'Joe',
-                    ],
+                    ['name' => 'Joe'],
                     [
                         'name' => 'Bill',
-                        'email' => 'bill@example.com'
-                    ]
+                        'email' => 'bill@example.com',
+                    ],
                 ],
-                'count' => 2
-            ]
+                'count' => 2,
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndPorpaginasOnScalarType(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -826,14 +813,14 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
             'contactsNamesIterator' => [
                 'items' => ['Bill'],
-                'count' => 2
-            ]
+                'count' => 2,
+            ],
         ], $this->getSuccessResult($result));
     }
 
@@ -842,10 +829,8 @@ class EndToEndTest extends TestCase
      */
     public function testEndToEnd2Iterators(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -872,7 +857,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -881,31 +866,28 @@ class EndToEndTest extends TestCase
                     [
                         'name' => 'Bill',
                         'uppercaseName' => 'BILL',
-                        'email' => 'bill@example.com'
-                    ]
+                        'email' => 'bill@example.com',
+                    ],
                 ],
-                'count' => 2
+                'count' => 2,
             ],
             'products' => [
                 'items' => [
                     [
                         'name' => 'Foo',
                         'price' => 42.0,
-                        'unauthorized' => null
-                    ]
+                        'unauthorized' => null,
+                    ],
                 ],
-                'count' => 1
-            ]
+                'count' => 1,
+            ],
         ], $this->getSuccessResult($result));
-
     }
 
     public function testEndToEndStaticFactories(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -915,30 +897,28 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
-            'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
+            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
         ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
-            'echoFilters' => [ "foo", "bar", "12", "42", "62" ]
+            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
         ], $this->getSuccessResult($result));
     }
 
     public function testNonNullableTypesWithOptionnalFactoryArguments(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -948,20 +928,18 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
-            'echoFilters' => []
+            'echoFilters' => [],
         ], $this->getSuccessResult($result));
     }
 
     public function testNullableTypesWithOptionnalFactoryArguments(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -971,20 +949,16 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'echoNullableFilters' => null
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['echoNullableFilters' => null], $this->getSuccessResult($result));
     }
 
     public function testEndToEndResolveInfo(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -994,20 +968,16 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'echoResolveInfo' => 'echoResolveInfo'
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['echoResolveInfo' => 'echoResolveInfo'], $this->getSuccessResult($result));
     }
 
     public function testEndToEndRightIssues(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1021,7 +991,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('You need to be logged to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1037,7 +1007,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('You need to be logged to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1052,7 +1022,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1067,7 +1037,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1083,7 +1053,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Cannot query field "hidden" on type "ContactInterface".', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1091,10 +1061,8 @@ class EndToEndTest extends TestCase
 
     public function testAutowireService(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1106,28 +1074,22 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
             'contacts' => [
-                [
-                    'injectService' => 'OK',
-                ],
-                [
-                    'injectService' => 'OK',
-                ]
+                ['injectService' => 'OK'],
+                ['injectService' => 'OK'],
 
-            ]
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testParameterAnnotationsInSourceField(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1139,28 +1101,22 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
             'contacts' => [
-                [
-                    'injectServiceFromExternal' => 'OK',
-                ],
-                [
-                    'injectServiceFromExternal' => 'OK',
-                ]
+                ['injectServiceFromExternal' => 'OK'],
+                ['injectServiceFromExternal' => 'OK'],
 
-            ]
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1170,20 +1126,16 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'echoProductType' => 'NON_FOOD'
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['echoProductType' => 'NON_FOOD'], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums2(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1193,20 +1145,16 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'echoSomeProductType' => 'FOOD'
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['echoSomeProductType' => 'FOOD'], $this->getSuccessResult($result));
     }
 
     public function testEndToEndEnums3(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query echo($productType: ProductTypes!) {
@@ -1214,32 +1162,24 @@ class EndToEndTest extends TestCase
         }
         ';
 
-        $variables = [
-            'productType' => 'NON_FOOD'
-        ];
+        $variables = ['productType' => 'NON_FOOD'];
 
         $result = GraphQL::executeQuery(
             $schema,
             $queryString,
             null,
             null,
-            $variables
+            $variables,
         );
 
-        $this->assertSame([
-            'echoProductType' => 'NON_FOOD'
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['echoProductType' => 'NON_FOOD'], $this->getSuccessResult($result));
     }
 
-    /**
-     * @requires PHP >= 8.1
-     */
+    /** @requires PHP >= 8.1 */
     public function testEndToEndNativeEnums(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $gql = '
             query {
@@ -1253,7 +1193,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $gql
+            $gql,
         );
 
         $this->assertSame([
@@ -1261,16 +1201,58 @@ class EndToEndTest extends TestCase
                 'color' => 'red',
                 'size' => 'M',
                 'state' => 'Off',
-            ]
+            ],
+        ], $this->getSuccessResult($result));
+
+        $gql = '
+            mutation($color:Color!,$size:Size!,$state:Position!) {
+                updateButton(color: $color, size: $size, state: $state) {
+                    color
+                    size
+                    state
+                }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql,
+            variableValues: [
+                'color' => Color::Red->value,
+                'size' => Size::M->name,
+                'state' => Position::Off->name,
+            ],
+        );
+        $this->assertSame([
+            'updateButton' => [
+                'color' => 'red',
+                'size' => 'M',
+                'state' => 'Off',
+            ],
+        ], $this->getSuccessResult($result));
+
+        $gql = '
+            mutation($size:Size!) {
+                singleEnum(size: $size)
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql,
+            variableValues: [
+                'size' => Size::L->name,
+            ],
+        );
+        $this->assertSame([
+                'singleEnum' => 'L',
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndDateTime(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1280,20 +1262,16 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'echoDate' => '2019-05-05T01:02:03+00:00'
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['echoDate' => '2019-05-05T01:02:03+00:00'], $this->getSuccessResult($result));
     }
 
     public function testEndToEndErrorHandlingOfInconstentTypesInArrays(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1305,7 +1283,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->expectException(TypeMismatchRuntimeException::class);
@@ -1315,10 +1293,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndNonDefaultOutputType(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1332,24 +1308,22 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
             'otherContact' => [
                 'name' => 'Joe',
                 'fullName' => 'JOE',
-                'phone' => '0123456789'
-            ]
+                'phone' => '0123456789',
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndSecurityAnnotation(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1359,12 +1333,10 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'secretPhrase' => 'you can see this secret only if passed parameter is "foo"'
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['secretPhrase' => 'you can see this secret only if passed parameter is "foo"'], $this->getSuccessResult($result));
 
         $queryString = '
         query {
@@ -1374,7 +1346,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->expectException(MissingAuthorizationException::class);
@@ -1384,10 +1356,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndSecurityFailWithAnnotation(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         // Test with failWith attribute
         $queryString = '
@@ -1398,12 +1368,10 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'nullableSecretPhrase' => null
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['nullableSecretPhrase' => null], $this->getSuccessResult($result));
 
         // Test with @FailWith annotation
         $queryString = '
@@ -1414,12 +1382,10 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
-        $this->assertSame([
-            'nullableSecretPhrase2' => null
-        ], $this->getSuccessResult($result));
+        $this->assertSame(['nullableSecretPhrase2' => null], $this->getSuccessResult($result));
 
         // Test with @FailWith annotation on property
         $queryString = '
@@ -1432,7 +1398,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
@@ -1441,10 +1407,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndSecurityWithUser(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         // Test with failWith attribute
         $queryString = '
@@ -1455,7 +1419,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1464,14 +1428,14 @@ class EndToEndTest extends TestCase
     public function testEndToEndSecurityWithUserConnected(): void
     {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 42;
@@ -1479,25 +1443,19 @@ class EndToEndTest extends TestCase
                     }
                 };
             },
-            AuthorizationServiceInterface::class => static function() {
+            AuthorizationServiceInterface::class => static function () {
                 return new class implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
-                        if ($right === 'CAN_EDIT' && $subject->bar == 42) {
-                            return true;
-                        }
-                        return false;
+                        return $right === 'CAN_EDIT' && $subject->bar === 42;
                     }
                 };
             },
 
-
         ]);
 
-        /**
-         * @var Schema $schema
-         */
         $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
 
         // Test with failWith attribute
         $queryString = '
@@ -1508,11 +1466,10 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('you can see this secret only if user.bar is set to 42', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingUser']);
-
 
         // Test with failWith attribute
         $queryString = '
@@ -1523,7 +1480,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGranted']);
@@ -1531,10 +1488,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndSecurityWithThis(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1544,7 +1499,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1557,7 +1512,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingThis']);
@@ -1565,10 +1520,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndSecurityInField(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1582,7 +1535,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1597,17 +1550,16 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
-    public function testEndToEndUnions(){
-        /**
-         * @var Schema $schema
-         */
+    public function testEndToEndUnions(): void
+    {
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1623,7 +1575,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
         $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
 
@@ -1632,11 +1584,10 @@ class EndToEndTest extends TestCase
         $this->assertEquals('unicorn', $resultArray['data']['getProduct']['special']);
     }
 
-    public function testEndToEndUnionsInIterables(){
-        /**
-         * @var Schema $schema
-         */
+    public function testEndToEndUnionsInIterables(): void
+    {
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1652,7 +1603,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
         $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
 
@@ -1663,10 +1614,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndMagicFieldWithPhpType(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1680,49 +1629,43 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
             'contacts' => [
                 [
-                    'magicContact' => [
-                        'name' => 'foo'
-                    ]
+                    'magicContact' => ['name' => 'foo'],
                 ],
                 [
-                    'magicContact' => [
-                        'name' => 'foo'
-                    ]
+                    'magicContact' => ['name' => 'foo'],
                 ],
-            ]
+            ],
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInjectUser(): void
     {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 42;
                         return $user;
                     }
                 };
-            }
+            },
         ]);
 
-        /**
-         * @var Schema $schema
-         */
         $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
 
         // Test with failWith attribute
         $queryString = '
@@ -1733,7 +1676,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame(42, $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
@@ -1755,11 +1698,10 @@ class EndToEndTest extends TestCase
         $schema->validate();
     }
 
-    public function testNullableResult(){
-        /**
-         * @var Schema $schema
-         */
+    public function testNullableResult(): void
+    {
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1771,21 +1713,19 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
         $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
-        if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
-            $this->fail('Expected a successful answer. Got '.json_encode($resultArray, JSON_PRETTY_PRINT));
+        if (isset($resultArray['errors']) || ! isset($resultArray['data'])) {
+            $this->fail('Expected a successful answer. Got ' . json_encode($resultArray, JSON_PRETTY_PRINT));
         }
         $this->assertNull($resultArray['data']['nullableResult']);
     }
 
     public function testEndToEndFieldAnnotationInProperty(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -1800,7 +1740,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
@@ -1820,7 +1760,7 @@ class EndToEndTest extends TestCase
 
         GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->expectException(AccessPropertyException::class);
@@ -1836,7 +1776,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->expectException(AccessPropertyException::class);
@@ -1846,10 +1786,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndInputAnnotations(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
         $queryString = '
         mutation {
             createPost(
@@ -1917,7 +1855,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -1927,9 +1865,7 @@ class EndToEndTest extends TestCase
                 'publishedAt' => '2021-01-24T00:00:00+00:00',
                 'comment' => 'foo',
                 'summary' => 'foo',
-                'author' => [
-                    'name' => 'foo',
-                ],
+                'author' => ['name' => 'foo'],
             ],
             'updatePost' => [
                 'id' => 100,
@@ -1943,19 +1879,15 @@ class EndToEndTest extends TestCase
                 'comment' => 'some description',
                 'summary' => 'foo',
                 'magazine' => 'bar',
-                'author' => [
-                    'name' => 'foo',
-                ],
+                'author' => ['name' => 'foo'],
             ],
         ], $this->getSuccessResult($result));
     }
 
     public function testEndToEndInputAnnotationIssues(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
         $queryString = '
         mutation {
             createPost(
@@ -1970,7 +1902,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -1993,7 +1925,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Field ArticleInput.title of required type String! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -2016,7 +1948,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->expectException(AccessPropertyException::class);
@@ -2026,10 +1958,8 @@ class EndToEndTest extends TestCase
 
     public function testEndToEndInputEmptyValues(): void
     {
-        /**
-         * @var Schema $schema
-         */
         $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         mutation {
@@ -2051,7 +1981,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -2069,11 +1999,11 @@ class EndToEndTest extends TestCase
         $validator = new Validator();
 
         $container = $this->createContainer([
-            InputTypeGenerator::class => function (ContainerInterface $container) use ($validator) {
+            InputTypeGenerator::class => static function (ContainerInterface $container) use ($validator) {
                 return new InputTypeGenerator(
                     $container->get(InputTypeUtils::class),
                     $container->get(FieldsBuilder::class),
-                    $validator
+                    $validator,
                 );
             },
         ]);
@@ -2108,17 +2038,17 @@ class EndToEndTest extends TestCase
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
-
-    public function testEndToEndSetterWithSecurity() {
+    public function testEndToEndSetterWithSecurity(): void
+    {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 42;
@@ -2126,24 +2056,19 @@ class EndToEndTest extends TestCase
                     }
                 };
             },
-            AuthorizationServiceInterface::class => static function() {
+            AuthorizationServiceInterface::class => static function () {
                 return new class implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
-                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
-                            return true;
-                        }
-                        return false;
+                        return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
 
         ]);
 
-        /**
-         * @var Schema $schema
-         */
         $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
 
         $queryString = '
         query {
@@ -2155,12 +2080,11 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
         $this->assertSame('preset{secret}', $data['trickyProduct']['conditionalSecret']);
-//
         $queryString = '
         mutation {
             updateTrickyProduct(
@@ -2182,7 +2106,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
@@ -2204,13 +2128,13 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
         $this->assertSame('Special box', $data['trickyProduct']['name']);
         $this->assertSame(11.99, $data['trickyProduct']['price']);
-        $this->assertSame("hello", $data['trickyProduct']['secret']);
+        $this->assertSame('hello', $data['trickyProduct']['secret']);
         $this->assertSame(11.11, $data['trickyProduct']['multi']);
 
         $queryString = '
@@ -2231,7 +2155,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
@@ -2239,16 +2163,17 @@ class EndToEndTest extends TestCase
         $this->assertSame(11.99, $data['createTrickyProduct']['price']);
     }
 
-    public function testEndToEndSetterWithSecurityError() {
+    public function testEndToEndSetterWithSecurityError(): void
+    {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 42;
@@ -2256,23 +2181,18 @@ class EndToEndTest extends TestCase
                     }
                 };
             },
-            AuthorizationServiceInterface::class => static function() {
+            AuthorizationServiceInterface::class => static function () {
                 return new class implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
-                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
-                            return true;
-                        }
-                        return false;
+                        return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
 
         ]);
-        /**
-         * @var Schema $schema
-         */
         $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
 
         // try getConditionalSecret with wrong key
         $queryString = '
@@ -2285,7 +2205,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -2311,20 +2231,20 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
          $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 42;
@@ -2332,7 +2252,7 @@ class EndToEndTest extends TestCase
                     }
                 };
             },
-            AuthorizationServiceInterface::class => static function() {
+            AuthorizationServiceInterface::class => static function () {
                 return new class implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
@@ -2342,10 +2262,8 @@ class EndToEndTest extends TestCase
             },
 
         ]);
-        /**
-         * @var Schema $schema
-         */
         $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
 
         // try getSecret with sufficient rights
         $queryString = '
@@ -2360,7 +2278,7 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
@@ -2386,18 +2304,18 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 43;
@@ -2405,14 +2323,11 @@ class EndToEndTest extends TestCase
                     }
                 };
             },
-            AuthorizationServiceInterface::class => static function() {
+            AuthorizationServiceInterface::class => static function () {
                 return new class implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
-                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
-                            return true;
-                        }
-                        return false;
+                        return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
@@ -2422,7 +2337,7 @@ class EndToEndTest extends TestCase
         // set conditionalSecret with wrong user
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
@@ -2444,14 +2359,14 @@ class EndToEndTest extends TestCase
     public function testArrayInput(): void
     {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static function() {
+            AuthenticationServiceInterface::class => static function () {
                 return new class implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
                     }
 
-                    public function getUser(): ?object
+                    public function getUser(): object|null
                     {
                         $user = new stdClass();
                         $user->bar = 42;
@@ -2459,14 +2374,11 @@ class EndToEndTest extends TestCase
                     }
                 };
             },
-            AuthorizationServiceInterface::class => static function() {
+            AuthorizationServiceInterface::class => static function () {
                 return new class implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
-                        if ($right === 'CAN_SET_SECRET' || $right === "CAN_SEE_SECRET") {
-                            return true;
-                        }
-                        return false;
+                        return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
@@ -2494,10 +2406,10 @@ class EndToEndTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $data = $this->getSuccessResult($result);
-        $this->assertSame(["graph", "ql"], $data['updateTrickyProduct']['list']);
+        $this->assertSame(['graph', 'ql'], $data['updateTrickyProduct']['list']);
     }
 }
