@@ -79,7 +79,7 @@ class Schema extends \GraphQL\Type\Schema
         if (is_callable($preservedType)) {
             $preservedType = $preservedType();
         }
-        $config->setTypes([...$preservedType, ...$recursiveTypeMapper->getOutputTypes()]);
+        $config->setTypes(array_merge($preservedType, $recursiveTypeMapper->getOutputTypes()));
     
 
         $config->setTypeLoader(static function (string $name) use ($query, $mutation, $rootTypeMapper) {
