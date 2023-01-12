@@ -64,6 +64,8 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
      * If many exceptions are passed, they are bundled in the GraphQLAggregateException
      *
      * @param (ClientAware&Throwable)[] $exceptions
+     *
+     * @throws GraphQLAggregateException|Throwable
      */
     public static function throwExceptions(array $exceptions): void
     {

@@ -46,6 +46,7 @@ class InputTypeParameter implements InputTypeParameterInterface
         return $this->name;
     }
 
+    /** @return InputType&Type */
     public function getType(): InputType
     {
         return $this->type;

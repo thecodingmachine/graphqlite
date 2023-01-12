@@ -7,22 +7,26 @@ namespace TheCodingMachine\GraphQLite\Exceptions;
 use GraphQL\Error\ClientAware;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
+use GraphQL\Executor\ExecutionResult;
+use Throwable;
 
 use function array_map;
 
 /**
  * A custom error handler and error formatter for Webonyx that can read the GraphQLAggregateExceptionInterface
  * and the GraphQLExceptionInterface.
+ *
+ * @phpstan-import-type SerializableError from ExecutionResult
  */
 final class WebonyxErrorHandler
 {
-    /** @return mixed[] */
-    public static function errorFormatter(Error $error): array
+    /** @return SerializableError */
+    public static function errorFormatter(Throwable $error): array
     {
         $formattedError = FormattedError::createFromException($error);
         $previous = $error->getPrevious();
         if ($previous instanceof GraphQLExceptionInterface && ! empty($previous->getExtensions())) {
-            $formattedError['extensions'] += $previous->getExtensions();
+            $formattedError['extensions'] = isset($formattedError['extensions']) ? $previous->getExtensions() + $formattedError['extensions'] : $previous->getExtensions();
         }
 
         return $formattedError;
