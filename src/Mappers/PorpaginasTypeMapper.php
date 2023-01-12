@@ -43,7 +43,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param (OutputType&Type&NamedType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
      *
      * @return MutableObjectType|MutableInterfaceType
      *
@@ -62,15 +62,16 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @param OutputType&Type $subType
+     * @param OutputType&Type&NamedType $subType
      *
      * @return MutableObjectType|MutableInterfaceType
      */
     private function getObjectType(OutputType $subType): MutableInterface
     {
         /** @var mixed $name - invalid vendor mapping */
-        $name = $subType->name;
+        $name = $subType->name();
 
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
         if ($name === null) {
             throw new RuntimeException('Cannot get name property from sub type ' . $subType::class);
         }

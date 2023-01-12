@@ -99,7 +99,14 @@ trait MutableAdapterTrait
 
             $this->finalFields = $this->type->getFields();
             foreach ($this->fieldsCallables as $fieldsCallable) {
-                $this->finalFields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->finalFields;
+                /**
+                 * @var FieldDefinition[] $fields
+                 */
+                $fields =  FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->finalFields;
+
+
+
+                $this->finalFields = $fields;
             }
             if (empty($this->finalFields)) {
                 throw NoFieldsException::create($this->name);

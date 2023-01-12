@@ -95,13 +95,13 @@ class InputFieldDescriptor
         $this->name = $name;
     }
 
-    /** @return (InputType&Type)|(InputType&Type&NullableType)  */
+    /** @return ((InputType&Type)|(InputType&Type&NullableType))  */
     public function getType(): InputType
     {
         return $this->type;
     }
 
-    /** @param (InputType&Type)|(InputType&Type&NullableType)  $type */
+    /** @param (InputType&Type)  $type */
     public function setType(InputType $type): void
     {
         $this->type = $type;
