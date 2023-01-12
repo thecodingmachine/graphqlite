@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 
 use function array_map;
+use function assert;
 use function gettype;
 use function is_object;
 
 class UnionType extends \GraphQL\Type\Definition\UnionType
 {
-    /** @param array<int,ObjectType> $types */
+    /** @param array<int,ObjectType&NamedType> $types */
     public function __construct(
         array $types,
         RecursiveTypeMapperInterface $typeMapper,
@@ -29,21 +31,24 @@ class UnionType extends \GraphQL\Type\Definition\UnionType
             }
         }
 
-        $typeNames = array_map(static fn (ObjectType $type) => $type->name, $types);
+        $typeNames = array_map(static fn (ObjectType $type) => $type->name(), $types);
         $name = $namingStrategy->getUnionTypeName($typeNames);
 
         parent::__construct([
             'name' => $name,
             'types' => $types,
-            'resolveType' => static function ($value) use ($typeMapper) {
-                if (! is_object($value)) {
-                    throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
-                }
+            'resolveType' =>
+                static function (mixed $value) use ($typeMapper): ObjectType {
+                    if (! is_object($value)) {
+                        throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
+                    }
 
-                $className = $value::class;
+                    $className = $value::class;
 
-                return $typeMapper->mapClassToInterfaceOrType($className, null);
-            },
+                    $result =  $typeMapper->mapClassToInterfaceOrType($className, null);
+                    assert($result instanceof ObjectType);
+                    return $result;
+                },
         ]);
     }
 }

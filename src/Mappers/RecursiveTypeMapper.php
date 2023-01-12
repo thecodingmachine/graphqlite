@@ -278,7 +278,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
      * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type)
-     * @param (OutputType&Type)|null $subType
+     * @param (OutputType&Type&NamedType)|null $subType
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -286,7 +286,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         $cacheKey = $className;
         if ($subType !== null) {
-            $cacheKey .= '__`__' . $subType->name;
+            $cacheKey .= '__`__' . $subType->name();
         }
         if (isset($this->classToTypeCache[$cacheKey])) {
             return $this->classToTypeCache[$cacheKey];
@@ -339,7 +339,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * has children) or returns an output type otherwise.
      *
      * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType&Type)|null $subType A subtype (if the main className is an iterator)
+     * @param (OutputType&Type&NamedType)|null $subType A subtype (if the main className is an iterator)
      *
      * @return OutputType&Type&NamedType
      *
@@ -353,7 +353,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
         }
         $cacheKey = $closestClassName;
         if ($subType !== null) {
-            $cacheKey .= '__`__' . $subType->name;
+            $cacheKey .= '__`__' . $subType->name();
         }
         if (! isset($this->interfaces[$cacheKey])) {
             $objectType = $this->mapClassToType($className, $subType);
