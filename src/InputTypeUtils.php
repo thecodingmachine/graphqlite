@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\InputObjectType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver;
@@ -22,6 +22,7 @@ use function array_map;
 use function assert;
 use function ltrim;
 
+/** @phpstan-import-type FieldConfig from InputObjectType */
 class InputTypeUtils
 {
     public function __construct(
@@ -96,7 +97,7 @@ class InputTypeUtils
      *
      * @param ParameterInterface[] $args
      *
-     * @return array<string, array<string, mixed|InputType>>
+     * @return iterable<FieldConfig>|callable(): iterable<FieldConfig>
      */
     public static function getInputTypeArgs(array $args): array
     {

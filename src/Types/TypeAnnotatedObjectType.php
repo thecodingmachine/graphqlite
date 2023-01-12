@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
@@ -12,12 +13,14 @@ use function get_parent_class;
 
 /**
  * An object type built from the Type annotation
+ *
+ * @phpstan-import-type ObjectConfig from ObjectType
  */
 class TypeAnnotatedObjectType extends MutableObjectType
 {
     /**
      * @param class-string<object> $className
-     * @param mixed[] $config
+     * @param ObjectConfig $config
      */
     public function __construct(string $className, array $config)
     {

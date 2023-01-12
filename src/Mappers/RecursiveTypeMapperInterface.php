@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use GraphQL\Type\SchemaConfig;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
@@ -20,6 +21,7 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
  * Unlike the TypeMapperInterface, if a given class does not map a type, parent classes are explored.
  *
  * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
+ * @phpstan-import-type Types from SchemaConfig
  */
 interface RecursiveTypeMapperInterface
 {
@@ -76,7 +78,7 @@ interface RecursiveTypeMapperInterface
      * Returns an array containing all OutputTypes.
      * Needed for introspection because of interfaces.
      *
-     * @return array<string, OutputType>
+     * @return Types
      */
     public function getOutputTypes(): array;
 

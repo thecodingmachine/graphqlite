@@ -16,6 +16,10 @@ use function is_string;
 /**
  * An input object type built from the Factory annotation.
  * It can be later extended with the "Decorate" annotation
+ *
+ * @phpstan-import-type InputObjectConfig from InputObjectType
+ * @phpstan-import-type ArgumentType from InputObjectField
+ * @phpstan-import-type InputObjectFieldConfig from InputObjectField
  */
 class MutableInputObjectType extends InputObjectType implements MutableInputInterface
 {
@@ -31,7 +35,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
     /** @var array<string, InputObjectField>|null */
     protected array|null $finalFields = null;
 
-    /** @param mixed[] $config */
+    /** @param InputObjectConfig $config */
     public function __construct(array $config)
     {
         $this->status = self::STATUS_PENDING;
@@ -86,12 +90,21 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
             $this->finalFields = parent::getFields();
             foreach ($this->fieldsCallables as $fieldsCallable) {
                 $fieldDefinitions = $fieldsCallable();
+                /** @var (ArgumentType)[] $fieldDefinitions */
                 foreach ($fieldDefinitions as $name => $fieldDefinition) {
                     if ($fieldDefinition instanceof Type) {
                         $fieldDefinition = ['type' => $fieldDefinition];
                     }
                     assert(is_string($name));
-                    $this->finalFields[$name] = new InputObjectField($fieldDefinition + ['name' => $name]);
+                    // @codingStandardsIgnoreStart
+                    /**
+                     * @var InputObjectFieldConfig $config
+                     */
+                    // @codingStandardsIgnoreEnd
+
+                    $config = $fieldDefinition;
+                    $config['name'] = $name;
+                    $this->finalFields[$name] = new InputObjectField($config);
                 }
             }
             if (empty($this->finalFields)) {
