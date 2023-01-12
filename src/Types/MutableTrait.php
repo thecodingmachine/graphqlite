@@ -118,7 +118,9 @@ trait MutableTrait
 
         $this->fields = [];
         foreach ($this->fieldsCallables as $fieldsCallable) {
-            $this->fields = FieldDefinition::defineFieldMap($this, $fieldsCallable()) + $this->fields;
+            /** @var FieldDefinition[] $newFields */
+            $newFields = FieldDefinition::defineFieldMap($this, $fieldsCallable());
+            $this->fields +=  $newFields;
         }
 
         if (empty($this->fields) && empty(parent::getFieldNames())) {
