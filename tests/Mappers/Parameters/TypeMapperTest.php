@@ -9,14 +9,10 @@ use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Fixtures80\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompositeRootTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 
@@ -52,7 +48,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertInstanceOf(NonNull::class, $gqType);
         assert($gqType instanceof NonNull);
-        $memberType = $gqType->getOfType();
+        $memberType = $gqType->getWrappedType();
         $this->assertInstanceOf(UnionType::class, $memberType);
         assert($memberType instanceof UnionType);
         $unionTypes = $memberType->getTypes();

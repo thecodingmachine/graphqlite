@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use GraphQL\Error\Error;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\StringType;
 use Porpaginas\Arrays\ArrayResult;
@@ -30,7 +31,7 @@ class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
     {
         $mapper = $this->getPorpaginasTypeMapper();
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(\Error::class);
         $mapper->mapClassToType(ArrayResult::class, new ListOfType(new StringType()), $this->getTypeMapper());
     }
 
