@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 
-class ArgumentResolverTest extends AbstractQueryProviderTest
+abstract class ArgumentResolverTest extends AbstractQueryProviderTest
 {
 
     public function testResolveArrayException(): void
