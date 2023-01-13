@@ -45,8 +45,6 @@ interface RootTypeMapperInterface
      * also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
-     *
-     * @return ((GraphQLType&NamedType)|null)
      */
     public function mapNameToType(string $typeName): NamedType;
 }

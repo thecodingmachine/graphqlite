@@ -78,7 +78,7 @@ interface RecursiveTypeMapperInterface
      * Returns an array containing all OutputTypes.
      * Needed for introspection because of interfaces.
      *
-     * @return Types
+     * @return (Type&NamedType)[]
      */
     public function getOutputTypes(): array;
 
