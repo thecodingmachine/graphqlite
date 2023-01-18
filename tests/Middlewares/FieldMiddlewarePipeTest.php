@@ -15,7 +15,7 @@ class FieldMiddlewarePipeTest extends TestCase
         $finalHandler = new class implements FieldHandlerInterface {
             public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
             {
-                return FieldDefinition::create(['name'=>'foo', 'type'=>Type::string()]);
+                return new  FieldDefinition(['name'=>'foo', 'type'=>Type::string()]);
             }
         };
 
@@ -27,7 +27,7 @@ class FieldMiddlewarePipeTest extends TestCase
         $middlewarePipe->pipe(new class implements FieldMiddlewareInterface {
             public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
             {
-                return FieldDefinition::create(['name'=>'bar', 'type'=>Type::string()]);
+                return new FieldDefinition(['name'=>'bar', 'type'=>Type::string()]);
             }
         });
 

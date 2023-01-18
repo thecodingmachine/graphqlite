@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
-use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Type\Definition\ScalarType;
@@ -14,11 +14,10 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class DateTimeType extends ScalarType
 {
-    /** @var string */
-    public $name = 'DateTime';
+    public string $name = 'DateTime';
 
-    /** @var string */
-    public $description = 'The `DateTime` scalar type represents time data, represented as an ISO-8601 encoded UTC date string.';
+    public string|null $description
+        = 'The `DateTime` scalar type represents time data, represented as an ISO-8601 encoded UTC date string.';
 
     public function serialize(mixed $value): string
     {
@@ -26,7 +25,7 @@ class DateTimeType extends ScalarType
             throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: ' . Utils::printSafe($value));
         }
 
-        return $value->format(DateTime::ATOM);
+        return $value->format(DateTimeInterface::ATOM);
     }
 
     public function parseValue(mixed $value): DateTimeImmutable|null
@@ -52,7 +51,7 @@ class DateTimeType extends ScalarType
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
-    public function parseLiteral($valueNode, array|null $variables = null): mixed
+    public function parseLiteral($valueNode, array|null $variables = null): string
     {
         if ($valueNode instanceof StringValueNode) {
             return $valueNode->value;

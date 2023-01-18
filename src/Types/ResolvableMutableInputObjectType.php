@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Error\ClientAware;
+use GraphQL\Language\AST\InputObjectTypeDefinitionNode;
+use GraphQL\Language\AST\InputObjectTypeExtensionNode;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionException;
 use ReflectionMethod;
@@ -22,6 +25,8 @@ use function is_callable;
 
 /**
  * A GraphQL input object that can be resolved using a factory
+ *
+ * @phpstan-import-type FieldConfig from InputObjectType
  */
 class ResolvableMutableInputObjectType extends MutableInputObjectType implements ResolvableMutableInputInterface
 {
@@ -43,14 +48,19 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      */
     private array $decoratorsParameters = [];
 
-    /** @param array<string,mixed> $additionalConfig */
+    /** @param array{name?: string|null,description?: string|null,parseValue?: callable(array<string, mixed>): mixed,astNode?: InputObjectTypeDefinitionNode|null,extensionASTNodes?: array<int, InputObjectTypeExtensionNode>|null} $additionalConfig */
     public function __construct(string $name, private FieldsBuilder $fieldsBuilder, object|string $factory, string $methodName, string|null $comment, private bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
     {
         $resolve = [$factory, $methodName];
         assert(is_callable($resolve));
         $this->resolve       = $resolve;
 
-        $fields = function () {
+        /**
+         * @return iterable<FieldConfig>
+         *
+         * @throws ReflectionException
+         */
+        $fields = function (): array {
             return InputTypeUtils::getInputTypeArgs($this->getParameters());
         };
 
@@ -61,7 +71,6 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         if ($comment) {
             $config['description'] = $comment;
         }
-
         $config += $additionalConfig;
         parent::__construct($config);
     }

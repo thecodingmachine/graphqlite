@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\Argument;
+use GraphQL\Type\Definition\InputObjectField;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
@@ -22,6 +25,11 @@ use function array_map;
 use function assert;
 use function ltrim;
 
+/**
+ * @phpstan-import-type FieldConfig from InputObjectType
+ * @phpstan-import-type ArgumentConfig from Argument
+ * @phpstan-import-type InputObjectFieldConfig from InputObjectField
+ */
 class InputTypeUtils
 {
     public function __construct(
@@ -96,7 +104,7 @@ class InputTypeUtils
      *
      * @param ParameterInterface[] $args
      *
-     * @return array<string, array<string, mixed|InputType>>
+     * @return array{defaultValue?:mixed,type:\GraphQL\Type\Definition\Type&InputType}[]
      */
     public static function getInputTypeArgs(array $args): array
     {
@@ -104,7 +112,7 @@ class InputTypeUtils
             return $parameter instanceof InputTypeParameterInterface;
         });
 
-        return array_map(static function (InputTypeParameterInterface $parameter) {
+        return array_map(static function (InputTypeParameterInterface $parameter): array {
             $desc = [
                 'type' => $parameter->getType(),
             ];

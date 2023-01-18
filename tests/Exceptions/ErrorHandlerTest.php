@@ -13,11 +13,9 @@ class ErrorHandlerTest extends TestCase
         $exception = new GraphQLException('foo', 0, null, 'MyCategory', ['field' => 'foo']);
         $error = new Error('foo', null, null, [], null, $exception);
         $formattedError = WebonyxErrorHandler::errorFormatter($error);
-
         $this->assertSame([
             'message' => 'foo',
             'extensions' => [
-                'category' => 'MyCategory',
                 'field' => 'foo'
             ]
         ], $formattedError);
@@ -37,7 +35,6 @@ class ErrorHandlerTest extends TestCase
             [
                 'message' => 'bar',
                 'extensions' => [
-                    'category' => 'MyCategory',
                     'field' => 'foo'
                 ]
             ],
@@ -45,14 +42,12 @@ class ErrorHandlerTest extends TestCase
                 'message' => 'foo',
                 'extensions' => [
                     'field' => 'foo',
-                    'category' => 'MyCategory',
                 ]
             ],
             [
                 'message' => 'foo',
                 'extensions' => [
                     'field' => 'foo',
-                    'category' => 'MyCategory',
                 ]
             ]], $formattedError);
     }

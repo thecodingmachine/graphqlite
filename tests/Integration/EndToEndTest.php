@@ -1907,7 +1907,7 @@ class EndToEndTest extends TestCase
 
         $this->assertSame('Field PostInput.title of required type String! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
         $this->assertSame('Field PostInput.publishedAt of required type DateTime! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
-        $this->assertSame('Field "id" is not defined by type PostInput.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+        $this->assertSame('Field "id" is not defined by type "PostInput".', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
 
         $queryString = '
         mutation {
@@ -1929,8 +1929,8 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame('Field ArticleInput.title of required type String! was not provided.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
-        $this->assertSame('Field "id" is not defined by type ArticleInput.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
-        $this->assertSame('Field "publishedAt" is not defined by type ArticleInput.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
+        $this->assertSame('Field "id" is not defined by type "ArticleInput".', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][1]['message']);
+        $this->assertSame('Field "publishedAt" is not defined by type "ArticleInput".', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][2]['message']);
 
         $queryString = '
         mutation {

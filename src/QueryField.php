@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
 use GraphQL\Error\ClientAware;
+use GraphQL\Language\AST\FieldDefinitionNode;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
@@ -31,6 +32,10 @@ use function is_object;
  * A GraphQL field that maps to a PHP method automatically.
  *
  * @internal
+ *
+ * @phpstan-import-type FieldResolver from FieldDefinition
+ * @phpstan-import-type ArgumentListConfig from FieldDefinition
+ * @phpstan-import-type ComplexityFn from FieldDefinition
  */
 class QueryField extends FieldDefinition
 {
@@ -40,7 +45,7 @@ class QueryField extends FieldDefinition
      * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
      * @param callable $resolver The resolver actually called
      * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
-     * @param array<string, mixed> $additionalConfig
+     * @param array{resolve?: FieldResolver|null,args?: ArgumentListConfig|null,description?: string|null,deprecationReason?: string|null,astNode?: FieldDefinitionNode|null,complexity?: ComplexityFn|null} $additionalConfig
      */
     public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, string|null $comment, string|null $deprecationReason, string|null $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
     {

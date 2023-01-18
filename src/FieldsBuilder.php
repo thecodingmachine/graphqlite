@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
@@ -895,7 +896,7 @@ class FieldsBuilder
             if (! in_array($name, $constructerParameters)) {
                 $inputFieldDescriptor->setTargetMethodOnSource($methodName);
             }
-
+            assert($type instanceof InputType);
             $inputFieldDescriptor->setType($type);
             $inputFieldDescriptor->setInjectSource($injectSource);
 
@@ -990,7 +991,7 @@ class FieldsBuilder
                 if (! $inputType && $isUpdate && $type instanceof NonNull) {
                     $type = $type->getWrappedType();
                 }
-
+                assert($type instanceof InputType);
                 $inputFieldDescriptor->setType($type);
                 $inputFieldDescriptor->setInjectSource(false);
                 $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());

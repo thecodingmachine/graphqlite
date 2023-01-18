@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Error\ClientAware;
+use GraphQL\Language\AST\InputValueDefinitionNode;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
-use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
@@ -19,11 +19,15 @@ use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+use Throwable;
 
 /**
  * A GraphQL input field that maps to a PHP method automatically.
  *
  * @internal
+ *
+ * @phpstan-import-type InputObjectFieldConfig from InputObjectField
+ * @phpstan-import-type ArgumentType from InputObjectField
  */
 class InputField extends InputObjectField
 {
@@ -33,14 +37,12 @@ class InputField extends InputObjectField
     private bool $forConstructorHydration = false;
 
     /**
-     * @param InputType|(NullableType&Type) $type
+     * @param (Type&InputType) $type
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
-     * @param callable $resolver The resolver actually called
      * @param mixed|null $defaultValue the default value set for this field
-     * @param array<string, mixed> $additionalConfig
+     * @param array{defaultValue?: mixed,description?: string|null,astNode?: InputValueDefinitionNode|null}|null $additionalConfig
      */
-    public function __construct(string $name, $type, array $arguments, ResolverInterface|null $originalResolver, callable|null $resolver, string|null $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array $additionalConfig = [])
+    public function __construct(string $name, InputType $type, array $arguments, ResolverInterface|null $originalResolver, callable|null $resolver, string|null $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array|null $additionalConfig = null)
     {
         $config = [
             'name' => $name,
@@ -77,8 +79,18 @@ class InputField extends InputObjectField
                 return $result;
             };
         }
+        if ($additionalConfig !== null) {
+            if (isset($additionalConfig['astNode'])) {
+                $config['astNode'] = $additionalConfig['astNode'];
+            }
+            if (isset($additionalConfig['defaultValue'])) {
+                $config['defaultValue'] = $additionalConfig['defaultValue'];
+            }
+            if (isset($additionalConfig['description'])) {
+                $config['description'] = $additionalConfig['description'];
+            }
+        }
 
-        $config += $additionalConfig;
         parent::__construct($config);
     }
 
@@ -167,6 +179,7 @@ class InputField extends InputObjectField
     private function paramsToArguments(array $parameters, object|null $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
     {
         $toPassArgs = [];
+        /** @var (ClientAware&Throwable)[] $exceptions */
         $exceptions = [];
         foreach ($parameters as $parameter) {
             try {

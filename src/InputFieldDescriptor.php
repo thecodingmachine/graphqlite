@@ -26,8 +26,8 @@ use function is_callable;
 class InputFieldDescriptor
 {
     private string $name;
-    /** @var InputType|(NullableType&Type) */
-    private $type;
+    /** @var (InputType&Type)|(InputType&Type&NullableType) */
+    private InputType $type;
     /** @var array<string, ParameterInterface> */
     private array $parameters = [];
     /** @var callable|null */
@@ -95,14 +95,14 @@ class InputFieldDescriptor
         $this->name = $name;
     }
 
-    /** @return InputType|(NullableType&Type) */
-    public function getType()
+    /** @return ((InputType&Type)|(InputType&Type&NullableType))  */
+    public function getType(): InputType
     {
         return $this->type;
     }
 
-    /** @param InputType|(NullableType&Type) $type */
-    public function setType($type): void
+    /** @param (InputType&Type)  $type */
+    public function setType(InputType $type): void
     {
         $this->type = $type;
     }

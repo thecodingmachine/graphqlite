@@ -34,7 +34,7 @@ class HttpCodeDeciderTest extends TestCase
         $errorCode600 = new Error('Foo', null, null, [], null, $exception600);
 
         $clientAwareException = new class extends Exception implements ClientAware {
-            public function isClientSafe()
+            public function isClientSafe():bool
             {
                 return true;
             }
