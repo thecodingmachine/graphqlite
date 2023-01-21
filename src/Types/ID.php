@@ -19,7 +19,7 @@ class ID
     /**
      * Note: if $value is an object, it has a __toString method on it.
      */
-    public function __construct(private bool|float|int|string|object $value)
+    public function __construct(private readonly bool|float|int|string|object $value)
     {
         if (! is_scalar($value) && (! is_object($value) || ! method_exists($value, '__toString'))) {
             throw new InvalidArgumentException('ID constructor cannot be passed a non scalar value.');

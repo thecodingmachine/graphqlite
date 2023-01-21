@@ -25,9 +25,9 @@ use function is_array;
 class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 {
     public function __construct(
-        private ExpressionLanguage $language,
-        private AuthenticationServiceInterface $authenticationService,
-        private AuthorizationServiceInterface $authorizationService,
+        private readonly ExpressionLanguage $language,
+        private readonly AuthenticationServiceInterface $authenticationService,
+        private readonly AuthorizationServiceInterface $authorizationService,
     ) {
     }
 

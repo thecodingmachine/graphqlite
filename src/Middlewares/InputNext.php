@@ -23,7 +23,7 @@ final class InputNext implements InputFieldHandlerInterface
      * @param InputFieldHandlerInterface $fallbackHandler Fallback handler to
      *     invoke when the queue is exhausted.
      */
-    public function __construct(SplQueue $queue, private InputFieldHandlerInterface $fallbackHandler)
+    public function __construct(SplQueue $queue, private readonly InputFieldHandlerInterface $fallbackHandler)
     {
         $this->queue = clone $queue;
     }
