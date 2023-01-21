@@ -52,8 +52,7 @@ class TypeResolver
         return $type;
     }
 
-    /** @return OutputType&Type */
-    public function mapNameToOutputType(string $typeName): OutputType
+    public function mapNameToOutputType(string $typeName): OutputType&Type
     {
         $type = $this->mapNameToType($typeName);
         if (! $type instanceof OutputType || ($type instanceof WrappingType && ! $type->getWrappedType() instanceof OutputType)) {

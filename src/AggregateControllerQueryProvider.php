@@ -29,7 +29,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
      * @param iterable<string>   $controllers          A list of controllers name in the container.
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(private iterable $controllers, private FieldsBuilder $fieldsBuilder, private ContainerInterface $controllersContainer)
+    public function __construct(private readonly iterable $controllers, private readonly FieldsBuilder $fieldsBuilder, private readonly ContainerInterface $controllersContainer)
     {
     }
 

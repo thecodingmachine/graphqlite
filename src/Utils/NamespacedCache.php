@@ -20,7 +20,7 @@ class NamespacedCache implements CacheInterface
 
     private string $namespace;
 
-    public function __construct(private CacheInterface $cache)
+    public function __construct(private readonly CacheInterface $cache)
     {
         $this->namespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
     }

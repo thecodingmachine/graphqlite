@@ -15,7 +15,7 @@ class AggregateControllerQueryProviderFactory implements QueryProviderFactoryInt
      * @param iterable<string> $controllers A list of controllers name in the container.
      * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
      */
-    public function __construct(private iterable $controllers, private ContainerInterface $controllersContainer)
+    public function __construct(private readonly iterable $controllers, private readonly ContainerInterface $controllersContainer)
     {
     }
 

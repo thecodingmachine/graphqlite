@@ -67,8 +67,7 @@ class QueryFieldDescriptor
         return $this->type;
     }
 
-    /** @param OutputType&Type $type */
-    public function setType(Type $type): void
+    public function setType(OutputType&Type $type): void
     {
         $this->type = $type;
     }
