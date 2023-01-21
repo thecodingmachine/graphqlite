@@ -14,8 +14,7 @@ interface InputTypeParameterInterface extends ParameterInterface
     /** @param array<string, mixed> $args */
     public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): mixed;
 
-    /** @return InputType&Type */
-    public function getType(): InputType;
+    public function getType(): InputType&Type;
 
     public function hasDefaultValue(): bool;
 

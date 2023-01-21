@@ -15,8 +15,7 @@ class InputTypeParameter implements InputTypeParameterInterface
     private bool $doesHaveDefaultValue;
     private string|null $description = null;
 
-    /** @param InputType&Type $type */
-    public function __construct(private string $name, private InputType $type, bool $hasDefaultValue, private mixed $defaultValue, private ArgumentResolver $argumentResolver)
+    public function __construct(private readonly string $name, private readonly InputType&Type $type, bool $hasDefaultValue, private readonly mixed $defaultValue, private readonly ArgumentResolver $argumentResolver)
     {
         $this->doesHaveDefaultValue = $hasDefaultValue;
     }
@@ -46,8 +45,7 @@ class InputTypeParameter implements InputTypeParameterInterface
         return $this->name;
     }
 
-    /** @return InputType&Type */
-    public function getType(): InputType
+    public function getType(): InputType&Type
     {
         return $this->type;
     }
