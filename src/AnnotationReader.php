@@ -67,7 +67,7 @@ class AnnotationReader
      * @param string $mode One of self::LAX_MODE or self::STRICT_MODE. If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
      * @param array<int,string> $strictNamespaces Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
      */
-    public function __construct(private Reader $reader, private string $mode = self::STRICT_MODE, private array $strictNamespaces = [])
+    public function __construct(private readonly Reader $reader, private readonly string $mode = self::STRICT_MODE, private readonly array $strictNamespaces = [])
     {
         if (! in_array($mode, [self::LAX_MODE, self::STRICT_MODE], true)) {
             throw new InvalidArgumentException('The mode passed must be one of AnnotationReader::LAX_MODE, AnnotationReader::STRICT_MODE');

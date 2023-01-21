@@ -32,7 +32,7 @@ class CachedDocBlockFactory
     private ContextFactory $contextFactory;
 
     /** @param CacheInterface $cache The cache we fetch data from. Note this is a SAFE cache. It does not need to be purged. */
-    public function __construct(private CacheInterface $cache, DocBlockFactory|null $docBlockFactory = null)
+    public function __construct(private readonly CacheInterface $cache, DocBlockFactory|null $docBlockFactory = null)
     {
         $this->docBlockFactory = $docBlockFactory ?: DocBlockFactory::createInstance();
         $this->contextFactory  = new ContextFactory();

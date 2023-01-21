@@ -21,12 +21,10 @@ use function assert;
  */
 class ContainerParameterHandler implements ParameterMiddlewareInterface
 {
-    /** @var ContainerInterface */
-    private $container;
 
-    public function __construct(ContainerInterface $container)
+
+    public function __construct(private readonly ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
