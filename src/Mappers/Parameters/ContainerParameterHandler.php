@@ -21,8 +21,6 @@ use function assert;
  */
 class ContainerParameterHandler implements ParameterMiddlewareInterface
 {
-
-
     public function __construct(private readonly ContainerInterface $container)
     {
     }
