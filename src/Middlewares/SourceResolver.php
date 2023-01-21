@@ -15,11 +15,11 @@ use function is_callable;
  *
  * @internal
  */
-class SourceResolver implements SourceResolverInterface
+final class SourceResolver implements SourceResolverInterface
 {
     private object|null $object = null;
 
-    public function __construct(private string $methodName)
+    public function __construct(private readonly string $methodName)
     {
     }
 

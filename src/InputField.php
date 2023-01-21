@@ -29,7 +29,7 @@ use Throwable;
  * @phpstan-import-type InputObjectFieldConfig from InputObjectField
  * @phpstan-import-type ArgumentType from InputObjectField
  */
-class InputField extends InputObjectField
+final class InputField extends InputObjectField
 {
     /** @var callable */
     private $resolve;

@@ -16,7 +16,7 @@ use function method_exists;
  *
  * @internal
  */
-class MagicPropertyResolver implements SourceResolverInterface
+final class MagicPropertyResolver implements SourceResolverInterface
 {
     private object|null $object = null;
 
