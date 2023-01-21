@@ -63,7 +63,6 @@ use function key;
 use function reset;
 use function rtrim;
 use function str_starts_with;
-use function strpos;
 use function trim;
 
 use const PHP_EOL;
@@ -843,7 +842,7 @@ class FieldsBuilder
 
             $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $methodName = $refMethod->getName();
-            if (strpos($methodName, 'set') !== 0) {
+            if (! str_starts_with($methodName, 'set')) {
                 continue;
             }
             $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
