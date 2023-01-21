@@ -56,16 +56,16 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
     public function __construct(
         string $cachePrefix,
-        private TypeGenerator $typeGenerator,
-        private InputTypeGenerator $inputTypeGenerator,
-        private InputTypeUtils $inputTypeUtils,
-        private ContainerInterface $container,
-        private AnnotationReader $annotationReader,
-        private NamingStrategyInterface $namingStrategy,
-        private RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private CacheInterface $cache,
+        private readonly TypeGenerator $typeGenerator,
+        private readonly InputTypeGenerator $inputTypeGenerator,
+        private readonly InputTypeUtils $inputTypeUtils,
+        private readonly ContainerInterface $container,
+        private readonly AnnotationReader $annotationReader,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly CacheInterface $cache,
         protected int|null $globTTL = 2,
-        private int|null $mapTTL = null,
+        private readonly int|null $mapTTL = null,
     )
     {
         $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
@@ -185,7 +185,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         $globExtendTypeMapperCache = new GlobExtendTypeMapperCache();
 
         $classes = $this->getClassList();
-        foreach ($classes as $className => $refClass) {
+        foreach ($classes as $refClass) {
             $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function () use ($refClass) {
                 $extendAnnotationsCache = new GlobExtendAnnotationsCache();
 
@@ -320,7 +320,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName): Type&NamedType
     {
         $typeClassName = $this->getMaps()->getTypeByGraphQLTypeName($typeName);
 

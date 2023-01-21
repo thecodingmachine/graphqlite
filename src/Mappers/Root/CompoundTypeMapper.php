@@ -40,15 +40,15 @@ use function iterator_to_array;
 class CompoundTypeMapper implements RootTypeMapperInterface
 {
     public function __construct(
-        private RootTypeMapperInterface $next,
-        private RootTypeMapperInterface $topRootTypeMapper,
-        private NamingStrategyInterface $namingStrategy,
-        private TypeRegistry $typeRegistry,
-        private RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly RootTypeMapperInterface $next,
+        private readonly RootTypeMapperInterface $topRootTypeMapper,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly TypeRegistry $typeRegistry,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
     ) {
     }
 
-    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
     {
         if (! $type instanceof Compound) {
             return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
@@ -87,7 +87,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
         return $return;
     }
 
-    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType
     {
         if (! $type instanceof Compound) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
@@ -165,7 +165,7 @@ class CompoundTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType
+    public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
         return $this->next->mapNameToType($typeName);
     }

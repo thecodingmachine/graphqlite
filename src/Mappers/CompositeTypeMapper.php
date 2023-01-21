@@ -132,7 +132,7 @@ class CompositeTypeMapper implements TypeMapperInterface
      *
      * @return NamedType&Type&((ResolvableMutableInputInterface&InputObjectType)|MutableInterface)
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName): Type&NamedType
     {
         foreach ($this->typeMappers as $typeMapper) {
             if ($typeMapper->canMapNameToType($typeName)) {

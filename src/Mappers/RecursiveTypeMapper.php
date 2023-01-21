@@ -476,7 +476,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @return NamedType&Type&(InputType|OutputType)
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName): Type&NamedType
     {
         if ($this->typeRegistry->hasType($typeName)) {
             return $this->typeRegistry->getType($typeName);

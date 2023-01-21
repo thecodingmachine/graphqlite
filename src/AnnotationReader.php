@@ -100,20 +100,11 @@ class AnnotationReader
             assert($type === null || $type instanceof $annotationClass);
             return $type;
         } catch (AnnotationException $e) {
-            switch ($this->mode) {
-                case self::STRICT_MODE:
-                    throw $e;
-
-                case self::LAX_MODE:
-                    if ($this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())) {
-                        throw $e;
-                    }
-
-                    return null;
-
-                default:
-                    throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
-            }
+            return match ($this->mode) {
+                self::STRICT_MODE=> throw $e,
+                self::LAX_MODE=>$this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName()) ? throw $e : null,
+                default=>throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
+            };
         }
     }
 
@@ -139,20 +130,11 @@ class AnnotationReader
 
             return $this->methodAnnotationCache[$cacheKey] = $this->reader->getMethodAnnotation($refMethod, $annotationClass);
         } catch (AnnotationException $e) {
-            switch ($this->mode) {
-                case self::STRICT_MODE:
-                    throw $e;
-
-                case self::LAX_MODE:
-                    if ($this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getDeclaringClass()->getName())) {
-                        throw $e;
-                    }
-
-                    return null;
-
-                default:
-                    throw new RuntimeException("Unexpected mode '" . $this->mode . "'."); // @codeCoverageIgnore
-            }
+            return match ($this->mode) {
+                self::STRICT_MODE=> throw $e,
+                self::LAX_MODE=>$this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getName()) ? throw $e : null,
+                default=>throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
+            };
         }
     }
 

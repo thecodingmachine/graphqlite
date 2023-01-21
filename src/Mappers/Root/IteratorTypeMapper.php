@@ -34,11 +34,11 @@ use function iterator_to_array;
  */
 class IteratorTypeMapper implements RootTypeMapperInterface
 {
-    public function __construct(private RootTypeMapperInterface $next, private RootTypeMapperInterface $topRootTypeMapper)
+    public function __construct(private readonly RootTypeMapperInterface $next, private readonly RootTypeMapperInterface $topRootTypeMapper)
     {
     }
 
-    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
     {
         if (! $type instanceof Compound) {
             try {
@@ -70,7 +70,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         return $result;
     }
 
-    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType
     {
         if (! $type instanceof Compound) {
             //try {
@@ -102,7 +102,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType
+    public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
         // TODO: how to handle this? Do we need?
         return $this->next->mapNameToType($typeName);
@@ -125,7 +125,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      *
      * @return (OutputType&GraphQLType)|(InputType&GraphQLType)|null
      */
-    private function toGraphQLType(Compound $type, Closure $topToGraphQLType, bool $isOutputType)
+    private function toGraphQLType(Compound $type, Closure $topToGraphQLType, bool $isOutputType): GraphQLType|null
     {
         $types = iterator_to_array($type);
 

@@ -50,17 +50,17 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
         $typeMapper->setNext(new class implements RootTypeMapperInterface {
 
-            public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType
+            public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
             {
                 return new NonNull(new StringType());
             }
 
-            public function toGraphQLInputType(Type $type, null|InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType
+            public function toGraphQLInputType(Type $type, null|InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType&GraphQLType
             {
                 throw new \RuntimeException('Not implemented');
             }
 
-            public function mapNameToType(string $typeName): NamedType
+            public function mapNameToType(string $typeName): NamedType&GraphQLType
             {
                 throw new \RuntimeException('Not implemented');
             }

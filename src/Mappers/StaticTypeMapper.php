@@ -161,7 +161,7 @@ final class StaticTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName): Type&NamedType
     {
         if (isset($this->notMappedTypes[$typeName])) {
             return $this->notMappedTypes[$typeName];
