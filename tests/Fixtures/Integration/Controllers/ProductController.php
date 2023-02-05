@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\ProductInternal;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\ProductTypeEnum;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\TrickyProduct;
@@ -27,6 +28,15 @@ class ProductController
         return new ArrayResult([
             new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
         ]);
+    }
+
+    /**
+     * @Query()
+     * @return ProductInternal
+     */
+    public function getProductsExternalType()
+    {
+        return new ProductInternal();
     }
 
     /**
