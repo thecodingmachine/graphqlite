@@ -37,7 +37,7 @@
         "php-coveralls/php-coveralls": "^2.1",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^1.9",
-        "phpunit/phpunit": "^8.5.19 || ^9.5.8",
+        "phpunit/phpunit": "^8.5.19 || ^9.5.8 || ^10.0.0",
         "symfony/var-dumper": "^5.4 || ^6.0",
         "thecodingmachine/phpstan-strict-rules": "^1.0"
     },
