@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
@@ -180,7 +181,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                     return [TestObject::class, TestObject2::class];
                 }
 
-                public function mapNameToType(string $typeName): Type
+                public function mapNameToType(string $typeName): Type&NamedType
                 {
                     return match ($typeName) {
                         'TestObject' => $this->testObjectType,
@@ -432,8 +433,7 @@ abstract class AbstractQueryProviderTest extends TestCase
 
     protected function resolveType(string $type): \phpDocumentor\Reflection\Type
     {
-        $phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
-        return $phpDocumentorTypeResolver->resolve($type);
+        return (new PhpDocumentorTypeResolver())->resolve($type);
     }
 
     protected function getNamespaceFactory(): NamespaceFactory

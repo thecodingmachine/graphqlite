@@ -12,7 +12,7 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
  */
 class InjectUserParameter implements ParameterInterface
 {
-    public function __construct(private AuthenticationServiceInterface $authenticationService)
+    public function __construct(private readonly AuthenticationServiceInterface $authenticationService)
     {
     }
 

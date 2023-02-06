@@ -42,11 +42,11 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
     ];
 
     public function __construct(
-        private ServerConfig $config,
-        private ResponseFactoryInterface $responseFactory,
-        private StreamFactoryInterface $streamFactory,
-        private HttpCodeDeciderInterface $httpCodeDecider,
-        private string $graphqlUri = '/graphql',
+        private readonly ServerConfig $config,
+        private readonly ResponseFactoryInterface $responseFactory,
+        private readonly StreamFactoryInterface $streamFactory,
+        private readonly HttpCodeDeciderInterface $httpCodeDecider,
+        private readonly string $graphqlUri = '/graphql',
         StandardServer|null $handler = null,
     )
     {

@@ -25,19 +25,11 @@ use ReflectionProperty;
  */
 interface RootTypeMapperInterface
 {
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     *
-     * @return OutputType&GraphQLType
-     */
-    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType;
+    /** @param (OutputType&GraphQLType)|null $subType */
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType;
 
-    /**
-     * @param (InputType&GraphQLType)|null $subType
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType;
+    /** @param (InputType&GraphQLType)|null $subType */
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType;
 
     /**
      * Returns a GraphQL type by name.
@@ -46,5 +38,5 @@ interface RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType;
+    public function mapNameToType(string $typeName): NamedType&GraphQLType;
 }

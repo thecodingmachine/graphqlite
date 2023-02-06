@@ -38,24 +38,20 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
     /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
-        private RootTypeMapperInterface $next,
-        private AnnotationReader $annotationReader,
-        private CacheInterface $cacheService,
-        private array $namespaces,
+        private readonly RootTypeMapperInterface $next,
+        private readonly AnnotationReader $annotationReader,
+        private readonly CacheInterface $cacheService,
+        private readonly array $namespaces,
     ) {
     }
 
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     *
-     * @return OutputType&GraphQLType
-     */
+    /** @param (OutputType&GraphQLType)|null $subType */
     public function toGraphQLOutputType(
         Type $type,
         OutputType|null $subType,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-    ): OutputType {
+    ): OutputType&GraphQLType {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
@@ -69,7 +65,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         string $argumentName,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-    ): InputType
+    ): InputType&GraphQLType
     {
         $result = $this->map($type);
         if ($result === null) {
@@ -140,7 +136,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType
+    public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
         // This is a hack to make sure "$schema->assertValid()" returns true.
         // The mapNameToType will fail if the mapByClassName method was not called before.

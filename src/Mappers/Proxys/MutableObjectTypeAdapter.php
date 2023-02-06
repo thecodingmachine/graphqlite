@@ -26,7 +26,7 @@ use function sprintf;
  *
  * @internal
  */
-class MutableObjectTypeAdapter extends MutableObjectType implements MutableInterface
+final class MutableObjectTypeAdapter extends MutableObjectType
 {
     /** @use MutableAdapterTrait */
     use MutableAdapterTrait;

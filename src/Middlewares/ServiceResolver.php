@@ -12,7 +12,7 @@ use function get_class;
  *
  * @internal
  */
-class ServiceResolver implements ResolverInterface
+final class ServiceResolver implements ResolverInterface
 {
     /** @var callable&array{0:object, 1:string} */
     private $callable;

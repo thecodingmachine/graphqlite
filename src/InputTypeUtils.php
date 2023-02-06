@@ -33,8 +33,8 @@ use function ltrim;
 class InputTypeUtils
 {
     public function __construct(
-        private AnnotationReader $annotationReader,
-        private NamingStrategyInterface $namingStrategy,
+        private readonly AnnotationReader $annotationReader,
+        private readonly NamingStrategyInterface $namingStrategy,
     )
     {
     }

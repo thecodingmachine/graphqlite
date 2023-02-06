@@ -138,7 +138,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
      *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName): Type&NamedType
     {
         if (! $this->canMapNameToType($typeName)) {
             throw CannotMapTypeException::createForName($typeName);

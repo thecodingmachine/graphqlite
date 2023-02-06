@@ -15,11 +15,11 @@ use function assert;
  *
  * @internal
  */
-class SourceInputPropertyResolver implements SourceResolverInterface
+final class SourceInputPropertyResolver implements SourceResolverInterface
 {
     private object|null $object = null;
 
-    public function __construct(private string $propertyName)
+    public function __construct(private readonly string $propertyName)
     {
     }
 

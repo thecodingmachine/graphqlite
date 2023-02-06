@@ -21,7 +21,7 @@ final class Next implements FieldHandlerInterface
      * @param FieldHandlerInterface $fallbackHandler Fallback handler to
      *     invoke when the queue is exhausted.
      */
-    public function __construct(SplQueue $queue, private FieldHandlerInterface $fallbackHandler)
+    public function __construct(SplQueue $queue, private readonly FieldHandlerInterface $fallbackHandler)
     {
         $this->queue           = clone $queue;
     }

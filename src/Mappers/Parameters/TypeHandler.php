@@ -63,16 +63,15 @@ class TypeHandler implements ParameterHandlerInterface
     private PhpDocumentorTypeResolver $phpDocumentorTypeResolver;
 
     public function __construct(
-        private ArgumentResolver $argumentResolver,
-        private RootTypeMapperInterface $rootTypeMapper,
-        private TypeResolver $typeResolver,
+        private readonly ArgumentResolver $argumentResolver,
+        private readonly RootTypeMapperInterface $rootTypeMapper,
+        private readonly TypeResolver $typeResolver,
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
     }
 
-    /** @return GraphQLType&OutputType */
-    public function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj): GraphQLType
+    public function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj): GraphQLType&OutputType
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {

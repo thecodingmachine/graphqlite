@@ -26,13 +26,11 @@ use function is_array;
 class ArgumentResolver
 {
     /**
-     * Casts a value received from GraphQL into an argument passed to a method.
-     *
-     * @param InputType&Type $type
+     * Casts a value received from GraphQL into an argument passed to a method.*
      *
      * @throws Error
      */
-    public function resolve(object|null $source, mixed $val, mixed $context, ResolveInfo $resolveInfo, InputType $type): mixed
+    public function resolve(object|null $source, mixed $val, mixed $context, ResolveInfo $resolveInfo, InputType&Type $type): mixed
     {
         $type = $this->stripNonNullType($type);
         if ($type instanceof ListOfType) {
@@ -68,10 +66,12 @@ class ArgumentResolver
         throw new RuntimeException('Unexpected type: ' . $type::class);
     }
 
-    private function stripNonNullType(Type $type): Type
+    private function stripNonNullType(InputType&Type $type): InputType&Type
     {
         if ($type instanceof NonNull) {
-            return $this->stripNonNullType($type->getWrappedType());
+            $wrapped = $type->getWrappedType();
+            assert($wrapped instanceof InputType);
+            return $this->stripNonNullType($wrapped);
         }
 
         return $type;

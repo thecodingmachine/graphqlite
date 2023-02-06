@@ -78,19 +78,17 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * @param string $typeName The name of the GraphQL type
              * @return NamedType&Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
              */
-            public function mapNameToType(string $typeName): Type
+            public function mapNameToType(string $typeName): Type&NamedType
             {
-                switch ($typeName) {
-                    case 'TestObject':
-                        return new MutableObjectType([
-                            'name'    => 'TestObject',
-                            'fields'  => [
-                                'test'   => Type::string(),
-                            ],
-                        ]);
-                    default:
-                        throw CannotMapTypeException::createForName($typeName);
-                }
+                return match ($typeName) {
+                    'TestObject' => new MutableObjectType([
+                        'name' => 'TestObject',
+                        'fields' => [
+                            'test' => Type::string(),
+                        ],
+                    ]),
+                    default => throw CannotMapTypeException::createForName($typeName),
+                };
             }
 
             /**

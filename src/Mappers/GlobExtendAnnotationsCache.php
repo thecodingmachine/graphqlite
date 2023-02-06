@@ -9,7 +9,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
  *
  * @internal
  */
-class GlobExtendAnnotationsCache
+final class GlobExtendAnnotationsCache
 {
     private string|null $extendTypeClassName = null;
 

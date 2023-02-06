@@ -19,7 +19,7 @@ use function is_object;
  *
  * @internal
  */
-class ResolveUtils
+final class ResolveUtils
 {
     public static function assertInnerReturnType(mixed $result, Type $type): void
     {

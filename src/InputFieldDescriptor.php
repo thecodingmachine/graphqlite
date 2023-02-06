@@ -27,7 +27,7 @@ class InputFieldDescriptor
 {
     private string $name;
     /** @var (InputType&Type)|(InputType&Type&NullableType) */
-    private InputType $type;
+    private InputType&Type $type;
     /** @var array<string, ParameterInterface> */
     private array $parameters = [];
     /** @var callable|null */
@@ -96,13 +96,12 @@ class InputFieldDescriptor
     }
 
     /** @return ((InputType&Type)|(InputType&Type&NullableType))  */
-    public function getType(): InputType
+    public function getType(): InputType&Type
     {
         return $this->type;
     }
 
-    /** @param (InputType&Type)  $type */
-    public function setType(InputType $type): void
+    public function setType(InputType&Type $type): void
     {
         $this->type = $type;
     }

@@ -16,7 +16,7 @@ final class NamespaceFactory
 {
     private ClassNameMapper $classNameMapper;
 
-    public function __construct(private CacheInterface $cache, ClassNameMapper|null $classNameMapper = null, private int|null $globTTL = 2)
+    public function __construct(private readonly CacheInterface $cache, ClassNameMapper|null $classNameMapper = null, private int|null $globTTL = 2)
     {
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
     }

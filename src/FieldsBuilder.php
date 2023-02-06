@@ -62,7 +62,7 @@ use function is_string;
 use function key;
 use function reset;
 use function rtrim;
-use function strpos;
+use function str_starts_with;
 use function trim;
 
 use const PHP_EOL;
@@ -75,16 +75,16 @@ class FieldsBuilder
     private TypeHandler $typeMapper;
 
     public function __construct(
-        private AnnotationReader $annotationReader,
-        private RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private ArgumentResolver $argumentResolver,
-        private TypeResolver $typeResolver,
-        private CachedDocBlockFactory $cachedDocBlockFactory,
-        private NamingStrategyInterface $namingStrategy,
-        private RootTypeMapperInterface $rootTypeMapper,
-        private ParameterMiddlewareInterface $parameterMapper,
-        private FieldMiddlewareInterface $fieldMiddleware,
-        private InputFieldMiddlewareInterface $inputFieldMiddleware,
+        private readonly AnnotationReader $annotationReader,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly ArgumentResolver $argumentResolver,
+        private readonly TypeResolver $typeResolver,
+        private readonly CachedDocBlockFactory $cachedDocBlockFactory,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly RootTypeMapperInterface $rootTypeMapper,
+        private readonly ParameterMiddlewareInterface $parameterMapper,
+        private readonly FieldMiddlewareInterface $fieldMiddleware,
+        private readonly InputFieldMiddlewareInterface $inputFieldMiddleware,
     )
     {
         $this->typeMapper = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
@@ -342,7 +342,7 @@ class FieldsBuilder
             $methodName = $refMethod->getName();
 
             if ($queryAnnotation instanceof Field) {
-                if (strpos($methodName, 'set') === 0) {
+                if (str_starts_with($methodName, 'set')) {
                     continue;
                 }
                 $for = $queryAnnotation->getFor();
@@ -673,12 +673,8 @@ class FieldsBuilder
         return $sourceRefClass->getMethod($magicGet);
     }
 
-    /**
-     * @param ReflectionClass<object> $refClass
-     *
-     * @return OutputType&Type
-     */
-    private function resolveOutputType(string $outputType, ReflectionClass $refClass, SourceFieldInterface $sourceField): OutputType
+    /** @param ReflectionClass<object> $refClass */
+    private function resolveOutputType(string $outputType, ReflectionClass $refClass, SourceFieldInterface $sourceField): OutputType&Type
     {
         try {
             return $this->typeResolver->mapNameToOutputType($outputType);
@@ -688,12 +684,8 @@ class FieldsBuilder
         }
     }
 
-    /**
-     * @param ReflectionClass<object> $refClass
-     *
-     * @return OutputType&Type
-     */
-    private function resolvePhpType(string $phpTypeStr, ReflectionClass $refClass, ReflectionMethod $refMethod): OutputType
+    /** @param ReflectionClass<object> $refClass */
+    private function resolvePhpType(string $phpTypeStr, ReflectionClass $refClass, ReflectionMethod $refMethod): OutputType&Type
     {
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
@@ -850,7 +842,7 @@ class FieldsBuilder
 
             $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
             $methodName = $refMethod->getName();
-            if (strpos($methodName, 'set') !== 0) {
+            if (! str_starts_with($methodName, 'set')) {
                 continue;
             }
             $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);

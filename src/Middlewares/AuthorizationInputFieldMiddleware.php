@@ -20,8 +20,8 @@ use function assert;
 class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
 {
     public function __construct(
-        private AuthenticationServiceInterface $authenticationService,
-        private AuthorizationServiceInterface $authorizationService,
+        private readonly AuthenticationServiceInterface $authenticationService,
+        private readonly AuthorizationServiceInterface $authorizationService,
     )
     {
     }

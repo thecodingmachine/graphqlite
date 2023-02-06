@@ -30,7 +30,7 @@ final class NS
     private array|null $classes = null;
 
     /** @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation) */
-    public function __construct(private string $namespace, private CacheInterface $cache, private ClassNameMapper $classNameMapper, private int|null $globTTL, private bool $recursive)
+    public function __construct(private readonly string $namespace, private readonly CacheInterface $cache, private readonly ClassNameMapper $classNameMapper, private readonly int|null $globTTL, private readonly bool $recursive)
     {
     }
 
@@ -44,8 +44,8 @@ final class NS
     {
         if ($this->classes === null) {
             $this->classes = [];
-            $explorer      = new GlobClassExplorer($this->namespace, $this->cache, $this->globTTL, $this->classNameMapper, $this->recursive);
-            $classes       = $explorer->getClassMap();
+            $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTTL, $this->classNameMapper, $this->recursive);
+            $classes = $explorer->getClassMap();
             foreach ($classes as $className => $phpFile) {
                 if (! class_exists($className, false) && ! interface_exists($className, false)) {
                     // Let's try to load the file if it was not imported yet.

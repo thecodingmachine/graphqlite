@@ -12,7 +12,7 @@ use Psr\Container\ContainerInterface;
  */
 class ContainerParameter implements ParameterInterface
 {
-    public function __construct(private ContainerInterface $container, private string $identifier)
+    public function __construct(private readonly ContainerInterface $container, private readonly string $identifier)
     {
     }
 

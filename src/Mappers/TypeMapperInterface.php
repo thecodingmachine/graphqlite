@@ -53,7 +53,7 @@ interface TypeMapperInterface
      *
      * @return NamedType&Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)
      */
-    public function mapNameToType(string $typeName): Type;
+    public function mapNameToType(string $typeName): Type&NamedType;
 
     /**
      * Returns the list of classes that have matching GraphQL types.

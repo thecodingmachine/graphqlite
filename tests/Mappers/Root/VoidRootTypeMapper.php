@@ -15,30 +15,18 @@ use ReflectionProperty;
 
 class VoidRootTypeMapper implements RootTypeMapperInterface
 {
-    /** @var RootTypeMapperInterface */
-    private $next;
-
-    public function __construct(RootTypeMapperInterface $next)
+    public function __construct(private readonly RootTypeMapperInterface $next)
     {
-        $this->next = $next;
     }
 
-    /**
-     * @param (OutputType&GraphQLType)|null $subType
-     *
-     * @return OutputType&GraphQLType
-     */
-    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    /** @param (OutputType&GraphQLType)|null $subType */
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
     {
         return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
-    /**
-     * @param (InputType&GraphQLType)|null $subType
-     *
-     * @return InputType&GraphQLType
-     */
-    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    /** @param (InputType&GraphQLType)|null $subType */
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType
     {
         return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
     }
@@ -50,7 +38,7 @@ class VoidRootTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType
+    public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
         return $this->next->mapNameToType($typeName);
     }

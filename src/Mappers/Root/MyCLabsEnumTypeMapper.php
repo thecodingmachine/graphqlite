@@ -35,17 +35,17 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     private array $cacheByName = [];
 
     /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
-    public function __construct(private RootTypeMapperInterface $next, private AnnotationReader $annotationReader, private CacheInterface $cacheService, private array $namespaces)
+    public function __construct(private readonly RootTypeMapperInterface $next, private readonly AnnotationReader $annotationReader, private readonly CacheInterface $cacheService, private readonly array $namespaces)
     {
     }
 
-    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&\GraphQL\Type\Definition\Type
     {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
-    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&\GraphQL\Type\Definition\Type
     {
         $result = $this->map($type);
         return $result ?? $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
@@ -102,7 +102,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType
+    public function mapNameToType(string $typeName): NamedType&\GraphQL\Type\Definition\Type
     {
         // This is a hack to make sure "$schema->assertValid()" returns true.
         // The mapNameToType will fail if the mapByClassName method was not called before.

@@ -26,7 +26,7 @@ use function is_array;
  */
 class SecurityFieldMiddleware implements FieldMiddlewareInterface
 {
-    public function __construct(private ExpressionLanguage $language, private AuthenticationServiceInterface $authenticationService, private AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
+    public function __construct(private readonly ExpressionLanguage $language, private readonly AuthenticationServiceInterface $authenticationService, private readonly AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
     {
         /*$this->logger = $logger;*/
     }

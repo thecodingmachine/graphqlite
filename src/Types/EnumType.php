@@ -18,7 +18,7 @@ use function is_string;
 class EnumType extends BaseEnumType
 {
     /** @param class-string<UnitEnum> $enumName */
-    public function __construct(string $enumName, string $typeName, private bool $useValues = false)
+    public function __construct(string $enumName, string $typeName, private readonly bool $useValues = false)
     {
         $values = [];
         foreach ($enumName::cases() as $case) {

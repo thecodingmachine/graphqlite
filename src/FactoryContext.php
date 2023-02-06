@@ -18,19 +18,19 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 final class FactoryContext
 {
     public function __construct(
-        private AnnotationReader $annotationReader,
-        private TypeResolver $typeResolver,
-        private NamingStrategyInterface $namingStrategy,
-        private TypeRegistry $typeRegistry,
-        private FieldsBuilder $fieldsBuilder,
-        private TypeGenerator $typeGenerator,
-        private InputTypeGenerator $inputTypeGenerator,
-        private RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private ContainerInterface $container,
-        private CacheInterface $cache,
-        private InputTypeValidatorInterface|null $inputTypeValidator,
-        private int|null $globTTL,
-        private int|null $mapTTL = null,
+        private readonly AnnotationReader $annotationReader,
+        private readonly TypeResolver $typeResolver,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly TypeRegistry $typeRegistry,
+        private readonly FieldsBuilder $fieldsBuilder,
+        private readonly TypeGenerator $typeGenerator,
+        private readonly InputTypeGenerator $inputTypeGenerator,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly ContainerInterface $container,
+        private readonly CacheInterface $cache,
+        private readonly InputTypeValidatorInterface|null $inputTypeValidator,
+        private readonly int|null $globTTL,
+        private readonly int|null $mapTTL = null,
     ) {
     }
 

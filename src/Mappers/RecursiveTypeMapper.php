@@ -341,11 +341,9 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
      * @param (OutputType&Type&NamedType)|null $subType A subtype (if the main className is an iterator)
      *
-     * @return OutputType&Type&NamedType
-     *
      * @throws CannotMapTypeExceptionInterface
      */
-    public function mapClassToInterfaceOrType(string $className, OutputType|null $subType): OutputType
+    public function mapClassToInterfaceOrType(string $className, OutputType|null $subType): OutputType&Type&NamedType
     {
         $closestClassName = $this->findClosestMatchingParent($className);
         if ($closestClassName === null) {
@@ -478,7 +476,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      *
      * @return NamedType&Type&(InputType|OutputType)
      */
-    public function mapNameToType(string $typeName): Type
+    public function mapNameToType(string $typeName): Type&NamedType
     {
         if ($this->typeRegistry->hasType($typeName)) {
             return $this->typeRegistry->getType($typeName);

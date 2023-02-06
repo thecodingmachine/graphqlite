@@ -39,7 +39,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         $this->next = $next;
     }
 
-    public function toGraphQLOutputType(Type $type, OutputType|GraphQLType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType
+    public function toGraphQLOutputType(Type $type, OutputType|GraphQLType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
@@ -65,7 +65,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         return $graphQlType;
     }
 
-    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType
+    public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType
     {
         // Let's check a "null" value in the docblock
         $isNullable = $this->isNullable($type);
@@ -99,7 +99,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
      *
      * @param string $typeName The name of the GraphQL type
      */
-    public function mapNameToType(string $typeName): NamedType
+    public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
         return $this->next->mapNameToType($typeName);
     }

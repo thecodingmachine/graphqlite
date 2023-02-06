@@ -19,15 +19,15 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 final class RootTypeMapperFactoryContext
 {
     public function __construct(
-        private AnnotationReader $annotationReader,
-        private TypeResolver $typeResolver,
-        private NamingStrategyInterface $namingStrategy,
-        private TypeRegistry $typeRegistry,
-        private RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private ContainerInterface $container,
-        private CacheInterface $cache,
-        private int|null $globTTL,
-        private int|null $mapTTL = null,
+        private readonly AnnotationReader $annotationReader,
+        private readonly TypeResolver $typeResolver,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly TypeRegistry $typeRegistry,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly ContainerInterface $container,
+        private readonly CacheInterface $cache,
+        private readonly int|null $globTTL,
+        private readonly int|null $mapTTL = null,
     ) {
     }
 

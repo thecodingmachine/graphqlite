@@ -37,7 +37,7 @@ use function is_object;
  * @phpstan-import-type ArgumentListConfig from FieldDefinition
  * @phpstan-import-type ComplexityFn from FieldDefinition
  */
-class QueryField extends FieldDefinition
+final class QueryField extends FieldDefinition
 {
     /**
      * @param OutputType&Type $type
