@@ -61,13 +61,6 @@ final class NS
                 }
 
                 $refClass = new ReflectionClass($className);
-                // Enum's are not classes
-                if (interface_exists(UnitEnum::class)) {
-                    // @phpstan-ignore-next-line - Remove this after minimum supported PHP version is >= 8.1
-                    if ($refClass->isEnum()) {
-                        continue;
-                    }
-                }
 
                 $this->classes[$className] = $refClass;
             }
