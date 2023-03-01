@@ -116,11 +116,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
 
         foreach ($classes as $className => $refClass) {
             // Enum's are not types
-            if (interface_exists(UnitEnum::class)) {
-                // @phpstan-ignore-next-line - Remove this after minimum supported PHP version is >= 8.1
-                if ($refClass->isEnum()) {
-                    continue;
-                }
+            if ($refClass->isEnum()) {
+                continue;
             }
             $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
                 $annotationsCache = new GlobAnnotationsCache();
@@ -195,11 +192,8 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         $classes = $this->getClassList();
         foreach ($classes as $refClass) {
             // Enum's are not types
-            if (interface_exists(UnitEnum::class)) {
-                // @phpstan-ignore-next-line - Remove this after minimum supported PHP version is >= 8.1
-                if ($refClass->isEnum()) {
-                    continue;
-                }
+            if ($refClass->isEnum()) {
+                continue;
             }
             $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function () use ($refClass) {
                 $extendAnnotationsCache = new GlobExtendAnnotationsCache();

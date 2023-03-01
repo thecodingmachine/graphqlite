@@ -1175,7 +1175,6 @@ class EndToEndTest extends TestCase
         $this->assertSame(['echoProductType' => 'NON_FOOD'], $this->getSuccessResult($result));
     }
 
-    /** @requires PHP >= 8.1 */
     public function testEndToEndMutationNativeEnums(): void
     {
         $schema = $this->mainContainer->get(Schema::class);
@@ -1232,7 +1231,6 @@ class EndToEndTest extends TestCase
         ], $this->getSuccessResult($result));
     }
 
-    /** @requires PHP >= 8.1 */
     public function testEndToEndNativeEnums(): void
     {
         $schema = $this->mainContainer->get(Schema::class);
