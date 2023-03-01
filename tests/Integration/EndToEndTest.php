@@ -1175,7 +1175,62 @@ class EndToEndTest extends TestCase
         $this->assertSame(['echoProductType' => 'NON_FOOD'], $this->getSuccessResult($result));
     }
 
-    /** @requires PHP >= 8.1 */
+    public function testEndToEndMutationNativeEnums(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $gql = '
+        mutation($size:Size!) {
+            singleEnum(size: $size)
+        }
+        ';
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql,
+            variableValues: [
+                'size' => Size::L->name,
+            ],
+        );
+
+        $this->assertSame([
+            'singleEnum' => 'L',
+        ], $this->getSuccessResult($result));
+    }
+
+    public function testEndToEndInputVars(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+            mutation ($contact: ContactInput!) {
+                saveContact(contact: $contact) {
+                    name,
+                    birthDate
+                }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            variableValues: [
+                'contact' => [
+                    'name' => "foo",
+                    'birthDate' => "1942-12-24T00:00:00+00:00"
+                ]
+            ]
+        );
+
+        $this->assertSame([
+            'saveContact' => [
+                'name' => 'foo',
+                'birthDate' => '1942-12-24T00:00:00+00:00'
+            ],
+        ], $this->getSuccessResult($result));
+    }
+
     public function testEndToEndNativeEnums(): void
     {
         $schema = $this->mainContainer->get(Schema::class);

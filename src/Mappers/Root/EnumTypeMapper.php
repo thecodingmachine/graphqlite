@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
@@ -94,12 +95,13 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /** @param class-string $enumClass */
     private function mapByClassName(string $enumClass): EnumType|null
     {
-        if (isset($this->cache[$enumClass])) {
-            return $this->cache[$enumClass];
-        }
-
         if (! enum_exists($enumClass)) {
             return null;
+        }
+        /** @var class-string<Enum> $enumClass */
+        $enumClass = ltrim($enumClass, '\\');
+        if (isset($this->cache[$enumClass])) {
+            return $this->cache[$enumClass];
         }
 
         // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
@@ -119,7 +121,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
         $type = new EnumType($enumClass, $typeName, $useValues);
 
-        return $this->cacheByName[$typeName] = $this->cache[$enumClass] = $type;
+        return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }
 
     private function getTypeName(ReflectionClass $reflectionClass): string
@@ -178,7 +180,6 @@ class EnumTypeMapper implements RootTypeMapperInterface
                 return $nameToClassMapping;
             });
         }
-
         return $this->nameToClassMapping;
     }
 }
