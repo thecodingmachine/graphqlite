@@ -10,8 +10,13 @@ use Throwable;
 class GraphQLException extends Exception implements GraphQLExceptionInterface
 {
     /** @param array<string, mixed> $extensions */
-    public function __construct(string $message, int $code = 0, Throwable|null $previous = null, private string $category = 'Exception', private array $extensions = [])
-    {
+    public function __construct(
+        string $message,
+        int $code = 0,
+        Throwable|null $previous = null,
+        protected string $category = 'Exception',
+        protected array $extensions = [],
+    ) {
         parent::__construct($message, $code, $previous);
     }
 
