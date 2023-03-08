@@ -30,15 +30,20 @@ final class NS
     private array|null $classes = null;
 
     /** @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation) */
-    public function __construct(private readonly string $namespace, private readonly CacheInterface $cache, private readonly ClassNameMapper $classNameMapper, private readonly int|null $globTTL, private readonly bool $recursive)
-    {
+    public function __construct(
+        private readonly string $namespace,
+        private readonly CacheInterface $cache,
+        private readonly ClassNameMapper $classNameMapper,
+        private readonly int|null $globTTL,
+        private readonly bool $recursive,
+    ) {
     }
 
     /**
      * Returns the array of globbed classes.
      * Only instantiable classes are returned.
      *
-     * @return array<string,ReflectionClass<object>> Key: fully qualified class name
+     * @return array<class-string,ReflectionClass<object>> Key: fully qualified class name
      */
     public function getClassList(): array
     {
