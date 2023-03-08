@@ -101,6 +101,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }
 
+
     private function getTypeName(ReflectionClass $refClass): string
     {
         $enumType = $this->annotationReader->getEnumTypeAnnotation($refClass);
@@ -165,6 +166,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
                             continue;
                         }
 
+                        /** @var class-string<Enum> $className */
                         $nameToClassMapping[$this->getTypeName($classRef)] = $className;
                     }
                 }
