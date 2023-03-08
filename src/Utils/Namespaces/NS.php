@@ -50,8 +50,8 @@ final class NS
         if ($this->classes === null) {
             $this->classes = [];
             $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->globTTL, $this->classNameMapper, $this->recursive);
+            /** @var array<class-string, string> $classes Override class-explorer lib */
             $classes = $explorer->getClassMap();
-            /** @var class-string $className */
             foreach ($classes as $className => $phpFile) {
                 if (! class_exists($className, false) && ! interface_exists($className, false)) {
                     // Let's try to load the file if it was not imported yet.
@@ -72,6 +72,7 @@ final class NS
             }
         }
 
+        // @phpstan-ignore-next-line - Not sure why we cannot annotate the $classes above
         return $this->classes;
     }
 
