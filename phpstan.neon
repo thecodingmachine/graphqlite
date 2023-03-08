@@ -11,6 +11,7 @@ parameters:
     level: 8
     checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
     ignoreErrors:
         - "#PHPDoc tag \\@throws with type Psr\\\\Container\\\\ContainerExceptionInterface is not subtype of Throwable#"
         - "#Parameter .* of class ReflectionMethod constructor expects string(\\|null)?, object\\|string given.#"

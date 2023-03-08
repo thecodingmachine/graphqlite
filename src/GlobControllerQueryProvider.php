@@ -30,7 +30,7 @@ use function str_replace;
  */
 final class GlobControllerQueryProvider implements QueryProviderInterface
 {
-    /** @var array<string,string>|null */
+    /** @var array<int,string>|null */
     private array|null $instancesList = null;
     private ClassNameMapper $classNameMapper;
     private AggregateControllerQueryProvider|null $aggregateControllerQueryProvider = null;
@@ -73,9 +73,11 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function getInstancesList(): array
     {
         if ($this->instancesList === null) {
-            $this->instancesList = $this->cacheContract->get('globQueryProvider', function () {
-                return $this->buildInstancesList();
-            });
+            $this->instancesList = $this->cacheContract->get(
+                'globQueryProvider',
+                fn () => $this->buildInstancesList(),
+            );
+
             if (! is_array($this->instancesList)) {
                 throw new InvalidArgumentException('The instance list returned is not an array. There might be an issue with your PSR-16 cache implementation.');
             }
