@@ -126,7 +126,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
             return null;
         }
         if ($type instanceof Nullable) {
-            return $type->getActualType();
+            return $this->getNonNullable($type->getActualType());
         }
         if ($type instanceof Compound) {
             $types = array_map([$this, 'getNonNullable'], iterator_to_array($type));
