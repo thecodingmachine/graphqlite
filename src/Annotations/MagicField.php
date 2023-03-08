@@ -46,8 +46,11 @@ class MagicField implements SourceFieldInterface
     /** @var array<string, ParameterAnnotations> */
     private $parameterAnnotations;
 
-    /** @param mixed[] $attributes */
-    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null)
+    /**
+     * @param mixed[] $attributes
+     * @param array<MiddlewareAnnotationInterface|ParameterAnnotationInterface> $annotations
+     */
+    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null, array $annotations = [])
     {
         $this->name = $attributes['name'] ?? $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
@@ -63,7 +66,7 @@ class MagicField implements SourceFieldInterface
         }
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
-        $annotations = $attributes['annotations'] ?? [];
+        $annotations = $annotations ?: $attributes['annotations'] ?? [];
         if (! is_array($annotations)) {
             $annotations = [$annotations];
         }

@@ -29,7 +29,16 @@ class MagicFieldTest extends TestCase
     public function testAnnotations(): void
     {
         $magicField = new MagicField(['name'=>'test', 'outputType'=>'String!', 'annotations'=>[new Logged(), new Autowire(['for'=>'foo'])]]);
+
         $this->assertNotEmpty($magicField->getMiddlewareAnnotations()->getAnnotationsByType(Logged::class));
         $this->assertNotEmpty($magicField->getParameterAnnotations()['foo']->getAnnotationsByType(Autowire::class));
     }
+
+	public function testAnnotationsFromParameter(): void
+	{
+		$magicField = new MagicField(name: 'test', outputType: 'String!', annotations: [new Logged(), new Autowire(['for'=>'foo'])]);
+
+		$this->assertNotEmpty($magicField->getMiddlewareAnnotations()->getAnnotationsByType(Logged::class));
+		$this->assertNotEmpty($magicField->getParameterAnnotations()['foo']->getAnnotationsByType(Autowire::class));
+	}
 }
