@@ -20,9 +20,9 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 {
-	/**
-	 * @dataProvider nullableVariationsProvider
-	 */
+    /**
+     * @dataProvider nullableVariationsProvider
+     */
     public function testMultipleCompound(callable $type): void
     {
         $compoundTypeMapper = $this->getRootTypeMapper();
@@ -31,16 +31,16 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
         $this->assertNotInstanceOf(NonNull::class, $result);
     }
 
-	public function nullableVariationsProvider(): Generator
-	{
-		yield 'php documentor generated from phpdoc' => [
-			fn () => $this->resolveType(TestObject::class.'|'.TestObject2::class.'|null'),
-		];
+    public function nullableVariationsProvider(): Generator
+    {
+        yield 'php documentor generated from phpdoc' => [
+            fn () => $this->resolveType(TestObject::class . '|' . TestObject2::class . '|null'),
+        ];
 
-		yield 'type handler nullable wrapped native reflection union type' => [
-			fn () => new Nullable($this->resolveType(TestObject::class.'|'.TestObject2::class.'|null')),
-		];
-	}
+        yield 'type handler nullable wrapped native reflection union type' => [
+            fn () => new Nullable($this->resolveType(TestObject::class . '|' . TestObject2::class . '|null')),
+        ];
+    }
 
     public function testOnlyNull(): void
     {
@@ -85,6 +85,6 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('a type mapper returned a GraphQL\\Type\\Definition\\NonNull instance.');
-        $typeMapper->toGraphQLOutputType($this->resolveType(TestObject::class.'|'.TestObject2::class.'|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
+        $typeMapper->toGraphQLOutputType($this->resolveType(TestObject::class . '|' . TestObject2::class . '|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 }
