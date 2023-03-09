@@ -12,7 +12,6 @@ use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
-use TheCodingMachine\GraphQLite\QueryField;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -39,8 +38,19 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
         assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
+        // Avoid wrapping resolver callback when no annotations are specified.
+        if (! $loggedAnnotation && ! $rightAnnotation) {
+            return $fieldHandler->handle($queryFieldDescriptor);
+        }
+
         $failWith = $annotations->getAnnotationByType(FailWith::class);
         assert($failWith === null || $failWith instanceof FailWith);
+        $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
+        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
+
+        if ($failWith !== null && $hideIfUnauthorized !== null) {
+            throw IncompatibleAnnotationsException::cannotUseFailWithAndHide();
+        }
 
         // If the failWith value is null and the return type is non-nullable, we must set it to nullable.
         $type = $queryFieldDescriptor->getType();
@@ -50,28 +60,32 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
             $queryFieldDescriptor->setType($type);
         }
 
-        if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
-            return $fieldHandler->handle($queryFieldDescriptor);
-        }
-
-        $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
-        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
-
-        if ($failWith !== null && $hideIfUnauthorized !== null) {
-            throw IncompatibleAnnotationsException::cannotUseFailWithAndHide();
-        }
-
-        if ($failWith !== null) {
-            $failWithValue = $failWith->getValue();
-
-            return QueryField::alwaysReturn($queryFieldDescriptor, $failWithValue);
-        }
-
-        if ($hideIfUnauthorized !== null) {
+        // When using the same Schema instance for multiple subsequent requests, this middleware will only
+        // get called once, meaning #[HideIfUnauthorized] only works when Schema is used for a single request
+        // and then discarded. This check is to keep the latter case working.
+        if ($hideIfUnauthorized !== null && ! $this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
             return null;
         }
 
-        return QueryField::unauthorizedError($queryFieldDescriptor, $loggedAnnotation !== null && ! $this->authenticationService->isLogged());
+        $resolver = $queryFieldDescriptor->getResolver();
+
+        $queryFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
+            if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
+                return $resolver(...$args);
+            }
+
+            if ($failWith !== null) {
+                return $failWith->getValue();
+            }
+
+            if ($loggedAnnotation !== null && ! $this->authenticationService->isLogged()) {
+                throw MissingAuthorizationException::unauthorized();
+            }
+
+            throw MissingAuthorizationException::forbidden();
+        });
+
+        return $fieldHandler->handle($queryFieldDescriptor);
     }
 
     /**

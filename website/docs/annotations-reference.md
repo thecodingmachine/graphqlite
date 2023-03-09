@@ -150,6 +150,10 @@ value          | *yes*       | mixed | The value to return if the user is not au
 
 ## @HideIfUnauthorized
 
+<div class="alert alert--warning">This annotation only works when a Schema is used to handle exactly one use request. 
+If you serve your GraphQL API from long-running standalone servers (like Laravel Octane, Swoole, RoadRunner etc) and 
+share the same Schema instance between multiple requests, please avoid using @HideIfUnauthorized.</div>
+
 The `@HideIfUnauthorized` annotation is used to completely hide the query / mutation / field if the user is not authorized
 to access it (according to the `@Logged` and `@Right` annotations).
 
