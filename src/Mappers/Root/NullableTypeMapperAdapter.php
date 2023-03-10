@@ -15,6 +15,7 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Nullable;
+use phpDocumentor\Reflection\Types\Void_;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
@@ -106,9 +107,14 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
 
     private function isNullable(Type $docBlockTypeHint): bool
     {
-        if ($docBlockTypeHint instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
+        if (
+            $docBlockTypeHint instanceof Null_ ||
+            $docBlockTypeHint instanceof Nullable ||
+            $docBlockTypeHint instanceof Void_
+        ) {
             return true;
         }
+
         if ($docBlockTypeHint instanceof Compound) {
             foreach ($docBlockTypeHint as $type) {
                 if ($this->isNullable($type)) {

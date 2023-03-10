@@ -27,12 +27,14 @@ use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
+use phpDocumentor\Reflection\Types\Void_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Types;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
 
@@ -130,10 +132,10 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return match ($fqcn) {
                  '\\' . DateTimeImmutable::class,
                  '\\' . DateTimeInterface::class=>
-                     self::getDateTimeType(),
+                     Types::dateTime(),
 
                  '\\' . UploadedFileInterface::class=>
-                     self::getUploadType(),
+                     Types::upload(),
 
                  '\\' . DateTime::class=>
                     throw CannotMapTypeException::createForDateTime(),
@@ -146,29 +148,11 @@ class BaseTypeMapper implements RootTypeMapperInterface
             };
         }
 
+        if ($type instanceof Void_) {
+            return Types::void();
+        }
+
         return null;
-    }
-
-    private static UploadType|null $uploadType = null;
-
-    private static function getUploadType(): UploadType
-    {
-        if (self::$uploadType === null) {
-            self::$uploadType = new UploadType();
-        }
-
-        return self::$uploadType;
-    }
-
-    private static DateTimeType|null $dateTimeType = null;
-
-    private static function getDateTimeType(): DateTimeType
-    {
-        if (self::$dateTimeType === null) {
-            self::$dateTimeType = new DateTimeType();
-        }
-
-        return self::$dateTimeType;
     }
 
     /**
@@ -182,9 +166,10 @@ class BaseTypeMapper implements RootTypeMapperInterface
     {
         // No need to map base types, only types added by us.
         return match ($typeName) {
-            'Upload'=>self::getUploadType(),
-            'DateTime'=>self::getDateTimeType(),
-            default=>$this->next->mapNameToType($typeName)
+            'Upload' => Types::upload(),
+            'DateTime' => Types::dateTime(),
+            'Void' => Types::void(),
+            default => $this->next->mapNameToType($typeName)
         };
     }
 }

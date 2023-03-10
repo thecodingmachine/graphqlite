@@ -2467,4 +2467,28 @@ class EndToEndTest extends TestCase
         $data = $this->getSuccessResult($result);
         $this->assertSame(['graph', 'ql'], $data['updateTrickyProduct']['list']);
     }
+
+    public function testEndToEndVoidResult(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $gql = '
+            mutation($id: ID!) {
+                deleteButton(id: $id)
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql,
+            variableValues: [
+                'id' => 123,
+            ],
+        );
+
+        self::assertSame([
+            'deleteButton' => null,
+        ], $this->getSuccessResult($result));
+    }
 }
