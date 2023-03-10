@@ -15,7 +15,6 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Nullable;
-use phpDocumentor\Reflection\Types\Void_;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
@@ -28,16 +27,14 @@ use function count;
 use function iterator_to_array;
 
 /**
- * This root type mapper is the very first type mapper that must be called.
- * It handles the "compound" types and is in charge of creating Union Types and detecting subTypes (for arrays)
+ * This root type mapper wraps types as "non nullable" if the corresponding PHPDoc type doesn't allow null.
  */
 class NullableTypeMapperAdapter implements RootTypeMapperInterface
 {
-    private RootTypeMapperInterface $next;
-
-    public function setNext(RootTypeMapperInterface $next): void
+    public function __construct(
+        private readonly RootTypeMapperInterface $next,
+    )
     {
-        $this->next = $next;
     }
 
     public function toGraphQLOutputType(Type $type, OutputType|GraphQLType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
@@ -107,11 +104,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
 
     private function isNullable(Type $docBlockTypeHint): bool
     {
-        if (
-            $docBlockTypeHint instanceof Null_ ||
-            $docBlockTypeHint instanceof Nullable ||
-            $docBlockTypeHint instanceof Void_
-        ) {
+        if ($docBlockTypeHint instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
             return true;
         }
 

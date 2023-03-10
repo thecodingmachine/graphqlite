@@ -27,7 +27,6 @@ use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
-use phpDocumentor\Reflection\Types\Void_;
 use Psr\Http\Message\UploadedFileInterface;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -148,10 +147,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
             };
         }
 
-        if ($type instanceof Void_) {
-            return Types::void();
-        }
-
         return null;
     }
 
@@ -168,7 +163,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return match ($typeName) {
             'Upload' => Types::upload(),
             'DateTime' => Types::dateTime(),
-            'Void' => Types::void(),
             default => $this->next->mapNameToType($typeName)
         };
     }
