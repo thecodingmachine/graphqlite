@@ -66,8 +66,7 @@ class TypeHandler implements ParameterHandlerInterface
         private readonly ArgumentResolver $argumentResolver,
         private readonly RootTypeMapperInterface $rootTypeMapper,
         private readonly TypeResolver $typeResolver,
-    )
-    {
+    ) {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
     }
 
@@ -160,7 +159,7 @@ class TypeHandler implements ParameterHandlerInterface
             if ($parameterType === null) {
                 $phpdocType = new Mixed_();
                 $allowsNull = false;
-                //throw MissingTypeHintException::missingTypeHint($parameter);
+            // throw MissingTypeHintException::missingTypeHint($parameter);
             } else {
                 $declaringClass = $parameter->getDeclaringClass();
                 assert($declaringClass !== null);
@@ -214,8 +213,7 @@ class TypeHandler implements ParameterHandlerInterface
         bool $toInput,
         string|null $argumentName = null,
         bool|null $isNullable = null,
-    ): GraphQLType
-    {
+    ): GraphQLType {
         $propertyType = $refProperty->getType();
         if ($propertyType !== null) {
             $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
@@ -252,8 +250,7 @@ class TypeHandler implements ParameterHandlerInterface
         string|null $inputTypeName = null,
         mixed $defaultValue = null,
         bool|null $isNullable = null,
-    ): InputTypeProperty
-    {
+    ): InputTypeProperty {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
         /** @var Var_[] $varTags */
@@ -310,8 +307,7 @@ class TypeHandler implements ParameterHandlerInterface
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
         string|null $argumentName = null,
-    ): GraphQLType
-    {
+    ): GraphQLType {
         $graphQlType = null;
         if ($isNullable && ! $type instanceof Nullable) {
             // In case a parameter has a default value, let's wrap the main type in a nullable
@@ -320,14 +316,15 @@ class TypeHandler implements ParameterHandlerInterface
         $innerType = $type instanceof Nullable ? $type->getActualType() : $type;
 
         if (
-            $innerType instanceof Array_
-            || $innerType instanceof Iterable_
-            || $innerType instanceof Mixed_
+            $innerType instanceof Array_ ||
+            $innerType instanceof Iterable_ ||
+            $innerType instanceof Mixed_ ||
             // Try to match generic phpdoc-provided iterables with non-generic return-type-provided iterables
             // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
-            || ($innerType instanceof Object_
-                && $docBlockType instanceof Collection
-                && (string) $innerType->getFqsen() === (string) $docBlockType->getFqsen()
+            (
+                $innerType instanceof Object_ &&
+                $docBlockType instanceof Collection &&
+                (string) $innerType->getFqsen() === (string) $docBlockType->getFqsen()
             )
         ) {
             // We need to use the docBlockType
@@ -410,6 +407,7 @@ class TypeHandler implements ParameterHandlerInterface
 
             return $phpdocType;
         }
+
         return new Compound(
             array_map(
                 function ($namedType) use ($reflectionClass): Type {
@@ -422,6 +420,7 @@ class TypeHandler implements ParameterHandlerInterface
                     if ($namedType->allowsNull()) {
                         $phpdocType = new Nullable($phpdocType);
                     }
+
                     return $phpdocType;
                 },
                 $type->getTypes(),

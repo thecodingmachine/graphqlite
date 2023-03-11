@@ -73,7 +73,6 @@ class SchemaFactory
 {
     public const GLOB_CACHE_SECONDS = 2;
 
-
     /** @var array<int,string> */
     private array $controllerNamespaces = [];
 
@@ -97,21 +96,13 @@ class SchemaFactory
 
     /** @var ParameterMiddlewareInterface[] */
     private array $parameterMiddlewares = [];
-
     private Reader|null $doctrineAnnotationReader = null;
-
     private AuthenticationServiceInterface|null $authenticationService = null;
-
     private AuthorizationServiceInterface|null $authorizationService = null;
-
     private InputTypeValidatorInterface|null $inputTypeValidator = null;
-
     private NamingStrategyInterface|null $namingStrategy = null;
-
     private ClassNameMapper|null $classNameMapper = null;
-
     private SchemaConfig|null $schemaConfig = null;
-
     private int|null $globTTL = self::GLOB_CACHE_SECONDS;
 
     /** @var array<int, FieldMiddlewareInterface> */
@@ -119,9 +110,7 @@ class SchemaFactory
 
     /** @var array<int, InputFieldMiddlewareInterface> */
     private array $inputFieldMiddlewares = [];
-
     private ExpressionLanguage|null $expressionLanguage = null;
-
     private string $cacheNamespace;
 
     public function __construct(private CacheInterface $cache, private ContainerInterface $container)
@@ -338,15 +327,15 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $symfonyCache           = new Psr16Adapter($this->cache, $this->cacheNamespace);
-        $annotationReader       = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
-        $authenticationService  = $this->authenticationService ?: new FailAuthenticationService();
-        $authorizationService   = $this->authorizationService ?: new FailAuthorizationService();
-        $typeResolver           = new TypeResolver();
-        $namespacedCache        = new NamespacedCache($this->cache);
-        $cachedDocBlockFactory  = new CachedDocBlockFactory($namespacedCache);
-        $namingStrategy         = $this->namingStrategy ?: new NamingStrategy();
-        $typeRegistry           = new TypeRegistry();
+        $symfonyCache = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
+        $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
+        $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver = new TypeResolver();
+        $namespacedCache = new NamespacedCache($this->cache);
+        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
+        $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry = new TypeRegistry();
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
@@ -435,8 +424,8 @@ class SchemaFactory
             $inputFieldMiddlewarePipe,
         );
 
-        $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
-        $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
+        $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
         foreach ($nsList as $ns) {

@@ -33,8 +33,10 @@ use const JSON_ERROR_NONE;
 final class WebonyxGraphqlMiddleware implements MiddlewareInterface
 {
     private StandardServer $standardServer;
+
     /** @var array<int,string> */
     private array $graphqlHeaderList = ['application/graphql'];
+
     /** @var array<int,string> */
     private array $allowedMethods = [
         'GET',
@@ -48,8 +50,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         private readonly HttpCodeDeciderInterface $httpCodeDecider,
         private readonly string $graphqlUri = '/graphql',
         StandardServer|null $handler = null,
-    )
-    {
+    ) {
         $this->standardServer = $handler ?? new StandardServer($config);
     }
 
@@ -76,7 +77,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
             $context->reset();
         }
         $result = $this->standardServer->executePsrRequest($request);
-        //return $this->standardServer->processPsrRequest($request, $this->responseFactory->createResponse(), $this->streamFactory->createStream());
+        // return $this->standardServer->processPsrRequest($request, $this->responseFactory->createResponse(), $this->streamFactory->createStream());
 
         return $this->getJsonResponse($this->processResult($result), $this->decideHttpCode($result));
     }
@@ -128,7 +129,6 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         }
 
         throw new RuntimeException('Unexpected response from StandardServer::executePsrRequest');
-
         // @codeCoverageIgnoreEnd
     }
 
@@ -175,6 +175,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         }
 
         $stream = $this->streamFactory->createStream($data);
+
         return $response->withBody($stream)
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($statusCode);

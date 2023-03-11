@@ -51,6 +51,7 @@ final class MagicPropertyResolver implements SourceResolverInterface
     public function toString(): string
     {
         $class = $this->getObject()::class;
+
         return $class . '::__get(\'' . $this->propertyName . '\')';
     }
 }

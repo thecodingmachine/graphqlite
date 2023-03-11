@@ -32,7 +32,7 @@ class PrefetchBuffer
     }
 
     /**
-     * @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field.
+     * @param array<int,mixed> $arguments the input arguments passed from GraphQL to the field
      *
      * @return array<int, object>
      */

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -14,7 +13,6 @@ class TestDoubleReturnTag
     /**
      * @Field()
      * @return string
-     * @return array
      */
     public function test(): array
     {

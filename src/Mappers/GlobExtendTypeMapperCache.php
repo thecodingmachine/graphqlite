@@ -7,12 +7,13 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use ReflectionClass;
 
 /**
- * The cached results of a GlobTypeMapper
+ * The cached results of a GlobTypeMapper.
  */
 class GlobExtendTypeMapperCache
 {
     /** @var array<string,array<string,string>> Maps a domain class to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN */
     private array $mapClassToExtendTypeArray = [];
+
     /** @var array<string,array<string,string>> Maps a GraphQL type name to one or many type extenders (with the @ExtendType annotation) The array of type extenders has a key and value equals to FQCN */
     private array $mapNameToExtendType = [];
 

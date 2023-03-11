@@ -7,12 +7,9 @@ use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
-use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputA;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputB;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
@@ -105,7 +102,8 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->expectExceptionMessage("Input type 'TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar' cannot be a decorator.");
 
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
-        $input->decorate(function () {});
+        $input->decorate(function () {
+        });
     }
 
     public function testResolvesCorrectlyWithRequiredConstructParam(): void
@@ -140,7 +138,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         /** @var TestOnlyConstruct $result */
         $result = $input->resolve(null, $args, [], $resolveInfo);
 
-        $this->assertEquals(false, $result->getBaz());
+        $this->assertFalse($result->getBaz());
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
     }
@@ -160,7 +158,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $input->freeze();
         $fields = $input->getFields();
 
-        $date = "2022-05-02T04:42:30Z";
+        $date = '2022-05-02T04:42:30Z';
 
         $args = [
             'date' => $date,
@@ -173,7 +171,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         /** @var TestConstructorAndProperties $result */
         $result = $input->resolve(null, $args, [], $resolveInfo);
 
-        $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
+        $this->assertEquals(new DateTime('2022-05-02T04:42:30Z'), $result->getDate());
         $this->assertEquals('Foo', $result->getFoo());
         $this->assertEquals(200, $result->getBar());
     }
@@ -236,5 +234,4 @@ class InputTypeTest extends AbstractQueryProviderTest
         $fields = $input->getFields();
         $this->assertInstanceOf(NonNull::class, $fields['bar']->getType());
     }
-
 }

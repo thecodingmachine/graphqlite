@@ -26,22 +26,17 @@ use function is_array;
 class SourceField implements SourceFieldInterface
 {
     private string $name;
-
     private string|null $outputType = null;
-
     private string|null $phpType = null;
-
     private string|null $description = null;
-
     private string|null $sourceName;
-
     private MiddlewareAnnotations $middlewareAnnotations;
 
     /** @var array<string, ParameterAnnotations> */
     private array $parameterAnnotations;
 
     /**
-     * @param mixed[] $attributes
+     * @param mixed[]                                                           $attributes
      * @param array<MiddlewareAnnotationInterface|ParameterAnnotationInterface> $annotations
      */
     public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null, array $annotations = [])
@@ -112,7 +107,7 @@ class SourceField implements SourceFieldInterface
     }
 
     /**
-     * Returns the property name in the source class
+     * Returns the property name in the source class.
      */
     public function getSourceName(): string|null
     {

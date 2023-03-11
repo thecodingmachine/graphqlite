@@ -1,11 +1,7 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
-
-use DateTimeInterface;
-use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -18,23 +14,17 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class Product
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
-    /**
-     * @var float
-     */
+
+    /** @var float */
     private $price;
-    /**
-     * @var ProductTypeEnum
-     */
+
+    /** @var ProductTypeEnum */
     private $type;
 
     /**
      * Product constructor.
-     * @param string $name
-     * @param float $price
      */
     public function __construct(string $name, float $price, ProductTypeEnum $type = null)
     {
@@ -45,7 +35,6 @@ class Product
 
     /**
      * @Field(name="name")
-     * @return string
      */
     public function getName(): string
     {
@@ -54,7 +43,6 @@ class Product
 
     /**
      * @Field()
-     * @return float
      */
     public function getPrice(): float
     {
@@ -65,16 +53,12 @@ class Product
      * @Field()
      * @Right("YOU_DONT_HAVE_THIS_RIGHT")
      * @FailWith(null)
-     * @return string
      */
     public function getUnauthorized(): string
     {
         return 'You are not allowed to see this';
     }
 
-    /**
-     * @return ProductTypeEnum
-     */
     public function getType(): ProductTypeEnum
     {
         return $this->type;
@@ -82,7 +66,6 @@ class Product
 
     /**
      * @Factory()
-     * @return Product
      */
     public static function create(string $name, float $price, ProductTypeEnum $type = null): self
     {

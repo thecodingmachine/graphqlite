@@ -18,12 +18,12 @@ final class Next implements FieldHandlerInterface
     /**
      * Clones the queue provided to allow re-use.
      *
-     * @param FieldHandlerInterface $fallbackHandler Fallback handler to
-     *     invoke when the queue is exhausted.
+     * @param FieldHandlerInterface $fallbackHandler fallback handler to
+     *                                               invoke when the queue is exhausted
      */
     public function __construct(SplQueue $queue, private readonly FieldHandlerInterface $fallbackHandler)
     {
-        $this->queue           = clone $queue;
+        $this->queue = clone $queue;
     }
 
     public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null

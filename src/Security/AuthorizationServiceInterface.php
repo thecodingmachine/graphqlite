@@ -8,7 +8,7 @@ namespace TheCodingMachine\GraphQLite\Security;
 interface AuthorizationServiceInterface
 {
     /**
-     * Returns true if the "current" user has access to the right "$right"
+     * Returns true if the "current" user has access to the right "$right".
      *
      * @param mixed $subject The scope this right applies on. $subject is typically an object or a FQCN. Set $subject to "null" if the right is global.
      */

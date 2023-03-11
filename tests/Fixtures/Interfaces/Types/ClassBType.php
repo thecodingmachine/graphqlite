@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
@@ -13,5 +12,4 @@ use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB;
  */
 class ClassBType
 {
-
 }

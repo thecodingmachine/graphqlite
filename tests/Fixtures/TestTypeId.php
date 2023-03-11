@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use TheCodingMachine\GraphQLite\Annotations\SourceField;

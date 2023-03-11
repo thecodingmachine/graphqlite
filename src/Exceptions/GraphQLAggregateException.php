@@ -48,7 +48,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     }
 
     /**
-     * By convention, the aggregated code is the highest code of all exceptions
+     * By convention, the aggregated code is the highest code of all exceptions.
      */
     private function updateCode(): void
     {
@@ -61,7 +61,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     /**
      * Throw the exceptions passed in parameter.
      * If only one exception is passed, it is thrown.
-     * If many exceptions are passed, they are bundled in the GraphQLAggregateException
+     * If many exceptions are passed, they are bundled in the GraphQLAggregateException.
      *
      * @param (ClientAware&Throwable)[] $exceptions
      *

@@ -48,6 +48,7 @@ final class SourcePropertyResolver implements SourceResolverInterface
     public function toString(): string
     {
         $class = $this->getObject()::class;
+
         return $class . '::' . $this->propertyName;
     }
 }

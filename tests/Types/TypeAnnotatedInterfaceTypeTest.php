@@ -8,7 +8,6 @@ use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 
 class TypeAnnotatedInterfaceTypeTest extends AbstractQueryProviderTest
 {
-
     public function testResolveTypeException()
     {
         $typeAnnotatedInterfaceType = new TypeAnnotatedInterfaceType('Foo', [], $this->getTypeMapper());

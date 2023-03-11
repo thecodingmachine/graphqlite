@@ -7,14 +7,13 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 abstract class AbstractRequest
 {
     private string|null $outputType;
-
     private string|null $name;
 
     /** @param mixed[] $attributes */
     public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null)
     {
         $this->outputType = $outputType ?? $attributes['outputType'] ?? null;
-        $this->name       = $name ?? $attributes['name'] ?? null;
+        $this->name = $name ?? $attributes['name'] ?? null;
     }
 
     /**

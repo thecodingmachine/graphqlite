@@ -7,7 +7,6 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
 class InputTypeUtilsTest extends AbstractQueryProviderTest
 {
-
     public function testNoReturnType(): void
     {
         $inputTypeGenerator = $this->getInputTypeUtils();
@@ -37,7 +36,6 @@ class InputTypeUtilsTest extends AbstractQueryProviderTest
 
     public function factoryNoReturnType()
     {
-        
     }
 
     public function factoryStringReturnType(): string
@@ -49,5 +47,4 @@ class InputTypeUtilsTest extends AbstractQueryProviderTest
     {
         return null;
     }
-
 }

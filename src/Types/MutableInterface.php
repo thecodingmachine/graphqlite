@@ -16,7 +16,7 @@ interface MutableInterface
 {
     // In pending state, we can still add fields.
     public const STATUS_PENDING = 'pending';
-    public const STATUS_FROZEN  = 'frozen';
+    public const STATUS_FROZEN = 'frozen';
 
     public function freeze(): void;
 

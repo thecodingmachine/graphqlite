@@ -14,7 +14,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 /**
- * Maps a PHP class to a GraphQL type
+ * Maps a PHP class to a GraphQL type.
  *
  * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */
@@ -23,15 +23,15 @@ interface TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
+     * @param class-string<object> $className the exact class name to look for (this function does not look into parent classes)
      */
     public function canMapClassToType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param class-string<object> $className the exact class name to look for (this function does not look into parent classes)
+     * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed
      *
      * @return MutableObjectType|MutableInterfaceType
      *
@@ -47,7 +47,7 @@ interface TypeMapperInterface
     public function canMapNameToType(string $typeName): bool;
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *
@@ -79,7 +79,7 @@ interface TypeMapperInterface
     public function mapClassToInputType(string $className): ResolvableMutableInputInterface;
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $className FQCN
+     * Returns true if this type mapper can extend an existing type for the $className FQCN.
      *
      * @param class-string<object> $className
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
@@ -97,7 +97,7 @@ interface TypeMapperInterface
     public function extendTypeForClass(string $className, MutableInterface $type): void;
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -113,7 +113,7 @@ interface TypeMapperInterface
     public function extendTypeForName(string $typeName, MutableInterface $type): void;
 
     /**
-     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type.
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool;
 

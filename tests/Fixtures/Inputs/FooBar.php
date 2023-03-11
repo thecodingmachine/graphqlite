@@ -11,7 +11,6 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
  */
 class FooBar
 {
-
     /**
      * Foo comment.
      *
@@ -36,9 +35,6 @@ class FooBar
 
     /**
      * FooBar constructor.
-     *
-     * @param string      $foo
-     * @param string|null $bar
      */
     public function __construct(string $foo, ?string $bar = 'test')
     {

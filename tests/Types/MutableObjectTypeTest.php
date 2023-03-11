@@ -8,17 +8,15 @@ use RuntimeException;
 
 class MutableObjectTypeTest extends TestCase
 {
-    /**
-     * @var MutableObjectType
-     */
+    /** @var MutableObjectType */
     private $type;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->type = new MutableObjectType([
-            'name'    => 'TestObject',
-            'fields'  => [
-                'test'   => Type::string(),
+            'name' => 'TestObject',
+            'fields' => [
+                'test' => Type::string(),
             ],
         ]);
     }
@@ -32,15 +30,15 @@ class MutableObjectTypeTest extends TestCase
 
     public function testAddFields(): void
     {
-        $this->type->addFields(function() {
+        $this->type->addFields(function () {
             return [
-                'test'   => Type::int(),
-                'test2'   => Type::string(),
+                'test' => Type::int(),
+                'test2' => Type::string(),
             ];
         });
-        $this->type->addFields(function() {
+        $this->type->addFields(function () {
             return [
-                'test3'   => Type::int(),
+                'test3' => Type::int(),
             ];
         });
         $this->type->freeze();
@@ -84,14 +82,15 @@ class MutableObjectTypeTest extends TestCase
     {
         $this->type->freeze();
         $this->expectException(RuntimeException::class);
-        $this->type->addFields(function() {});
+        $this->type->addFields(function () {
+        });
     }
 
     public function testNoFieldsType(): void
     {
         $type = new MutableObjectType([
-            'name'    => 'TestObject',
-            'fields'  => [],
+            'name' => 'TestObject',
+            'fields' => [],
         ]);
         $type->freeze();
         $this->expectException(NoFieldsException::class);

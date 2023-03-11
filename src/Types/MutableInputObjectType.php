@@ -15,7 +15,7 @@ use function is_string;
 
 /**
  * An input object type built from the Factory annotation.
- * It can be later extended with the "Decorate" annotation
+ * It can be later extended with the "Decorate" annotation.
  *
  * @phpstan-import-type InputObjectConfig from InputObjectType
  * @phpstan-import-type ArgumentType from InputObjectField
@@ -25,8 +25,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
 {
     // In pending state, we can still add fields.
     public const STATUS_PENDING = 'pending';
-    public const STATUS_FROZEN  = 'frozen';
-
+    public const STATUS_FROZEN = 'frozen';
     protected string $status;
 
     /** @var array<callable> */

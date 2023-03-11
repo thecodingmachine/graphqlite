@@ -22,8 +22,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
     public function __construct(
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly AuthorizationServiceInterface $authorizationService,
-    )
-    {
+    ) {
     }
 
     /** @throws MissingAuthorizationException */
@@ -46,6 +45,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         if ($hideIfUnauthorized !== null) {
             return null;
         }
+
         return InputField::unauthorizedError($inputFieldDescriptor, $loggedAnnotation !== null && ! $this->authenticationService->isLogged());
     }
 

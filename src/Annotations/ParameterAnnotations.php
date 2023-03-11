@@ -9,7 +9,7 @@ use function array_pop;
 use function count;
 
 /**
- * A list of annotations that implement the ParameterAnnotation interface
+ * A list of annotations that implement the ParameterAnnotation interface.
  */
 class ParameterAnnotations
 {
@@ -19,7 +19,7 @@ class ParameterAnnotations
     }
 
     /**
-     * Return annotations of the $className type
+     * Return annotations of the $className type.
      *
      * @param class-string<T> $className
      *
@@ -64,7 +64,7 @@ class ParameterAnnotations
         return $this->annotations;
     }
 
-    public function merge(ParameterAnnotations $parameterAnnotations): void
+    public function merge(self $parameterAnnotations): void
     {
         $this->annotations = [...$this->annotations, ...$parameterAnnotations->annotations];
     }

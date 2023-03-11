@@ -65,8 +65,6 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     /**
      * @param Type[] $unionTypes
-     *
-     * @return CannotMapTypeException
      */
     public static function createForBadTypeInUnion(array $unionTypes): self
     {
@@ -95,8 +93,6 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     /**
      * @param class-string<object> $className
      * @param NamedType&(ObjectType|InterfaceType) $type
-     *
-     * @return CannotMapTypeException
      */
     public static function createForExtendType(string $className, NamedType $type): self
     {
@@ -105,8 +101,6 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
 
     /**
      * @param NamedType&(ObjectType|InterfaceType) $type
-     *
-     * @return CannotMapTypeException
      */
     public static function createForExtendName(string $name, NamedType $type): self
     {

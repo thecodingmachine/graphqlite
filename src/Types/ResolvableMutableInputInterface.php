@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * A GraphQL input object that can be resolved
+ * A GraphQL input object that can be resolved.
  */
 interface ResolvableMutableInputInterface extends MutableInputInterface
 {
@@ -15,7 +15,6 @@ interface ResolvableMutableInputInterface extends MutableInputInterface
      * Resolves the arguments into an object.
      *
      * @param mixed[] $args
-     * @param mixed   $context
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */

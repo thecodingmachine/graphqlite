@@ -20,22 +20,20 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactOtherType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
+use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
-
 
 class SchemaFactoryTest extends TestCase
 {
-
     public function testCreateSchema(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
@@ -170,7 +168,6 @@ class SchemaFactoryTest extends TestCase
 
     private function doTestSchema(Schema $schema): void
     {
-
         $schema->assertValid();
 
         $queryString = '
@@ -194,15 +191,14 @@ class SchemaFactoryTest extends TestCase
             'contacts' => [
                 [
                     'name' => 'Joe',
-                    'uppercaseName' => 'JOE'
+                    'uppercaseName' => 'JOE',
                 ],
                 [
                     'name' => 'Bill',
                     'uppercaseName' => 'BILL',
-                    'email' => 'bill@example.com'
-                ]
-
-            ]
+                    'email' => 'bill@example.com',
+                ],
+            ],
         ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data']);
     }
 

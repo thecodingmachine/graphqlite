@@ -1,5 +1,4 @@
 /.github export-ignore
-/.php_cs export-ignore
 /tests export-ignore
 /website export-ignore
 /phpcs.xml.dist export-ignore

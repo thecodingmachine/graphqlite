@@ -25,13 +25,9 @@ class Input implements TypeInterface
 {
     /** @var class-string<object>|null */
     private string|null $class = null;
-
     private string|null $name = null;
-
     private bool $default;
-
     private string|null $description = null;
-
     private bool $update;
 
     /** @param mixed[] $attributes */

@@ -1,25 +1,21 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
- * Class SpecialProduct
- * @package TheCodingMachine\GraphQLite\Fixtures\Integration\Models
+ * Class SpecialProduct.
+ *
  * @Type()
  */
 class SpecialProduct
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
-    /**
-     * @var float
-     */
+
+    /** @var float */
     private $price;
 
     public function __construct(string $name, float $price)
@@ -30,16 +26,14 @@ class SpecialProduct
 
     /**
      * @Field()
-     * @return string
      */
     public function getSpecial(): string
     {
-        return "unicorn";
+        return 'unicorn';
     }
 
     /**
      * @Field()
-     * @return string
      */
     public function getName(): string
     {
@@ -48,7 +42,6 @@ class SpecialProduct
 
     /**
      * @Field()
-     * @return float
      */
     public function getPrice(): float
     {

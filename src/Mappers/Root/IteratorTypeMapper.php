@@ -30,7 +30,7 @@ use function iterator_to_array;
 
 /**
  * This root type mapper is used when one of the types (in a compound type) is an iterator.
- * In this case, if the other types are arrays, they are passed as subTypes. For instance: ResultIterator|User[] => ResultIterator<User>
+ * In this case, if the other types are arrays, they are passed as subTypes. For instance: ResultIterator|User[] => ResultIterator<User>.
  */
 class IteratorTypeMapper implements RootTypeMapperInterface
 {
@@ -73,7 +73,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType
     {
         if (! $type instanceof Compound) {
-            //try {
+            // try {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
 
             /*} catch (CannotMapTypeException $e) {
@@ -86,12 +86,14 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             if ($topType instanceof NonNull) {
                 $topType = $topType->getWrappedType();
             }
+
             return $topType;
         }, false);
         if ($result === null) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }
         assert($result instanceof InputType);
+
         return $result;
     }
 
@@ -141,7 +143,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                 $singleDocBlockType = $this->getTypeInArray($singleDocBlockType);
                 if ($singleDocBlockType !== null) {
                     $subGraphQlType = $topToGraphQLType($singleDocBlockType, null);
-                    //$subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
+                    // $subGraphQlType = $this->toGraphQlType($singleDocBlockType, null, false, $refMethod, $docBlockObj);
 
                     // By convention, we trim the NonNull part of the "$subGraphQlType"
                     if ($subGraphQlType instanceof NonNull) {
@@ -178,7 +180,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
 
             return $result;
 
-            //return $this->mapDocBlockType($type, $docBlockType, $isNullable, false, $refMethod, $docBlockObj);
+            // return $this->mapDocBlockType($type, $docBlockType, $isNullable, false, $refMethod, $docBlockObj);
         }
 
         if (count($unionTypes) === 1) {
@@ -200,7 +202,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     }
 
     /**
-     * Removes the iterator type from $types
+     * Removes the iterator type from $types.
      *
      * @param Type[] $types
      */
@@ -214,7 +216,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             }
 
             /** @var class-string<object> $fqcn */
-            $fqcn     = (string) $singleDocBlockType->getFqsen();
+            $fqcn = (string) $singleDocBlockType->getFqsen();
             $refClass = new ReflectionClass($fqcn);
             // Note : $refClass->isIterable() is only accessible in PHP 7.2
             if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {

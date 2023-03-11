@@ -88,9 +88,9 @@ class TypeRegistry
     {
         $type = $this->getType($typeName);
         if (
-            ! $type instanceof MutableInterface
-            && ! $type instanceof MutableInputInterface
-            || (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)
+            ! $type instanceof MutableInterface &&
+            ! $type instanceof MutableInputInterface ||
+            (! $type instanceof MutableInterfaceType && ! $type instanceof MutableObjectType)
         ) {
             throw new GraphQLRuntimeException('Expected GraphQL type "' . $typeName . '" to be either a MutableObjectType or a MutableInterfaceType. Got a ' . $type::class);
         }

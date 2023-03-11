@@ -8,12 +8,13 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeRegistryTest extends TestCase
 {
-
     public function testRegisterTypeException(): void
     {
         $type = new ObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -27,7 +28,9 @@ class TypeRegistryTest extends TestCase
     {
         $type = new ObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -43,7 +46,9 @@ class TypeRegistryTest extends TestCase
     {
         $type = new ObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -51,18 +56,21 @@ class TypeRegistryTest extends TestCase
 
         $this->assertTrue($registry->hasType('Foo'));
         $this->assertFalse($registry->hasType('Bar'));
-
     }
 
     public function testGetMutableObjectType(): void
     {
         $type = new MutableObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
         $type2 = new ObjectType([
             'name' => 'FooBar',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -79,11 +87,15 @@ class TypeRegistryTest extends TestCase
     {
         $type = new MutableObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
         $type2 = new ObjectType([
             'name' => 'FooBar',
-            'fields' => function() {return [];}
+            'fields' => function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();

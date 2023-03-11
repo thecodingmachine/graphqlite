@@ -29,12 +29,11 @@ class TypeGenerator
         private ContainerInterface $container,
         private RecursiveTypeMapperInterface $recursiveTypeMapper,
         private FieldsBuilder $fieldsBuilder,
-    )
-    {
+    ) {
     }
 
     /**
-     * @param class-string<object> $annotatedObjectClassName The FQCN of an object with a Type annotation.
+     * @param class-string<object> $annotatedObjectClassName the FQCN of an object with a Type annotation
      *
      * @return MutableInterface&(MutableInterfaceType|MutableObjectType)
      *
@@ -98,7 +97,7 @@ class TypeGenerator
     }
 
     /**
-     * @param object $annotatedObject An object with a ExtendType annotation.
+     * @param object $annotatedObject an object with a ExtendType annotation
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      *
      * @throws ReflectionException
@@ -113,7 +112,7 @@ class TypeGenerator
             throw MissingAnnotationException::missingExtendTypeException();
         }
 
-        //$typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $extendTypeAnnotation);
+        // $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $extendTypeAnnotation);
         $typeName = $type->name;
 
         /*if ($this->typeRegistry->hasType($typeName)) {

@@ -12,11 +12,15 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
 {
     private ContainerInterface$container;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->container = new LazyContainer([
-            TypeFoo::class => function() { return new TypeFoo(); },
-            stdClass::class => function() { return new stdClass(); }
+            TypeFoo::class => function () {
+                return new TypeFoo();
+            },
+            stdClass::class => function () {
+                return new stdClass();
+            },
         ]);
     }
 
@@ -45,7 +49,7 @@ class TypeGeneratorTest extends AbstractQueryProviderTest
 
         $type = new MutableObjectType([
             'name' => 'foo',
-            'fields' => []
+            'fields' => [],
         ]);
 
         $this->expectException(MissingAnnotationException::class);

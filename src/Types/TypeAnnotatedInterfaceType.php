@@ -9,20 +9,18 @@ use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 
-use function get_class;
 use function gettype;
 use function is_object;
 
 /**
- * An object type built from the Type annotation
+ * An object type built from the Type annotation.
  */
 class TypeAnnotatedInterfaceType extends MutableInterfaceType
 {
     /**
      * @param class-string<object> $className
-     * @param RecursiveTypeMapperInterface $recursiveTypeMapper
      */
-    public function __construct(string $className, array $config,private RecursiveTypeMapperInterface $recursiveTypeMapper)
+    public function __construct(string $className, array $config, private RecursiveTypeMapperInterface $recursiveTypeMapper)
     {
         parent::__construct($config, $className);
     }
@@ -62,19 +60,17 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
                     $fields = $fieldsBuilder->getSelfFields($className, $typeName);
                 }
 
-                //$fields += $interfaceFields;
+                // $fields += $interfaceFields;
 
                 return $fields;
-            }
+            },
         ], $recursiveTypeMapper);
     }
 
     /**
-     * Resolves concrete ObjectType for given object value
+     * Resolves concrete ObjectType for given object value.
      *
-     * @param mixed $objectValue
      * @param mixed[] $context
-     *
      */
     public function resolveType($objectValue, $context, ResolveInfo $info): MutableObjectType
     {
@@ -82,7 +78,7 @@ class TypeAnnotatedInterfaceType extends MutableInterfaceType
             throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($objectValue) . '"');
         }
 
-        $className = get_class($objectValue);
+        $className = $objectValue::class;
 
         if ($this->recursiveTypeMapper->canMapClassToType($className)) {
             return $this->recursiveTypeMapper->mapClassToType($className, null);

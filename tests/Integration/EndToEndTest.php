@@ -94,7 +94,7 @@ class EndToEndTest extends TestCase
 {
     private ContainerInterface $mainContainer;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->mainContainer = $this->createContainer();
     }
@@ -127,6 +127,7 @@ class EndToEndTest extends TestCase
                         ),
                     ]);
                 }
+
                 return $queryProvider;
             },
             FieldsBuilder::class => static function (ContainerInterface $container) {
@@ -147,12 +148,14 @@ class EndToEndTest extends TestCase
                 $pipe = new FieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationFieldMiddleware::class));
                 $pipe->pipe($container->get(SecurityFieldMiddleware::class));
+
                 return $pipe;
             },
             InputFieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new InputFieldMiddlewarePipe();
                 $pipe->pipe($container->get(AuthorizationInputFieldMiddleware::class));
                 $pipe->pipe($container->get(SecurityInputFieldMiddleware::class));
+
                 return $pipe;
             },
             AuthorizationInputFieldMiddleware::class => static function (ContainerInterface $container) {
@@ -199,6 +202,7 @@ class EndToEndTest extends TestCase
             RecursiveTypeMapperInterface::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
+
                 return new RecursiveTypeMapper(
                     $container->get(TypeMapperInterface::class),
                     $container->get(NamingStrategyInterface::class),
@@ -213,11 +217,13 @@ class EndToEndTest extends TestCase
             NamespaceFactory::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
+
                 return new NamespaceFactory(new Psr16Cache($arrayAdapter));
             },
             GlobTypeMapper::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
+
                 return new GlobTypeMapper(
                     $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types'),
                     $container->get(TypeGenerator::class),
@@ -234,6 +240,7 @@ class EndToEndTest extends TestCase
             GlobTypeMapper::class . '2' => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
+
                 return new GlobTypeMapper(
                     $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models'),
                     $container->get(TypeGenerator::class),
@@ -294,6 +301,7 @@ class EndToEndTest extends TestCase
             CachedDocBlockFactory::class => static function () {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
+
                 return new CachedDocBlockFactory(new Psr16Cache($arrayAdapter));
             },
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {
@@ -303,12 +311,13 @@ class EndToEndTest extends TestCase
                 // These are in reverse order of execution
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
-                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models') ]);
+                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [$container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models')]);
                 if (interface_exists(UnitEnum::class)) {
-                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models') ]);
+                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [$container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models')]);
                 }
                 $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(NamingStrategyInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
+
                 return $rootTypeMapper;
             },
             ContainerParameterHandler::class => static function (ContainerInterface $container) {
@@ -340,6 +349,7 @@ class EndToEndTest extends TestCase
             $services[GlobTypeMapper::class . '3'] = static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
+
                 return new GlobTypeMapper(
                     $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models'),
                     $container->get(TypeGenerator::class),
@@ -379,6 +389,7 @@ class EndToEndTest extends TestCase
         if (isset($array['errors']) || ! isset($array['data'])) {
             $this->fail('Expected a successful answer. Got ' . json_encode($array, JSON_PRETTY_PRINT));
         }
+
         return $array['data'];
     }
 
@@ -428,7 +439,6 @@ class EndToEndTest extends TestCase
                     'repeatInnerName' => 'Bill',
                     'email' => 'bill@example.com',
                 ],
-
             ],
         ], $this->getSuccessResult($result));
 
@@ -457,7 +467,6 @@ class EndToEndTest extends TestCase
                     'repeatInnerName' => 'Bill',
                     'email' => 'bill@example.com',
                 ],
-
             ],
         ], $this->getSuccessResult($result));
     }
@@ -501,7 +510,6 @@ class EndToEndTest extends TestCase
                     'deprecatedUppercaseName' => 'BILL',
                     'deprecatedName' => 'Bill',
                 ],
-
             ],
         ], $this->getSuccessResult($result));
 
@@ -535,6 +543,7 @@ class EndToEndTest extends TestCase
             if (in_array($field['name'], $deprecatedFields)) {
                 return true;
             }
+
             return false;
         });
         $this->assertCount(
@@ -825,7 +834,7 @@ class EndToEndTest extends TestCase
     }
 
     /**
-     * This tests is used to be sure that the PorpaginasIterator types are not mixed up when cached (because it has a subtype)
+     * This tests is used to be sure that the PorpaginasIterator types are not mixed up when cached (because it has a subtype).
      */
     public function testEndToEnd2Iterators(): void
     {
@@ -901,7 +910,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
@@ -911,7 +920,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
     }
 
@@ -1081,7 +1090,6 @@ class EndToEndTest extends TestCase
             'contacts' => [
                 ['injectService' => 'OK'],
                 ['injectService' => 'OK'],
-
             ],
         ], $this->getSuccessResult($result));
     }
@@ -1108,7 +1116,6 @@ class EndToEndTest extends TestCase
             'contacts' => [
                 ['injectServiceFromExternal' => 'OK'],
                 ['injectServiceFromExternal' => 'OK'],
-
             ],
         ], $this->getSuccessResult($result));
     }
@@ -1217,16 +1224,16 @@ class EndToEndTest extends TestCase
             $queryString,
             variableValues: [
                 'contact' => [
-                    'name' => "foo",
-                    'birthDate' => "1942-12-24T00:00:00+00:00"
-                ]
+                    'name' => 'foo',
+                    'birthDate' => '1942-12-24T00:00:00+00:00',
+                ],
             ]
         );
 
         $this->assertSame([
             'saveContact' => [
                 'name' => 'foo',
-                'birthDate' => '1942-12-24T00:00:00+00:00'
+                'birthDate' => '1942-12-24T00:00:00+00:00',
             ],
         ], $this->getSuccessResult($result));
     }
@@ -1457,7 +1464,7 @@ class EndToEndTest extends TestCase
         );
 
         $data = $this->getSuccessResult($result);
-        $this->assertSame(null, $data['contacts'][0]['failWithNull']);
+        $this->assertNull($data['contacts'][0]['failWithNull']);
     }
 
     public function testEndToEndSecurityWithUser(): void
@@ -1484,7 +1491,7 @@ class EndToEndTest extends TestCase
     {
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -1494,19 +1501,19 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 42;
+
                         return $user;
                     }
                 };
             },
             AuthorizationServiceInterface::class => static function () {
-                return new class implements AuthorizationServiceInterface {
+                return new class () implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
                         return $right === 'CAN_EDIT' && $subject->bar === 42;
                     }
                 };
             },
-
         ]);
 
         $schema = $container->get(Schema::class);
@@ -1703,7 +1710,7 @@ class EndToEndTest extends TestCase
     {
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -1713,6 +1720,7 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 42;
+
                         return $user;
                     }
                 };
@@ -2120,7 +2128,7 @@ class EndToEndTest extends TestCase
     {
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -2130,19 +2138,19 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 42;
+
                         return $user;
                     }
                 };
             },
             AuthorizationServiceInterface::class => static function () {
-                return new class implements AuthorizationServiceInterface {
+                return new class () implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
                         return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
-
         ]);
 
         $schema = $container->get(Schema::class);
@@ -2245,7 +2253,7 @@ class EndToEndTest extends TestCase
     {
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -2255,19 +2263,19 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 42;
+
                         return $user;
                     }
                 };
             },
             AuthorizationServiceInterface::class => static function () {
-                return new class implements AuthorizationServiceInterface {
+                return new class () implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
                         return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
-
         ]);
         $schema = $container->get(Schema::class);
         assert($schema instanceof Schema);
@@ -2312,11 +2320,11 @@ class EndToEndTest extends TestCase
             $queryString,
         );
 
-         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -2326,19 +2334,19 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 42;
+
                         return $user;
                     }
                 };
             },
             AuthorizationServiceInterface::class => static function () {
-                return new class implements AuthorizationServiceInterface {
+                return new class () implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
                         return false;
                     }
                 };
             },
-
         ]);
         $schema = $container->get(Schema::class);
         assert($schema instanceof Schema);
@@ -2387,7 +2395,7 @@ class EndToEndTest extends TestCase
         $this->assertSame('You do not have sufficient rights to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -2397,12 +2405,13 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 43;
+
                         return $user;
                     }
                 };
             },
             AuthorizationServiceInterface::class => static function () {
-                return new class implements AuthorizationServiceInterface {
+                return new class () implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
                         return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
@@ -2438,7 +2447,7 @@ class EndToEndTest extends TestCase
     {
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
-                return new class implements AuthenticationServiceInterface {
+                return new class () implements AuthenticationServiceInterface {
                     public function isLogged(): bool
                     {
                         return true;
@@ -2448,19 +2457,19 @@ class EndToEndTest extends TestCase
                     {
                         $user = new stdClass();
                         $user->bar = 42;
+
                         return $user;
                     }
                 };
             },
             AuthorizationServiceInterface::class => static function () {
-                return new class implements AuthorizationServiceInterface {
+                return new class () implements AuthorizationServiceInterface {
                     public function isAllowed(string $right, $subject = null): bool
                     {
                         return $right === 'CAN_SET_SECRET' || $right === 'CAN_SEE_SECRET';
                     }
                 };
             },
-
         ]);
 
         $schema = $container->get(Schema::class);

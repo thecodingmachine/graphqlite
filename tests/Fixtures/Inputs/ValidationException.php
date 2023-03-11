@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 /**
- * Just a wrapper Exception class to allow us to confirm an Exception thrown, is from validation
+ * Just a wrapper Exception class to allow us to confirm an Exception thrown, is from validation.
  *
  * @author Jacob Thomason <jacob@thomason.xxx>
  */

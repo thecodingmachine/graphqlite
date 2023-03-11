@@ -25,6 +25,7 @@ class UseInputType implements ParameterAnnotationInterface
 {
     /** @var string|null */
     private $for;
+
     /** @var string */
     private $inputType;
 
@@ -55,6 +56,7 @@ class UseInputType implements ParameterAnnotationInterface
         if ($this->for === null) {
             throw new BadMethodCallException('The @UseInputType annotation must be passed a target and an input type. For instance: #[UseInputType("MyInputType")]');
         }
+
         return $this->for;
     }
 

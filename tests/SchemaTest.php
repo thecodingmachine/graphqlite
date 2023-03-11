@@ -2,14 +2,11 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use PHPUnit\Framework\TestCase;
-
 class SchemaTest extends AbstractQueryProviderTest
 {
-
     public function testEmptyQuery(): void
     {
-        $queryProvider = new class implements QueryProviderInterface {
+        $queryProvider = new class () implements QueryProviderInterface {
             public function getQueries(): array
             {
                 return [];

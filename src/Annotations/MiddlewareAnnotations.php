@@ -9,7 +9,7 @@ use function array_pop;
 use function count;
 
 /**
- * A list of annotations that implement the MiddlewareAnnotation interface
+ * A list of annotations that implement the MiddlewareAnnotation interface.
  */
 class MiddlewareAnnotations
 {
@@ -19,7 +19,7 @@ class MiddlewareAnnotations
     }
 
     /**
-     * Return annotations of the $className type
+     * Return annotations of the $className type.
      *
      * @return array<int, MiddlewareAnnotationInterface>
      */

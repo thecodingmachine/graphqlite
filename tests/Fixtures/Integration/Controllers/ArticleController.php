@@ -7,12 +7,8 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Article;
 
 class ArticleController
 {
-
     /**
      * @Mutation()
-     * @param Article $article
-     *
-     * @return Article
      */
     public function createArticle(Article $article): Article
     {

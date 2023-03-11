@@ -53,7 +53,6 @@ class AnnotationReader
     // In this mode, exceptions will be thrown for any incorrect annotations.
     public const STRICT_MODE = 'STRICT_MODE';
 
-
     /** @var array<string, (object|null)> */
     private array $methodAnnotationCache = [];
 
@@ -64,8 +63,8 @@ class AnnotationReader
     private array $propertyAnnotationsCache = [];
 
     /**
-     * @param string $mode One of self::LAX_MODE or self::STRICT_MODE. If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
-     * @param array<int,string> $strictNamespaces Classes in those namespaces MUST have valid annotations (otherwise, an error is thrown).
+     * @param string            $mode             One of self::LAX_MODE or self::STRICT_MODE. If true, no exceptions will be thrown for incorrect annotations in code coming from the "vendor/" directory.
+     * @param array<int,string> $strictNamespaces classes in those namespaces MUST have valid annotations (otherwise, an error is thrown)
      */
     public function __construct(private readonly Reader $reader, private readonly string $mode = self::STRICT_MODE, private readonly array $strictNamespaces = [])
     {
@@ -78,7 +77,7 @@ class AnnotationReader
      * Returns a class annotation. Does not look in the parent class.
      *
      * @param ReflectionClass<object> $refClass
-     * @param class-string<T> $annotationClass
+     * @param class-string<T>         $annotationClass
      *
      * @return T|null
      *
@@ -94,16 +93,18 @@ class AnnotationReader
             if ($attribute) {
                 $instance = $attribute->newInstance();
                 assert($instance instanceof $annotationClass);
+
                 return $instance;
             }
             $type = $this->reader->getClassAnnotation($refClass, $annotationClass);
             assert($type === null || $type instanceof $annotationClass);
+
             return $type;
         } catch (AnnotationException $e) {
             return match ($this->mode) {
-                self::STRICT_MODE=> throw $e,
-                self::LAX_MODE=>$this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName()) ? throw $e : null,
-                default=>throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
+                self::STRICT_MODE => throw $e,
+                self::LAX_MODE => $this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName()) ? throw $e : null,
+                default => throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
             };
         }
     }
@@ -131,9 +132,9 @@ class AnnotationReader
             return $this->methodAnnotationCache[$cacheKey] = $this->reader->getMethodAnnotation($refMethod, $annotationClass);
         } catch (AnnotationException $e) {
             return match ($this->mode) {
-                self::STRICT_MODE=> throw $e,
-                self::LAX_MODE=>$this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getName()) ? throw $e : null,
-                default=>throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
+                self::STRICT_MODE => throw $e,
+                self::LAX_MODE => $this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getName()) ? throw $e : null,
+                default => throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
             };
         }
     }
@@ -157,7 +158,7 @@ class AnnotationReader
      * Returns the class annotations. Finds in the parents too.
      *
      * @param ReflectionClass<T> $refClass
-     * @param class-string<A> $annotationClass
+     * @param class-string<A>    $annotationClass
      *
      * @return A[]
      *
@@ -193,8 +194,8 @@ class AnnotationReader
                 }
 
                 if (
-                    ($this->mode === self::LAX_MODE)
-                    && $this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())
+                    ($this->mode === self::LAX_MODE) &&
+                    $this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName())
                 ) {
                     throw $e;
                 }
@@ -315,7 +316,7 @@ class AnnotationReader
     }
 
     /**
-     * Only used in unit tests/
+     * Only used in unit tests/.
      *
      * @deprecated Use getParameterAnnotationsPerParameter instead
      *
@@ -330,7 +331,7 @@ class AnnotationReader
         $name = $refParameter->getName();
 
         $filteredAnnotations = array_values(array_filter($parameterAnnotations, static function (ParameterAnnotationInterface $parameterAnnotation) use ($name) {
-            return $parameterAnnotation->getTarget() === $name;
+            return $name === $parameterAnnotation->getTarget();
         }));
 
         return new ParameterAnnotations($filteredAnnotations);

@@ -13,7 +13,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 /**
  * A context class containing a number of classes created on the fly by SchemaFactory.
  * Those classes are made available to factories implementing QueryProviderFactoryInterface
- * or TypeMapperFactoryInterface
+ * or TypeMapperFactoryInterface.
  */
 final class FactoryContext
 {

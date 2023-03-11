@@ -1,14 +1,12 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
-
+use DateTimeInterface;
 use Porpaginas\Arrays\ArrayResult;
 use Porpaginas\Result;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
 
@@ -28,8 +26,6 @@ class ContactController
 
     /**
      * @Mutation()
-     * @param Contact $contact
-     * @return Contact
      */
     public function saveContact(Contact $contact): Contact
     {
@@ -38,10 +34,9 @@ class ContactController
 
     /**
      * @Mutation()
-     * @param \DateTimeInterface $birthDate
-     * @return Contact
      */
-    public function saveBirthDate(\DateTimeInterface $birthDate): Contact {
+    public function saveBirthDate(DateTimeInterface $birthDate): Contact
+    {
         $contact = new Contact('Bill');
         $contact->setBirthDate($birthDate);
 

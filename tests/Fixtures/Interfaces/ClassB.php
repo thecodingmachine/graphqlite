@@ -2,12 +2,9 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
 
-
 class ClassB extends ClassA
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $bar;
 
     public function __construct(string $foo, string $bar)

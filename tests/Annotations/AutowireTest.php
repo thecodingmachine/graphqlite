@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class AutowireTest extends TestCase
 {
-
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);

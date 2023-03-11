@@ -28,14 +28,14 @@ interface RecursiveTypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type).
+     * @param class-string<object> $className the class name to look for (this function looks into parent classes if the class does not match a type)
      */
     public function canMapClassToType(string $className): bool;
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type).
+     * @param class-string<object> $className the class name to look for (this function looks into parent classes if the class does not match a type)
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -44,7 +44,7 @@ interface RecursiveTypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL interface (or returns null if no interface is found).
      *
-     * @param string      $className                                   The exact class name to look for (this function does not look into parent classes).
+     * @param string $className the exact class name to look for (this function does not look into parent classes)
      * @param (OutputType&Type)|null $subType A subtype (if the main className is an iterator)
      *
      * @throws CannotMapTypeExceptionInterface
@@ -88,7 +88,7 @@ interface RecursiveTypeMapperInterface
     public function canMapNameToType(string $typeName): bool;
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *
@@ -102,7 +102,7 @@ interface RecursiveTypeMapperInterface
     public function findClosestMatchingParent(string $className): string|null;
 
     /**
-     * Generates an object type from an interface type (in case no object type maps this interface)
+     * Generates an object type from an interface type (in case no object type maps this interface).
      */
     public function getGeneratedObjectTypeFromInterfaceType(MutableInterfaceType $type): MutableObjectType;
 }

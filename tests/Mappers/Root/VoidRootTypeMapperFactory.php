@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
-
 
 class VoidRootTypeMapperFactory implements RootTypeMapperFactoryInterface
 {

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Controllers;
-
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\BazInterface;

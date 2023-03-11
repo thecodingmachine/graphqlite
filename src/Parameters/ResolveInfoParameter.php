@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * A parameter type-hinted to ResolveInfo
+ * A parameter type-hinted to ResolveInfo.
  */
 class ResolveInfoParameter implements ParameterInterface
 {

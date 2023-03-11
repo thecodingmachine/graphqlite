@@ -47,7 +47,7 @@ class MagicField implements SourceFieldInterface
     private $parameterAnnotations;
 
     /**
-     * @param mixed[] $attributes
+     * @param mixed[]                                                           $attributes
      * @param array<MiddlewareAnnotationInterface|ParameterAnnotationInterface> $annotations
      */
     public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null, array $annotations = [])
@@ -120,7 +120,7 @@ class MagicField implements SourceFieldInterface
     }
 
     /**
-     * Returns the property name in the source class
+     * Returns the property name in the source class.
      */
     public function getSourceName(): string|null
     {

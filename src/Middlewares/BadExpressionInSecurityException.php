@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use Throwable;
 
 /**
- * Exception wrapping exceptions occurring when the Security annotation is evaluated
+ * Exception wrapping exceptions occurring when the Security annotation is evaluated.
  */
 class BadExpressionInSecurityException extends Exception
 {

@@ -20,8 +20,8 @@ final class InputNext implements InputFieldHandlerInterface
     /**
      * Clones the queue provided to allow re-use.
      *
-     * @param InputFieldHandlerInterface $fallbackHandler Fallback handler to
-     *     invoke when the queue is exhausted.
+     * @param InputFieldHandlerInterface $fallbackHandler fallback handler to
+     *                                                    invoke when the queue is exhausted
      */
     public function __construct(SplQueue $queue, private readonly InputFieldHandlerInterface $fallbackHandler)
     {
@@ -36,6 +36,7 @@ final class InputNext implements InputFieldHandlerInterface
 
         $middleware = $this->queue->dequeue();
         assert($middleware instanceof InputFieldMiddlewareInterface);
+
         return $middleware->process($inputFieldDescriptor, $this);
     }
 }

@@ -39,7 +39,7 @@ class IteratorTypeMapperTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('"\ArrayObject" is iterable. Please provide a more specific type. For instance: \ArrayObject|User[].');
-        $result = $typeMapper->toGraphQLOutputType($this->resolveType('ArrayObject|'.TestObject::class), null, new ReflectionMethod(__CLASS__, 'testInputIterator'), new DocBlock());
+        $result = $typeMapper->toGraphQLOutputType($this->resolveType('ArrayObject|' . TestObject::class), null, new ReflectionMethod(__CLASS__, 'testInputIterator'), new DocBlock());
     }
 
     public function testIterableWithTwoArrays(): void

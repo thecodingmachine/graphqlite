@@ -12,8 +12,8 @@ class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
 {
     private function getContainer(): ContainerInterface
     {
-        return new class implements ContainerInterface {
-            public function get($id):string
+        return new class () implements ContainerInterface {
+            public function get($id): string
             {
                 return 'foo';
             }

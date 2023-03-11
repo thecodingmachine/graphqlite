@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 
@@ -13,7 +13,6 @@ use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
  */
 class Validator implements InputTypeValidatorInterface
 {
-
     private bool $isEnabled;
 
     public function __construct(bool $isEnabled = true)

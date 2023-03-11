@@ -10,7 +10,6 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
  */
 abstract class AbstractFoo
 {
-
     /**
      * @Field()
      * @var string

@@ -27,6 +27,7 @@ class ExtendType
 {
     /** @var class-string<object>|null */
     private $class;
+
     /** @var string|null */
     private $name;
 

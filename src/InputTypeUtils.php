@@ -35,12 +35,11 @@ class InputTypeUtils
     public function __construct(
         private readonly AnnotationReader $annotationReader,
         private readonly NamingStrategyInterface $namingStrategy,
-    )
-    {
+    ) {
     }
 
     /**
-     * Returns an array with 2 elements: [ $inputName, $className ]
+     * Returns an array with 2 elements: [ $inputName, $className ].
      *
      * @return array{0: string, 1:class-string<object>}
      */

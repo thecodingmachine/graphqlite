@@ -40,6 +40,7 @@ class HideParameter implements ParameterAnnotationInterface
         if ($this->for === null) {
             throw new BadMethodCallException('The @HideParameter annotation must be passed a target. For instance: "@HideParameter(for="$myParameterToHide")"');
         }
+
         return $this->for;
     }
 }

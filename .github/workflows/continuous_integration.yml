@@ -9,9 +9,37 @@ on:
       - master
 
 jobs:
+  code-style:
+    name: "Code style"
 
-  continuous-integration:
-    name: "Continuous Integration"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: code-style-composer-${{ hashFiles('**/composer.json') }}-
+          restore-keys: |
+            code-style-composer-
+
+      - name: Install dependencies with composer
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run php-cs-fixer
+        run: composer cs-fix -- --dry-run --diff --using-cache=no
+
+  tests:
+    name: "Tests"
 
     runs-on: "ubuntu-latest"
 

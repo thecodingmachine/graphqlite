@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
-
 
 use ArrayIterator;
 use DateTimeImmutable;
@@ -10,7 +8,6 @@ use Porpaginas\Arrays\ArrayResult;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\ProductTypeEnum;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct;
@@ -91,9 +88,6 @@ class ProductController
     /**
      * @Mutation()
      * @UseInputType(for="$product", inputType="CreateTrickyProductInput!")
-     *
-     * @param TrickyProduct $product
-     * @return TrickyProduct
      */
     public function createTrickyProduct(TrickyProduct $product): TrickyProduct
     {
@@ -102,23 +96,20 @@ class ProductController
 
     /**
      * @Query()
-     *
-     * @return TrickyProduct
      */
-    public function getTrickyProduct(): TrickyProduct {
+    public function getTrickyProduct(): TrickyProduct
+    {
         $product = new TrickyProduct();
-        $product->setName("Special","box");
+        $product->setName('Special', 'box');
         $product->price = 11.99;
         $product->multi = 11.11;
+
         return $product;
     }
 
     /**
      * @Mutation()
      * @UseInputType(for="$product", inputType="UpdateTrickyProductInput!")
-     *
-     * @param TrickyProduct $product
-     * @return TrickyProduct
      */
     public function updateTrickyProduct(TrickyProduct $product): TrickyProduct
     {

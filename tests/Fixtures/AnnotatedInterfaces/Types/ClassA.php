@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -10,7 +9,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class ClassA implements FooInterface, BarInterface, BazInterface
 {
-
     public function getBar(): string
     {
         return 'bar';

@@ -9,7 +9,6 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 
 class CannotMapTypeTraitTest extends AbstractQueryProviderTest
 {
-
     public function testAddParamInfoSupphp74()
     {
         $e = CannotMapTypeException::createForType('Foo');

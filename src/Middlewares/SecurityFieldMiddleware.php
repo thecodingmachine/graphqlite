@@ -26,9 +26,9 @@ use function is_array;
  */
 class SecurityFieldMiddleware implements FieldMiddlewareInterface
 {
-    public function __construct(private readonly ExpressionLanguage $language, private readonly AuthenticationServiceInterface $authenticationService, private readonly AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
+    public function __construct(private readonly ExpressionLanguage $language, private readonly AuthenticationServiceInterface $authenticationService, private readonly AuthorizationServiceInterface $authorizationService/* , ?LoggerInterface $logger = null */)
     {
-        /*$this->logger = $logger;*/
+        /* $this->logger = $logger; */
     }
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
@@ -100,7 +100,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
     }
 
     /**
-     * @param array<int|string, mixed> $args
+     * @param array<int|string, mixed>          $args
      * @param array<string, ParameterInterface> $parameters
      *
      * @return array<string, mixed>

@@ -30,7 +30,7 @@
     },
     "require-dev": {
         "beberlei/porpaginas": "^1.2",
-        "doctrine/coding-standard": "^11.0",
+        "php-cs-fixer/shim": "~3.14.0",
         "ecodev/graphql-upload": "^7.0",
         "laminas/laminas-diactoros": "^2",
         "myclabs/php-enum": "^1.6.6",
@@ -57,9 +57,8 @@
     },
     "scripts": {
         "phpstan": "phpstan analyse -c phpstan.neon --no-progress -vvv --memory-limit=1G",
-        "cs-check": "phpcs",
-        "cs-fix": "phpcbf",
-        "test": ["@cs-check", "@phpstan", "phpunit"]
+        "cs-fix": "php-cs-fixer fix -v --show-progress=dots",
+        "test": ["@cs-fix", "@phpstan", "phpunit"]
     },
     "extra": {
         "branch-alias": {

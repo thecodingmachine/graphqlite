@@ -16,8 +16,7 @@ class InjectUserParameter implements ParameterInterface
     public function __construct(
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly bool $optional,
-    )
-    {
+    ) {
     }
 
     /** @param array<string, mixed> $args */

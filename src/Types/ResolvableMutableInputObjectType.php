@@ -24,7 +24,7 @@ use function is_array;
 use function is_callable;
 
 /**
- * A GraphQL input object that can be resolved using a factory
+ * A GraphQL input object that can be resolved using a factory.
  *
  * @phpstan-import-type FieldConfig from InputObjectType
  */
@@ -32,17 +32,20 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
 {
     /** @var callable&array{object|string, string} */
     private $resolve;
+
     /** @var ParameterInterface[]|null */
     private array|null $parameters = null;
+
     /**
      * The list of decorator callables to be applied.
      *
      * @var array<int, callable&array<int, object|string>>
      */
     private array $decorators = [];
+
     /**
      * The list of decorator parameters to be applied.
-     * The key matches the key of $this->decorators
+     * The key matches the key of $this->decorators.
      *
      * @var array<int, ParameterInterface[]>
      */
@@ -53,7 +56,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     {
         $resolve = [$factory, $methodName];
         assert(is_callable($resolve));
-        $this->resolve       = $resolve;
+        $this->resolve = $resolve;
 
         /**
          * @return iterable<FieldConfig>
@@ -83,7 +86,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     private function getParameters(): array
     {
         if ($this->parameters === null) {
-            $method           = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
+            $method = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
             $this->parameters = $this->fieldsBuilder->getParameters($method);
         }
 
@@ -94,7 +97,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     private function getParametersForDecorator(int $key): array
     {
         if (! isset($this->decoratorsParameters[$key])) {
-            $method                           = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
+            $method = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
             $this->decoratorsParameters[$key] = $this->fieldsBuilder->getParametersForDecorator($method);
         }
 

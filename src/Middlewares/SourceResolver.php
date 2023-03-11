@@ -31,6 +31,7 @@ final class SourceResolver implements SourceResolverInterface
     public function getObject(): object
     {
         assert($this->object !== null);
+
         return $this->object;
     }
 
@@ -48,6 +49,7 @@ final class SourceResolver implements SourceResolverInterface
     public function toString(): string
     {
         $class = $this->getObject()::class;
+
         return $class . '::' . $this->methodName . '()';
     }
 }

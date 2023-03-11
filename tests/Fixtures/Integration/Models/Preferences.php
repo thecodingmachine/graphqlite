@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
-use DateTimeInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\Type;

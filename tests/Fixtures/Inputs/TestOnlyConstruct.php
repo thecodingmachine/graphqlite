@@ -11,7 +11,6 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
  */
 class TestOnlyConstruct
 {
-
     /**
      * @Field()
      * @var string
@@ -30,7 +29,7 @@ class TestOnlyConstruct
      */
     private $baz;
 
-    public function __construct(string $foo, bool  $baz, int $bar = 100)
+    public function __construct(string $foo, bool $baz, int $bar = 100)
     {
         $this->foo = $foo;
         $this->bar = $bar;
@@ -46,7 +45,7 @@ class TestOnlyConstruct
     {
         throw new Exception('This should not be called!');
     }
-    
+
     public function setBaz(bool $baz): void
     {
         throw new Exception('This should not be called!');

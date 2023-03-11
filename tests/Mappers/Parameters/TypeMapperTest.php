@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
-use DateTimeImmutable;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\UnionType;
@@ -16,9 +15,11 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 
+use function assert;
+use function count;
+
 class TypeMapperTest extends AbstractQueryProviderTest
 {
-
     public function testMapScalarUnionException(): void
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
@@ -55,6 +56,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
+
     /**
      * @requires PHP >= 8.0
      */
@@ -69,14 +71,13 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertNotInstanceOf(NonNull::class, $gqType);
-        assert(!($gqType instanceof NonNull));
+        assert(! ($gqType instanceof NonNull));
         $this->assertInstanceOf(UnionType::class, $gqType);
         assert($gqType instanceof UnionType);
         $unionTypes = $gqType->getTypes();
         $this->assertEquals(2, count($unionTypes));
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
-
     }
 
     public function testHideParameter(): void
@@ -120,7 +121,6 @@ class TypeMapperTest extends AbstractQueryProviderTest
      */
     private function dummy()
     {
-
     }
 
     /**
@@ -128,7 +128,6 @@ class TypeMapperTest extends AbstractQueryProviderTest
      */
     private function withDefaultValue($foo = 24)
     {
-
     }
 
     /**
@@ -136,6 +135,5 @@ class TypeMapperTest extends AbstractQueryProviderTest
      */
     private function withoutDefaultValue($foo)
     {
-
     }
 }

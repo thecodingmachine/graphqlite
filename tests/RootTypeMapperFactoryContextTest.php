@@ -2,16 +2,14 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 
 class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
 {
-    const GLOB_TTL_SECONDS = 2;
+    public const GLOB_TTL_SECONDS = 2;
 
     public function testContext(): void
     {

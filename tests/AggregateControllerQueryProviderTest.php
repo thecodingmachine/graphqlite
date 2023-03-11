@@ -2,14 +2,8 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
-use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
 class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
 {
@@ -17,24 +11,23 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $container = new class([ 'controller' => $controller ]) implements ContainerInterface {
-
+        $container = new class (['controller' => $controller]) implements ContainerInterface {
             public function __construct(private array $controllers)
             {
             }
 
-            public function get($id):mixed
+            public function get($id): mixed
             {
                 return $this->controllers[$id];
             }
 
-            public function has($id):bool
+            public function has($id): bool
             {
                 return isset($this->controllers[$id]);
             }
         };
 
-        $aggregateQueryProvider = new AggregateControllerQueryProvider([ 'controller' ], $this->getFieldsBuilder(), $container);
+        $aggregateQueryProvider = new AggregateControllerQueryProvider(['controller'], $this->getFieldsBuilder(), $container);
 
         $queries = $aggregateQueryProvider->getQueries();
         $this->assertCount(9, $queries);

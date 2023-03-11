@@ -3,7 +3,9 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -25,7 +27,6 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
-use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class GlobTypeMapperTest extends AbstractQueryProviderTest
@@ -35,7 +36,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -58,7 +59,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($anotherMapperSameCache->canMapNameToType('Foo'));
 
         $this->expectException(CannotMapTypeException::class);
-        $mapper->mapClassToType(\stdClass::class, null);
+        $mapper->mapClassToType(stdClass::class, null);
     }
 
     public function testGlobTypeMapperDuplicateTypesException(): void
@@ -66,7 +67,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             TestType::class => function () {
                 return new TestType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -82,7 +83,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             TestInput::class => function () {
                 return new TestInput();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -110,11 +111,13 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
             $mapper->canMapClassToInputType(TestObject::class);
         } catch (DuplicateMappingException $e) {
             // Depending on the environment, one of the messages can be returned.
-            $this->assertContains($e->getMessage(),
+            $this->assertContains(
+                $e->getMessage(),
                 [
                     'The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'',
-                    'The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\''
-                ]);
+                    'The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\'',
+                ]
+            );
             $caught = true;
         }
         $this->assertTrue($caught, 'DuplicateMappingException is thrown');
@@ -123,17 +126,17 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
     public function testGlobTypeMapperInheritedInputTypesException(): void
     {
         $container = new LazyContainer([
-            ChildTestFactory::class => function() {
+            ChildTestFactory::class => function () {
                 return new ChildTestFactory();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
 
         $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
 
-        //$this->expectException(DuplicateMappingException::class);
-        //$this->expectExceptionMessage('The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'');
+        // $this->expectException(DuplicateMappingException::class);
+        // $this->expectExceptionMessage('The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'');
         $this->assertTrue($mapper->canMapClassToInputType(TestObject::class));
         $mapper->mapClassToInputType(TestObject::class);
     }
@@ -143,7 +146,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             TestType::class => function () {
                 return new TestType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -160,7 +163,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -179,7 +182,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
             },
             TestFactory::class => function () {
                 return new TestFactory();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -200,7 +203,6 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($anotherMapperSameCache->canMapClassToInputType(TestObject::class));
         $this->assertSame('TestObjectInput', $anotherMapperSameCache->mapClassToInputType(TestObject::class, $this->getTypeMapper())->name);
 
-
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapClassToInputType(TestType::class, $this->getTypeMapper());
     }
@@ -213,7 +215,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
             },
             FooExtendType::class => function () {
                 return new FooExtendType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -237,7 +239,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $this->assertTrue($anotherMapperSameCache->canExtendTypeForName('TestObject', $type));
 
         $this->expectException(CannotMapTypeException::class);
-        $mapper->extendTypeForClass(\stdClass::class, $type);
+        $mapper->extendTypeForClass(stdClass::class, $type);
     }
 
     public function testEmptyGlobTypeMapper(): void
@@ -259,7 +261,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             FilterDecorator::class => function () {
                 return new FilterDecorator();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -269,7 +271,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
 
         $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\Integration\Types'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
-        $inputType = new MockResolvableInputObjectType(['name'=>'FilterInput']);
+        $inputType = new MockResolvableInputObjectType(['name' => 'FilterInput']);
 
         $mapper->decorateInputTypeForName('FilterInput', $inputType);
 
@@ -285,7 +287,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();
@@ -319,9 +321,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\BadExtendType'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
         $testObjectType = new MutableObjectType([
-            'name'    => 'TestObject',
-            'fields'  => [
-                'test'   => Type::string(),
+            'name' => 'TestObject',
+            'fields' => [
+                'test' => Type::string(),
             ],
         ]);
 
@@ -352,9 +354,9 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\BadExtendType2'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(new AnnotationReader()), new NamingStrategy(), $this->getTypeMapper(), $cache);
 
         $testObjectType = new MutableObjectType([
-            'name'    => 'TestObject',
-            'fields'  => [
-                'test'   => Type::string(),
+            'name' => 'TestObject',
+            'fields' => [
+                'test' => Type::string(),
             ],
         ]);
 
@@ -368,7 +370,7 @@ class GlobTypeMapperTest extends AbstractQueryProviderTest
         $container = new LazyContainer([
             FooType::class => function () {
                 return new FooType();
-            }
+            },
         ]);
 
         $typeGenerator = $this->getTypeGenerator();

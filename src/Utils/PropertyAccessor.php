@@ -76,11 +76,13 @@ class PropertyAccessor
         $setter = self::findSetter($class, $propertyName);
         if ($setter) {
             $instance->$setter($value);
+
             return;
         }
 
         if (self::isPublicProperty($class, $propertyName)) {
             $instance->$propertyName = $value;
+
             return;
         }
 

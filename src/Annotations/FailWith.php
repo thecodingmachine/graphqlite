@@ -21,11 +21,7 @@ use function is_array;
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class FailWith implements MiddlewareAnnotationInterface
 {
-    /**
-     * The default value to use if the right is not enforced.
-     *
-     * @var mixed
-     */
+    /** The default value to use if the right is not enforced. */
     private $value;
 
     /** @throws BadMethodCallException */

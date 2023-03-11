@@ -26,7 +26,7 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
 {
     /**
      * The array of classes.
-     * Key: fully qualified class name
+     * Key: fully qualified class name.
      *
      * @var array<string,ReflectionClass<object>>
      */

@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateQueries;
 
-use ArrayObject;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithDuplicateQuery

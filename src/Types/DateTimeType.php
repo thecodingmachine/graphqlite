@@ -15,7 +15,6 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 class DateTimeType extends ScalarType
 {
     public string $name = 'DateTime';
-
     public string|null $description
         = 'The `DateTime` scalar type represents time data, represented as an ISO-8601 encoded UTC date string.';
 
@@ -42,11 +41,10 @@ class DateTimeType extends ScalarType
     }
 
     /**
-     * Parses an externally provided literal value (hardcoded in GraphQL query) to use as an input
+     * Parses an externally provided literal value (hardcoded in GraphQL query) to use as an input.
      *
      * In the case of an invalid node or value this method must throw an Exception
      *
-     * @param mixed $valueNode
      * @param array<string, mixed>|null $variables
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint

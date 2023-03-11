@@ -1,10 +1,9 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Annotations;
 
 /**
- * No namespace here
+ * No namespace here.
  *
  * @foo()
  */
@@ -15,6 +14,5 @@ class ClassWithInvalidClassAnnotation
      */
     public function testMethod(): void
     {
-
     }
 }

@@ -26,7 +26,7 @@ class Schema extends \GraphQL\Type\Schema
             $config = SchemaConfig::create();
         }
 
-        $query    = new ObjectType([
+        $query = new ObjectType([
             'name' => 'Query',
             'fields' => static function () use ($queryProvider) {
                 $queries = $queryProvider->getQueries();
@@ -81,8 +81,9 @@ class Schema extends \GraphQL\Type\Schema
                 return $mutation;
             }
 
-            $type =  $rootTypeMapper->mapNameToType($name);
+            $type = $rootTypeMapper->mapNameToType($name);
             assert($type instanceof Type);
+
             return $type;
         });
 

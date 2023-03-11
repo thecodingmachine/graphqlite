@@ -7,10 +7,10 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 class MappedClass
 {
     /** @var string */
-    //private $className;
+    // private $className;
 
     /** @var MappedClass|null */
-    //private $parent;
+    // private $parent;
 
     /** @var MappedClass[] */
     private array $children = [];
@@ -32,7 +32,6 @@ class MappedClass
         return $this->parent;
     }*/
 
-    /** @param MappedClass|null $parent */
     /*public function setParent(?MappedClass $parent): void
     {
         $this->parent = $parent;
@@ -44,7 +43,7 @@ class MappedClass
         return $this->children;
     }
 
-    public function addChild(MappedClass $child): void
+    public function addChild(self $child): void
     {
         $this->children[] = $child;
     }

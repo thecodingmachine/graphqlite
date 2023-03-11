@@ -13,5 +13,5 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 enum Color: string
 {
     case Green = 'green';
-    case Red   = 'red';
+    case Red = 'red';
 }

@@ -19,6 +19,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 {
     /** @var InputField[] */
     private array $constructorInputFields = [];
+
     /** @var InputField[] */
     private array $inputFields = [];
 
@@ -49,6 +50,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
 
                 $fieldConfigs[] = $field->config;
             }
+
             return $fieldConfigs;
         };
 

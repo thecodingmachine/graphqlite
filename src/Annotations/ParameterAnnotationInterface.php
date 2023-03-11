@@ -10,7 +10,7 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 interface ParameterAnnotationInterface
 {
     /**
-     * Returns the name of the targeted parameter (without the leading "$")
+     * Returns the name of the targeted parameter (without the leading "$").
      */
     public function getTarget(): string;
 }

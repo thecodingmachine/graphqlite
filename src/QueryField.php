@@ -40,11 +40,11 @@ use function is_object;
 final class QueryField extends FieldDefinition
 {
     /**
-     * @param OutputType&Type $type
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
-     * @param callable $resolver The resolver actually called
-     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
+     * @param OutputType&Type                                                                                                                                                                                $type
+     * @param array<string, ParameterInterface>                                                                                                                                                              $arguments        indexed by argument name
+     * @param ResolverInterface                                                                                                                                                                              $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
+     * @param callable                                                                                                                                                                                       $resolver         The resolver actually called
+     * @param array<string, ParameterInterface>                                                                                                                                                              $prefetchArgs     indexed by argument name
      * @param array{resolve?: FieldResolver|null,args?: ArgumentListConfig|null,description?: string|null,deprecationReason?: string|null,astNode?: FieldDefinitionNode|null,complexity?: ComplexityFn|null} $additionalConfig
      */
     public function __construct(string $name, OutputType $type, array $arguments, ResolverInterface $originalResolver, callable $resolver, string|null $comment, string|null $deprecationReason, string|null $prefetchMethodName, array $prefetchArgs, array $additionalConfig = [])
@@ -171,9 +171,7 @@ final class QueryField extends FieldDefinition
     }
 
     /**
-     * @param mixed $value A value that will always be returned by this field.
-     *
-     * @return QueryField
+     * @param mixed $value a value that will always be returned by this field
      */
     public static function alwaysReturn(QueryFieldDescriptor $fieldDescriptor, mixed $value): self
     {
@@ -188,8 +186,6 @@ final class QueryField extends FieldDefinition
 
     /**
      * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
-     *
-     * @return QueryField
      */
     public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
     {
@@ -209,6 +205,7 @@ final class QueryField extends FieldDefinition
     {
         $type = $fieldDescriptor->getType();
         assert($type !== null);
+
         return new self(
             $fieldDescriptor->getName(),
             $type,

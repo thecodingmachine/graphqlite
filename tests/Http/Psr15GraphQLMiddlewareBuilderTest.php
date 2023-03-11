@@ -2,26 +2,22 @@
 
 namespace TheCodingMachine\GraphQLite\Http;
 
-use GraphQL\Executor\ExecutionResult;
-use GraphQL\Server\ServerConfig;
+use Laminas\Diactoros\Response\TextResponse;
+use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\StreamFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
-use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
-use Laminas\Diactoros\Response\TextResponse;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequest;
-use Laminas\Diactoros\StreamFactory;
+
 use function fopen;
 use function fwrite;
 use function json_decode;
@@ -30,7 +26,6 @@ use function rewind;
 
 class Psr15GraphQLMiddlewareBuilderTest extends TestCase
 {
-
     public function testCreateMiddleware()
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
@@ -52,8 +47,8 @@ class Psr15GraphQLMiddlewareBuilderTest extends TestCase
         $middlewareBuilder->setResponseFactory(new ResponseFactory());
         $middlewareBuilder->setUrl('/foobar');
 
-        $handler = new class implements RequestHandlerInterface {
-            public function handle(ServerRequestInterface $request) : ResponseInterface
+        $handler = new class () implements RequestHandlerInterface {
+            public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new TextResponse('skipped');
             }
@@ -66,16 +61,17 @@ class Psr15GraphQLMiddlewareBuilderTest extends TestCase
         $this->assertSame('Joe', $data['contacts'][0]['name']);
     }
 
-    private function createRequest() : ServerRequest
+    private function createRequest(): ServerRequest
     {
-        $data        = [
-            'query'     => "{\n contacts {\nname\n}\n}",
+        $data = [
+            'query' => "{\n contacts {\nname\n}\n}",
             'variables' => ['id' => '4d967a0f65224f1685a602cbe4eef667'],
         ];
         $jsonContent = json_encode($data);
-        $stream      = fopen('php://memory', 'rb+');
+        $stream = fopen('php://memory', 'rb+');
         fwrite($stream, $jsonContent);
         rewind($stream);
+
         return new ServerRequest(
             [],
             [],
@@ -83,7 +79,7 @@ class Psr15GraphQLMiddlewareBuilderTest extends TestCase
             'POST',
             $stream,
             [
-                'content-type' => 'application/json'
+                'content-type' => 'application/json',
             ]
         );
     }

@@ -15,9 +15,7 @@ final class GlobAnnotationsCache
 {
     /** @var class-string<object>|null */
     private string|null $typeClassName = null;
-
     private string|null $typeName = null;
-
     private bool $default;
 
     /** @var array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> An array mapping a factory method name to an input name / class name / default flag / declaring class */
@@ -55,7 +53,7 @@ final class GlobAnnotationsCache
 
     /**
      * @param class-string<object>|null $className
-     * @param class-string<object> $declaringClass
+     * @param class-string<object>      $declaringClass
      */
     public function registerFactory(string $methodName, string $inputName, string|null $className, bool $isDefault, string $declaringClass): void
     {

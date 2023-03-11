@@ -26,29 +26,31 @@ use function is_callable;
 class InputFieldDescriptor
 {
     private string $name;
+
     /** @var (InputType&Type)|(InputType&Type&NullableType) */
     private InputType&Type $type;
+
     /** @var array<string, ParameterInterface> */
     private array $parameters = [];
+
     /** @var callable|null */
     private $callable;
     private string|null $targetMethodOnSource;
     private string|null $targetPropertyOnSource;
 
     /**
-     * Implement in future PR
+     * Implement in future PR.
      */
     // private ?string $magicProperty;
 
-    /**
-     * Whether we should inject the source as the first parameter or not.
-     */
+    /** Whether we should inject the source as the first parameter or not. */
     private bool $injectSource = false;
     private string|null $comment = null;
     private MiddlewareAnnotations $middlewareAnnotations;
     private ReflectionMethod $refMethod;
     private ReflectionProperty $refProperty;
     private ResolverInterface|null $originalResolver = null;
+
     /** @var callable */
     private $resolver;
     private bool $isUpdate = false;
@@ -232,9 +234,9 @@ class InputFieldDescriptor
             $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
             $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
-            // } elseif ($this->magicProperty !== null) {
-            // Enable magic properties in a future PR
-            // $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
+        // } elseif ($this->magicProperty !== null) {
+        // Enable magic properties in a future PR
+        // $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
         } else {
             throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
         }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
@@ -16,12 +15,14 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -33,10 +34,8 @@ use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -74,12 +73,13 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->testObjectType === null) {
             $this->testObjectType = new MutableObjectType([
-                'name'    => 'TestObject',
-                'fields'  => [
-                    'test'   => Type::string(),
+                'name' => 'TestObject',
+                'fields' => [
+                    'test' => Type::string(),
                 ],
             ]);
         }
+
         return $this->testObjectType;
     }
 
@@ -87,12 +87,13 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->testObjectType2 === null) {
             $this->testObjectType2 = new MutableObjectType([
-                'name'    => 'TestObject2',
-                'fields'  => [
-                    'test'   => Type::string(),
+                'name' => 'TestObject2',
+                'fields' => [
+                    'test' => Type::string(),
                 ],
             ]);
         }
+
         return $this->testObjectType2;
     }
 
@@ -100,14 +101,15 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->inputTestObjectType === null) {
             $this->inputTestObjectType = new MockResolvableInputObjectType([
-                'name'    => 'TestObjectInput',
-                'fields'  => [
-                    'test'   => Type::string(),
+                'name' => 'TestObjectInput',
+                'fields' => [
+                    'test' => Type::string(),
                 ],
-            ], function($source, $args) {
+            ], function ($source, $args) {
                 return new TestObject($args['test']);
             });
         }
+
         return $this->inputTestObjectType;
     }
 
@@ -117,23 +119,19 @@ abstract class AbstractQueryProviderTest extends TestCase
             $arrayAdapter = new ArrayAdapter();
             $arrayAdapter->setLogger(new ExceptionLogger());
 
-            $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()/*, $this->getInputTestObjectType2()*/) implements TypeMapperInterface {
-                /**
-                 * @var ObjectType
-                 */
+            $this->typeMapper = new RecursiveTypeMapper(new class ($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()/* , $this->getInputTestObjectType2() */) implements TypeMapperInterface {
+                /** @var ObjectType */
                 private $testObjectType;
-                /**
-                 * @var ObjectType
-                 */
-                private $testObjectType2;
-                /**
-                 * @var InputObjectType
-                 */
-                private $inputTestObjectType;
-                /**
-                 * @var InputObjectType
-                 */
 
+                /** @var ObjectType */
+                private $testObjectType2;
+
+                /** @var InputObjectType */
+                private $inputTestObjectType;
+
+                /**
+                 * @var InputObjectType
+                 */
                 public function __construct(
                     ObjectType $testObjectType,
                     ObjectType $testObjectType2,
@@ -225,9 +223,9 @@ abstract class AbstractQueryProviderTest extends TestCase
                 {
                     throw CannotMapTypeException::createForDecorateName($typeName, $type);
                 }
-
             }, new NamingStrategy(), new Psr16Cache($arrayAdapter), $this->getTypeRegistry(), $this->getAnnotationReader());
         }
+
         return $this->typeMapper;
     }
 
@@ -236,6 +234,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->argumentResolver === null) {
             $this->argumentResolver = new ArgumentResolver();
         }
+
         return $this->argumentResolver;
     }
 
@@ -244,6 +243,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->registry === null) {
             $this->registry = $this->buildAutoWiringContainer(new LazyContainer([]));
         }
+
         return $this->registry;
     }
 
@@ -257,6 +257,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->annotationReader === null) {
             $this->annotationReader = new AnnotationReader(new DoctrineAnnotationReader());
         }
+
         return $this->annotationReader;
     }
 
@@ -266,6 +267,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->parameterMiddlewarePipe = new ParameterMiddlewarePipe();
             $this->parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
         }
+
         return $this->parameterMiddlewarePipe;
     }
 
@@ -285,11 +287,13 @@ abstract class AbstractQueryProviderTest extends TestCase
             new Psr16Adapter($psr16Cache),
             [new SecurityExpressionLanguageProvider()]
         );
-        
+
         $fieldMiddlewarePipe->pipe(
-            new SecurityFieldMiddleware($expressionLanguage,
-            new VoidAuthenticationService(),
-            new VoidAuthorizationService())
+            new SecurityFieldMiddleware(
+                $expressionLanguage,
+                new VoidAuthenticationService(),
+                new VoidAuthorizationService()
+            )
         );
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
@@ -316,6 +320,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->rootTypeMapper === null) {
             $this->rootTypeMapper = $this->buildRootTypeMapper();
         }
+
         return $this->rootTypeMapper;
     }
 
@@ -360,6 +365,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
         $topRootTypeMapper->setNext($rootTypeMapper);
+
         return $topRootTypeMapper;
     }
 
@@ -368,6 +374,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->fieldsBuilder === null) {
             $this->fieldsBuilder = $this->buildFieldsBuilder();
         }
+
         return $this->fieldsBuilder;
     }
 
@@ -411,6 +418,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 new NamingStrategy()
             );
         }
+
         return $this->inputTypeUtils;
     }
 
@@ -420,6 +428,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->typeResolver = new TypeResolver();
             $this->typeResolver->registerSchema(new \GraphQL\Type\Schema([]));
         }
+
         return $this->typeResolver;
     }
 
@@ -428,6 +437,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->typeRegistry === null) {
             $this->typeRegistry = new TypeRegistry();
         }
+
         return $this->typeRegistry;
     }
 
@@ -445,6 +455,7 @@ abstract class AbstractQueryProviderTest extends TestCase
 
             $this->namespaceFactory = new NamespaceFactory($psr16Cache);
         }
+
         return $this->namespaceFactory;
     }
 }

@@ -32,7 +32,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
+     * @param class-string<object> $className the exact class name to look for (this function does not look into parent classes)
      */
     public function canMapClassToType(string $className): bool
     {
@@ -42,8 +42,8 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType&Type&NamedType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param class-string<object> $className the exact class name to look for (this function does not look into parent classes)
+     * @param (OutputType&Type&NamedType)|null $subType An optional sub-type if the main class is an iterator that needs to be typed
      *
      * @return MutableObjectType|MutableInterfaceType
      *
@@ -71,7 +71,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
         /** @var mixed $name - invalid vendor mapping */
         $name = $subType->name();
 
-        /** @noinspection PhpConditionAlreadyCheckedInspection */
+        /* @noinspection PhpConditionAlreadyCheckedInspection */
         if ($name === null) {
             throw new RuntimeException('Cannot get name property from sub type ' . $subType::class);
         }
@@ -130,7 +130,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *
@@ -193,7 +193,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $className FQCN
+     * Returns true if this type mapper can extend an existing type for the $className FQCN.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -216,7 +216,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -238,7 +238,7 @@ class PorpaginasTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type.
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {

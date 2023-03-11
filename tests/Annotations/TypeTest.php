@@ -19,13 +19,13 @@ class TypeTest extends TestCase
 
     public function testExternal(): void
     {
-        $type = new Type(['external'=>true]);
-        $this->assertSame(false, $type->isSelfType());
+        $type = new Type(['external' => true]);
+        $this->assertFalse($type->isSelfType());
     }
 
     public function testException2()
     {
-        $type = new Type(['default'=>false]);
+        $type = new Type(['default' => false]);
         $this->expectException(GraphQLRuntimeException::class);
         $this->expectExceptionMessage('Problem in annotation @Type for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
         $type->setClass(FooInterface::class);

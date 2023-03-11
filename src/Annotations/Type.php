@@ -49,7 +49,7 @@ class Type implements TypeInterface
     private $useEnumValues = false;
 
     /**
-     * @param mixed[] $attributes
+     * @param mixed[]                   $attributes
      * @param class-string<object>|null $class
      */
     public function __construct(
@@ -135,7 +135,7 @@ class Type implements TypeInterface
     }
 
     /**
-     * Returns true if this enum type
+     * Returns true if this enum type.
      */
     public function useEnumValues(): bool
     {

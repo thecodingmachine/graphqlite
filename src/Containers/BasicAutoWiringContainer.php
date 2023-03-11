@@ -28,12 +28,12 @@ class BasicAutoWiringContainer implements ContainerInterface
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $id identifier of the entry to look for
      *
-     * @return mixed Entry.
+     * @return mixed entry
      *
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     * @throws NotFoundExceptionInterface  no entry was found for **this** identifier
+     * @throws ContainerExceptionInterface error while retrieving the entry
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */
@@ -67,7 +67,7 @@ class BasicAutoWiringContainer implements ContainerInterface
      * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
      * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $id identifier of the entry to look for
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
      */

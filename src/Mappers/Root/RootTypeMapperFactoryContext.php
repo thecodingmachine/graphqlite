@@ -14,7 +14,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 /**
  * A context class containing a number of classes created on the fly by SchemaFactory.
- * Those classes are made available to factories implementing RootTypeMapperFactoryInterface
+ * Those classes are made available to factories implementing RootTypeMapperFactoryInterface.
  */
 final class RootTypeMapperFactoryContext
 {

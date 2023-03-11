@@ -12,25 +12,19 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class Button
 {
-    /**
-     * @var Color
-     */
+    /** @var Color */
     private $color;
 
-    /**
-     * @var Size
-     */
+    /** @var Size */
     private $size;
 
-    /**
-     * @var Position
-     */
+    /** @var Position */
     private $state;
 
     public function __construct(Color $color, Size $size, Position $state)
     {
         $this->color = $color;
-        $this->size  = $size;
+        $this->size = $size;
         $this->state = $state;
     }
 

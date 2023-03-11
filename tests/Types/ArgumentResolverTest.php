@@ -11,7 +11,6 @@ use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 
 abstract class ArgumentResolverTest extends AbstractQueryProviderTest
 {
-
     public function testResolveArrayException(): void
     {
         $argumentResolver = $this->getArgumentResolver();
@@ -26,6 +25,6 @@ abstract class ArgumentResolverTest extends AbstractQueryProviderTest
         $argumentResolver = $this->getArgumentResolver();
 
         $this->expectException(RuntimeException::class);
-        $argumentResolver->resolve(null, 42, null, $this->createMock(ResolveInfo::class), new class extends Type implements InputType {});
+        $argumentResolver->resolve(null, 42, null, $this->createMock(ResolveInfo::class), new class () extends Type implements InputType {});
     }
 }

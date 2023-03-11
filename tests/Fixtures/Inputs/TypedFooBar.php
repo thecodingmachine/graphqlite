@@ -10,14 +10,9 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
  */
 class TypedFooBar
 {
-
-    /**
-     * @Field()
-     */
+    /** @Field() */
     public string $foo;
 
-    /**
-     * @Field()
-     */
+    /** @Field() */
     public ?int $bar = 10;
 }

@@ -16,7 +16,7 @@ class NamingStrategyTest extends TestCase
         $factory = new Factory();
         $this->assertSame('FooClassInput', $namingStrategy->getInputTypeName('Bar\\FooClass', $factory));
 
-        $factory = new Factory(['name'=>'MyInputType']);
+        $factory = new Factory(['name' => 'MyInputType']);
         $this->assertSame('MyInputType', $namingStrategy->getInputTypeName('Bar\\FooClass', $factory));
     }
 

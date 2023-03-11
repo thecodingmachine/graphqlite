@@ -1,15 +1,12 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
-use function array_search;
-use function strtoupper;
-use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+
+use function strtoupper;
 
 /**
  * A test type that is not a default type.

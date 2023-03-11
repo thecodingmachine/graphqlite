@@ -12,8 +12,8 @@ use Psr\Container\ContainerInterface;
 class AggregateControllerQueryProviderFactory implements QueryProviderFactoryInterface
 {
     /**
-     * @param iterable<string> $controllers A list of controllers name in the container.
-     * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
+     * @param iterable<string>   $controllers          a list of controllers name in the container
+     * @param ContainerInterface $controllersContainer the container we will fetch controllers from
      */
     public function __construct(private readonly iterable $controllers, private readonly ContainerInterface $controllersContainer)
     {

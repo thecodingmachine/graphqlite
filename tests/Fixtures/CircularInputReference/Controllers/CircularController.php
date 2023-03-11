@@ -13,6 +13,6 @@ class CircularController
      */
     public function testCircularInput(CircularInputA $inAndOut): ID
     {
-        return new ID("myID");
+        return new ID('myID');
     }
 }

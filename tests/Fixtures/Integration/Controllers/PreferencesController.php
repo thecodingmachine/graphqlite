@@ -9,9 +9,6 @@ class PreferencesController
 {
     /**
      * @Mutation()
-     * @param Preferences $preferences
-     *
-     * @return Preferences
      */
     public function updatePreferences(Preferences $preferences): Preferences
     {

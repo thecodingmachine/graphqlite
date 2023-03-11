@@ -1,11 +1,8 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
-use Exception;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**

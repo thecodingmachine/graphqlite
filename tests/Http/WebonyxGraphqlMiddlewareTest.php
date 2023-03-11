@@ -8,17 +8,18 @@ use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
 use GraphQL\Executor\Promise\Promise;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
+use Laminas\Diactoros\Response\TextResponse;
+use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\StreamFactory;
+use Laminas\Diactoros\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
-use Laminas\Diactoros\Response\TextResponse;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequest;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\Uri;
+
 use function fopen;
 use function fwrite;
 use function json_encode;
@@ -26,25 +27,27 @@ use function rewind;
 
 class WebonyxGraphqlMiddlewareTest extends TestCase
 {
-    public function testProcess() : void
+    public function testProcess(): void
     {
-        $handler = new class implements RequestHandlerInterface {
-            public function handle(ServerRequestInterface $request) : ResponseInterface
+        $handler = new class () implements RequestHandlerInterface {
+            public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new TextResponse('skipped');
             }
         };
-        $standardServer = new class extends StandardServer {
+        $standardServer = new class () extends StandardServer {
             /** @var ExecutionResult|ExecutionResult[]|Promise */
             private $executionResult;
+
             public function __construct()
             {
                 parent::__construct([]);
             }
+
             /**
              * @param ExecutionResult|ExecutionResult[]|Promise $executionResult
              */
-            public function setExecutionResult($executionResult) : void
+            public function setExecutionResult($executionResult): void
             {
                 $this->executionResult = $executionResult;
             }
@@ -52,7 +55,7 @@ class WebonyxGraphqlMiddlewareTest extends TestCase
             /**
              * @return ExecutionResult|ExecutionResult[]|Promise
              */
-            public function executePsrRequest( RequestInterface $request)
+            public function executePsrRequest(RequestInterface $request)
             {
                 return $this->executionResult;
             }
@@ -87,16 +90,18 @@ class WebonyxGraphqlMiddlewareTest extends TestCase
         $this->expectExceptionMessage('Only SyncPromiseAdapter is supported');
         $middleware->process($request, $handler);
     }
-    private function createRequest() : ServerRequest
+
+    private function createRequest(): ServerRequest
     {
-        $data        = [
-            'query'     => 'query getMatter($id: String!) {\n matter(id: $id) {\nid\n}\n}',
+        $data = [
+            'query' => 'query getMatter($id: String!) {\n matter(id: $id) {\nid\n}\n}',
             'variables' => ['id' => '4d967a0f65224f1685a602cbe4eef667'],
         ];
         $jsonContent = json_encode($data);
-        $stream      = fopen('php://memory', 'r+');
+        $stream = fopen('php://memory', 'r+');
         fwrite($stream, $jsonContent);
         rewind($stream);
+
         return new ServerRequest(
             [],
             [],

@@ -13,37 +13,37 @@ use TheCodingMachine\GraphQLite\Types\NoFieldsException;
 
 class MutableObjectTypeAdapterTest extends TestCase
 {
-
     private function getAdapter(): MutableObjectTypeAdapter
     {
         $type = new ObjectType([
             'name' => 'TestLegacyObject',
             'fields' => [
                 'foo' => [
-                    'type' =>Type::int(),
-                    'resolve' => function(TestLegacyObject $source) {
+                    'type' => Type::int(),
+                    'resolve' => function (TestLegacyObject $source) {
                         return $source->getFoo();
-                    }
-                ]
-            ]
+                    },
+                ],
+            ],
         ]);
 
         $adapter = new MutableObjectTypeAdapter($type);
 
         return $adapter;
     }
+
     public function testAdapter()
     {
         $type = new ObjectType([
             'name' => 'TestLegacyObject',
             'fields' => [
                 'foo' => [
-                    'type' =>Type::int(),
-                    'resolve' => function(TestLegacyObject $source) {
+                    'type' => Type::int(),
+                    'resolve' => function (TestLegacyObject $source) {
                         return $source->getFoo();
-                    }
-                ]
-            ]
+                    },
+                ],
+            ],
         ]);
 
         $adapter = new MutableObjectTypeAdapter($type);
@@ -57,7 +57,6 @@ class MutableObjectTypeAdapterTest extends TestCase
         $this->assertSame($type->hasField('foo'), $adapter->hasField('foo'));
         $interfaceType = new InterfaceType(['name' => 'Foo']);
         $this->assertSame($type->implementsInterface($interfaceType), $adapter->implementsInterface($interfaceType));
-
     }
 
     public function testGetStatus(): void
@@ -73,15 +72,15 @@ class MutableObjectTypeAdapterTest extends TestCase
     {
         $type = $this->getAdapter();
 
-        $type->addFields(function() {
+        $type->addFields(function () {
             return [
-                'test'   => Type::int(),
-                'test2'   => Type::string(),
+                'test' => Type::int(),
+                'test2' => Type::string(),
             ];
         });
-        $type->addFields(function() {
+        $type->addFields(function () {
             return [
-                'test3'   => Type::int(),
+                'test3' => Type::int(),
             ];
         });
         $type->freeze();
@@ -121,7 +120,8 @@ class MutableObjectTypeAdapterTest extends TestCase
 
         $type->freeze();
         $this->expectException(RuntimeException::class);
-        $type->addFields(function() {});
+        $type->addFields(function () {
+        });
     }
 
     public function testNoFieldsType(): void
@@ -129,8 +129,7 @@ class MutableObjectTypeAdapterTest extends TestCase
         $type = new ObjectType([
             'name' => 'TestLegacyObject',
             'fields' => [
-
-            ]
+            ],
         ]);
 
         $adapter = new MutableObjectTypeAdapter($type);
@@ -140,5 +139,4 @@ class MutableObjectTypeAdapterTest extends TestCase
         $this->expectExceptionMessage('The GraphQL object type "TestLegacyObject" has no fields defined. Please check that some fields are defined (using the @Field annotation). If some fields are defined, please check that at least one is visible to the current user.');
         $adapter->getFields();
     }
-
 }

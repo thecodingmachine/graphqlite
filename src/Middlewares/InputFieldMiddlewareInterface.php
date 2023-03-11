@@ -8,7 +8,7 @@ use TheCodingMachine\GraphQLite\InputField;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 
 /**
- * A middleware use to process annotations when evaluating a input field
+ * A middleware use to process annotations when evaluating a input field.
  */
 interface InputFieldMiddlewareInterface
 {

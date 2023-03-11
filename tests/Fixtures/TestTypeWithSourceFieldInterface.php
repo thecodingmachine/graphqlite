@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
@@ -21,7 +20,7 @@ class TestTypeWithSourceFieldInterface implements FromSourceFieldsInterface
     public function getSourceFields(): array
     {
         return [
-            new SourceField(['name'=>'test']),
+            new SourceField(['name' => 'test']),
         ];
     }
 }

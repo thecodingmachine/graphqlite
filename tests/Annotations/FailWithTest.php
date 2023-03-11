@@ -8,7 +8,6 @@ use ReflectionMethod;
 
 class FailWithTest extends TestCase
 {
-
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);
@@ -23,11 +22,11 @@ class FailWithTest extends TestCase
     {
         $method = new ReflectionMethod(__CLASS__, 'method1');
         $failWith = $method->getAttributes()[0]->newInstance();
-        $this->assertSame(null, $failWith->getValue());
+        $this->assertNull($failWith->getValue());
     }
 
     #[FailWith(value: null)]
-    public function method1(): void {
+    public function method1(): void
+    {
     }
-
 }

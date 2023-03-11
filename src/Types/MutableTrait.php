@@ -23,8 +23,9 @@ trait MutableTrait
 
     /** @var array<string,FieldDefinition>|null */
     private array|null $fields = null;
+
     /** @var class-string<object>|null */
-    private string|null $className  = null;
+    private string|null $className = null;
 
     public function freeze(): void
     {
@@ -34,6 +35,7 @@ trait MutableTrait
     public function getStatus(): string
     {
         assert($this->status !== null);
+
         return $this->status;
     }
 
@@ -46,8 +48,6 @@ trait MutableTrait
     }
 
     /**
-     * @param string $name
-     *
      * @throws Exception
      *
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint
@@ -82,6 +82,7 @@ trait MutableTrait
     {
         $this->initializeFields();
         assert($this->fields !== null);
+
         return array_merge(parent::getFields(), $this->fields);
     }
 
@@ -95,7 +96,7 @@ trait MutableTrait
     }
 
     /**
-     * Returns the PHP class mapping this GraphQL type (if any)
+     * Returns the PHP class mapping this GraphQL type (if any).
      *
      * @return class-string<object>|null
      */
@@ -107,9 +108,7 @@ trait MutableTrait
     private function initializeFields(): void
     {
         if ($this->status === MutableInterface::STATUS_PENDING) {
-            throw new RuntimeException(
-                'You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.',
-            );
+            throw new RuntimeException('You must freeze() the MutableObjectType, ' . $this->className . ', before fetching its fields.');
         }
 
         if (isset($this->fields)) {
@@ -120,7 +119,7 @@ trait MutableTrait
         foreach ($this->fieldsCallables as $fieldsCallable) {
             /** @var FieldDefinition[] $newFields */
             $newFields = FieldDefinition::defineFieldMap($this, $fieldsCallable());
-            $this->fields +=  $newFields;
+            $this->fields += $newFields;
         }
 
         if (empty($this->fields) && empty(parent::getFieldNames())) {

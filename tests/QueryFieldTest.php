@@ -18,7 +18,7 @@ class QueryFieldTest extends TestCase
     {
         $sourceResolver = new SourceResolver('getTest');
         $queryField = new QueryField('foo', Type::string(), [
-            new class implements ParameterInterface {
+            new class () implements ParameterInterface {
                 public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');

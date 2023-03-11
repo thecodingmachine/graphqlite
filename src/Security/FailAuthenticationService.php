@@ -10,7 +10,7 @@ namespace TheCodingMachine\GraphQLite\Security;
 class FailAuthenticationService implements AuthenticationServiceInterface
 {
     /**
-     * Returns true if the "current" user is logged
+     * Returns true if the "current" user is logged.
      */
     public function isLogged(): bool
     {

@@ -25,12 +25,13 @@ use function is_a;
 use function ltrim;
 
 /**
- * Maps an class extending MyCLabs enums to a GraphQL type
+ * Maps an class extending MyCLabs enums to a GraphQL type.
  */
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<object>, EnumType> */
     private array $cache = [];
+
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
 
@@ -51,9 +52,9 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         OutputType|null $subType,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-    ): OutputType&\GraphQL\Type\Definition\Type
-    {
+    ): OutputType&\GraphQL\Type\Definition\Type {
         $result = $this->map($type);
+
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
@@ -63,9 +64,9 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         string $argumentName,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-    ): InputType&\GraphQL\Type\Definition\Type
-    {
+    ): InputType&\GraphQL\Type\Definition\Type {
         $result = $this->map($type);
+
         return $result ?? $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
     }
 
@@ -78,7 +79,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         if ($fqsen === null) {
             return null;
         }
-        /** @var  class-string<object> $enumClass */
+        /** @var class-string<object> $enumClass */
         $enumClass = (string) $fqsen;
 
         return $this->mapByClassName($enumClass);
@@ -98,9 +99,9 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 
         $refClass = new ReflectionClass($enumClass);
         $type = new MyCLabsEnumType($enumClass, $this->getTypeName($refClass));
+
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }
-
 
     private function getTypeName(ReflectionClass $refClass): string
     {
@@ -111,6 +112,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
                 return $name;
             }
         }
+
         return $refClass->getShortName();
     }
 
@@ -135,6 +137,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             $className = $nameToClassMapping[$typeName];
             $type = $this->mapByClassName($className);
             assert($type !== null);
+
             return $type;
         }
 
@@ -170,6 +173,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
                         $nameToClassMapping[$this->getTypeName($classRef)] = $className;
                     }
                 }
+
                 return $nameToClassMapping;
             });
         }

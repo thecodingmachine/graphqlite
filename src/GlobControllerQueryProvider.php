@@ -37,9 +37,9 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private CacheContractInterface $cacheContract;
 
     /**
-     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
-     * @param ContainerInterface $container The container we will fetch controllers from.
-     * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
+     * @param string             $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
+     * @param ContainerInterface $container the container we will fetch controllers from
+     * @param bool               $recursive whether subnamespaces of $namespace must be analyzed
      */
     public function __construct(
         private string $namespace,
@@ -50,8 +50,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         ClassNameMapper|null $classNameMapper = null,
         private int|null $cacheTtl = null,
         private bool $recursive = true,
-    )
-    {
+    ) {
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
         $this->cacheContract = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
     }
@@ -126,6 +125,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
                 return true;
             }
         }
+
         return false;
     }
 

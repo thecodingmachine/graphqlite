@@ -21,6 +21,7 @@ class MissingTypeHintRuntimeException extends GraphQLRuntimeException
     {
         $returnType = $method->getReturnType();
         assert($returnType === null || $returnType instanceof ReflectionNamedType);
+
         return new self(sprintf('The return type of factory "%s::%s" must be an object, "%s" passed instead.', $method->getDeclaringClass()->getName(), $method->getName(), $returnType ? $returnType->getName() : 'mixed'));
     }
 

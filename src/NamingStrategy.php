@@ -21,7 +21,7 @@ class NamingStrategy implements NamingStrategyInterface
 {
     /**
      * Returns the name of the GraphQL interface from a name of a concrete class (when the interface is created
-     * automatically to manage inheritance)
+     * automatically to manage inheritance).
      */
     public function getInterfaceNameFromConcreteName(string $concreteType): string
     {
@@ -30,7 +30,7 @@ class NamingStrategy implements NamingStrategyInterface
 
     /**
      * Returns the name of the GraphQL object from a name of GraphQL interface type (when the object is created
-     * automatically from a "Type" annotated interface)
+     * automatically from a "Type" annotated interface).
      */
     public function getConcreteNameFromInterfaceName(string $name): string
     {
@@ -57,7 +57,7 @@ class NamingStrategy implements NamingStrategyInterface
         }
         // Else, let's take the name of the targeted class
         $typeClassName = $type->getClass();
-        $prevPos       = strrpos($typeClassName, '\\');
+        $prevPos = strrpos($typeClassName, '\\');
         if ($prevPos) {
             $typeClassName = substr($typeClassName, $prevPos + 1);
         }

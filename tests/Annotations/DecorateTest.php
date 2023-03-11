@@ -8,7 +8,6 @@ use ReflectionMethod;
 
 class DecorateTest extends TestCase
 {
-
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);
@@ -26,7 +25,8 @@ class DecorateTest extends TestCase
         $this->assertSame('foobar', $attribute->getInputTypeName());
     }
 
-    #[Decorate("foobar")]
-    public function method1(): void {
+    #[Decorate('foobar')]
+    public function method1(): void
+    {
     }
 }

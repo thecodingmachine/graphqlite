@@ -32,7 +32,7 @@ interface SourceFieldInterface
     public function getDescription(): string|null;
 
     /**
-     * Returns the property name in the source class
+     * Returns the property name in the source class.
      */
     public function getSourceName(): string|null;
 

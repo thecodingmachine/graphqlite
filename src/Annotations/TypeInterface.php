@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 /**
- * Applies to all GraphQL "Type" annotations (Type and Input)
+ * Applies to all GraphQL "Type" annotations (Type and Input).
  */
 interface TypeInterface
 {

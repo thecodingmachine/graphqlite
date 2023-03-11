@@ -10,7 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class DateTimeTypeTest extends TestCase
 {
-
     public function testSerialize(): void
     {
         $dateTimeType = new DateTimeType();
@@ -29,13 +28,11 @@ class DateTimeTypeTest extends TestCase
 
         $this->expectException(Exception::class);
         $dateTimeType->parseLiteral(null);
-
     }
 
     public function testParseValue(): void
     {
         $dateTimeType = new DateTimeType();
-
 
         $this->assertNull($dateTimeType->parseValue(null));
     }

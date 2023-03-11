@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -11,9 +10,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class User extends Contact
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $email;
 
     public function __construct(string $name, string $email)
@@ -24,7 +21,6 @@ class User extends Contact
 
     /**
      * @Field(name="email")
-     * @return string
      */
     public function getEmail(): string
     {

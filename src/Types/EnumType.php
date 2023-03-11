@@ -34,7 +34,6 @@ class EnumType extends BaseEnumType
 
     // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
 
-    /** @param mixed $value */
     public function serialize($value): string
     {
         if (! $value instanceof UnitEnum) {

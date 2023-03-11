@@ -2,13 +2,12 @@
 
 namespace TheCodingMachine\GraphQLite\Annotations;
 
-use \ReflectionMethod;
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class RightTest extends TestCase
 {
-
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);
@@ -30,11 +29,13 @@ class RightTest extends TestCase
         $this->assertSame('foo', $right->getName());
     }
 
-    #[Right(name: "foo")]
-    public function method1(): void {
+    #[Right(name: 'foo')]
+    public function method1(): void
+    {
     }
 
-    #[Right("foo")]
-    public function method2(): void {
+    #[Right('foo')]
+    public function method2(): void
+    {
     }
 }

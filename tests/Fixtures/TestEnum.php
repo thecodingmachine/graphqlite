@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
-
 
 use MyCLabs\Enum\Enum;
 

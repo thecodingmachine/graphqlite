@@ -35,7 +35,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
         $baseTypeMapper = new BaseTypeMapper(new FinalRootTypeMapper($this->getTypeMapper()), $this->getTypeMapper(), $this->getRootTypeMapper());
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage("type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.");
+        $this->expectExceptionMessage('type-hinting against DateTime is not allowed. Please use the DateTimeImmutable type instead.');
         $baseTypeMapper->toGraphQLInputType(new Object_(new Fqsen('\\DateTime')), null, 'foo', new ReflectionMethod(BaseTypeMapper::class, '__construct'), new DocBlock());
     }
 
@@ -58,14 +58,11 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     }
 
     /**
-     * @param string $phpdocType
      * @param class-string $expectedItemType
-     *
-     * @return void
      *
      * @dataProvider genericIterablesProvider
      */
-    public function testOutputGenericIterables(string $phpdocType, string $expectedItemType, ?string $expectedWrappedItemType = null): void
+    public function testOutputGenericIterables(string $phpdocType, string $expectedItemType, string $expectedWrappedItemType = null): void
     {
         $typeMapper = $this->getRootTypeMapper();
 
@@ -75,7 +72,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(ListOfType::class, $result->getWrappedType());
         $itemType = $result->getWrappedType()->getWrappedType();
         $this->assertInstanceOf($expectedItemType, $itemType);
-        if (null !== $expectedWrappedItemType) {
+        if ($expectedWrappedItemType !== null) {
             $this->assertInstanceOf(WrappingType::class, $itemType);
             $this->assertInstanceOf($expectedWrappedItemType, $itemType->getWrappedType());
         }
@@ -88,14 +85,14 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
 
         // key information cannot be presented in GQL types for now
         yield 'iterable with provided int key and test object item' => [
-            \sprintf('iterable<%s>', TestObject::class),
+            sprintf('iterable<%s>', TestObject::class),
             NonNull::class,
             MutableObjectType::class,
         ];
         yield '\Iterator with provided string key and int item' => ['\Iterator<string, int>', NonNull::class, IntType::class];
         yield '\IteratorAggregate with provided int key and bool item' => ['\IteratorAggregate<int, bool>', NonNull::class, BooleanType::class];
         yield '\Traversable with provided string key and test object item' => [
-            \sprintf('\Traversable<string, %s>', TestObject::class),
+            sprintf('\Traversable<string, %s>', TestObject::class),
             NonNull::class,
             MutableObjectType::class,
         ];

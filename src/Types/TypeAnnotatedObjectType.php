@@ -12,7 +12,7 @@ use function class_implements;
 use function get_parent_class;
 
 /**
- * An object type built from the Type annotation
+ * An object type built from the Type annotation.
  *
  * @phpstan-import-type ObjectConfig from ObjectType
  */
@@ -20,7 +20,7 @@ class TypeAnnotatedObjectType extends MutableObjectType
 {
     /**
      * @param class-string<object> $className
-     * @param ObjectConfig $config
+     * @param ObjectConfig         $config
      */
     public function __construct(string $className, array $config)
     {
@@ -34,7 +34,7 @@ class TypeAnnotatedObjectType extends MutableObjectType
             'name' => $typeName,
             'fields' => static function () use ($annotatedObject, $recursiveTypeMapper, $className, $fieldsBuilder, $typeName) {
                 $parentClass = get_parent_class($className);
-                $parentType  = null;
+                $parentType = null;
                 if ($parentClass !== false) {
                     if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
                         $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);

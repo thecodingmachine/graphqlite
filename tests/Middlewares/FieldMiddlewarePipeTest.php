@@ -9,13 +9,12 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 class FieldMiddlewarePipeTest extends TestCase
 {
-
     public function testHandle(): void
     {
-        $finalHandler = new class implements FieldHandlerInterface {
+        $finalHandler = new class () implements FieldHandlerInterface {
             public function handle(QueryFieldDescriptor $fieldDescriptor): ?FieldDefinition
             {
-                return new  FieldDefinition(['name'=>'foo', 'type'=>Type::string()]);
+                return new FieldDefinition(['name' => 'foo', 'type' => Type::string()]);
             }
         };
 
@@ -24,10 +23,10 @@ class FieldMiddlewarePipeTest extends TestCase
         $definition = $middlewarePipe->process(new QueryFieldDescriptor(), $finalHandler);
         $this->assertSame('foo', $definition->name);
 
-        $middlewarePipe->pipe(new class implements FieldMiddlewareInterface {
+        $middlewarePipe->pipe(new class () implements FieldMiddlewareInterface {
             public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
             {
-                return new FieldDefinition(['name'=>'bar', 'type'=>Type::string()]);
+                return new FieldDefinition(['name' => 'bar', 'type' => Type::string()]);
             }
         });
 

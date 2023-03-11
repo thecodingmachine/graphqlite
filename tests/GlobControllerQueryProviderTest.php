@@ -5,7 +5,6 @@ namespace TheCodingMachine\GraphQLite;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\NullCache;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
 class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
@@ -14,10 +13,8 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
     {
         $controller = new TestController();
 
-        $container = new class([ TestController::class => $controller ]) implements ContainerInterface {
-            /**
-             * @var array
-             */
+        $container = new class ([TestController::class => $controller]) implements ContainerInterface {
+            /** @var array */
             private $controllers;
 
             public function __construct(array $controllers)
@@ -25,12 +22,12 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
                 $this->controllers = $controllers;
             }
 
-            public function get($id):mixed
+            public function get($id): mixed
             {
                 return $this->controllers[$id];
             }
 
-            public function has($id):bool
+            public function has($id): bool
             {
                 return isset($this->controllers[$id]);
             }
@@ -43,6 +40,5 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $mutations = $globControllerQueryProvider->getMutations();
         $this->assertCount(1, $mutations);
-
     }
 }

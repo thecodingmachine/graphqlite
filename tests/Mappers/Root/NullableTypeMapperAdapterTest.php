@@ -13,6 +13,7 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -64,8 +65,7 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
     {
         $typeMapper = new NullableTypeMapperAdapter();
 
-        $typeMapper->setNext(new class implements RootTypeMapperInterface {
-
+        $typeMapper->setNext(new class () implements RootTypeMapperInterface {
             public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
             {
                 return new NonNull(new StringType());
@@ -73,15 +73,14 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
             public function toGraphQLInputType(Type $type, null|InputType $subType, string $argumentName, $reflector, DocBlock $docBlockObj): InputType&GraphQLType
             {
-                throw new \RuntimeException('Not implemented');
+                throw new RuntimeException('Not implemented');
             }
 
             public function mapNameToType(string $typeName): NamedType&GraphQLType
             {
-                throw new \RuntimeException('Not implemented');
+                throw new RuntimeException('Not implemented');
             }
         });
-
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('a type mapper returned a GraphQL\\Type\\Definition\\NonNull instance.');

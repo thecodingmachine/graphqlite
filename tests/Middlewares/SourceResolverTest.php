@@ -8,7 +8,6 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class SourceResolverTest extends TestCase
 {
-
     public function testExceptionInInvoke()
     {
         $sourceResolver = new SourceResolver('test');

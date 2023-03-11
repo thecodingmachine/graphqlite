@@ -2,21 +2,18 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 
-use Exception;
+use DateTimeImmutable;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
-use TheCodingMachine\GraphQLite\Annotations\Right;
 
 /**
  * @Input()
  */
 class TestConstructorAndProperties
 {
-
-    /**
-     * @Field()
-     */
-    private \DateTimeImmutable $date;
+    /** @Field() */
+    private DateTimeImmutable $date;
 
     /**
      * @Field()
@@ -30,20 +27,20 @@ class TestConstructorAndProperties
      */
     private $bar;
 
-    public function __construct(\DateTimeImmutable $date, string $foo)
+    public function __construct(DateTimeImmutable $date, string $foo)
     {
         $this->date = $date;
         $this->foo = $foo;
     }
 
-    public function getDate(): \DateTimeImmutable
+    public function getDate(): DateTimeImmutable
     {
         return $this->date;
     }
 
     public function setFoo(string $foo): void
     {
-        throw new \RuntimeException("This should not be called");
+        throw new RuntimeException('This should not be called');
     }
 
     public function getFoo(): string

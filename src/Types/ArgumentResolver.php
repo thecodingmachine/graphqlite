@@ -21,12 +21,12 @@ use function assert;
 use function is_array;
 
 /**
- * Resolves arguments based on input value and InputType
+ * Resolves arguments based on input value and InputType.
  */
 class ArgumentResolver
 {
     /**
-     * Casts a value received from GraphQL into an argument passed to a method.*
+     * Casts a value received from GraphQL into an argument passed to a method.*.
      *
      * @throws Error
      */
@@ -41,6 +41,7 @@ class ArgumentResolver
             return array_map(function ($item) use ($type, $source, $context, $resolveInfo) {
                 $wrappedType = $type->getWrappedType();
                 assert($wrappedType instanceof InputType);
+
                 return $this->resolve($source, $item, $context, $resolveInfo, $wrappedType);
             }, $val);
         }
@@ -71,6 +72,7 @@ class ArgumentResolver
         if ($type instanceof NonNull) {
             $wrapped = $type->getWrappedType();
             assert($wrapped instanceof InputType);
+
             return $this->stripNonNullType($wrapped);
         }
 

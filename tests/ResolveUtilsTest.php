@@ -23,7 +23,7 @@ class ResolveUtilsTest extends TestCase
 
     public function testAssertObjectOk(): void
     {
-        ResolveUtils::assertInnerReturnType(new stdClass(), new ObjectType(['name'=>'foo']));
+        ResolveUtils::assertInnerReturnType(new stdClass(), new ObjectType(['name' => 'foo']));
         $this->assertTrue(true);
     }
 
@@ -41,7 +41,7 @@ class ResolveUtilsTest extends TestCase
 
     public function testAssertInputObjectOk(): void
     {
-        ResolveUtils::assertInnerInputType(new stdClass(), new ObjectType(['name'=>'foo']));
+        ResolveUtils::assertInnerInputType(new stdClass(), new ObjectType(['name' => 'foo']));
         $this->assertTrue(true);
     }
 }

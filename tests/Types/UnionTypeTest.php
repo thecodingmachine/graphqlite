@@ -4,7 +4,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
-use PHPUnit\Framework\TestCase;
+use InvalidArgumentException;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -25,14 +25,14 @@ class UnionTypeTest extends AbstractQueryProviderTest
     public function testException(): void
     {
         $unionType = new UnionType([$this->getTestObjectType(), $this->getTestObjectType2()], $this->getTypeMapper(), new NamingStrategy());
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolveInfo = $this->getMockBuilder(ResolveInfo::class)->disableOriginalConstructor()->getMock();
         $unionType->resolveType('foo', null, $resolveInfo);
     }
 
     public function testException2(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         new UnionType([new StringType()], $this->getTypeMapper(), new NamingStrategy());
     }
 }

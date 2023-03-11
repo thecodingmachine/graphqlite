@@ -1,17 +1,12 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
-
-use Porpaginas\Arrays\ArrayResult;
 use stdClass;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
-use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Security;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
 
 class SecurityController
@@ -74,7 +69,6 @@ class SecurityController
     /**
      * @Query()
      * @InjectUser(for="$user")
-     * @param stdClass $user
      */
     public function getInjectedUser(stdClass $user): int
     {

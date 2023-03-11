@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class ExtendTypeTest extends TestCase
 {
-
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);

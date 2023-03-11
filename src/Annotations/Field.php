@@ -38,7 +38,7 @@ class Field extends AbstractRequest
     private $inputType;
 
     /**
-     * @param mixed[] $attributes
+     * @param mixed[]         $attributes
      * @param string|string[] $for
      */
     public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $prefetchMethod = null, string|array|null $for = null, string|null $description = null, string|null $inputType = null)
@@ -57,7 +57,7 @@ class Field extends AbstractRequest
     }
 
     /**
-     * Returns the prefetch method name (the method that will be called to fetch many records at once)
+     * Returns the prefetch method name (the method that will be called to fetch many records at once).
      */
     public function getPrefetchMethod(): string|null
     {

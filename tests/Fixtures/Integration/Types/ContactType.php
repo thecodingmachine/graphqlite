@@ -1,18 +1,18 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
+
+use RuntimeException;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\HideParameter;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 use function array_search;
 use function strtoupper;
-use TheCodingMachine\GraphQLite\Annotations\ExtendType;
-use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
-use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Annotations\Autowire;
-use TheCodingMachine\GraphQLite\Annotations\HideParameter;
-use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 /**
  * @ExtendType(class=Contact::class)
@@ -30,7 +30,7 @@ class ContactType
      */
     public function customField(Contact $contact, string $prefix): string
     {
-        return $prefix.' '.strtoupper($contact->getName());
+        return $prefix . ' ' . strtoupper($contact->getName());
     }
 
     /**
@@ -40,16 +40,17 @@ class ContactType
     {
         $index = array_search($contact, $data['contacts'], true);
         if ($index === false) {
-            throw new \RuntimeException('Index not found');
+            throw new RuntimeException('Index not found');
         }
-        return $data['prefix'].$data['contacts'][$index]->getName().$suffix;
+
+        return $data['prefix'] . $data['contacts'][$index]->getName() . $suffix;
     }
 
     public function prefetchContacts(iterable $contacts, string $prefix)
     {
         return [
             'contacts' => $contacts,
-            'prefix' => $prefix
+            'prefix' => $prefix,
         ];
     }
 }

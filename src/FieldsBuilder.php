@@ -68,7 +68,7 @@ use function trim;
 use const PHP_EOL;
 
 /**
- * A class in charge if returning list of fields for queries / mutations / entities / input types
+ * A class in charge if returning list of fields for queries / mutations / entities / input types.
  */
 class FieldsBuilder
 {
@@ -85,8 +85,7 @@ class FieldsBuilder
         private readonly ParameterMiddlewareInterface $parameterMapper,
         private readonly FieldMiddlewareInterface $fieldMiddleware,
         private readonly InputFieldMiddlewareInterface $inputFieldMiddleware,
-    )
-    {
+    ) {
         $this->typeMapper = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
     }
 
@@ -198,11 +197,11 @@ class FieldsBuilder
     }
 
     /**
-     * Track Field annotation in a self targeted type
+     * Track Field annotation in a self targeted type.
      *
      * @param class-string<object> $className
      *
-     * @return array<string, FieldDefinition> QueryField indexed by name.
+     * @return array<string, FieldDefinition> queryField indexed by name
      */
     public function getSelfFields(string $className, string|null $typeName = null): array
     {
@@ -224,14 +223,14 @@ class FieldsBuilder
     }
 
     /**
-     * @param ReflectionMethod $refMethod A method annotated with a Factory annotation.
+     * @param ReflectionMethod $refMethod a method annotated with a Factory annotation
      *
-     * @return array<string, ParameterInterface> Returns an array of parameters.
+     * @return array<string, ParameterInterface> returns an array of parameters
      */
     public function getParameters(ReflectionMethod $refMethod): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-        //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
+        // $docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = $refMethod->getParameters();
 
@@ -239,14 +238,14 @@ class FieldsBuilder
     }
 
     /**
-     * @param ReflectionMethod $refMethod A method annotated with a Decorate annotation.
+     * @param ReflectionMethod $refMethod a method annotated with a Decorate annotation
      *
-     * @return array<string, ParameterInterface> Returns an array of parameters.
+     * @return array<string, ParameterInterface> returns an array of parameters
      */
     public function getParametersForDecorator(ReflectionMethod $refMethod): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-        //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
+        // $docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = $refMethod->getParameters();
 
@@ -261,10 +260,10 @@ class FieldsBuilder
     }
 
     /**
-     * @param object|class-string<object> $controller The controller instance, or the name of the source class name
+     * @param object|class-string<object>   $controller     The controller instance, or the name of the source class name
      * @param class-string<AbstractRequest> $annotationName
-     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
-     * @param string|null $typeName Type name for which fields should be extracted for.
+     * @param bool                          $injectSource   Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
+     * @param string|null                   $typeName       type name for which fields should be extracted for
      *
      * @return array<string, FieldDefinition>
      *
@@ -414,7 +413,7 @@ class FieldsBuilder
 
             $fieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
-            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class () implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
@@ -507,7 +506,7 @@ class FieldsBuilder
 
             $fieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
-            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class () implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
@@ -528,7 +527,7 @@ class FieldsBuilder
     }
 
     /**
-     * @param SourceFieldInterface[] $sourceFields
+     * @param SourceFieldInterface[]  $sourceFields
      * @param ReflectionClass<object> $refClass
      *
      * @return FieldDefinition[]
@@ -630,7 +629,7 @@ class FieldsBuilder
             $fieldDescriptor->setInjectSource(false);
             $fieldDescriptor->setMiddlewareAnnotations($sourceField->getMiddlewareAnnotations());
 
-            $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
+            $field = $this->fieldMiddleware->process($fieldDescriptor, new class () implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
@@ -694,6 +693,7 @@ class FieldsBuilder
         assert($phpdocType !== null);
 
         $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $context);
+
         return $this->typeMapper->mapReturnType($refMethod, $fakeDocBlock);
 
         // TODO: add a catch to CannotMapTypeExceptionInterface and a "addMagicFieldInfo" method to know where the issues are coming from.
@@ -741,7 +741,7 @@ class FieldsBuilder
 
         foreach ($refParameters as $parameter) {
             $parameterAnnotations = $parameterAnnotationsPerParameter[$parameter->getName()] ?? new ParameterAnnotations([]);
-            //$parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
+            // $parameterAnnotations = $this->annotationReader->getParameterAnnotations($parameter);
             if (! empty($additionalParameterAnnotations[$parameter->getName()])) {
                 $parameterAnnotations->merge($additionalParameterAnnotations[$parameter->getName()]);
                 unset($additionalParameterAnnotations[$parameter->getName()]);
@@ -817,7 +817,7 @@ class FieldsBuilder
      * Gets input fields by class method annotations.
      *
      * @param class-string<AbstractRequest> $annotationName
-     * @param array<mixed> $defaultProperties
+     * @param array<mixed>                  $defaultProperties
      *
      * @return array<string, InputField>
      *
@@ -894,7 +894,7 @@ class FieldsBuilder
 
             $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
-            $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+            $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class () implements InputFieldHandlerInterface {
                 public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
                 {
                     return InputField::fromFieldDescriptor($inputFieldDescriptor);
@@ -915,7 +915,7 @@ class FieldsBuilder
      * Gets input fields by class property annotations.
      *
      * @param class-string<AbstractRequest> $annotationName
-     * @param array<mixed> $defaultProperties
+     * @param array<mixed>                  $defaultProperties
      *
      * @return array<string, InputField>
      *
@@ -989,7 +989,7 @@ class FieldsBuilder
                 $inputFieldDescriptor->setTargetPropertyOnSource($refProperty->getName());
                 $inputFieldDescriptor->setMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
-                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class () implements InputFieldHandlerInterface {
                     public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
                     {
                         return InputField::fromFieldDescriptor($inputFieldDescriptor);

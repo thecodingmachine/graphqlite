@@ -26,14 +26,16 @@ use function assert;
 use function enum_exists;
 
 /**
- * Maps an enum class to a GraphQL type (only available in PHP>=8.1)
+ * Maps an enum class to a GraphQL type (only available in PHP>=8.1).
  */
 class EnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<UnitEnum>, EnumType> */
     private array $cache = [];
+
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
+
     /** @var array<string, class-string<UnitEnum>> */
     private array|null $nameToClassMapping = null;
 
@@ -54,11 +56,12 @@ class EnumTypeMapper implements RootTypeMapperInterface
         DocBlock $docBlockObj,
     ): OutputType&GraphQLType {
         $result = $this->map($type);
+
         return $result ?? $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
     }
 
     /**
-     * Maps into the appropriate InputType
+     * Maps into the appropriate InputType.
      */
     public function toGraphQLInputType(
         Type $type,
@@ -66,8 +69,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         string $argumentName,
         ReflectionMethod|ReflectionProperty $reflector,
         DocBlock $docBlockObj,
-    ): InputType&GraphQLType
-    {
+    ): InputType&GraphQLType {
         $result = $this->map($type);
         if ($result === null) {
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
@@ -152,6 +154,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
             $className = $nameToClassMapping[$typeName];
             $type = $this->mapByClassName($className);
             assert($type !== null);
+
             return $type;
         }
 
@@ -177,9 +180,11 @@ class EnumTypeMapper implements RootTypeMapperInterface
                         $nameToClassMapping[$this->getTypeName($classRef)] = $className;
                     }
                 }
+
                 return $nameToClassMapping;
             });
         }
+
         return $this->nameToClassMapping;
     }
 }

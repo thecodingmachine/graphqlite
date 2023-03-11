@@ -2,13 +2,13 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use Doctrine\Common\Annotations\AnnotationException;
+use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use ReflectionClass;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -165,8 +165,8 @@ class AnnotationReaderTest extends TestCase
         $this->assertSame(TestType::class, $type->getClass());
 
         // We get the same instance
-        //$type2 = $annotationReader->getTypeAnnotation(new ReflectionClass(TestType::class));
-        //$this->assertSame($type, $type2, 'Assert some cache is available');
+        // $type2 = $annotationReader->getTypeAnnotation(new ReflectionClass(TestType::class));
+        // $this->assertSame($type, $type2, 'Assert some cache is available');
     }
 
     /**

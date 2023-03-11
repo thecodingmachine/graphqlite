@@ -4,11 +4,9 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
 
 class UseInputTypeTest extends TestCase
 {
-
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);

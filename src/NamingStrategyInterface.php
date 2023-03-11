@@ -13,13 +13,13 @@ interface NamingStrategyInterface
 {
     /**
      * Returns the name of the GraphQL interface from a name of GraphQL concrete type (when the interface is created
-     * automatically to manage inheritance)
+     * automatically to manage inheritance).
      */
     public function getInterfaceNameFromConcreteName(string $concreteType): string;
 
     /**
      * Returns the name of the GraphQL object from a name of GraphQL interface type (when the object is created
-     * automatically from a "Type" annotated interface)
+     * automatically from a "Type" annotated interface).
      */
     public function getConcreteNameFromInterfaceName(string $name): string;
 

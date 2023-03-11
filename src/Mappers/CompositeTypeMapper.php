@@ -126,7 +126,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *
@@ -159,7 +159,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $className FQCN
+     * Returns true if this type mapper can extend an existing type for the $className FQCN.
      *
      * @param class-string<object> $className
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
@@ -195,7 +195,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -229,7 +229,7 @@ class CompositeTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type.
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {

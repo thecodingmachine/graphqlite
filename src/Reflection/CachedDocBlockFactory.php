@@ -25,8 +25,10 @@ use function md5;
 class CachedDocBlockFactory
 {
     private DocBlockFactory $docBlockFactory;
+
     /** @var array<string, DocBlock> */
     private array $docBlockArrayCache = [];
+
     /** @var array<string, Context> */
     private array $contextArrayCache = [];
     private ContextFactory $contextFactory;
@@ -35,11 +37,11 @@ class CachedDocBlockFactory
     public function __construct(private readonly CacheInterface $cache, DocBlockFactory|null $docBlockFactory = null)
     {
         $this->docBlockFactory = $docBlockFactory ?: DocBlockFactory::createInstance();
-        $this->contextFactory  = new ContextFactory();
+        $this->contextFactory = new ContextFactory();
     }
 
     /**
-     * Fetches a DocBlock object from a ReflectionMethod
+     * Fetches a DocBlock object from a ReflectionMethod.
      *
      * @throws InvalidArgumentException
      */
@@ -60,7 +62,7 @@ class CachedDocBlockFactory
                 'docblock' => $docBlock,
             ] = $cacheItem;
 
-            if (filemtime($fileName) === $time) {
+            if ($time === filemtime($fileName)) {
                 $this->docBlockArrayCache[$key] = $docBlock;
 
                 return $docBlock;
@@ -82,7 +84,7 @@ class CachedDocBlockFactory
     {
         $docComment = $reflector->getDocComment() ?: '/** */';
 
-        $refClass     = $reflector->getDeclaringClass();
+        $refClass = $reflector->getDeclaringClass();
         $refClassName = $refClass->getName();
 
         if (! isset($this->contextArrayCache[$refClassName])) {
@@ -112,7 +114,7 @@ class CachedDocBlockFactory
                 'context' => $context,
             ] = $cacheItem;
 
-            if (filemtime($fileName) === $time) {
+            if ($time === filemtime($fileName)) {
                 $this->contextArrayCache[$className] = $context;
 
                 return $context;
@@ -127,6 +129,7 @@ class CachedDocBlockFactory
         ]);
 
         $this->contextArrayCache[$className] = $context;
+
         return $context;
     }
 }

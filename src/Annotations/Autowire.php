@@ -25,6 +25,7 @@ class Autowire implements ParameterAnnotationInterface
 {
     /** @var string|null */
     private $for;
+
     /** @var string|null */
     private $identifier;
 
@@ -47,6 +48,7 @@ class Autowire implements ParameterAnnotationInterface
         if ($this->for === null) {
             throw new BadMethodCallException('The @Autowire annotation must be passed a target. For instance: "@Autowire(for="$myService")"');
         }
+
         return $this->for;
     }
 

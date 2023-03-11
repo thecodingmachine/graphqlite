@@ -2,12 +2,10 @@
 
 namespace TheCodingMachine\GraphQLite\Exceptions;
 
-use GraphQL\Error\Error;
 use PHPUnit\Framework\TestCase;
 
 class GraphQLAggregateExceptionTest extends TestCase
 {
-
     public function testAggregateException()
     {
         $error = new GraphQLException('foo', 12);
@@ -26,7 +24,5 @@ class GraphQLAggregateExceptionTest extends TestCase
 
         $this->expectException(GraphQLException::class);
         GraphQLAggregateException::throwExceptions([$error]);
-
     }
-
 }

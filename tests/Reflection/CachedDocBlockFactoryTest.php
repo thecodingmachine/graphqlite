@@ -7,11 +7,9 @@ use ReflectionClass;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 
 class CachedDocBlockFactoryTest extends TestCase
 {
-
     public function testGetDocBlock(): void
     {
         $arrayCache = new Psr16Cache(new ArrayAdapter());

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\InputOutputNameConflict\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Factory;
@@ -12,9 +11,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class InAndOut
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $value;
 
     public function __construct(string $value)

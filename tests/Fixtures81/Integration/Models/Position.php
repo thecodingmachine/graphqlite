@@ -10,5 +10,5 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 enum Position: int
 {
     case Off = 0;
-    case On  = 1;
+    case On = 1;
 }

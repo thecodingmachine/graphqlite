@@ -9,7 +9,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 
 class FactoryContextTest extends AbstractQueryProviderTest
 {
-    const GLOB_TTL_SECONDS = 2;
+    public const GLOB_TTL_SECONDS = 2;
 
     public function testContext(): void
     {

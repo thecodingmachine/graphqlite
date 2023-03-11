@@ -24,8 +24,8 @@ class LazyContainer implements ContainerInterface
     /**
      * Instantiate the container.
      *
-     * @param array<string, Closure> $entries The array of closures defining each entry of the container. Entries must be passed as an array of anonymous functions.
-     * @param ContainerInterface|null $delegateLookupContainer Optional delegate lookup container.
+     * @param array<string, Closure>  $entries                 The array of closures defining each entry of the container. Entries must be passed as an array of anonymous functions.
+     * @param ContainerInterface|null $delegateLookupContainer optional delegate lookup container
      */
     public function __construct(private array $entries, ContainerInterface|null $delegateLookupContainer = null)
     {

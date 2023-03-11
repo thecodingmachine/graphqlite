@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures\StaticTypeMapper\Controllers;
-
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\StaticTypeMapper\Types\TestLegacyObject;

@@ -31,7 +31,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     private array $types = [];
 
     /**
-     * An array mapping a fully qualified class name to the matching TypeInterface
+     * An array mapping a fully qualified class name to the matching TypeInterface.
      *
      * @param array<string,ObjectType|InterfaceType> $types
      */
@@ -47,9 +47,9 @@ final class StaticTypeMapper implements TypeMapperInterface
     private array $inputTypes = [];
 
     /**
-     * An array mapping a fully qualified class name to the matching InputTypeInterface
+     * An array mapping a fully qualified class name to the matching InputTypeInterface.
      *
-     * @param array<string,ResolvableMutableInputInterface &InputObjectType> $inputTypes
+     * @param array<string,ResolvableMutableInputInterface&InputObjectType> $inputTypes
      */
     public function setInputTypes(array $inputTypes): void
     {
@@ -86,6 +86,7 @@ final class StaticTypeMapper implements TypeMapperInterface
         if ($type instanceof InterfaceType && ! $type instanceof MutableInterfaceType) {
             return new MutableInterfaceTypeAdapter($type);
         }
+
         return $type;
     }
 
@@ -153,7 +154,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *
@@ -201,7 +202,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $className FQCN
+     * Returns true if this type mapper can extend an existing type for the $className FQCN.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -224,7 +225,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -246,7 +247,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type.
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {

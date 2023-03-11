@@ -40,6 +40,7 @@ class InjectUser implements ParameterAnnotationInterface
         if ($this->for === null) {
             throw new BadMethodCallException('The @InjectUser annotation must be passed a target. For instance: "@InjectUser(for="$user")"');
         }
+
         return $this->for;
     }
 }

@@ -33,13 +33,12 @@ final class InputField extends InputObjectField
 {
     /** @var callable */
     private $resolve;
-
     private bool $forConstructorHydration = false;
 
     /**
      * @param (Type&InputType) $type
-     * @param array<string, ParameterInterface> $arguments Indexed by argument name.
-     * @param mixed|null $defaultValue the default value set for this field
+     * @param array<string, ParameterInterface>                                                                  $arguments        indexed by argument name
+     * @param mixed|null                                                                                         $defaultValue     the default value set for this field
      * @param array{defaultValue?: mixed,description?: string|null,astNode?: InputValueDefinitionNode|null}|null $additionalConfig
      */
     public function __construct(string $name, InputType $type, array $arguments, ResolverInterface|null $originalResolver, callable|null $resolver, string|null $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array|null $additionalConfig = null)
@@ -76,6 +75,7 @@ final class InputField extends InputObjectField
             $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments) {
                 $result = $arguments[$this->name]->resolve($source, $args, $context, $info);
                 $this->assertInputType($result);
+
                 return $result;
             };
         }
@@ -125,8 +125,6 @@ final class InputField extends InputObjectField
 
     /**
      * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
-     *
-     * @return InputField
      */
     public static function unauthorizedError(InputFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
     {

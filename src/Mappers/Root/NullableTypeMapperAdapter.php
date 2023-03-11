@@ -28,7 +28,7 @@ use function iterator_to_array;
 
 /**
  * This root type mapper is the very first type mapper that must be called.
- * It handles the "compound" types and is in charge of creating Union Types and detecting subTypes (for arrays)
+ * It handles the "compound" types and is in charge of creating Union Types and detecting subTypes (for arrays).
  */
 class NullableTypeMapperAdapter implements RootTypeMapperInterface
 {

@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class ErrorHandlerTest extends TestCase
 {
-
     public function testErrorFormatter()
     {
         $exception = new GraphQLException('foo', 0, null, 'MyCategory', ['field' => 'foo']);
@@ -16,8 +15,8 @@ class ErrorHandlerTest extends TestCase
         $this->assertSame([
             'message' => 'foo',
             'extensions' => [
-                'field' => 'foo'
-            ]
+                'field' => 'foo',
+            ],
         ], $formattedError);
     }
 
@@ -35,20 +34,20 @@ class ErrorHandlerTest extends TestCase
             [
                 'message' => 'bar',
                 'extensions' => [
-                    'field' => 'foo'
-                ]
+                    'field' => 'foo',
+                ],
             ],
             [
                 'message' => 'foo',
                 'extensions' => [
                     'field' => 'foo',
-                ]
+                ],
             ],
             [
                 'message' => 'foo',
                 'extensions' => [
                     'field' => 'foo',
-                ]
+                ],
             ]], $formattedError);
     }
 }

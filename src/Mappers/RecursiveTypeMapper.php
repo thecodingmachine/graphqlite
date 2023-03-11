@@ -39,7 +39,7 @@ use function get_parent_class;
 class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 {
     /**
-     * An array mapping a class name to the MappedClass instance (useful to know if the class has children)
+     * An array mapping a class name to the MappedClass instance (useful to know if the class has children).
      *
      * @var array<class-string<object>,MappedClass>|null
      */
@@ -76,7 +76,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         if ($this->mappedClasses === null) {
             $this->mappedClasses = [];
-            $supportedClasses    = array_flip($this->typeMapper->getSupportedClasses());
+            $supportedClasses = array_flip($this->typeMapper->getSupportedClasses());
             foreach ($supportedClasses as $supportedClass => $foo) {
                 $this->getMappedClass($supportedClass, $supportedClasses);
             }
@@ -92,7 +92,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     private function getMappedClass(string $className, array $supportedClasses): MappedClass
     {
         if (! isset($this->mappedClasses[$className])) {
-            $mappedClass = new MappedClass(/*$className*/);
+            $mappedClass = new MappedClass(/* $className */);
             $this->mappedClasses[$className] = $mappedClass;
             $parentClassName = $className;
             /** @phpstan-var class-string<object> $interfaceName */
@@ -109,7 +109,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             while ($parentClassName = get_parent_class($parentClassName)) {
                 if (isset($supportedClasses[$parentClassName])) {
                     $parentMappedClass = $this->getMappedClass($parentClassName, $supportedClasses);
-                    //$mappedClass->setParent($parentMappedClass);
+                    // $mappedClass->setParent($parentMappedClass);
                     $parentMappedClass->addChild($mappedClass);
                     break;
                 }
@@ -153,15 +153,15 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      */
     private function buildInterfaceToClassNameMap(): array
     {
-        $map              = [];
+        $map = [];
         $supportedClasses = $this->getClassTree();
         foreach ($supportedClasses as $className => $mappedClass) {
             if (empty($mappedClass->getChildren())) {
                 continue;
             }
 
-            $objectType          = $this->mapClassToType($className, null);
-            $interfaceName       = $this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name);
+            $objectType = $this->mapClassToType($className, null);
+            $interfaceName = $this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name);
             $map[$interfaceName] = $className;
         }
 
@@ -267,7 +267,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param class-string<object> $className The class name to look for (this function looks into parent classes if the class does not match a type).
+     * @param class-string<object> $className the class name to look for (this function looks into parent classes if the class does not match a type)
      */
     public function canMapClassToType(string $className): bool
     {
@@ -306,10 +306,10 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
             }
 
-            //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
-                return $type;
+            // if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+            return $type;
 
-            //}
+            // }
         }
 
         $this->typeRegistry->registerType($type);
@@ -325,7 +325,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
         $type->freeze();
 
-        if ($type instanceof MutableInterfaceType /*&& isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())*/) {
+        if ($type instanceof MutableInterfaceType /* && isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren()) */) {
             // Let's fix the classToType...
             // Cast as an object
             $type = $this->classToTypeCache[$cacheKey] = $this->getGeneratedObjectTypeFromInterfaceType($type);
@@ -338,7 +338,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
      * Maps a PHP fully qualified class name to a GraphQL type. Returns an interface if possible (if the class
      * has children) or returns an output type otherwise.
      *
-     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
+     * @param class-string<object> $className the exact class name to look for (this function does not look into parent classes)
      * @param (OutputType&Type&NamedType)|null $subType A subtype (if the main className is an iterator)
      *
      * @throws CannotMapTypeExceptionInterface
@@ -404,10 +404,10 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
             }
 
-            //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+            // if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
             return $type;
 
-            //}
+            // }
         }
 
         $this->typeRegistry->registerType($type);
@@ -470,7 +470,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     }
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *

@@ -2,8 +2,8 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
-use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @Type(class=TestTypeWithMagicProperty::class)

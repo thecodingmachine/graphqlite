@@ -22,6 +22,7 @@ class Factory
 {
     /** @var string|null */
     private $name;
+
     /** @var bool */
     private $default;
 

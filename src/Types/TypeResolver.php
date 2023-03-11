@@ -40,7 +40,7 @@ class TypeResolver
         try {
             $parsedOutputType = Parser::parseType($typeName);
 
-            $type             = AST::typeFromAST([$this->schema, 'getType'], $parsedOutputType);
+            $type = AST::typeFromAST([$this->schema, 'getType'], $parsedOutputType);
         } catch (Error $e) {
             throw CannotMapTypeException::createForParseError($e);
         }

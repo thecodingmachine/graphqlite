@@ -1,11 +1,10 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
+use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 
 /**
  * @Type(class=TestObject::class)

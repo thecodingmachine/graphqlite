@@ -127,28 +127,23 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
         if ($type instanceof Object_) {
             $fqcn = (string) $type->getFqsen();
+
             return match ($fqcn) {
-                 '\\' . DateTimeImmutable::class,
-                 '\\' . DateTimeInterface::class=>
-                     self::getDateTimeType(),
+                '\\' . DateTimeImmutable::class,
+                '\\' . DateTimeInterface::class => self::getDateTimeType(),
 
-                 '\\' . UploadedFileInterface::class=>
-                     self::getUploadType(),
+                '\\' . UploadedFileInterface::class => self::getUploadType(),
 
-                 '\\' . DateTime::class=>
-                    throw CannotMapTypeException::createForDateTime(),
+                '\\' . DateTime::class => throw CannotMapTypeException::createForDateTime(),
 
-                 '\\' . ID::class
-                    => GraphQLType::id(),
+                '\\' . ID::class => GraphQLType::id(),
 
-                default=>
-                     null
+                default => null
             };
         }
 
         return null;
     }
-
     private static UploadType|null $uploadType = null;
 
     private static function getUploadType(): UploadType
@@ -159,7 +154,6 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
         return self::$uploadType;
     }
-
     private static DateTimeType|null $dateTimeType = null;
 
     private static function getDateTimeType(): DateTimeType
@@ -182,9 +176,9 @@ class BaseTypeMapper implements RootTypeMapperInterface
     {
         // No need to map base types, only types added by us.
         return match ($typeName) {
-            'Upload'=>self::getUploadType(),
-            'DateTime'=>self::getDateTimeType(),
-            default=>$this->next->mapNameToType($typeName)
+            'Upload' => self::getUploadType(),
+            'DateTime' => self::getDateTimeType(),
+            default => $this->next->mapNameToType($typeName)
         };
     }
 }

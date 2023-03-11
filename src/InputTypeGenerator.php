@@ -24,6 +24,7 @@ class InputTypeGenerator
 {
     /** @var array<string, ResolvableMutableInputObjectType> */
     private array $factoryCache = [];
+
     /** @var array<string, InputType> */
     private array $inputCache = [];
 

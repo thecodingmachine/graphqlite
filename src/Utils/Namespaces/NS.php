@@ -8,7 +8,6 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use UnitEnum;
 
 use function class_exists;
 use function interface_exists;
@@ -23,7 +22,7 @@ final class NS
     /**
      * The array of globbed classes.
      * Only instantiable classes are returned.
-     * Key: fully qualified class name
+     * Key: fully qualified class name.
      *
      * @var array<string,ReflectionClass<object>>
      */

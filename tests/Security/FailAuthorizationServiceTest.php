@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 class FailAuthorizationServiceTest extends TestCase
 {
-
     public function testIsAllowed(): void
     {
         $service = new FailAuthorizationService();

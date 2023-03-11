@@ -68,7 +68,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
     }
 
     /**
-     * @param array<int|string, mixed> $args
+     * @param array<int|string, mixed>          $args
      * @param array<string, ParameterInterface> $parameters
      *
      * @return array<string, mixed>

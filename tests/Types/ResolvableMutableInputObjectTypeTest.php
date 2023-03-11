@@ -41,12 +41,12 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         $obj = $inputType->resolve(new stdClass(), ['string' => 'foobar', 'bool' => false], null, $resolveInfo);
         $this->assertInstanceOf(TestObject::class, $obj);
         $this->assertSame('foobar', $obj->getTest());
-        $this->assertSame(false, $obj->isTestBool());
+        $this->assertFalse($obj->isTestBool());
 
         $obj = $inputType->resolve(new stdClass(), ['string' => 'foobar'], null, $resolveInfo);
         $this->assertInstanceOf(TestObject::class, $obj);
         $this->assertSame('foobar', $obj->getTest());
-        $this->assertSame(true, $obj->isTestBool());
+        $this->assertTrue($obj->isTestBool());
 
         $this->expectException(MissingArgumentException::class);
         $this->expectExceptionMessage("Expected argument 'string' was not provided in GraphQL input type 'InputObject' used in factory 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myFactory()'");
@@ -104,8 +104,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
 
         $obj = $inputType->resolve(new stdClass(), [
             'date' => '2018-12-25',
-            'stringList' =>
-            [
+            'stringList' => [
                 'foo',
                 'bar',
             ],
@@ -120,13 +119,13 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         $fieldsBuilder = $this->createMock(FieldsBuilder::class);
 
         $fieldsBuilder->method('getParameters')->willReturn([
-            new class implements ParameterInterface {
+            new class () implements ParameterInterface {
                 public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
                 }
             },
-            new class implements ParameterInterface {
+            new class () implements ParameterInterface {
                 public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
@@ -146,8 +145,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         $this->expectException(GraphQLAggregateException::class);
         $obj = $inputType->resolve(new stdClass(), [
             'date' => '2018-12-25',
-            'stringList' =>
-            [
+            'stringList' => [
                 'foo',
                 'bar',
             ],
@@ -166,13 +164,13 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         ]);
 
         $fieldsBuilder->method('getParametersForDecorator')->willReturn([
-            new class implements ParameterInterface {
+            new class () implements ParameterInterface {
                 public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
                 }
             },
-            new class implements ParameterInterface {
+            new class () implements ParameterInterface {
                 public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
                 {
                     throw new Error('boum');
@@ -195,8 +193,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
         $this->expectException(GraphQLAggregateException::class);
         $obj = $inputType->resolve(new stdClass(), [
             'date' => '2018-12-25',
-            'stringList' =>
-            [
+            'stringList' => [
                 'foo',
                 'bar',
             ],

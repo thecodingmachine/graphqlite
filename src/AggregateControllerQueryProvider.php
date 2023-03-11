@@ -26,8 +26,8 @@ use function sort;
 class AggregateControllerQueryProvider implements QueryProviderInterface
 {
     /**
-     * @param iterable<string>   $controllers          A list of controllers name in the container.
-     * @param ContainerInterface $controllersContainer The container we will fetch controllers from.
+     * @param iterable<string>   $controllers          a list of controllers name in the container
+     * @param ContainerInterface $controllersContainer the container we will fetch controllers from
      */
     public function __construct(private readonly iterable $controllers, private readonly FieldsBuilder $fieldsBuilder, private readonly ContainerInterface $controllersContainer)
     {
@@ -52,7 +52,7 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         $mutationList = [];
 
         foreach ($this->controllers as $controllerName) {
-            $controller   = $this->controllersContainer->get($controllerName);
+            $controller = $this->controllersContainer->get($controllerName);
             $mutationList[$controllerName] = $this->fieldsBuilder->getMutations($controller);
         }
 

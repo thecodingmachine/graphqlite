@@ -1,17 +1,13 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 class TestObject
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $test;
-    /**
-     * @var bool
-     */
+
+    /** @var bool */
     private $testBool;
 
     public function __construct(string $test, bool $testBool = false)
@@ -21,17 +17,13 @@ class TestObject
     }
 
     /**
-     * This is a test summary
-     * @return string
+     * This is a test summary.
      */
     public function getTest(): string
     {
         return $this->test;
     }
 
-    /**
-     * @return bool
-     */
     public function isTestBool(): bool
     {
         return $this->testBool;
@@ -42,7 +34,7 @@ class TestObject
      */
     public function testRight()
     {
-        return "foo";
+        return 'foo';
     }
 
     public function getSibling(self $foo): self

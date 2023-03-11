@@ -8,7 +8,6 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class MagicPropertyResolverTest extends TestCase
 {
-
     public function testExceptionInInvoke()
     {
         $sourceResolver = new MagicPropertyResolver('test');

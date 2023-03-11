@@ -39,24 +39,24 @@ class TypeResolverTest extends TestCase
                 'fields' => [
                     'hello' => [
                         'type' => Type::string(),
-                        'resolve' => function() {
+                        'resolve' => function () {
                             return 'Hello World!';
-                        }
+                        },
                     ],
-                ]
+                ],
             ]),
-            'typeLoader' => function($name) {
+            'typeLoader' => function ($name) {
                 if ($name === 'MyInput') {
                     return new InputObjectType([
-                        'name' => 'MyInput'
+                        'name' => 'MyInput',
                     ]);
-                };
+                }
                 if ($name === 'MyOutput') {
                     return new ObjectType([
-                        'name' => 'MyOutput'
+                        'name' => 'MyOutput',
                     ]);
-                };
-            }
+                }
+            },
         ]);
     }
 

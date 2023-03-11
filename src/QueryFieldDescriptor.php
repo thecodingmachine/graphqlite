@@ -26,21 +26,24 @@ use function is_array;
 class QueryFieldDescriptor
 {
     private string $name;
+
     /** @var (OutputType&Type)|null */
-    private Type|null $type  = null;
+    private Type|null $type = null;
+
     /** @var array<string, ParameterInterface> */
     private array $parameters = [];
+
     /** @var array<string, ParameterInterface> */
     private array $prefetchParameters = [];
     private string|null $prefetchMethodName = null;
+
     /** @var callable|null */
     private $callable;
     private string|null $targetMethodOnSource = null;
     private string|null $targetPropertyOnSource = null;
     private string|null $magicProperty = null;
-    /**
-     * Whether we should inject the source as the first parameter or not.
-     */
+
+    /** Whether we should inject the source as the first parameter or not. */
     private bool $injectSource;
     private string|null $comment = null;
     private string|null $deprecationReason = null;
@@ -48,6 +51,7 @@ class QueryFieldDescriptor
     private ReflectionMethod $refMethod;
     private ReflectionProperty $refProperty;
     private ResolverInterface|null $originalResolver = null;
+
     /** @var callable */
     private $resolver;
 

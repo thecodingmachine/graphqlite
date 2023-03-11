@@ -29,17 +29,19 @@ class Security implements MiddlewareAnnotationInterface
 {
     /** @var string */
     private $expression;
-    /** @var mixed */
     private $failWith;
+
     /** @var bool */
     private $failWithIsSet = false;
+
     /** @var int */
     private $statusCode;
+
     /** @var string */
     private $message;
 
     /**
-     * @param array<string, mixed>|string $data  data array managed by the Doctrine Annotations library or the expression
+     * @param array<string, mixed>|string $data data array managed by the Doctrine Annotations library or the expression
      *
      * @throws BadMethodCallException
      */

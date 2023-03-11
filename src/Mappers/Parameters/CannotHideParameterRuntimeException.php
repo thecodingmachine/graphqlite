@@ -16,6 +16,7 @@ class CannotHideParameterRuntimeException extends GraphQLRuntimeException
     {
         $method = $parameter->getDeclaringFunction();
         assert($method instanceof ReflectionMethod);
+
         return new self('For parameter $' . $parameter->getName() . ' of method ' . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '(), cannot use the @HideParameter annotation. The parameter needs to provide a default value.');
     }
 }

@@ -14,7 +14,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class Post
 {
-
     /**
      * @Field(for="Post")
      * @var int
@@ -64,42 +63,27 @@ class Post
      */
     private $inaccessible;
 
-    /**
-     * @param string $title
-     */
     public function __construct(string $title, $dummy = null)
     {
         $this->title = $title;
         $this->description = 'bar';
     }
 
-    /**
-     * @return string|null
-     */
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    /**
-     * @param string|null $description
-     */
     public function setDescription(?string $description): void
     {
         $this->description = $description;
     }
 
-    /**
-     * @param string|null $summary
-     */
     public function setSummary(?string $summary): void
     {
         $this->summary = $summary;
     }
 
-    /**
-     * @param string $inaccessible
-     */
     private function setInaccessible(string $inaccessible): void
     {
         $this->inaccessible = $inaccessible;

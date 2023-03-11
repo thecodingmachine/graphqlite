@@ -18,7 +18,7 @@ class MyCLabsEnumType extends EnumType
 {
     public function __construct(string $enumClassName, string $typeName)
     {
-        $consts         = $enumClassName::toArray();
+        $consts = $enumClassName::toArray();
         $constInstances = [];
         foreach ($consts as $key => $value) {
             $constInstances[$key] = ['value' => $enumClassName::$key()];
@@ -35,6 +35,7 @@ class MyCLabsEnumType extends EnumType
         if (! $value instanceof Enum) {
             throw new InvalidArgumentException('Expected a Myclabs Enum instance');
         }
+
         return $value->getKey();
     }
 }

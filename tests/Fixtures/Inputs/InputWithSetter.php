@@ -11,13 +11,8 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
  */
 class InputWithSetter
 {
-
-    /**
-     * @Field()
-     */
+    /** @Field() */
     private string $foo;
-
-
     private int $bar = 10;
 
     public function setFoo(string $foo): void
@@ -29,21 +24,16 @@ class InputWithSetter
      * @Field(for="InputWithSetterInput")
      * @Field(for="ForcedTypeInput", inputType="Int!")
      */
-    public function setBar(int $bar): void {
+    public function setBar(int $bar): void
+    {
         $this->bar = $bar;
     }
 
-    /**
-     * @return string
-     */
     public function getFoo(): string
     {
         return $this->foo;
     }
 
-    /**
-     * @return int
-     */
     public function getBar(): int
     {
         return $this->bar;

@@ -5,7 +5,6 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;

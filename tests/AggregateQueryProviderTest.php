@@ -9,17 +9,19 @@ class AggregateQueryProviderTest extends TestCase
 {
     private function getMockQueryProvider(): QueryProviderInterface
     {
-        return new class implements QueryProviderInterface {
+        return new class () implements QueryProviderInterface {
             public function getQueries(): array
             {
                 $queryFieldRef = new ReflectionClass(QueryField::class);
-                return [ $queryFieldRef->newInstanceWithoutConstructor() ];
+
+                return [$queryFieldRef->newInstanceWithoutConstructor()];
             }
 
             public function getMutations(): array
             {
                 $queryFieldRef = new ReflectionClass(QueryField::class);
-                return [ $queryFieldRef->newInstanceWithoutConstructor() ];
+
+                return [$queryFieldRef->newInstanceWithoutConstructor()];
             }
         };
     }

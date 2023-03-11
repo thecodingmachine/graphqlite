@@ -2,35 +2,34 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use Exception;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\NamedType;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 class CompositeTypeMapperTest extends AbstractQueryProviderTest
 {
-    /**
-     * @var CompositeTypeMapper
-     */
+    /** @var CompositeTypeMapper */
     protected $composite;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
-        $typeMapper1 = new class() implements TypeMapperInterface {
-            public function mapClassToType(string $className, ?OutputType $subType): \TheCodingMachine\GraphQLite\Types\MutableInterface
+        $typeMapper1 = new class () implements TypeMapperInterface {
+            public function mapClassToType(string $className, ?OutputType $subType): MutableInterface
             {
                 if ($className === TestObject::class) {
                     return new MutableObjectType([
-                        'name'    => 'TestObject',
-                        'fields'  => [
-                            'test'   => Type::string(),
+                        'name' => 'TestObject',
+                        'fields' => [
+                            'test' => Type::string(),
                         ],
                     ]);
                 } else {
@@ -42,9 +41,9 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             {
                 if ($className === TestObject::class) {
                     return new MockResolvableInputObjectType([
-                        'name'    => 'TestObject',
-                        'fields'  => [
-                            'test'   => Type::string(),
+                        'name' => 'TestObject',
+                        'fields' => [
+                            'test' => Type::string(),
                         ],
                     ]);
                 } else {
@@ -73,7 +72,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             }
 
             /**
-             * Returns a GraphQL type by name (can be either an input or output type)
+             * Returns a GraphQL type by name (can be either an input or output type).
              *
              * @param string $typeName The name of the GraphQL type
              * @return NamedType&Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType)
@@ -95,7 +94,6 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
              * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
              *
              * @param string $typeName The name of the GraphQL type
-             * @return bool
              */
             public function canMapNameToType(string $typeName): bool
             {
@@ -119,20 +117,16 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
 
             public function extendTypeForName(string $typeName, MutableInterface $type): void
             {
-                $type->addFields(function() {
+                $type->addFields(function () {
                     return [
-                        'test2' => Type::int()
+                        'test2' => Type::int(),
                     ];
                 });
-                //throw CannotMapTypeException::createForExtendName($typeName, $type);
+                // throw CannotMapTypeException::createForExtendName($typeName, $type);
             }
 
             /**
-             * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
-             *
-             * @param string $typeName
-             * @param ResolvableMutableInputInterface $type
-             * @return bool
+             * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type.
              */
             public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
             {
@@ -142,8 +136,6 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             /**
              * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
              *
-             * @param string $typeName
-             * @param ResolvableMutableInputInterface $type
              * @throws CannotMapTypeExceptionInterface
              */
             public function decorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): void
@@ -156,36 +148,34 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
         $this->composite->addTypeMapper($typeMapper1);
     }
 
-
     public function testComposite(): void
     {
         $this->assertTrue($this->composite->canMapClassToType(TestObject::class));
-        $this->assertFalse($this->composite->canMapClassToType(\Exception::class));
+        $this->assertFalse($this->composite->canMapClassToType(Exception::class));
         $this->assertTrue($this->composite->canMapClassToInputType(TestObject::class));
-        $this->assertFalse($this->composite->canMapClassToInputType(\Exception::class));
+        $this->assertFalse($this->composite->canMapClassToInputType(Exception::class));
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapClassToType(TestObject::class, null));
         $this->assertInstanceOf(InputObjectType::class, $this->composite->mapClassToInputType(TestObject::class));
         $this->assertSame([TestObject::class], $this->composite->getSupportedClasses());
         $this->assertInstanceOf(ObjectType::class, $this->composite->mapNameToType('TestObject'));
         $this->assertTrue($this->composite->canMapNameToType('TestObject'));
         $this->assertFalse($this->composite->canMapNameToType('NotExists'));
-        $this->assertFalse($this->composite->canDecorateInputTypeForName('Foo', new MockResolvableInputObjectType(['name' => 'foo',
+        $this->assertFalse($this->composite->canDecorateInputTypeForName('Foo', new MockResolvableInputObjectType(
+            ['name' => 'foo',
             'fields' => [
-            'arg' => Type::string()
+            'arg' => Type::string(),
         ]]
         )));
 
-
         $type = new MutableObjectType([
-            'name'    => 'TestObject',
-            'fields'  => [
-                'test'   => Type::string(),
+            'name' => 'TestObject',
+            'fields' => [
+                'test' => Type::string(),
             ],
         ]);
 
         $this->assertFalse($this->composite->canExtendTypeForClass('foo', $type));
         $this->assertTrue($this->composite->canExtendTypeForName('foo', $type));
-
 
         $this->composite->extendTypeForName('foo', $type);
 
@@ -196,13 +186,13 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
     public function testException1(): void
     {
         $this->expectException(CannotMapTypeException::class);
-        $this->composite->mapClassToType(\Exception::class, null);
+        $this->composite->mapClassToType(Exception::class, null);
     }
 
     public function testException2(): void
     {
         $this->expectException(CannotMapTypeException::class);
-        $this->composite->mapClassToInputType(\Exception::class);
+        $this->composite->mapClassToInputType(Exception::class);
     }
 
     public function testException3(): void

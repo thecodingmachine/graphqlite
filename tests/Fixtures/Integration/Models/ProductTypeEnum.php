@@ -10,6 +10,6 @@ use TheCodingMachine\GraphQLite\Annotations\EnumType;
  */
 class ProductTypeEnum extends Enum
 {
-    const FOOD = 'food';
-    const NON_FOOD = 'non food';
+    public const FOOD = 'food';
+    public const NON_FOOD = 'non food';
 }

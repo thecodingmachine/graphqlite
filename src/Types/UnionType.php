@@ -22,8 +22,7 @@ class UnionType extends \GraphQL\Type\Definition\UnionType
         array $types,
         RecursiveTypeMapperInterface $typeMapper,
         NamingStrategyInterface $namingStrategy,
-    )
-    {
+    ) {
         // Make sure all types are object types
         foreach ($types as $type) {
             if (! $type instanceof ObjectType) {
@@ -37,18 +36,18 @@ class UnionType extends \GraphQL\Type\Definition\UnionType
         parent::__construct([
             'name' => $name,
             'types' => $types,
-            'resolveType' =>
-                static function (mixed $value) use ($typeMapper): ObjectType {
-                    if (! is_object($value)) {
-                        throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
-                    }
+            'resolveType' => static function (mixed $value) use ($typeMapper): ObjectType {
+                if (! is_object($value)) {
+                    throw new InvalidArgumentException('Expected object for resolveType. Got: "' . gettype($value) . '"');
+                }
 
-                    $className = $value::class;
+                $className = $value::class;
 
-                    $result =  $typeMapper->mapClassToInterfaceOrType($className, null);
-                    assert($result instanceof ObjectType);
-                    return $result;
-                },
+                $result = $typeMapper->mapClassToInterfaceOrType($className, null);
+                assert($result instanceof ObjectType);
+
+                return $result;
+            },
         ]);
     }
 }

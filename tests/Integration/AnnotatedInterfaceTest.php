@@ -14,12 +14,10 @@ use TheCodingMachine\GraphQLite\SchemaFactory;
 
 class AnnotatedInterfaceTest extends TestCase
 {
-    /**
-     * @var Schema
-     */
+    /** @var Schema */
     private $schema;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
 
@@ -58,7 +56,7 @@ class AnnotatedInterfaceTest extends TestCase
                 'parentValue' => 'parent',
                 'grandFather' => 'grandFather',
                 'grandMother' => 'grandMother',
-            ]
+            ],
         ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
 
@@ -80,7 +78,7 @@ class AnnotatedInterfaceTest extends TestCase
         $this->assertSame([
             'qux' => [
                 'qux' => 'qux',
-            ]
+            ],
         ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
 
@@ -112,8 +110,7 @@ class AnnotatedInterfaceTest extends TestCase
                 'bar' => 'bar',
                 'parentValue' => 'parent',
                 'classD' => 'classD',
-            ]
+            ],
         ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data'] ?? $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['errors']);
     }
-
 }

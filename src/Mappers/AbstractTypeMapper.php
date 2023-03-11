@@ -30,7 +30,6 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
-use UnitEnum;
 use function assert;
 
 /**
@@ -40,18 +39,15 @@ use function assert;
  */
 abstract class AbstractTypeMapper implements TypeMapperInterface
 {
-    /**
-     * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
-     */
+    /** Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass. */
     private ClassBoundCacheContractInterface $mapClassToAnnotationsCache;
-    /**
-     * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
-     */
-    private ClassBoundCacheContractInterface $mapClassToExtendAnnotationsCache;
 
+    /** Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass. */
+    private ClassBoundCacheContractInterface $mapClassToExtendAnnotationsCache;
     private CacheContractInterface $cacheContract;
     private GlobTypeMapperCache|null $globTypeMapperCache = null;
     private GlobExtendTypeMapperCache|null $globExtendTypeMapperCache = null;
+
     /** @var array<string, class-string<object>> */
     private array $registeredInputs;
 
@@ -67,8 +63,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         private readonly CacheInterface $cache,
         protected int|null $globTTL = 2,
         private readonly int|null $mapTTL = null,
-    )
-    {
+    ) {
         $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
         $this->mapClassToAnnotationsCache = new ClassBoundCacheContract(new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'classToAnnotations_' . $cachePrefix))));
         $this->mapClassToExtendAnnotationsCache = new ClassBoundCacheContract(new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'classToExtendAnnotations_' . $cachePrefix))));
@@ -246,15 +241,15 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     public function canMapClassToType(string $className): bool
     {
-        return $this->getMaps()->getTypeByObjectClass($className) !== null
-            || $this->getMaps()->getInputByObjectClass($className) !== null;
+        return $this->getMaps()->getTypeByObjectClass($className) !== null ||
+            $this->getMaps()->getInputByObjectClass($className) !== null;
     }
 
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param class-string<object> $className The exact class name to look for (this function does not look into parent classes).
-     * @param OutputType|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
+     * @param class-string<object> $className the exact class name to look for (this function does not look into parent classes)
+     * @param OutputType|null      $subType   an optional sub-type if the main class is an iterator that needs to be typed
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -313,6 +308,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         $input = $this->getMaps()->getInputByObjectClass($className);
         if ($input !== null) {
             [$className, $typeName, $description, $isUpdate] = $input;
+
             return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
         }
 
@@ -320,7 +316,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns a GraphQL type by name (can be either an input or output type)
+     * Returns a GraphQL type by name (can be either an input or output type).
      *
      * @param string $typeName The name of the GraphQL type
      *
@@ -345,6 +341,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         $input = $this->getMaps()->getInputByGraphQLInputTypeName($typeName);
         if ($input !== null) {
             [$className, $description, $isUpdate] = $input;
+
             return $this->inputTypeGenerator->mapInput($className, $typeName, $description, $isUpdate);
         }
 
@@ -374,7 +371,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $className FQCN
+     * Returns true if this type mapper can extend an existing type for the $className FQCN.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -405,7 +402,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
+     * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type.
      *
      * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
      */
@@ -436,7 +433,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type
+     * Returns true if this type mapper can decorate an existing input type for the $typeName GraphQL input type.
      */
     public function canDecorateInputTypeForName(string $typeName, ResolvableMutableInputInterface $type): bool
     {
@@ -446,7 +443,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     /**
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
-     * @param ResolvableMutableInputInterface &InputObjectType $type
+     * @param ResolvableMutableInputInterface&InputObjectType $type
      *
      * @throws CannotMapTypeExceptionInterface
      */

@@ -23,12 +23,12 @@ final class Next implements ParameterHandlerInterface
     /**
      * Clones the queue provided to allow re-use.
      *
-     * @param ParameterHandlerInterface $fallbackHandler Fallback handler to
-     *     invoke when the queue is exhausted.
+     * @param ParameterHandlerInterface $fallbackHandler fallback handler to
+     *                                                   invoke when the queue is exhausted
      */
     public function __construct(SplQueue $queue, protected ParameterHandlerInterface $fallbackHandler)
     {
-        $this->queue           = clone $queue;
+        $this->queue = clone $queue;
     }
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface

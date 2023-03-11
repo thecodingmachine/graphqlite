@@ -10,13 +10,11 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
  */
 class CircularInputA
 {
-
     /**
      * @Field(inputType="CircularInputBInput")
      * @var CircularInputB
      */
     private $circularInputB;
-
     private int $bar = 10;
 
     /** @param CircularInputB $circularInputB */
@@ -28,7 +26,8 @@ class CircularInputA
     /**
      * @Field
      */
-    public function setBar(int $bar): void {
+    public function setBar(int $bar): void
+    {
         $this->bar = $bar;
     }
 
@@ -40,9 +39,6 @@ class CircularInputA
         return $this->circularInputB;
     }
 
-    /**
-     * @return int
-     */
     public function getBar(): int
     {
         return $this->bar;

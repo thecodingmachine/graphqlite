@@ -8,7 +8,7 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * Factory class in charge of creating NS instances
+ * Factory class in charge of creating NS instances.
  *
  * @internal
  */

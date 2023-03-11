@@ -22,3 +22,4 @@ website/.cache-loader
 
 .phpunit.result.cache
 .phpstan-cache
+.php-cs-fixer.cache

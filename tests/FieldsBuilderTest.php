@@ -10,52 +10,53 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidParameterAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
-use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
+use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
-use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -68,7 +69,6 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
@@ -112,7 +112,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
             'dateTimeImmutable' => '2017-01-01 01:01:01',
             'dateTime' => '2017-01-01 01:01:01',
             'id' => 42,
-            'enum' => TestEnum::ON()
+            'enum' => TestEnum::ON(),
         ];
 
         $resolve = $usersQuery->resolveFn;
@@ -149,11 +149,9 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testErrors(): void
     {
-        $controller = new class
-        {
+        $controller = new class () {
             /**
              * @Query
-             * @return string
              */
             public function test($noTypeHint): string
             {
@@ -169,11 +167,10 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testTypeInDocBlock(): void
     {
-        $controller = new class
-        {
+        $controller = new class () {
             /**
              * @Query
-             * @param int $typeHintInDocBlock
+             * @param  int    $typeHintInDocBlock
              * @return string
              */
             public function test($typeHintInDocBlock)
@@ -275,7 +272,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testLoggedInSourceField(): void
     {
-        $authenticationService = new class implements AuthenticationServiceInterface {
+        $authenticationService = new class () implements AuthenticationServiceInterface {
             public function isLogged(): bool
             {
                 return true;
@@ -306,12 +303,11 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(4, $fields);
 
         $this->assertSame('testBool', $fields['testBool']->name);
-
     }
 
     public function testRightInSourceField(): void
     {
-        $authorizationService = new class implements AuthorizationServiceInterface {
+        $authorizationService = new class () implements AuthorizationServiceInterface {
             public function isAllowed(string $right, $subject = null): bool
             {
                 return true;
@@ -338,7 +334,6 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(4, $fields);
 
         $this->assertSame('testRight', $fields['testRight']->name);
-
     }
 
     public function testMissingTypeAnnotation(): void
@@ -399,7 +394,6 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertCount(1, $fields);
 
         $this->assertSame('test', $fields['test']->name);
-
     }
 
     public function testQueryProviderWithIterableClass(): void
@@ -600,7 +594,6 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertSame('test', $fields['test']->name);
         $this->assertInstanceOf(StringType::class, $fields['test']->getType());
-
 
         $resolve = $fields['test']->resolveFn;
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));

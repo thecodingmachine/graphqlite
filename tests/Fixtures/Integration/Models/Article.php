@@ -12,7 +12,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
  */
 class Article extends Post
 {
-
     /**
      * @Field(for="Article")
      * @var int
