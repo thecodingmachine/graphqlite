@@ -162,6 +162,8 @@ to access it (according to the `@Logged` and `@Right` annotations).
 Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your
 query / mutation / field.
 
+See [the authentication and authorization page](authentication-authorization.mdx) for more details.
+
 **Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
 
 Attribute      | Compulsory | Type   | Definition
