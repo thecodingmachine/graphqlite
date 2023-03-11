@@ -1227,7 +1227,7 @@ class EndToEndTest extends TestCase
                     'name' => 'foo',
                     'birthDate' => '1942-12-24T00:00:00+00:00',
                 ],
-            ]
+            ],
         );
 
         $this->assertSame([

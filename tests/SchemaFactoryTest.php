@@ -87,8 +87,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
@@ -130,8 +130,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
@@ -184,7 +184,7 @@ class SchemaFactoryTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -207,8 +207,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
@@ -225,7 +225,7 @@ class SchemaFactoryTest extends TestCase
         ';
         GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
     }
 
@@ -234,8 +234,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
             ->setAuthorizationService(new VoidAuthorizationService())
@@ -252,7 +252,7 @@ class SchemaFactoryTest extends TestCase
         ';
         GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
     }
 }

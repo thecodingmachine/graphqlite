@@ -33,7 +33,7 @@ class InjectUserParameterHandlerTest extends AbstractQueryProviderTest
 
         self::assertEquals(
             new InjectUserParameter($authenticationService, $optional),
-            $mapped
+            $mapped,
         );
     }
 

@@ -30,7 +30,7 @@ class FactoryContextTest extends AbstractQueryProviderTest
             $container,
             $arrayCache,
             $validator,
-            self::GLOB_TTL_SECONDS
+            self::GLOB_TTL_SECONDS,
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());

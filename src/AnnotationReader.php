@@ -104,7 +104,7 @@ class AnnotationReader
             return match ($this->mode) {
                 self::STRICT_MODE => throw $e,
                 self::LAX_MODE => $this->isErrorImportant($annotationClass, $refClass->getDocComment() ?: '', $refClass->getName()) ? throw $e : null,
-                default => throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
+                default => throw new RuntimeException("Unexpected mode '" . $this->mode . "'."), // @codeCoverageIgnore
             };
         }
     }
@@ -134,7 +134,7 @@ class AnnotationReader
             return match ($this->mode) {
                 self::STRICT_MODE => throw $e,
                 self::LAX_MODE => $this->isErrorImportant($annotationClass, $refMethod->getDocComment() ?: '', $refMethod->getName()) ? throw $e : null,
-                default => throw new RuntimeException("Unexpected mode '" . $this->mode . "'.") // @codeCoverageIgnore
+                default => throw new RuntimeException("Unexpected mode '" . $this->mode . "'."), // @codeCoverageIgnore
             };
         }
     }

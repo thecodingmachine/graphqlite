@@ -25,7 +25,7 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $container,
             $arrayCache,
-            self::GLOB_TTL_SECONDS
+            self::GLOB_TTL_SECONDS,
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());

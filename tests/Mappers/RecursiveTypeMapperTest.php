@@ -39,7 +39,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             new NamingStrategy(),
             new Psr16Cache(new ArrayAdapter()),
             $this->getTypeRegistry(),
-            $this->getAnnotationReader()
+            $this->getAnnotationReader(),
         );
 
         $this->assertFalse($typeMapper->canMapClassToType(ClassC::class));
@@ -67,7 +67,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             new NamingStrategy(),
             new Psr16Cache(new ArrayAdapter()),
             $this->getTypeRegistry(),
-            $this->getAnnotationReader()
+            $this->getAnnotationReader(),
         );
 
         $this->assertTrue($recursiveTypeMapper->canMapNameToType('Foobar'));
@@ -105,7 +105,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             new NamingStrategy(),
             new Psr16Cache(new ArrayAdapter()),
             $this->getTypeRegistry(),
-            $this->getAnnotationReader()
+            $this->getAnnotationReader(),
         );
 
         $this->assertFalse($recursiveTypeMapper->canMapClassToInputType(ClassC::class));
@@ -135,7 +135,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
                 new NamingStrategy(),
                 new Psr16Cache(new ArrayAdapter()),
                 $this->getTypeRegistry(),
-                $this->getAnnotationReader()
+                $this->getAnnotationReader(),
             );
 
             $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry(), $this->typeMapper, $this->getFieldsBuilder());
@@ -210,7 +210,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             new NamingStrategy(),
             new Psr16Cache(new ArrayAdapter()),
             $this->getTypeRegistry(),
-            $this->getAnnotationReader()
+            $this->getAnnotationReader(),
         );
 
         $this->expectException(DuplicateMappingException::class);
@@ -228,7 +228,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             new NamingStrategy(),
             new Psr16Cache(new ArrayAdapter()),
             $this->getTypeRegistry(),
-            $this->getAnnotationReader()
+            $this->getAnnotationReader(),
         );
 
         $this->expectException(CannotMapTypeException::class);
@@ -249,7 +249,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             new NamingStrategy(),
             new Psr16Cache(new ArrayAdapter()),
             $this->getTypeRegistry(),
-            $this->getAnnotationReader()
+            $this->getAnnotationReader(),
         );
 
         $type = $recursiveTypeMapper->mapNameToType('FilterInput');

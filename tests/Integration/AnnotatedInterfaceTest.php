@@ -46,7 +46,7 @@ class AnnotatedInterfaceTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $this->schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -72,7 +72,7 @@ class AnnotatedInterfaceTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $this->schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([
@@ -100,7 +100,7 @@ class AnnotatedInterfaceTest extends TestCase
 
         $result = GraphQL::executeQuery(
             $this->schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([

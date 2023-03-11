@@ -135,7 +135,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 public function __construct(
                     ObjectType $testObjectType,
                     ObjectType $testObjectType2,
-                    InputObjectType $inputTestObjectType
+                    InputObjectType $inputTestObjectType,
                 ) {
                     $this->testObjectType = $testObjectType;
                     $this->testObjectType2 = $testObjectType2;
@@ -280,20 +280,20 @@ abstract class AbstractQueryProviderTest extends TestCase
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware(
             new VoidAuthenticationService(),
-            new VoidAuthorizationService()
+            new VoidAuthorizationService(),
         ));
 
         $expressionLanguage = new ExpressionLanguage(
             new Psr16Adapter($psr16Cache),
-            [new SecurityExpressionLanguageProvider()]
+            [new SecurityExpressionLanguageProvider()],
         );
 
         $fieldMiddlewarePipe->pipe(
             new SecurityFieldMiddleware(
                 $expressionLanguage,
                 new VoidAuthenticationService(),
-                new VoidAuthorizationService()
-            )
+                new VoidAuthorizationService(),
+            ),
         );
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
@@ -311,7 +311,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->buildRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
             $fieldMiddlewarePipe,
-            $inputFieldMiddlewarePipe
+            $inputFieldMiddlewarePipe,
         );
     }
 
@@ -335,14 +335,14 @@ abstract class AbstractQueryProviderTest extends TestCase
         $rootTypeMapper = new BaseTypeMapper(
             $errorRootTypeMapper,
             $this->getTypeMapper(),
-            $topRootTypeMapper
+            $topRootTypeMapper,
         );
 
         $rootTypeMapper = new MyCLabsEnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
             $arrayAdapter,
-            []
+            [],
         );
 
         if (interface_exists(UnitEnum::class)) {
@@ -350,7 +350,7 @@ abstract class AbstractQueryProviderTest extends TestCase
                 $rootTypeMapper,
                 $this->getAnnotationReader(),
                 $arrayAdapter,
-                []
+                [],
             );
         }
 
@@ -359,7 +359,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $topRootTypeMapper,
             new NamingStrategy(),
             $this->getTypeRegistry(),
-            $this->getTypeMapper()
+            $this->getTypeMapper(),
         );
 
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
@@ -390,7 +390,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getTypeRegistry(),
             $this->getRegistry(),
             $this->getTypeMapper(),
-            $this->getFieldsBuilder()
+            $this->getFieldsBuilder(),
         );
 
         return $this->typeGenerator;
@@ -404,7 +404,7 @@ abstract class AbstractQueryProviderTest extends TestCase
 
         $this->inputTypeGenerator = new InputTypeGenerator(
             $this->getInputTypeUtils(),
-            $this->getFieldsBuilder()
+            $this->getFieldsBuilder(),
         );
 
         return $this->inputTypeGenerator;
@@ -415,7 +415,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         if ($this->inputTypeUtils === null) {
             $this->inputTypeUtils = new InputTypeUtils(
                 $this->getAnnotationReader(),
-                new NamingStrategy()
+                new NamingStrategy(),
             );
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
@@ -52,11 +54,15 @@ return (new Config())
         'class_attributes_separation' => [
             'elements' => ['method' => 'one', 'property' => 'only_if_meta'],
         ],
+        'single_line_throw' => false,
+        'trailing_comma_in_multiline' => [
+            'elements' => ['arguments', 'arrays', 'match', 'parameters'],
+        ],
     ])
     ->setRiskyAllowed(true)
     ->setFinder(
         (new Finder())
             ->in([__DIR__ . '/src', __DIR__ . '/tests'])
             ->append([__FILE__])
-            ->notPath('#Fixtures/TestDoubleReturnTag\.php#')
+            ->notPath('#Fixtures/TestDoubleReturnTag\.php#'),
     );

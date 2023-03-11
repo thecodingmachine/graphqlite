@@ -22,7 +22,7 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
             new FinalRootTypeMapper($this->getTypeMapper()),
             new NamingStrategy(),
             $this->getTypeRegistry(),
-            $this->getTypeMapper()
+            $this->getTypeMapper(),
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -36,7 +36,7 @@ class CompoundTypeMapperTest extends AbstractQueryProviderTest
             new FinalRootTypeMapper($this->getTypeMapper()),
             new NamingStrategy(),
             $this->getTypeRegistry(),
-            $this->getTypeMapper()
+            $this->getTypeMapper(),
         );
 
         $this->expectException(RuntimeException::class);

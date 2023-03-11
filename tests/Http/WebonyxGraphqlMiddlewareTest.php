@@ -66,7 +66,7 @@ class WebonyxGraphqlMiddlewareTest extends TestCase
             new StreamFactory(),
             new HttpCodeDecider(),
             '/graphql',
-            $standardServer
+            $standardServer,
         );
         $standardServer->setExecutionResult(new ExecutionResult(['foo']));
         $request = $this->createRequest();
@@ -81,7 +81,7 @@ class WebonyxGraphqlMiddlewareTest extends TestCase
         $standardServer->setExecutionResult([new ExecutionResult(['foo']), new ExecutionResult(['bar'])]);
         $this->assertSame(
             '[{"data":["foo"]},{"data":["bar"]}]',
-            $middleware->process($request, $handler)->getBody()->getContents()
+            $middleware->process($request, $handler)->getBody()->getContents(),
         );
         $syncPromise = new SyncPromise();
         $request = $this->createRequest()->withUri(new Uri('/graphql'));
@@ -108,7 +108,7 @@ class WebonyxGraphqlMiddlewareTest extends TestCase
             null,
             null,
             $stream,
-            []
+            [],
         );
     }
 }

@@ -24,7 +24,7 @@ class InjectUserParameterTest extends TestCase
             null,
             [],
             null,
-            $this->createStub(ResolveInfo::class)
+            $this->createStub(ResolveInfo::class),
         );
 
         self::assertSame($user, $resolved);
@@ -49,7 +49,7 @@ class InjectUserParameterTest extends TestCase
             null,
             [],
             null,
-            $this->createStub(ResolveInfo::class)
+            $this->createStub(ResolveInfo::class),
         );
     }
 }

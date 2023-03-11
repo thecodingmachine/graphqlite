@@ -138,7 +138,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
                 '\\' . ID::class => GraphQLType::id(),
 
-                default => null
+                default => null,
             };
         }
 
@@ -178,7 +178,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return match ($typeName) {
             'Upload' => self::getUploadType(),
             'DateTime' => self::getDateTimeType(),
-            default => $this->next->mapNameToType($typeName)
+            default => $this->next->mapNameToType($typeName),
         };
     }
 }

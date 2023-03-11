@@ -28,7 +28,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             new TestFactory(),
             'myFactory',
             'my comment',
-            false
+            false,
         );
 
         $this->assertSame('InputObject', $inputType->name);
@@ -62,7 +62,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             $testFactory,
             'myFactory',
             'my comment',
-            true
+            true,
         );
 
         $inputType->decorate([$testFactory, 'myDecorator']);
@@ -84,7 +84,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             $testFactory,
             'myFactory',
             'my comment',
-            false
+            false,
         );
 
         $inputType->decorate([$testFactory, 'myDecorator']);
@@ -99,7 +99,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             new TestFactory(),
             'myListFactory',
             null,
-            false
+            false,
         );
 
         $obj = $inputType->resolve(new stdClass(), [
@@ -139,7 +139,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             new TestFactory(),
             'myListFactory',
             null,
-            false
+            false,
         );
 
         $this->expectException(GraphQLAggregateException::class);
@@ -185,7 +185,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
             $testFactory,
             'myListFactory',
             null,
-            false
+            false,
         );
 
         $inputType->decorate([$testFactory, 'myDecorator']);

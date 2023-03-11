@@ -223,7 +223,7 @@ class AnnotationReaderTest extends TestCase
 
     private function method1(
         #[Autowire('myService')]
-        $dao
+        $dao,
     ): void {
     }
 }

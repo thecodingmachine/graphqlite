@@ -164,7 +164,7 @@ class CompositeTypeMapperTest extends AbstractQueryProviderTest
             ['name' => 'foo',
             'fields' => [
             'arg' => Type::string(),
-        ]]
+        ]],
         )));
 
         $type = new MutableObjectType([

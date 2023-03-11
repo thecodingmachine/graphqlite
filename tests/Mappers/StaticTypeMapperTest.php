@@ -174,7 +174,7 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
 
         $result = GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
 
         $this->assertSame([

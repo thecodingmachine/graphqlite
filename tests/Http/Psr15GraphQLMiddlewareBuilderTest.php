@@ -80,7 +80,7 @@ class Psr15GraphQLMiddlewareBuilderTest extends TestCase
             $stream,
             [
                 'content-type' => 'application/json',
-            ]
+            ],
         );
     }
 }

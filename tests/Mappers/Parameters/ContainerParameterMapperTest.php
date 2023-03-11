@@ -31,7 +31,7 @@ class ContainerParameterMapperTest extends AbstractQueryProviderTest
                 public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
                 {
                 }
-            }
+            },
         );
     }
 
