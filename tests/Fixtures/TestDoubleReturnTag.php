@@ -13,6 +13,7 @@ class TestDoubleReturnTag
     /**
      * @Field()
      * @return string
+     * @return array
      */
     public function test(): array
     {

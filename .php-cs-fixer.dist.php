@@ -58,5 +58,5 @@ return (new Config())
         (new Finder())
             ->in([__DIR__ . '/src', __DIR__ . '/tests'])
             ->append([__FILE__])
-            ->name('*.php')
+            ->notPath('#Fixtures/TestDoubleReturnTag\.php#')
     );

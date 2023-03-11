@@ -29,7 +29,7 @@ class Security implements MiddlewareAnnotationInterface
 {
     /** @var string */
     private $expression;
-    private $failWith;
+    private mixed $failWith = null;
 
     /** @var bool */
     private $failWithIsSet = false;

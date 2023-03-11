@@ -18,7 +18,7 @@ class CachedDocBlockFactoryTest extends TestCase
         $refMethod = new ReflectionMethod(CachedDocBlockFactory::class, 'getDocBlock');
 
         $docBlock = $cachedDocBlockFactory->getDocBlock($refMethod);
-        $this->assertSame('Fetches a DocBlock object from a ReflectionMethod', $docBlock->getSummary());
+        $this->assertSame('Fetches a DocBlock object from a ReflectionMethod.', $docBlock->getSummary());
         $docBlock2 = $cachedDocBlockFactory->getDocBlock($refMethod);
         $this->assertSame($docBlock2, $docBlock);
 

@@ -22,7 +22,7 @@ use function is_array;
 class FailWith implements MiddlewareAnnotationInterface
 {
     /** The default value to use if the right is not enforced. */
-    private $value;
+    private mixed $value;
 
     /** @throws BadMethodCallException */
     public function __construct(mixed $values = [], mixed $value = '__fail__with__magic__key__')
