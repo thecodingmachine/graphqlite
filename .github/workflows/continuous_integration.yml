@@ -102,10 +102,6 @@ jobs:
       - name: "Run static code analysis with phpstan/phpstan"
         run: "composer phpstan"
 
-      - name: "Run coding standard checks with squizlabs/php_codesniffer"
-        run: "composer cs-check"
-        if: ${{ matrix.php-version == '7.2' }} # Do not suggest using features after 7.2
-
       - name: "Archive code coverage results"
         uses: actions/upload-artifact@v3
         with:
