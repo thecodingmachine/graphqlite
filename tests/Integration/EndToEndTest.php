@@ -1737,6 +1737,29 @@ class EndToEndTest extends TestCase
         $this->assertSame(42, $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
     }
 
+    public function testEndToEndInjectUserUnauthenticated(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static fn () => new VoidAuthenticationService(),
+        ]);
+
+        $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+            query {
+                injectedUser
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $this->assertSame('You need to be logged to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
     public function testInputOutputNameConflict(): void
     {
         $arrayAdapter = new ArrayAdapter();
