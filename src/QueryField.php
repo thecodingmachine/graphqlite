@@ -15,7 +15,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
-use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -143,6 +142,7 @@ final class QueryField extends FieldDefinition
         }
 
         $config += $additionalConfig;
+
         parent::__construct($config);
     }
 
@@ -179,25 +179,6 @@ final class QueryField extends FieldDefinition
     {
         $callable = static function () use ($value) {
             return $value;
-        };
-
-        $fieldDescriptor->setResolver($callable);
-
-        return self::fromDescriptor($fieldDescriptor);
-    }
-
-    /**
-     * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
-     *
-     * @return QueryField
-     */
-    public static function unauthorizedError(QueryFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
-    {
-        $callable = static function () use ($isNotLogged): void {
-            if ($isNotLogged) {
-                throw MissingAuthorizationException::unauthorized();
-            }
-            throw MissingAuthorizationException::forbidden();
         };
 
         $fieldDescriptor->setResolver($callable);

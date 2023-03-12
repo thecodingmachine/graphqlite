@@ -13,7 +13,6 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
-use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
@@ -121,25 +120,6 @@ final class InputField extends InputObjectField
     public function forConstructorHydration(): bool
     {
         return $this->forConstructorHydration;
-    }
-
-    /**
-     * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
-     *
-     * @return InputField
-     */
-    public static function unauthorizedError(InputFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
-    {
-        $callable = static function () use ($isNotLogged): void {
-            if ($isNotLogged) {
-                throw MissingAuthorizationException::unauthorized();
-            }
-            throw MissingAuthorizationException::forbidden();
-        };
-
-        $fieldDescriptor->setResolver($callable);
-
-        return self::fromDescriptor($fieldDescriptor);
     }
 
     private static function fromDescriptor(InputFieldDescriptor $fieldDescriptor): self

@@ -36,17 +36,33 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
         assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
-        if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
+        // Avoid wrapping resolver callback when no annotations are specified.
+        if (! $loggedAnnotation && ! $rightAnnotation) {
             return $inputFieldHandler->handle($inputFieldDescriptor);
         }
 
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
         assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
 
-        if ($hideIfUnauthorized !== null) {
+        if ($hideIfUnauthorized !== null && ! $this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
             return null;
         }
-        return InputField::unauthorizedError($inputFieldDescriptor, $loggedAnnotation !== null && ! $this->authenticationService->isLogged());
+
+        $resolver = $inputFieldDescriptor->getResolver();
+
+        $inputFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $resolver) {
+            if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
+                return $resolver(...$args);
+            }
+
+            if ($loggedAnnotation !== null && ! $this->authenticationService->isLogged()) {
+                throw MissingAuthorizationException::unauthorized();
+            }
+
+            throw MissingAuthorizationException::forbidden();
+        });
+
+        return $inputFieldHandler->handle($inputFieldDescriptor);
     }
 
     /**
