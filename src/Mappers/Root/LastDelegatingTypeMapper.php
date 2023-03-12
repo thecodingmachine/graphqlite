@@ -14,9 +14,9 @@ use ReflectionMethod;
 use ReflectionProperty;
 
 /**
- * The last "top" root type mapper that always calls the dynamicly set "next" mapper.
+ * The last root type mapper that always calls the dynamicly set "next" mapper.
  */
-class LastTopRootTypeMapper implements RootTypeMapperInterface
+class LastDelegatingTypeMapper implements RootTypeMapperInterface
 {
     private RootTypeMapperInterface $next;
 

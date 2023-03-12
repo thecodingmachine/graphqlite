@@ -15,21 +15,20 @@ class VoidTypeTest extends TestCase
 {
     public function testSerialize(): void
     {
-        self::assertNull(Types::void()->serialize(null));
+        self::assertNull((new VoidType())->serialize(null));
     }
 
     public function testParseValue(): void
     {
         $this->expectExceptionObject(new GraphQLRuntimeException());
 
-        Types::void()->parseValue(null);
+        (new VoidType())->parseValue(null);
     }
 
     public function testParseLiteral(): void
     {
         $this->expectExceptionObject(new GraphQLRuntimeException());
 
-        Types::void()->parseLiteral(new NullValueNode([]));
-
+        (new VoidType())->parseLiteral(new NullValueNode([]));
     }
 }

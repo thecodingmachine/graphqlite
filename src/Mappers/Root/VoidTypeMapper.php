@@ -14,10 +14,12 @@ use phpDocumentor\Reflection\Types\Void_;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Types;
+use TheCodingMachine\GraphQLite\Types\VoidType;
 
 class VoidTypeMapper implements RootTypeMapperInterface
 {
+    private static VoidType $voidType;
+
     public function __construct(
         private readonly RootTypeMapperInterface $next,
     )
@@ -30,7 +32,7 @@ class VoidTypeMapper implements RootTypeMapperInterface
             return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
         }
 
-        return Types::void();
+        return self::getVoidType();
     }
 
     public function toGraphQLInputType(Type $type, InputType|null $subType, string $argumentName, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): InputType&GraphQLType
@@ -39,14 +41,19 @@ class VoidTypeMapper implements RootTypeMapperInterface
             return $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
         }
 
-        throw CannotMapTypeException::mustBeOutputType(Types::void()->name);
+        throw CannotMapTypeException::mustBeOutputType(self::getVoidType()->name);
     }
 
     public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
         return match ($typeName) {
-            Types::void()->name => Types::void(),
+            self::getVoidType()->name => self::getVoidType(),
             default => $this->next->mapNameToType($typeName),
         };
+    }
+
+    private static function getVoidType(): VoidType
+    {
+        return self::$voidType ??= new VoidType();
     }
 }

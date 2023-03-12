@@ -48,7 +48,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\LastTopRootTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
@@ -306,7 +306,7 @@ class EndToEndTest extends TestCase
                 );
             },
             'topRootTypeMapper' => static function () {
-                return new LastTopRootTypeMapper();
+                return new LastDelegatingTypeMapper();
             },
             'rootTypeMapper' => static function (ContainerInterface $container) {
                 // These are in reverse order of execution

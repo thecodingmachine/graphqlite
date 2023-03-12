@@ -33,7 +33,6 @@ use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Types;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
 
@@ -131,10 +130,10 @@ class BaseTypeMapper implements RootTypeMapperInterface
             return match ($fqcn) {
                  '\\' . DateTimeImmutable::class,
                  '\\' . DateTimeInterface::class=>
-                     Types::dateTime(),
+                     self::getDateTimeType(),
 
                  '\\' . UploadedFileInterface::class=>
-                     Types::upload(),
+                     self::getUploadType(),
 
                  '\\' . DateTime::class=>
                     throw CannotMapTypeException::createForDateTime(),
@@ -150,6 +149,28 @@ class BaseTypeMapper implements RootTypeMapperInterface
         return null;
     }
 
+    private static UploadType|null $uploadType = null;
+
+    private static function getUploadType(): UploadType
+    {
+        if (self::$uploadType === null) {
+            self::$uploadType = new UploadType();
+        }
+
+        return self::$uploadType;
+    }
+
+    private static DateTimeType|null $dateTimeType = null;
+
+    private static function getDateTimeType(): DateTimeType
+    {
+        if (self::$dateTimeType === null) {
+            self::$dateTimeType = new DateTimeType();
+        }
+
+        return self::$dateTimeType;
+    }
+
     /**
      * Returns a GraphQL type by name.
      * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType", it should
@@ -161,9 +182,9 @@ class BaseTypeMapper implements RootTypeMapperInterface
     {
         // No need to map base types, only types added by us.
         return match ($typeName) {
-            'Upload' => Types::upload(),
-            'DateTime' => Types::dateTime(),
-            default => $this->next->mapNameToType($typeName)
+            'Upload'=>self::getUploadType(),
+            'DateTime'=>self::getDateTimeType(),
+            default=>$this->next->mapNameToType($typeName)
         };
     }
 }
