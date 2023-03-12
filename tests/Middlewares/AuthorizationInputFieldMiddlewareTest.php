@@ -2,22 +2,24 @@
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
+use stdClass;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
-use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
-use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Right;
-use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
+use TheCodingMachine\GraphQLite\InputField;
+use TheCodingMachine\GraphQLite\InputFieldDescriptor;
+use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
-class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
+class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
 {
     public function testReturnsResolversValueWhenAuthorized(): void
     {
@@ -27,7 +29,7 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
         $authorizationService = $this->createMock(AuthorizationServiceInterface::class);
         $authorizationService->method('isAllowed')
             ->willReturn(true);
-        $middleware = new AuthorizationFieldMiddleware($authenticationService, $authorizationService);
+        $middleware = new AuthorizationInputFieldMiddleware($authenticationService, $authorizationService);
 
         $descriptor = $this->stubDescriptor([new Logged(), new Right('test')]);
         $descriptor->setResolver(fn () => 123);
@@ -35,40 +37,21 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
         $field = $middleware->process($descriptor, $this->stubFieldHandler());
 
         self::assertNotNull($field);
-        self::assertSame(123, ($field->resolveFn)());
-    }
-
-
-    public function testFailsForHideIfUnauthorizedAndFailWith(): void
-    {
-        $middleware = new AuthorizationFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
-
-        $this->expectException(IncompatibleAnnotationsException::class);
-        $middleware->process($this->stubDescriptor([new Logged(), new HideIfUnauthorized(), new FailWith(value: 123)]), $this->stubFieldHandler());
+        self::assertSame(123, $this->resolveField($field));
     }
 
     public function testHidesFieldForHideIfUnauthorized(): void
     {
-        $middleware = new AuthorizationFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
+        $middleware = new AuthorizationInputFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
 
         $field = $middleware->process($this->stubDescriptor([new Logged(), new HideIfUnauthorized()]), $this->stubFieldHandler());
 
         self::assertNull($field);
     }
 
-    public function testReturnsFailsWithValueWhenNotAuthorized(): void
-    {
-        $middleware = new AuthorizationFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
-
-        $field = $middleware->process($this->stubDescriptor([new Logged(), new FailWith(value: 123)]), $this->stubFieldHandler());
-
-        self::assertNotNull($field);
-        self::assertSame(123, ($field->resolveFn)());
-    }
-
     public function testThrowsUnauthorizedExceptionWhenNotAuthorized(): void
     {
-        $middleware = new AuthorizationFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
+        $middleware = new AuthorizationInputFieldMiddleware(new VoidAuthenticationService(), new VoidAuthorizationService());
 
         $field = $middleware->process($this->stubDescriptor([new Logged()]), $this->stubFieldHandler());
 
@@ -76,7 +59,7 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
 
         $this->expectExceptionObject(MissingAuthorizationException::unauthorized());
 
-        ($field->resolveFn)();
+        $this->resolveField($field);
     }
 
     public function testThrowsForbiddenExceptionWhenNotAuthorized(): void
@@ -84,7 +67,7 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
         $authenticationService = $this->createMock(AuthenticationServiceInterface::class);
         $authenticationService->method('isLogged')
             ->willReturn(true);
-        $middleware = new AuthorizationFieldMiddleware($authenticationService, new VoidAuthorizationService());
+        $middleware = new AuthorizationInputFieldMiddleware($authenticationService, new VoidAuthorizationService());
 
         $field = $middleware->process($this->stubDescriptor([new Logged(), new Right('test')]), $this->stubFieldHandler());
 
@@ -92,31 +75,48 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
 
         $this->expectExceptionObject(MissingAuthorizationException::forbidden());
 
-        ($field->resolveFn)();
+        $this->resolveField($field);
     }
 
     /**
      * @param MiddlewareAnnotationInterface[] $annotations
      */
-    private function stubDescriptor(array $annotations): QueryFieldDescriptor
+    private function stubDescriptor(array $annotations): InputFieldDescriptor
     {
-        $descriptor = new QueryFieldDescriptor();
+        $descriptor = new InputFieldDescriptor();
         $descriptor->setMiddlewareAnnotations(new MiddlewareAnnotations($annotations));
+        $descriptor->setTargetMethodOnSource('foo');
         $descriptor->setResolver(fn () => self::fail('Should not be called.'));
 
         return $descriptor;
     }
 
-    private function stubFieldHandler(): FieldHandlerInterface
+    private function stubFieldHandler(): InputFieldHandlerInterface
     {
-        return new class implements FieldHandlerInterface {
-            public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
+        return new class implements InputFieldHandlerInterface {
+            public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
             {
-                return new FieldDefinition([
-                    'name' => 'foo',
-                    'resolve' => $fieldDescriptor->getResolver(),
-                ]);
+                return new InputField(
+                    name: 'foo',
+                    type: Type::string(),
+                    arguments: [
+                        'foo' => new SourceParameter(),
+                    ],
+                    originalResolver: $inputFieldDescriptor->getOriginalResolver(),
+                    resolver: $inputFieldDescriptor->getResolver(),
+                    comment: null,
+                    isUpdate: false,
+                    hasDefaultValue: false,
+                    defaultValue: null
+                );
             }
         };
+    }
+    
+    private function resolveField(InputField $field): mixed
+    {
+        return $field->getResolve()(
+            new stdClass(), [], null, $this->createStub(ResolveInfo::class),
+        );
     }
 }

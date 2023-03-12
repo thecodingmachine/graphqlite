@@ -30,6 +30,10 @@ class InjectUserParameterHandler implements ParameterMiddlewareInterface
             return $next->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
         }
 
-        return new InjectUserParameter($this->authenticationService);
+        // Now we need to know if authentication is optional. If type isn't nullable we'll assume the user
+        // is required for that parameter. If type is missing, it's also assumed optional.
+        $optional = $parameter->getType()?->allowsNull() ?? true;
+
+        return new InjectUserParameter($this->authenticationService, $optional);
     }
 }

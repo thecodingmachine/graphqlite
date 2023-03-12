@@ -29,7 +29,7 @@
         "webonyx/graphql-php": "^v15.0"
     },
     "require-dev": {
-        "beberlei/porpaginas": "^1.2",
+        "beberlei/porpaginas": "^1.2 || ^2.0",
         "doctrine/coding-standard": "^11.0",
         "ecodev/graphql-upload": "^7.0",
         "laminas/laminas-diactoros": "^2",

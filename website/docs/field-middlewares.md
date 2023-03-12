@@ -63,7 +63,9 @@ class QueryFieldDescriptor
 
 The role of a middleware is to analyze the `QueryFieldDescriptor` and modify it (or to directly return a `FieldDefinition`).
 
-If you want the field to purely disappear, your middleware can return `null`.
+If you want the field to purely disappear, your middleware can return `null`, although this should be used with caution:
+field middlewares only get called once per Schema instance. If you use a long-running server (like Laravel Octane, Swoole, RoadRunner etc)
+and share the same Schema instance across requests, you will not be able to hide fields based on request data.
 
 ## Annotations parsing
 
