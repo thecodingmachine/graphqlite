@@ -42,7 +42,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
         $this->assertCount(9, $queries);
 
         $mutations = $globControllerQueryProvider->getMutations();
-        $this->assertCount(1, $mutations);
+        $this->assertCount(2, $mutations);
 
     }
 }

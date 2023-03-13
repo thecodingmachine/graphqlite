@@ -137,4 +137,11 @@ class TestController
     {
         return ['42'];
     }
+
+    /**
+     * @Mutation
+     */
+    public function testVoid(): void
+    {
+    }
 }

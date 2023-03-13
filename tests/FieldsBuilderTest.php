@@ -70,6 +70,7 @@ use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
+use TheCodingMachine\GraphQLite\Types\VoidType;
 
 class FieldsBuilderTest extends AbstractQueryProviderTest
 {
@@ -136,7 +137,8 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $mutations = $queryProvider->getMutations($controller);
 
-        $this->assertCount(1, $mutations);
+        $this->assertCount(2, $mutations);
+
         $mutation = $mutations['mutation'];
         $this->assertSame('mutation', $mutation->name);
 
@@ -145,6 +147,9 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
+
+        $testVoidMutation = $mutations['testVoid'];
+        $this->assertInstanceOf(VoidType::class, $testVoidMutation->getType());
     }
 
     public function testErrors(): void

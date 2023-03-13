@@ -48,9 +48,11 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
@@ -297,7 +299,14 @@ class EndToEndTest extends TestCase
                 return new CachedDocBlockFactory(new Psr16Cache($arrayAdapter));
             },
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {
-                return new NullableTypeMapperAdapter();
+                return new VoidTypeMapper(
+                    new NullableTypeMapperAdapter(
+                        $container->get('topRootTypeMapper')
+                    )
+                );
+            },
+            'topRootTypeMapper' => static function () {
+                return new LastDelegatingTypeMapper();
             },
             'rootTypeMapper' => static function (ContainerInterface $container) {
                 // These are in reverse order of execution
@@ -363,7 +372,7 @@ class EndToEndTest extends TestCase
         }
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
 
-        $container->get(RootTypeMapperInterface::class)->setNext($container->get('rootTypeMapper'));
+        $container->get('topRootTypeMapper')->setNext($container->get('rootTypeMapper'));
         /*$container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new CompoundTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
@@ -2489,5 +2498,29 @@ class EndToEndTest extends TestCase
 
         $data = $this->getSuccessResult($result);
         $this->assertSame(['graph', 'ql'], $data['updateTrickyProduct']['list']);
+    }
+
+    public function testEndToEndVoidResult(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $gql = '
+            mutation($id: ID!) {
+                deleteButton(id: $id)
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql,
+            variableValues: [
+                'id' => 123,
+            ],
+        );
+
+        self::assertSame([
+            'deleteButton' => null,
+        ], $this->getSuccessResult($result));
     }
 }

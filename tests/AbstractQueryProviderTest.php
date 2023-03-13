@@ -29,9 +29,11 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -324,7 +326,9 @@ abstract class AbstractQueryProviderTest extends TestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
 
-        $topRootTypeMapper = new NullableTypeMapperAdapter();
+        $lastTopRootTypeMapper = new LastDelegatingTypeMapper();
+        $topRootTypeMapper = new NullableTypeMapperAdapter($lastTopRootTypeMapper);
+        $topRootTypeMapper = new VoidTypeMapper($topRootTypeMapper);
 
         $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
         $rootTypeMapper = new BaseTypeMapper(
@@ -359,7 +363,8 @@ abstract class AbstractQueryProviderTest extends TestCase
 
         $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $topRootTypeMapper);
 
-        $topRootTypeMapper->setNext($rootTypeMapper);
+        $lastTopRootTypeMapper->setNext($rootTypeMapper);
+
         return $topRootTypeMapper;
     }
 

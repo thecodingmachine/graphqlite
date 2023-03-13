@@ -10,6 +10,7 @@ use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Button;
 use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Color;
 use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Position;
 use TheCodingMachine\GraphQLite\Fixtures81\Integration\Models\Size;
+use TheCodingMachine\GraphQLite\Types\ID;
 
 final class ButtonController
 {
@@ -23,6 +24,11 @@ final class ButtonController
     public function updateButton(Color $color, Size $size, Position $state): Button
     {
         return new Button($color, $size, $state);
+    }
+
+    #[Mutation]
+    public function deleteButton(ID $id): void
+    {
     }
 
     #[Mutation]
