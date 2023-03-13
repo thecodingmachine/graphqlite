@@ -224,13 +224,7 @@ class SchemaFactory
      */
     private function getDoctrineAnnotationReader(CacheItemPoolInterface $cache): Reader
     {
-        if ($this->doctrineAnnotationReader === null) {
-            AnnotationRegistry::registerLoader('class_exists');
-
-            return new PsrCachedReader(new DoctrineAnnotationReader(), $cache, true);
-        }
-
-        return $this->doctrineAnnotationReader;
+        return $this->doctrineAnnotationReader ?? new PsrCachedReader(new DoctrineAnnotationReader(), $cache, true);
     }
 
     public function setAuthenticationService(AuthenticationServiceInterface $authenticationService): self
