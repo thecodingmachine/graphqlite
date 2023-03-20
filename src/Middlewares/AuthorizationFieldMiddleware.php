@@ -31,7 +31,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
-        $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
+        $annotations = $queryFieldDescriptor->middlewareAnnotations;
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
         assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
@@ -53,11 +53,11 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         }
 
         // If the failWith value is null and the return type is non-nullable, we must set it to nullable.
-        $type = $queryFieldDescriptor->getType();
+        $type = $queryFieldDescriptor->type;
         if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
             $type = $type->getWrappedType();
             assert($type instanceof OutputType);
-            $queryFieldDescriptor->setType($type);
+            $queryFieldDescriptor = $queryFieldDescriptor->withType($type);
         }
 
         // When using the same Schema instance for multiple subsequent requests, this middleware will only
@@ -69,7 +69,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 
         $resolver = $queryFieldDescriptor->getResolver();
 
-        $queryFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
+        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
             if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
                 return $resolver(...$args);
             }

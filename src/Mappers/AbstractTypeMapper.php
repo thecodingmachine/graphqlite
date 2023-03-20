@@ -196,8 +196,6 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 continue;
             }
             $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function () use ($refClass) {
-                $extendAnnotationsCache = new GlobExtendAnnotationsCache();
-
                 $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
                 if ($extendType !== null) {
@@ -221,9 +219,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                     }
 
                     // FIXME: $extendClassName === NULL!!!!!!
-                    $extendAnnotationsCache->setExtendType($extendClassName, $typeName);
-
-                    return $extendAnnotationsCache;
+                    return new GlobExtendAnnotationsCache($extendClassName, $typeName);
                 }
 
                 return 'nothing';

@@ -29,8 +29,9 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
             ->willReturn(true);
         $middleware = new AuthorizationFieldMiddleware($authenticationService, $authorizationService);
 
-        $descriptor = $this->stubDescriptor([new Logged(), new Right('test')]);
-        $descriptor->setResolver(fn () => 123);
+        $descriptor = $this
+            ->stubDescriptor([new Logged(), new Right('test')])
+            ->withResolver(fn () => 123);
 
         $field = $middleware->process($descriptor, $this->stubFieldHandler());
 
@@ -100,9 +101,10 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
      */
     private function stubDescriptor(array $annotations): QueryFieldDescriptor
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setMiddlewareAnnotations(new MiddlewareAnnotations($annotations));
-        $descriptor->setResolver(fn () => self::fail('Should not be called.'));
+        $descriptor = new QueryFieldDescriptor(
+            middlewareAnnotations: new MiddlewareAnnotations($annotations),
+        );
+        $descriptor = $descriptor->withResolver(fn () => self::fail('Should not be called.'));
 
         return $descriptor;
     }

@@ -8,42 +8,46 @@ class QueryFieldDescriptorTest extends TestCase
 {
     public function testExceptionInSetCallable(): void
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setCallable([$this, 'testExceptionInSetCallable']);
+        $descriptor = new QueryFieldDescriptor(
+            callable: [$this, 'testExceptionInSetCallable'],
+        );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setCallable([$this, 'testExceptionInSetCallable']);
+        $descriptor->withCallable([$this, 'testExceptionInSetCallable']);
     }
 
     public function testExceptionInSetTargetMethodOnSource(): void
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setTargetMethodOnSource('test');
+        $descriptor = new QueryFieldDescriptor(
+            targetMethodOnSource: 'test'
+        );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setTargetMethodOnSource('test');
+        $descriptor->withTargetMethodOnSource('test');
     }
 
     public function testExceptionInSetTargetPropertyOnSource(): void
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setTargetPropertyOnSource('test');
+        $descriptor = new QueryFieldDescriptor(
+            targetPropertyOnSource: 'test',
+        );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setTargetPropertyOnSource('test');
+        $descriptor->withTargetPropertyOnSource('test');
     }
 
     public function testExceptionInSetMagicProperty(): void
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setMagicProperty('test');
+        $descriptor = new QueryFieldDescriptor(
+            magicProperty: 'test'
+        );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setMagicProperty('test');
+        $descriptor->withMagicProperty('test');
     }
 
     public function testExceptionInGetOriginalResolver(): void

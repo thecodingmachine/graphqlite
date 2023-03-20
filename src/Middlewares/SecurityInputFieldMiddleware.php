@@ -33,7 +33,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 
     public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null
     {
-        $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
+        $annotations = $inputFieldDescriptor->middlewareAnnotations;
         /** @var Security[] $securityAnnotations */
         $securityAnnotations = $annotations->getAnnotationsByType(Security::class);
 
@@ -44,10 +44,10 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         $resolver = $inputFieldDescriptor->getResolver();
         $originalResolver = $inputFieldDescriptor->getOriginalResolver();
 
-        $parameters = $inputFieldDescriptor->getParameters();
+        $parameters = $inputFieldDescriptor->parameters;
 
-        $inputFieldDescriptor->setResolver(function (...$args) use ($securityAnnotations, $resolver, $parameters, $inputFieldDescriptor, $originalResolver) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver);
+        $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $parameters, $inputFieldDescriptor) {
+            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));
 
             foreach ($securityAnnotations as $annotation) {
                 try {
@@ -61,7 +61,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
                 }
             }
 
-            return $resolver(...$args);
+            return $resolver($source, ...$args);
         });
 
         return $inputFieldHandler->handle($inputFieldDescriptor);
@@ -73,14 +73,14 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, ResolverInterface $callable): array
+    private function getVariables(array $args, array $parameters, object $source): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier
             'user' => $this->authenticationService->getUser(),
             'authorizationService' => $this->authorizationService, // Used by the is_granted expression language function.
             'authenticationService' => $this->authenticationService, // Used by the is_logged expression language function.
-            'this' => $callable->getObject(),
+            'this' => $source,
         ];
 
         $argsName = array_keys($parameters);

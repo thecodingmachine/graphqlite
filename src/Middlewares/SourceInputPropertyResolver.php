@@ -10,45 +10,41 @@ use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use function assert;
 
 /**
- * A class that represents a callable on an object to resolve property value.
- * The object can be modified after class invocation.
+ * Resolves field by setting the value of $propertyName on the source object.
  *
  * @internal
  */
-final class SourceInputPropertyResolver implements SourceResolverInterface
+final class SourceInputPropertyResolver implements ResolverInterface
 {
-    private object|null $object = null;
-
-    public function __construct(private readonly string $propertyName)
+    public function __construct(
+        private readonly string $className,
+        private readonly string $propertyName,
+    )
     {
     }
 
-    public function setObject(object $object): void
+    public function executionSource(?object $source): object
     {
-        $this->object = $object;
-    }
-
-    public function getObject(): object
-    {
-        $object = $this->object;
-        assert($object !== null);
-
-        return $object;
-    }
-
-    public function __invoke(mixed ...$args): mixed
-    {
-        if ($this->object === null) {
-            throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for SourceInputPropertyResolver.');
         }
-        PropertyAccessor::setValue($this->object, $this->propertyName, ...$args);
+
+        return $source;
+    }
+
+    public function __invoke(object|null $source, mixed ...$args): mixed
+    {
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for SourceInputPropertyResolver.');
+        }
+
+        PropertyAccessor::setValue($source, $this->propertyName, ...$args);
+
         return $args[0];
     }
 
     public function toString(): string
     {
-        $class = $this->getObject()::class;
-
-        return $class . '::' . $this->propertyName;
+        return $this->className . '::' . $this->propertyName;
     }
 }

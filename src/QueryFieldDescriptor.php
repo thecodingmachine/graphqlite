@@ -13,9 +13,10 @@ use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
-use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
+use TheCodingMachine\GraphQLite\Utils\Cloneable;
 use function is_array;
 
 /**
@@ -25,85 +26,64 @@ use function is_array;
  */
 class QueryFieldDescriptor
 {
-    private string $name;
-    /** @var (OutputType&Type)|null */
-    private Type|null $type  = null;
-    /** @var array<string, ParameterInterface> */
-    private array $parameters = [];
-    /** @var array<string, ParameterInterface> */
-    private array $prefetchParameters = [];
-    private string|null $prefetchMethodName = null;
-    /** @var callable|null */
-    private $callable;
-    private string|null $targetMethodOnSource = null;
-    private string|null $targetPropertyOnSource = null;
-    private string|null $magicProperty = null;
-    /**
-     * Whether we should inject the source as the first parameter or not.
-     */
-    private bool $injectSource;
-    private string|null $comment = null;
-    private string|null $deprecationReason = null;
-    private MiddlewareAnnotations $middlewareAnnotations;
-    private ReflectionMethod $refMethod;
-    private ReflectionProperty $refProperty;
-    private ResolverInterface|null $originalResolver = null;
+    use Cloneable;
+
+    private readonly ResolverInterface $originalResolver;
     /** @var callable */
-    private $resolver;
+    private readonly mixed $resolver;
 
-    public function getName(): string
+    /**
+     * @param (OutputType&Type)|null $type
+     * @param array<string, ParameterInterface> $parameters
+     * @param array<string, ParameterInterface> $prefetchParameters
+     * @param callable $callable
+     * @param bool $injectSource Whether we should inject the source as the first parameter or not.
+     */
+    public function __construct(
+        public readonly string|null             $name = null,
+        public readonly Type|null               $type = null,
+        public readonly array                   $parameters = [],
+        public readonly array                   $prefetchParameters = [],
+        public readonly string|null             $prefetchMethodName = null,
+        private readonly mixed $callable = null,
+        private readonly string|null            $targetMethodOnSource = null,
+        private readonly string|null            $targetPropertyOnSource = null,
+        private readonly string|null            $magicProperty = null,
+        public readonly bool                    $injectSource = false,
+        public readonly string|null             $comment = null,
+        public readonly string|null             $deprecationReason = null,
+        public readonly MiddlewareAnnotations   $middlewareAnnotations = new MiddlewareAnnotations([]),
+        public readonly ReflectionMethod|null   $refMethod = null,
+        public readonly ReflectionProperty|null $refProperty = null,
+    )
     {
-        return $this->name;
     }
 
-    public function setName(string $name): void
+    public function withName(string $name): self
     {
-        $this->name = $name;
+        return $this->with(name: $name);
     }
 
-    /** @return (OutputType&Type)|null */
-    public function getType(): Type|null
+    public function withType(OutputType&Type $type): self
     {
-        return $this->type;
-    }
-
-    public function setType(OutputType&Type $type): void
-    {
-        $this->type = $type;
-    }
-
-    /** @return array<string, ParameterInterface> */
-    public function getParameters(): array
-    {
-        return $this->parameters;
+        return $this->with(type: $type);
     }
 
     /** @param array<string, ParameterInterface> $parameters */
-    public function setParameters(array $parameters): void
+    public function withParameters(array $parameters): self
     {
-        $this->parameters = $parameters;
-    }
-
-    /** @return array<string, ParameterInterface> */
-    public function getPrefetchParameters(): array
-    {
-        return $this->prefetchParameters;
+        return $this->with(parameters: $parameters);
     }
 
     /** @param array<string, ParameterInterface> $prefetchParameters */
-    public function setPrefetchParameters(array $prefetchParameters): void
+    public function withPrefetchParameters(array $prefetchParameters): self
     {
-        $this->prefetchParameters = $prefetchParameters;
+        return $this->with(prefetchParameters: $prefetchParameters);
     }
 
-    public function getPrefetchMethodName(): string|null
+    public function withPrefetchMethodName(string|null $prefetchMethodName): self
     {
-        return $this->prefetchMethodName;
-    }
-
-    public function setPrefetchMethodName(string|null $prefetchMethodName): void
-    {
-        $this->prefetchMethodName = $prefetchMethodName;
+        return $this->with(prefetchMethodName: $prefetchMethodName);
     }
 
     /**
@@ -111,108 +91,90 @@ class QueryFieldDescriptor
      * This should not be used in the context of a field middleware.
      * Use getResolver/setResolver if you want to wrap the resolver in another method.
      */
-    public function setCallable(callable $callable): void
+    public function withCallable(callable $callable): self
     {
-        if ($this->originalResolver !== null) {
+        if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the callable via setCallable because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
-        $this->callable = $callable;
-        $this->targetMethodOnSource = null;
-        $this->targetPropertyOnSource = null;
-        $this->magicProperty = null;
+
+        return $this->with(
+            callable: $callable,
+            targetMethodOnSource: null,
+            targetPropertyOnSource: null,
+            magicProperty: null,
+        );
     }
 
-    public function setTargetMethodOnSource(string $targetMethodOnSource): void
+    public function withTargetMethodOnSource(string $targetMethodOnSource): self
     {
-        if ($this->originalResolver !== null) {
+        if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
-        $this->callable = null;
-        $this->targetMethodOnSource = $targetMethodOnSource;
-        $this->targetPropertyOnSource = null;
-        $this->magicProperty = null;
+
+        return $this->with(
+            callable: null,
+            targetMethodOnSource: $targetMethodOnSource,
+            targetPropertyOnSource: null,
+            magicProperty: null,
+        );
     }
 
-    public function setTargetPropertyOnSource(string|null $targetPropertyOnSource): void
+    public function withTargetPropertyOnSource(string|null $targetPropertyOnSource): self
     {
-        if ($this->originalResolver !== null) {
+        if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
-        $this->callable = null;
-        $this->targetMethodOnSource = null;
-        $this->targetPropertyOnSource = $targetPropertyOnSource;
-        $this->magicProperty = null;
+
+        return $this->with(
+            callable: null,
+            targetMethodOnSource: null,
+            targetPropertyOnSource: $targetPropertyOnSource,
+            magicProperty: null,
+        );
     }
 
-    public function setMagicProperty(string $magicProperty): void
+    public function withMagicProperty(string $magicProperty): self
     {
-        if ($this->originalResolver !== null) {
+        if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
         }
-        $this->callable = null;
-        $this->targetMethodOnSource = null;
-        $this->targetPropertyOnSource = null;
-        $this->magicProperty = $magicProperty;
+
+        return $this->with(
+            callable: null,
+            targetMethodOnSource: null,
+            targetPropertyOnSource: null,
+            magicProperty: $magicProperty,
+        );
     }
 
-    public function isInjectSource(): bool
+    public function withInjectSource(bool $injectSource): self
     {
-        return $this->injectSource;
+        return $this->with(injectSource: $injectSource);
     }
 
-    public function setInjectSource(bool $injectSource): void
+    public function withComment(string|null $comment): self
     {
-        $this->injectSource = $injectSource;
+        return $this->with(comment: $comment);
     }
 
-    public function getComment(): string|null
+    public function withDeprecationReason(string|null $deprecationReason): self
     {
-        return $this->comment;
+        return $this->with(deprecationReason: $deprecationReason);
     }
 
-    public function setComment(string|null $comment): void
+    public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): self
     {
-        $this->comment = $comment;
+        return $this->with(middlewareAnnotations: $middlewareAnnotations);
     }
 
-    public function getDeprecationReason(): string|null
+    public function withRefMethod(ReflectionMethod $refMethod): self
     {
-        return $this->deprecationReason;
+        return $this->with(refMethod: $refMethod);
     }
 
-    public function setDeprecationReason(string|null $deprecationReason): void
+    public function withRefProperty(ReflectionProperty $refProperty): self
     {
-        $this->deprecationReason = $deprecationReason;
-    }
-
-    public function getMiddlewareAnnotations(): MiddlewareAnnotations
-    {
-        return $this->middlewareAnnotations;
-    }
-
-    public function setMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void
-    {
-        $this->middlewareAnnotations = $middlewareAnnotations;
-    }
-
-    public function getRefMethod(): ReflectionMethod
-    {
-        return $this->refMethod;
-    }
-
-    public function setRefMethod(ReflectionMethod $refMethod): void
-    {
-        $this->refMethod = $refMethod;
-    }
-
-    public function getRefProperty(): ReflectionProperty
-    {
-        return $this->refProperty;
-    }
-
-    public function setRefProperty(ReflectionProperty $refProperty): void
-    {
-        $this->refProperty = $refProperty;
+        return $this->with(refProperty: $refProperty);
     }
 
     /**
@@ -229,11 +191,11 @@ class QueryFieldDescriptor
             $callable = $this->callable;
             $this->originalResolver = new ServiceResolver($callable);
         } elseif ($this->targetMethodOnSource !== null) {
-            $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
+            $this->originalResolver = new SourceMethodResolver('test', $this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
-            $this->originalResolver = new SourcePropertyResolver($this->targetPropertyOnSource);
+            $this->originalResolver = new SourcePropertyResolver('test', $this->targetPropertyOnSource);
         } elseif ($this->magicProperty !== null) {
-            $this->originalResolver = new MagicPropertyResolver($this->magicProperty);
+            $this->originalResolver = new MagicPropertyResolver('test', $this->magicProperty);
         } else {
             throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource) or a magic property (via setMagicProperty).');
         }
@@ -247,15 +209,15 @@ class QueryFieldDescriptor
      */
     public function getResolver(): callable
     {
-        if ($this->resolver === null) {
+        if (!isset($this->resolver)) {
             $this->resolver = $this->getOriginalResolver();
         }
 
         return $this->resolver;
     }
 
-    public function setResolver(callable $resolver): void
+    public function withResolver(callable $resolver): self
     {
-        $this->resolver = $resolver;
+        return $this->with(resolver: $resolver);
     }
 }

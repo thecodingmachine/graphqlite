@@ -33,7 +33,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
-        $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
+        $annotations = $queryFieldDescriptor->middlewareAnnotations;
         /** @var Security[] $securityAnnotations */
         $securityAnnotations = $annotations->getAnnotationsByType(Security::class);
 
@@ -46,7 +46,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $makeReturnTypeNullable = false;
-        $type = $queryFieldDescriptor->getType();
+        $type = $queryFieldDescriptor->type;
         if ($type instanceof NonNull) {
             if ($failWith !== null && $failWith->getValue() === null) {
                 $makeReturnTypeNullable = true;
@@ -62,17 +62,17 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             if ($makeReturnTypeNullable) {
                 $type = $type->getWrappedType();
                 assert($type instanceof OutputType);
-                $queryFieldDescriptor->setType($type);
+                $queryFieldDescriptor = $queryFieldDescriptor->withType($type);
             }
         }
 
         $resolver = $queryFieldDescriptor->getResolver();
         $originalResolver = $queryFieldDescriptor->getOriginalResolver();
 
-        $parameters = $queryFieldDescriptor->getParameters();
+        $parameters = $queryFieldDescriptor->parameters;
 
-        $queryFieldDescriptor->setResolver(function (...$args) use ($securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor, $originalResolver) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver);
+        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor) {
+            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));
 
             foreach ($securityAnnotations as $annotation) {
                 try {
@@ -93,7 +93,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
                 }
             }
 
-            return $resolver(...$args);
+            return $resolver($source, ...$args);
         });
 
         return $fieldHandler->handle($queryFieldDescriptor);
@@ -105,14 +105,14 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, ResolverInterface $callable): array
+    private function getVariables(array $args, array $parameters, object $source): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier
             'user' => $this->authenticationService->getUser(),
             'authorizationService' => $this->authorizationService, // Used by the is_granted expression language function.
             'authenticationService' => $this->authenticationService, // Used by the is_logged expression language function.
-            'this' => $callable->getObject(),
+            'this' => $source,
         ];
 
         $argsName = array_keys($parameters);

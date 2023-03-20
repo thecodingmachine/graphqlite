@@ -31,8 +31,9 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
             ->willReturn(true);
         $middleware = new AuthorizationInputFieldMiddleware($authenticationService, $authorizationService);
 
-        $descriptor = $this->stubDescriptor([new Logged(), new Right('test')]);
-        $descriptor->setResolver(fn () => 123);
+        $descriptor = $this
+            ->stubDescriptor([new Logged(), new Right('test')])
+            ->withResolver(fn () => 123);
 
         $field = $middleware->process($descriptor, $this->stubFieldHandler());
 
@@ -83,10 +84,11 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
      */
     private function stubDescriptor(array $annotations): InputFieldDescriptor
     {
-        $descriptor = new InputFieldDescriptor();
-        $descriptor->setMiddlewareAnnotations(new MiddlewareAnnotations($annotations));
-        $descriptor->setTargetMethodOnSource('foo');
-        $descriptor->setResolver(fn () => self::fail('Should not be called.'));
+        $descriptor = new InputFieldDescriptor(
+            middlewareAnnotations: new MiddlewareAnnotations($annotations),
+            targetMethodOnSource: 'foo',
+        );
+        $descriptor = $descriptor->withResolver(fn () => self::fail('Should not be called.'));
 
         return $descriptor;
     }

@@ -10,9 +10,24 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 class InputTypeProperty extends InputTypeParameter
 {
-    public function __construct(private readonly string $propertyName, string $fieldName, InputType&Type $type, bool $hasDefaultValue, mixed $defaultValue, ArgumentResolver $argumentResolver)
+    public function __construct(
+        private readonly string $propertyName,
+        string $fieldName,
+        InputType&Type $type,
+        string $description,
+        bool $hasDefaultValue,
+        mixed $defaultValue,
+        ArgumentResolver $argumentResolver
+    )
     {
-        parent::__construct($fieldName, $type, $hasDefaultValue, $defaultValue, $argumentResolver);
+        parent::__construct(
+            $fieldName,
+            $type,
+            $description,
+            $hasDefaultValue,
+            $defaultValue,
+            $argumentResolver
+        );
     }
 
     public function getPropertyName(): string

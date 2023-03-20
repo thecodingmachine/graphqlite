@@ -111,7 +111,7 @@ class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
 {
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
     {
-        $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
+        $annotations = $queryFieldDescriptor->middlewareAnnotations;
 
         /**
          * @var OnlyDebug $onlyDebug
