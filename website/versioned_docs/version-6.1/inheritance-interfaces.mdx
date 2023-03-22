@@ -45,7 +45,7 @@ When writing your GraphQL query, you are able to use fragments to retrieve field
 ```graphql
 contact {
     name
-    ... User {
+    ... on User {
        email
     }
 }
