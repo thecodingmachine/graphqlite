@@ -38,26 +38,26 @@ interface FieldMiddlewareInterface
 class QueryFieldDescriptor
 {
     public function getName() { /* ... */ }
-    public function withName(string $name)  { /* ... */ }
+    public function withName(string $name): self  { /* ... */ }
     public function getType() { /* ... */ }
-    public function withType($type): void  { /* ... */ }
+    public function withType($type): self  { /* ... */ }
     public function getParameters(): array  { /* ... */ }
-    public function withParameters(array $parameters): void  { /* ... */ }
+    public function withParameters(array $parameters): self  { /* ... */ }
     public function getPrefetchParameters(): array  { /* ... */ }
-    public function withPrefetchParameters(array $prefetchParameters): void  { /* ... */ }
+    public function withPrefetchParameters(array $prefetchParameters): self  { /* ... */ }
     public function getPrefetchMethodName(): ?string { /* ... */ }
-    public function withPrefetchMethodName(?string $prefetchMethodName): void { /* ... */ }
+    public function withPrefetchMethodName(?string $prefetchMethodName): self { /* ... */ }
     public function withCallable(callable $callable): self { /* ... */ }
     public function withTargetMethodOnSource(?string $targetMethodOnSource): self { /* ... */ }
     public function isInjectSource(): bool { /* ... */ }
-    public function withInjectSource(bool $injectSource): void { /* ... */ }
+    public function withInjectSource(bool $injectSource): self { /* ... */ }
     public function getComment(): ?string { /* ... */ }
-    public function withComment(?string $comment): void { /* ... */ }
+    public function withComment(?string $comment): self { /* ... */ }
     public function getMiddlewareAnnotations(): MiddlewareAnnotations { /* ... */ }
-    public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void { /* ... */ }
+    public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): self { /* ... */ }
     public function getOriginalResolver(): ResolverInterface { /* ... */ }
     public function getResolver(): callable { /* ... */ }
-    public function withResolver(callable $resolver): void { /* ... */ }
+    public function withResolver(callable $resolver): self { /* ... */ }
 }
 ```
 
