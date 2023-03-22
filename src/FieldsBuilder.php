@@ -405,7 +405,7 @@ class FieldsBuilder
             $fieldDescriptor = $fieldDescriptor->withParameters($args);
 
             if (is_string($controller)) {
-                $fieldDescriptor = $fieldDescriptor->withTargetMethodOnSource($methodName);
+                $fieldDescriptor = $fieldDescriptor->withTargetMethodOnSource($refMethod->getDeclaringClass()->getName(), $methodName);
             } else {
                 $callable = [$controller, $methodName];
                 assert(is_callable($callable));
@@ -500,7 +500,7 @@ class FieldsBuilder
             }
 
             if (is_string($controller)) {
-                $fieldDescriptor = $fieldDescriptor->withTargetPropertyOnSource($refProperty->getName());
+                $fieldDescriptor = $fieldDescriptor->withTargetPropertyOnSource($refProperty->getDeclaringClass()->getName(), $refProperty->getName());
             } else {
                 $fieldDescriptor = $fieldDescriptor->withCallable(static function () use ($controller, $refProperty) {
                     return PropertyAccessor::getValue($controller, $refProperty->getName());
@@ -612,6 +612,7 @@ class FieldsBuilder
                     name: $sourceField->getName(),
                     type: $type,
                     parameters: $args,
+                    targetClass: $refMethod->getDeclaringClass()->getName(),
                     targetMethodOnSource: $methodName,
                     comment: $description,
                     deprecationReason: $deprecationReason ?? null,
@@ -632,6 +633,7 @@ class FieldsBuilder
                 $fieldDescriptor = new QueryFieldDescriptor(
                     name: $sourceField->getName(),
                     type: $type,
+                    targetClass: $refClass->getName(),
                     magicProperty: $sourceField->getSourceName() ?? $sourceField->getName(),
                     comment: $sourceField->getDescription(),
                 );
@@ -901,7 +903,7 @@ class FieldsBuilder
                 ->withDefaultValue($args[$name]->getDefaultValue());
             $constructerParameters = $this->getClassConstructParameterNames($refClass);
             if (! in_array($name, $constructerParameters)) {
-                $inputFieldDescriptor = $inputFieldDescriptor->withTargetMethodOnSource($methodName);
+                $inputFieldDescriptor = $inputFieldDescriptor->withTargetMethodOnSource($refMethod->getDeclaringClass()->getName(), $methodName);
             }
 
             $inputFieldDescriptor = $inputFieldDescriptor
@@ -992,6 +994,7 @@ class FieldsBuilder
                     name: $inputProperty->getName(),
                     type: $type,
                     parameters: [$inputProperty->getName() => $inputProperty],
+                    targetClass: $refProperty->getDeclaringClass()->getName(),
                     targetPropertyOnSource: $refProperty->getName(),
                     injectSource: false,
                     comment: trim($description),

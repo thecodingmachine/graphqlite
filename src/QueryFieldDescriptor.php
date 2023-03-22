@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
 
+use function assert;
 use function is_array;
 
 /**
@@ -45,6 +46,7 @@ class QueryFieldDescriptor
         private readonly array $prefetchParameters = [],
         private readonly string|null $prefetchMethodName = null,
         private readonly mixed $callable = null,
+        private readonly string|null $targetClass = null,
         private readonly string|null $targetMethodOnSource = null,
         private readonly string|null $targetPropertyOnSource = null,
         private readonly string|null $magicProperty = null,
@@ -125,13 +127,14 @@ class QueryFieldDescriptor
 
         return $this->with(
             callable: $callable,
+            targetClass: null,
             targetMethodOnSource: null,
             targetPropertyOnSource: null,
             magicProperty: null,
         );
     }
 
-    public function withTargetMethodOnSource(string $targetMethodOnSource): self
+    public function withTargetMethodOnSource(string $className, string $targetMethodOnSource): self
     {
         if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via withTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/withResolver');
@@ -139,13 +142,14 @@ class QueryFieldDescriptor
 
         return $this->with(
             callable: null,
+            targetClass: $className,
             targetMethodOnSource: $targetMethodOnSource,
             targetPropertyOnSource: null,
             magicProperty: null,
         );
     }
 
-    public function withTargetPropertyOnSource(string|null $targetPropertyOnSource): self
+    public function withTargetPropertyOnSource(string $className, string|null $targetPropertyOnSource): self
     {
         if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via withTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/withResolver');
@@ -153,13 +157,14 @@ class QueryFieldDescriptor
 
         return $this->with(
             callable: null,
+            targetClass: $className,
             targetMethodOnSource: null,
             targetPropertyOnSource: $targetPropertyOnSource,
             magicProperty: null,
         );
     }
 
-    public function withMagicProperty(string $magicProperty): self
+    public function withMagicProperty(string $className, string $magicProperty): self
     {
         if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via withMagicProperty because it was already used. You can still wrap the callable using getResolver/withResolver');
@@ -167,6 +172,7 @@ class QueryFieldDescriptor
 
         return $this->with(
             callable: null,
+            targetClass: $className,
             targetMethodOnSource: null,
             targetPropertyOnSource: null,
             magicProperty: $magicProperty,
@@ -247,11 +253,17 @@ class QueryFieldDescriptor
             $callable = $this->callable;
             $this->originalResolver = new ServiceResolver($callable);
         } elseif ($this->targetMethodOnSource !== null) {
-            $this->originalResolver = new SourceMethodResolver('test', $this->targetMethodOnSource);
+            assert($this->targetClass !== null);
+
+            $this->originalResolver = new SourceMethodResolver($this->targetClass, $this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
-            $this->originalResolver = new SourcePropertyResolver('test', $this->targetPropertyOnSource);
+            assert($this->targetClass !== null);
+
+            $this->originalResolver = new SourcePropertyResolver($this->targetClass, $this->targetPropertyOnSource);
         } elseif ($this->magicProperty !== null) {
-            $this->originalResolver = new MagicPropertyResolver('test', $this->magicProperty);
+            assert($this->targetClass !== null);
+
+            $this->originalResolver = new MagicPropertyResolver($this->targetClass, $this->magicProperty);
         } else {
             throw new GraphQLRuntimeException('The QueryFieldDescriptor should be passed either a resolve method (via withCallable) or a target method on source object (via withTargetMethodOnSource) or a magic property (via withMagicProperty).');
         }

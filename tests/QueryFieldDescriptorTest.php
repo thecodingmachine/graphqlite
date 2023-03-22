@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class QueryFieldDescriptorTest extends TestCase
 {
@@ -25,12 +26,13 @@ class QueryFieldDescriptorTest extends TestCase
         $descriptor = new QueryFieldDescriptor(
             name: 'test',
             type: Type::string(),
+            targetClass: stdClass::class,
             targetMethodOnSource: 'test'
         );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->withTargetMethodOnSource('test');
+        $descriptor->withTargetMethodOnSource(stdClass::class, 'test');
     }
 
     public function testExceptionInSetTargetPropertyOnSource(): void
@@ -38,12 +40,13 @@ class QueryFieldDescriptorTest extends TestCase
         $descriptor = new QueryFieldDescriptor(
             name: 'test',
             type: Type::string(),
+            targetClass: stdClass::class,
             targetPropertyOnSource: 'test',
         );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->withTargetPropertyOnSource('test');
+        $descriptor->withTargetPropertyOnSource(stdClass::class, 'test');
     }
 
     public function testExceptionInSetMagicProperty(): void
@@ -51,12 +54,13 @@ class QueryFieldDescriptorTest extends TestCase
         $descriptor = new QueryFieldDescriptor(
             name: 'test',
             type: Type::string(),
+            targetClass: stdClass::class,
             magicProperty: 'test'
         );
         $descriptor->getResolver();
 
         $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->withMagicProperty('test');
+        $descriptor->withMagicProperty(stdClass::class, 'test');
     }
 
     public function testExceptionInGetOriginalResolver(): void

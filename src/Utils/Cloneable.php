@@ -14,7 +14,11 @@ use function array_key_exists;
  */
 trait Cloneable
 {
-    /** @param array<string, mixed> ...$values */
+    /**
+     * @param array<string, mixed> ...$values
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     */
     public function with(...$values): static
     {
         $refClass = new ReflectionClass(static::class);

@@ -204,7 +204,7 @@ class TypeHandler implements ParameterHandlerInterface
             description: null,
             hasDefaultValue: $hasDefaultValue,
             defaultValue: $defaultValue,
-            argumentResolver: $this->argumentResolver
+            argumentResolver: $this->argumentResolver,
         );
     }
 
@@ -305,7 +305,7 @@ class TypeHandler implements ParameterHandlerInterface
             description: trim($docBlockComment),
             hasDefaultValue: $hasDefault,
             defaultValue: $defaultValue,
-            argumentResolver: $this->argumentResolver
+            argumentResolver: $this->argumentResolver,
         );
     }
 

@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 use function array_keys;
+use function array_map;
 use function array_reduce;
 
 /**
@@ -40,7 +41,7 @@ final class StaticTypeMapper implements TypeMapperInterface
     public function __construct(
         array $types = [],
         private readonly array $inputTypes = [],
-        array $notMappedTypes = []
+        array $notMappedTypes = [],
     )
     {
         $this->types = array_map(fn (ObjectType|InterfaceType $type) => $this->castOutputTypeToMutable($type), $types);

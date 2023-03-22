@@ -16,6 +16,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
 
+use function assert;
 use function is_callable;
 
 /**
@@ -41,6 +42,7 @@ class InputFieldDescriptor
         private readonly InputType&Type $type,
         private readonly array $parameters = [],
         private readonly mixed $callable = null,
+        private readonly string|null $targetClass = null,
         private readonly string|null $targetMethodOnSource = null,
         private readonly string|null $targetPropertyOnSource = null,
         private readonly bool $injectSource = false,
@@ -132,12 +134,13 @@ class InputFieldDescriptor
         // $this->magicProperty = null;
         return $this->with(
             callable: $callable,
+            targetClass: null,
             targetMethodOnSource: null,
             targetPropertyOnSource: null,
         );
     }
 
-    public function withTargetMethodOnSource(string $targetMethodOnSource): self
+    public function withTargetMethodOnSource(string $className, string $targetMethodOnSource): self
     {
         if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via withTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/withResolver');
@@ -147,12 +150,13 @@ class InputFieldDescriptor
         // $this->magicProperty = null;
         return $this->with(
             callable: null,
+            targetClass: $className,
             targetMethodOnSource: $targetMethodOnSource,
             targetPropertyOnSource: null,
         );
     }
 
-    public function withTargetPropertyOnSource(string|null $targetPropertyOnSource): self
+    public function withTargetPropertyOnSource(string $className, string|null $targetPropertyOnSource): self
     {
         if (isset($this->originalResolver)) {
             throw new GraphQLRuntimeException('You cannot modify the target method via withTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/withResolver');
@@ -162,6 +166,7 @@ class InputFieldDescriptor
         // $this->magicProperty = null;
         return $this->with(
             callable: null,
+            targetClass: $className,
             targetMethodOnSource: null,
             targetPropertyOnSource: $targetPropertyOnSource,
         );
@@ -231,9 +236,13 @@ class InputFieldDescriptor
             $callable = $this->callable;
             $this->originalResolver = new ServiceResolver($callable);
         } elseif ($this->targetMethodOnSource !== null) {
-            $this->originalResolver = new SourceMethodResolver('test', $this->targetMethodOnSource);
+            assert($this->targetClass !== null);
+
+            $this->originalResolver = new SourceMethodResolver($this->targetClass, $this->targetMethodOnSource);
         } elseif ($this->targetPropertyOnSource !== null) {
-            $this->originalResolver = new SourceInputPropertyResolver('test', $this->targetPropertyOnSource);
+            assert($this->targetClass !== null);
+
+            $this->originalResolver = new SourceInputPropertyResolver($this->targetClass, $this->targetPropertyOnSource);
             // } elseif ($this->magicProperty !== null) {
             // Enable magic properties in a future PR
             // $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);

@@ -87,6 +87,7 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
         $descriptor = new InputFieldDescriptor(
             name: 'foo',
             type: Type::string(),
+            targetClass: stdClass::class,
             targetMethodOnSource: 'foo',
             middlewareAnnotations: new MiddlewareAnnotations($annotations),
         );
