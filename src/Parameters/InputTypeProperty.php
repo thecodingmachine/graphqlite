@@ -17,7 +17,7 @@ class InputTypeProperty extends InputTypeParameter
         string $description,
         bool $hasDefaultValue,
         mixed $defaultValue,
-        ArgumentResolver $argumentResolver
+        ArgumentResolver $argumentResolver,
     )
     {
         parent::__construct(
@@ -26,7 +26,7 @@ class InputTypeProperty extends InputTypeParameter
             $description,
             $hasDefaultValue,
             $defaultValue,
-            $argumentResolver
+            $argumentResolver,
         );
     }
 

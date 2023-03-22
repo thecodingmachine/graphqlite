@@ -18,7 +18,7 @@ class InputTypeParameter implements InputTypeParameterInterface
         private readonly string|null $description,
         private readonly bool $hasDefaultValue,
         private readonly mixed $defaultValue,
-        private readonly ArgumentResolver $argumentResolver
+        private readonly ArgumentResolver $argumentResolver,
     )
     {
     }

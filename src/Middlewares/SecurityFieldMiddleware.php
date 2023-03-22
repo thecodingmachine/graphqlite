@@ -33,7 +33,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
-        $annotations = $queryFieldDescriptor->middlewareAnnotations;
+        $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
         /** @var Security[] $securityAnnotations */
         $securityAnnotations = $annotations->getAnnotationsByType(Security::class);
 
@@ -46,7 +46,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $makeReturnTypeNullable = false;
-        $type = $queryFieldDescriptor->type;
+        $type = $queryFieldDescriptor->getType();
         if ($type instanceof NonNull) {
             if ($failWith !== null && $failWith->getValue() === null) {
                 $makeReturnTypeNullable = true;
@@ -69,7 +69,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         $resolver = $queryFieldDescriptor->getResolver();
         $originalResolver = $queryFieldDescriptor->getOriginalResolver();
 
-        $parameters = $queryFieldDescriptor->parameters;
+        $parameters = $queryFieldDescriptor->getParameters();
 
         $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor) {
             $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));

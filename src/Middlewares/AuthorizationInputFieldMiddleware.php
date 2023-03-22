@@ -29,7 +29,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
     /** @throws MissingAuthorizationException */
     public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null
     {
-        $annotations = $inputFieldDescriptor->middlewareAnnotations;
+        $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
         assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);

@@ -38,26 +38,26 @@ interface FieldMiddlewareInterface
 class QueryFieldDescriptor
 {
     public function getName() { /* ... */ }
-    public function setName(string $name)  { /* ... */ }
+    public function withName(string $name)  { /* ... */ }
     public function getType() { /* ... */ }
-    public function setType($type): void  { /* ... */ }
+    public function withType($type): void  { /* ... */ }
     public function getParameters(): array  { /* ... */ }
-    public function setParameters(array $parameters): void  { /* ... */ }
+    public function withParameters(array $parameters): void  { /* ... */ }
     public function getPrefetchParameters(): array  { /* ... */ }
-    public function setPrefetchParameters(array $prefetchParameters): void  { /* ... */ }
+    public function withPrefetchParameters(array $prefetchParameters): void  { /* ... */ }
     public function getPrefetchMethodName(): ?string { /* ... */ }
-    public function setPrefetchMethodName(?string $prefetchMethodName): void { /* ... */ }
-    public function setCallable(callable $callable): void { /* ... */ }
-    public function setTargetMethodOnSource(?string $targetMethodOnSource): void { /* ... */ }
+    public function withPrefetchMethodName(?string $prefetchMethodName): void { /* ... */ }
+    public function withCallable(callable $callable): self { /* ... */ }
+    public function withTargetMethodOnSource(?string $targetMethodOnSource): self { /* ... */ }
     public function isInjectSource(): bool { /* ... */ }
-    public function setInjectSource(bool $injectSource): void { /* ... */ }
+    public function withInjectSource(bool $injectSource): void { /* ... */ }
     public function getComment(): ?string { /* ... */ }
-    public function setComment(?string $comment): void { /* ... */ }
+    public function withComment(?string $comment): void { /* ... */ }
     public function getMiddlewareAnnotations(): MiddlewareAnnotations { /* ... */ }
-    public function setMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void { /* ... */ }
+    public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void { /* ... */ }
     public function getOriginalResolver(): ResolverInterface { /* ... */ }
     public function getResolver(): callable { /* ... */ }
-    public function setResolver(callable $resolver): void { /* ... */ }
+    public function withResolver(callable $resolver): void { /* ... */ }
 }
 ```
 
@@ -113,7 +113,7 @@ class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
 {
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): ?FieldDefinition
     {
-        $annotations = $queryFieldDescriptor->middlewareAnnotations;
+        $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
         /**
          * @var OnlyDebug $onlyDebug

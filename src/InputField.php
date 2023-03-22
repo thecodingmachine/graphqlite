@@ -121,22 +121,22 @@ final class InputField extends InputObjectField
     private static function fromDescriptor(InputFieldDescriptor $fieldDescriptor): self
     {
         return new self(
-            $fieldDescriptor->name,
-            $fieldDescriptor->type,
-            $fieldDescriptor->parameters,
+            $fieldDescriptor->getName(),
+            $fieldDescriptor->getType(),
+            $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
-            $fieldDescriptor->comment,
-            $fieldDescriptor->isUpdate,
-            $fieldDescriptor->hasDefaultValue,
-            $fieldDescriptor->defaultValue,
+            $fieldDescriptor->getComment(),
+            $fieldDescriptor->isUpdate(),
+            $fieldDescriptor->hasDefaultValue(),
+            $fieldDescriptor->getDefaultValue(),
         );
     }
 
     public static function fromFieldDescriptor(InputFieldDescriptor $fieldDescriptor): self
     {
-        $arguments = $fieldDescriptor->parameters;
-        if ($fieldDescriptor->injectSource === true) {
+        $arguments = $fieldDescriptor->getParameters();
+        if ($fieldDescriptor->isInjectSource() === true) {
             $arguments = ['__graphqlite_source' => new SourceParameter()] + $arguments;
         }
         $fieldDescriptor = $fieldDescriptor->withParameters($arguments);

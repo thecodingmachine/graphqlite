@@ -16,8 +16,8 @@ class BadExpressionInSecurityException extends Exception
 {
     public static function wrapException(Throwable $e, QueryFieldDescriptor|InputFieldDescriptor $fieldDescriptor): self
     {
-        $refMethod = $fieldDescriptor->refMethod;
-        $message = 'An error occurred while evaluating expression in @Security annotation of method "' . $refMethod->getDeclaringClass()->getName() . '::' . $refMethod->getName() . '": ' . $e->getMessage();
+        $refMethod = $fieldDescriptor->getRefMethod();
+        $message = 'An error occurred while evaluating expression in @Security annotation of method "' . $refMethod?->getDeclaringClass()?->getName() . '::' . $refMethod?->getName() . '": ' . $e->getMessage();
 
         return new self($message, $e->getCode(), $e);
     }

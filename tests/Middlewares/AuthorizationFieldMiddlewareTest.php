@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
@@ -102,6 +103,8 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
     private function stubDescriptor(array $annotations): QueryFieldDescriptor
     {
         $descriptor = new QueryFieldDescriptor(
+            name: 'foo',
+            type: Type::string(),
             middlewareAnnotations: new MiddlewareAnnotations($annotations),
         );
         $descriptor = $descriptor->withResolver(fn () => self::fail('Should not be called.'));
@@ -115,7 +118,7 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
             public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
             {
                 return new FieldDefinition([
-                    'name' => 'foo',
+                    'name' => $fieldDescriptor->getName(),
                     'resolve' => $fieldDescriptor->getResolver(),
                 ]);
             }

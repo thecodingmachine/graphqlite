@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
-
 /**
  * Resolves a field's value on a type.
  *

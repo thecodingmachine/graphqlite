@@ -6,8 +6,6 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
-use function assert;
-use function get_class;
 use function method_exists;
 
 /**
@@ -19,11 +17,11 @@ final class MagicPropertyResolver implements ResolverInterface
 {
     public function __construct(
         private readonly string $className,
-        private readonly string $propertyName
+        private readonly string $propertyName,
     ) {
     }
 
-    public function executionSource(?object $source): object
+    public function executionSource(object|null $source): object
     {
         if ($source === null) {
             throw new GraphQLRuntimeException('You must provide a source for MagicPropertyResolver.');
@@ -39,7 +37,7 @@ final class MagicPropertyResolver implements ResolverInterface
         }
 
         if (! method_exists($source, '__get')) {
-            throw MissingMagicGetException::cannotFindMagicGet(get_class($source));
+            throw MissingMagicGetException::cannotFindMagicGet($source::class);
         }
 
         return $source->__get($this->propertyName);

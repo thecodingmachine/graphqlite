@@ -16,16 +16,12 @@ use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
-use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 
-use function array_unshift;
 use function assert;
-use function is_callable;
-use function is_object;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -43,6 +39,7 @@ final class QueryField extends FieldDefinition
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
      * @param callable $resolver The resolver actually called
+     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
      * @param array{resolve?: FieldResolver|null,args?: ArgumentListConfig|null,description?: string|null,deprecationReason?: string|null,astNode?: FieldDefinitionNode|null,complexity?: ComplexityFn|null} $additionalConfig
      */
     public function __construct(
@@ -55,7 +52,7 @@ final class QueryField extends FieldDefinition
         string|null $deprecationReason,
         string|null $prefetchMethodName,
         array $prefetchArgs,
-        array $additionalConfig = []
+        array $additionalConfig = [],
     )
     {
         $config = [
@@ -70,7 +67,7 @@ final class QueryField extends FieldDefinition
             $config['deprecationReason'] = $deprecationReason;
         }
 
-        $resolveFn = function (object|null $source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+        $resolveFn = function (object|null $source, array $args, $context, ResolveInfo $info) use ($name, $arguments, $originalResolver, $resolver) {
             /*if ($resolve !== null) {
                 $method = $resolve;
             } elseif ($targetMethodOnSource !== null) {
@@ -78,7 +75,7 @@ final class QueryField extends FieldDefinition
             } else {
                 throw new InvalidArgumentException('The QueryField constructor should be passed either a resolve method or a target method on source object.');
             }*/
-            $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
+            $toPassArgs = self::paramsToArguments($name, $arguments, $source, $args, $context, $info, $resolver);
 
             $result = $resolver($source, ...$toPassArgs);
 
@@ -96,16 +93,27 @@ final class QueryField extends FieldDefinition
         if ($prefetchMethodName === null) {
             $config['resolve'] = $resolveFn;
         } else {
-            $config['resolve'] = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $prefetchArgs, $resolveFn, $originalResolver) {
+            $config['resolve'] = static function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $resolveFn) {
                 // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is $context
                 // $context MUST be a ContextInterface
                 if (! $context instanceof ContextInterface) {
                     throw new GraphQLRuntimeException('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \TheCodingMachine\GraphQLite\Context\Context');
                 }
 
-                $context->getPrefetchBuffer($this)->register($source, $args);
+                // TODO: this is to be refactored in a prefetch refactor PR that follows. For now this hack will do.
+                foreach ($arguments as $argument) {
+                    if ($argument instanceof PrefetchDataParameter) {
+                        $prefetchArgument = $argument;
 
-                return new Deferred(function () use ($source, $args, $context, $info, $resolveFn) {
+                        break;
+                    }
+                }
+
+                assert(($prefetchArgument ?? null) !== null);
+
+                $context->getPrefetchBuffer($prefetchArgument)->register($source, $args);
+
+                return new Deferred(static function () use ($source, $args, $context, $info, $resolveFn) {
                     return $resolveFn($source, $args, $context, $info);
                 });
             };
@@ -159,31 +167,32 @@ final class QueryField extends FieldDefinition
     private static function fromDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
         return new self(
-            $fieldDescriptor->name,
-            $fieldDescriptor->type,
-            $fieldDescriptor->parameters,
+            $fieldDescriptor->getName(),
+            $fieldDescriptor->getType(),
+            $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
-            $fieldDescriptor->comment,
-            $fieldDescriptor->deprecationReason,
-            $fieldDescriptor->prefetchMethodName,
-            $fieldDescriptor->prefetchParameters,
+            $fieldDescriptor->getComment(),
+            $fieldDescriptor->getDeprecationReason(),
+            $fieldDescriptor->getPrefetchMethodName(),
+            $fieldDescriptor->getPrefetchParameters(),
         );
     }
 
     public static function fromFieldDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
-        $arguments = $fieldDescriptor->parameters;
-        if ($fieldDescriptor->prefetchMethodName !== null) {
+        $arguments = $fieldDescriptor->getParameters();
+        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
             $arguments = [
                 '__graphqlite_prefectData' => new PrefetchDataParameter(
+                    fieldName: $fieldDescriptor->getName(),
                     originalResolver: $fieldDescriptor->getOriginalResolver(),
-                    methodName: $fieldDescriptor->prefetchMethodName,
-                    parameters: $fieldDescriptor->prefetchParameters,
-                )
+                    methodName: $fieldDescriptor->getPrefetchMethodName(),
+                    parameters: $fieldDescriptor->getPrefetchParameters(),
+                ),
             ] + $arguments;
         }
-        if ($fieldDescriptor->injectSource === true) {
+        if ($fieldDescriptor->isInjectSource() === true) {
             $arguments = ['__graphqlite_source' => new SourceParameter()] + $arguments;
         }
         $fieldDescriptor = $fieldDescriptor->withParameters($arguments);
@@ -199,15 +208,15 @@ final class QueryField extends FieldDefinition
      *
      * @return array<int, mixed>
      */
-    public function paramsToArguments(array $parameters, object|null $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
+    public static function paramsToArguments(string $name, array $parameters, object|null $source, array $args, mixed $context, ResolveInfo $info, callable $resolve): array
     {
         $toPassArgs = [];
         $exceptions = [];
         foreach ($parameters as $parameter) {
             try {
-                $toPassArgs[] = $parameter->resolve($source, $args, $context, $info, $this);
+                $toPassArgs[] = $parameter->resolve($source, $args, $context, $info);
             } catch (MissingArgumentException $e) {
-                throw MissingArgumentException::wrapWithFieldContext($e, $this->name, $resolve);
+                throw MissingArgumentException::wrapWithFieldContext($e, $name, $resolve);
             } catch (ClientAware $e) {
                 $exceptions[] = $e;
             }

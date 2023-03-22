@@ -22,7 +22,7 @@ final class ServiceResolver implements ResolverInterface
         $this->callable = $callable;
     }
 
-    public function executionSource(?object $source): object
+    public function executionSource(object|null $source): object
     {
         return $this->callable[0];
     }

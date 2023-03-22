@@ -33,7 +33,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 
     public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): InputField|null
     {
-        $annotations = $inputFieldDescriptor->middlewareAnnotations;
+        $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
         /** @var Security[] $securityAnnotations */
         $securityAnnotations = $annotations->getAnnotationsByType(Security::class);
 
@@ -44,7 +44,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         $resolver = $inputFieldDescriptor->getResolver();
         $originalResolver = $inputFieldDescriptor->getOriginalResolver();
 
-        $parameters = $inputFieldDescriptor->parameters;
+        $parameters = $inputFieldDescriptor->getParameters();
 
         $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $parameters, $inputFieldDescriptor) {
             $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));

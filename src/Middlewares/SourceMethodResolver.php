@@ -23,7 +23,7 @@ final class SourceMethodResolver implements ResolverInterface
     {
     }
 
-    public function executionSource(?object $source): object
+    public function executionSource(object|null $source): object
     {
         if ($source === null) {
             throw new GraphQLRuntimeException('You must provide a source for SourceMethodResolver.');

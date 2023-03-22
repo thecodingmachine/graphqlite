@@ -31,7 +31,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 
     public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
     {
-        $annotations = $queryFieldDescriptor->middlewareAnnotations;
+        $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
         assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
@@ -53,7 +53,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         }
 
         // If the failWith value is null and the return type is non-nullable, we must set it to nullable.
-        $type = $queryFieldDescriptor->type;
+        $type = $queryFieldDescriptor->getType();
         if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
             $type = $type->getWrappedType();
             assert($type instanceof OutputType);

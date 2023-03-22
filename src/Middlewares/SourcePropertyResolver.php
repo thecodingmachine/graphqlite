@@ -7,8 +7,6 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
-use function assert;
-
 /**
  * Resolves field by getting the value of $propertyName from the source object.
  *
@@ -23,7 +21,7 @@ final class SourcePropertyResolver implements ResolverInterface
     {
     }
 
-    public function executionSource(?object $source): object
+    public function executionSource(object|null $source): object
     {
         if ($source === null) {
             throw new GraphQLRuntimeException('You must provide a source for SourcePropertyResolver.');
