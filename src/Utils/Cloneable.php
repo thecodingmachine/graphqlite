@@ -15,7 +15,7 @@ use function array_key_exists;
 trait Cloneable
 {
     /** @param array<string, mixed> ...$values */
-    public function with(array ...$values): static
+    public function with(...$values): static
     {
         $refClass = new ReflectionClass(static::class);
         $clone = $refClass->newInstanceWithoutConstructor();
