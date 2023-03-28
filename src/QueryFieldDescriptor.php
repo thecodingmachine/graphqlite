@@ -14,7 +14,6 @@ use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
 

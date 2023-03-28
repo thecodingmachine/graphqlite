@@ -54,6 +54,7 @@ use function array_intersect_key;
 use function array_keys;
 use function array_merge;
 use function array_shift;
+use function array_slice;
 use function assert;
 use function count;
 use function get_parent_class;
@@ -778,15 +779,13 @@ class FieldsBuilder
     /**
      * Extracts prefetch method info from annotation.
      *
-     * @return PrefetchDataParameter|null
-     *
      * @throws InvalidArgumentException
      */
     private function getPrefetchParameter(
         string $fieldName,
         ReflectionClass $refClass,
         ReflectionMethod|ReflectionProperty $reflector,
-        object $annotation
+        object $annotation,
     ): PrefetchDataParameter|null
     {
         if ($annotation instanceof Field) {
@@ -806,7 +805,7 @@ class FieldsBuilder
 
                 return new PrefetchDataParameter(
                     fieldName: $fieldName,
-                    resolver: function (array $sources, ...$args) use ($prefetchMethodName) {
+                    resolver: static function (array $sources, ...$args) use ($prefetchMethodName) {
                         $source = $sources[0];
 
                         return $source->{$prefetchMethodName}($sources, ...$args);

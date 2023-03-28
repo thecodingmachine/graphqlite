@@ -9,13 +9,10 @@ use GraphQL\Type\Definition\ResolveInfo;
 use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
-use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\PrefetchBuffer;
 use TheCodingMachine\GraphQLite\QueryField;
 
-use function array_unshift;
 use function assert;
-use function is_callable;
 
 /**
  * Typically the first parameter of "self" fields or the second parameter of "external" fields that will be filled with the data fetched from the prefetch method.
@@ -75,6 +72,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         return ($this->resolver)($sources, ...$toPassPrefetchArgs);
     }
 
+    /** @inheritDoc */
     public function toInputTypeParameters(): array
     {
         // Given these signatures:

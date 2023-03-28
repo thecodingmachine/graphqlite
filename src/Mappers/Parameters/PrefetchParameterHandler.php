@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use phpDocumentor\Reflection\DocBlock;
@@ -8,14 +10,16 @@ use Psr\Container\ContainerInterface;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\InvalidPrefetchMethodRuntimeException;
-use TheCodingMachine\GraphQLite\Parameters\InjectUserParameter;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
+
+use function assert;
+use function is_callable;
+use function is_string;
 
 /**
  * Handles {@see Prefetch} annotated parameters.
@@ -23,13 +27,13 @@ use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 class PrefetchParameterHandler implements ParameterMiddlewareInterface
 {
     public function __construct(
-        private readonly FieldsBuilder      $fieldsBuilder,
+        private readonly FieldsBuilder $fieldsBuilder,
         private readonly ContainerInterface $container,
     )
     {
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
+    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
     {
         $prefetch = $parameterAnnotations->getAnnotationByType(Prefetch::class);
 
@@ -46,9 +50,7 @@ class PrefetchParameterHandler implements ParameterMiddlewareInterface
         );
     }
 
-    /**
-     * @return array{callable, array<string, ParameterInterface>}
-     */
+    /** @return array{callable, array<string, ParameterInterface>} */
     private function parseResolver(Prefetch $prefetch, ReflectionParameter $parameter): array
     {
         $declaringMethod = $parameter->getDeclaringFunction();
@@ -68,11 +70,11 @@ class PrefetchParameterHandler implements ParameterMiddlewareInterface
                 $declaringMethod,
                 $declaringMethod->getDeclaringClass(),
                 $resolver[1],
-                $e
+                $e,
             );
         }
 
-        if (!$refMethod->isStatic()) {
+        if (! $refMethod->isStatic()) {
             $resolver = fn (...$args) => $this->container->get($resolver[0])->{$resolver[1]}(...$args);
         }
 

@@ -16,16 +16,14 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 
-use function assert;
+use function array_filter;
+use function array_map;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -92,20 +90,20 @@ final class QueryField extends FieldDefinition
                 return $result;
             };
 
-            $deferred = (bool) array_filter($toPassArgs, fn (mixed $value) => $value instanceof SyncPromise);
+            $deferred = (bool) array_filter($toPassArgs, static fn (mixed $value) => $value instanceof SyncPromise);
 
             // GraphQL allows deferring resolving the field's value using promises, i.e. they call the resolve
             // function ahead of time for all of the fields (allowing us to gather all calls and do something
             // in batch, like prefetch) and then resolve the promises as needed. To support that for prefetch,
             // we're checking if any of the resolved parameters returned a promise. If they did, we know
             // that the value should also be resolved using a promise, so we're wrapping it in one.
-            return $deferred ? new Deferred(function () use ($toPassArgs, $callResolver) {
+            return $deferred ? new Deferred(static function () use ($toPassArgs, $callResolver) {
                 $syncPromiseAdapter = new SyncPromiseAdapter();
 
                 // Wait for every deferred parameter.
                 $toPassArgs = array_map(
-                    fn (mixed $value) => $value instanceof SyncPromise ? $syncPromiseAdapter->wait(new Promise($value, $syncPromiseAdapter)) : $value,
-                    $toPassArgs
+                    static fn (mixed $value) => $value instanceof SyncPromise ? $syncPromiseAdapter->wait(new Promise($value, $syncPromiseAdapter)) : $value,
+                    $toPassArgs,
                 );
 
                 return $callResolver(...$toPassArgs);

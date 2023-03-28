@@ -10,9 +10,7 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class Prefetch implements ParameterAnnotationInterface
 {
-    /**
-     * @param string|(callable & array{class-string, string}) $callable
-     */
+    /** @param string|(callable&array{class-string, string}) $callable */
     public function __construct(public readonly string|array $callable)
     {
     }

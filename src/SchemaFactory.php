@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\SchemaConfig;
@@ -46,7 +45,6 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
