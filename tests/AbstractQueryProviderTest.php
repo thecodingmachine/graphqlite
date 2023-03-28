@@ -16,12 +16,14 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -40,6 +42,7 @@ use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
@@ -276,6 +279,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $psr16Cache = new Psr16Cache($arrayAdapter);
+        $container = new EmptyContainer();
 
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware(
@@ -295,11 +299,8 @@ abstract class AbstractQueryProviderTest extends TestCase
         );
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
-
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
-        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
-
-        return new FieldsBuilder(
+        $fieldsBuilder = new FieldsBuilder(
             $this->getAnnotationReader(),
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
@@ -307,10 +308,15 @@ abstract class AbstractQueryProviderTest extends TestCase
             new CachedDocBlockFactory($psr16Cache),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
-            $this->getParameterMiddlewarePipe(),
+            $parameterMiddlewarePipe,
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe
         );
+
+        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+        $parameterMiddlewarePipe->pipe(new PrefetchParameterHandler($fieldsBuilder, $container));
+
+        return $fieldsBuilder;
     }
 
     protected function getRootTypeMapper(): RootTypeMapperInterface

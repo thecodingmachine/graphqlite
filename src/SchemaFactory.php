@@ -23,6 +23,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -45,6 +46,7 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
@@ -411,14 +413,7 @@ class SchemaFactory
         $lastTopRootTypeMapper->setNext($rootTypeMapper);
 
         $argumentResolver = new ArgumentResolver();
-
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
-        foreach ($this->parameterMiddlewares as $parameterMapper) {
-            $parameterMiddlewarePipe->pipe($parameterMapper);
-        }
-        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
-        $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
-        $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
         $fieldsBuilder = new FieldsBuilder(
             $annotationReader,
@@ -432,6 +427,14 @@ class SchemaFactory
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe,
         );
+
+        foreach ($this->parameterMiddlewares as $parameterMapper) {
+            $parameterMiddlewarePipe->pipe($parameterMapper);
+        }
+        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+        $parameterMiddlewarePipe->pipe(new PrefetchParameterHandler($fieldsBuilder, $this->container));
+        $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
+        $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
         $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
         $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);

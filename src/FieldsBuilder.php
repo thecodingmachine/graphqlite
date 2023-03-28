@@ -41,6 +41,7 @@ use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -225,15 +226,16 @@ class FieldsBuilder
 
     /**
      * @param ReflectionMethod $refMethod A method annotated with a Factory annotation.
+     * @param int $skip Skip first N parameters if those are passed in externally
      *
      * @return array<string, ParameterInterface> Returns an array of parameters.
      */
-    public function getParameters(ReflectionMethod $refMethod): array
+    public function getParameters(ReflectionMethod $refMethod, int $skip = 0): array
     {
         $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
-        $parameters = $refMethod->getParameters();
+        $parameters = array_slice($refMethod->getParameters(), $skip);
 
         return $this->mapParameters($parameters, $docBlockObj);
     }
@@ -245,19 +247,8 @@ class FieldsBuilder
      */
     public function getParametersForDecorator(ReflectionMethod $refMethod): array
     {
-        $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
-        //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
-
-        $parameters = $refMethod->getParameters();
-
-        if (empty($parameters)) {
-            return [];
-        }
-
-        // Let's remove the first parameter.
-        array_shift($parameters);
-
-        return $this->mapParameters($parameters, $docBlockObj);
+        // First parameter of a decorator is always $source so we're skipping that.
+        return $this->getParameters($refMethod, 1);
     }
 
     /**
@@ -381,26 +372,24 @@ class FieldsBuilder
                 refMethod: $refMethod,
             );
 
-            [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod] = $this->getPrefetchMethodInfo($refClass, $refMethod, $queryAnnotation);
-            if ($prefetchMethodName) {
-                $fieldDescriptor = $fieldDescriptor
-                    ->withPrefetchMethodName($prefetchMethodName)
-                    ->withPrefetchParameters($prefetchArgs);
-            }
-
             $parameters = $refMethod->getParameters();
             if ($injectSource === true) {
                 $firstParameter = array_shift($parameters);
                 // TODO: check that $first_parameter type is correct.
             }
-            if ($prefetchMethodName !== null && $prefetchRefMethod !== null) {
-                $secondParameter = array_shift($parameters);
-                if ($secondParameter === null) {
-                    throw InvalidPrefetchMethodRuntimeException::prefetchDataIgnored($prefetchRefMethod, $injectSource);
-                }
+
+            // TODO: remove once support for deprecated prefetchMethod on Field is removed.
+            $prefetchDataParameter = $this->getPrefetchParameter($name, $refClass, $refMethod, $queryAnnotation);
+
+            if ($prefetchDataParameter) {
+                array_shift($parameters);
             }
 
             $args = $this->mapParameters($parameters, $docBlockObj);
+
+            if ($prefetchDataParameter) {
+                $args = ['__graphqlite_prefectData' => $prefetchDataParameter, ...$args];
+            }
 
             $fieldDescriptor = $fieldDescriptor->withParameters($args);
 
@@ -491,13 +480,6 @@ class FieldsBuilder
                 deprecationReason: $this->getDeprecationReason($docBlock),
                 refProperty: $refProperty,
             );
-
-            [$prefetchMethodName, $prefetchArgs] = $this->getPrefetchMethodInfo($refClass, $refProperty, $queryAnnotation);
-            if ($prefetchMethodName) {
-                $fieldDescriptor = $fieldDescriptor
-                    ->withPrefetchMethodName($prefetchMethodName)
-                    ->withPrefetchParameters($prefetchArgs);
-            }
 
             if (is_string($controller)) {
                 $fieldDescriptor = $fieldDescriptor->withTargetPropertyOnSource($refProperty->getDeclaringClass()->getName(), $refProperty->getName());
@@ -796,16 +778,17 @@ class FieldsBuilder
     /**
      * Extracts prefetch method info from annotation.
      *
-     * @return array{0: string|null, 1: array<mixed>, 2: ReflectionMethod|null}
+     * @return PrefetchDataParameter|null
      *
      * @throws InvalidArgumentException
      */
-    private function getPrefetchMethodInfo(ReflectionClass $refClass, ReflectionMethod|ReflectionProperty $reflector, object $annotation): array
+    private function getPrefetchParameter(
+        string $fieldName,
+        ReflectionClass $refClass,
+        ReflectionMethod|ReflectionProperty $reflector,
+        object $annotation
+    ): PrefetchDataParameter|null
     {
-        $prefetchMethodName = null;
-        $prefetchArgs = [];
-        $prefetchRefMethod = null;
-
         if ($annotation instanceof Field) {
             $prefetchMethodName = $annotation->getPrefetchMethod();
             if ($prefetchMethodName !== null) {
@@ -820,10 +803,20 @@ class FieldsBuilder
 
                 $prefetchDocBlockObj = $this->cachedDocBlockFactory->getDocBlock($prefetchRefMethod);
                 $prefetchArgs = $this->mapParameters($prefetchParameters, $prefetchDocBlockObj);
+
+                return new PrefetchDataParameter(
+                    fieldName: $fieldName,
+                    resolver: function (array $sources, ...$args) use ($prefetchMethodName) {
+                        $source = $sources[0];
+
+                        return $source->{$prefetchMethodName}($sources, ...$args);
+                    },
+                    parameters: $prefetchArgs,
+                );
             }
         }
 
-        return [$prefetchMethodName, $prefetchArgs, $prefetchRefMethod];
+        return null;
     }
 
     /**

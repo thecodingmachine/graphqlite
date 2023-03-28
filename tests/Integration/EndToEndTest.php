@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -61,6 +62,7 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
@@ -132,7 +134,8 @@ class EndToEndTest extends TestCase
                 return $queryProvider;
             },
             FieldsBuilder::class => static function (ContainerInterface $container) {
-                return new FieldsBuilder(
+                $parameterMiddlewarePipe = $container->get(ParameterMiddlewareInterface::class);
+                $fieldsBuilder = new FieldsBuilder(
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
@@ -140,10 +143,14 @@ class EndToEndTest extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMiddlewareInterface::class),
+                    $parameterMiddlewarePipe,
                     $container->get(FieldMiddlewareInterface::class),
                     $container->get(InputFieldMiddlewareInterface::class),
                 );
+
+                $parameterMiddlewarePipe->pipe(new PrefetchParameterHandler($fieldsBuilder, $container));
+
+                return $fieldsBuilder;
             },
             FieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();

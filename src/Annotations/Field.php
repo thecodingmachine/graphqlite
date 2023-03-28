@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
+use const E_USER_DEPRECATED;
 
 /**
  * @Annotation
@@ -54,6 +55,14 @@ class Field extends AbstractRequest
         }
 
         $this->for = (array) $forValue;
+
+        if ($this->prefetchMethod) {
+            trigger_error(
+                "Using #[Field(prefetchMethod='$this->prefetchMethod')] on fields is deprecated in favor " .
+                "of #[Prefetch('$this->prefetchMethod')] \$data attribute on the parameter itself.",
+                E_USER_DEPRECATED
+            );
+        }
     }
 
     /**
