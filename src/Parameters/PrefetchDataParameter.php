@@ -79,8 +79,8 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         //   function name(#[Prefetch('prefetch1') $data1, string $arg2, #[Prefetch('prefetch2') $data2)
         //   function prefetch1(iterable $sources, int $arg1)
         //   function prefetch2(iterable $sources, int $arg3)
-        // Then field `name` in GraphQL scheme should contain arg1: name(arg1: Int!, arg2: String!, arg3: Int!)
-        // That's exactly what we're doing here - adding those prefetch params as input parameters for the field
+        // Then field `name` in GraphQL scheme should look like so: name(arg1: Int!, arg2: String!, arg3: Int!)
+        // That's exactly what we're doing here - adding `arg1` and `arg3` from prefetch methods as input params
         return InputTypeUtils::toInputParameters($this->parameters);
     }
 }
