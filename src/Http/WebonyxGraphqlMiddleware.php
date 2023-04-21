@@ -34,7 +34,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
 {
     private StandardServer $standardServer;
     /** @var array<int,string> */
-    private array $graphqlHeaderList = ['application/graphql'];
+    private array $graphqlHeaderList = ['application/graphql', 'application/json'];
     /** @var array<int,string> */
     private array $allowedMethods = [
         'GET',
