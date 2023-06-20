@@ -11,6 +11,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
 /**
  * A context class containing a number of classes created on the fly by SchemaFactory.
@@ -18,6 +19,9 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 final class RootTypeMapperFactoryContext
 {
+    /**
+     * @param iterable<NS> $typeNamespaces
+     */
     public function __construct(
         private readonly AnnotationReader $annotationReader,
         private readonly TypeResolver $typeResolver,
@@ -26,6 +30,7 @@ final class RootTypeMapperFactoryContext
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
         private readonly ContainerInterface $container,
         private readonly CacheInterface $cache,
+        private readonly iterable $typeNamespaces,
         private readonly int|null $globTTL,
         private readonly int|null $mapTTL = null,
     ) {
@@ -64,6 +69,12 @@ final class RootTypeMapperFactoryContext
     public function getCache(): CacheInterface
     {
         return $this->cache;
+    }
+
+    /** @return iterable<NS> */
+    public function getTypeNamespaces(): iterable
+    {
+        return $this->typeNamespaces;
     }
 
     public function getGlobTTL(): int|null
