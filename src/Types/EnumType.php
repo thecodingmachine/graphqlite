@@ -17,19 +17,34 @@ use function is_string;
  */
 class EnumType extends BaseEnumType
 {
-    /** @param class-string<UnitEnum> $enumName */
-    public function __construct(string $enumName, string $typeName, private readonly bool $useValues = false)
-    {
-        $values = [];
+    /**
+     * @param class-string<UnitEnum> $enumName
+     * @param array<string, string> $caseDescriptions
+     */
+    public function __construct(
+        string $enumName,
+        string $typeName,
+        ?string $description,
+        array $caseDescriptions,
+        private readonly bool $useValues = false,
+    ) {
+        $typeValues = [];
         foreach ($enumName::cases() as $case) {
-            /** @var UnitEnum $case */
-            $values[$this->serialize($case)] = ['value' => $case];
+            $key = $this->serialize($case);
+            $typeValues[$key] = [
+                'name' => $key,
+                'value' => $case,
+                'description' => $caseDescriptions[$case->name] ?? null,
+            ];
         }
 
-        parent::__construct([
-            'name' => $typeName,
-            'values' => $values,
-        ]);
+        parent::__construct(
+            [
+                'name' => $typeName,
+                'values' => $typeValues,
+                'description' => $description,
+            ]
+        );
     }
 
     // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
