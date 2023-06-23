@@ -122,20 +122,33 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
         $docBlockFactory = DocBlockFactory::createInstance();
 
+        $enumDescription = null;
         $docComment = $reflectionEnum->getDocComment();
-        $enumDescription = $docComment ? $docBlockFactory->create($docComment)->getSummary() : null;
+        if ($docComment) {
+            $docBlock = $docBlockFactory->create($docComment);
+            $enumDescription = $docBlock->getSummary();
+        }
 
         $enumCaseDescriptions = [];
+        $enumCaseDeprecationReasons = [];
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docComment = $reflectionEnumCase->getDocComment();
             if ($docComment) {
-                $enumCaseDescription = $docBlockFactory->create($docComment)->getSummary();
+                $docBlock = $docBlockFactory->create($docComment);
+                $enumCaseDescription = $docBlock->getSummary();
+
                 $enumCaseDescriptions[$reflectionEnumCase->getName()] = $enumCaseDescription;
+                $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
+
+                if ($deprecation) {
+                    $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = (string) $deprecation;
+                }
             }
         }
 
         /** @var array<string, string> $enumCaseDescriptions */
-        $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $useValues);
+        /** @var array<string, string> $enumCaseDeprecationReasons */
+        $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }

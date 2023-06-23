@@ -20,12 +20,14 @@ class EnumType extends BaseEnumType
     /**
      * @param class-string<UnitEnum> $enumName
      * @param array<string, string> $caseDescriptions
+     * @param array<string, string> $caseDeprecationReasons
      */
     public function __construct(
         string $enumName,
         string $typeName,
         ?string $description,
         array $caseDescriptions,
+        array $caseDeprecationReasons,
         private readonly bool $useValues = false,
     ) {
         $typeValues = [];
@@ -35,6 +37,7 @@ class EnumType extends BaseEnumType
                 'name' => $key,
                 'value' => $case,
                 'description' => $caseDescriptions[$case->name] ?? null,
+                'deprecationReason' => $caseDeprecationReasons[$case->name] ?? null,
             ];
         }
 
