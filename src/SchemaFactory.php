@@ -399,6 +399,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
+                $nsList,
                 $this->globTTL,
             );
 
