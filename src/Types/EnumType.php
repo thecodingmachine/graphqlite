@@ -38,7 +38,7 @@ class EnumType extends BaseEnumType
     public function serialize($value): string
     {
         if (! $value instanceof UnitEnum) {
-            throw new InvalidArgumentException('Expected a Myclabs Enum instance');
+            throw new InvalidArgumentException('Expected a UnitEnum instance');
         }
 
         if (! $this->useValues) {
