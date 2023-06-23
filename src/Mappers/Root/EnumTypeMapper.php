@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
@@ -119,7 +120,35 @@ class EnumTypeMapper implements RootTypeMapperInterface
             $reflectionEnum->isBacked() &&
             (string) $reflectionEnum->getBackingType() === 'string';
 
-        $type = new EnumType($enumClass, $typeName, $useValues);
+        $docBlockFactory = DocBlockFactory::createInstance();
+
+        $enumDescription = null;
+        $docComment = $reflectionEnum->getDocComment();
+        if ($docComment) {
+            $docBlock = $docBlockFactory->create($docComment);
+            $enumDescription = $docBlock->getSummary();
+        }
+
+        $enumCaseDescriptions = [];
+        $enumCaseDeprecationReasons = [];
+        foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
+            $docComment = $reflectionEnumCase->getDocComment();
+            if ($docComment) {
+                $docBlock = $docBlockFactory->create($docComment);
+                $enumCaseDescription = $docBlock->getSummary();
+
+                $enumCaseDescriptions[$reflectionEnumCase->getName()] = $enumCaseDescription;
+                $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
+
+                if ($deprecation) {
+                    $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = (string) $deprecation;
+                }
+            }
+        }
+
+        /** @var array<string, string> $enumCaseDescriptions */
+        /** @var array<string, string> $enumCaseDeprecationReasons */
+        $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }
