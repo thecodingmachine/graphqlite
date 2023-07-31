@@ -328,3 +328,16 @@ class User extends Model
 ```
 
 </div>
+
+## Export the schema from the CLI
+
+The extension comes with a special command: `graphqlite:export-schema`.
+
+Usage:
+
+```console
+$ ./artisan graphqlite:export-schema --output=schema.graphql
+```
+
+This will export your GraphQL schema in SDL format. You can use this exported schema to import it in other
+tools (like graphql-codegen).

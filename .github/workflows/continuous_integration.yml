@@ -84,7 +84,7 @@ jobs:
           name: "codeCoverage"
           path: "build"
 
-      - uses: codecov/codecov-action@v3.1.1 # upload the coverage to codecov
+      - uses: codecov/codecov-action@v3.1.4 # upload the coverage to codecov
         with:
           fail_ci_if_error: true # optional (default = false)
         # Do not upload in forks, and only on php8, latest deps

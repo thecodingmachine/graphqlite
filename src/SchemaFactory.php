@@ -211,6 +211,9 @@ class SchemaFactory
         return $this;
     }
 
+    /**
+     * @deprecated Use PHP8 Attributes instead
+     */
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
@@ -396,6 +399,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
+                $nsList,
                 $this->globTTL,
             );
 

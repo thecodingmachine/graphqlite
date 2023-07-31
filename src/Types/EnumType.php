@@ -17,19 +17,37 @@ use function is_string;
  */
 class EnumType extends BaseEnumType
 {
-    /** @param class-string<UnitEnum> $enumName */
-    public function __construct(string $enumName, string $typeName, private readonly bool $useValues = false)
-    {
-        $values = [];
+    /**
+     * @param class-string<UnitEnum> $enumName
+     * @param array<string, string> $caseDescriptions
+     * @param array<string, string> $caseDeprecationReasons
+     */
+    public function __construct(
+        string $enumName,
+        string $typeName,
+        ?string $description,
+        array $caseDescriptions,
+        array $caseDeprecationReasons,
+        private readonly bool $useValues = false,
+    ) {
+        $typeValues = [];
         foreach ($enumName::cases() as $case) {
-            /** @var UnitEnum $case */
-            $values[$this->serialize($case)] = ['value' => $case];
+            $key = $this->serialize($case);
+            $typeValues[$key] = [
+                'name' => $key,
+                'value' => $case,
+                'description' => $caseDescriptions[$case->name] ?? null,
+                'deprecationReason' => $caseDeprecationReasons[$case->name] ?? null,
+            ];
         }
 
-        parent::__construct([
-            'name' => $typeName,
-            'values' => $values,
-        ]);
+        parent::__construct(
+            [
+                'name' => $typeName,
+                'values' => $typeValues,
+                'description' => $description,
+            ]
+        );
     }
 
     // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
@@ -38,7 +56,7 @@ class EnumType extends BaseEnumType
     public function serialize($value): string
     {
         if (! $value instanceof UnitEnum) {
-            throw new InvalidArgumentException('Expected a Myclabs Enum instance');
+            throw new InvalidArgumentException('Expected a UnitEnum instance');
         }
 
         if (! $this->useValues) {
