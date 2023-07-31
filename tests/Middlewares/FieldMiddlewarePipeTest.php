@@ -19,9 +19,13 @@ class FieldMiddlewarePipeTest extends TestCase
             }
         };
 
+        $descriptor = new QueryFieldDescriptor(
+            name: 'foo',
+            type: Type::string(),
+        );
         $middlewarePipe = new FieldMiddlewarePipe();
 
-        $definition = $middlewarePipe->process(new QueryFieldDescriptor(), $finalHandler);
+        $definition = $middlewarePipe->process($descriptor, $finalHandler);
         $this->assertSame('foo', $definition->name);
 
         $middlewarePipe->pipe(new class implements FieldMiddlewareInterface {
@@ -31,7 +35,12 @@ class FieldMiddlewarePipeTest extends TestCase
             }
         });
 
-        $definition = $middlewarePipe->process(new QueryFieldDescriptor(), $finalHandler);
+        $descriptor = new QueryFieldDescriptor(
+            name: 'bar',
+            type: Type::string(),
+        );
+
+        $definition = $middlewarePipe->process($descriptor, $finalHandler);
         $this->assertSame('bar', $definition->name);
     }
 }

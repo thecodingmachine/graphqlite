@@ -11,15 +11,15 @@ class SourceResolverTest extends TestCase
 
     public function testExceptionInInvoke()
     {
-        $sourceResolver = new SourceResolver('test');
+        $sourceResolver = new SourceMethodResolver(stdClass::class, 'test');
         $this->expectException(GraphQLRuntimeException::class);
-        $sourceResolver();
+        $sourceResolver(null);
     }
 
     public function testToString()
     {
-        $sourceResolver = new SourceResolver('test');
-        $sourceResolver->setObject(new stdClass());
+        $sourceResolver = new SourceMethodResolver(stdClass::class, 'test');
+
         $this->assertSame('stdClass::test()', $sourceResolver->toString());
     }
 }

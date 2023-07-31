@@ -7,8 +7,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use function get_class;
 
 /**
- * A class that represents a callable on an object.
- * The object can be modified after class invocation.
+ * Resolves field by calling a callable.
  *
  * @internal
  */
@@ -23,12 +22,12 @@ final class ServiceResolver implements ResolverInterface
         $this->callable = $callable;
     }
 
-    public function getObject(): object
+    public function executionSource(object|null $source): object
     {
         return $this->callable[0];
     }
 
-    public function __invoke(mixed ...$args): mixed
+    public function __invoke(object|null $source, mixed ...$args): mixed
     {
         $callable = $this->callable;
 
@@ -37,7 +36,7 @@ final class ServiceResolver implements ResolverInterface
 
     public function toString(): string
     {
-        $class = get_class($this->getObject());
+        $class = get_class($this->callable[0]);
 
         return $class . '::' . $this->callable[1] . '()';
     }

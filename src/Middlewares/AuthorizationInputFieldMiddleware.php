@@ -50,7 +50,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
 
         $resolver = $inputFieldDescriptor->getResolver();
 
-        $inputFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $resolver) {
+        $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $resolver) {
             if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
                 return $resolver(...$args);
             }

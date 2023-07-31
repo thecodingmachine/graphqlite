@@ -57,7 +57,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
             $type = $type->getWrappedType();
             assert($type instanceof OutputType);
-            $queryFieldDescriptor->setType($type);
+            $queryFieldDescriptor = $queryFieldDescriptor->withType($type);
         }
 
         // When using the same Schema instance for multiple subsequent requests, this middleware will only
@@ -69,7 +69,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 
         $resolver = $queryFieldDescriptor->getResolver();
 
-        $queryFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
+        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
             if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
                 return $resolver(...$args);
             }

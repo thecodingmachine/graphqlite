@@ -127,7 +127,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 $type = $this->annotationReader->getTypeAnnotation($refClass);
                 if ($type !== null) {
                     $typeName = $this->namingStrategy->getOutputTypeName($className, $type);
-                    $annotationsCache->setType($type->getClass(), $typeName, $type->isDefault());
+                    $annotationsCache = $annotationsCache->withType($type->getClass(), $typeName, $type->isDefault());
                     $containsAnnotations = true;
                 }
 
@@ -139,7 +139,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                     }
 
                     $this->registeredInputs[$inputName] = $refClass->getName();
-                    $annotationsCache->registerInput($inputName, $className, $input);
+                    $annotationsCache = $annotationsCache->registerInput($inputName, $className, $input);
                     $containsAnnotations = true;
                 }
 
@@ -154,7 +154,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                     if ($factory !== null) {
                         [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
-                        $annotationsCache->registerFactory($method->getName(), $inputName, $className, $factory->isDefault(), $refClass->getName());
+                        $annotationsCache = $annotationsCache->registerFactory($method->getName(), $inputName, $className, $factory->isDefault(), $refClass->getName());
                         $containsAnnotations = true;
                     }
 
@@ -164,7 +164,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                         continue;
                     }
 
-                    $annotationsCache->registerDecorator($method->getName(), $decorator->getInputTypeName(), $refClass->getName());
+                    $annotationsCache = $annotationsCache->registerDecorator($method->getName(), $decorator->getInputTypeName(), $refClass->getName());
                     $containsAnnotations = true;
                 }
 
@@ -196,8 +196,6 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 continue;
             }
             $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function () use ($refClass) {
-                $extendAnnotationsCache = new GlobExtendAnnotationsCache();
-
                 $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
                 if ($extendType !== null) {
@@ -221,9 +219,7 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                     }
 
                     // FIXME: $extendClassName === NULL!!!!!!
-                    $extendAnnotationsCache->setExtendType($extendClassName, $typeName);
-
-                    return $extendAnnotationsCache;
+                    return new GlobExtendAnnotationsCache($extendClassName, $typeName);
                 }
 
                 return 'nothing';
