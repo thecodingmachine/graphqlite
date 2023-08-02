@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite;
 
+use PHPUnit\Runner\Version;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Parameters\ExpandsInputTypeParameters;
@@ -41,6 +42,10 @@ class InputTypeUtilsTest extends AbstractQueryProviderTest
 
     public function testToInputParameters(): void
     {
+        if (Version::series() === '8.5') {
+            $this->markTestSkipped('Broken on PHPUnit 8.');
+        }
+
         self::assertSame([], InputTypeUtils::toInputParameters([]));
         self::assertSame([
             'second' => $second = $this->createStub(InputTypeParameterInterface::class),
