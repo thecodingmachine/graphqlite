@@ -153,8 +153,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testErrors(): void
     {
-        $controller = new class
-        {
+        $controller = new class {
             /**
              * @Query
              * @return string
@@ -173,8 +172,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testTypeInDocBlock(): void
     {
-        $controller = new class
-        {
+        $controller = new class {
             /**
              * @Query
              * @param int $typeHintInDocBlock
@@ -688,7 +686,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(InvalidPrefetchMethodRuntimeException::class);
-        $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a "prefetch method" that could not be found. Unable to find method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists.');
+        $this->expectExceptionMessage('#[Prefetch] attribute on parameter $data in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a callable that is invalid: Method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists wasn\'t found or isn\'t accessible.');
         $queryProvider->getFields($controller);
     }
 

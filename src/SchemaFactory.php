@@ -22,7 +22,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -337,19 +337,19 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $symfonyCache           = new Psr16Adapter($this->cache, $this->cacheNamespace);
-        $annotationReader       = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
-        $authenticationService  = $this->authenticationService ?: new FailAuthenticationService();
-        $authorizationService   = $this->authorizationService ?: new FailAuthorizationService();
-        $typeResolver           = new TypeResolver();
-        $namespacedCache        = new NamespacedCache($this->cache);
-        $cachedDocBlockFactory  = new CachedDocBlockFactory($namespacedCache);
-        $namingStrategy         = $this->namingStrategy ?: new NamingStrategy();
-        $typeRegistry           = new TypeRegistry();
+        $symfonyCache = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
+        $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
+        $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver = new TypeResolver();
+        $namespacedCache = new NamespacedCache($this->cache);
+        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
+        $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry = new TypeRegistry();
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
-            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
+            static fn(string $namespace) => $namespaceFactory->createNamespace($namespace),
             $this->typeNamespaces,
         );
 
@@ -390,7 +390,7 @@ class SchemaFactory
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
         }
 
-        if (! empty($this->rootTypeMapperFactories)) {
+        if (!empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
                 $annotationReader,
                 $typeResolver,
@@ -429,17 +429,18 @@ class SchemaFactory
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe,
         );
+        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $this->container);
 
         foreach ($this->parameterMiddlewares as $parameterMapper) {
             $parameterMiddlewarePipe->pipe($parameterMapper);
         }
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
-        $parameterMiddlewarePipe->pipe(new PrefetchParameterHandler($fieldsBuilder, $this->container));
+        $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
         $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
         $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
-        $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
-        $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
+        $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
         foreach ($nsList as $ns) {
@@ -457,7 +458,7 @@ class SchemaFactory
             ));
         }
 
-        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
+        if (!empty($this->typeMapperFactories) || !empty($this->queryProviderFactories)) {
             $context = new FactoryContext(
                 $annotationReader,
                 $typeResolver,

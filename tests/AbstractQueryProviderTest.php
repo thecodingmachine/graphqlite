@@ -23,7 +23,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
@@ -79,9 +79,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->testObjectType === null) {
             $this->testObjectType = new MutableObjectType([
-                'name'    => 'TestObject',
-                'fields'  => [
-                    'test'   => Type::string(),
+                'name' => 'TestObject',
+                'fields' => [
+                    'test' => Type::string(),
                 ],
             ]);
         }
@@ -92,9 +92,9 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->testObjectType2 === null) {
             $this->testObjectType2 = new MutableObjectType([
-                'name'    => 'TestObject2',
-                'fields'  => [
-                    'test'   => Type::string(),
+                'name' => 'TestObject2',
+                'fields' => [
+                    'test' => Type::string(),
                 ],
             ]);
         }
@@ -105,11 +105,11 @@ abstract class AbstractQueryProviderTest extends TestCase
     {
         if ($this->inputTestObjectType === null) {
             $this->inputTestObjectType = new MockResolvableInputObjectType([
-                'name'    => 'TestObjectInput',
-                'fields'  => [
-                    'test'   => Type::string(),
+                'name' => 'TestObjectInput',
+                'fields' => [
+                    'test' => Type::string(),
                 ],
-            ], function($source, $args) {
+            ], function ($source, $args) {
                 return new TestObject($args['test']);
             });
         }
@@ -122,7 +122,8 @@ abstract class AbstractQueryProviderTest extends TestCase
             $arrayAdapter = new ArrayAdapter();
             $arrayAdapter->setLogger(new ExceptionLogger());
 
-            $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()/*, $this->getInputTestObjectType2()*/) implements TypeMapperInterface {
+            $this->typeMapper = new RecursiveTypeMapper(new class($this->getTestObjectType(), $this->getTestObjectType2(), $this->getInputTestObjectType()/*, $this->getInputTestObjectType2()*/
+            ) implements TypeMapperInterface {
                 /**
                  * @var ObjectType
                  */
@@ -135,15 +136,17 @@ abstract class AbstractQueryProviderTest extends TestCase
                  * @var InputObjectType
                  */
                 private $inputTestObjectType;
+
                 /**
                  * @var InputObjectType
                  */
 
                 public function __construct(
-                    ObjectType $testObjectType,
-                    ObjectType $testObjectType2,
+                    ObjectType      $testObjectType,
+                    ObjectType      $testObjectType2,
                     InputObjectType $inputTestObjectType
-                ) {
+                )
+                {
                     $this->testObjectType = $testObjectType;
                     $this->testObjectType2 = $testObjectType2;
                     $this->inputTestObjectType = $inputTestObjectType;
@@ -291,11 +294,11 @@ abstract class AbstractQueryProviderTest extends TestCase
             new Psr16Adapter($psr16Cache),
             [new SecurityExpressionLanguageProvider()]
         );
-        
+
         $fieldMiddlewarePipe->pipe(
             new SecurityFieldMiddleware($expressionLanguage,
-            new VoidAuthenticationService(),
-            new VoidAuthorizationService())
+                new VoidAuthenticationService(),
+                new VoidAuthorizationService())
         );
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
@@ -312,9 +315,10 @@ abstract class AbstractQueryProviderTest extends TestCase
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe
         );
+        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container);
 
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
-        $parameterMiddlewarePipe->pipe(new PrefetchParameterHandler($fieldsBuilder, $container));
+        $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
 
         return $fieldsBuilder;
     }
