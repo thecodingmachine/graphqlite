@@ -29,7 +29,8 @@
     ],
     "Performance": [
       "query-plan",
-      "prefetch-method"
+      "prefetch-method",
+      "automatic-persisted-queries"
     ],
     "Advanced": [
       "file-uploads",
