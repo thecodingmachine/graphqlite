@@ -25,8 +25,8 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
      */
     public function __construct(
         private readonly string $fieldName,
-        private readonly mixed  $resolver,
-        public readonly array   $parameters,
+        private readonly mixed $resolver,
+        public readonly array $parameters,
     )
     {
     }
@@ -38,7 +38,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
 
         // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is $context
         // $context MUST be a ContextInterface
-        if (!$context instanceof ContextInterface) {
+        if (! $context instanceof ContextInterface) {
             throw new GraphQLRuntimeException('When using "prefetch", you should ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \TheCodingMachine\GraphQLite\Context\Context');
         }
 
@@ -53,7 +53,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         // needed, GraphQL calls the callback of Deferred below. That's when we call the prefetch method,
         // already knowing all the requested fields (source-arguments combinations).
         return new Deferred(function () use ($info, $context, $args, $prefetchBuffer) {
-            if (!$prefetchBuffer->hasResult($args)) {
+            if (! $prefetchBuffer->hasResult($args)) {
                 $prefetchResult = $this->computePrefetch($args, $context, $info, $prefetchBuffer);
 
                 $prefetchBuffer->storeResult($prefetchResult, $args);

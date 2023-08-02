@@ -6,13 +6,10 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
-use Psr\Container\ContainerInterface;
-use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
-use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\InvalidCallableRuntimeException;
 use TheCodingMachine\GraphQLite\InvalidPrefetchMethodRuntimeException;
 use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
@@ -20,8 +17,6 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 
 use function assert;
-use function is_callable;
-use function is_string;
 
 /**
  * Handles {@see Prefetch} annotated parameters.

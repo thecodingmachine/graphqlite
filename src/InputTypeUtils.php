@@ -113,12 +113,14 @@ class InputTypeUtils
                 $result[$name] = $parameter;
             }
 
-            if ($parameter instanceof ExpandsInputTypeParameters) {
-                $result = [
-                    ...$result,
-                    ...$parameter->toInputTypeParameters(),
-                ];
+            if (! ($parameter instanceof ExpandsInputTypeParameters)) {
+                continue;
             }
+
+            $result = [
+                ...$result,
+                ...$parameter->toInputTypeParameters(),
+            ];
         }
 
         return $result;

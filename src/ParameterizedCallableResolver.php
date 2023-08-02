@@ -1,19 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite;
 
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use ReflectionParameter;
-use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+
+use function assert;
+use function is_callable;
+use function is_string;
 
 class ParameterizedCallableResolver
 {
     public function __construct(
-        private readonly FieldsBuilder      $fieldsBuilder,
+        private readonly FieldsBuilder $fieldsBuilder,
         private readonly ContainerInterface $container,
     )
     {
@@ -42,8 +46,8 @@ class ParameterizedCallableResolver
         }
 
         // If method isn't static, then we should try to resolve the class name through the container.
-        if (!$refMethod->isStatic()) {
-            $callable = fn(...$args) => $this->container->get($callable[0])->{$callable[1]}(...$args);
+        if (! $refMethod->isStatic()) {
+            $callable = fn (...$args) => $this->container->get($callable[0])->{$callable[1]}(...$args);
         }
 
         assert(is_callable($callable));

@@ -785,10 +785,10 @@ class FieldsBuilder
      * @throws InvalidArgumentException
      */
     private function getPrefetchParameter(
-        string                              $fieldName,
-        ReflectionClass                     $refClass,
+        string $fieldName,
+        ReflectionClass $refClass,
         ReflectionMethod|ReflectionProperty $reflector,
-        object                              $annotation,
+        object $annotation,
     ): PrefetchDataParameter|null
     {
         if ($annotation instanceof Field) {
