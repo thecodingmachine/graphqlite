@@ -33,11 +33,11 @@ class CachePersistedQueryLoader
         $query = $operation->query;
 
         if (!$query) {
-            throw PersistedQueryError::notFound();
+            throw new PersistedQueryNotFoundException();
         }
 
         if (!$this->queryMatchesId($queryId, $query)) {
-            throw PersistedQueryError::idInvalid();
+            throw new PersistedQueryIdInvalidException();
         }
 
         $this->cache->set($queryId, $query, $this->ttl);

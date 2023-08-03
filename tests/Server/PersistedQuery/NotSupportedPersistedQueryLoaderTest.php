@@ -9,7 +9,7 @@ class NotSupportedPersistedQueryLoaderTest extends TestCase
 {
     public function testThrowsNotSupportedException(): void
     {
-        $this->expectException(PersistedQueryError::class);
+        $this->expectException(PersistedQueryNotSupportedException::class);
         $this->expectExceptionMessage('Persisted queries are not supported by this server.');
 
         $loader = new NotSupportedPersistedQueryLoader();

@@ -17,6 +17,6 @@ class NotSupportedPersistedQueryLoader
 {
     public function __invoke(string $queryId, OperationParams $operation): string|DocumentNode
     {
-        throw PersistedQueryError::notSupported();
+        throw new PersistedQueryNotSupportedException();
     }
 }

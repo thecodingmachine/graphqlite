@@ -44,7 +44,7 @@ class CachePersistedQueryLoaderTest extends TestCase
 
     public function testThrowsNotFoundExceptionWhenQueryNotFound(): void
     {
-        $this->expectException(PersistedQueryError::class);
+        $this->expectException(PersistedQueryNotFoundException::class);
         $this->expectExceptionMessage('Persisted query by that ID was not found and "query" was omitted.');
 
         $loader = new CachePersistedQueryLoader($this->cache);
@@ -54,7 +54,7 @@ class CachePersistedQueryLoaderTest extends TestCase
 
     public function testThrowsIdInvalidExceptionWhenQueryDoesNotMatchId(): void
     {
-        $this->expectException(PersistedQueryError::class);
+        $this->expectException(PersistedQueryIdInvalidException::class);
         $this->expectExceptionMessage('Persisted query by that ID doesnt match the provided query; you are likely incorrectly hashing your query.');
 
         $loader = new CachePersistedQueryLoader($this->cache);
