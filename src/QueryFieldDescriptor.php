@@ -35,7 +35,6 @@ class QueryFieldDescriptor
 
     /**
      * @param array<string, ParameterInterface> $parameters
-     * @param array<string, ParameterInterface> $prefetchParameters
      * @param callable $callable
      * @param bool $injectSource Whether we should inject the source as the first parameter or not.
      */
@@ -43,8 +42,6 @@ class QueryFieldDescriptor
         private readonly string $name,
         private readonly OutputType&Type $type,
         private readonly array $parameters = [],
-        private readonly array $prefetchParameters = [],
-        private readonly string|null $prefetchMethodName = null,
         private readonly mixed $callable = null,
         private readonly string|null $targetClass = null,
         private readonly string|null $targetMethodOnSource = null,
@@ -90,28 +87,6 @@ class QueryFieldDescriptor
     public function withParameters(array $parameters): self
     {
         return $this->with(parameters: $parameters);
-    }
-
-    /** @return array<string, ParameterInterface> */
-    public function getPrefetchParameters(): array
-    {
-        return $this->prefetchParameters;
-    }
-
-    /** @param array<string, ParameterInterface> $prefetchParameters */
-    public function withPrefetchParameters(array $prefetchParameters): self
-    {
-        return $this->with(prefetchParameters: $prefetchParameters);
-    }
-
-    public function getPrefetchMethodName(): string|null
-    {
-        return $this->prefetchMethodName;
-    }
-
-    public function withPrefetchMethodName(string|null $prefetchMethodName): self
-    {
-        return $this->with(prefetchMethodName: $prefetchMethodName);
     }
 
     /**

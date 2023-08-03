@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -61,10 +62,12 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
@@ -132,7 +135,8 @@ class EndToEndTest extends TestCase
                 return $queryProvider;
             },
             FieldsBuilder::class => static function (ContainerInterface $container) {
-                return new FieldsBuilder(
+                $parameterMiddlewarePipe = $container->get(ParameterMiddlewareInterface::class);
+                $fieldsBuilder = new FieldsBuilder(
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
@@ -140,10 +144,15 @@ class EndToEndTest extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMiddlewareInterface::class),
+                    $parameterMiddlewarePipe,
                     $container->get(FieldMiddlewareInterface::class),
                     $container->get(InputFieldMiddlewareInterface::class),
                 );
+                $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container);
+
+                $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
+
+                return $fieldsBuilder;
             },
             FieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
@@ -312,9 +321,9 @@ class EndToEndTest extends TestCase
                 // These are in reverse order of execution
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
-                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models') ]);
+                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [$container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models')]);
                 if (interface_exists(UnitEnum::class)) {
-                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models') ]);
+                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [$container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models')]);
                 }
                 $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(NamingStrategyInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
@@ -385,7 +394,7 @@ class EndToEndTest extends TestCase
     private function getSuccessResult(ExecutionResult $result, int $debugFlag = DebugFlag::RETHROW_INTERNAL_EXCEPTIONS): mixed
     {
         $array = $result->toArray($debugFlag);
-        if (isset($array['errors']) || ! isset($array['data'])) {
+        if (isset($array['errors']) || !isset($array['data'])) {
             $this->fail('Expected a successful answer. Got ' . json_encode($array, JSON_PRETTY_PRINT));
         }
         return $array['data'];
@@ -592,7 +601,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
+        $this->expectExceptionMessage('When using "prefetch", you should ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
@@ -910,7 +919,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
@@ -920,7 +929,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
     }
 
@@ -1309,7 +1318,7 @@ class EndToEndTest extends TestCase
             ],
         );
         $this->assertSame([
-                'singleEnum' => 'L',
+            'singleEnum' => 'L',
         ], $this->getSuccessResult($result));
     }
 
@@ -1749,7 +1758,7 @@ class EndToEndTest extends TestCase
     public function testEndToEndInjectUserUnauthenticated(): void
     {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static fn () => new VoidAuthenticationService(),
+            AuthenticationServiceInterface::class => static fn() => new VoidAuthenticationService(),
         ]);
 
         $schema = $container->get(Schema::class);
@@ -1803,7 +1812,7 @@ class EndToEndTest extends TestCase
             $queryString,
         );
         $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
-        if (isset($resultArray['errors']) || ! isset($resultArray['data'])) {
+        if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
             $this->fail('Expected a successful answer. Got ' . json_encode($resultArray, JSON_PRETTY_PRINT));
         }
         $this->assertNull($resultArray['data']['nullableResult']);
@@ -2321,7 +2330,7 @@ class EndToEndTest extends TestCase
             $queryString,
         );
 
-         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {

@@ -43,10 +43,6 @@ class QueryFieldDescriptor
     public function withType($type): self  { /* ... */ }
     public function getParameters(): array  { /* ... */ }
     public function withParameters(array $parameters): self  { /* ... */ }
-    public function getPrefetchParameters(): array  { /* ... */ }
-    public function withPrefetchParameters(array $prefetchParameters): self  { /* ... */ }
-    public function getPrefetchMethodName(): ?string { /* ... */ }
-    public function withPrefetchMethodName(?string $prefetchMethodName): self { /* ... */ }
     public function withCallable(callable $callable): self { /* ... */ }
     public function withTargetMethodOnSource(?string $targetMethodOnSource): self { /* ... */ }
     public function isInjectSource(): bool { /* ... */ }

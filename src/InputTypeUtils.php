@@ -17,10 +17,10 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
 use RuntimeException;
+use TheCodingMachine\GraphQLite\Parameters\ExpandsInputTypeParameters;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
-use function array_filter;
 use function array_map;
 use function assert;
 use function ltrim;
@@ -100,6 +100,33 @@ class InputTypeUtils
     }
 
     /**
+     * @param array<string, ParameterInterface> $parameters
+     *
+     * @return array<string, InputTypeParameterInterface>
+     */
+    public static function toInputParameters(array $parameters): array
+    {
+        $result = [];
+
+        foreach ($parameters as $name => $parameter) {
+            if ($parameter instanceof InputTypeParameterInterface) {
+                $result[$name] = $parameter;
+            }
+
+            if (! ($parameter instanceof ExpandsInputTypeParameters)) {
+                continue;
+            }
+
+            $result = [
+                ...$result,
+                ...$parameter->toInputTypeParameters(),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Maps an array of ParameterInterface to an array of field descriptors as accepted by Webonyx.
      *
      * @param ParameterInterface[] $args
@@ -108,9 +135,7 @@ class InputTypeUtils
      */
     public static function getInputTypeArgs(array $args): array
     {
-        $inputTypeArgs = array_filter($args, static function (ParameterInterface $parameter) {
-            return $parameter instanceof InputTypeParameterInterface;
-        });
+        $inputTypeArgs = self::toInputParameters($args);
 
         return array_map(static function (InputTypeParameterInterface $parameter): array {
             $desc = [

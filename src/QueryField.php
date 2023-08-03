@@ -6,6 +6,9 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Deferred;
 use GraphQL\Error\ClientAware;
+use GraphQL\Executor\Promise\Adapter\SyncPromise;
+use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
+use GraphQL\Executor\Promise\Promise;
 use GraphQL\Language\AST\FieldDefinitionNode;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ListOfType;
@@ -13,15 +16,14 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQLite\Context\ContextInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 
-use function assert;
+use function array_filter;
+use function array_map;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -39,7 +41,6 @@ final class QueryField extends FieldDefinition
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param ResolverInterface $originalResolver A pointer to the resolver being called (but not wrapped by any field middleware)
      * @param callable $resolver The resolver actually called
-     * @param array<string, ParameterInterface> $prefetchArgs Indexed by argument name.
      * @param array{resolve?: FieldResolver|null,args?: ArgumentListConfig|null,description?: string|null,deprecationReason?: string|null,astNode?: FieldDefinitionNode|null,complexity?: ComplexityFn|null} $additionalConfig
      */
     public function __construct(
@@ -50,15 +51,13 @@ final class QueryField extends FieldDefinition
         callable $resolver,
         string|null $comment,
         string|null $deprecationReason,
-        string|null $prefetchMethodName,
-        array $prefetchArgs,
         array $additionalConfig = [],
     )
     {
         $config = [
             'name' => $name,
             'type' => $type,
-            'args' => InputTypeUtils::getInputTypeArgs($prefetchArgs + $arguments),
+            'args' => InputTypeUtils::getInputTypeArgs($arguments),
         ];
         if ($comment) {
             $config['description'] = $comment;
@@ -67,7 +66,7 @@ final class QueryField extends FieldDefinition
             $config['deprecationReason'] = $deprecationReason;
         }
 
-        $resolveFn = function (object|null $source, array $args, $context, ResolveInfo $info) use ($name, $arguments, $originalResolver, $resolver) {
+        $config['resolve'] = function (object|null $source, array $args, $context, ResolveInfo $info) use ($name, $arguments, $originalResolver, $resolver) {
             /*if ($resolve !== null) {
                 $method = $resolve;
             } elseif ($targetMethodOnSource !== null) {
@@ -77,47 +76,39 @@ final class QueryField extends FieldDefinition
             }*/
             $toPassArgs = self::paramsToArguments($name, $arguments, $source, $args, $context, $info, $resolver);
 
-            $result = $resolver($source, ...$toPassArgs);
+            $callResolver = function (...$args) use ($originalResolver, $source, $resolver) {
+                $result = $resolver($source, ...$args);
 
-            try {
-                $this->assertReturnType($result);
-            } catch (TypeMismatchRuntimeException $e) {
-                $e->addInfo($this->name, $originalResolver->toString());
+                try {
+                    $this->assertReturnType($result);
+                } catch (TypeMismatchRuntimeException $e) {
+                    $e->addInfo($this->name, $originalResolver->toString());
 
-                throw $e;
-            }
-
-            return $result;
-        };
-
-        if ($prefetchMethodName === null) {
-            $config['resolve'] = $resolveFn;
-        } else {
-            $config['resolve'] = static function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $resolveFn) {
-                // The PrefetchBuffer must be tied to the current request execution. The only object we have for this is $context
-                // $context MUST be a ContextInterface
-                if (! $context instanceof ContextInterface) {
-                    throw new GraphQLRuntimeException('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \TheCodingMachine\GraphQLite\Context\Context');
+                    throw $e;
                 }
 
-                // TODO: this is to be refactored in a prefetch refactor PR that follows. For now this hack will do.
-                foreach ($arguments as $argument) {
-                    if ($argument instanceof PrefetchDataParameter) {
-                        $prefetchArgument = $argument;
-
-                        break;
-                    }
-                }
-
-                assert(($prefetchArgument ?? null) !== null);
-
-                $context->getPrefetchBuffer($prefetchArgument)->register($source, $args);
-
-                return new Deferred(static function () use ($source, $args, $context, $info, $resolveFn) {
-                    return $resolveFn($source, $args, $context, $info);
-                });
+                return $result;
             };
-        }
+
+            $deferred = (bool) array_filter($toPassArgs, static fn (mixed $value) => $value instanceof SyncPromise);
+
+            // GraphQL allows deferring resolving the field's value using promises, i.e. they call the resolve
+            // function ahead of time for all of the fields (allowing us to gather all calls and do something
+            // in batch, like prefetch) and then resolve the promises as needed. To support that for prefetch,
+            // we're checking if any of the resolved parameters returned a promise. If they did, we know
+            // that the value should also be resolved using a promise, so we're wrapping it in one.
+            return $deferred ? new Deferred(static function () use ($toPassArgs, $callResolver) {
+                $syncPromiseAdapter = new SyncPromiseAdapter();
+
+                // Wait for every deferred parameter.
+                $toPassArgs = array_map(
+                    static fn (mixed $value) => $value instanceof SyncPromise ? $syncPromiseAdapter->wait(new Promise($value, $syncPromiseAdapter)) : $value,
+                    $toPassArgs,
+                );
+
+                return $callResolver(...$toPassArgs);
+            }) : $callResolver(...$toPassArgs);
+        };
 
         $config += $additionalConfig;
 
@@ -174,24 +165,12 @@ final class QueryField extends FieldDefinition
             $fieldDescriptor->getResolver(),
             $fieldDescriptor->getComment(),
             $fieldDescriptor->getDeprecationReason(),
-            $fieldDescriptor->getPrefetchMethodName(),
-            $fieldDescriptor->getPrefetchParameters(),
         );
     }
 
     public static function fromFieldDescriptor(QueryFieldDescriptor $fieldDescriptor): self
     {
         $arguments = $fieldDescriptor->getParameters();
-        if ($fieldDescriptor->getPrefetchMethodName() !== null) {
-            $arguments = [
-                '__graphqlite_prefectData' => new PrefetchDataParameter(
-                    fieldName: $fieldDescriptor->getName(),
-                    originalResolver: $fieldDescriptor->getOriginalResolver(),
-                    methodName: $fieldDescriptor->getPrefetchMethodName(),
-                    parameters: $fieldDescriptor->getPrefetchParameters(),
-                ),
-            ] + $arguments;
-        }
         if ($fieldDescriptor->isInjectSource() === true) {
             $arguments = ['__graphqlite_source' => new SourceParameter()] + $arguments;
         }

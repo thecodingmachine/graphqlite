@@ -119,6 +119,17 @@ annotations    | *no*       | array\<Annotations\>  | A set of annotations that 
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
+## @Prefetch
+
+Marks field parameter to be used for [prefetching](prefetch-method.mdx).
+
+**Applies on**: parameters of methods annotated with `@Query`, `@Mutation` or `@Field`.
+
+Attribute                     | Compulsory | Type     | Definition
+------------------------------|------------|----------|--------
+callable                      | *no*       | callable | Name of the prefetch method (in same class) or a full callable, either a static method or regular service from the container
+
+
 ## @Logged
 
 The `@Logged` annotation is used to declare a Query/Mutation/Field is only visible to logged users.
