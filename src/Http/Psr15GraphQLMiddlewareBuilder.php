@@ -92,8 +92,6 @@ class Psr15GraphQLMiddlewareBuilder
 
     public function useAutomaticPersistedQueries(CacheInterface $cache, DateInterval $ttl = null): self
     {
-        $ttl ??= new DateInterval('1H');
-
         $this->config->setPersistedQueryLoader(new CachePersistedQueryLoader($cache, $ttl));
 
         return $this;

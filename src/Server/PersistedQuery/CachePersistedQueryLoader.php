@@ -19,7 +19,7 @@ class CachePersistedQueryLoader
 {
     public function __construct(
         private readonly CacheInterface $cache,
-        private readonly DateInterval $ttl,
+        private readonly DateInterval|null $ttl = null,
     ) {}
 
     public function __invoke(string $queryId, OperationParams $operation): string|DocumentNode

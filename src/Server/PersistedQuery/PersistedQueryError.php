@@ -34,7 +34,7 @@ class PersistedQueryError extends RequestError implements GraphQLExceptionInterf
 	public static function idInvalid(): self
 	{
         // This isn't part of an Apollo spec, but it's still nice to have.
-		return new self('Persisted query by that ID doesnt match the provided query; you are likely using a wrong hashing method.', code: 'PERSISTED_QUERY_ID_INVALID');
+		return new self('Persisted query by that ID doesnt match the provided query; you are likely incorrectly hashing your query.', code: 'PERSISTED_QUERY_ID_INVALID');
 	}
 
     public function getExtensions(): array

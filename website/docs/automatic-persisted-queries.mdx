@@ -56,6 +56,6 @@ $builder = new Psr15GraphQLMiddlewareBuilder($schema);
 
 // You need to provide a PSR compatible cache and a TTL for queries. The best cache would be some kind
 // of in-memory cache with a limit on number of entries to make sure your cache can't be maliciously spammed with queries.
-$builder->useAutomaticPersistedQueries($cache, new DateInterval('1H'));
+$builder->useAutomaticPersistedQueries($cache, new DateInterval('PT1H'));
 ```
 

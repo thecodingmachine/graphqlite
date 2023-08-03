@@ -165,9 +165,9 @@ $builder->setResponseFactory(new ResponseFactory()); // Set a PSR-18 ResponseFac
 $builder->setStreamFactory(new StreamFactory()); // Set a PSR-18 StreamFactory (not needed if you are using zend-framework/zend-diactoros ^2
 $builder->setHttpCodeDecider(new HttpCodeDecider()); // Set a class in charge of deciding the HTTP status code based on the response.
 
-// Configure the server to use Apollo automatic persisted queries with given cache and time-to-live.
+// Configure the server to use Apollo automatic persisted queries with given cache and an optional time-to-live.
 // See https://www.apollographql.com/docs/apollo-server/performance/apq/
-$builder->useAutomaticPersistedQueries($cache, new DateInterval('1H'));
+$builder->useAutomaticPersistedQueries($cache, new DateInterval('PT1H'));
 ```
 
 ### Example
