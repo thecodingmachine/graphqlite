@@ -17,9 +17,9 @@ use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
-
 use TheCodingMachine\GraphQLite\Server\PersistedQuery\CachePersistedQueryLoader;
 use TheCodingMachine\GraphQLite\Server\PersistedQuery\NotSupportedPersistedQueryLoader;
+
 use function class_exists;
 
 /**
@@ -90,7 +90,7 @@ class Psr15GraphQLMiddlewareBuilder
         return $this;
     }
 
-    public function useAutomaticPersistedQueries(CacheInterface $cache, DateInterval $ttl = null): self
+    public function useAutomaticPersistedQueries(CacheInterface $cache, DateInterval|null $ttl = null): self
     {
         $this->config->setPersistedQueryLoader(new CachePersistedQueryLoader($cache, $ttl));
 

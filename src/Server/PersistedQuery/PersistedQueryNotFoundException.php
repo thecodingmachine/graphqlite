@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Server\PersistedQuery;
 
 use GraphQL\Error\Error;
@@ -10,15 +12,14 @@ use Throwable;
  */
 class PersistedQueryNotFoundException extends Error implements PersistedQueryException
 {
-    public function __construct(Throwable $previous = null) {
+    public function __construct(Throwable|null $previous = null)
+    {
         parent::__construct('Persisted query by that ID was not found and "query" was omitted.', previous: $previous);
 
         $this->code = 'PERSISTED_QUERY_NOT_FOUND';
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function getExtensions(): array
     {
         return [

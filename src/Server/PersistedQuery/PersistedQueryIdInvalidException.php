@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Server\PersistedQuery;
 
 use GraphQL\Server\RequestError;
@@ -10,12 +12,14 @@ use Throwable;
  */
 class PersistedQueryIdInvalidException extends RequestError implements PersistedQueryException
 {
-    public function __construct(Throwable $previous = null) {
+    public function __construct(Throwable|null $previous = null)
+    {
         parent::__construct('Persisted query by that ID doesnt match the provided query; you are likely incorrectly hashing your query.', previous: $previous);
 
         $this->code = 'PERSISTED_QUERY_ID_INVALID';
     }
 
+    /** @return array<string, mixed> */
     public function getExtensions(): array
     {
         return [
