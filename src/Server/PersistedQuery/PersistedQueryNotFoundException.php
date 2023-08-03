@@ -16,6 +16,9 @@ class PersistedQueryNotFoundException extends Error implements PersistedQueryExc
         $this->code = 'PERSISTED_QUERY_NOT_FOUND';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getExtensions(): array
     {
         return [

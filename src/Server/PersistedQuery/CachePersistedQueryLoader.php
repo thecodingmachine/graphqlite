@@ -5,15 +5,10 @@ namespace TheCodingMachine\GraphQLite\Server\PersistedQuery;
 use DateInterval;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Server\OperationParams;
-use GraphQL\Server\ServerConfig;
 use Psr\SimpleCache\CacheInterface;
 
 /**
  * Uses cache to automatically store persisted queries, a.k.a. Apollo automatic persisted queries.
- *
- * @phpstan-import-type PersistedQueryLoader from ServerConfig
- *
- * @implements PersistedQueryLoader
  */
 class CachePersistedQueryLoader
 {

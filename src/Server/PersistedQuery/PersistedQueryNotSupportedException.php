@@ -16,6 +16,9 @@ class PersistedQueryNotSupportedException extends Error implements PersistedQuer
         $this->code = 'PERSISTED_QUERY_NOT_SUPPORTED';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getExtensions(): array
     {
         return [
