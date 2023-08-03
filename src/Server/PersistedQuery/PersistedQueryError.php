@@ -2,11 +2,12 @@
 
 namespace TheCodingMachine\GraphQLite\Server\PersistedQuery;
 
-use GraphQL\Server\RequestError;
+use GraphQL\Error\ClientAware;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
 use Throwable;
 
-class PersistedQueryError extends RequestError implements GraphQLExceptionInterface
+class PersistedQueryError extends RuntimeException implements GraphQLExceptionInterface
 {
 	/**
 	 * @param string $code
@@ -42,5 +43,10 @@ class PersistedQueryError extends RequestError implements GraphQLExceptionInterf
         return [
             'code' => $this->code,
         ];
+    }
+
+    public function isClientSafe(): bool
+    {
+        return true;
     }
 }
