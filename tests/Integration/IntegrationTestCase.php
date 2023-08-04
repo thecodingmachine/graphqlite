@@ -37,6 +37,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -64,6 +65,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
@@ -122,7 +124,8 @@ class IntegrationTestCase extends TestCase
                 return $queryProvider;
             },
             FieldsBuilder::class => static function (ContainerInterface $container) {
-                return new FieldsBuilder(
+                $parameterMiddlewarePipe = $container->get(ParameterMiddlewareInterface::class);
+                $fieldsBuilder = new FieldsBuilder(
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
@@ -130,10 +133,15 @@ class IntegrationTestCase extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMiddlewareInterface::class),
+                    $parameterMiddlewarePipe,
                     $container->get(FieldMiddlewareInterface::class),
                     $container->get(InputFieldMiddlewareInterface::class),
                 );
+                $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container);
+
+                $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
+
+                return $fieldsBuilder;
             },
             FieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
