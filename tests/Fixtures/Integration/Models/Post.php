@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeInterface;
+use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -38,6 +39,7 @@ class Post
      * @Field(name="comment")
      * @var string|null
      */
+    #[Cost(complexity: 5)]
     private $description = 'foo';
 
     /**
@@ -50,6 +52,7 @@ class Post
      * @Field()
      * @var Contact|null
      */
+    #[Cost(complexity: 3)]
     public $author = null;
 
     /**

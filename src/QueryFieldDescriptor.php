@@ -199,6 +199,15 @@ class QueryFieldDescriptor
         return $this->with(comment: $comment);
     }
 
+    public function withAddedCommentLines(string $comment): self
+    {
+        if (!$this->comment) {
+            return $this->withComment($comment);
+        }
+
+        return $this->withComment($this->comment . "\n" . $comment);
+    }
+
     public function getDeprecationReason(): string|null
     {
         return $this->deprecationReason;
