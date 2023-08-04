@@ -24,6 +24,7 @@ use TheCodingMachine\GraphQLite\Server\PersistedQuery\CachePersistedQueryLoader;
 use TheCodingMachine\GraphQLite\Server\PersistedQuery\NotSupportedPersistedQueryLoader;
 
 use function class_exists;
+use function is_callable;
 
 /**
  * A factory generating a PSR-15 middleware tailored for GraphQLite.
@@ -41,9 +42,7 @@ class Psr15GraphQLMiddlewareBuilder
 
     private HttpCodeDeciderInterface $httpCodeDecider;
 
-    /**
-     * @var ValidationRule[]
-     */
+    /** @var ValidationRule[] */
     private array $addedValidationRules = [];
 
     public function __construct(Schema $schema)

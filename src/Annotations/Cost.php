@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
@@ -15,6 +17,7 @@ class Cost implements MiddlewareAnnotationInterface
     public function __construct(
         public readonly int $complexity = 1,
         public readonly array $multipliers = [],
-        public readonly ?int $defaultMultiplier = null,
-    ) {}
+        public readonly int|null $defaultMultiplier = null,
+    ) {
+    }
 }

@@ -212,9 +212,7 @@ class SchemaFactory
         return $this;
     }
 
-    /**
-     * @deprecated Use PHP8 Attributes instead
-     */
+    /** @deprecated Use PHP8 Attributes instead */
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
@@ -350,7 +348,7 @@ class SchemaFactory
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
-            static fn(string $namespace) => $namespaceFactory->createNamespace($namespace),
+            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
             $this->typeNamespaces,
         );
 
@@ -392,7 +390,7 @@ class SchemaFactory
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
         }
 
-        if (!empty($this->rootTypeMapperFactories)) {
+        if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
                 $annotationReader,
                 $typeResolver,
@@ -460,7 +458,7 @@ class SchemaFactory
             ));
         }
 
-        if (!empty($this->typeMapperFactories) || !empty($this->queryProviderFactories)) {
+        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
             $context = new FactoryContext(
                 $annotationReader,
                 $typeResolver,

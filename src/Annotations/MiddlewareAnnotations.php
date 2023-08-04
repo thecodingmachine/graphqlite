@@ -21,11 +21,11 @@ class MiddlewareAnnotations
     /**
      * Return annotations of the $className type
      *
-     * @template TAnnotation of MiddlewareAnnotationInterface
-     *
      * @param class-string<TAnnotation> $className
      *
      * @return array<int, TAnnotation>
+     *
+     * @template TAnnotation of MiddlewareAnnotationInterface
      */
     public function getAnnotationsByType(string $className): array
     {
@@ -37,11 +37,11 @@ class MiddlewareAnnotations
     /**
      * Returns at most 1 annotation of the $className type.
      *
-     * @template TAnnotation of MiddlewareAnnotationInterface
-     *
      * @param class-string<TAnnotation> $className
      *
      * @return TAnnotation|null
+     *
+     * @template TAnnotation of MiddlewareAnnotationInterface
      */
     public function getAnnotationByType(string $className): MiddlewareAnnotationInterface|null
     {

@@ -176,7 +176,7 @@ class QueryFieldDescriptor
 
     public function withAddedCommentLines(string $comment): self
     {
-        if (!$this->comment) {
+        if (! $this->comment) {
             return $this->withComment($comment);
         }
 

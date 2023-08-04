@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
+
+use function implode;
+use function is_int;
 
 /**
  * Reference implementation: https://github.com/ChilliCream/graphql-platform/blob/388f5c988bbb806e46e2315f1844ea5bb63096f2/src/HotChocolate/Core/src/Execution/Options/ComplexityAnalyzerSettings.cs#L58
@@ -15,20 +20,20 @@ class CostFieldMiddleware implements FieldMiddlewareInterface
     {
         $costAttribute = $queryFieldDescriptor->getMiddlewareAnnotations()->getAnnotationByType(Cost::class);
 
-        if (!$costAttribute) {
+        if (! $costAttribute) {
             return $fieldHandler->handle($queryFieldDescriptor);
         }
 
         $field = $fieldHandler->handle(
-            $queryFieldDescriptor->withAddedCommentLines($this->buildQueryComment($costAttribute))
+            $queryFieldDescriptor->withAddedCommentLines($this->buildQueryComment($costAttribute)),
         );
 
-        if (!$field) {
+        if (! $field) {
             return $field;
         }
 
-        $field->complexityFn = function (int $childrenComplexity, array $fieldArguments) use ($costAttribute): int {
-            if (!$costAttribute->multipliers) {
+        $field->complexityFn = static function (int $childrenComplexity, array $fieldArguments) use ($costAttribute): int {
+            if (! $costAttribute->multipliers) {
                 return $costAttribute->complexity + $childrenComplexity;
             }
 
@@ -38,7 +43,7 @@ class CostFieldMiddleware implements FieldMiddlewareInterface
             foreach ($costAttribute->multipliers as $multiplier) {
                 $value = $fieldArguments[$multiplier] ?? null;
 
-                if (!is_int($value)) {
+                if (! is_int($value)) {
                     continue;
                 }
 
@@ -58,7 +63,7 @@ class CostFieldMiddleware implements FieldMiddlewareInterface
 
     private function buildQueryComment(Cost $costAttribute): string
     {
-        return "Cost: " .
+        return 'Cost: ' .
             implode(', ', [
                 'complexity = ' . $costAttribute->complexity,
                 'multipliers = [' . implode(', ', $costAttribute->multipliers) . ']',
