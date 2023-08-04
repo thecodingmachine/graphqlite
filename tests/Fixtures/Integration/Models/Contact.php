@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
+use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Annotations\Security;
 use function array_search;
 use DateTimeInterface;
@@ -212,9 +213,9 @@ class Contact
     }
 
     /**
-     * @Field(prefetchMethod="prefetchTheContacts")
+     * @Field()
      */
-    public function repeatInnerName($data): string
+    public function repeatInnerName(#[Prefetch('prefetchTheContacts')] $data): string
     {
         $index = array_search($this, $data, true);
         if ($index === false) {
@@ -223,7 +224,7 @@ class Contact
         return $data[$index]->getName();
     }
 
-    public function prefetchTheContacts(iterable $contacts)
+    public static function prefetchTheContacts(iterable $contacts)
     {
         return $contacts;
     }

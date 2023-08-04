@@ -48,10 +48,9 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethods;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
@@ -154,8 +153,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testErrors(): void
     {
-        $controller = new class
-        {
+        $controller = new class {
             /**
              * @Query
              * @return string
@@ -174,8 +172,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testTypeInDocBlock(): void
     {
-        $controller = new class
-        {
+        $controller = new class {
             /**
              * @Query
              * @param int $typeHintInDocBlock
@@ -689,24 +686,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(InvalidPrefetchMethodRuntimeException::class);
-        $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a "prefetch method" that could not be found. Unable to find method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists.');
-        $queryProvider->getFields($controller);
-    }
-
-    public function testInvalidPrefetchParameter(): void
-    {
-        $controller = new TestTypeWithInvalidPrefetchParameter();
-
-        $queryProvider = $this->buildFieldsBuilder();
-
-        $this->expectException(InvalidPrefetchMethodRuntimeException::class);
-        $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter::prefetch specifies a "prefetch method" but the data from the prefetch method is not gathered. The "prefetch" method should accept a second parameter that will contain data returned by the prefetch method.');
+        $this->expectExceptionMessage('#[Prefetch] attribute on parameter $data in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a callable that is invalid: Method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists wasn\'t found or isn\'t accessible.');
         $queryProvider->getFields($controller);
     }
 
     public function testPrefetchMethod(): void
     {
-        $controller = new TestTypeWithPrefetchMethod();
+        $controller = new TestTypeWithPrefetchMethods();
 
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -715,9 +701,11 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertSame('test', $testField->name);
 
-        $this->assertCount(2, $testField->args);
-        $this->assertSame('string', $testField->args[0]->name);
-        $this->assertSame('int', $testField->args[1]->name);
+        $this->assertCount(4, $testField->args);
+        $this->assertSame('arg1', $testField->args[0]->name);
+        $this->assertSame('arg2', $testField->args[1]->name);
+        $this->assertSame('arg3', $testField->args[2]->name);
+        $this->assertSame('arg4', $testField->args[3]->name);
     }
 
     public function testSecurityBadQuery(): void

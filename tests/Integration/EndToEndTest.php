@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -62,10 +63,12 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
@@ -296,7 +299,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
+        $this->expectExceptionMessage('When using "prefetch", you should ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
@@ -614,7 +617,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
@@ -624,7 +627,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
     }
 
@@ -1013,7 +1016,7 @@ class EndToEndTest extends IntegrationTestCase
             ],
         );
         $this->assertSame([
-                'singleEnum' => 'L',
+            'singleEnum' => 'L',
         ], $this->getSuccessResult($result));
     }
 
@@ -1453,7 +1456,7 @@ class EndToEndTest extends IntegrationTestCase
     public function testEndToEndInjectUserUnauthenticated(): void
     {
         $container = $this->createContainer([
-            AuthenticationServiceInterface::class => static fn () => new VoidAuthenticationService(),
+            AuthenticationServiceInterface::class => static fn() => new VoidAuthenticationService(),
         ]);
 
         $schema = $container->get(Schema::class);
@@ -1507,7 +1510,7 @@ class EndToEndTest extends IntegrationTestCase
             $queryString,
         );
         $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
-        if (isset($resultArray['errors']) || ! isset($resultArray['data'])) {
+        if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
             $this->fail('Expected a successful answer. Got ' . json_encode($resultArray, JSON_PRETTY_PRINT));
         }
         $this->assertNull($resultArray['data']['nullableResult']);
@@ -2025,7 +2028,7 @@ class EndToEndTest extends IntegrationTestCase
             $queryString,
         );
 
-         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {

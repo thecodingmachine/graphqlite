@@ -24,7 +24,7 @@ class QueryFieldTest extends TestCase
                     throw new Error('boum');
                 }
             },
-        ], $sourceResolver, $sourceResolver, null, null, null, []);
+        ], $sourceResolver, $sourceResolver, null, null, []);
 
         $resolve = $queryField->resolveFn;
 
