@@ -255,11 +255,11 @@ Attribute      | Compulsory | Type | Definition
 
 Sets complexity and multipliers on fields for [automatic query complexity](operation-complexity.md#static-request-analysis).
 
-Attribute           | Compulsory | Type          | Definition                                                      |
---------------------|------------|---------------|-----------------------------------------------------------------|
-*complexity*        | *no*       | int           | Complexity for that field                                       |
-*multipliers*       | *no*       | array<string> | Names of fields by value of which complexity will be multiplied |
-*defaultMultiplier* | *no*       | int           | Default multiplier value if all multipliers are missing/null    |
+Attribute           | Compulsory | Type            | Definition                                                      
+--------------------|------------|-----------------|-----------------------------------------------------------------
+*complexity*        | *no*       | int             | Complexity for that field                                       
+*multipliers*       | *no*       | array\<string\> | Names of fields by value of which complexity will be multiplied 
+*defaultMultiplier* | *no*       | int             | Default multiplier value if all multipliers are missing/null    
 
 ## @Validate
 
