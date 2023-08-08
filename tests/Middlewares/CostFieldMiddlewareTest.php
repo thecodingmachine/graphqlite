@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\Type;
+use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
@@ -19,7 +20,7 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
-class CostFieldMiddlewareTest extends AbstractQueryProviderTest
+class CostFieldMiddlewareTest extends TestCase
 {
     public function testIgnoresFieldsWithoutCustomCost(): void
     {
@@ -82,6 +83,40 @@ class CostFieldMiddlewareTest extends AbstractQueryProviderTest
         yield 'default multiplier 100 * (default 1 + children 8) #2' => [900, new Cost(multipliers: ['missing'], defaultMultiplier: 100)];
         yield 'default multiplier 100 * (default 1 + children 8) #3' => [900, new Cost(multipliers: ['null', 'missing'], defaultMultiplier: 100)];
 
+    }
+
+    /**
+     * @dataProvider addsCostInDescriptionProvider
+     */
+    public function testAddsCostInDescription(string $expectedDescription, Cost $cost): void
+    {
+        $queryFieldDescriptor = $this->createMock(QueryFieldDescriptor::class);
+        $queryFieldDescriptor->method('getMiddlewareAnnotations')
+            ->willReturn(new MiddlewareAnnotations([$cost]));
+        $queryFieldDescriptor->expects($this->once())
+            ->method('withAddedCommentLines')
+            ->with($expectedDescription)
+            ->willReturnSelf();
+
+        (new CostFieldMiddleware())->process($queryFieldDescriptor, $this->stubFieldHandler(null));
+    }
+
+    public static function addsCostInDescriptionProvider(): iterable
+    {
+        yield [
+            'Cost: complexity = 1, multipliers = [], defaultMultiplier = null',
+            new Cost(),
+        ];
+
+        yield [
+            'Cost: complexity = 5, multipliers = [take], defaultMultiplier = 500',
+            new Cost(complexity: 5, multipliers: ['take'], defaultMultiplier: 500)
+        ];
+
+        yield [
+            'Cost: complexity = 5, multipliers = [take, null], defaultMultiplier = null',
+            new Cost(complexity: 5, multipliers: ['take', 'null'], defaultMultiplier: null)
+        ];
     }
 
     /**

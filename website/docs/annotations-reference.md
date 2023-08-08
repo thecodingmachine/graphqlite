@@ -251,6 +251,16 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *for*          | *yes*      | string | The name of the PHP parameter to hide
 
+## @Cost
+
+Sets complexity and multipliers on fields for [automatic query complexity](operation-complexity.md#static-request-analysis).
+
+Attribute           | Compulsory | Type          | Definition                                                      |
+--------------------|------------|---------------|-----------------------------------------------------------------|
+*complexity*        | *no*       | int           | Complexity for that field                                       |
+*multipliers*       | *no*       | array<string> | Names of fields by value of which complexity will be multiplied |
+*defaultMultiplier* | *no*       | int           | Default multiplier value if all multipliers are missing/null    |
+
 ## @Validate
 
 <div class="alert alert--info">This annotation is only available in the GraphQLite Laravel package</div>
