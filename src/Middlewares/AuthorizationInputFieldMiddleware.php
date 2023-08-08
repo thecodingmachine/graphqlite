@@ -32,9 +32,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
-        assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
-        assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
         // Avoid wrapping resolver callback when no annotations are specified.
         if (! $loggedAnnotation && ! $rightAnnotation) {
@@ -42,7 +40,6 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         }
 
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
-        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
 
         if ($hideIfUnauthorized !== null && ! $this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
             return null;

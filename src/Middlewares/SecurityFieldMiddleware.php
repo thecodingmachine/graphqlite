@@ -42,7 +42,6 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         }
 
         $failWith = $annotations->getAnnotationByType(FailWith::class);
-        assert($failWith instanceof FailWith || $failWith === null);
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $makeReturnTypeNullable = false;
