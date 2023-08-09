@@ -8,8 +8,8 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@docusaurus/core": "2.3.1",
-    "@docusaurus/preset-classic": "2.3.1",
+    "@docusaurus/core": "2.4.1",
+    "@docusaurus/preset-classic": "2.4.1",
     "clsx": "^1.1.1",
     "mdx-mermaid": "^1.2.3",
     "mermaid": "^8.12.0",

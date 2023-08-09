@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
+use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use function array_search;
 use function strtoupper;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
@@ -34,9 +35,9 @@ class ContactType
     }
 
     /**
-     * @Field(prefetchMethod="prefetchContacts")
+     * @Field()
      */
-    public function repeatName(Contact $contact, $data, string $suffix): string
+    public function repeatName(Contact $contact, #[Prefetch('prefetchContacts')] $data, string $suffix): string
     {
         $index = array_search($contact, $data['contacts'], true);
         if ($index === false) {
@@ -45,7 +46,7 @@ class ContactType
         return $data['prefix'].$data['contacts'][$index]->getName().$suffix;
     }
 
-    public function prefetchContacts(iterable $contacts, string $prefix)
+    public static function prefetchContacts(iterable $contacts, string $prefix)
     {
         return [
             'contacts' => $contacts,

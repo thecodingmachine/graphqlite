@@ -9,7 +9,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 class HardCodedParameter implements ParameterInterface
 {
-    public function __construct(private mixed $value)
+    public function __construct(private mixed $value = null)
     {
     }
 

@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -48,9 +49,11 @@ use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
@@ -59,10 +62,12 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
@@ -130,7 +135,8 @@ class EndToEndTest extends TestCase
                 return $queryProvider;
             },
             FieldsBuilder::class => static function (ContainerInterface $container) {
-                return new FieldsBuilder(
+                $parameterMiddlewarePipe = $container->get(ParameterMiddlewareInterface::class);
+                $fieldsBuilder = new FieldsBuilder(
                     $container->get(AnnotationReader::class),
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
@@ -138,10 +144,15 @@ class EndToEndTest extends TestCase
                     $container->get(CachedDocBlockFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
-                    $container->get(ParameterMiddlewareInterface::class),
+                    $parameterMiddlewarePipe,
                     $container->get(FieldMiddlewareInterface::class),
                     $container->get(InputFieldMiddlewareInterface::class),
                 );
+                $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container);
+
+                $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
+
+                return $fieldsBuilder;
             },
             FieldMiddlewareInterface::class => static function (ContainerInterface $container) {
                 $pipe = new FieldMiddlewarePipe();
@@ -297,15 +308,22 @@ class EndToEndTest extends TestCase
                 return new CachedDocBlockFactory(new Psr16Cache($arrayAdapter));
             },
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {
-                return new NullableTypeMapperAdapter();
+                return new VoidTypeMapper(
+                    new NullableTypeMapperAdapter(
+                        $container->get('topRootTypeMapper')
+                    )
+                );
+            },
+            'topRootTypeMapper' => static function () {
+                return new LastDelegatingTypeMapper();
             },
             'rootTypeMapper' => static function (ContainerInterface $container) {
                 // These are in reverse order of execution
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
-                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models') ]);
+                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [$container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models')]);
                 if (interface_exists(UnitEnum::class)) {
-                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [ $container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models') ]);
+                    $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), new ArrayAdapter(), [$container->get(NamespaceFactory::class)->createNamespace('TheCodingMachine\\GraphQLite\\Fixtures81\\Integration\\Models')]);
                 }
                 $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(NamingStrategyInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
@@ -363,7 +381,7 @@ class EndToEndTest extends TestCase
         }
         $container->get(TypeMapperInterface::class)->addTypeMapper($container->get(PorpaginasTypeMapper::class));
 
-        $container->get(RootTypeMapperInterface::class)->setNext($container->get('rootTypeMapper'));
+        $container->get('topRootTypeMapper')->setNext($container->get('rootTypeMapper'));
         /*$container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new CompoundTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
         $container->get(CompositeRootTypeMapper::class)->addRootTypeMapper(new IteratorTypeMapper($container->get(RootTypeMapperInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class)));
@@ -376,7 +394,7 @@ class EndToEndTest extends TestCase
     private function getSuccessResult(ExecutionResult $result, int $debugFlag = DebugFlag::RETHROW_INTERNAL_EXCEPTIONS): mixed
     {
         $array = $result->toArray($debugFlag);
-        if (isset($array['errors']) || ! isset($array['data'])) {
+        if (isset($array['errors']) || !isset($array['data'])) {
             $this->fail('Expected a successful answer. Got ' . json_encode($array, JSON_PRETTY_PRINT));
         }
         return $array['data'];
@@ -583,7 +601,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('When using "prefetch", you sure ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
+        $this->expectExceptionMessage('When using "prefetch", you should ensure that the GraphQL execution "context" (passed to the GraphQL::executeQuery method) is an instance of \\TheCodingMachine\\GraphQLite\\Context');
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
@@ -901,7 +919,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
 
         // Call again to test GlobTypeMapper cache
@@ -911,7 +929,7 @@ class EndToEndTest extends TestCase
         );
 
         $this->assertSame([
-            'echoFilters' => [ 'foo', 'bar', '12', '42', '62' ],
+            'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
     }
 
@@ -1300,7 +1318,7 @@ class EndToEndTest extends TestCase
             ],
         );
         $this->assertSame([
-                'singleEnum' => 'L',
+            'singleEnum' => 'L',
         ], $this->getSuccessResult($result));
     }
 
@@ -1737,6 +1755,29 @@ class EndToEndTest extends TestCase
         $this->assertSame(42, $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['injectedUser']);
     }
 
+    public function testEndToEndInjectUserUnauthenticated(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static fn() => new VoidAuthenticationService(),
+        ]);
+
+        $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+            query {
+                injectedUser
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $this->assertSame('You need to be logged to access this field', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
     public function testInputOutputNameConflict(): void
     {
         $arrayAdapter = new ArrayAdapter();
@@ -1771,7 +1812,7 @@ class EndToEndTest extends TestCase
             $queryString,
         );
         $resultArray = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
-        if (isset($resultArray['errors']) || ! isset($resultArray['data'])) {
+        if (isset($resultArray['errors']) || !isset($resultArray['data'])) {
             $this->fail('Expected a successful answer. Got ' . json_encode($resultArray, JSON_PRETTY_PRINT));
         }
         $this->assertNull($resultArray['data']['nullableResult']);
@@ -2289,7 +2330,7 @@ class EndToEndTest extends TestCase
             $queryString,
         );
 
-         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
 
         $container = $this->createContainer([
             AuthenticationServiceInterface::class => static function () {
@@ -2466,5 +2507,29 @@ class EndToEndTest extends TestCase
 
         $data = $this->getSuccessResult($result);
         $this->assertSame(['graph', 'ql'], $data['updateTrickyProduct']['list']);
+    }
+
+    public function testEndToEndVoidResult(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $gql = '
+            mutation($id: ID!) {
+                deleteButton(id: $id)
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $gql,
+            variableValues: [
+                'id' => 123,
+            ],
+        );
+
+        self::assertSame([
+            'deleteButton' => null,
+        ], $this->getSuccessResult($result));
     }
 }

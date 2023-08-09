@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Http;
 
+use DateInterval;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Type\Schema;
@@ -12,14 +13,19 @@ use Laminas\Diactoros\StreamFactory;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\CachePersistedQueryLoader;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\NotSupportedPersistedQueryLoader;
 
 use function class_exists;
 
 /**
  * A factory generating a PSR-15 middleware tailored for GraphQLite.
+ *
+ * @phpstan-import-type PersistedQueryLoader from ServerConfig
  */
 class Psr15GraphQLMiddlewareBuilder
 {
@@ -40,6 +46,7 @@ class Psr15GraphQLMiddlewareBuilder
         $this->config->setErrorFormatter([WebonyxErrorHandler::class, 'errorFormatter']);
         $this->config->setErrorsHandler([WebonyxErrorHandler::class, 'errorHandler']);
         $this->config->setContext(new Context());
+        $this->config->setPersistedQueryLoader(new NotSupportedPersistedQueryLoader());
         $this->httpCodeDecider = new HttpCodeDecider();
     }
 
@@ -79,6 +86,13 @@ class Psr15GraphQLMiddlewareBuilder
     public function setHttpCodeDecider(HttpCodeDeciderInterface $httpCodeDecider): self
     {
         $this->httpCodeDecider = $httpCodeDecider;
+
+        return $this;
+    }
+
+    public function useAutomaticPersistedQueries(CacheInterface $cache, DateInterval|null $ttl = null): self
+    {
+        $this->config->setPersistedQueryLoader(new CachePersistedQueryLoader($cache, $ttl));
 
         return $this;
     }

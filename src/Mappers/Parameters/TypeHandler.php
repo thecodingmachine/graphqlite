@@ -198,7 +198,14 @@ class TypeHandler implements ParameterHandlerInterface
             $defaultValue = $parameter->getDefaultValue();
         }
 
-        return new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
+        return new InputTypeParameter(
+            name: $parameter->getName(),
+            type: $type,
+            description: null,
+            hasDefaultValue: $hasDefaultValue,
+            defaultValue: $defaultValue,
+            argumentResolver: $this->argumentResolver,
+        );
     }
 
     /**
@@ -291,10 +298,15 @@ class TypeHandler implements ParameterHandlerInterface
         $hasDefault = $defaultValue !== null || $isNullable;
         $fieldName = $argumentName ?? $refProperty->getName();
 
-        $inputProperty = new InputTypeProperty($refProperty->getName(), $fieldName, $inputType, $hasDefault, $defaultValue, $this->argumentResolver);
-        $inputProperty->setDescription(trim($docBlockComment));
-
-        return $inputProperty;
+        return new InputTypeProperty(
+            propertyName: $refProperty->getName(),
+            fieldName: $fieldName,
+            type: $inputType,
+            description: trim($docBlockComment),
+            hasDefaultValue: $hasDefault,
+            defaultValue: $defaultValue,
+            argumentResolver: $this->argumentResolver,
+        );
     }
 
     /**

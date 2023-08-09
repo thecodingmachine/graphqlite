@@ -249,9 +249,7 @@ Let's say you want to force a parameter to be of type "ID", you can use this:
 
 ```php
 #[Factory]
-#[UseInputType(for: "$id", inputType:"ID!")]
-public function getProductById(string $id): Product
-{
+public function getProductById(#[UseInputType(inputType:"ID!")] string $id): Product {
     return $this->productRepository->findById($id);
 }
 ```

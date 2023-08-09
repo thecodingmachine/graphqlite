@@ -13,9 +13,7 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
-use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
-use TheCodingMachine\GraphQLite\Middlewares\SourceResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
@@ -55,12 +53,9 @@ final class InputField extends InputObjectField
         }
 
         if ($originalResolver !== null && $resolver !== null) {
-            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
-                if ($originalResolver instanceof SourceResolverInterface) {
-                    $originalResolver->setObject($source);
-                }
+            $this->resolve = function (object $source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
                 $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
-                $result = $resolver(...$toPassArgs);
+                $result = $resolver($source, ...$toPassArgs);
 
                 try {
                     $this->assertInputType($result);
@@ -73,7 +68,7 @@ final class InputField extends InputObjectField
             };
         } else {
             $this->forConstructorHydration = true;
-            $this->resolve = function ($source, array $args, $context, ResolveInfo $info) use ($arguments) {
+            $this->resolve = function (object|null $source, array $args, $context, ResolveInfo $info) use ($arguments) {
                 $result = $arguments[$this->name]->resolve($source, $args, $context, $info);
                 $this->assertInputType($result);
                 return $result;
@@ -123,25 +118,6 @@ final class InputField extends InputObjectField
         return $this->forConstructorHydration;
     }
 
-    /**
-     * @param bool $isNotLogged False if the user is logged (and the error is a 403), true if the error is unlogged (the error is a 401)
-     *
-     * @return InputField
-     */
-    public static function unauthorizedError(InputFieldDescriptor $fieldDescriptor, bool $isNotLogged): self
-    {
-        $callable = static function () use ($isNotLogged): void {
-            if ($isNotLogged) {
-                throw MissingAuthorizationException::unauthorized();
-            }
-            throw MissingAuthorizationException::forbidden();
-        };
-
-        $fieldDescriptor->setResolver($callable);
-
-        return self::fromDescriptor($fieldDescriptor);
-    }
-
     private static function fromDescriptor(InputFieldDescriptor $fieldDescriptor): self
     {
         return new self(
@@ -163,7 +139,7 @@ final class InputField extends InputObjectField
         if ($fieldDescriptor->isInjectSource() === true) {
             $arguments = ['__graphqlite_source' => new SourceParameter()] + $arguments;
         }
-        $fieldDescriptor->setParameters($arguments);
+        $fieldDescriptor = $fieldDescriptor->withParameters($arguments);
 
         return self::fromDescriptor($fieldDescriptor);
     }

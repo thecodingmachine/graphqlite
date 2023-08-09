@@ -223,7 +223,8 @@ The `@InjectUser` annotation can be used next to:
 * `@Field` annotations
 
 The object injected as the current user depends on your framework. It is in fact the object returned by the
-["authentication service" configured in GraphQLite](implementing-security.md).
+["authentication service" configured in GraphQLite](implementing-security.md). If user is not authenticated and
+parameter's type is not nullable, an authorization exception is thrown, similar to `@Logged` annotation.
 
 ## Hiding fields / queries / mutations
 
@@ -231,7 +232,7 @@ By default, a user analysing the GraphQL schema can see all queries/mutations/ty
 Some will be available to him and some won't.
 
 If you want to add an extra level of security (or if you want your schema to be kept secret to unauthorized users),
-you can use the `@HideIfUnauthorized` annotation.
+you can use the `@HideIfUnauthorized` annotation. Beware of [it's limitations](annotations-reference.md).
 
 <Tabs
   defaultValue="php8"
@@ -292,4 +293,4 @@ class UserController
 While this is the most secured mode, it can have drawbacks when working with development tools
 (you need to be logged as admin to fetch the complete schema).
 
-<div class="alert alert--info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optionnal from GraphQLite 4+.</div>
+<div class="alert alert--info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optional from GraphQLite 4+.</div>

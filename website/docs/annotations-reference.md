@@ -119,6 +119,17 @@ annotations    | *no*       | array\<Annotations\>  | A set of annotations that 
 
 (*) **Note**: `outputType` and `phpType` are mutually exclusive. You MUST provide one of them.
 
+## @Prefetch
+
+Marks field parameter to be used for [prefetching](prefetch-method.mdx).
+
+**Applies on**: parameters of methods annotated with `@Query`, `@Mutation` or `@Field`.
+
+Attribute                     | Compulsory | Type     | Definition
+------------------------------|------------|----------|--------
+callable                      | *no*       | callable | Name of the prefetch method (in same class) or a full callable, either a static method or regular service from the container
+
+
 ## @Logged
 
 The `@Logged` annotation is used to declare a Query/Mutation/Field is only visible to logged users.
@@ -150,6 +161,10 @@ value          | *yes*       | mixed | The value to return if the user is not au
 
 ## @HideIfUnauthorized
 
+<div class="alert alert--warning">This annotation only works when a Schema is used to handle exactly one use request. 
+If you serve your GraphQL API from long-running standalone servers (like Laravel Octane, Swoole, RoadRunner etc) and 
+share the same Schema instance between multiple requests, please avoid using @HideIfUnauthorized.</div>
+
 The `@HideIfUnauthorized` annotation is used to completely hide the query / mutation / field if the user is not authorized
 to access it (according to the `@Logged` and `@Right` annotations).
 
@@ -161,6 +176,8 @@ to access it (according to the `@Logged` and `@Right` annotations).
 
 Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your
 query / mutation / field.
+
+See [the authentication and authorization page](authentication-authorization.mdx) for more details.
 
 **Applies on**: methods annotated with `@Query`, `@Mutation` or `@Field`.
 

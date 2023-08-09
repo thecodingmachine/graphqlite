@@ -8,6 +8,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
+use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
 class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
 {
@@ -18,6 +19,7 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
         $namingStrategy = new NamingStrategy();
         $container = new EmptyContainer();
         $arrayCache = new Psr16Cache(new ArrayAdapter());
+        $nsList = [$this->getNamespaceFactory()->createNamespace('namespace')];
 
         $context = new RootTypeMapperFactoryContext(
             $this->getAnnotationReader(),
@@ -27,6 +29,7 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
             $this->getTypeMapper(),
             $container,
             $arrayCache,
+            $nsList,
             self::GLOB_TTL_SECONDS
         );
 
@@ -37,6 +40,8 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
         $this->assertSame($this->getTypeMapper(), $context->getRecursiveTypeMapper());
         $this->assertSame($container, $context->getContainer());
         $this->assertSame($arrayCache, $context->getCache());
+        $this->assertSame($nsList, $context->getTypeNamespaces());
+        $this->assertContainsOnlyInstancesOf(NS::class, $context->getTypeNamespaces());
         $this->assertSame(self::GLOB_TTL_SECONDS, $context->getGlobTTL());
         $this->assertNull($context->getMapTTL());
     }

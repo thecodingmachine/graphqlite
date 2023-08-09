@@ -12,11 +12,11 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
-        "doctrine/annotations": "1.13.2",
+        "doctrine/annotations": "^1.14 || ^2.0",
         "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
         "phpdocumentor/type-resolver": "^1.4",
-        "psr/container": "^2",
+        "psr/container": "^1.1 || ^2",
         "psr/http-factory": "^1",
         "psr/http-message": "^1.0.1",
         "psr/http-server-handler": "^1",
@@ -29,10 +29,10 @@
         "webonyx/graphql-php": "^v15.0"
     },
     "require-dev": {
-        "beberlei/porpaginas": "^1.2",
-        "doctrine/coding-standard": "^11.0",
+        "beberlei/porpaginas": "^1.2 || ^2.0",
+        "doctrine/coding-standard": "^11.0 || ^12.0",
         "ecodev/graphql-upload": "^7.0",
-        "laminas/laminas-diactoros": "^2",
+        "laminas/laminas-diactoros": "^2 || ^3",
         "myclabs/php-enum": "^1.6.6",
         "php-coveralls/php-coveralls": "^2.1",
         "phpstan/extension-installer": "^1.1",

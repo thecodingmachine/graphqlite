@@ -27,16 +27,14 @@ use function count;
 use function iterator_to_array;
 
 /**
- * This root type mapper is the very first type mapper that must be called.
- * It handles the "compound" types and is in charge of creating Union Types and detecting subTypes (for arrays)
+ * This root type mapper wraps types as "non nullable" if the corresponding PHPDoc type doesn't allow null.
  */
 class NullableTypeMapperAdapter implements RootTypeMapperInterface
 {
-    private RootTypeMapperInterface $next;
-
-    public function setNext(RootTypeMapperInterface $next): void
+    public function __construct(
+        private readonly RootTypeMapperInterface $next,
+    )
     {
-        $this->next = $next;
     }
 
     public function toGraphQLOutputType(Type $type, OutputType|GraphQLType|null $subType, ReflectionMethod|ReflectionProperty $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
@@ -109,6 +107,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         if ($docBlockTypeHint instanceof Null_ || $docBlockTypeHint instanceof Nullable) {
             return true;
         }
+
         if ($docBlockTypeHint instanceof Compound) {
             foreach ($docBlockTypeHint as $type) {
                 if ($this->isNullable($type)) {
@@ -126,7 +125,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
             return null;
         }
         if ($type instanceof Nullable) {
-            return $type->getActualType();
+            return $this->getNonNullable($type->getActualType());
         }
         if ($type instanceof Compound) {
             $types = array_map([$this, 'getNonNullable'], iterator_to_array($type));

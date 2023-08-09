@@ -7,47 +7,40 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
-use function assert;
-
 /**
- * A class that represents a callable on an object to resolve property value.
- * The object can be modified after class invocation.
+ * Resolves field by getting the value of $propertyName from the source object.
  *
  * @internal
  */
-final class SourcePropertyResolver implements SourceResolverInterface
+final class SourcePropertyResolver implements ResolverInterface
 {
-    private object|null $object = null;
-
-    public function __construct(private readonly string $propertyName)
+    public function __construct(
+        private readonly string $className,
+        private readonly string $propertyName,
+    )
     {
     }
 
-    public function setObject(object $object): void
+    public function executionSource(object|null $source): object
     {
-        $this->object = $object;
-    }
-
-    public function getObject(): object
-    {
-        $object = $this->object;
-        assert($object !== null);
-
-        return $object;
-    }
-
-    public function __invoke(mixed ...$args): mixed
-    {
-        if ($this->object === null) {
-            throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for SourcePropertyResolver.');
         }
 
-        return PropertyAccessor::getValue($this->object, $this->propertyName, ...$args);
+        return $source;
+    }
+
+    public function __invoke(object|null $source, mixed ...$args): mixed
+    {
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for SourcePropertyResolver.');
+        }
+
+        return PropertyAccessor::getValue($source, $this->propertyName, ...$args);
     }
 
     public function toString(): string
     {
-        $class = $this->getObject()::class;
-        return $class . '::' . $this->propertyName;
+        return $this->className . '::' . $this->propertyName;
     }
 }

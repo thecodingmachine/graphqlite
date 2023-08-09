@@ -10,6 +10,8 @@ class TestControllerWithArrayParam
 {
     /**
      * @Query()
+     *
+     * @return string[]
      */
     public function test(iterable $params): array
     {

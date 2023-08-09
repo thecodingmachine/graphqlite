@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
+use Generator;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\NonNull;
@@ -10,6 +11,7 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
+use phpDocumentor\Reflection\Types\Nullable;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
@@ -18,12 +20,26 @@ use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 {
-    public function testMultipleCompound(): void
+    /**
+     * @dataProvider nullableVariationsProvider
+     */
+    public function testMultipleCompound(callable $type): void
     {
         $compoundTypeMapper = $this->getRootTypeMapper();
 
-        $result = $compoundTypeMapper->toGraphQLOutputType($this->resolveType(TestObject::class.'|'.TestObject2::class.'|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
+        $result = $compoundTypeMapper->toGraphQLOutputType($type(), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
         $this->assertNotInstanceOf(NonNull::class, $result);
+    }
+
+    public function nullableVariationsProvider(): Generator
+    {
+        yield 'php documentor generated from phpdoc' => [
+            fn () => $this->resolveType(TestObject::class . '|' . TestObject2::class . '|null'),
+        ];
+
+        yield 'type handler nullable wrapped native reflection union type' => [
+            fn () => new Nullable($this->resolveType(TestObject::class . '|' . TestObject2::class . '|null')),
+        ];
     }
 
     public function testOnlyNull(): void
@@ -46,9 +62,7 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
     public function testNonNullableReturnedByWrappedMapper(): void
     {
-        $typeMapper = new NullableTypeMapperAdapter();
-
-        $typeMapper->setNext(new class implements RootTypeMapperInterface {
+        $next = new class implements RootTypeMapperInterface {
 
             public function toGraphQLOutputType(Type $type, ?OutputType $subType, $reflector, DocBlock $docBlockObj): OutputType&GraphQLType
             {
@@ -64,11 +78,13 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
             {
                 throw new \RuntimeException('Not implemented');
             }
-        });
+        };
+
+        $typeMapper = new NullableTypeMapperAdapter($next);
 
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('a type mapper returned a GraphQL\\Type\\Definition\\NonNull instance.');
-        $typeMapper->toGraphQLOutputType($this->resolveType(TestObject::class.'|'.TestObject2::class.'|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
+        $typeMapper->toGraphQLOutputType($this->resolveType(TestObject::class . '|' . TestObject2::class . '|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 }

@@ -20,20 +20,22 @@ class InputFieldMiddlewarePipeTest extends TestCase
         };
 
         $middlewarePipe = new InputFieldMiddlewarePipe();
-        $inputFieldDescriptor = new InputFieldDescriptor();
-        $inputFieldDescriptor->setCallable(static function (){
-            return null;
-        });
-        $inputFieldDescriptor->setName("foo");
-        $inputFieldDescriptor->setType(Type::string());
+        $inputFieldDescriptor = new InputFieldDescriptor(
+            name: 'foo',
+            type: Type::string(),
+            callable: static function (){
+                return null;
+            }
+        );
         $definition = $middlewarePipe->process($inputFieldDescriptor, $finalHandler);
         $this->assertSame('foo', $definition->name);
 
         $middlewarePipe->pipe(new class implements InputFieldMiddlewareInterface {
             public function process(InputFieldDescriptor $inputFieldDescriptor, InputFieldHandlerInterface $inputFieldHandler): ?InputField
             {
-                $inputFieldDescriptor->setName("bar");
-                return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                return InputField::fromFieldDescriptor(
+                    $inputFieldDescriptor->withName("bar")
+                );
             }
         });
 

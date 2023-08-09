@@ -6,51 +6,45 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
-use function assert;
-use function get_class;
 use function method_exists;
 
 /**
- * A class that represents a magic property of an object.
- * The object can be modified after class invocation.
+ * Resolves field by getting the value of $propertyName from the source object through magic getter __get.
  *
  * @internal
  */
-final class MagicPropertyResolver implements SourceResolverInterface
+final class MagicPropertyResolver implements ResolverInterface
 {
-    private object|null $object = null;
-
-    public function __construct(private string $propertyName)
-    {
+    public function __construct(
+        private readonly string $className,
+        private readonly string $propertyName,
+    ) {
     }
 
-    public function setObject(object $object): void
+    public function executionSource(object|null $source): object
     {
-        $this->object = $object;
-    }
-
-    public function getObject(): object
-    {
-        assert($this->object !== null);
-
-        return $this->object;
-    }
-
-    public function __invoke(mixed ...$args): mixed
-    {
-        if ($this->object === null) {
-            throw new GraphQLRuntimeException('You must call "setObject" on MagicPropertyResolver before invoking the object.');
-        }
-        if (! method_exists($this->object, '__get')) {
-            throw MissingMagicGetException::cannotFindMagicGet(get_class($this->object));
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for MagicPropertyResolver.');
         }
 
-        return $this->object->__get($this->propertyName);
+        return $source;
+    }
+
+    public function __invoke(object|null $source, mixed ...$args): mixed
+    {
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for MagicPropertyResolver.');
+        }
+
+        if (! method_exists($source, '__get')) {
+            throw MissingMagicGetException::cannotFindMagicGet($source::class);
+        }
+
+        return $source->__get($this->propertyName);
     }
 
     public function toString(): string
     {
-        $class = $this->getObject()::class;
-        return $class . '::__get(\'' . $this->propertyName . '\')';
+        return $this->className . '::__get(\'' . $this->propertyName . '\')';
     }
 }
