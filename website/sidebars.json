@@ -25,7 +25,8 @@
     "Security": [
       "authentication-authorization",
       "fine-grained-security",
-      "implementing-security"
+      "implementing-security",
+      "operation-complexity"
     ],
     "Performance": [
       "query-plan",

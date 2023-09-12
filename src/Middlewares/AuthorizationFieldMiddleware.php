@@ -34,9 +34,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
-        assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
-        assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
         // Avoid wrapping resolver callback when no annotations are specified.
         if (! $loggedAnnotation && ! $rightAnnotation) {
@@ -44,9 +42,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         }
 
         $failWith = $annotations->getAnnotationByType(FailWith::class);
-        assert($failWith === null || $failWith instanceof FailWith);
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
-        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
 
         if ($failWith !== null && $hideIfUnauthorized !== null) {
             throw IncompatibleAnnotationsException::cannotUseFailWithAndHide();

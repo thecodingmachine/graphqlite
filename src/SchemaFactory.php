@@ -41,6 +41,7 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\CostFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
@@ -211,9 +212,7 @@ class SchemaFactory
         return $this;
     }
 
-    /**
-     * @deprecated Use PHP8 Attributes instead
-     */
+    /** @deprecated Use PHP8 Attributes instead */
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
@@ -349,7 +348,7 @@ class SchemaFactory
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
-            static fn(string $namespace) => $namespaceFactory->createNamespace($namespace),
+            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
             $this->typeNamespaces,
         );
 
@@ -363,6 +362,7 @@ class SchemaFactory
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
+        $fieldMiddlewarePipe->pipe(new CostFieldMiddleware());
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
         foreach ($this->inputFieldMiddlewares as $inputFieldMiddleware) {
@@ -390,7 +390,7 @@ class SchemaFactory
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
         }
 
-        if (!empty($this->rootTypeMapperFactories)) {
+        if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
                 $annotationReader,
                 $typeResolver,
@@ -458,7 +458,7 @@ class SchemaFactory
             ));
         }
 
-        if (!empty($this->typeMapperFactories) || !empty($this->queryProviderFactories)) {
+        if (! empty($this->typeMapperFactories) || ! empty($this->queryProviderFactories)) {
             $context = new FactoryContext(
                 $annotationReader,
                 $typeResolver,

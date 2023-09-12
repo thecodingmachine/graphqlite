@@ -51,6 +51,7 @@ class PrefetchParameterMiddlewareTest extends AbstractQueryProviderTest
     {
         $parameterizedCallableResolver = $this->createMock(ParameterizedCallableResolver::class);
         $parameterizedCallableResolver
+            ->expects($this->once())
             ->method('resolve')
             ->with('dummy', new IsEqual(new ReflectionClass(self::class)), 1)
             ->willReturn([
@@ -83,6 +84,7 @@ class PrefetchParameterMiddlewareTest extends AbstractQueryProviderTest
 
         $parameterizedCallableResolver = $this->createMock(ParameterizedCallableResolver::class);
         $parameterizedCallableResolver
+            ->expects($this->once())
             ->method('resolve')
             ->with([TestType::class, 'notExists'], new IsEqual(new ReflectionClass(self::class)), 1)
             ->willThrowException(InvalidCallableRuntimeException::methodNotFound(TestType::class, 'notExists'));

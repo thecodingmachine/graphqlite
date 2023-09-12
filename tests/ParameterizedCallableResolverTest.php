@@ -59,7 +59,8 @@ class ParameterizedCallableResolverTest extends TestCase
             ->willReturn($expectedParameters);
 
         $container = $this->createMock(ContainerInterface::class);
-        $container->method('get')
+        $container->expects($this->once())
+            ->method('get')
             ->with(FooExtendType::class)
             ->willReturn(new FooExtendType());
 

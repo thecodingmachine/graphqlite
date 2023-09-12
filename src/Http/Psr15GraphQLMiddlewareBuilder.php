@@ -8,6 +8,9 @@ use DateInterval;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Type\Schema;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\QueryComplexity;
+use GraphQL\Validator\Rules\ValidationRule;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\StreamFactory;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -21,6 +24,7 @@ use TheCodingMachine\GraphQLite\Server\PersistedQuery\CachePersistedQueryLoader;
 use TheCodingMachine\GraphQLite\Server\PersistedQuery\NotSupportedPersistedQueryLoader;
 
 use function class_exists;
+use function is_callable;
 
 /**
  * A factory generating a PSR-15 middleware tailored for GraphQLite.
@@ -37,6 +41,9 @@ class Psr15GraphQLMiddlewareBuilder
     private StreamFactoryInterface|null $streamFactory = null;
 
     private HttpCodeDeciderInterface $httpCodeDecider;
+
+    /** @var ValidationRule[] */
+    private array $addedValidationRules = [];
 
     public function __construct(Schema $schema)
     {
@@ -97,6 +104,18 @@ class Psr15GraphQLMiddlewareBuilder
         return $this;
     }
 
+    public function limitQueryComplexity(int $complexity): self
+    {
+        return $this->addValidationRule(new QueryComplexity($complexity));
+    }
+
+    public function addValidationRule(ValidationRule $rule): self
+    {
+        $this->addedValidationRules[] = $rule;
+
+        return $this;
+    }
+
     public function createMiddleware(): MiddlewareInterface
     {
         if ($this->responseFactory === null && ! class_exists(ResponseFactory::class)) {
@@ -108,6 +127,21 @@ class Psr15GraphQLMiddlewareBuilder
             throw new GraphQLRuntimeException('You need to set a StreamFactory to use the Psr15GraphQLMiddlewareBuilder. Call Psr15GraphQLMiddlewareBuilder::setStreamFactory or try installing zend-diactoros: composer require zendframework/zend-diactoros'); // @codeCoverageIgnore
         }
         $this->streamFactory = $this->streamFactory ?: new StreamFactory();
+
+        // If getValidationRules() is null in the config, DocumentValidator will default to DocumentValidator::allRules().
+        // So if we only added given rule, all of the default rules would not be validated, so we must also provide them.
+        $originalValidationRules = $this->config->getValidationRules() ?? DocumentValidator::allRules();
+
+        $this->config->setValidationRules(function (...$args) use ($originalValidationRules) {
+            if (is_callable($originalValidationRules)) {
+                $originalValidationRules = $originalValidationRules(...$args);
+            }
+
+            return [
+                ...$originalValidationRules,
+                ...$this->addedValidationRules,
+            ];
+        });
 
         return new WebonyxGraphqlMiddleware($this->config, $this->responseFactory, $this->streamFactory, $this->httpCodeDecider, $this->url);
     }
