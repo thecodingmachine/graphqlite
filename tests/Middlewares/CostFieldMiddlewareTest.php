@@ -109,17 +109,17 @@ class CostFieldMiddlewareTest extends TestCase
     public static function addsCostInDescriptionProvider(): iterable
     {
         yield [
-            '\nCost: complexity = 1, multipliers = [], defaultMultiplier = null',
+            "\nCost: complexity = 1, multipliers = [], defaultMultiplier = null",
             new Cost(),
         ];
 
         yield [
-            '\nCost: complexity = 5, multipliers = [take], defaultMultiplier = 500',
+            "\nCost: complexity = 5, multipliers = [take], defaultMultiplier = 500",
             new Cost(complexity: 5, multipliers: ['take'], defaultMultiplier: 500)
         ];
 
         yield [
-            '\nCost: complexity = 5, multipliers = [take, null], defaultMultiplier = null',
+            "\nCost: complexity = 5, multipliers = [take, null], defaultMultiplier = null",
             new Cost(complexity: 5, multipliers: ['take', 'null'], defaultMultiplier: null)
         ];
     }
