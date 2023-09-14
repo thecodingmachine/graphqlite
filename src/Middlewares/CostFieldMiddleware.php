@@ -63,7 +63,7 @@ class CostFieldMiddleware implements FieldMiddlewareInterface
 
     private function buildQueryComment(Cost $costAttribute): string
     {
-        return 'Cost: ' .
+        return "\nCost: " .
             implode(', ', [
                 'complexity = ' . $costAttribute->complexity,
                 'multipliers = [' . implode(', ', $costAttribute->multipliers) . ']',
