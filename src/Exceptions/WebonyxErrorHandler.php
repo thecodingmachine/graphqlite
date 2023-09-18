@@ -16,11 +16,11 @@ use function array_map;
  * A custom error handler and error formatter for Webonyx that can read the GraphQLAggregateExceptionInterface
  * and the GraphQLExceptionInterface.
  *
- * @phpstan-import-type SerializableError from ExecutionResult
+ * @phpstan-import-type SerializableErrors from ExecutionResult
  */
 final class WebonyxErrorHandler
 {
-    /** @return SerializableError */
+    /** @return SerializableErrors */
     public static function errorFormatter(Throwable $error): array
     {
         $formattedError = FormattedError::createFromException($error);
