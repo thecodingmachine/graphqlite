@@ -27,6 +27,7 @@ use function json_encode;
 use function json_last_error;
 use function json_last_error_msg;
 use function max;
+use function strtolower;
 
 use const JSON_ERROR_NONE;
 
@@ -60,7 +61,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         }
 
         // Let's json deserialize if this is not already done.
-        if (empty($request->getParsedBody())) {
+        if (strtolower($request->getMethod()) === 'post' && empty($request->getParsedBody())) {
             $content = $request->getBody()->getContents();
             $data = json_decode($content, true);
 
@@ -75,8 +76,8 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
         if ($context instanceof ResetableContextInterface) {
             $context->reset();
         }
+
         $result = $this->standardServer->executePsrRequest($request);
-        //return $this->standardServer->processPsrRequest($request, $this->responseFactory->createResponse(), $this->streamFactory->createStream());
 
         return $this->getJsonResponse($this->processResult($result), $this->decideHttpCode($result));
     }
