@@ -18,6 +18,7 @@ use ReflectionMethod;
 use ReflectionNamedType;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\ExpandsInputTypeParameters;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -143,6 +144,9 @@ class InputTypeUtils
             ];
             if ($parameter->hasDefaultValue()) {
                 $desc['defaultValue'] = $parameter->getDefaultValue();
+            }
+            if ($parameter instanceof InputTypeParameter && $parameter->getDescription()) {
+                $desc['description'] = $parameter->getDescription();
             }
 
             return $desc;

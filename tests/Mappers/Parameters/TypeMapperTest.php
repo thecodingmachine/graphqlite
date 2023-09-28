@@ -14,6 +14,7 @@ use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Fixtures80\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 
 class TypeMapperTest extends AbstractQueryProviderTest
@@ -98,6 +99,22 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame(24, $param->resolve(null, [], null, $resolveInfo));
     }
 
+    public function testParameterWithDescription(): void
+    {
+        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+
+        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+
+        $refMethod = new ReflectionMethod($this, 'withParamDescription');
+        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $refParameter = $refMethod->getParameters()[0];
+
+        $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $this->getAnnotationReader()->getParameterAnnotations($refParameter));
+        $this->assertInstanceOf(InputTypeParameter::class, $parameter);
+        assert($parameter instanceof InputTypeParameter);
+        $this->assertEquals('Foo parameter', $parameter->getDescription());
+    }
+
     public function testHideParameterException(): void
     {
         $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
@@ -119,6 +136,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
      * @return int|string
      */
     private function dummy()
+    {
+
+    }
+
+    /**
+     * @param int $foo Foo parameter
+     */
+    private function withParamDescription(int $foo)
     {
 
     }

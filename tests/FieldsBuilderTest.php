@@ -32,6 +32,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithDescriptions;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
@@ -706,6 +707,20 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertSame('arg2', $testField->args[1]->name);
         $this->assertSame('arg3', $testField->args[2]->name);
         $this->assertSame('arg4', $testField->args[3]->name);
+    }
+
+    public function testOutputTypeArgumentDescription(): void
+    {
+        $controller = new TestTypeWithDescriptions();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getFields($controller);
+        $testField = $fields['customField'];
+
+        $this->assertCount(1, $testField->args);
+        $this->assertSame('arg1', $testField->args[0]->name);
+        $this->assertSame('Test argument description', $testField->args[0]->description);
     }
 
     public function testSecurityBadQuery(): void
