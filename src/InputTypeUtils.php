@@ -145,7 +145,7 @@ class InputTypeUtils
             if ($parameter->hasDefaultValue()) {
                 $desc['defaultValue'] = $parameter->getDefaultValue();
             }
-            if ($parameter instanceof InputTypeParameter && $parameter->getDescription()) {
+            if ($parameter->getDescription()) {
                 $desc['description'] = $parameter->getDescription();
             }
 

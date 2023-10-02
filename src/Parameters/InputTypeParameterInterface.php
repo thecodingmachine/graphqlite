@@ -19,4 +19,8 @@ interface InputTypeParameterInterface extends ParameterInterface
     public function hasDefaultValue(): bool;
 
     public function getDefaultValue(): mixed;
+
+    public function getName(): string;
+
+    public function getDescription(): string;
 }
