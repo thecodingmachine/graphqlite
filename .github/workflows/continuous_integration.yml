@@ -24,7 +24,7 @@ jobs:
     steps:
       # Cancel previous runs of the same branch
       - name: cancel
-        uses: styfle/cancel-workflow-action@0.10.1
+        uses: styfle/cancel-workflow-action@0.12.0
         with:
           access_token: ${{ github.token }}
 
