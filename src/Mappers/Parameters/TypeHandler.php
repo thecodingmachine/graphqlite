@@ -188,6 +188,8 @@ class TypeHandler implements ParameterHandlerInterface
             }
         }
 
+        $description = $this->getParameterDescriptionFromDocBlock($docBlock, $parameter);
+
         $hasDefaultValue = false;
         $defaultValue = null;
         if ($parameter->allowsNull()) {
@@ -201,11 +203,25 @@ class TypeHandler implements ParameterHandlerInterface
         return new InputTypeParameter(
             name: $parameter->getName(),
             type: $type,
-            description: null,
+            description: $description,
             hasDefaultValue: $hasDefaultValue,
             defaultValue: $defaultValue,
             argumentResolver: $this->argumentResolver,
         );
+    }
+
+    private function getParameterDescriptionFromDocBlock(DocBlock $docBlock, ReflectionParameter $parameter): string|null
+    {
+        /** @var DocBlock\Tags\Param[] $paramTags */
+        $paramTags = $docBlock->getTagsByName('param');
+
+        foreach ($paramTags as $paramTag) {
+            if ($paramTag->getVariableName() === $parameter->getName()) {
+                return $paramTag->getDescription()?->render();
+            }
+        }
+
+        return null;
     }
 
     /**
