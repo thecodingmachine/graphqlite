@@ -212,8 +212,6 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
 
-        // Techncially at this point, we already know it's working, since an exception would have been
-        // thrown otherwise, requiring the generic type to be specified.
         $fieldsBuilder->getInputFields(
             PropertyPromotionInputTypeWithoutGenericDoc::class,
             'PropertyPromotionInputTypeWithoutGenericDocInput',
