@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
+use PhpParser\Builder\Property;
 use ReflectionMethod;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -69,6 +70,8 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Fixtures80\PropertyPromotionInputType;
+use TheCodingMachine\GraphQLite\Fixtures80\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\VoidType;
 
@@ -195,6 +198,48 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(IntType::class, $query->args[0]->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $query->getType());
         $this->assertInstanceOf(StringType::class, $query->getType()->getWrappedType());
+    }
+
+    /**
+     * Tests that the fields builder will fail when a parameter is missing it's generic docblock
+     * definition, when required - an array, for instance, or could be a collection (List types)
+     *
+     * @requires PHP >= 8.0
+     */
+    public function testTypeMissingForPropertyPromotionWithoutGenericDoc(): void
+    {
+        $fieldsBuilder = $this->buildFieldsBuilder();
+
+        $this->expectException(CannotMapTypeException::class);
+
+        // Techncially at this point, we already know it's working, since an exception would have been
+        // thrown otherwise, requiring the generic type to be specified.
+        $fieldsBuilder->getInputFields(
+            PropertyPromotionInputTypeWithoutGenericDoc::class,
+            'PropertyPromotionInputTypeWithoutGenericDocInput',
+        );
+    }
+
+    /**
+     * Tests that the fields builder will properly build an input type using property promotion
+     * with the generic docblock defined on the constructor and not the property directly.
+     *
+     * @requires PHP >= 8.0
+     */
+    public function testTypeInDocBlockWithPropertyPromotion(): void
+    {
+        $fieldsBuilder = $this->buildFieldsBuilder();
+
+        // Techncially at this point, we already know it's working, since an exception would have been
+        // thrown otherwise, requiring the generic type to be specified.
+        // @see self::testTypeMissingForPropertyPromotionWithoutGenericDoc
+        $inputFields = $fieldsBuilder->getInputFields(
+            PropertyPromotionInputType::class,
+            'PropertyPromotionInputTypeInput',
+        );
+
+        $this->assertCount(1, $inputFields);
+        $this->assertEquals('amounts', reset($inputFields)->name);
     }
 
     public function testQueryProviderWithFixedReturnType(): void
