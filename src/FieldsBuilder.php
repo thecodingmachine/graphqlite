@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
+use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use Psr\SimpleCache\InvalidArgumentException;

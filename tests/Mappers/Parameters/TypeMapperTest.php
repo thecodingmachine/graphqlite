@@ -22,7 +22,12 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testMapScalarUnionException(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $this->getCachedDocBlockFactory(),
+        );
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
 
@@ -39,9 +44,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
      */
     public function testMapObjectUnionWorks(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'objectUnion');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
@@ -61,9 +71,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
      */
     public function testMapObjectNullableUnionWorks(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'nullableObjectUnion');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
@@ -82,9 +97,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testHideParameter(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod($this, 'withDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
@@ -101,9 +121,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testParameterWithDescription(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod($this, 'withParamDescription');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
@@ -117,9 +142,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testHideParameterException(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod($this, 'withoutDefaultValue');
         $refParameter = $refMethod->getParameters()[0];

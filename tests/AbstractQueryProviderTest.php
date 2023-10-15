@@ -277,6 +277,15 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->parameterMiddlewarePipe;
     }
 
+    protected function getCachedDocBlockFactory(): CachedDocBlockFactory
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $psr16Cache = new Psr16Cache($arrayAdapter);
+
+        return new CachedDocBlockFactory($psr16Cache);
+    }
+
     protected function buildFieldsBuilder(): FieldsBuilder
     {
         $arrayAdapter = new ArrayAdapter();
@@ -308,7 +317,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory($psr16Cache),
+            $this->getCachedDocBlockFactory(),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $parameterMiddlewarePipe,
