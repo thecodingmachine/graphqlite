@@ -89,7 +89,12 @@ class FieldsBuilder
         private readonly InputFieldMiddlewareInterface $inputFieldMiddleware,
     )
     {
-        $this->typeMapper = new TypeHandler($this->argumentResolver, $this->rootTypeMapper, $this->typeResolver);
+        $this->typeMapper = new TypeHandler(
+            $this->argumentResolver,
+            $this->rootTypeMapper,
+            $this->typeResolver,
+            $this->cachedDocBlockFactory,
+        );
     }
 
     /**

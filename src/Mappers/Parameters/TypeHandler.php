@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\Fqsen;
@@ -41,6 +42,7 @@ use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
@@ -66,6 +68,7 @@ class TypeHandler implements ParameterHandlerInterface
         private readonly ArgumentResolver $argumentResolver,
         private readonly RootTypeMapperInterface $rootTypeMapper,
         private readonly TypeResolver $typeResolver,
+        private readonly CachedDocBlockFactory $cachedDocBlockFactory,
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
@@ -124,6 +127,27 @@ class TypeHandler implements ParameterHandlerInterface
         $varTags = $docBlock->getTagsByName('var');
 
         if (! $varTags) {
+            // If we don't have any @var tags, was this property promoted, and if so, do we have an
+            // @param tag on the constructor docblock?  If so, use that for the type.
+            if ($refProperty->isPromoted()) {
+                $refConstructor = $refProperty->getDeclaringClass()->getConstructor();
+                if (! $refConstructor) {
+                    return null;
+                }
+
+                $docBlock = $this->cachedDocBlockFactory->getDocBlock($refConstructor);
+                $paramTags = $docBlock->getTagsByName('param');
+                foreach ($paramTags as $paramTag) {
+                    if (! $paramTag instanceof Param) {
+                        continue;
+                    }
+
+                    if ($paramTag->getVariableName() === $refProperty->getName()) {
+                        return $paramTag->getType();
+                    }
+                }
+            }
+
             return null;
         }
 
