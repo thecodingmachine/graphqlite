@@ -46,9 +46,6 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertNotInstanceOf(NonNull::class, $fields['bar']->getType());
     }
 
-    /**
-     * @requires PHP >= 7.4
-     */
     public function testInputConfiguredCorrectlyWithTypedProperties(): void
     {
         $input = new InputType(TypedFooBar::class, 'TypedFooBarInput', 'Test', false, $this->getFieldsBuilder());

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures80;
+namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use TheCodingMachine\GraphQLite\Annotations as GraphQLite;
 
