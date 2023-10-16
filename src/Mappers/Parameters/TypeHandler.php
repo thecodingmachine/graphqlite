@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\Fqsen;
@@ -137,11 +138,7 @@ class TypeHandler implements ParameterHandlerInterface
                 $docBlock = $this->cachedDocBlockFactory->getDocBlock($refConstructor);
                 $paramTags = $docBlock->getTagsByName('param');
                 foreach ($paramTags as $paramTag) {
-                    if (! method_exists($paramTag, 'getVariableName')) {
-                        continue;
-                    }
-
-                    if (! method_exists($paramTag, 'getType')) {
+                    if (! $paramTag instanceof Param) {
                         continue;
                     }
 
