@@ -356,6 +356,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $topRootTypeMapper
         );
 
+        // Annotation support - deprecated
         $rootTypeMapper = new MyCLabsEnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
@@ -363,14 +364,12 @@ abstract class AbstractQueryProviderTest extends TestCase
             []
         );
 
-        if (interface_exists(UnitEnum::class)) {
-            $rootTypeMapper = new EnumTypeMapper(
-                $rootTypeMapper,
-                $this->getAnnotationReader(),
-                $arrayAdapter,
-                []
-            );
-        }
+        $rootTypeMapper = new EnumTypeMapper(
+            $rootTypeMapper,
+            $this->getAnnotationReader(),
+            $arrayAdapter,
+            []
+        );
 
         $rootTypeMapper = new CompoundTypeMapper(
             $rootTypeMapper,

@@ -70,8 +70,8 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures80\PropertyPromotionInputType;
-use TheCodingMachine\GraphQLite\Fixtures80\PropertyPromotionInputTypeWithoutGenericDoc;
+use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputType;
+use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\VoidType;
 
@@ -203,8 +203,6 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     /**
      * Tests that the fields builder will fail when a parameter is missing it's generic docblock
      * definition, when required - an array, for instance, or could be a collection (List types)
-     *
-     * @requires PHP >= 8.0
      */
     public function testTypeMissingForPropertyPromotionWithoutGenericDoc(): void
     {
@@ -221,8 +219,6 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
     /**
      * Tests that the fields builder will properly build an input type using property promotion
      * with the generic docblock defined on the constructor and not the property directly.
-     *
-     * @requires PHP >= 8.0
      */
     public function testTypeInDocBlockWithPropertyPromotion(): void
     {

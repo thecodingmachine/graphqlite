@@ -11,7 +11,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
-use TheCodingMachine\GraphQLite\Fixtures80\UnionOutputType;
+use TheCodingMachine\GraphQLite\Fixtures\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
@@ -39,9 +39,6 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
-    /**
-     * @requires PHP >= 8.0
-     */
     public function testMapObjectUnionWorks(): void
     {
         $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
@@ -66,9 +63,7 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
-    /**
-     * @requires PHP >= 8.0
-     */
+
     public function testMapObjectNullableUnionWorks(): void
     {
         $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
