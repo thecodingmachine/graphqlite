@@ -5,6 +5,7 @@
 /phpunit.xml
 /.php_cs/cache
 /.idea
+/.vscode
 
 node_modules
 
