@@ -175,24 +175,6 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals(200, $result->getBar());
     }
 
-    /**
-     * @group PR-466
-     */
-    public function testConstructorHydrationFailingWithMiddlewareAnnotations(): void
-    {
-        $this->expectException(IncompatibleAnnotationsException::class);
-
-        $input = new InputType(
-            TestConstructorAndPropertiesInvalid::class,
-            'TestConstructorAndPropertiesInvalidInput',
-            null,
-            false,
-            $this->getFieldsBuilder(),
-        );
-        $input->freeze();
-        $fields = $input->getFields();
-    }
-
     public function testFailsResolvingFieldWithoutRequiredConstructParam(): void
     {
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
@@ -202,7 +184,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
         $this->expectException(FailedResolvingInputType::class);
-        $this->expectExceptionMessage("Parameter 'foo' is missing for class 'TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar' constructor. It should be mapped as required field.");
+        $this->expectExceptionMessage("TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar::__construct(): Argument #1 (\$foo) not passed. It should be mapped as required field.");
 
         $input->resolve(null, $args, [], $resolveInfo);
     }

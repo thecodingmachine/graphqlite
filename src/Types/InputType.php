@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Types;
 
+use ArgumentCountError;
 use GraphQL\Type\Definition\ResolveInfo;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
@@ -66,6 +67,34 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     /** @param array<string, mixed> $args */
     public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $resolveInfo): object
     {
+        // Sometimes developers may wish to pull the source from somewhere (like a model from a database)
+        // instead of actually creating a new instance. So if given, we'll use that.
+        $source ??= $this->createInstance($this->makeConstructorArgs($source, $args, $context, $resolveInfo));
+
+        foreach ($this->inputFields as $inputField) {
+            $name = $inputField->name;
+            if (! array_key_exists($name, $args)) {
+                continue;
+            }
+
+            $resolve = $inputField->getResolve();
+            $resolve($source, $args, $context, $resolveInfo);
+        }
+
+        if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
+            $this->inputTypeValidator->validate($source);
+        }
+
+        return $source;
+    }
+
+    public function decorate(callable $decorator): void
+    {
+        throw FailedResolvingInputType::createForDecorator($this->className);
+    }
+
+    private function makeConstructorArgs(object|null $source, array $args, mixed $context, ResolveInfo $resolveInfo): array
+    {
         $constructorArgs = [];
         foreach ($this->constructorInputFields as $constructorInputField) {
             $name = $constructorInputField->name;
@@ -75,31 +104,12 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
                 continue;
             }
 
-            $constructorArgs[$name] = $resolve(null, $args, $context, $resolveInfo);
+            // Although $source will most likely be either `null` or unused by the resolver, we'll still
+            // pass it in there in case the developer does want to use a source somehow.
+            $constructorArgs[$name] = $resolve($source, $args, $context, $resolveInfo);
         }
 
-        $instance = $this->createInstance($constructorArgs);
-
-        foreach ($this->inputFields as $inputField) {
-            $name = $inputField->name;
-            if (! array_key_exists($name, $args)) {
-                continue;
-            }
-
-            $resolve = $inputField->getResolve();
-            $resolve($instance, $args, $context, $resolveInfo);
-        }
-
-        if ($this->inputTypeValidator && $this->inputTypeValidator->isEnabled()) {
-            $this->inputTypeValidator->validate($instance);
-        }
-
-        return $instance;
-    }
-
-    public function decorate(callable $decorator): void
-    {
-        throw FailedResolvingInputType::createForDecorator($this->className);
+        return $constructorArgs;
     }
 
     /**
@@ -110,23 +120,13 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     private function createInstance(array $values): object
     {
         $refClass = new ReflectionClass($this->className);
-        $constructor = $refClass->getConstructor();
-        $constructorParameters = $constructor ? $constructor->getParameters() : [];
 
-        $parameters = [];
-        foreach ($constructorParameters as $parameter) {
-            $name = $parameter->getName();
-            if (! array_key_exists($name, $values)) {
-                if (! $parameter->isDefaultValueAvailable()) {
-                    throw FailedResolvingInputType::createForMissingConstructorParameter($refClass->getName(), $name);
-                }
-
-                $values[$name] = $parameter->getDefaultValue();
-            }
-
-            $parameters[] = $values[$name];
+        try {
+            // This is the same as named parameters syntax, meaning default values are automatically used
+            // and any missing properties without default values will throw a fatal error.
+            return $refClass->newInstance(...$values);
+        } catch (ArgumentCountError $e) {
+            throw FailedResolvingInputType::createForMissingConstructorParameter($e->getMessage());
         }
-
-        return $refClass->newInstanceArgs($parameters);
     }
 }

@@ -21,6 +21,19 @@ final class MagicPropertyResolver implements ResolverInterface
     ) {
     }
 
+    /**
+     * @return class-string
+     */
+    public function className(): string
+    {
+        return $this->className;
+    }
+
+    public function propertyName(): string
+    {
+        return $this->propertyName;
+    }
+
     public function executionSource(object|null $source): object
     {
         if ($source === null) {

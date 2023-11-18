@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
@@ -15,10 +16,14 @@ use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 final class SourceInputPropertyResolver implements ResolverInterface
 {
     public function __construct(
-        private readonly string $className,
-        private readonly string $propertyName,
+        private readonly ReflectionProperty $propertyReflection,
     )
     {
+    }
+
+    public function propertyReflection(): ReflectionProperty
+    {
+        return $this->propertyReflection;
     }
 
     public function executionSource(object|null $source): object
@@ -36,13 +41,13 @@ final class SourceInputPropertyResolver implements ResolverInterface
             throw new GraphQLRuntimeException('You must provide a source for SourceInputPropertyResolver.');
         }
 
-        PropertyAccessor::setValue($source, $this->propertyName, ...$args);
+        PropertyAccessor::setValue($source, $this->propertyReflection->getName(), ...$args);
 
         return $args[0];
     }
 
     public function toString(): string
     {
-        return $this->className . '::' . $this->propertyName;
+        return $this->propertyReflection->getDeclaringClass()->getName() . '::' . $this->propertyReflection->getName();
     }
 }
