@@ -69,7 +69,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
     {
         // Sometimes developers may wish to pull the source from somewhere (like a model from a database)
         // instead of actually creating a new instance. So if given, we'll use that.
-        $source ??= $this->createInstance($this->makeConstructorArgs($source, $args, $context, $resolveInfo));
+        $source = $this->createInstance($this->makeConstructorArgs($source, $args, $context, $resolveInfo));
 
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
