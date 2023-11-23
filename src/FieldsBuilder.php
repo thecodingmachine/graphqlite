@@ -396,7 +396,9 @@ class FieldsBuilder
                 $args = ['__graphqlite_prefectData' => $prefetchDataParameter, ...$args];
             }
 
-            $resolver = is_string($controller) ? new SourceMethodResolver($refMethod) : new ServiceResolver([$controller, $methodName]);
+            $resolver = is_string($controller) ?
+                new SourceMethodResolver($refMethod) :
+                new ServiceResolver([$controller, $methodName]);
 
             $fieldDescriptor = new QueryFieldDescriptor(
                 name: $name,
@@ -478,15 +480,16 @@ class FieldsBuilder
                 assert($type instanceof OutputType);
             }
 
+            $originalResolver = new SourcePropertyResolver($refProperty);
             $resolver = is_string($controller) ?
-                new SourcePropertyResolver($refProperty) :
-                new ServiceResolver(fn () => PropertyAccessor::getValue($controller, $refProperty->getName()));
+                $originalResolver :
+               fn () => PropertyAccessor::getValue($controller, $refProperty->getName());
 
             $fieldDescriptor = new QueryFieldDescriptor(
                 name: $name,
                 type: $type,
                 resolver: $resolver,
-                originalResolver: $resolver,
+                originalResolver: $originalResolver,
                 injectSource: false,
                 comment: trim($description),
                 deprecationReason: $this->getDeprecationReason($docBlock),

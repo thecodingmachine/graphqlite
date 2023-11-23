@@ -93,6 +93,11 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         throw FailedResolvingInputType::createForDecorator($this->className);
     }
 
+    /**
+     * @param array<string, mixed> $args
+     *
+     * @return array<string, mixed>
+     */
     private function makeConstructorArgs(object|null $source, array $args, mixed $context, ResolveInfo $resolveInfo): array
     {
         $constructorArgs = [];
@@ -126,7 +131,7 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             // and any missing properties without default values will throw a fatal error.
             return $refClass->newInstance(...$values);
         } catch (ArgumentCountError $e) {
-            throw FailedResolvingInputType::createForMissingConstructorParameter($e->getMessage());
+            throw FailedResolvingInputType::createForMissingConstructorParameter($e);
         }
     }
 }

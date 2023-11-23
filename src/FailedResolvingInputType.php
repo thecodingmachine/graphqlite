@@ -10,9 +10,9 @@ use function sprintf;
 
 class FailedResolvingInputType extends RuntimeException
 {
-    public static function createForMissingConstructorParameter(string $original): self
+    public static function createForMissingConstructorParameter(\ArgumentCountError $original): self
     {
-        return new self(sprintf("%s. It should be mapped as required field.", $original));
+        return new self(sprintf("%s. It should be mapped as required field.", $original->getMessage()), previous: $original);
     }
 
     public static function createForDecorator(string $class): self

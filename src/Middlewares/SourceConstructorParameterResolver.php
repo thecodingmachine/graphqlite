@@ -11,6 +11,9 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
  */
 class SourceConstructorParameterResolver implements ResolverInterface
 {
+    /**
+     * @param class-string $className
+     */
     public function __construct(
         private readonly string $className,
         private readonly string $parameterName,
@@ -32,6 +35,10 @@ class SourceConstructorParameterResolver implements ResolverInterface
 
     public function executionSource(object|null $source): object
     {
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for SourceConstructorParameterResolver.');
+        }
+
         return $source;
     }
 

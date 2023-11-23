@@ -15,6 +15,9 @@ use function method_exists;
  */
 final class MagicPropertyResolver implements ResolverInterface
 {
+    /**
+     * @param class-string $className
+     */
     public function __construct(
         private readonly string $className,
         private readonly string $propertyName,
