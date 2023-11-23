@@ -33,12 +33,8 @@ class SourceConstructorParameterResolver implements ResolverInterface
         return $this->parameterName;
     }
 
-    public function executionSource(object|null $source): object
+    public function executionSource(object|null $source): object|null
     {
-        if ($source === null) {
-            throw new GraphQLRuntimeException('You must provide a source for SourceConstructorParameterResolver.');
-        }
-
         return $source;
     }
 

@@ -26,12 +26,8 @@ final class SourceInputPropertyResolver implements ResolverInterface
         return $this->propertyReflection;
     }
 
-    public function executionSource(object|null $source): object
+    public function executionSource(object|null $source): object|null
     {
-        if ($source === null) {
-            throw new GraphQLRuntimeException('You must provide a source for SourceInputPropertyResolver.');
-        }
-
         return $source;
     }
 

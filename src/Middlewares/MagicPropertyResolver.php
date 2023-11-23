@@ -37,12 +37,8 @@ final class MagicPropertyResolver implements ResolverInterface
         return $this->propertyName;
     }
 
-    public function executionSource(object|null $source): object
+    public function executionSource(object|null $source): object|null
     {
-        if ($source === null) {
-            throw new GraphQLRuntimeException('You must provide a source for MagicPropertyResolver.');
-        }
-
         return $source;
     }
 

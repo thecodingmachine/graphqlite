@@ -17,7 +17,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndProperties;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndPropertiesInvalid;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorPromotedProperties;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
@@ -172,6 +172,36 @@ class InputTypeTest extends AbstractQueryProviderTest
 
         $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
         $this->assertEquals('Foo', $result->getFoo());
+        $this->assertEquals(200, $result->getBar());
+    }
+
+    public function testResolvesCorrectlyWithConstructorPromotedProperties(): void
+    {
+        $input = new InputType(
+            TestConstructorPromotedProperties::class,
+            'TestConstructorPromotedPropertiesInput',
+            null,
+            false,
+            $this->getFieldsBuilder(),
+        );
+        $input->freeze();
+        $fields = $input->getFields();
+
+        $date = "2022-05-02T04:42:30Z";
+
+        $args = [
+            'date' => $date,
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        /** @var TestConstructorPromotedProperties $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
+        $this->assertEquals('Foo', $result->foo);
         $this->assertEquals(200, $result->getBar());
     }
 

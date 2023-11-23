@@ -2,39 +2,24 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 
-use Exception;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 
-/**
- * @Input()
- */
-class TestConstructorAndPropertiesInvalid
+#[Input]
+class TestConstructorPromotedProperties
 {
+    #[Field]
+    private int $bar;
 
-    /**
-     * @Field()
-     */
-    private \DateTimeImmutable $date;
-
-    /**
-     * @Field()
-     * @Right("INVALID_MIDDLEWARE")
-     * @var string
-     */
-    private $foo;
-
-    /**
-     * @Field()
-     * @var int
-     */
-    private $bar;
-
-    public function __construct(\DateTimeImmutable $date, string $foo)
+    public function __construct(
+        #[Field]
+        private readonly \DateTimeImmutable $date,
+        #[Field]
+        #[Right('FOOOOO')]
+        public string $foo
+    )
     {
-        $this->date = $date;
-        $this->foo = $foo;
     }
 
     public function getDate(): \DateTimeImmutable
@@ -45,11 +30,6 @@ class TestConstructorAndPropertiesInvalid
     public function setFoo(string $foo): void
     {
         throw new \RuntimeException("This should not be called");
-    }
-
-    public function getFoo(): string
-    {
-        return $this->foo;
     }
 
     public function setBar(int $bar): void
