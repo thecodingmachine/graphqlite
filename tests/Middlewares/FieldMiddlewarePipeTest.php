@@ -19,9 +19,12 @@ class FieldMiddlewarePipeTest extends TestCase
             }
         };
 
+        $resolver = fn () => self::fail('Should not be called.');
         $descriptor = new QueryFieldDescriptor(
             name: 'foo',
             type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
         );
         $middlewarePipe = new FieldMiddlewarePipe();
 
@@ -38,6 +41,8 @@ class FieldMiddlewarePipeTest extends TestCase
         $descriptor = new QueryFieldDescriptor(
             name: 'bar',
             type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
         );
 
         $definition = $middlewarePipe->process($descriptor, $finalHandler);

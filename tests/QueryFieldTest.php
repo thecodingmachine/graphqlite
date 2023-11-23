@@ -8,6 +8,7 @@ use GraphQL\Error\Error;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
@@ -19,7 +20,7 @@ class QueryFieldTest extends TestCase
 {
     public function testExceptionsHandling(): void
     {
-        $sourceResolver = new SourceMethodResolver(TestObject::class, 'getTest');
+        $sourceResolver = new SourceMethodResolver(new ReflectionMethod(TestObject::class, 'getTest'));
         $queryField = new QueryField('foo', Type::string(), [
             new class implements ParameterInterface {
                 public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed

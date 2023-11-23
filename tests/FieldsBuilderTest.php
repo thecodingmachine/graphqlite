@@ -777,7 +777,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $resolve = $query->resolveFn;
 
         $this->expectException(BadExpressionInSecurityException::class);
-        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
+        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity()": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
     }
 
