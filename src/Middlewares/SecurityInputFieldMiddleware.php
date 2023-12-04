@@ -73,7 +73,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, object $source): array
+    private function getVariables(array $args, array $parameters, object|null $source): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier

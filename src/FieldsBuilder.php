@@ -38,7 +38,13 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceConstructorParameterResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
@@ -370,14 +376,6 @@ class FieldsBuilder
                 $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
             }
 
-            $fieldDescriptor = new QueryFieldDescriptor(
-                name: $name,
-                type: $type,
-                comment: trim($description),
-                deprecationReason: $this->getDeprecationReason($docBlockObj),
-                refMethod: $refMethod,
-            );
-
             $parameters = $refMethod->getParameters();
             if ($injectSource === true) {
                 $firstParameter = array_shift($parameters);
@@ -398,19 +396,21 @@ class FieldsBuilder
                 $args = ['__graphqlite_prefectData' => $prefetchDataParameter, ...$args];
             }
 
-            $fieldDescriptor = $fieldDescriptor->withParameters($args);
+            $resolver = is_string($controller) ?
+                new SourceMethodResolver($refMethod) :
+                new ServiceResolver([$controller, $methodName]);
 
-            if (is_string($controller)) {
-                $fieldDescriptor = $fieldDescriptor->withTargetMethodOnSource($refMethod->getDeclaringClass()->getName(), $methodName);
-            } else {
-                $callable = [$controller, $methodName];
-                assert(is_callable($callable));
-                $fieldDescriptor = $fieldDescriptor->withCallable($callable);
-            }
-
-            $fieldDescriptor = $fieldDescriptor
-                ->withInjectSource($injectSource)
-                ->withMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
+            $fieldDescriptor = new QueryFieldDescriptor(
+                name: $name,
+                type: $type,
+                resolver: $resolver,
+                originalResolver: $resolver,
+                parameters: $args,
+                injectSource: $injectSource,
+                comment: trim($description),
+                deprecationReason: $this->getDeprecationReason($docBlockObj),
+                middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refMethod),
+            );
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
@@ -480,25 +480,21 @@ class FieldsBuilder
                 assert($type instanceof OutputType);
             }
 
+            $originalResolver = new SourcePropertyResolver($refProperty);
+            $resolver = is_string($controller) ?
+                $originalResolver :
+               fn () => PropertyAccessor::getValue($controller, $refProperty->getName());
+
             $fieldDescriptor = new QueryFieldDescriptor(
                 name: $name,
                 type: $type,
+                resolver: $resolver,
+                originalResolver: $originalResolver,
+                injectSource: false,
                 comment: trim($description),
                 deprecationReason: $this->getDeprecationReason($docBlock),
-                refProperty: $refProperty,
+                middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refProperty),
             );
-
-            if (is_string($controller)) {
-                $fieldDescriptor = $fieldDescriptor->withTargetPropertyOnSource($refProperty->getDeclaringClass()->getName(), $refProperty->getName());
-            } else {
-                $fieldDescriptor = $fieldDescriptor->withCallable(static function () use ($controller, $refProperty) {
-                    return PropertyAccessor::getValue($controller, $refProperty->getName());
-                });
-            }
-
-            $fieldDescriptor = $fieldDescriptor
-                ->withInjectSource(false)
-                ->withMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refProperty));
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
                 public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
@@ -597,15 +593,16 @@ class FieldsBuilder
                     $type = $this->typeMapper->mapReturnType($refMethod, $docBlockObj);
                 }
 
+                $resolver = new SourceMethodResolver($refMethod);
+
                 $fieldDescriptor = new QueryFieldDescriptor(
                     name: $sourceField->getName(),
                     type: $type,
+                    resolver: $resolver,
+                    originalResolver: $resolver,
                     parameters: $args,
-                    targetClass: $refMethod->getDeclaringClass()->getName(),
-                    targetMethodOnSource: $methodName,
                     comment: $description,
                     deprecationReason: $deprecationReason ?? null,
-                    refMethod: $refMethod,
                 );
             } else {
                 $outputType = $sourceField->getOutputType();
@@ -619,11 +616,13 @@ class FieldsBuilder
                     $type = $this->resolvePhpType($phpTypeStr, $refClass, $magicGefRefMethod);
                 }
 
+                $resolver = new MagicPropertyResolver($refClass->getName(), $sourceField->getSourceName() ?? $sourceField->getName());
+
                 $fieldDescriptor = new QueryFieldDescriptor(
                     name: $sourceField->getName(),
                     type: $type,
-                    targetClass: $refClass->getName(),
-                    magicProperty: $sourceField->getSourceName() ?? $sourceField->getName(),
+                    resolver: $resolver,
+                    originalResolver: $resolver,
                     comment: $sourceField->getDescription(),
                 );
             }
@@ -889,26 +888,21 @@ class FieldsBuilder
 
             assert($type instanceof InputType);
 
+            $resolver = new SourceMethodResolver($refMethod);
+
             $inputFieldDescriptor = new InputFieldDescriptor(
                 name: $name,
                 type: $type,
+                resolver: $resolver,
+                originalResolver: $resolver,
                 parameters: $args,
+                injectSource: $injectSource,
                 comment: trim($description),
-                refMethod: $refMethod,
+                middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refMethod),
                 isUpdate: $isUpdate,
+                hasDefaultValue: $isUpdate,
+                defaultValue: $args[$name]->getDefaultValue()
             );
-
-            $inputFieldDescriptor = $inputFieldDescriptor
-                ->withHasDefaultValue($isUpdate)
-                ->withDefaultValue($args[$name]->getDefaultValue());
-            $constructerParameters = $this->getClassConstructParameterNames($refClass);
-            if (!in_array($name, $constructerParameters)) {
-                $inputFieldDescriptor = $inputFieldDescriptor->withTargetMethodOnSource($refMethod->getDeclaringClass()->getName(), $methodName);
-            }
-
-            $inputFieldDescriptor = $inputFieldDescriptor
-                ->withInjectSource($injectSource)
-                ->withMiddlewareAnnotations($this->annotationReader->getMiddlewareAnnotations($refMethod));
 
             $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
                 public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
@@ -965,53 +959,38 @@ class FieldsBuilder
                 $description = $inputProperty->getDescription();
             }
 
-            if (in_array($name, $constructerParameters)) {
-                $middlewareAnnotations = $this->annotationReader->getPropertyAnnotations($refProperty, MiddlewareAnnotationInterface::class);
-                if ($middlewareAnnotations !== []) {
-                    throw IncompatibleAnnotationsException::middlewareAnnotationsUnsupported();
-                }
-                // constructor hydrated
-                $field = new InputField(
-                    $name,
-                    $inputProperty->getType(),
-                    [$inputProperty->getName() => $inputProperty],
-                    null,
-                    null,
-                    trim($description),
-                    $isUpdate,
-                    $inputProperty->hasDefaultValue(),
-                    $inputProperty->getDefaultValue(),
-                );
-            } else {
-                $type = $inputProperty->getType();
-                if (!$inputType && $isUpdate && $type instanceof NonNull) {
-                    $type = $type->getWrappedType();
-                }
-                assert($type instanceof InputType);
-
-                // setters and properties
-                $inputFieldDescriptor = new InputFieldDescriptor(
-                    name: $inputProperty->getName(),
-                    type: $type,
-                    parameters: [$inputProperty->getName() => $inputProperty],
-                    targetClass: $refProperty->getDeclaringClass()->getName(),
-                    targetPropertyOnSource: $refProperty->getName(),
-                    injectSource: false,
-                    comment: trim($description),
-                    middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refProperty),
-                    refProperty: $refProperty,
-                    isUpdate: $isUpdate,
-                    hasDefaultValue: $inputProperty->hasDefaultValue(),
-                    defaultValue: $inputProperty->getDefaultValue(),
-                );
-
-                $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                    public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
-                    {
-                        return InputField::fromFieldDescriptor($inputFieldDescriptor);
-                    }
-                });
+            $type = $inputProperty->getType();
+            if (!$inputType && $isUpdate && $type instanceof NonNull) {
+                $type = $type->getWrappedType();
             }
+            assert($type instanceof InputType);
+            $forConstructorHydration = in_array($name, $constructerParameters);
+            $resolver = $forConstructorHydration ?
+                new SourceConstructorParameterResolver($refProperty->getDeclaringClass()->getName(), $refProperty->getName()) :
+                new SourceInputPropertyResolver($refProperty);
+
+            // setters and properties
+            $inputFieldDescriptor = new InputFieldDescriptor(
+                name: $inputProperty->getName(),
+                type: $type,
+                resolver: $resolver,
+                originalResolver: $resolver,
+                parameters: [$inputProperty->getName() => $inputProperty],
+                injectSource: false,
+                forConstructorHydration: $forConstructorHydration,
+                comment: trim($description),
+                middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refProperty),
+                isUpdate: $isUpdate,
+                hasDefaultValue: $inputProperty->hasDefaultValue(),
+                defaultValue: $inputProperty->getDefaultValue(),
+            );
+
+            $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
+                public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
+                {
+                    return InputField::fromFieldDescriptor($inputFieldDescriptor);
+                }
+            });
 
             if ($field === null) {
                 continue;

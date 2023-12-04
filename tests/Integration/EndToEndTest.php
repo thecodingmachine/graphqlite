@@ -1832,6 +1832,46 @@ class EndToEndTest extends IntegrationTestCase
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
+    public function testEndToEndInputConstructor(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+        mutation {
+            updateArticle(input: {
+                magazine: "Test"
+            }) {
+                magazine
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Test', $data['updateArticle']['magazine']);
+        $queryString = '
+        mutation {
+            updateArticle(input: {
+                magazine: "NYTimes"
+            }) {
+                magazine
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
     public function testEndToEndSetterWithSecurity(): void
     {
         $container = $this->createContainer([

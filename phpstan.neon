@@ -17,10 +17,7 @@ parameters:
         - "#Parameter .* of class ReflectionMethod constructor expects string(\\|null)?, object\\|string given.#"
         - "#PHPDoc tag @throws with type Psr\\\\SimpleCache\\\\InvalidArgumentException is not subtype of Throwable#"
         - '#Variable \$context might not be defined.#'
-        # TODO: fix these in the resolver refactor PR that follows; it'll be initialized in the constructor
-        - '#Class TheCodingMachine\\GraphQLite\\(QueryFieldDescriptor|InputFieldDescriptor) has an uninitialized readonly property \$(originalResolver|resolver)\. Assign it in the constructor.#'
-        - '#Readonly property TheCodingMachine\\GraphQLite\\(QueryFieldDescriptor|InputFieldDescriptor)::\$(originalResolver|resolver) is assigned outside of the constructor\.#'
-        - '#Property TheCodingMachine\\GraphQLite\\(QueryFieldDescriptor|InputFieldDescriptor)::\$resolver \(callable\) in isset\(\) is not nullable\.#'
+        - '#Parameter \#1 \$callable of class TheCodingMachine\\GraphQLite\\Middlewares\\ServiceResolver constructor expects array{object, string}&callable\(\): mixed, array{object, non-empty-string} given.#'
         -
            message: '#Parameter .* of class GraphQL\\Error\\Error constructor expects#'
            path: src/Exceptions/WebonyxErrorHandler.php

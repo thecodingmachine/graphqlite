@@ -102,14 +102,15 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
      */
     private function stubDescriptor(array $annotations): QueryFieldDescriptor
     {
-        $descriptor = new QueryFieldDescriptor(
+        $resolver = fn () => self::fail('Should not be called.');
+
+        return new QueryFieldDescriptor(
             name: 'foo',
             type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
             middlewareAnnotations: new MiddlewareAnnotations($annotations),
         );
-        $descriptor = $descriptor->withResolver(fn () => self::fail('Should not be called.'));
-
-        return $descriptor;
     }
 
     private function stubFieldHandler(): FieldHandlerInterface

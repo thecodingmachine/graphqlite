@@ -15,18 +15,30 @@ use function method_exists;
  */
 final class MagicPropertyResolver implements ResolverInterface
 {
+    /**
+     * @param class-string $className
+     */
     public function __construct(
         private readonly string $className,
         private readonly string $propertyName,
     ) {
     }
 
-    public function executionSource(object|null $source): object
+    /**
+     * @return class-string
+     */
+    public function className(): string
     {
-        if ($source === null) {
-            throw new GraphQLRuntimeException('You must provide a source for MagicPropertyResolver.');
-        }
+        return $this->className;
+    }
 
+    public function propertyName(): string
+    {
+        return $this->propertyName;
+    }
+
+    public function executionSource(object|null $source): object|null
+    {
         return $source;
     }
 

@@ -17,7 +17,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndProperties;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndPropertiesInvalid;
+use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorPromotedProperties;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
@@ -175,22 +175,34 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals(200, $result->getBar());
     }
 
-    /**
-     * @group PR-466
-     */
-    public function testConstructorHydrationFailingWithMiddlewareAnnotations(): void
+    public function testResolvesCorrectlyWithConstructorPromotedProperties(): void
     {
-        $this->expectException(IncompatibleAnnotationsException::class);
-
         $input = new InputType(
-            TestConstructorAndPropertiesInvalid::class,
-            'TestConstructorAndPropertiesInvalidInput',
+            TestConstructorPromotedProperties::class,
+            'TestConstructorPromotedPropertiesInput',
             null,
             false,
             $this->getFieldsBuilder(),
         );
         $input->freeze();
         $fields = $input->getFields();
+
+        $date = "2022-05-02T04:42:30Z";
+
+        $args = [
+            'date' => $date,
+            'foo' => 'Foo',
+            'bar' => 200,
+        ];
+
+        $resolveInfo = $this->createMock(ResolveInfo::class);
+
+        /** @var TestConstructorPromotedProperties $result */
+        $result = $input->resolve(null, $args, [], $resolveInfo);
+
+        $this->assertEquals(new DateTime("2022-05-02T04:42:30Z"), $result->getDate());
+        $this->assertEquals('Foo', $result->foo);
+        $this->assertEquals(200, $result->getBar());
     }
 
     public function testFailsResolvingFieldWithoutRequiredConstructParam(): void
@@ -202,7 +214,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
         $this->expectException(FailedResolvingInputType::class);
-        $this->expectExceptionMessage("Parameter 'foo' is missing for class 'TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar' constructor. It should be mapped as required field.");
+        $this->expectExceptionMessage("TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar::__construct(): Argument #1 (\$foo) not passed. It should be mapped as required field.");
 
         $input->resolve(null, $args, [], $resolveInfo);
     }

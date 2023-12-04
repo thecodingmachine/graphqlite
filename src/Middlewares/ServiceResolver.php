@@ -22,6 +22,12 @@ final class ServiceResolver implements ResolverInterface
         $this->callable = $callable;
     }
 
+    /** @return callable&array{0:object, 1:string} */
+    public function callable(): callable
+    {
+        return $this->callable;
+    }
+
     public function executionSource(object|null $source): object
     {
         return $this->callable[0];
