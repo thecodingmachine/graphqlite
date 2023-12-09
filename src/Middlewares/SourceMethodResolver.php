@@ -17,18 +17,18 @@ use function is_callable;
 final class SourceMethodResolver implements ResolverInterface
 {
     public function __construct(
-        private readonly string $className,
-        private readonly string $methodName,
+        private readonly \ReflectionMethod $methodReflection,
     )
     {
     }
 
-    public function executionSource(object|null $source): object
+    public function methodReflection(): \ReflectionMethod
     {
-        if ($source === null) {
-            throw new GraphQLRuntimeException('You must provide a source for SourceMethodResolver.');
-        }
+        return $this->methodReflection;
+    }
 
+    public function executionSource(object|null $source): object|null
+    {
         return $source;
     }
 
@@ -38,7 +38,7 @@ final class SourceMethodResolver implements ResolverInterface
             throw new GraphQLRuntimeException('You must provide a source for SourceMethodResolver.');
         }
 
-        $callable = [$source, $this->methodName];
+        $callable = [$source, $this->methodReflection->getName()];
         assert(is_callable($callable));
 
         return $callable(...$args);
@@ -46,6 +46,6 @@ final class SourceMethodResolver implements ResolverInterface
 
     public function toString(): string
     {
-        return $this->className . '::' . $this->methodName . '()';
+        return $this->methodReflection->getDeclaringClass()->getName() . '::' . $this->methodReflection->getName() . '()';
     }
 }

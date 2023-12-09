@@ -19,13 +19,15 @@ class InputFieldMiddlewarePipeTest extends TestCase
             }
         };
 
+        $resolver = static function (){
+            return null;
+        };
         $middlewarePipe = new InputFieldMiddlewarePipe();
         $inputFieldDescriptor = new InputFieldDescriptor(
             name: 'foo',
             type: Type::string(),
-            callable: static function (){
-                return null;
-            }
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
         );
         $definition = $middlewarePipe->process($inputFieldDescriptor, $finalHandler);
         $this->assertSame('foo', $definition->name);

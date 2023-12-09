@@ -7,6 +7,7 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Article;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\UpdateArticleInput;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
 
 class ArticleController
@@ -32,6 +33,15 @@ class ArticleController
      */
     public function createArticle(Article $article): Article
     {
+        return $article;
+    }
+
+    #[Mutation]
+    public function updateArticle(UpdateArticleInput $input): Article
+    {
+        $article = new Article('test');
+        $article->magazine = $input->magazine;
+
         return $article;
     }
 }

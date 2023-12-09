@@ -32,16 +32,25 @@ final class InputField extends InputObjectField
     /** @var callable */
     private $resolve;
 
-    private bool $forConstructorHydration = false;
-
     /**
      * @param (Type&InputType) $type
      * @param array<string, ParameterInterface> $arguments Indexed by argument name.
      * @param mixed|null $defaultValue the default value set for this field
      * @param array{defaultValue?: mixed,description?: string|null,astNode?: InputValueDefinitionNode|null}|null $additionalConfig
      */
-    public function __construct(string $name, InputType $type, array $arguments, ResolverInterface|null $originalResolver, callable|null $resolver, string|null $comment, bool $isUpdate, bool $hasDefaultValue, mixed $defaultValue, array|null $additionalConfig = null)
-    {
+    public function __construct(
+        string $name,
+        InputType $type,
+        array $arguments,
+        ResolverInterface $originalResolver,
+        callable $resolver,
+        private bool $forConstructorHydration,
+        string|null $comment,
+        bool $isUpdate,
+        bool $hasDefaultValue,
+        mixed $defaultValue,
+        array|null $additionalConfig = null
+    ) {
         $config = [
             'name' => $name,
             'type' => $type,
@@ -52,28 +61,27 @@ final class InputField extends InputObjectField
             $config['defaultValue'] = $defaultValue;
         }
 
-        if ($originalResolver !== null && $resolver !== null) {
-            $this->resolve = function (object $source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+        $this->resolve = function (object|null $source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
+            if ($this->forConstructorHydration) {
+                $toPassArgs = [
+                    $arguments[$this->name]->resolve($source, $args, $context, $info)
+                ];
+            } else {
                 $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
-                $result = $resolver($source, ...$toPassArgs);
+            }
 
-                try {
-                    $this->assertInputType($result);
-                } catch (TypeMismatchRuntimeException $e) {
-                    $e->addInfo($this->name, $originalResolver->toString());
-                    throw $e;
-                }
+            $result = $resolver($source, ...$toPassArgs);
 
-                return $result;
-            };
-        } else {
-            $this->forConstructorHydration = true;
-            $this->resolve = function (object|null $source, array $args, $context, ResolveInfo $info) use ($arguments) {
-                $result = $arguments[$this->name]->resolve($source, $args, $context, $info);
+            try {
                 $this->assertInputType($result);
-                return $result;
-            };
-        }
+            } catch (TypeMismatchRuntimeException $e) {
+                $e->addInfo($this->name, $originalResolver->toString());
+                throw $e;
+            }
+
+            return $result;
+        };
+
         if ($additionalConfig !== null) {
             if (isset($additionalConfig['astNode'])) {
                 $config['astNode'] = $additionalConfig['astNode'];
@@ -126,6 +134,7 @@ final class InputField extends InputObjectField
             $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
+            $fieldDescriptor->isForConstructorHydration(),
             $fieldDescriptor->getComment(),
             $fieldDescriptor->isUpdate(),
             $fieldDescriptor->hasDefaultValue(),

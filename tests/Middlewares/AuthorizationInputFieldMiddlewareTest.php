@@ -84,16 +84,15 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
      */
     private function stubDescriptor(array $annotations): InputFieldDescriptor
     {
-        $descriptor = new InputFieldDescriptor(
+        $resolver = fn () => self::fail('Should not be called.');
+
+        return new InputFieldDescriptor(
             name: 'foo',
             type: Type::string(),
-            targetClass: stdClass::class,
-            targetMethodOnSource: 'foo',
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
             middlewareAnnotations: new MiddlewareAnnotations($annotations),
         );
-        $descriptor = $descriptor->withResolver(fn () => self::fail('Should not be called.'));
-
-        return $descriptor;
     }
 
     private function stubFieldHandler(): InputFieldHandlerInterface
@@ -109,10 +108,11 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
                     ],
                     originalResolver: $inputFieldDescriptor->getOriginalResolver(),
                     resolver: $inputFieldDescriptor->getResolver(),
+                    forConstructorHydration: false,
                     comment: null,
                     isUpdate: false,
                     hasDefaultValue: false,
-                    defaultValue: null
+                    defaultValue: null,
                 );
             }
         };
