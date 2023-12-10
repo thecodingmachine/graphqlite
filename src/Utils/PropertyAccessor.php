@@ -22,17 +22,12 @@ class PropertyAccessor
      */
     public static function findGetter(string $class, string $propertyName): string|null
     {
-        $name = ucfirst($propertyName);
-
         foreach (['get', 'is'] as $prefix) {
-            $methodName = $prefix . $name;
+            $methodName = self::propertyToMethodName($prefix, $propertyName);
+
             if (self::isPublicMethod($class, $methodName)) {
                 return $methodName;
             }
-        }
-
-        if (method_exists($class, '__call')) {
-            return 'get' . $name;
         }
 
         return null;
@@ -43,10 +38,9 @@ class PropertyAccessor
      */
     public static function findSetter(string $class, string $propertyName): string|null
     {
-        $name = ucfirst($propertyName);
+        $methodName = self::propertyToMethodName('set', $propertyName);
 
-        $methodName = 'set' . $name;
-        if (self::isPublicMethod($class, $methodName) || method_exists($class, '__call')) {
+        if (self::isPublicMethod($class, $methodName)) {
             return $methodName;
         }
 
@@ -66,6 +60,12 @@ class PropertyAccessor
             return $object->$propertyName;
         }
 
+        if (method_exists($class, '__call')) {
+            $method = self::propertyToMethodName('get', $propertyName);
+
+            return $object->$method(...$args);
+        }
+
         throw AccessPropertyException::createForUnreadableProperty($class, $propertyName);
     }
 
@@ -81,6 +81,13 @@ class PropertyAccessor
 
         if (self::isPublicProperty($class, $propertyName)) {
             $instance->$propertyName = $value;
+            return;
+        }
+
+        if (method_exists($class, '__call')) {
+            $method = self::propertyToMethodName('set', $propertyName);
+
+            $instance->$method($value);
             return;
         }
 
@@ -116,5 +123,10 @@ class PropertyAccessor
         }
 
         return true;
+    }
+
+    private static function propertyToMethodName(string $prefix, string $propertyName): string
+    {
+        return $prefix . ucfirst($propertyName);
     }
 }
