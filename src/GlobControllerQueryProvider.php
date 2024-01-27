@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use function class_exists;
+use function interface_exists;
+use function is_array;
+use function str_replace;
 use GraphQL\Type\Definition\FieldDefinition;
 use InvalidArgumentException;
 use Mouf\Composer\ClassNameMapper;
@@ -16,15 +20,11 @@ use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-
-use function class_exists;
-use function interface_exists;
-use function is_array;
-use function str_replace;
+use TheCodingMachine\GraphQLite\Annotations\Subscription;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
- * Analyzes all classes and detects "Query" and "Mutation" annotations.
+ * Analyzes all classes and detects "Query", "Mutation", and "Subscription" annotations.
  *
  * Assumes that the container contains a class whose identifier is the same as the class name.
  */
@@ -53,14 +53,20 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     )
     {
         $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
-        $this->cacheContract = new Psr16Adapter($this->cache, str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace), $cacheTtl ?? 0);
+        $this->cacheContract = new Psr16Adapter(
+            $this->cache,
+            str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace),
+            $cacheTtl ?? 0,
+        );
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
     {
-        if ($this->aggregateControllerQueryProvider === null) {
-            $this->aggregateControllerQueryProvider = new AggregateControllerQueryProvider($this->getInstancesList(), $this->fieldsBuilder, $this->container);
-        }
+        $this->aggregateControllerQueryProvider ??= new AggregateControllerQueryProvider(
+            $this->getInstancesList(),
+            $this->fieldsBuilder,
+            $this->container,
+        );
 
         return $this->aggregateControllerQueryProvider;
     }
@@ -100,7 +106,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             if (! $refClass->isInstantiable()) {
                 continue;
             }
-            if (! $this->hasQueriesOrMutations($refClass)) {
+            if (! $this->hasOperations($refClass)) {
                 continue;
             }
             if (! $this->container->has($className)) {
@@ -114,7 +120,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     }
 
     /** @param ReflectionClass<object> $reflectionClass */
-    private function hasQueriesOrMutations(ReflectionClass $reflectionClass): bool
+    private function hasOperations(ReflectionClass $reflectionClass): bool
     {
         foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
             $queryAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Query::class);
@@ -123,6 +129,10 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             }
             $mutationAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Mutation::class);
             if ($mutationAnnotation !== null) {
+                return true;
+            }
+            $subscriptionAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Subscription::class);
+            if ($subscriptionAnnotation !== null) {
                 return true;
             }
         }
@@ -139,5 +149,11 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     public function getMutations(): array
     {
         return $this->getAggregateControllerQueryProvider()->getMutations();
+    }
+
+    /** @return array<string,FieldDefinition> */
+    public function getSubscriptions(): array
+    {
+        return $this->getAggregateControllerQueryProvider()->getSubscriptions();
     }
 }

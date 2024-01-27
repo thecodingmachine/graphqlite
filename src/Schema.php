@@ -20,13 +20,18 @@ use function assert;
  */
 class Schema extends \GraphQL\Type\Schema
 {
-    public function __construct(QueryProviderInterface $queryProvider, RecursiveTypeMapperInterface $recursiveTypeMapper, TypeResolver $typeResolver, RootTypeMapperInterface $rootTypeMapper, SchemaConfig|null $config = null)
-    {
+    public function __construct(
+        QueryProviderInterface $queryProvider,
+        RecursiveTypeMapperInterface $recursiveTypeMapper,
+        TypeResolver $typeResolver,
+        RootTypeMapperInterface $rootTypeMapper,
+        SchemaConfig|null $config = null,
+    ) {
         if ($config === null) {
             $config = SchemaConfig::create();
         }
 
-        $query    = new ObjectType([
+        $query = new ObjectType([
             'name' => 'Query',
             'fields' => static function () use ($queryProvider) {
                 $queries = $queryProvider->getQueries();
@@ -45,6 +50,7 @@ class Schema extends \GraphQL\Type\Schema
                 return $queries;
             },
         ]);
+
         $mutation = new ObjectType([
             'name' => 'Mutation',
             'fields' => static function () use ($queryProvider) {
@@ -65,14 +71,35 @@ class Schema extends \GraphQL\Type\Schema
             },
         ]);
 
+        $subscription = new ObjectType([
+            'name' => 'Subscription',
+            'fields' => static function () use ($queryProvider) {
+                $subscriptions = $queryProvider->getSubscriptions();
+                if (empty($subscriptions)) {
+                    return [
+                        'dummySubscription' => [
+                            'type' => Type::string(),
+                            'description' => 'A placeholder query used by thecodingmachine/graphqlite when there are no declared subscriptions.',
+                            'resolve' => static function () {
+                                return 'This is a placeholder subscription. Please create a subscription using the @Subscription annotation.';
+                            },
+                        ],
+                    ];
+                }
+
+                return $subscriptions;
+            },
+        ]);
+
         $config->setQuery($query);
         $config->setMutation($mutation);
+        $config->setSubscription($subscription);
 
         $config->setTypes(static function () use ($recursiveTypeMapper) {
             return $recursiveTypeMapper->getOutputTypes();
         });
 
-        $config->setTypeLoader(static function (string $name) use ($query, $mutation, $rootTypeMapper) {
+        $config->setTypeLoader(static function (string $name) use ($query, $mutation, $subscription, $rootTypeMapper) {
             // We need to find a type FROM a GraphQL type name
             if ($name === 'Query') {
                 return $query;
@@ -81,7 +108,11 @@ class Schema extends \GraphQL\Type\Schema
                 return $mutation;
             }
 
-            $type =  $rootTypeMapper->mapNameToType($name);
+            if ($name === 'Subscription') {
+                return $subscription;
+            }
+
+            $type = $rootTypeMapper->mapNameToType($name);
             assert($type instanceof Type);
             return $type;
         });
