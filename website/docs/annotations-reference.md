@@ -29,6 +29,17 @@ Attribute      | Compulsory | Type | Definition
 name           | *no*       | string | The name of the mutation. If skipped, the name of the method is used instead.
 [outputType](custom-types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
 
+## @Subscription
+
+The `@Subscription` annotation is used to declare a GraphQL subscription.
+
+**Applies on**: controller methods.
+
+Attribute      | Compulsory | Type | Definition
+---------------|------------|------|--------
+name           | *no*       | string | The name of the subscription. If skipped, the name of the method is used instead.
+[outputType](custom-types.mdx)     | *no*       | string | Defines the GraphQL output type that will be sent for the subscription.
+
 ## @Type
 
 The `@Type` annotation is used to declare a GraphQL object type.  This is used with standard output
@@ -67,7 +78,7 @@ Attribute      | Compulsory | Type   | Definition
 name           | *no*       | string | The name of the GraphQL input type generated. If not passed, the name of the class with suffix "Input" is used. If the class ends with "Input", the "Input" suffix is not added.
 description    | *no*       | string | Description of the input type in the documentation. If not passed, PHP doc comment is used.
 default        | *no*       | bool   | Name of the input type represented in your GraphQL schema. Defaults to `true` *only if* the name is not specified. If `name` is specified, this will default to `false`, so must also be included for `true` when `name` is used.
-update         | *no*       | bool   | Determines if the the input represents a partial update. When set to `true` all input fields will become optional and won't have default values thus won't be set on resolve if they are not specified in the query/mutation.  This primarily applies to nullable fields.
+update         | *no*       | bool   | Determines if the the input represents a partial update. When set to `true` all input fields will become optional and won't have default values thus won't be set on resolve if they are not specified in the query/mutation/subscription.  This primarily applies to nullable fields.
 
 ## @Field
 
@@ -151,7 +162,7 @@ name           | *yes*       | string | The name of the right.
 ## @FailWith
 
 The `@FailWith` annotation is used to declare a default value to return in the user is not authorized to see a specific
-query / mutation / field (according to the `@Logged` and `@Right` annotations).
+query/mutation/subscription/field (according to the `@Logged` and `@Right` annotations).
 
 **Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
 
@@ -161,11 +172,11 @@ value          | *yes*       | mixed | The value to return if the user is not au
 
 ## @HideIfUnauthorized
 
-<div class="alert alert--warning">This annotation only works when a Schema is used to handle exactly one use request. 
-If you serve your GraphQL API from long-running standalone servers (like Laravel Octane, Swoole, RoadRunner etc) and 
+<div class="alert alert--warning">This annotation only works when a Schema is used to handle exactly one use request.
+If you serve your GraphQL API from long-running standalone servers (like Laravel Octane, Swoole, RoadRunner etc) and
 share the same Schema instance between multiple requests, please avoid using @HideIfUnauthorized.</div>
 
-The `@HideIfUnauthorized` annotation is used to completely hide the query / mutation / field if the user is not authorized
+The `@HideIfUnauthorized` annotation is used to completely hide the query/mutation/subscription/field if the user is not authorized
 to access it (according to the `@Logged` and `@Right` annotations).
 
 **Applies on**: methods or properties annotated with `@Query`, `@Mutation` or `@Field` and one of `@Logged` or `@Right` annotations.
@@ -175,7 +186,7 @@ to access it (according to the `@Logged` and `@Right` annotations).
 ## @InjectUser
 
 Use the `@InjectUser` annotation to inject an instance of the current user logged in into a parameter of your
-query / mutation / field.
+query/mutation/subscription/field.
 
 See [the authentication and authorization page](authentication-authorization.mdx) for more details.
 
@@ -255,11 +266,11 @@ Attribute      | Compulsory | Type | Definition
 
 Sets complexity and multipliers on fields for [automatic query complexity](operation-complexity.md#static-request-analysis).
 
-Attribute           | Compulsory | Type            | Definition                                                      
+Attribute           | Compulsory | Type            | Definition
 --------------------|------------|-----------------|-----------------------------------------------------------------
-*complexity*        | *no*       | int             | Complexity for that field                                       
-*multipliers*       | *no*       | array\<string\> | Names of fields by value of which complexity will be multiplied 
-*defaultMultiplier* | *no*       | int             | Default multiplier value if all multipliers are missing/null    
+*complexity*        | *no*       | int             | Complexity for that field
+*multipliers*       | *no*       | array\<string\> | Names of fields by value of which complexity will be multiplied
+*defaultMultiplier* | *no*       | int             | Default multiplier value if all multipliers are missing/null
 
 ## @Validate
 
