@@ -2270,4 +2270,63 @@ class EndToEndTest extends IntegrationTestCase
             'deleteButton' => null,
         ], $this->getSuccessResult($result));
     }
+
+    public function testEndToEndSubscription(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+        $queryString = '
+        subscription {
+          contactAdded  {
+            nickName
+            age
+          }
+        }
+        ';
+
+        $result = GraphQL::executeQuery($schema, $queryString);
+
+        $this->assertSame([
+            'contactAdded' => [
+                'nickName' => 'foo',
+                'age' => 42,
+            ],
+        ], $this->getSuccessResult($result));
+    }
+
+    public function testEndToEndSubscriptionWithInput(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+        $queryString = '
+        subscription {
+          contactAddedWithFilter(
+            contact: {
+                name: "foo",
+                birthDate: "1942-12-24T00:00:00+00:00",
+                relations: [
+                    {
+                        name: "bar"
+                    }
+                ]
+            }
+          ) {
+            name,
+            birthDate,
+            relations {
+              name
+            }
+          }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $this->assertSame([
+            'contactAddedWithFilter' => null,
+        ], $this->getSuccessResult($result));
+    }
 }

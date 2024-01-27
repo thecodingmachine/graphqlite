@@ -2,14 +2,8 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
-use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
 class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
 {
@@ -41,5 +35,8 @@ class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
 
         $mutations = $aggregateQueryProvider->getMutations();
         $this->assertCount(2, $mutations);
+
+        $subscriptions = $aggregateQueryProvider->getSubscriptions();
+        $this->assertCount(2, $subscriptions);
     }
 }

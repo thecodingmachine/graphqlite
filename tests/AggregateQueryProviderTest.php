@@ -21,7 +21,22 @@ class AggregateQueryProviderTest extends TestCase
                 $queryFieldRef = new ReflectionClass(QueryField::class);
                 return [ $queryFieldRef->newInstanceWithoutConstructor() ];
             }
+
+            public function getSubscriptions(): array
+            {
+                $queryFieldRef = new ReflectionClass(QueryField::class);
+                return [ $queryFieldRef->newInstanceWithoutConstructor() ];
+            }
         };
+    }
+
+    public function testGetQueries(): void
+    {
+        $aggregateQueryProvider = new AggregateQueryProvider([$this->getMockQueryProvider(), $this->getMockQueryProvider()]);
+        $this->assertCount(2, $aggregateQueryProvider->getQueries());
+
+        $aggregateQueryProvider = new AggregateQueryProvider([]);
+        $this->assertCount(0, $aggregateQueryProvider->getQueries());
     }
 
     public function testGetMutations(): void
@@ -33,12 +48,12 @@ class AggregateQueryProviderTest extends TestCase
         $this->assertCount(0, $aggregateQueryProvider->getMutations());
     }
 
-    public function testGetQueries(): void
+    public function testGetSubscriptions(): void
     {
         $aggregateQueryProvider = new AggregateQueryProvider([$this->getMockQueryProvider(), $this->getMockQueryProvider()]);
-        $this->assertCount(2, $aggregateQueryProvider->getQueries());
+        $this->assertCount(2, $aggregateQueryProvider->getSubscriptions());
 
         $aggregateQueryProvider = new AggregateQueryProvider([]);
-        $this->assertCount(0, $aggregateQueryProvider->getQueries());
+        $this->assertCount(0, $aggregateQueryProvider->getSubscriptions());
     }
 }

@@ -41,7 +41,7 @@ class Schema extends \GraphQL\Type\Schema
                             'type' => Type::string(),
                             'description' => 'A placeholder query used by thecodingmachine/graphqlite when there are no declared queries.',
                             'resolve' => static function () {
-                                return 'This is a placeholder query. Please create a query using the @Query annotation.';
+                                return 'This is a placeholder query. Please create a query using the "Query" attribute.';
                             },
                         ],
                     ];
@@ -61,7 +61,7 @@ class Schema extends \GraphQL\Type\Schema
                             'type' => Type::string(),
                             'description' => 'A placeholder query used by thecodingmachine/graphqlite when there are no declared mutations.',
                             'resolve' => static function () {
-                                return 'This is a placeholder mutation. Please create a mutation using the @Mutation annotation.';
+                                return 'This is a placeholder mutation. Please create a mutation using the "Mutation" attribute.';
                             },
                         ],
                     ];
@@ -81,7 +81,7 @@ class Schema extends \GraphQL\Type\Schema
                             'type' => Type::string(),
                             'description' => 'A placeholder query used by thecodingmachine/graphqlite when there are no declared subscriptions.',
                             'resolve' => static function () {
-                                return 'This is a placeholder subscription. Please create a subscription using the @Subscription annotation.';
+                                return 'This is a placeholder subscription. Please create a subscription using the "Subscription" attribute.';
                             },
                         ],
                     ];

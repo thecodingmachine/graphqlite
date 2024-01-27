@@ -14,7 +14,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
-use PhpParser\Builder\Property;
 use ReflectionMethod;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -142,17 +141,39 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertCount(2, $mutations);
 
-        $mutation = $mutations['mutation'];
-        $this->assertSame('mutation', $mutation->name);
+        $testReturnMutation = $mutations['testReturn'];
+        $this->assertSame('testReturn', $testReturnMutation->name);
 
-        $resolve = $mutation->resolveFn;
-        $result = $resolve(new stdClass(), ['testObject' => ['test' => 42]], null, $this->createMock(ResolveInfo::class));
+        $resolve = $testReturnMutation->resolveFn;
+        $result = $resolve(
+            new stdClass(),
+            ['testObject' => ['test' => 42]],
+            null,
+            $this->createMock(ResolveInfo::class),
+        );
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
 
         $testVoidMutation = $mutations['testVoid'];
         $this->assertInstanceOf(VoidType::class, $testVoidMutation->getType());
+    }
+
+    public function testSubscriptions(): void
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $subscriptions = $queryProvider->getSubscriptions($controller);
+
+        $this->assertCount(2, $subscriptions);
+
+        $testSubscribeSubscription = $subscriptions['testSubscribe'];
+        $this->assertSame('testSubscribe', $testSubscribeSubscription->name);
+
+        $testSubscribeWithInputSubscription = $subscriptions['testSubscribeWithInput'];
+        $this->assertInstanceOf(IDType::class, $testSubscribeWithInputSubscription->getType());
     }
 
     public function testErrors(): void
