@@ -4,7 +4,26 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use const PHP_EOL;
 use Doctrine\Common\Annotations\AnnotationException;
+use function array_diff_key;
+use function array_fill_keys;
+use function array_intersect_key;
+use function array_keys;
+use function array_merge;
+use function array_shift;
+use function array_slice;
+use function assert;
+use function count;
+use function get_parent_class;
+use function in_array;
+use function is_callable;
+use function is_string;
+use function key;
+use function reset;
+use function rtrim;
+use function str_starts_with;
+use function trim;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NonNull;
@@ -27,12 +46,14 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
+use TheCodingMachine\GraphQLite\Annotations\Subscription;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
@@ -51,29 +72,9 @@ use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
-
-use function array_diff_key;
-use function array_fill_keys;
-use function array_intersect_key;
-use function array_keys;
-use function array_merge;
-use function array_shift;
-use function array_slice;
-use function assert;
-use function count;
-use function get_parent_class;
-use function in_array;
-use function is_callable;
-use function is_string;
-use function key;
-use function reset;
-use function rtrim;
-use function str_starts_with;
-use function trim;
-
-use const PHP_EOL;
 
 /**
  * A class in charge if returning list of fields for queries / mutations / entities / input types
@@ -121,6 +122,16 @@ class FieldsBuilder
     public function getMutations(object $controller): array
     {
         return $this->getFieldsByAnnotations($controller, Mutation::class, false);
+    }
+
+    /**
+     * @return array<string, FieldDefinition>
+     *
+     * @throws ReflectionException
+     */
+    public function getSubscriptions(object $controller): array
+    {
+        return $this->getFieldsByAnnotations($controller, Subscription::class, false);
     }
 
     /** @return array<string, FieldDefinition> QueryField indexed by name. */
@@ -266,7 +277,7 @@ class FieldsBuilder
     /**
      * @param object|class-string<object> $controller The controller instance, or the name of the source class name
      * @param class-string<AbstractRequest> $annotationName
-     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query and @Mutation
+     * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query, @Mutation, and @Subscription.
      * @param string|null $typeName Type name for which fields should be extracted for.
      *
      * @return array<string, FieldDefinition>

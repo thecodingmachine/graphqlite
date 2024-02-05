@@ -13,6 +13,7 @@
     "Usage": [
       "queries",
       "mutations",
+      "subscriptions",
       "type-mapping",
       "autowiring",
       "extend-type",
