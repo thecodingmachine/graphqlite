@@ -143,9 +143,7 @@ class SchemaFactoryTest extends TestCase
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
-        $errors = $this->doTestSchemaWithError($factory->createSchema());
-        $this->assertCount(1, $errors);
-        $this->assertSame('Unknown type "User"', $errors[0]['message']);
+        $this->doTestSchemaWithError($factory->createSchema());
     }
 
     public function testException(): void
@@ -193,14 +191,14 @@ class SchemaFactoryTest extends TestCase
         );
     }
 
-    private function doTestSchemaWithError(Schema $schema): array
+    private function doTestSchemaWithError(Schema $schema): void
     {
         $result = $this->_doTestSchema($schema);
         $resultArr = $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
         $this->assertArrayHasKey('errors', $resultArr);
         $this->assertArrayNotHasKey('data', $resultArr);
-
-        return $resultArr['errors'];
+        $this->assertCount(1, $resultArr);
+        $this->assertSame('Unknown type "User"', $resultArr['errors'][0]['message']);
     }
 
     private function doTestSchema(Schema $schema): void
