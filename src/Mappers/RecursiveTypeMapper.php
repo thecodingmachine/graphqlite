@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
-use GraphQL\Error\Error;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use GraphQL\Utils\Utils;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use RuntimeException;
@@ -522,6 +520,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
             return $this->mapClassToInterfaceOrType($className, null);
         }
-        throw Error::createLocatedError("Unknown type ".Utils::printSafe($typeName));
+        throw TypeNotFoundException::createError($typeName);
     }
 }

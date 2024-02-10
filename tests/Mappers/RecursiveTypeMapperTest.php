@@ -3,7 +3,6 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use GraphQL\Error\Error;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -94,7 +93,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame('ClassA', $recursiveMapper->mapNameToType('ClassA')->name);
         $this->assertSame('ClassAInterface', $recursiveMapper->mapNameToType('ClassAInterface')->name);
 
-        $this->expectException(Error::class);
+        $this->expectException(TypeNotFoundException::class);
         $recursiveMapper->mapNameToType('NotExists');
     }
 
@@ -247,7 +246,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             $this->getAnnotationReader()
         );
 
-        $this->expectException(Error::class);
+        $this->expectException(TypeNotFoundException::class);
         $recursiveTypeMapper->mapNameToType('Foo');
     }
 
