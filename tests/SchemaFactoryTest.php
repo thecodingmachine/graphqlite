@@ -30,7 +30,6 @@ use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
-use TheCodingMachine\GraphQLite\Mappers\TypeNotFoundException;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
@@ -169,7 +168,7 @@ class SchemaFactoryTest extends TestCase
         $factory->createSchema();
     }
 
-    private function _doTestSchema(Schema $schema): ExecutionResult
+    private function execTestQuery(Schema $schema): ExecutionResult
     {
         $schema->assertValid();
 
@@ -193,7 +192,7 @@ class SchemaFactoryTest extends TestCase
 
     private function doTestSchemaWithError(Schema $schema): void
     {
-        $result = $this->_doTestSchema($schema);
+        $result = $this->execTestQuery($schema);
         $resultArr = $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
         $this->assertArrayHasKey('errors', $resultArr);
         $this->assertArrayNotHasKey('data', $resultArr);
@@ -203,7 +202,7 @@ class SchemaFactoryTest extends TestCase
 
     private function doTestSchema(Schema $schema): void
     {
-        $result = $this->_doTestSchema($schema);
+        $result = $this->execTestQuery($schema);
         $resultArr = $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
         $this->assertArrayHasKey('data', $resultArr);
         $this->assertSame([

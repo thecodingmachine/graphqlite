@@ -520,6 +520,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
             return $this->mapClassToInterfaceOrType($className, null);
         }
+
         throw TypeNotFoundException::createError($typeName);
     }
 }
