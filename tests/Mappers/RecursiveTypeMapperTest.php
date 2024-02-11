@@ -93,7 +93,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame('ClassA', $recursiveMapper->mapNameToType('ClassA')->name);
         $this->assertSame('ClassAInterface', $recursiveMapper->mapNameToType('ClassAInterface')->name);
 
-        $this->expectException(CannotMapTypeException::class);
+        $this->expectException(TypeNotFoundException::class);
         $recursiveMapper->mapNameToType('NotExists');
     }
 
@@ -233,6 +233,8 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
     /**
      * Tests that the RecursiveTypeMapper behaves correctly if there are no types to map.
+     *
+     * @see \GraphQL\Server\Helper::promiseToExecuteOperation()
      */
     public function testMapNoTypes(): void
     {
@@ -244,7 +246,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             $this->getAnnotationReader()
         );
 
-        $this->expectException(CannotMapTypeException::class);
+        $this->expectException(TypeNotFoundException::class);
         $recursiveTypeMapper->mapNameToType('Foo');
     }
 
