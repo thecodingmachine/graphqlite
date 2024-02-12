@@ -20,6 +20,8 @@ use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 final class RootTypeMapperFactoryContext
 {
     /**
+     * Constructor
+     *
      * @param iterable<NS> $typeNamespaces
      */
     public function __construct(

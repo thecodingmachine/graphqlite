@@ -23,6 +23,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     public function __construct(iterable $exceptions = [])
     {
         parent::__construct('Many exceptions have be thrown:');
+
         foreach ($exceptions as $exception) {
             $this->add($exception);
         }

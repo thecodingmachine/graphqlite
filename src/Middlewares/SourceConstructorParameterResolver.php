@@ -1,8 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+declare(strict_types=1);
 
-use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+namespace TheCodingMachine\GraphQLite\Middlewares;
 
 /**
  * Resolves field by returning the passed value, so it can later be used in construction of the input type.
@@ -12,6 +12,8 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 class SourceConstructorParameterResolver implements ResolverInterface
 {
     /**
+     * Constructor
+     *
      * @param class-string $className
      */
     public function __construct(
@@ -20,9 +22,7 @@ class SourceConstructorParameterResolver implements ResolverInterface
     ) {
     }
 
-    /**
-     * @return class-string
-     */
+    /** @return class-string */
     public function className(): string
     {
         return $this->className;

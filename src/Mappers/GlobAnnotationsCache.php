@@ -18,9 +18,13 @@ final class GlobAnnotationsCache
 
     /**
      * @param class-string<object>|null $typeClassName
-     * @param array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> $factories An array mapping a factory method name to an input name / class name / default flag / declaring class
-     * @param array<string, array{0: string, 1:class-string<object>}> $decorators An array mapping a decorator method name to an input name / declaring class
-     * @param array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}> $inputs An array mapping an input type name to an input name / declaring class
+     * @param array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> $factories
+     *        An array mapping a factory method name to an input name / class name / default flag /
+     *        declaring class
+     * @param array<string, array{0: string, 1:class-string<object>}> $decorators
+     *        An array mapping a decorator method name to an input name / declaring class
+     * @param array<string, array{0: class-string<object>, 1: bool, 2: string|null, 3: bool}> $inputs
+     *        An array mapping an input type name to an input name / declaring class
      */
     public function __construct(
         private readonly string|null $typeClassName = null,
@@ -67,6 +71,7 @@ final class GlobAnnotationsCache
         return $this->with(
             factories: [
                 ...$this->factories,
+                // phpcs:ignore
                 $methodName => [$inputName, $className, $isDefault, $declaringClass],
             ],
         );
@@ -78,6 +83,7 @@ final class GlobAnnotationsCache
         return $this->with(
             decorators: [
                 ...$this->decorators,
+                // phpcs:ignore
                 $methodName => [$inputName, $declaringClass],
             ],
         );
@@ -105,6 +111,7 @@ final class GlobAnnotationsCache
         return $this->with(
             inputs: [
                 ...$this->inputs,
+                // phpcs:ignore
                 $name => [$className, $input->isDefault(), $input->getDescription(), $input->isUpdate()],
             ],
         );

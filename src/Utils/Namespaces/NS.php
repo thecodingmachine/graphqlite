@@ -8,7 +8,6 @@ use Mouf\Composer\ClassNameMapper;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use UnitEnum;
 
 use function class_exists;
 use function interface_exists;

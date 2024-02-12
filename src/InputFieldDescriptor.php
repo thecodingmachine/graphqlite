@@ -6,21 +6,13 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\Type;
-use ReflectionMethod;
-use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
-use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
-use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceConstructorParameterResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
-use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
-
-use function assert;
-use function is_callable;
 
 /**
  * A class that describes a field to be created.

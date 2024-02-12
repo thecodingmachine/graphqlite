@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use ArgumentCountError;
 use RuntimeException;
 
 use function sprintf;
 
 class FailedResolvingInputType extends RuntimeException
 {
-    public static function createForMissingConstructorParameter(\ArgumentCountError $original): self
+    public static function createForMissingConstructorParameter(ArgumentCountError $original): self
     {
-        return new self(sprintf("%s. It should be mapped as required field.", $original->getMessage()), previous: $original);
+        return new self(sprintf('%s. It should be mapped as required field.', $original->getMessage()), previous: $original);
     }
 
     public static function createForDecorator(string $class): self

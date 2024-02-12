@@ -25,7 +25,7 @@ class EnumType extends BaseEnumType
     public function __construct(
         string $enumName,
         string $typeName,
-        ?string $description,
+        string|null $description,
         array $caseDescriptions,
         array $caseDeprecationReasons,
         private readonly bool $useValues = false,
@@ -41,13 +41,11 @@ class EnumType extends BaseEnumType
             ];
         }
 
-        parent::__construct(
-            [
-                'name' => $typeName,
-                'values' => $typeValues,
-                'description' => $description,
-            ]
-        );
+        parent::__construct([
+            'name' => $typeName,
+            'values' => $typeValues,
+            'description' => $description,
+        ]);
     }
 
     // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint

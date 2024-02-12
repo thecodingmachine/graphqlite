@@ -30,7 +30,6 @@ use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
-use UnitEnum;
 use function assert;
 
 /**
@@ -70,8 +69,20 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
     )
     {
         $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
-        $this->mapClassToAnnotationsCache = new ClassBoundCacheContract(new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'classToAnnotations_' . $cachePrefix))));
-        $this->mapClassToExtendAnnotationsCache = new ClassBoundCacheContract(new ClassBoundMemoryAdapter(new ClassBoundCache(new FileBoundCache($this->cache, 'classToExtendAnnotations_' . $cachePrefix))));
+
+        $classToAnnotationsCache = new ClassBoundCache(
+            new FileBoundCache($this->cache, 'classToAnnotations_' . $cachePrefix),
+        );
+        $this->mapClassToAnnotationsCache = new ClassBoundCacheContract(
+            new ClassBoundMemoryAdapter($classToAnnotationsCache),
+        );
+
+        $classToExtendedAnnotationsCache = new ClassBoundCache(
+            new FileBoundCache($this->cache, 'classToExtendAnnotations_' . $cachePrefix),
+        );
+        $this->mapClassToExtendAnnotationsCache = new ClassBoundCacheContract(
+            new ClassBoundMemoryAdapter($classToExtendedAnnotationsCache),
+        );
     }
 
     /**
