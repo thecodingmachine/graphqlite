@@ -24,6 +24,7 @@ class MutableInterfaceType extends InterfaceType implements MutableInterface
         $this->status = self::STATUS_PENDING;
 
         parent::__construct($config);
+
         $this->className = $className;
     }
 }

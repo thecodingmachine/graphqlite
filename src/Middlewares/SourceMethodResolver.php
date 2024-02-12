@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
+use ReflectionMethod;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 use function assert;
@@ -17,12 +18,12 @@ use function is_callable;
 final class SourceMethodResolver implements ResolverInterface
 {
     public function __construct(
-        private readonly \ReflectionMethod $methodReflection,
+        private readonly ReflectionMethod $methodReflection,
     )
     {
     }
 
-    public function methodReflection(): \ReflectionMethod
+    public function methodReflection(): ReflectionMethod
     {
         return $this->methodReflection;
     }

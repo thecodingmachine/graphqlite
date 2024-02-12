@@ -18,7 +18,8 @@ class AggregateControllerQueryProviderFactory implements QueryProviderFactoryInt
     public function __construct(
         private readonly iterable $controllers,
         private readonly ContainerInterface $controllersContainer,
-    ) {}
+    ) {
+    }
 
     public function create(FactoryContext $context): QueryProviderInterface
     {

@@ -49,7 +49,7 @@ final class InputField extends InputObjectField
         bool $isUpdate,
         bool $hasDefaultValue,
         mixed $defaultValue,
-        array|null $additionalConfig = null
+        array|null $additionalConfig = null,
     ) {
         $config = [
             'name' => $name,
@@ -63,9 +63,7 @@ final class InputField extends InputObjectField
 
         $this->resolve = function (object|null $source, array $args, $context, ResolveInfo $info) use ($arguments, $originalResolver, $resolver) {
             if ($this->forConstructorHydration) {
-                $toPassArgs = [
-                    $arguments[$this->name]->resolve($source, $args, $context, $info)
-                ];
+                $toPassArgs = [$arguments[$this->name]->resolve($source, $args, $context, $info)];
             } else {
                 $toPassArgs = $this->paramsToArguments($arguments, $source, $args, $context, $info, $resolver);
             }

@@ -12,8 +12,6 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
-use function assert;
-
 /**
  * Middleware in charge of managing "Logged" and "Right" annotations.
  */

@@ -25,6 +25,7 @@ use UnitEnum;
 
 use function assert;
 use function enum_exists;
+use function ltrim;
 
 /**
  * Maps an enum class to a GraphQL type (only available in PHP>=8.1)
@@ -129,25 +130,29 @@ class EnumTypeMapper implements RootTypeMapperInterface
             $enumDescription = $docBlock->getSummary();
         }
 
+        /** @var array<string, string> $enumCaseDescriptions */
         $enumCaseDescriptions = [];
+        /** @var array<string, string> $enumCaseDeprecationReasons */
         $enumCaseDeprecationReasons = [];
+
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docComment = $reflectionEnumCase->getDocComment();
-            if ($docComment) {
-                $docBlock = $docBlockFactory->create($docComment);
-                $enumCaseDescription = $docBlock->getSummary();
+            if (! $docComment) {
+                continue;
+            }
 
-                $enumCaseDescriptions[$reflectionEnumCase->getName()] = $enumCaseDescription;
-                $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
+            $docBlock = $docBlockFactory->create($docComment);
+            $enumCaseDescription = $docBlock->getSummary();
 
-                if ($deprecation) {
-                    $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = (string) $deprecation;
-                }
+            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $enumCaseDescription;
+            $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
+
+            // phpcs:ignore
+            if ($deprecation) {
+                $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = (string) $deprecation;
             }
         }
 
-        /** @var array<string, string> $enumCaseDescriptions */
-        /** @var array<string, string> $enumCaseDeprecationReasons */
         $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;

@@ -18,7 +18,6 @@ use ReflectionMethod;
 use ReflectionNamedType;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Parameters\ExpandsInputTypeParameters;
-use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 

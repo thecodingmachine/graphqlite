@@ -53,7 +53,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     {
         $resolve = [$factory, $methodName];
         assert(is_callable($resolve));
-        $this->resolve       = $resolve;
+        $this->resolve = $resolve;
 
         /**
          * @return iterable<FieldConfig>
@@ -71,7 +71,9 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
         if ($comment) {
             $config['description'] = $comment;
         }
+
         $config += $additionalConfig;
+
         parent::__construct($config);
     }
 
@@ -83,7 +85,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     private function getParameters(): array
     {
         if ($this->parameters === null) {
-            $method           = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
+            $method = new ReflectionMethod($this->resolve[0], $this->resolve[1]);
             $this->parameters = $this->fieldsBuilder->getParameters($method);
         }
 
@@ -94,7 +96,7 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
     private function getParametersForDecorator(int $key): array
     {
         if (! isset($this->decoratorsParameters[$key])) {
-            $method                           = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
+            $method = new ReflectionMethod($this->decorators[$key][0], $this->decorators[$key][1]);
             $this->decoratorsParameters[$key] = $this->fieldsBuilder->getParametersForDecorator($method);
         }
 

@@ -9,13 +9,16 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use function method_exists;
 
 /**
- * Resolves field by getting the value of $propertyName from the source object through magic getter __get.
+ * Resolves field by getting the value of $propertyName from the source object through
+ * magic getter __get.
  *
  * @internal
  */
 final class MagicPropertyResolver implements ResolverInterface
 {
     /**
+     * Constructor
+     *
      * @param class-string $className
      */
     public function __construct(
@@ -24,9 +27,7 @@ final class MagicPropertyResolver implements ResolverInterface
     ) {
     }
 
-    /**
-     * @return class-string
-     */
+    /** @return class-string */
     public function className(): string
     {
         return $this->className;

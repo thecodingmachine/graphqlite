@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use function class_exists;
-use function interface_exists;
-use function is_array;
-use function str_replace;
 use GraphQL\Type\Definition\FieldDefinition;
 use InvalidArgumentException;
 use Mouf\Composer\ClassNameMapper;
@@ -21,6 +17,11 @@ use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
+
+use function class_exists;
+use function interface_exists;
+use function is_array;
+use function str_replace;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
