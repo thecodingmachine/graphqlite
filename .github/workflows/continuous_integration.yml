@@ -86,6 +86,6 @@ jobs:
 
       - uses: codecov/codecov-action@v4.0.1 # upload the coverage to codecov
         with:
-          fail_ci_if_error: true # optional (default = false)
+          fail_ci_if_error: false # optional (default = false) - Need CODECOV_TOKEN
         # Do not upload in forks, and only on php8.3, latest deps
         if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.3' && matrix.install-args == '' }}
