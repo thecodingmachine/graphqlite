@@ -32,6 +32,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithDescriptions;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
@@ -48,10 +49,9 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethod;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethods;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
@@ -69,6 +69,8 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputType;
+use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\VoidType;
 
@@ -139,11 +141,16 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertCount(2, $mutations);
 
-        $mutation = $mutations['mutation'];
-        $this->assertSame('mutation', $mutation->name);
+        $testReturnMutation = $mutations['testReturn'];
+        $this->assertSame('testReturn', $testReturnMutation->name);
 
-        $resolve = $mutation->resolveFn;
-        $result = $resolve(new stdClass(), ['testObject' => ['test' => 42]], null, $this->createMock(ResolveInfo::class));
+        $resolve = $testReturnMutation->resolveFn;
+        $result = $resolve(
+            new stdClass(),
+            ['testObject' => ['test' => 42]],
+            null,
+            $this->createMock(ResolveInfo::class),
+        );
 
         $this->assertInstanceOf(TestObject::class, $result);
         $this->assertEquals('42', $result->getTest());
@@ -152,10 +159,26 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(VoidType::class, $testVoidMutation->getType());
     }
 
+    public function testSubscriptions(): void
+    {
+        $controller = new TestController();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $subscriptions = $queryProvider->getSubscriptions($controller);
+
+        $this->assertCount(2, $subscriptions);
+
+        $testSubscribeSubscription = $subscriptions['testSubscribe'];
+        $this->assertSame('testSubscribe', $testSubscribeSubscription->name);
+
+        $testSubscribeWithInputSubscription = $subscriptions['testSubscribeWithInput'];
+        $this->assertInstanceOf(IDType::class, $testSubscribeWithInputSubscription->getType());
+    }
+
     public function testErrors(): void
     {
-        $controller = new class
-        {
+        $controller = new class {
             /**
              * @Query
              * @return string
@@ -174,8 +197,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
     public function testTypeInDocBlock(): void
     {
-        $controller = new class
-        {
+        $controller = new class {
             /**
              * @Query
              * @param int $typeHintInDocBlock
@@ -197,6 +219,42 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $this->assertInstanceOf(IntType::class, $query->args[0]->getType()->getWrappedType());
         $this->assertInstanceOf(NonNull::class, $query->getType());
         $this->assertInstanceOf(StringType::class, $query->getType()->getWrappedType());
+    }
+
+    /**
+     * Tests that the fields builder will fail when a parameter is missing it's generic docblock
+     * definition, when required - an array, for instance, or could be a collection (List types)
+     */
+    public function testTypeMissingForPropertyPromotionWithoutGenericDoc(): void
+    {
+        $fieldsBuilder = $this->buildFieldsBuilder();
+
+        $this->expectException(CannotMapTypeException::class);
+
+        $fieldsBuilder->getInputFields(
+            PropertyPromotionInputTypeWithoutGenericDoc::class,
+            'PropertyPromotionInputTypeWithoutGenericDocInput',
+        );
+    }
+
+    /**
+     * Tests that the fields builder will properly build an input type using property promotion
+     * with the generic docblock defined on the constructor and not the property directly.
+     */
+    public function testTypeInDocBlockWithPropertyPromotion(): void
+    {
+        $fieldsBuilder = $this->buildFieldsBuilder();
+
+        // Techncially at this point, we already know it's working, since an exception would have been
+        // thrown otherwise, requiring the generic type to be specified.
+        // @see self::testTypeMissingForPropertyPromotionWithoutGenericDoc
+        $inputFields = $fieldsBuilder->getInputFields(
+            PropertyPromotionInputType::class,
+            'PropertyPromotionInputTypeInput',
+        );
+
+        $this->assertCount(1, $inputFields);
+        $this->assertEquals('amounts', reset($inputFields)->name);
     }
 
     public function testQueryProviderWithFixedReturnType(): void
@@ -689,24 +747,13 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(InvalidPrefetchMethodRuntimeException::class);
-        $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a "prefetch method" that could not be found. Unable to find method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists.');
-        $queryProvider->getFields($controller);
-    }
-
-    public function testInvalidPrefetchParameter(): void
-    {
-        $controller = new TestTypeWithInvalidPrefetchParameter();
-
-        $queryProvider = $this->buildFieldsBuilder();
-
-        $this->expectException(InvalidPrefetchMethodRuntimeException::class);
-        $this->expectExceptionMessage('The @Field annotation in TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchParameter::prefetch specifies a "prefetch method" but the data from the prefetch method is not gathered. The "prefetch" method should accept a second parameter that will contain data returned by the prefetch method.');
+        $this->expectExceptionMessage('#[Prefetch] attribute on parameter $data in TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::test specifies a callable that is invalid: Method TheCodingMachine\\GraphQLite\\Fixtures\\TestTypeWithInvalidPrefetchMethod::notExists wasn\'t found or isn\'t accessible.');
         $queryProvider->getFields($controller);
     }
 
     public function testPrefetchMethod(): void
     {
-        $controller = new TestTypeWithPrefetchMethod();
+        $controller = new TestTypeWithPrefetchMethods();
 
         $queryProvider = $this->buildFieldsBuilder();
 
@@ -715,9 +762,25 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
 
         $this->assertSame('test', $testField->name);
 
-        $this->assertCount(2, $testField->args);
-        $this->assertSame('string', $testField->args[0]->name);
-        $this->assertSame('int', $testField->args[1]->name);
+        $this->assertCount(4, $testField->args);
+        $this->assertSame('arg1', $testField->args[0]->name);
+        $this->assertSame('arg2', $testField->args[1]->name);
+        $this->assertSame('arg3', $testField->args[2]->name);
+        $this->assertSame('arg4', $testField->args[3]->name);
+    }
+
+    public function testOutputTypeArgumentDescription(): void
+    {
+        $controller = new TestTypeWithDescriptions();
+
+        $queryProvider = $this->buildFieldsBuilder();
+
+        $fields = $queryProvider->getFields($controller);
+        $testField = $fields['customField'];
+
+        $this->assertCount(1, $testField->args);
+        $this->assertSame('arg1', $testField->args[0]->name);
+        $this->assertSame('Test argument description', $testField->args[0]->description);
     }
 
     public function testSecurityBadQuery(): void
@@ -735,7 +798,7 @@ class FieldsBuilderTest extends AbstractQueryProviderTest
         $resolve = $query->resolveFn;
 
         $this->expectException(BadExpressionInSecurityException::class);
-        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
+        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity()": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
     }
 

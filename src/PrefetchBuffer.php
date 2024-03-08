@@ -20,7 +20,7 @@ class PrefetchBuffer
     /** @var array<string, mixed> An array of prefetch method results, indexed by hash of arguments. */
     private array $results = [];
 
-    /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function register(
         object $object,
         array $arguments,
@@ -29,7 +29,7 @@ class PrefetchBuffer
         $this->objects[$this->computeHash($arguments, $info)][] = $object;
     }
 
-    /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     private function computeHash(
         array $arguments,
         ?ResolveInfo $info = null
@@ -44,7 +44,7 @@ class PrefetchBuffer
     }
 
     /**
-     * @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field.
+     * @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field.
      *
      * @return array<int, object>
      */
@@ -55,7 +55,7 @@ class PrefetchBuffer
         return $this->objects[$this->computeHash($arguments, $info)] ?? [];
     }
 
-    /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function purge(
         array $arguments,
         ?ResolveInfo $info = null
@@ -63,7 +63,7 @@ class PrefetchBuffer
         unset($this->objects[$this->computeHash($arguments, $info)]);
     }
 
-    /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function storeResult(
         mixed $result,
         array $arguments,
@@ -72,7 +72,7 @@ class PrefetchBuffer
         $this->results[$this->computeHash($arguments, $info)] = $result;
     }
 
-    /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function hasResult(
         array $arguments,
         ?ResolveInfo $info = null
@@ -80,7 +80,7 @@ class PrefetchBuffer
         return array_key_exists($this->computeHash($arguments, $info), $this->results);
     }
 
-    /** @param array<int,mixed> $arguments The input arguments passed from GraphQL to the field. */
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function getResult(
         array $arguments,
         ?ResolveInfo $info = null

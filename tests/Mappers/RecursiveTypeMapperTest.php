@@ -35,10 +35,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             'name' => 'Foobar'
         ]);
 
-        $typeMapper = new StaticTypeMapper();
-        $typeMapper->setTypes([
-            ClassB::class => $objectType
-        ]);
+        $typeMapper = new StaticTypeMapper(
+            types: [
+                ClassB::class => $objectType
+            ]
+        );
 
         $recursiveTypeMapper = new RecursiveTypeMapper(
             $typeMapper,
@@ -63,10 +64,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             'name' => 'Foobar'
         ]);
 
-        $typeMapper = new StaticTypeMapper();
-        $typeMapper->setTypes([
-            ClassB::class => $objectType
-        ]);
+        $typeMapper = new StaticTypeMapper(
+            types: [
+                ClassB::class => $objectType
+            ]
+        );
 
         $recursiveTypeMapper = new RecursiveTypeMapper(
             $typeMapper,
@@ -91,7 +93,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame('ClassA', $recursiveMapper->mapNameToType('ClassA')->name);
         $this->assertSame('ClassAInterface', $recursiveMapper->mapNameToType('ClassAInterface')->name);
 
-        $this->expectException(CannotMapTypeException::class);
+        $this->expectException(TypeNotFoundException::class);
         $recursiveMapper->mapNameToType('NotExists');
     }
 
@@ -102,10 +104,11 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             'name' => 'Foobar'
         ]);
 
-        $typeMapper = new StaticTypeMapper();
-        $typeMapper->setInputTypes([
-            ClassB::class => $inputObjectType
-        ]);
+        $typeMapper = new StaticTypeMapper(
+            inputTypes: [
+                ClassB::class => $inputObjectType
+            ]
+        );
 
         $recursiveTypeMapper = new RecursiveTypeMapper(
             $typeMapper,
@@ -199,15 +202,17 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             'name' => 'Foobar'
         ]);
 
-        $typeMapper1 = new StaticTypeMapper();
-        $typeMapper1->setTypes([
-            ClassB::class => $objectType
-        ]);
+        $typeMapper1 = new StaticTypeMapper(
+            types: [
+                ClassB::class => $objectType
+            ]
+        );
 
-        $typeMapper2 = new StaticTypeMapper();
-        $typeMapper2->setTypes([
-            ClassA::class => $objectType
-        ]);
+        $typeMapper2 = new StaticTypeMapper(
+            types: [
+                ClassA::class => $objectType
+            ]
+        );
 
         $compositeTypeMapper = new CompositeTypeMapper();
         $compositeTypeMapper->addTypeMapper($typeMapper1);
@@ -228,6 +233,8 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
 
     /**
      * Tests that the RecursiveTypeMapper behaves correctly if there are no types to map.
+     *
+     * @see \GraphQL\Server\Helper::promiseToExecuteOperation()
      */
     public function testMapNoTypes(): void
     {
@@ -239,7 +246,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProviderTest
             $this->getAnnotationReader()
         );
 
-        $this->expectException(CannotMapTypeException::class);
+        $this->expectException(TypeNotFoundException::class);
         $recursiveTypeMapper->mapNameToType('Foo');
     }
 

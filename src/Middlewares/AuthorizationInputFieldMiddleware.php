@@ -12,8 +12,6 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
-use function assert;
-
 /**
  * Middleware in charge of managing "Logged" and "Right" annotations.
  */
@@ -32,9 +30,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         $annotations = $inputFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
-        assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
-        assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
         // Avoid wrapping resolver callback when no annotations are specified.
         if (! $loggedAnnotation && ! $rightAnnotation) {
@@ -42,7 +38,6 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
         }
 
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
-        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
 
         if ($hideIfUnauthorized !== null && ! $this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
             return null;
@@ -50,7 +45,7 @@ class AuthorizationInputFieldMiddleware implements InputFieldMiddlewareInterface
 
         $resolver = $inputFieldDescriptor->getResolver();
 
-        $inputFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $resolver) {
+        $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $resolver) {
             if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
                 return $resolver(...$args);
             }

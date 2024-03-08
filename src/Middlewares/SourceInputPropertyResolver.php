@@ -4,51 +4,46 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
-use function assert;
-
 /**
- * A class that represents a callable on an object to resolve property value.
- * The object can be modified after class invocation.
+ * Resolves field by setting the value of $propertyName on the source object.
  *
  * @internal
  */
-final class SourceInputPropertyResolver implements SourceResolverInterface
+final class SourceInputPropertyResolver implements ResolverInterface
 {
-    private object|null $object = null;
-
-    public function __construct(private readonly string $propertyName)
+    public function __construct(
+        private readonly ReflectionProperty $propertyReflection,
+    )
     {
     }
 
-    public function setObject(object $object): void
+    public function propertyReflection(): ReflectionProperty
     {
-        $this->object = $object;
+        return $this->propertyReflection;
     }
 
-    public function getObject(): object
+    public function executionSource(object|null $source): object|null
     {
-        $object = $this->object;
-        assert($object !== null);
-
-        return $object;
+        return $source;
     }
 
-    public function __invoke(mixed ...$args): mixed
+    public function __invoke(object|null $source, mixed ...$args): mixed
     {
-        if ($this->object === null) {
-            throw new GraphQLRuntimeException('You must call "setObject" on SourceResolver before invoking the object.');
+        if ($source === null) {
+            throw new GraphQLRuntimeException('You must provide a source for SourceInputPropertyResolver.');
         }
-        PropertyAccessor::setValue($this->object, $this->propertyName, ...$args);
+
+        PropertyAccessor::setValue($source, $this->propertyReflection->getName(), ...$args);
+
         return $args[0];
     }
 
     public function toString(): string
     {
-        $class = $this->getObject()::class;
-
-        return $class . '::' . $this->propertyName;
+        return $this->propertyReflection->getDeclaringClass()->getName() . '::' . $this->propertyReflection->getName();
     }
 }

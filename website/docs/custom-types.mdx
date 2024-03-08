@@ -98,6 +98,7 @@ You can use the `outputType` attribute in the following annotations:
 
 * `@Query`
 * `@Mutation`
+* `@Subscription`
 * `@Field`
 * `@SourceField`
 * `@MagicField`
@@ -140,17 +141,17 @@ The easiest way is to use a `StaticTypeMapper`. Use this class to register custo
 
 ```php
 // Sample code:
-$staticTypeMapper = new StaticTypeMapper();
+$staticTypeMapper = new StaticTypeMapper(
+    // Let's register a type that maps by default to the "MyClass" PHP class
+    types: [
+        MyClass::class => new MyCustomOutputType()
+    ],
 
-// Let's register a type that maps by default to the "MyClass" PHP class
-$staticTypeMapper->setTypes([
-    MyClass::class => new MyCustomOutputType()
-]);
-
-// If you don't want your output type to map to any PHP class by default, use:
-$staticTypeMapper->setNotMappedTypes([
-    new MyCustomOutputType()
-]);
+    // If you don't want your output type to map to any PHP class by default, use:
+    notMappedTypes: [
+        new MyCustomOutputType()
+    ],
+);
 
 // Register the static type mapper in your application using the SchemaFactory instance
 $schemaFactory->addTypeMapper($staticTypeMapper);

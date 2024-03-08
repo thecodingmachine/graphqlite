@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\SchemaConfig;
@@ -23,6 +22,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -41,6 +41,7 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\CostFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
@@ -58,12 +59,10 @@ use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-use UnitEnum;
 
 use function array_map;
 use function array_reverse;
 use function class_exists;
-use function interface_exists;
 use function md5;
 use function substr;
 
@@ -211,9 +210,7 @@ class SchemaFactory
         return $this;
     }
 
-    /**
-     * @deprecated Use PHP8 Attributes instead
-     */
+    /** @deprecated Use PHP8 Attributes instead */
     public function setDoctrineAnnotationReader(Reader $annotationReader): self
     {
         $this->doctrineAnnotationReader = $annotationReader;
@@ -337,15 +334,15 @@ class SchemaFactory
 
     public function createSchema(): Schema
     {
-        $symfonyCache           = new Psr16Adapter($this->cache, $this->cacheNamespace);
-        $annotationReader       = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
-        $authenticationService  = $this->authenticationService ?: new FailAuthenticationService();
-        $authorizationService   = $this->authorizationService ?: new FailAuthorizationService();
-        $typeResolver           = new TypeResolver();
-        $namespacedCache        = new NamespacedCache($this->cache);
-        $cachedDocBlockFactory  = new CachedDocBlockFactory($namespacedCache);
-        $namingStrategy         = $this->namingStrategy ?: new NamingStrategy();
-        $typeRegistry           = new TypeRegistry();
+        $symfonyCache = new Psr16Adapter($this->cache, $this->cacheNamespace);
+        $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
+        $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
+        $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
+        $typeResolver = new TypeResolver();
+        $namespacedCache = new NamespacedCache($this->cache);
+        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
+        $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
+        $typeRegistry = new TypeRegistry();
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
@@ -363,6 +360,7 @@ class SchemaFactory
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
+        $fieldMiddlewarePipe->pipe(new CostFieldMiddleware());
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
         foreach ($this->inputFieldMiddlewares as $inputFieldMiddleware) {
@@ -381,12 +379,10 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-
-        if (interface_exists(UnitEnum::class)) {
-            $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
-        }
+        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
 
         if (class_exists(Enum::class)) {
+            // Annotation support - deprecated
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
         }
 
@@ -399,6 +395,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
+                $nsList,
                 $this->globTTL,
             );
 
@@ -414,14 +411,7 @@ class SchemaFactory
         $lastTopRootTypeMapper->setNext($rootTypeMapper);
 
         $argumentResolver = new ArgumentResolver();
-
         $parameterMiddlewarePipe = new ParameterMiddlewarePipe();
-        foreach ($this->parameterMiddlewares as $parameterMapper) {
-            $parameterMiddlewarePipe->pipe($parameterMapper);
-        }
-        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
-        $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
-        $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
         $fieldsBuilder = new FieldsBuilder(
             $annotationReader,
@@ -435,9 +425,18 @@ class SchemaFactory
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe,
         );
+        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $this->container);
 
-        $typeGenerator      = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
-        $inputTypeUtils     = new InputTypeUtils($annotationReader, $namingStrategy);
+        foreach ($this->parameterMiddlewares as $parameterMapper) {
+            $parameterMiddlewarePipe->pipe($parameterMapper);
+        }
+        $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
+        $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
+        $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
+        $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
+
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
+        $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
         foreach ($nsList as $ns) {

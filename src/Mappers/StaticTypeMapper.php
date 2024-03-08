@@ -18,56 +18,34 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
 use function array_keys;
+use function array_map;
 use function array_reduce;
 
 /**
  * A simple implementation of the TypeMapperInterface that expects mapping to be passed in a setter.
- *
- * Note: no constructor argument as this results in a loop most of the time.
  */
 final class StaticTypeMapper implements TypeMapperInterface
 {
     /** @var array<string,MutableObjectType|MutableInterfaceType> */
-    private array $types = [];
-
-    /**
-     * An array mapping a fully qualified class name to the matching TypeInterface
-     *
-     * @param array<string,ObjectType|InterfaceType> $types
-     */
-    public function setTypes(array $types): void
-    {
-        foreach ($types as $className => $type) {
-            $type = $this->castOutputTypeToMutable($type);
-            $this->types[$className] = $type;
-        }
-    }
-
-    /** @var array<string,ResolvableMutableInputInterface&InputObjectType> */
-    private array $inputTypes = [];
-
-    /**
-     * An array mapping a fully qualified class name to the matching InputTypeInterface
-     *
-     * @param array<string,ResolvableMutableInputInterface &InputObjectType> $inputTypes
-     */
-    public function setInputTypes(array $inputTypes): void
-    {
-        $this->inputTypes = $inputTypes;
-    }
+    private readonly array $types;
 
     /** @var array<string,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> */
-    private array $notMappedTypes = [];
+    private readonly array $notMappedTypes;
 
     /**
-     * An array containing ObjectType or ResolvableMutableInputInterface instances that are not mapped by default to any class.
-     * ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
-     *
-     * @param array<int,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> $types
+     * @param array<string,ObjectType|InterfaceType> $types An array mapping a fully qualified class name to the matching TypeInterface
+     * @param array<string,ResolvableMutableInputInterface &InputObjectType> $inputTypes An array mapping a fully qualified class name to the matching InputTypeInterface
+     * @param array<int,Type&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)> $notMappedTypes An array containing ObjectType or ResolvableMutableInputInterface instances that are not mapped by default to any class.
+     *                              ObjectType not linked to any type by default will have to be accessed using the outputType attribute of the annotations.
      */
-    public function setNotMappedTypes(array $types): void
+    public function __construct(
+        array $types = [],
+        private readonly array $inputTypes = [],
+        array $notMappedTypes = [],
+    )
     {
-        $this->notMappedTypes = array_reduce($types, function ($result, Type $type) {
+        $this->types = array_map(fn (ObjectType|InterfaceType $type) => $this->castOutputTypeToMutable($type), $types);
+        $this->notMappedTypes = array_reduce($notMappedTypes, function ($result, Type $type) {
             if ($type instanceof ObjectType || $type instanceof InterfaceType) {
                 $type = $this->castOutputTypeToMutable($type);
             }

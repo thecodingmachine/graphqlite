@@ -34,9 +34,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
 
         $loggedAnnotation = $annotations->getAnnotationByType(Logged::class);
-        assert($loggedAnnotation === null || $loggedAnnotation instanceof Logged);
         $rightAnnotation = $annotations->getAnnotationByType(Right::class);
-        assert($rightAnnotation === null || $rightAnnotation instanceof Right);
 
         // Avoid wrapping resolver callback when no annotations are specified.
         if (! $loggedAnnotation && ! $rightAnnotation) {
@@ -44,9 +42,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         }
 
         $failWith = $annotations->getAnnotationByType(FailWith::class);
-        assert($failWith === null || $failWith instanceof FailWith);
         $hideIfUnauthorized = $annotations->getAnnotationByType(HideIfUnauthorized::class);
-        assert($hideIfUnauthorized instanceof HideIfUnauthorized || $hideIfUnauthorized === null);
 
         if ($failWith !== null && $hideIfUnauthorized !== null) {
             throw IncompatibleAnnotationsException::cannotUseFailWithAndHide();
@@ -57,7 +53,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
         if ($failWith !== null && $type instanceof NonNull && $failWith->getValue() === null) {
             $type = $type->getWrappedType();
             assert($type instanceof OutputType);
-            $queryFieldDescriptor->setType($type);
+            $queryFieldDescriptor = $queryFieldDescriptor->withType($type);
         }
 
         // When using the same Schema instance for multiple subsequent requests, this middleware will only
@@ -69,7 +65,7 @@ class AuthorizationFieldMiddleware implements FieldMiddlewareInterface
 
         $resolver = $queryFieldDescriptor->getResolver();
 
-        $queryFieldDescriptor->setResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
+        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (...$args) use ($rightAnnotation, $loggedAnnotation, $failWith, $resolver) {
             if ($this->isAuthorized($loggedAnnotation, $rightAnnotation)) {
                 return $resolver(...$args);
             }

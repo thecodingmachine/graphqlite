@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Error\DebugFlag;
+use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
 use Mouf\Composer\ClassNameMapper;
@@ -25,21 +29,19 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\PostType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
-
 
 class SchemaFactoryTest extends TestCase
 {
-
     public function testCreateSchema(): void
     {
         $container = new BasicAutoWiringContainer(new EmptyContainer());
@@ -69,7 +71,7 @@ class SchemaFactoryTest extends TestCase
 
         $factory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
         $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
-        $factory->setDoctrineAnnotationReader(new \Doctrine\Common\Annotations\AnnotationReader())
+        $factory->setDoctrineAnnotationReader(new AnnotationReader())
                 ->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
@@ -93,8 +95,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
@@ -140,8 +142,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
@@ -149,8 +151,7 @@ class SchemaFactoryTest extends TestCase
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
-        $this->expectException(CannotMapTypeException::class);
-        $this->doTestSchema($factory->createSchema());
+        $this->doTestSchemaWithError($factory->createSchema());
     }
 
     public function testException(): void
@@ -176,9 +177,8 @@ class SchemaFactoryTest extends TestCase
         $factory->createSchema();
     }
 
-    private function doTestSchema(Schema $schema): void
+    private function execTestQuery(Schema $schema): ExecutionResult
     {
-
         $schema->assertValid();
 
         $queryString = '
@@ -193,25 +193,41 @@ class SchemaFactoryTest extends TestCase
         }
         ';
 
-        $result = GraphQL::executeQuery(
+        return GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
+    }
 
+    private function doTestSchemaWithError(Schema $schema): void
+    {
+        $result = $this->execTestQuery($schema);
+        $resultArr = $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+        $this->assertArrayHasKey('errors', $resultArr);
+        $this->assertArrayNotHasKey('data', $resultArr);
+        $this->assertCount(1, $resultArr);
+        $this->assertSame('Unknown type "User"', $resultArr['errors'][0]['message']);
+    }
+
+    private function doTestSchema(Schema $schema): void
+    {
+        $result = $this->execTestQuery($schema);
+        $resultArr = $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+        $this->assertArrayHasKey('data', $resultArr);
         $this->assertSame([
             'contacts' => [
                 [
                     'name' => 'Joe',
-                    'uppercaseName' => 'JOE'
+                    'uppercaseName' => 'JOE',
                 ],
                 [
                     'name' => 'Bill',
                     'uppercaseName' => 'BILL',
-                    'email' => 'bill@example.com'
-                ]
+                    'email' => 'bill@example.com',
+                ],
 
-            ]
-        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS)['data']);
+            ],
+        ], $resultArr['data']);
     }
 
     public function testDuplicateQueryException(): void
@@ -219,8 +235,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
@@ -237,7 +253,7 @@ class SchemaFactoryTest extends TestCase
         ';
         GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
     }
 
@@ -246,8 +262,8 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(
-                new EmptyContainer()
-            )
+                new EmptyContainer(),
+            ),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
             ->setAuthorizationService(new VoidAuthorizationService())
@@ -264,7 +280,7 @@ class SchemaFactoryTest extends TestCase
         ';
         GraphQL::executeQuery(
             $schema,
-            $queryString
+            $queryString,
         );
     }
 }

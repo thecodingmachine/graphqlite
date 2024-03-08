@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class MagicPropertyResolverTest extends TestCase
@@ -11,23 +12,23 @@ class MagicPropertyResolverTest extends TestCase
 
     public function testExceptionInInvoke()
     {
-        $sourceResolver = new MagicPropertyResolver('test');
+        $sourceResolver = new MagicPropertyResolver(stdClass::class, 'test');
         $this->expectException(GraphQLRuntimeException::class);
-        $sourceResolver();
+
+        $sourceResolver(null);
     }
 
     public function testToString()
     {
-        $sourceResolver = new MagicPropertyResolver('test');
-        $sourceResolver->setObject(new stdClass());
+        $sourceResolver = new MagicPropertyResolver(stdClass::class, 'test');
+
         $this->assertSame("stdClass::__get('test')", $sourceResolver->toString());
     }
 
-    public function testGetObject()
+    public function testInvoke()
     {
-        $sourceResolver = new MagicPropertyResolver('test');
-        $obj = new stdClass();
-        $sourceResolver->setObject($obj);
-        $this->assertSame($obj, $sourceResolver->getObject());
+        $sourceResolver = new MagicPropertyResolver(TestTypeWithMagicProperty::class, 'test');
+
+        $this->assertSame('foo', $sourceResolver(new TestTypeWithMagicProperty()));
     }
 }

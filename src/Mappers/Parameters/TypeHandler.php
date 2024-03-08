@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\Fqsen;
@@ -41,6 +42,7 @@ use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
+use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
@@ -66,6 +68,7 @@ class TypeHandler implements ParameterHandlerInterface
         private readonly ArgumentResolver $argumentResolver,
         private readonly RootTypeMapperInterface $rootTypeMapper,
         private readonly TypeResolver $typeResolver,
+        private readonly CachedDocBlockFactory $cachedDocBlockFactory,
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
@@ -124,6 +127,27 @@ class TypeHandler implements ParameterHandlerInterface
         $varTags = $docBlock->getTagsByName('var');
 
         if (! $varTags) {
+            // If we don't have any @var tags, was this property promoted, and if so, do we have an
+            // @param tag on the constructor docblock?  If so, use that for the type.
+            if ($refProperty->isPromoted()) {
+                $refConstructor = $refProperty->getDeclaringClass()->getConstructor();
+                if (! $refConstructor) {
+                    return null;
+                }
+
+                $docBlock = $this->cachedDocBlockFactory->getDocBlock($refConstructor);
+                $paramTags = $docBlock->getTagsByName('param');
+                foreach ($paramTags as $paramTag) {
+                    if (! $paramTag instanceof Param) {
+                        continue;
+                    }
+
+                    if ($paramTag->getVariableName() === $refProperty->getName()) {
+                        return $paramTag->getType();
+                    }
+                }
+            }
+
             return null;
         }
 
@@ -188,6 +212,8 @@ class TypeHandler implements ParameterHandlerInterface
             }
         }
 
+        $description = $this->getParameterDescriptionFromDocBlock($docBlock, $parameter);
+
         $hasDefaultValue = false;
         $defaultValue = null;
         if ($parameter->allowsNull()) {
@@ -198,7 +224,28 @@ class TypeHandler implements ParameterHandlerInterface
             $defaultValue = $parameter->getDefaultValue();
         }
 
-        return new InputTypeParameter($parameter->getName(), $type, $hasDefaultValue, $defaultValue, $this->argumentResolver);
+        return new InputTypeParameter(
+            name: $parameter->getName(),
+            type: $type,
+            description: $description,
+            hasDefaultValue: $hasDefaultValue,
+            defaultValue: $defaultValue,
+            argumentResolver: $this->argumentResolver,
+        );
+    }
+
+    private function getParameterDescriptionFromDocBlock(DocBlock $docBlock, ReflectionParameter $parameter): string|null
+    {
+        /** @var DocBlock\Tags\Param[] $paramTags */
+        $paramTags = $docBlock->getTagsByName('param');
+
+        foreach ($paramTags as $paramTag) {
+            if ($paramTag->getVariableName() === $parameter->getName()) {
+                return $paramTag->getDescription()?->render();
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -291,10 +338,15 @@ class TypeHandler implements ParameterHandlerInterface
         $hasDefault = $defaultValue !== null || $isNullable;
         $fieldName = $argumentName ?? $refProperty->getName();
 
-        $inputProperty = new InputTypeProperty($refProperty->getName(), $fieldName, $inputType, $hasDefault, $defaultValue, $this->argumentResolver);
-        $inputProperty->setDescription(trim($docBlockComment));
-
-        return $inputProperty;
+        return new InputTypeProperty(
+            propertyName: $refProperty->getName(),
+            fieldName: $fieldName,
+            type: $inputType,
+            description: trim($docBlockComment),
+            hasDefaultValue: $hasDefault,
+            defaultValue: $defaultValue,
+            argumentResolver: $this->argumentResolver,
+        );
     }
 
     /**

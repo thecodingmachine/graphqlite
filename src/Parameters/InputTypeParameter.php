@@ -12,12 +12,15 @@ use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
 class InputTypeParameter implements InputTypeParameterInterface
 {
-    private bool $doesHaveDefaultValue;
-    private string|null $description = null;
-
-    public function __construct(private readonly string $name, private readonly InputType&Type $type, bool $hasDefaultValue, private readonly mixed $defaultValue, private readonly ArgumentResolver $argumentResolver)
+    public function __construct(
+        private readonly string $name,
+        private readonly InputType&Type $type,
+        private readonly string|null $description,
+        private readonly bool $hasDefaultValue,
+        private readonly mixed $defaultValue,
+        private readonly ArgumentResolver $argumentResolver,
+    )
     {
-        $this->doesHaveDefaultValue = $hasDefaultValue;
     }
 
     /** @param array<string, mixed> $args */
@@ -27,7 +30,7 @@ class InputTypeParameter implements InputTypeParameterInterface
             return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);
         }
 
-        if ($this->doesHaveDefaultValue) {
+        if ($this->hasDefaultValue) {
             return $this->defaultValue;
         }
 
@@ -52,7 +55,7 @@ class InputTypeParameter implements InputTypeParameterInterface
 
     public function hasDefaultValue(): bool
     {
-        return $this->doesHaveDefaultValue;
+        return $this->hasDefaultValue;
     }
 
     public function getDefaultValue(): mixed
@@ -63,10 +66,5 @@ class InputTypeParameter implements InputTypeParameterInterface
     public function getDescription(): string
     {
         return $this->description ?? '';
-    }
-
-    public function setDescription(string $description): void
-    {
-        $this->description = $description;
     }
 }

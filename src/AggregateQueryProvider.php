@@ -20,7 +20,9 @@ class AggregateQueryProvider implements QueryProviderInterface
     /** @param QueryProviderInterface[] $queryProviders */
     public function __construct(iterable $queryProviders)
     {
-        $this->queryProviders = is_array($queryProviders) ? $queryProviders : iterator_to_array($queryProviders);
+        $this->queryProviders = is_array($queryProviders)
+            ? $queryProviders
+            : iterator_to_array($queryProviders);
     }
 
     /** @return QueryField[] */
@@ -47,5 +49,18 @@ class AggregateQueryProvider implements QueryProviderInterface
         }
 
         return array_merge(...$mutationsArray);
+    }
+
+    /** @return QueryField[] */
+    public function getSubscriptions(): array
+    {
+        $subscriptionsArray = array_map(static function (QueryProviderInterface $queryProvider) {
+            return $queryProvider->getSubscriptions();
+        }, $this->queryProviders);
+        if ($subscriptionsArray === []) {
+            return [];
+        }
+
+        return array_merge(...$subscriptionsArray);
     }
 }

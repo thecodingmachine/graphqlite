@@ -19,9 +19,16 @@ class FieldMiddlewarePipeTest extends TestCase
             }
         };
 
+        $resolver = fn () => self::fail('Should not be called.');
+        $descriptor = new QueryFieldDescriptor(
+            name: 'foo',
+            type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
+        );
         $middlewarePipe = new FieldMiddlewarePipe();
 
-        $definition = $middlewarePipe->process(new QueryFieldDescriptor(), $finalHandler);
+        $definition = $middlewarePipe->process($descriptor, $finalHandler);
         $this->assertSame('foo', $definition->name);
 
         $middlewarePipe->pipe(new class implements FieldMiddlewareInterface {
@@ -31,7 +38,14 @@ class FieldMiddlewarePipeTest extends TestCase
             }
         });
 
-        $definition = $middlewarePipe->process(new QueryFieldDescriptor(), $finalHandler);
+        $descriptor = new QueryFieldDescriptor(
+            name: 'bar',
+            type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
+        );
+
+        $definition = $middlewarePipe->process($descriptor, $finalHandler);
         $this->assertSame('bar', $definition->name);
     }
 }

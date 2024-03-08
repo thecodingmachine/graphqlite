@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures81\Integration\Models;
+namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 

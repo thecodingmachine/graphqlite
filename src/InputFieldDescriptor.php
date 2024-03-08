@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\InputType;
-use GraphQL\Type\Definition\NullableType;
 use GraphQL\Type\Definition\Type;
-use ReflectionMethod;
-use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
-use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceConstructorParameterResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
-use TheCodingMachine\GraphQLite\Middlewares\SourceResolver;
+use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-
-use function is_callable;
+use TheCodingMachine\GraphQLite\Utils\Cloneable;
 
 /**
  * A class that describes a field to be created.
@@ -25,44 +21,38 @@ use function is_callable;
  */
 class InputFieldDescriptor
 {
-    private string $name;
-    /** @var (InputType&Type)|(InputType&Type&NullableType) */
-    private InputType&Type $type;
-    /** @var array<string, ParameterInterface> */
-    private array $parameters = [];
-    /** @var callable|null */
-    private $callable;
-    private string|null $targetMethodOnSource;
-    private string|null $targetPropertyOnSource;
+    use Cloneable;
 
     /**
-     * Implement in future PR
+     * @param array<string, ParameterInterface> $parameters
+     * @param callable $resolver
+     * @param bool $injectSource Whether we should inject the source as the first parameter or not.
      */
-    // private ?string $magicProperty;
-
-    /**
-     * Whether we should inject the source as the first parameter or not.
-     */
-    private bool $injectSource = false;
-    private string|null $comment = null;
-    private MiddlewareAnnotations $middlewareAnnotations;
-    private ReflectionMethod $refMethod;
-    private ReflectionProperty $refProperty;
-    private ResolverInterface|null $originalResolver = null;
-    /** @var callable */
-    private $resolver;
-    private bool $isUpdate = false;
-    private bool $hasDefaultValue = false;
-    private mixed $defaultValue = null;
+    public function __construct(
+        private readonly string $name,
+        private readonly InputType&Type $type,
+        private readonly mixed $resolver,
+        private readonly SourceInputPropertyResolver|SourceConstructorParameterResolver|SourceMethodResolver|ServiceResolver $originalResolver,
+        private readonly array $parameters = [],
+        private readonly bool $injectSource = false,
+        private readonly bool $forConstructorHydration = false,
+        private readonly string|null $comment = null,
+        private readonly MiddlewareAnnotations $middlewareAnnotations = new MiddlewareAnnotations([]),
+        private readonly bool $isUpdate = false,
+        private readonly bool $hasDefaultValue = false,
+        private readonly mixed $defaultValue = null,
+    )
+    {
+    }
 
     public function isUpdate(): bool
     {
         return $this->isUpdate;
     }
 
-    public function setIsUpdate(bool $isUpdate): void
+    public function withIsUpdate(bool $isUpdate): self
     {
-        $this->isUpdate = $isUpdate;
+        return $this->with(isUpdate: $isUpdate);
     }
 
     public function hasDefaultValue(): bool
@@ -70,9 +60,9 @@ class InputFieldDescriptor
         return $this->hasDefaultValue;
     }
 
-    public function setHasDefaultValue(bool $hasDefaultValue): void
+    public function withHasDefaultValue(bool $hasDefaultValue): self
     {
-        $this->hasDefaultValue = $hasDefaultValue;
+        return $this->with(hasDefaultValue: $hasDefaultValue);
     }
 
     public function getDefaultValue(): mixed
@@ -80,9 +70,9 @@ class InputFieldDescriptor
         return $this->defaultValue;
     }
 
-    public function setDefaultValue(mixed $defaultValue): void
+    public function withDefaultValue(mixed $defaultValue): self
     {
-        $this->defaultValue = $defaultValue;
+        return $this->with(defaultValue: $defaultValue);
     }
 
     public function getName(): string
@@ -90,20 +80,19 @@ class InputFieldDescriptor
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function withName(string $name): self
     {
-        $this->name = $name;
+        return $this->with(name: $name);
     }
 
-    /** @return ((InputType&Type)|(InputType&Type&NullableType))  */
     public function getType(): InputType&Type
     {
         return $this->type;
     }
 
-    public function setType(InputType&Type $type): void
+    public function withType(InputType&Type $type): self
     {
-        $this->type = $type;
+        return $this->with(type: $type);
     }
 
     /** @return array<string, ParameterInterface> */
@@ -113,56 +102,9 @@ class InputFieldDescriptor
     }
 
     /** @param array<string, ParameterInterface> $parameters */
-    public function setParameters(array $parameters): void
+    public function withParameters(array $parameters): self
     {
-        $this->parameters = $parameters;
-    }
-
-    /**
-     * Sets the callable targeting the resolver function if the resolver function is part of a service.
-     * This should not be used in the context of a field middleware.
-     * Use getResolver/setResolver if you want to wrap the resolver in another method.
-     */
-    public function setCallable(callable $callable): void
-    {
-        if ($this->originalResolver !== null) {
-            throw new GraphQLRuntimeException('You cannot modify the callable via setCallable because it was already used. You can still wrap the callable using getResolver/setResolver');
-        }
-
-        $this->callable = $callable;
-        $this->targetMethodOnSource = null;
-        $this->targetPropertyOnSource = null;
-
-        // To be enabled in a future PR
-        // $this->magicProperty = null;
-    }
-
-    public function setTargetMethodOnSource(string $targetMethodOnSource): void
-    {
-        if ($this->originalResolver !== null) {
-            throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
-        }
-
-        $this->callable = null;
-        $this->targetMethodOnSource = $targetMethodOnSource;
-        $this->targetPropertyOnSource = null;
-
-        // To be enabled in a future PR
-        // $this->magicProperty = null;
-    }
-
-    public function setTargetPropertyOnSource(string|null $targetPropertyOnSource): void
-    {
-        if ($this->originalResolver !== null) {
-            throw new GraphQLRuntimeException('You cannot modify the target method via setTargetMethodOnSource because it was already used. You can still wrap the callable using getResolver/setResolver');
-        }
-
-        $this->callable = null;
-        $this->targetMethodOnSource = null;
-        $this->targetPropertyOnSource = $targetPropertyOnSource;
-
-        // To be enabled in a future PR
-        // $this->magicProperty = null;
+        return $this->with(parameters: $parameters);
     }
 
     public function isInjectSource(): bool
@@ -170,9 +112,19 @@ class InputFieldDescriptor
         return $this->injectSource;
     }
 
-    public function setInjectSource(bool $injectSource): void
+    public function withInjectSource(bool $injectSource): self
     {
-        $this->injectSource = $injectSource;
+        return $this->with(injectSource: $injectSource);
+    }
+
+    public function isForConstructorHydration(): bool
+    {
+        return $this->forConstructorHydration;
+    }
+
+    public function withForConstructorHydration(bool $forConstructorHydration): self
+    {
+        return $this->with(forConstructorHydration: $forConstructorHydration);
     }
 
     public function getComment(): string|null
@@ -180,9 +132,9 @@ class InputFieldDescriptor
         return $this->comment;
     }
 
-    public function setComment(string|null $comment): void
+    public function withComment(string|null $comment): self
     {
-        $this->comment = $comment;
+        return $this->with(comment: $comment);
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations
@@ -190,55 +142,16 @@ class InputFieldDescriptor
         return $this->middlewareAnnotations;
     }
 
-    public function setMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): void
+    public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): self
     {
-        $this->middlewareAnnotations = $middlewareAnnotations;
-    }
-
-    public function getRefMethod(): ReflectionMethod
-    {
-        return $this->refMethod;
-    }
-
-    public function setRefMethod(ReflectionMethod $refMethod): void
-    {
-        $this->refMethod = $refMethod;
-    }
-
-    public function getRefProperty(): ReflectionProperty
-    {
-        return $this->refProperty;
-    }
-
-    public function setRefProperty(ReflectionProperty $refProperty): void
-    {
-        $this->refProperty = $refProperty;
+        return $this->with(middlewareAnnotations: $middlewareAnnotations);
     }
 
     /**
      * Returns the original callable that will be used to resolve the field.
      */
-    public function getOriginalResolver(): ResolverInterface
+    public function getOriginalResolver(): SourceInputPropertyResolver|SourceConstructorParameterResolver|SourceMethodResolver|ServiceResolver
     {
-        if (isset($this->originalResolver)) {
-            return $this->originalResolver;
-        }
-
-        if (is_callable($this->callable)) {
-            /** @var callable&array{0:object, 1:string} $callable */
-            $callable = $this->callable;
-            $this->originalResolver = new ServiceResolver($callable);
-        } elseif ($this->targetMethodOnSource !== null) {
-            $this->originalResolver = new SourceResolver($this->targetMethodOnSource);
-        } elseif ($this->targetPropertyOnSource !== null) {
-            $this->originalResolver = new SourceInputPropertyResolver($this->targetPropertyOnSource);
-            // } elseif ($this->magicProperty !== null) {
-            // Enable magic properties in a future PR
-            // $this->originalResolver = new MagicInputPropertyResolver($this->magicProperty);
-        } else {
-            throw new GraphQLRuntimeException('The InputFieldDescriptor should be passed either a resolve method (via setCallable) or a target method on source object (via setTargetMethodOnSource).');
-        }
-
         return $this->originalResolver;
     }
 
@@ -248,32 +161,11 @@ class InputFieldDescriptor
      */
     public function getResolver(): callable
     {
-        if ($this->resolver === null) {
-            $this->resolver = $this->getOriginalResolver();
-        }
-
         return $this->resolver;
     }
 
-    public function setResolver(callable $resolver): void
+    public function withResolver(callable $resolver): self
     {
-        $this->resolver = $resolver;
+        return $this->with(resolver: $resolver);
     }
-
-    /*
-    * Set the magic property
-    *
-    * @todo enable this in a future PR
-    *
-    * public function setMagicProperty(string $magicProperty): void
-    * {
-    * if ($this->originalResolver !== null) {
-    * throw new GraphQLRuntimeException('You cannot modify the target method via setMagicProperty because it was already used. You can still wrap the callable using getResolver/setResolver');
-    * }
-    * $this->callable = null;
-    * $this->targetMethodOnSource = null;
-    * $this->targetPropertyOnSource = null;
-    * $this->magicProperty = $magicProperty;
-    * }
-    */
 }

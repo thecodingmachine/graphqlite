@@ -3,7 +3,9 @@
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use stdClass;
+use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class SourceResolverTest extends TestCase
@@ -11,15 +13,15 @@ class SourceResolverTest extends TestCase
 
     public function testExceptionInInvoke()
     {
-        $sourceResolver = new SourceResolver('test');
+        $sourceResolver = new SourceMethodResolver(new ReflectionMethod(TestType::class, 'customField'));
         $this->expectException(GraphQLRuntimeException::class);
-        $sourceResolver();
+        $sourceResolver(null);
     }
 
     public function testToString()
     {
-        $sourceResolver = new SourceResolver('test');
-        $sourceResolver->setObject(new stdClass());
-        $this->assertSame('stdClass::test()', $sourceResolver->toString());
+        $sourceResolver = new SourceMethodResolver(new ReflectionMethod(TestType::class, 'customField'));
+
+        $this->assertSame('TheCodingMachine\GraphQLite\Fixtures\TestType::customField()', $sourceResolver->toString());
     }
 }

@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
@@ -29,8 +30,9 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
             ->willReturn(true);
         $middleware = new AuthorizationFieldMiddleware($authenticationService, $authorizationService);
 
-        $descriptor = $this->stubDescriptor([new Logged(), new Right('test')]);
-        $descriptor->setResolver(fn () => 123);
+        $descriptor = $this
+            ->stubDescriptor([new Logged(), new Right('test')])
+            ->withResolver(fn () => 123);
 
         $field = $middleware->process($descriptor, $this->stubFieldHandler());
 
@@ -100,11 +102,15 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
      */
     private function stubDescriptor(array $annotations): QueryFieldDescriptor
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setMiddlewareAnnotations(new MiddlewareAnnotations($annotations));
-        $descriptor->setResolver(fn () => self::fail('Should not be called.'));
+        $resolver = fn () => self::fail('Should not be called.');
 
-        return $descriptor;
+        return new QueryFieldDescriptor(
+            name: 'foo',
+            type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
+            middlewareAnnotations: new MiddlewareAnnotations($annotations),
+        );
     }
 
     private function stubFieldHandler(): FieldHandlerInterface
@@ -113,7 +119,7 @@ class AuthorizationFieldMiddlewareTest extends AbstractQueryProviderTest
             public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
             {
                 return new FieldDefinition([
-                    'name' => 'foo',
+                    'name' => $fieldDescriptor->getName(),
                     'resolve' => $fieldDescriptor->getResolver(),
                 ]);
             }

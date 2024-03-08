@@ -13,6 +13,7 @@
     "Usage": [
       "queries",
       "mutations",
+      "subscriptions",
       "type-mapping",
       "autowiring",
       "extend-type",
@@ -25,11 +26,13 @@
     "Security": [
       "authentication-authorization",
       "fine-grained-security",
-      "implementing-security"
+      "implementing-security",
+      "operation-complexity"
     ],
     "Performance": [
       "query-plan",
-      "prefetch-method"
+      "prefetch-method",
+      "automatic-persisted-queries"
     ],
     "Advanced": [
       "file-uploads",

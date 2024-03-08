@@ -18,18 +18,18 @@ jobs:
     strategy:
       matrix:
         install-args: ['', '--prefer-lowest']
-        php-version: ['8.1', '8.2']
+        php-version: ['8.1', '8.2', '8.3']
       fail-fast: false
 
     steps:
       # Cancel previous runs of the same branch
       - name: cancel
-        uses: styfle/cancel-workflow-action@0.10.1
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: "Checkout"
-        uses: "actions/checkout@v3"
+        uses: "actions/checkout@v4"
 
       - name: "Install PHP with extensions"
         uses: "shivammathur/setup-php@v2"
@@ -44,7 +44,7 @@ jobs:
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composercache.outputs.dir }}
           key: composer-${{ hashFiles('**/composer.json') }}-${{ matrix.install-args }}
@@ -61,7 +61,7 @@ jobs:
         run: "vendor/bin/phpunit"
 
       - name: phpstan-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: phpstan-${{ matrix.php-version }}-${{ matrix.install-args }}-${{ github.ref }}-${{ github.sha }}
           path: .phpstan-cache
@@ -76,16 +76,16 @@ jobs:
 
       - name: "Run coding standard checks with squizlabs/php_codesniffer"
         run: "composer cs-check"
-        if: ${{ matrix.php-version == '7.2' }} # Do not suggest using features after 7.2
 
       - name: "Archive code coverage results"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "codeCoverage"
           path: "build"
+          overwrite: true
 
-      - uses: codecov/codecov-action@v3.1.4 # upload the coverage to codecov
+      - uses: codecov/codecov-action@v4.0.1 # upload the coverage to codecov
         with:
-          fail_ci_if_error: true # optional (default = false)
-        # Do not upload in forks, and only on php8, latest deps
-        if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.0' && matrix.install-args == '' }}
+          fail_ci_if_error: false # optional (default = false) - Need CODECOV_TOKEN
+        # Do not upload in forks, and only on php8.3, latest deps
+        if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.3' && matrix.install-args == '' }}

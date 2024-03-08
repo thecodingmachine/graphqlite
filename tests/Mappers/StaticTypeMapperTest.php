@@ -31,37 +31,38 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
 
     public function setUp(): void
     {
-        $this->typeMapper = new StaticTypeMapper();
-        $this->typeMapper->setTypes([
-            TestObject::class => new MutableObjectType([
-                'name'    => 'TestObject',
-                'fields'  => [
-                    'test'   => Type::string(),
-                ],
-            ]),
-            TestObject2::class => new ObjectType([
-                'name'    => 'TestObject2',
-                'fields'  => [
-                    'test'   => Type::string(),
-                ],
-            ])
-        ]);
-        $this->typeMapper->setInputTypes([
-            TestObject::class => new MockResolvableInputObjectType([
-                'name'    => 'TestInputObject',
-                'fields'  => [
-                    'test'   => Type::string(),
-                ],
-            ])
-        ]);
-        $this->typeMapper->setNotMappedTypes([
-            new ObjectType([
-                'name' => 'TestNotMappedObject',
-                'fields'  => [
-                    'test'   => Type::string(),
-                ]
-            ])
-        ]);
+        $this->typeMapper = new StaticTypeMapper(
+            types: [
+                TestObject::class => new MutableObjectType([
+                    'name'    => 'TestObject',
+                    'fields'  => [
+                        'test'   => Type::string(),
+                    ],
+                ]),
+                TestObject2::class => new ObjectType([
+                    'name'    => 'TestObject2',
+                    'fields'  => [
+                        'test'   => Type::string(),
+                    ],
+                ])
+            ],
+            inputTypes: [
+                TestObject::class => new MockResolvableInputObjectType([
+                    'name'    => 'TestInputObject',
+                    'fields'  => [
+                        'test'   => Type::string(),
+                    ],
+                ])
+            ],
+            notMappedTypes: [
+                new ObjectType([
+                    'name' => 'TestNotMappedObject',
+                    'fields'  => [
+                        'test'   => Type::string(),
+                    ]
+                ])
+            ]
+        );
     }
 
     public function testStaticTypeMapper(): void
@@ -138,25 +139,25 @@ class StaticTypeMapperTest extends AbstractQueryProviderTest
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
         $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\StaticTypeMapper\\Controllers');
 
-        $staticTypeMapper = new StaticTypeMapper();
         // Let's register a type that maps by default to the "MyClass" PHP class
-        $staticTypeMapper->setTypes([
-            TestLegacyObject::class => new ObjectType([
-                'name' => 'TestLegacyObject',
-                'fields' => [
-                    'foo' => [
-                        'type' =>Type::int(),
-                        'resolve' => function(TestLegacyObject $source) {
-                            return $source->getFoo();
-                        }
+        $staticTypeMapper = new StaticTypeMapper(
+            types: [
+                TestLegacyObject::class => new ObjectType([
+                    'name' => 'TestLegacyObject',
+                    'fields' => [
+                        'foo' => [
+                            'type' =>Type::int(),
+                            'resolve' => function(TestLegacyObject $source) {
+                                return $source->getFoo();
+                            }
+                        ]
                     ]
-                ]
-            ]),
-        ]);
-
-        $staticTypeMapper->setNotMappedTypes([
-            new InterfaceType(['name' => 'FooInterface'])
-        ]);
+                ]),
+            ],
+            notMappedTypes: [
+                new InterfaceType(['name' => 'FooInterface'])
+            ]
+        );
 
         // Register the static type mapper in your application using the SchemaFactory instance
         $schemaFactory->addTypeMapper($staticTypeMapper);

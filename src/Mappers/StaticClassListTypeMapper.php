@@ -33,10 +33,38 @@ final class StaticClassListTypeMapper extends AbstractTypeMapper
     private array|null $classes = null;
 
     /** @param array<int, string> $classList The list of classes to analyze. */
-    public function __construct(private array $classList, TypeGenerator $typeGenerator, InputTypeGenerator $inputTypeGenerator, InputTypeUtils $inputTypeUtils, ContainerInterface $container, AnnotationReader $annotationReader, NamingStrategyInterface $namingStrategy, RecursiveTypeMapperInterface $recursiveTypeMapper, CacheInterface $cache, int|null $globTTL = 2, int|null $mapTTL = null)
-    {
-        $cachePrefix = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', implode('_', $classList));
-        parent::__construct($cachePrefix, $typeGenerator, $inputTypeGenerator, $inputTypeUtils, $container, $annotationReader, $namingStrategy, $recursiveTypeMapper, $cache, $globTTL, $mapTTL);
+    public function __construct(
+        private array $classList,
+        TypeGenerator $typeGenerator,
+        InputTypeGenerator $inputTypeGenerator,
+        InputTypeUtils $inputTypeUtils,
+        ContainerInterface $container,
+        AnnotationReader $annotationReader,
+        NamingStrategyInterface $namingStrategy,
+        RecursiveTypeMapperInterface $recursiveTypeMapper,
+        CacheInterface $cache,
+        int|null $globTTL = 2,
+        int|null $mapTTL = null,
+    ) {
+        $cachePrefix = str_replace(
+            ['\\', '{', '}', '(', ')', '/', '@', ':'],
+            '_',
+            implode('_', $classList),
+        );
+
+        parent::__construct(
+            $cachePrefix,
+            $typeGenerator,
+            $inputTypeGenerator,
+            $inputTypeUtils,
+            $container,
+            $annotationReader,
+            $namingStrategy,
+            $recursiveTypeMapper,
+            $cache,
+            $globTTL,
+            $mapTTL,
+        );
     }
 
     /**

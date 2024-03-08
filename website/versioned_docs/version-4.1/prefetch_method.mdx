@@ -56,12 +56,11 @@ Instead, GraphQLite offers an easier to implement solution: the ability to fetch
 #[Type]
 class PostType {
     /**
-     * @param Post $post
      * @param mixed $prefetchedUsers
      * @return User
      */
     #[Field(prefetchMethod: "prefetchUsers")]
-    public function getUser(Post $post, $prefetchedUsers): User
+    public function getUser($prefetchedUsers): User
     {
         // This method will receive the $prefetchedUsers as second argument. This is the return value of the "prefetchUsers" method below.
         // Using this prefetched list, it should be easy to map it to the post
@@ -92,11 +91,10 @@ class PostType {
 class PostType {
     /**
      * @Field(prefetchMethod="prefetchUsers")
-     * @param Post $post
      * @param mixed $prefetchedUsers
      * @return User
      */
-    public function getUser(Post $post, $prefetchedUsers): User
+    public function getUser($prefetchedUsers): User
     {
         // This method will receive the $prefetchedUsers as second argument. This is the return value of the "prefetchUsers" method below.
         // Using this prefetched list, it should be easy to map it to the post
@@ -143,12 +141,11 @@ For instance:
 #[Type]
 class PostType {
     /**
-     * @param Post $post
      * @param mixed $prefetchedComments
      * @return Comment[]
      */
     #[Field(prefetchMethod: "prefetchComments")]
-    public function getComments(Post $post, $prefetchedComments): array
+    public function getComments($prefetchedComments): array
     {
         // ...
     }
@@ -175,11 +172,10 @@ class PostType {
 class PostType {
     /**
      * @Field(prefetchMethod="prefetchComments")
-     * @param Post $post
      * @param mixed $prefetchedComments
      * @return Comment[]
      */
-    public function getComments(Post $post, $prefetchedComments): array
+    public function getComments($prefetchedComments): array
     {
         // ...
     }

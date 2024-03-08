@@ -23,9 +23,6 @@ class UseInputTypeTest extends TestCase
         (new UseInputType(['inputType' => 'foo']))->getTarget();
     }
 
-    /**
-     * @requires PHP >= 8.0
-     */
     public function testPhp8Annotation(): void
     {
         $attribute = new UseInputType('foo');

@@ -5,6 +5,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use Exception;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
@@ -14,9 +15,9 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class TestTypeWithInvalidPrefetchMethod
 {
     /**
-     * @Field(prefetchMethod="notExists")
+     * @Field()
      */
-    public function test(): string
+    public function test(object $source, #[Prefetch('notExists')] $data): string
     {
         return 'foo';
     }

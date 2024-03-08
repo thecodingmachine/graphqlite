@@ -16,9 +16,6 @@ class RightTest extends TestCase
         new Right([]);
     }
 
-    /**
-     * @requires PHP >= 8.0
-     */
     public function testPhp8Annotation(): void
     {
         $method = new ReflectionMethod(__CLASS__, 'method1');

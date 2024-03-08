@@ -31,8 +31,9 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
             ->willReturn(true);
         $middleware = new AuthorizationInputFieldMiddleware($authenticationService, $authorizationService);
 
-        $descriptor = $this->stubDescriptor([new Logged(), new Right('test')]);
-        $descriptor->setResolver(fn () => 123);
+        $descriptor = $this
+            ->stubDescriptor([new Logged(), new Right('test')])
+            ->withResolver(fn () => 123);
 
         $field = $middleware->process($descriptor, $this->stubFieldHandler());
 
@@ -83,12 +84,15 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
      */
     private function stubDescriptor(array $annotations): InputFieldDescriptor
     {
-        $descriptor = new InputFieldDescriptor();
-        $descriptor->setMiddlewareAnnotations(new MiddlewareAnnotations($annotations));
-        $descriptor->setTargetMethodOnSource('foo');
-        $descriptor->setResolver(fn () => self::fail('Should not be called.'));
+        $resolver = fn () => self::fail('Should not be called.');
 
-        return $descriptor;
+        return new InputFieldDescriptor(
+            name: 'foo',
+            type: Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
+            middlewareAnnotations: new MiddlewareAnnotations($annotations),
+        );
     }
 
     private function stubFieldHandler(): InputFieldHandlerInterface
@@ -97,17 +101,18 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
             public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
             {
                 return new InputField(
-                    name: 'foo',
-                    type: Type::string(),
+                    name: $inputFieldDescriptor->getName(),
+                    type: $inputFieldDescriptor->getType(),
                     arguments: [
                         'foo' => new SourceParameter(),
                     ],
                     originalResolver: $inputFieldDescriptor->getOriginalResolver(),
                     resolver: $inputFieldDescriptor->getResolver(),
+                    forConstructorHydration: false,
                     comment: null,
                     isUpdate: false,
                     hasDefaultValue: false,
-                    defaultValue: null
+                    defaultValue: null,
                 );
             }
         };

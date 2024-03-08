@@ -2,54 +2,35 @@
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use stdClass;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 
 class QueryFieldDescriptorTest extends TestCase
 {
-    public function testExceptionInSetCallable(): void
+    /**
+     * @dataProvider withAddedCommentLineProvider
+     */
+    public function testWithAddedCommentLine(string $expected, string|null $previous, string $added): void
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setCallable([$this, 'testExceptionInSetCallable']);
-        $descriptor->getResolver();
+        $resolver = fn () => null;
 
-        $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setCallable([$this, 'testExceptionInSetCallable']);
+        $descriptor = (new QueryFieldDescriptor(
+            'test',
+            Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
+            comment: $previous,
+        ))->withAddedCommentLines($added);
+
+        self::assertSame($expected, $descriptor->getComment());
     }
 
-    public function testExceptionInSetTargetMethodOnSource(): void
+    public static function withAddedCommentLineProvider(): iterable
     {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setTargetMethodOnSource('test');
-        $descriptor->getResolver();
-
-        $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setTargetMethodOnSource('test');
-    }
-
-    public function testExceptionInSetTargetPropertyOnSource(): void
-    {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setTargetPropertyOnSource('test');
-        $descriptor->getResolver();
-
-        $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setTargetPropertyOnSource('test');
-    }
-
-    public function testExceptionInSetMagicProperty(): void
-    {
-        $descriptor = new QueryFieldDescriptor();
-        $descriptor->setMagicProperty('test');
-        $descriptor->getResolver();
-
-        $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->setMagicProperty('test');
-    }
-
-    public function testExceptionInGetOriginalResolver(): void
-    {
-        $descriptor = new QueryFieldDescriptor();
-        $this->expectException(GraphQLRuntimeException::class);
-        $descriptor->getOriginalResolver();
+        yield ['', null, ''];
+        yield ['Asd', null, 'Asd'];
+        yield ["Some comment\nAsd", 'Some comment', 'Asd'];
     }
 }

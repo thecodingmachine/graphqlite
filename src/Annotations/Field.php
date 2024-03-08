@@ -6,6 +6,10 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
+
 /**
  * @Annotation
  * @Target({"PROPERTY", "METHOD"})
@@ -44,6 +48,7 @@ class Field extends AbstractRequest
     public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $prefetchMethod = null, string|array|null $for = null, string|null $description = null, string|null $inputType = null)
     {
         parent::__construct($attributes, $name, $outputType);
+
         $this->prefetchMethod = $prefetchMethod ?? $attributes['prefetchMethod'] ?? null;
         $this->description = $description ?? $attributes['description'] ?? null;
         $this->inputType = $inputType ?? $attributes['inputType'] ?? null;
@@ -54,6 +59,16 @@ class Field extends AbstractRequest
         }
 
         $this->for = (array) $forValue;
+
+        if (! $this->prefetchMethod) {
+            return;
+        }
+
+        trigger_error(
+            "Using #[Field(prefetchMethod='" . $this->prefetchMethod . "')] on fields is deprecated in favor " .
+            "of #[Prefetch('" . $this->prefetchMethod . "')] \$data attribute on the parameter itself.",
+            E_USER_DEPRECATED,
+        );
     }
 
     /**

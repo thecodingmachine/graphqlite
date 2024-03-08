@@ -14,4 +14,7 @@ interface QueryProviderInterface
 
     /** @return QueryField[] */
     public function getMutations(): array;
+
+    /** @return QueryField[] */
+    public function getSubscriptions(): array;
 }

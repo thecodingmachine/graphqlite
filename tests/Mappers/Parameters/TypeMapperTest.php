@@ -11,9 +11,10 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
-use TheCodingMachine\GraphQLite\Fixtures80\UnionOutputType;
+use TheCodingMachine\GraphQLite\Fixtures\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 
 class TypeMapperTest extends AbstractQueryProviderTest
@@ -21,7 +22,12 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testMapScalarUnionException(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $this->getCachedDocBlockFactory(),
+        );
 
         $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
 
@@ -33,14 +39,16 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
-    /**
-     * @requires PHP >= 8.0
-     */
     public function testMapObjectUnionWorks(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'objectUnion');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
@@ -55,14 +63,17 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
-    /**
-     * @requires PHP >= 8.0
-     */
+
     public function testMapObjectNullableUnionWorks(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'nullableObjectUnion');
         $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
@@ -81,9 +92,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
 
     public function testHideParameter(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod($this, 'withDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
@@ -98,11 +114,37 @@ class TypeMapperTest extends AbstractQueryProviderTest
         $this->assertSame(24, $param->resolve(null, [], null, $resolveInfo));
     }
 
+    public function testParameterWithDescription(): void
+    {
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
+
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
+
+        $refMethod = new ReflectionMethod($this, 'withParamDescription');
+        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $refParameter = $refMethod->getParameters()[0];
+
+        $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $this->getAnnotationReader()->getParameterAnnotations($refParameter));
+        $this->assertInstanceOf(InputTypeParameter::class, $parameter);
+        assert($parameter instanceof InputTypeParameter);
+        $this->assertEquals('Foo parameter', $parameter->getDescription());
+    }
+
     public function testHideParameterException(): void
     {
-        $typeMapper = new TypeHandler($this->getArgumentResolver(), $this->getRootTypeMapper(), $this->getTypeResolver());
+        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $cachedDocBlockFactory,
+        );
 
         $refMethod = new ReflectionMethod($this, 'withoutDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
@@ -119,6 +161,14 @@ class TypeMapperTest extends AbstractQueryProviderTest
      * @return int|string
      */
     private function dummy()
+    {
+
+    }
+
+    /**
+     * @param int $foo Foo parameter
+     */
+    private function withParamDescription(int $foo)
     {
 
     }

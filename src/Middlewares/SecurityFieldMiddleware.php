@@ -42,7 +42,6 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         }
 
         $failWith = $annotations->getAnnotationByType(FailWith::class);
-        assert($failWith instanceof FailWith || $failWith === null);
 
         // If the failWith value is null and the return type is non nullable, we must set it to nullable.
         $makeReturnTypeNullable = false;
@@ -62,7 +61,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             if ($makeReturnTypeNullable) {
                 $type = $type->getWrappedType();
                 assert($type instanceof OutputType);
-                $queryFieldDescriptor->setType($type);
+                $queryFieldDescriptor = $queryFieldDescriptor->withType($type);
             }
         }
 
@@ -71,8 +70,8 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
         $parameters = $queryFieldDescriptor->getParameters();
 
-        $queryFieldDescriptor->setResolver(function (...$args) use ($securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor, $originalResolver) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver);
+        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor) {
+            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));
 
             foreach ($securityAnnotations as $annotation) {
                 try {
@@ -93,7 +92,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
                 }
             }
 
-            return $resolver(...$args);
+            return $resolver($source, ...$args);
         });
 
         return $fieldHandler->handle($queryFieldDescriptor);
@@ -105,14 +104,14 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, ResolverInterface $callable): array
+    private function getVariables(array $args, array $parameters, object|null $source): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier
             'user' => $this->authenticationService->getUser(),
             'authorizationService' => $this->authorizationService, // Used by the is_granted expression language function.
             'authenticationService' => $this->authenticationService, // Used by the is_logged expression language function.
-            'this' => $callable->getObject(),
+            'this' => $source,
         ];
 
         $argsName = array_keys($parameters);

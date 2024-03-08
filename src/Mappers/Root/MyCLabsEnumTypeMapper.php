@@ -66,7 +66,13 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     ): InputType&\GraphQL\Type\Definition\Type
     {
         $result = $this->map($type);
-        return $result ?? $this->next->toGraphQLInputType($type, $subType, $argumentName, $reflector, $docBlockObj);
+        return $result ?? $this->next->toGraphQLInputType(
+            $type,
+            $subType,
+            $argumentName,
+            $reflector,
+            $docBlockObj,
+        );
     }
 
     private function map(Type $type): EnumType|null
@@ -101,7 +107,6 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
     }
 
-
     private function getTypeName(ReflectionClass $refClass): string
     {
         $enumType = $this->annotationReader->getEnumTypeAnnotation($refClass);
@@ -116,8 +121,8 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 
     /**
      * Returns a GraphQL type by name.
-     * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType", it should
-     * also map these types by name in the "mapNameToType" method.
+     * If this root type mapper can return this type in "toGraphQLOutputType" or "toGraphQLInputType",
+     * it should also map these types by name in the "mapNameToType" method.
      *
      * @param string $typeName The name of the GraphQL type
      */
@@ -125,7 +130,8 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     {
         // This is a hack to make sure "$schema->assertValid()" returns true.
         // The mapNameToType will fail if the mapByClassName method was not called before.
-        // This is actually not an issue in real life scenarios where enum types are never queried by type name.
+        // This is actually not an issue in real life scenarios where enum types are never queried
+        // by type name.
         if (isset($this->cacheByName[$typeName])) {
             return $this->cacheByName[$typeName];
         }
@@ -137,15 +143,6 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             assert($type !== null);
             return $type;
         }
-
-        /*if (strpos($typeName, 'MyCLabsEnum_') === 0) {
-            $className = str_replace('__', '\\', substr($typeName, 12));
-
-            $type = $this->mapByClassName($className);
-            if ($type !== null) {
-                return $type;
-            }
-        }*/
 
         return $this->next->mapNameToType($typeName);
     }
@@ -161,15 +158,16 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
             $this->nameToClassMapping = $this->cacheService->get('myclabsenum_name_to_class', function () {
                 $nameToClassMapping = [];
                 foreach ($this->namespaces as $ns) {
+                    /** @var class-string<Enum> $className */
                     foreach ($ns->getClassList() as $className => $classRef) {
                         if (! $classRef->isSubclassOf(Enum::class)) {
                             continue;
                         }
 
-                        /** @var class-string<Enum> $className */
                         $nameToClassMapping[$this->getTypeName($classRef)] = $className;
                     }
                 }
+
                 return $nameToClassMapping;
             });
         }
