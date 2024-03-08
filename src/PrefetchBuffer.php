@@ -36,7 +36,7 @@ class PrefetchBuffer
     ): string {
         if (
             null === $info
-            || null === ($queryBody = $info->operation->loc?->source->body)
+            || null === ($queryBody = $info->operation->loc?->source?->body)
         ) {
             return md5(serialize($arguments));
         }
