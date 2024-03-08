@@ -3,6 +3,7 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
 use function array_search;
 use function strtoupper;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
@@ -51,5 +52,53 @@ class ContactType
             'contacts' => $contacts,
             'prefix' => $prefix
         ];
+    }
+
+    /**
+     * @Field(prefetchMethod="prefetchPosts")
+     * @return Post[]|null
+     */
+    public function getPosts($contact, $posts): ?array
+    {
+        return $posts[$contact->getName()] ?? null;
+    }
+
+    public function prefetchPosts(iterable $contacts): array
+    {
+        $posts = [];
+        foreach ($contacts as $contact) {
+            $contactPost = array_filter(
+                $this->getContactPosts(),
+                fn(Post $post) => $post->author?->getName() === $contact->getName()
+            );
+
+            if ([] === $contactPost) {
+                continue;
+            }
+
+            $posts[$contact->getName()] = $contactPost;
+        }
+
+        return $posts;
+    }
+
+    private function getContactPosts(): array
+    {
+        return [
+            $this->generatePost('First Joe post', '1', new Contact('Joe')),
+            $this->generatePost('First Bill post', '2', new Contact('Bill')),
+            $this->generatePost('First Kate post', '3', new Contact('Kate')),
+        ];
+    }
+
+    private function generatePost(
+        string $title,
+        string $id,
+        Contact $author,
+    ): Post {
+        $post = new Post($title);
+        $post->id = $id;
+        $post->author = $author;
+        return $post;
     }
 }

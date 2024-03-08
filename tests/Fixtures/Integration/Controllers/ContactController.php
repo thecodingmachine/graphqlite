@@ -27,6 +27,18 @@ class ContactController
     }
 
     /**
+     * @Query()
+     */
+    public function getContact(string $name): ?Contact
+    {
+        return match( $name ) {
+            'Joe' => new Contact('Joe'),
+            'Bill' => new Contact('Bill'),
+             default => null,
+        };
+    }
+
+    /**
      * @Mutation()
      * @param Contact $contact
      * @return Contact

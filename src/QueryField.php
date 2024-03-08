@@ -104,10 +104,10 @@ final class QueryField extends FieldDefinition
 
                 $prefetchBuffer = $context->getPrefetchBuffer($this);
 
-                $prefetchBuffer->register($source, $args);
+                $prefetchBuffer->register($source, $args, $info);
 
                 return new Deferred(function () use ($prefetchBuffer, $source, $args, $context, $info, $prefetchArgs, $prefetchMethodName, $arguments, $resolveFn, $originalResolver) {
-                    if (! $prefetchBuffer->hasResult($args)) {
+                    if (! $prefetchBuffer->hasResult($args, $info)) {
                         if ($originalResolver instanceof SourceResolverInterface) {
                             $originalResolver->setObject($source);
                         }
@@ -115,7 +115,7 @@ final class QueryField extends FieldDefinition
                         // TODO: originalPrefetchResolver and prefetchResolver needed!!!
                         $prefetchCallable = [$originalResolver->getObject(), $prefetchMethodName];
 
-                        $sources = $prefetchBuffer->getObjectsByArguments($args);
+                        $sources = $prefetchBuffer->getObjectsByArguments($args, $info);
 
                         assert(is_callable($prefetchCallable));
                         $toPassPrefetchArgs = $this->paramsToArguments($prefetchArgs, $source, $args, $context, $info, $prefetchCallable);
@@ -123,9 +123,9 @@ final class QueryField extends FieldDefinition
                         array_unshift($toPassPrefetchArgs, $sources);
                         assert(is_callable($prefetchCallable));
                         $prefetchResult = $prefetchCallable(...$toPassPrefetchArgs);
-                        $prefetchBuffer->storeResult($prefetchResult, $args);
+                        $prefetchBuffer->storeResult($prefetchResult, $args, $info);
                     } else {
-                        $prefetchResult = $prefetchBuffer->getResult($args);
+                        $prefetchResult = $prefetchBuffer->getResult($args, $info);
                     }
 
                     foreach ($arguments as $argument) {
