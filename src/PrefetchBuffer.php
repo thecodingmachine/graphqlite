@@ -40,7 +40,7 @@ class PrefetchBuffer
             && isset($info->operation)
             && $info->operation->loc?->source?->body !== null
         ) {
-            return md5(serialize($arguments) . $info->operation->loc?->source?->body);
+            return md5(serialize($arguments) . $info->operation->loc->source->body);
         }
 
         return md5(serialize($arguments));
