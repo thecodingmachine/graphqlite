@@ -25,7 +25,7 @@ class PrefetchBuffer
     public function register(
         object $object,
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info = null,
     ): void {
         $this->objects[$this->computeHash($arguments, $info)][] = $object;
     }
@@ -33,7 +33,7 @@ class PrefetchBuffer
     /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     private function computeHash(
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info,
     ): string {
         if (
             $info instanceof ResolveInfo
@@ -53,7 +53,7 @@ class PrefetchBuffer
      */
     public function getObjectsByArguments(
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info = null,
     ): array {
         return $this->objects[$this->computeHash($arguments, $info)] ?? [];
     }
@@ -61,7 +61,7 @@ class PrefetchBuffer
     /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function purge(
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info = null,
     ): void {
         unset($this->objects[$this->computeHash($arguments, $info)]);
     }
@@ -70,7 +70,7 @@ class PrefetchBuffer
     public function storeResult(
         mixed $result,
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info = null,
     ): void {
         $this->results[$this->computeHash($arguments, $info)] = $result;
     }
@@ -78,7 +78,7 @@ class PrefetchBuffer
     /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function hasResult(
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info = null,
     ): bool {
         return array_key_exists($this->computeHash($arguments, $info), $this->results);
     }
@@ -86,7 +86,7 @@ class PrefetchBuffer
     /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function getResult(
         array $arguments,
-        mixed $info = null,
+        ResolveInfo|null $info = null,
     ): mixed {
         return $this->results[$this->computeHash($arguments, $info)];
     }
