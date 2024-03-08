@@ -28,7 +28,6 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactOtherType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\PostType;
-use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;

@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
@@ -23,14 +24,17 @@ class CompanyType
     }
 
     /**
-     * @Field(prefetchMethod="prefetchContacts")
+     * @Field()
      */
-    public function getContact(Company $company, array $contacts): ?Contact
-    {
+    public function getContact(
+        Company $company,
+        #[Prefetch('prefetchContacts')]
+        array $contacts
+    ): ?Contact {
         return $contacts[$company->name] ?? null;
     }
 
-    public function prefetchContacts(array $companies): array
+    public static function prefetchContacts(array $companies): array
     {
         $contacts = [];
 

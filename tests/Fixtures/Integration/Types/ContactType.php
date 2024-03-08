@@ -56,20 +56,23 @@ class ContactType
     }
 
     /**
-     * @Field(prefetchMethod="prefetchPosts")
+     * @Field()
      * @return Post[]|null
      */
-    public function getPosts($contact, $posts): ?array
-    {
+    public function getPosts(
+        Contact $contact,
+        #[Prefetch('prefetchPosts')]
+        $posts
+    ): ?array {
         return $posts[$contact->getName()] ?? null;
     }
 
-    public function prefetchPosts(iterable $contacts): array
+    public static function prefetchPosts(iterable $contacts): array
     {
         $posts = [];
         foreach ($contacts as $contact) {
             $contactPost = array_filter(
-                $this->getContactPosts(),
+                self::getContactPosts(),
                 fn(Post $post) => $post->author?->getName() === $contact->getName()
             );
 
@@ -83,16 +86,16 @@ class ContactType
         return $posts;
     }
 
-    private function getContactPosts(): array
+    private static function getContactPosts(): array
     {
         return [
-            $this->generatePost('First Joe post', '1', new Contact('Joe')),
-            $this->generatePost('First Bill post', '2', new Contact('Bill')),
-            $this->generatePost('First Kate post', '3', new Contact('Kate')),
+            self::generatePost('First Joe post', '1', new Contact('Joe')),
+            self::generatePost('First Bill post', '2', new Contact('Bill')),
+            self::generatePost('First Kate post', '3', new Contact('Kate')),
         ];
     }
 
-    private function generatePost(
+    private static function generatePost(
         string $title,
         string $id,
         Contact $author,
