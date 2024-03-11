@@ -18,12 +18,16 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers\ContactController;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\CompanyType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactOtherType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\PostType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
@@ -118,6 +122,10 @@ class SchemaFactoryTest extends TestCase
             ContactFactory::class,
             ContactOtherType::class,
             ContactType::class,
+            Post::class,
+            PostType::class,
+            Company::class,
+            CompanyType::class,
             ExtendedContactType::class,
             User::class,
         ]));

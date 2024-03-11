@@ -8,6 +8,9 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
+use GraphQL\Server\Helper;
+use GraphQL\Server\OperationParams;
+use GraphQL\Server\ServerConfig;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
@@ -21,6 +24,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Context\Context;
+use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\ValidationException;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
@@ -176,6 +180,70 @@ class EndToEndTest extends IntegrationTestCase
 
             ],
         ], $this->getSuccessResult($result));
+    }
+
+    public function testBatchPrefetching(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $schema->assertValid();
+
+        $queryContact = 'query { contact (name: "Joe") { name  posts { id  title } } } ';
+        $queryCompanyWithContact = 'query { company (id: "1"){ name contact  { name  posts { id  title } } } } ';
+
+        $config = ServerConfig::create(
+            [
+                'schema' => $schema,
+                'context' => new Context(),
+                'queryBatching' => true,
+                'errorFormatter' => [WebonyxErrorHandler::class, 'errorFormatter'],
+                'errorsHandler' => [WebonyxErrorHandler::class, 'errorHandler'],
+            ]
+        );
+
+        $result = (new Helper())->executeBatch(
+            $config,
+            [
+                /** Set specific prefetch result to buffer */
+                OperationParams::create(['query' => $queryContact]),
+                /** Use prefetch data from previous operation instead of getting specific prefetch */
+                OperationParams::create(['query' => $queryCompanyWithContact]),
+            ]
+        );
+
+        $this->assertSame(
+            [
+                'contact' => [
+                    'name' => 'Joe',
+                    'posts' => [
+                        [
+                            'id' => 1,
+                            'title' => 'First Joe post',
+                        ],
+                    ],
+                ],
+            ],
+            $this->getSuccessResult($result[0])
+        );
+
+        $this->assertSame(
+            [
+                'company' => [
+                    'name' => 'Company',
+                    'contact' => [
+                        'name' => 'Kate',
+                        'posts' => [
+                            [
+                                'id' => 3,
+                                'title' => 'First Kate post',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            $this->getSuccessResult($result[1])
+        );
     }
 
     public function testDeprecatedField(): void

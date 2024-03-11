@@ -26,6 +26,16 @@ class ContactController
         ];
     }
 
+    #[Query]
+    public function getContact(string $name): ?Contact
+    {
+        return match( $name ) {
+            'Joe' => new Contact('Joe'),
+            'Bill' => new Contact('Bill'),
+            default => null,
+        };
+    }
+
     #[Mutation]
     public function saveContact(Contact $contact): Contact
     {

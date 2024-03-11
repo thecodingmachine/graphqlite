@@ -43,7 +43,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         }
 
         $prefetchBuffer = $context->getPrefetchBuffer($this);
-        $prefetchBuffer->register($source, $args);
+        $prefetchBuffer->register($source, $args, $info);
 
         // The way this works is simple: GraphQL first iterates over every requested field and calls ->resolve()
         // on it. That, in turn, calls this method. GraphQL doesn't need the actual value just yet; it simply
@@ -53,20 +53,20 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         // needed, GraphQL calls the callback of Deferred below. That's when we call the prefetch method,
         // already knowing all the requested fields (source-arguments combinations).
         return new Deferred(function () use ($info, $context, $args, $prefetchBuffer) {
-            if (! $prefetchBuffer->hasResult($args)) {
+            if (! $prefetchBuffer->hasResult($args, $info)) {
                 $prefetchResult = $this->computePrefetch($args, $context, $info, $prefetchBuffer);
 
-                $prefetchBuffer->storeResult($prefetchResult, $args);
+                $prefetchBuffer->storeResult($prefetchResult, $args, $info);
             }
 
-            return $prefetchResult ?? $prefetchBuffer->getResult($args);
+            return $prefetchResult ?? $prefetchBuffer->getResult($args, $info);
         });
     }
 
     /** @param array<string, mixed> $args */
     private function computePrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): mixed
     {
-        $sources = $prefetchBuffer->getObjectsByArguments($args);
+        $sources = $prefetchBuffer->getObjectsByArguments($args, $info);
         $toPassPrefetchArgs = QueryField::paramsToArguments($this->fieldName, $this->parameters, null, $args, $context, $info, $this->resolver);
 
         return ($this->resolver)($sources, ...$toPassPrefetchArgs);
