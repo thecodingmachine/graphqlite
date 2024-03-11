@@ -86,3 +86,9 @@ That's it, you're good to go :tada: mutate away!
 ```
 
 Want to learn more? Head to the [documentation](https://graphqlite.thecodingmachine.io/)!
+
+## Contributing
+
+Contributions are welcomed via pull requests.  If you'd like to discuss prior to submitting a PR, consider a [discussion](https://github.com/thecodingmachine/graphqlite/discussions).  If it's a bug/issue, you can [submit an issue](https://github.com/thecodingmachine/graphqlite/issues) first.
+
+All PRs should have sufficient test coverage for any additions or changes.  PRs will not be merged without these.
