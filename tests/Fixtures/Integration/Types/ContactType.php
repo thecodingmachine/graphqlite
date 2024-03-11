@@ -56,9 +56,10 @@ class ContactType
     }
 
     /**
-     * @Field()
+     *
      * @return Post[]|null
      */
+    #[Field]
     public function getPosts(
         Contact $contact,
         #[Prefetch('prefetchPosts')]
@@ -76,7 +77,7 @@ class ContactType
                 fn(Post $post) => $post->author?->getName() === $contact->getName()
             );
 
-            if ([] === $contactPost) {
+            if (!$contactPost) {
                 continue;
             }
 

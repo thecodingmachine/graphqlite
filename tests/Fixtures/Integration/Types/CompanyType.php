@@ -10,22 +10,17 @@ use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
-/**
- * @ExtendType(class=Company::class)
- */
+#[ExtendType(class:Company::class)]
 class CompanyType
 {
-   /**
-     * @Field()
-     */
+
+    #[Field]
     public function getName(Company $company): string
     {
         return $company->name;
     }
 
-    /**
-     * @Field()
-     */
+    #[Field]
     public function getContact(
         Company $company,
         #[Prefetch('prefetchContacts')]

@@ -9,7 +9,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
 
 class CompanyController
 {
-    /** @Query() */
+    #[Query]
     public function getCompany(string $id): Company
     {
         return new Company('Company');

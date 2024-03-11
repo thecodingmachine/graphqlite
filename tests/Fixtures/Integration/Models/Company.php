@@ -6,9 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type()
- */
+#[Type]
 class Company
 {
     public function __construct(
