@@ -52,7 +52,7 @@ final class NS
             /** @var array<class-string, string> $classes Override class-explorer lib */
             $classes = $explorer->getClassMap();
             foreach ($classes as $className => $phpFile) {
-                if (!$this->loadClass($className, $phpFile)) {
+                if (! $this->loadClass($className, $phpFile)) {
                     continue;
                 }
 
