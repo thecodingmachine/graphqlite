@@ -30,7 +30,7 @@ class NSTest extends TestCase
             autoload: $autoload,
         );
 
-        self::assertSame($expectedClasses, array_keys($ns->getClassList()));
+        self::assertEqualsCanonicalizing($expectedClasses, array_keys($ns->getClassList()));
     }
 
     public static function loadsClassListProvider(): iterable
