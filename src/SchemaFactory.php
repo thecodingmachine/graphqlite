@@ -78,7 +78,7 @@ class SchemaFactory
     /** @var array<int,string> */
     private array $controllerNamespaces = [];
 
-    /** @var array<int,string> */
+    /** @var array<int, array{ string, bool }> */
     private array $typeNamespaces = [];
 
     /** @var QueryProviderInterface[] */
@@ -142,10 +142,12 @@ class SchemaFactory
 
     /**
      * Registers a namespace that can contain GraphQL types.
+     *
+     * @param bool $autoload Use autoloading when scanning classes. Set to `false` to use `require_once` instead.
      */
-    public function addTypeNamespace(string $namespace): self
+    public function addTypeNamespace(string $namespace, bool $autoload = true): self
     {
-        $this->typeNamespaces[] = $namespace;
+        $this->typeNamespaces[] = [$namespace, $autoload];
 
         return $this;
     }
@@ -346,7 +348,11 @@ class SchemaFactory
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
         $nsList = array_map(
-            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
+            static function (array $namespacePair) use ($namespaceFactory) {
+                [$namespace, $autoload] = $namespacePair;
+
+                return $namespaceFactory->createNamespace($namespace, autoload: $autoload);
+            },
             $this->typeNamespaces,
         );
 

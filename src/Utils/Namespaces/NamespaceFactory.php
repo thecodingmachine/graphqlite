@@ -22,8 +22,15 @@ final class NamespaceFactory
     }
 
     /** @param string $namespace A PHP namespace */
-    public function createNamespace(string $namespace, bool $recursive = true): NS
+    public function createNamespace(string $namespace, bool $recursive = true, bool $autoload = true): NS
     {
-        return new NS($namespace, $this->cache, $this->classNameMapper, $this->globTTL, $recursive);
+        return new NS(
+            namespace: $namespace,
+            cache: $this->cache,
+            classNameMapper: $this->classNameMapper,
+            globTTL: $this->globTTL,
+            recursive: $recursive,
+            autoload: $autoload,
+        );
     }
 }

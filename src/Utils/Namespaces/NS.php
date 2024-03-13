@@ -22,9 +22,8 @@ final class NS
     /**
      * The array of globbed classes.
      * Only instantiable classes are returned.
-     * Key: fully qualified class name
      *
-     * @var array<string,ReflectionClass<object>>
+     * @var array<class-string, ReflectionClass<object>>
      */
     private array|null $classes = null;
 
@@ -35,6 +34,7 @@ final class NS
         private readonly ClassNameMapper $classNameMapper,
         private readonly int|null $globTTL,
         private readonly bool $recursive,
+        private readonly bool $autoload = true,
     ) {
     }
 
@@ -42,7 +42,7 @@ final class NS
      * Returns the array of globbed classes.
      * Only instantiable classes are returned.
      *
-     * @return array<class-string,ReflectionClass<object>> Key: fully qualified class name
+     * @return array<class-string, ReflectionClass<object>> Key: fully qualified class name
      */
     public function getClassList(): array
     {
@@ -52,31 +52,47 @@ final class NS
             /** @var array<class-string, string> $classes Override class-explorer lib */
             $classes = $explorer->getClassMap();
             foreach ($classes as $className => $phpFile) {
-                if (! class_exists($className, false) && ! interface_exists($className, false)) {
-                    // Let's try to load the file if it was not imported yet.
-                    // We are importing the file manually to avoid triggering the autoloader.
-                    // The autoloader might trigger errors if the file does not respect PSR-4 or if the
-                    // Symfony DebugAutoLoader is installed. (see https://github.com/thecodingmachine/graphqlite/issues/216)
-                    require_once $phpFile;
-                    // Does it exists now?
-                    // @phpstan-ignore-next-line
-                    if (! class_exists($className, false) && ! interface_exists($className, false)) {
-                        continue;
-                    }
+                if (!$this->loadClass($className, $phpFile)) {
+                    continue;
                 }
 
-                $refClass = new ReflectionClass($className);
-
-                $this->classes[$className] = $refClass;
+                $this->classes[$className] = new ReflectionClass($className);
             }
         }
 
-        // @phpstan-ignore-next-line - Not sure why we cannot annotate the $classes above
         return $this->classes;
     }
 
     public function getNamespace(): string
     {
         return $this->namespace;
+    }
+
+    /**
+     * Attempt to load a class depending on the @see $autoload setting.
+     *
+     * @param class-string $className
+     */
+    private function loadClass(string $className, string $phpFile): bool
+    {
+        if (class_exists($className, $this->autoload) || interface_exists($className, $this->autoload)) {
+            return true;
+        }
+
+        // If autoloading was requested and there's no class by this name, then it's most likely that the
+        // guessed class name from GlobClassExplorer is simply not a class, so we'll skip it.
+        // See: https://github.com/thecodingmachine/graphqlite/issues/659
+        if ($this->autoload) {
+            return false;
+        }
+
+        // Otherwise attempt to load the file without autoloading.
+        // The autoloader might trigger errors if the file does not respect PSR-4 or if the
+        // Symfony DebugAutoLoader is installed. (see https://github.com/thecodingmachine/graphqlite/issues/216)
+        require_once $phpFile;
+
+        // The class might still not be loaded if guessed class name doesn't match the PHP file,
+        // so we should check if it got loaded after requiring the PHP file.
+        return class_exists($className, false) || interface_exists($className, false);
     }
 }
