@@ -174,7 +174,7 @@ $builder->useAutomaticPersistedQueries($cache, new DateInterval('PT1H'));
 
 In this example, we will focus on getting a working version of GraphQLite using:
 
-- [Zend Stratigility](https://docs.zendframework.com/zend-stratigility/) as a PSR-15 server
+- [Laminas Stratigility](https://docs.laminas.dev/laminas-stratigility/) as a PSR-15 server
 - `mouf/picotainer` (a micro-container) for the PSR-11 container
 - `symfony/cache ` for the PSR-16 cache
 
@@ -189,9 +189,9 @@ The choice of the libraries is really up to you. You can adapt it based on your 
   },
   "require": {
     "thecodingmachine/graphqlite": "^4",
-    "zendframework/zend-diactoros": "^2",
-    "zendframework/zend-stratigility": "^3",
-    "zendframework/zend-httphandlerrunner": "^1.0",
+    "laminas/laminas-diactoros": "^2",
+    "laminas/laminas-stratigility": "^3",
+    "laminas/laminas-httphandlerrunner": "^2",
     "mouf/picotainer": "^1.1",
     "symfony/cache": "^4.2"
   },
@@ -206,11 +206,11 @@ The choice of the libraries is really up to you. You can adapt it based on your 
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\ServerRequestFactory;
-use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
-use Zend\Stratigility\Middleware\ErrorResponseGenerator;
-use Zend\Stratigility\MiddlewarePipe;
+use Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter;
+use Laminas\Stratigility\Middleware\ErrorResponseGenerator;
+use Laminas\Stratigility\MiddlewarePipe;
 use Laminas\Diactoros\Server;
-use Zend\HttpHandlerRunner\RequestHandlerRunner;
+use Laminas\HttpHandlerRunner\RequestHandlerRunner;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -232,7 +232,7 @@ $runner = new RequestHandlerRunner(
 $runner->run();
 ```
 
-Here we are initializing a Zend `RequestHandler` (it receives requests) and we pass it to a Zend Stratigility `MiddlewarePipe`.
+Here we are initializing a Laminas `RequestHandler` (it receives requests) and we pass it to a Laminas Stratigility `MiddlewarePipe`.
 This `MiddlewarePipe` comes from the container declared in the `config/container.php` file:
 
 ```php title="config/container.php"
@@ -245,7 +245,7 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Simple\ApcuCache;
 use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\SchemaFactory;
-use Zend\Stratigility\MiddlewarePipe;
+use Laminas\Stratigility\MiddlewarePipe;
 
 // Picotainer is a minimalist PSR-11 container.
 return new Picotainer([
