@@ -9,7 +9,8 @@ use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use GraphQL\Type\SchemaConfig;
-use Mouf\Composer\ClassNameMapper;
+use Kcs\ClassFinder\Finder\ComposerFinder;
+use Kcs\ClassFinder\Finder\RecursiveFinder;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -89,7 +90,7 @@ class SchemaFactoryTest extends TestCase
         $this->doTestSchema($schema);
     }
 
-    public function testClassNameMapperInjectionWithValidMapper(): void
+    public function testFinderInjectionWithValidMapper(): void
     {
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
@@ -99,7 +100,7 @@ class SchemaFactoryTest extends TestCase
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
-                ->setClassNameMapper(ClassNameMapper::createFromComposerFile(null, null, true))
+                ->setFinder(new ComposerFinder())
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
@@ -136,7 +137,7 @@ class SchemaFactoryTest extends TestCase
         $this->doTestSchema($schema);
     }
 
-    public function testClassNameMapperInjectionWithInvalidMapper(): void
+    public function testFinderInjectionWithInvalidMapper(): void
     {
         $factory = new SchemaFactory(
             new Psr16Cache(new ArrayAdapter()),
@@ -146,7 +147,7 @@ class SchemaFactoryTest extends TestCase
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
-                ->setClassNameMapper(new ClassNameMapper())
+                ->setFinder(new RecursiveFinder(__DIR__ . '/Annotations'))
                 ->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers')
                 ->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 

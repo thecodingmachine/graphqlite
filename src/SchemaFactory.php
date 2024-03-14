@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\SchemaConfig;
-use Mouf\Composer\ClassNameMapper;
+use Kcs\ClassFinder\Finder\FinderInterface;
 use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
 use Psr\Cache\CacheItemPoolInterface;
@@ -109,7 +109,7 @@ class SchemaFactory
 
     private NamingStrategyInterface|null $namingStrategy = null;
 
-    private ClassNameMapper|null $classNameMapper = null;
+    private FinderInterface|null $finder = null;
 
     private SchemaConfig|null $schemaConfig = null;
 
@@ -262,9 +262,9 @@ class SchemaFactory
         return $this;
     }
 
-    public function setClassNameMapper(ClassNameMapper $classNameMapper): self
+    public function setFinder(FinderInterface $finder): self
     {
-        $this->classNameMapper = $classNameMapper;
+        $this->finder = $finder;
 
         return $this;
     }
@@ -344,7 +344,7 @@ class SchemaFactory
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
 
-        $namespaceFactory = new NamespaceFactory($namespacedCache, $this->classNameMapper, $this->globTTL);
+        $namespaceFactory = new NamespaceFactory($namespacedCache, $this->finder, $this->globTTL);
         $nsList = array_map(
             static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
             $this->typeNamespaces,
@@ -493,7 +493,7 @@ class SchemaFactory
                 $this->container,
                 $annotationReader,
                 $namespacedCache,
-                $this->classNameMapper,
+                $this->finder,
                 $this->globTTL,
             );
         }
