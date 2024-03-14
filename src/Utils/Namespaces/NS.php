@@ -8,6 +8,7 @@ use Kcs\ClassFinder\Finder\FinderInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * The NS class represents a PHP Namespace and provides utility methods to explore those classes.
@@ -43,9 +44,22 @@ final class NS
     public function getClassList(): array
     {
         if ($this->classes === null) {
-            $cacheKey = 'GraphQLite_NS_' . $this->namespace;
+            $cacheKey = 'GraphQLite_NS_' . preg_replace('/[\/{}()\\\\@:]/', '', $this->namespace);
             try {
-                $this->classes = $this->cache->get($cacheKey);
+                $classes = $this->cache->get($cacheKey);
+                if ($classes !== null) {
+                    foreach ($classes as $class) {
+                        if (class_exists($class, false) ||
+                            interface_exists($class, false) ||
+                            trait_exists($class, false)) {
+                            try {
+                                $this->classes[$class] = new ReflectionClass($class);
+                            } catch (ReflectionException) {
+                                // @ignoreException
+                            }
+                        }
+                    }
+                }
             } catch (InvalidArgumentException) {
                 $this->classes = null;
             }
@@ -62,7 +76,7 @@ final class NS
                     $this->classes[$className] = $reflector;
                 }
                 try {
-                    $this->cache->set($cacheKey, $this->classes, $this->globTTL);
+                    $this->cache->set($cacheKey, array_keys($this->classes), $this->globTTL);
                 } catch (InvalidArgumentException) {
                     // @ignoreException
                 }
