@@ -102,15 +102,63 @@ $result = GraphQL::executeQuery($schema, $query, null, new Context(), $variableV
 
 The smallest working example using no framework is:
 
-```php
+```json title="composer.json"
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {
+    "thecodingmachine/graphqlite": "^6",
+    "mouf/picotainer": "^1.1",
+    "symfony/cache": "^4.2"
+  }
+}
+```
+
+```php title="src/Controllers/MyController.php"
+<?php
+namespace App\Controllers;
+
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+class MyController
+{
+    #[Query]
+    public function hello(string $name): string
+    {
+        return 'Hello '.$name;
+    }
+}
+```
+
+```php title="index.php"
 <?php
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Context\Context;
 
-// $cache is a PSR-16 compatible cache.
-// $container is a PSR-11 compatible container.
+use Symfony\Component\Cache\Simple\ApcuCache;
+use Mouf\Picotainer\Picotainer;
+use GraphQL\Utils\SchemaPrinter;
+use App\Controllers\MyController;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// $cache is any PSR-16 compatible cache; ApcuCache has good performance,
+// FilesystemCache is a low-dependency alternative if APCu is not available.
+$cache = new ApcuCache();
+
+// $container is any PSR-11 compatible container which has
+// been populated with your controller classes.
+$container = new Picotainer([
+        MyController::class => function() {
+                return new MyController();
+        },
+]);
+
 $factory = new SchemaFactory($cache, $container);
 $factory->addControllerNamespace('App\\Controllers\\')
         ->addTypeNamespace('App\\');
@@ -128,6 +176,23 @@ $output = $result->toArray();
 header('Content-Type: application/json');
 echo json_encode($output);
 ```
+
+Then to install dependencies and run the server:
+```console
+$ composer install
+$ php -S localhost:8080
+```
+
+And check that it works:
+```console
+$ curl -X POST -d '{"query":"{ hello(name: \"World\") }"}' -H "Content-Type: application/json" http://localhost:8080
+```
+
+If all is working correctly this should output:
+```json
+{"data":{"hello":"Hello World"}}
+```
+
 
 ## PSR-15 Middleware
 
