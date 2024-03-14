@@ -10,6 +10,12 @@ use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 
+use function array_keys;
+use function class_exists;
+use function interface_exists;
+use function preg_replace;
+use function trait_exists;
+
 /**
  * The NS class represents a PHP Namespace and provides utility methods to explore those classes.
  *
@@ -49,18 +55,18 @@ final class NS
                 $classes = $this->cache->get($cacheKey);
                 if ($classes !== null) {
                     foreach ($classes as $class) {
-                        if (class_exists($class, false) ||
-                            interface_exists($class, false) ||
-                            trait_exists($class, false)) {
-                            try {
-                                $this->classes[$class] = new ReflectionClass($class);
-                            } catch (ReflectionException) {
-                                // @ignoreException
-                            }
+                        if (
+                            ! class_exists($class, false) &&
+                            ! interface_exists($class, false) &&
+                            ! trait_exists($class, false)
+                        ) {
+                            continue;
                         }
+
+                            $this->classes[$class] = new ReflectionClass($class);
                     }
                 }
-            } catch (InvalidArgumentException) {
+            } catch (InvalidArgumentException | ReflectionException) {
                 $this->classes = null;
             }
 
