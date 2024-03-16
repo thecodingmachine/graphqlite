@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Utils\Namespaces;
 
+use Exception;
 use Kcs\ClassFinder\Finder\FinderInterface;
+use Psr\SimpleCache\CacheException;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
@@ -38,7 +40,8 @@ final class NS
         private readonly CacheInterface $cache,
         private readonly FinderInterface $finder,
         private readonly int|null $globTTL,
-    ) {
+    )
+    {
     }
 
     /**
@@ -60,13 +63,15 @@ final class NS
                             ! interface_exists($class, false) &&
                             ! trait_exists($class, false)
                         ) {
-                            continue;
+                            // assume the cache is invalid
+                            throw new class extends Exception implements CacheException {
+                            };
                         }
 
-                            $this->classes[$class] = new ReflectionClass($class);
+                        $this->classes[$class] = new ReflectionClass($class);
                     }
                 }
-            } catch (InvalidArgumentException | ReflectionException) {
+            } catch (CacheException | InvalidArgumentException | ReflectionException) {
                 $this->classes = null;
             }
 
