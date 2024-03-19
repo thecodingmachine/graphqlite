@@ -95,7 +95,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function buildInstancesList(): array
     {
         $instances = [];
-        foreach ($this->finder->inNamespace($this->namespace) as $className => $refClass) {
+        foreach ((clone $this->finder)->inNamespace($this->namespace) as $className => $refClass) {
             if (! class_exists($className) && ! interface_exists($className)) {
                 continue;
             }
