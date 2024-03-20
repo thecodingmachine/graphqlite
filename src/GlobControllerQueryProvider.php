@@ -6,14 +6,14 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use InvalidArgumentException;
-use Mouf\Composer\ClassNameMapper;
+use Kcs\ClassFinder\Finder\ComposerFinder;
+use Kcs\ClassFinder\Finder\FinderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
-use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
@@ -33,27 +33,25 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
 {
     /** @var array<int,string>|null */
     private array|null $instancesList = null;
-    private ClassNameMapper $classNameMapper;
+    private FinderInterface $finder;
     private AggregateControllerQueryProvider|null $aggregateControllerQueryProvider = null;
     private CacheContractInterface $cacheContract;
 
     /**
      * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
-     * @param bool $recursive Whether subnamespaces of $namespace must be analyzed.
      */
     public function __construct(
-        private string $namespace,
-        private FieldsBuilder $fieldsBuilder,
-        private ContainerInterface $container,
-        private AnnotationReader $annotationReader,
-        private CacheInterface $cache,
-        ClassNameMapper|null $classNameMapper = null,
-        private int|null $cacheTtl = null,
-        private bool $recursive = true,
+        private readonly string $namespace,
+        private readonly FieldsBuilder $fieldsBuilder,
+        private readonly ContainerInterface $container,
+        private readonly AnnotationReader $annotationReader,
+        private readonly CacheInterface $cache,
+        FinderInterface|null $finder = null,
+        int|null $cacheTtl = null,
     )
     {
-        $this->classNameMapper = $classNameMapper ?? ClassNameMapper::createFromComposerFile(null, null, true);
+        $this->finder = $finder ?? new ComposerFinder();
         $this->cacheContract = new Psr16Adapter(
             $this->cache,
             str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace),
@@ -96,15 +94,12 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     /** @return array<int,string> */
     private function buildInstancesList(): array
     {
-        $explorer = new GlobClassExplorer($this->namespace, $this->cache, $this->cacheTtl, $this->classNameMapper, $this->recursive);
-        $classes = $explorer->getClasses();
         $instances = [];
-        foreach ($classes as $className) {
+        foreach ((clone $this->finder)->inNamespace($this->namespace) as $className => $refClass) {
             if (! class_exists($className) && ! interface_exists($className)) {
                 continue;
             }
-            $refClass = new ReflectionClass($className);
-            if (! $refClass->isInstantiable()) {
+            if (! $refClass instanceof ReflectionClass || ! $refClass->isInstantiable()) {
                 continue;
             }
             if (! $this->hasOperations($refClass)) {
