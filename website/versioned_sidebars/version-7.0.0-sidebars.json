@@ -1,0 +1,58 @@
+{
+  "docs": {
+    "Introduction": [
+      "index"
+    ],
+    "Installation": [
+      "getting-started",
+      "symfony-bundle",
+      "laravel-package",
+      "universal-service-providers",
+      "other-frameworks"
+    ],
+    "Usage": [
+      "queries",
+      "mutations",
+      "subscriptions",
+      "type-mapping",
+      "autowiring",
+      "extend-type",
+      "external-type-declaration",
+      "input-types",
+      "inheritance-interfaces",
+      "error-handling",
+      "validation"
+    ],
+    "Security": [
+      "authentication-authorization",
+      "fine-grained-security",
+      "implementing-security",
+      "operation-complexity"
+    ],
+    "Performance": [
+      "query-plan",
+      "prefetch-method",
+      "automatic-persisted-queries"
+    ],
+    "Advanced": [
+      "file-uploads",
+      "pagination",
+      "custom-types",
+      "field-middlewares",
+      "argument-resolving",
+      "extend-input-type",
+      "multiple-output-types",
+      "symfony-bundle-advanced",
+      "laravel-package-advanced",
+      "internals",
+      "troubleshooting",
+      "migrating"
+    ],
+    "Reference": [
+      "doctrine-annotations-attributes",
+      "annotations-reference",
+      "semver",
+      "changelog"
+    ]
+  }
+}

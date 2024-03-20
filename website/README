@@ -26,17 +26,23 @@ The [versioning section of the Docusaurus documentation](https://docusaurus.io/d
 1. Firstly, you need to update the `docs/CHANGELOG.md` file with the updates for the release.  The best way to do this is to review all the `is:merged` PRs since the last release.  Here is an example entry format:
 
 ```markdown
-#### Dependencies:
-https://github.com/thecodingmachine/graphqlite/pull/000 Upgraded to Symfony 69
+## 1.0.0
 
-#### Breaking Change:
-https://github.com/thecodingmachine/graphqlite/pull/000 Dropped PHP support
+### Dependencies:
 
-#### New Features:
-https://github.com/thecodingmachine/graphqlite/pull/000 Added support for the new GraphQL spec fork
+- #000 Upgraded to Symfony 69
 
-#### Miscellaneous:
-Added John Doe as a maintainer
+### Breaking Change:
+
+- #000 Dropped PHP support
+
+### New Features:
+
+- #000 Added support for the new GraphQL spec fork
+
+### Miscellaneous:
+
+- Added John Doe as a maintainer
 ```
 
 2. Next, you'll need to tag a new version with Docusaurus, which will cache a copy of the documentation in the `versioned_docs` directory, update the `versioned_sidebars`, and update the `versions.json` file.
