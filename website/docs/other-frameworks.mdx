@@ -261,6 +261,10 @@ return new Picotainer([
         return $builder->createMiddleware();
     },
     CacheInterface::class => function() {
+        // Any PSR-16 cache should work - APCu is recommended for good
+        // performance, but it requires that module to be enabled. For
+        // small scale testing with zero dependencies, FilesystemCache
+        // can be used instead.
         return new ApcuCache();
     },
     Schema::class => function(ContainerInterface $container) {
