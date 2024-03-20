@@ -1,0 +1,53 @@
+---
+id: subscriptions
+title: Subscriptions
+sidebar_label: Subscriptions
+---
+
+In GraphQLite, subscriptions are created [like queries](queries.mdx) or [mutations](mutations.mdx).
+
+To create a subscription, you must annotate a method in a controller with the `#[Subscription]` attribute.
+
+For instance:
+
+```php
+namespace App\Controller;
+
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+
+class ProductController
+{
+    #[Subscription(outputType: 'Product')]
+    public function productAdded(?ID $categoryId = null): void
+    {
+        // Some code that sets up any connections, stores the subscription details, etc.
+    }
+}
+```
+
+As you will notice in the above example, we're returning `void`.  In general, this is probably the
+correct return type.
+
+You could, however, type the `Product` as the return type of the method, instead
+of using the `outputType` argument on the `#[Subscription]` attribute.  This means you
+would have to return an instance of `Product` from the method though.  One exception here, is if
+you intend to use PHP for your long-running streaming process, you could block the process inside
+the controller and basically never return anything from the method, just terminating the
+connection/stream when it breaks, or when the client disconnects.
+
+Most implementations will want to offload the actual real-time streaming connection to a better suited
+technology, like SSE (server-sent events), WebSockets, etc.  GraphQLite does not make any assumptions
+here.  Therefore, it's most practical to return `void` from the controller method.  Since GraphQL
+is a strictly typed spec, we cannot return anything other than the defined `outputType` from the request.
+That would be a violation of the GraphQL specification.  Returning `void`, which is translated to `null`
+in the GraphQL response body, allows for us to complete the request and terminate the PHP process.
+
+We recommend using response headers to pass back any necessary information realted to the subscription.
+This might be a subscription ID, a streaming server URL to connect to, or whatever you need to pass
+back to the client.
+
+<div class="alert alert--info">
+  In the future, it may make sense to implement streaming servers directly into GraphQLite, especially
+  as PHP progresses with async and parallel processing.  At this time, we might consider returning a
+  `Generator` (or `Fiber`) from the controller method.
+</div>
