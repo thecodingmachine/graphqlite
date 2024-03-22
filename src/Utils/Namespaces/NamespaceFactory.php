@@ -15,12 +15,11 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class NamespaceFactory
 {
-    private FinderInterface $finder;
-
-    public function __construct(private readonly CacheInterface $cache, FinderInterface|null $finder = null, private int|null $globTTL = 2)
-    {
-        $this->finder = $finder ?? new ComposerFinder();
-    }
+    public function __construct(
+        private readonly CacheInterface $cache,
+        private readonly FinderInterface $finder,
+        private int|null $globTTL = 2
+    ) {}
 
     /** @param string $namespace A PHP namespace */
     public function createNamespace(string $namespace): NS

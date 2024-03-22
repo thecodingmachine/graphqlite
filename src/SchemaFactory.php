@@ -8,6 +8,7 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\SchemaConfig;
+use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
 use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
@@ -124,6 +125,8 @@ class SchemaFactory
     private ExpressionLanguage|null $expressionLanguage = null;
 
     private string $cacheNamespace;
+
+    private ?bool $useAutoloading = null;
 
     public function __construct(private CacheInterface $cache, private ContainerInterface $container)
     {
@@ -270,6 +273,16 @@ class SchemaFactory
     }
 
     /**
+     * Use autoloading when scanning for classes or not.
+     */
+    public function useAutoloading(bool $value = true): self
+    {
+        $this->useAutoloading = $value;
+
+        return $this;
+    }
+
+    /**
      * Sets the time to live time of the cache for annotations in files.
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
@@ -343,8 +356,13 @@ class SchemaFactory
         $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
+        $finder = $this->finder ?? new ComposerFinder();
 
-        $namespaceFactory = new NamespaceFactory($namespacedCache, $this->finder, $this->globTTL);
+        if ($this->useAutoloading !== null) {
+            $finder = $finder->useAutoloading($this->useAutoloading);
+        }
+
+        $namespaceFactory = new NamespaceFactory($namespacedCache, $finder, $this->globTTL);
         $nsList = array_map(
             static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
             $this->typeNamespaces,
@@ -493,7 +511,7 @@ class SchemaFactory
                 $this->container,
                 $annotationReader,
                 $namespacedCache,
-                $this->finder,
+                $finder,
                 $this->globTTL,
             );
         }
