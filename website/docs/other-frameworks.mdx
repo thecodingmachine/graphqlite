@@ -100,8 +100,8 @@ $result = GraphQL::executeQuery($schema, $query, null, new Context(), $variableV
 
 ### Disabling autoloading
 
-GraphQLite uses `kcs/class-finder` to iterate over classes and find all that have GraphQLite attributes. By default,
-it uses autoloading under the hood. But if you have an older codebase that contains classes with incorrect or missing
+GraphQLite uses `kcs/class-finder` to find all classes that have GraphQLite attributes. By default, it uses
+autoloading under the hood. But if you have an older codebase that contains classes with incorrect or missing
 namespaces, you may need to use `include_once` instead. To do so, you can overwrite the finder using `setFinder()`:
 
 ```php
