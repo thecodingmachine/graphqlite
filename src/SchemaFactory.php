@@ -126,8 +126,6 @@ class SchemaFactory
 
     private string $cacheNamespace;
 
-    private ?bool $useAutoloading = null;
-
     public function __construct(private CacheInterface $cache, private ContainerInterface $container)
     {
         $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
@@ -273,16 +271,6 @@ class SchemaFactory
     }
 
     /**
-     * Use autoloading when scanning for classes or not.
-     */
-    public function useAutoloading(bool $value = true): self
-    {
-        $this->useAutoloading = $value;
-
-        return $this;
-    }
-
-    /**
      * Sets the time to live time of the cache for annotations in files.
      * By default this is set to 2 seconds which is ok for development environments.
      * Set this to "null" (i.e. infinity) for production environments.
@@ -357,10 +345,6 @@ class SchemaFactory
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $finder = $this->finder ?? new ComposerFinder();
-
-        if ($this->useAutoloading !== null) {
-            $finder = $finder->useAutoloading($this->useAutoloading);
-        }
 
         $namespaceFactory = new NamespaceFactory($namespacedCache, $finder, $this->globTTL);
         $nsList = array_map(

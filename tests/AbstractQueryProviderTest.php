@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
+use Kcs\ClassFinder\Finder\ComposerFinder;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -466,7 +467,7 @@ abstract class AbstractQueryProviderTest extends TestCase
             $arrayAdapter->setLogger(new ExceptionLogger());
             $psr16Cache = new Psr16Cache($arrayAdapter);
 
-            $this->namespaceFactory = new NamespaceFactory($psr16Cache);
+            $this->namespaceFactory = new NamespaceFactory($psr16Cache, new ComposerFinder());
         }
         return $this->namespaceFactory;
     }

@@ -79,7 +79,7 @@ final class NS
                 $this->classes = [];
                 /** @var class-string $className */
                 /** @var ReflectionClass<object> $reflector */
-                foreach ($this->finder->inNamespace($this->namespace) as $className => $reflector) {
+                foreach ((clone $this->finder)->inNamespace($this->namespace) as $className => $reflector) {
                     if (! ($reflector instanceof ReflectionClass)) {
                         continue;
                     }
