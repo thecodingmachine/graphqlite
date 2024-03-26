@@ -6,7 +6,6 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use InvalidArgumentException;
-use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
