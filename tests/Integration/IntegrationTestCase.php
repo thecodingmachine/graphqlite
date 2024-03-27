@@ -5,6 +5,8 @@ namespace TheCodingMachine\GraphQLite\Integration;
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
+use Kcs\ClassFinder\Finder\ComposerFinder;
+use Kcs\ClassFinder\Finder\FinderInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
@@ -87,6 +89,7 @@ class IntegrationTestCase extends TestCase
             Schema::class => static function (ContainerInterface $container) {
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), $container->get(RootTypeMapperInterface::class));
             },
+            FinderInterface::class => fn () => new ComposerFinder(),
             QueryProviderInterface::class => static function (ContainerInterface $container) {
                 $queryProvider = new GlobControllerQueryProvider(
                     'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers',
@@ -94,6 +97,7 @@ class IntegrationTestCase extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     new Psr16Cache(new ArrayAdapter()),
+                    $container->get(FinderInterface::class),
                 );
 
                 $queryProvider = new AggregateQueryProvider([
@@ -104,6 +108,7 @@ class IntegrationTestCase extends TestCase
                         $container->get(BasicAutoWiringContainer::class),
                         $container->get(AnnotationReader::class),
                         new Psr16Cache(new ArrayAdapter()),
+                        $container->get(FinderInterface::class),
                     ),
                 ]);
 
@@ -201,7 +206,10 @@ class IntegrationTestCase extends TestCase
             NamespaceFactory::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new NamespaceFactory(new Psr16Cache($arrayAdapter));
+                return new NamespaceFactory(
+                    new Psr16Cache($arrayAdapter),
+                    $container->get(FinderInterface::class),
+                );
             },
             GlobTypeMapper::class => static function (ContainerInterface $container) {
                 $arrayAdapter = new ArrayAdapter();
