@@ -1,0 +1,17 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {
+    "thecodingmachine/graphqlite": "^6",
+    "laminas/laminas-diactoros": "^2",
+    "laminas/laminas-stratigility": "^3",
+    "laminas/laminas-httphandlerrunner": "^2",
+    "mouf/picotainer": "^1.1",
+    "symfony/cache": "^4.2"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
