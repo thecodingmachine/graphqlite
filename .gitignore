@@ -6,6 +6,8 @@
 /.php_cs/cache
 /.idea
 
+examples/*/vendor/
+
 node_modules
 
 lib/core/metadata.js
