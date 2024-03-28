@@ -75,12 +75,8 @@ class SchemaFactory
 {
     public const GLOB_CACHE_SECONDS = 2;
 
-
     /** @var array<int,string> */
-    private array $controllerNamespaces = [];
-
-    /** @var array<int,string> */
-    private array $typeNamespaces = [];
+    private array $namespaces = [];
 
     /** @var QueryProviderInterface[] */
     private array $queryProviders = [];
@@ -133,20 +129,40 @@ class SchemaFactory
 
     /**
      * Registers a namespace that can contain GraphQL controllers.
+     *
+     * @deprecated Using SchemaFactory::addControllerNamespace() is deprecated in favor of SchemaFactory::addNamespace()
      */
     public function addControllerNamespace(string $namespace): self
     {
-        $this->controllerNamespaces[] = $namespace;
+        trigger_error(
+            "Using SchemaFactory::addControllerNamespace() is deprecated in favor of SchemaFactory::addNamespace().",
+            E_USER_DEPRECATED,
+        );
 
-        return $this;
+        return $this->addNamespace($namespace);
     }
 
     /**
      * Registers a namespace that can contain GraphQL types.
+     *
+     * @deprecated Using SchemaFactory::addTypeNamespace() is deprecated in favor of SchemaFactory::addNamespace()
      */
     public function addTypeNamespace(string $namespace): self
     {
-        $this->typeNamespaces[] = $namespace;
+        trigger_error(
+            "Using SchemaFactory::addTypeNamespace() is deprecated in favor of SchemaFactory::addNamespace().",
+            E_USER_DEPRECATED,
+        );
+
+        return $this->addNamespace($namespace);
+    }
+
+    /**
+     * Registers a namespace that can contain GraphQL types or controllers.
+     */
+    public function addNamespace(string $namespace): self
+    {
+        $this->namespaces[] = $namespace;
 
         return $this;
     }
@@ -349,7 +365,7 @@ class SchemaFactory
         $namespaceFactory = new NamespaceFactory($namespacedCache, $finder, $this->globTTL);
         $nsList = array_map(
             static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
-            $this->typeNamespaces,
+            $this->namespaces,
         );
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
@@ -477,8 +493,8 @@ class SchemaFactory
             $this->typeMappers[] = $typeMapperFactory->create($context);
         }
 
-        if (empty($this->typeNamespaces) && empty($this->typeMappers)) {
-            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addTypeNamespace() at least once).');
+        if (empty($this->namespaces) && empty($this->typeMappers)) {
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for types found (You must call the SchemaFactory::addNamespace() at least once).');
         }
 
         foreach ($this->typeMappers as $typeMapper) {
@@ -488,9 +504,9 @@ class SchemaFactory
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
 
         $queryProviders = [];
-        foreach ($this->controllerNamespaces as $controllerNamespace) {
+        foreach ($this->namespaces as $namespace) {
             $queryProviders[] = new GlobControllerQueryProvider(
-                $controllerNamespace,
+                $namespace,
                 $fieldsBuilder,
                 $this->container,
                 $annotationReader,
@@ -509,7 +525,7 @@ class SchemaFactory
         }
 
         if ($queryProviders === []) {
-            throw new GraphQLRuntimeException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addControllerNamespace() at least once).');
+            throw new GraphQLRuntimeException('Cannot create schema: no namespace for controllers found (You must call the SchemaFactory::addNamespace() at least once).');
         }
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);

@@ -1549,8 +1549,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict');
 
         $schema = $schemaFactory->createSchema();
 
@@ -1873,9 +1872,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $schemaFactory->setAuthenticationService($container->get(AuthenticationServiceInterface::class));
         $schemaFactory->setAuthorizationService($container->get(AuthorizationServiceInterface::class));
         $schemaFactory->setInputTypeValidator($validator);
@@ -2249,8 +2246,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference');
 
         $schema = $schemaFactory->createSchema();
 

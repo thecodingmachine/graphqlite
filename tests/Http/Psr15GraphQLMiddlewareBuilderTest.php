@@ -39,9 +39,7 @@ class Psr15GraphQLMiddlewareBuilderTest extends TestCase
         $factory = new SchemaFactory($cache, $container);
         $factory->setAuthenticationService(new VoidAuthenticationService());
         $factory->setAuthorizationService(new VoidAuthorizationService());
-
-        $factory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
-        $factory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
 
         $schema = $factory->createSchema();
 

@@ -24,8 +24,7 @@ class AnnotatedInterfaceTest extends TestCase
         $container = new BasicAutoWiringContainer(new EmptyContainer());
 
         $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), $container);
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\AnnotatedInterfaces\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\AnnotatedInterfaces\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\AnnotatedInterfaces');
 
         $this->schema = $schemaFactory->createSchema();
     }
