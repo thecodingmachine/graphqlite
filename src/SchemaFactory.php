@@ -12,11 +12,17 @@ use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
 use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\CacheUtils\ClassBoundCache;
+use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
+use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
+use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
@@ -49,7 +55,10 @@ use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
@@ -60,7 +69,6 @@ use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-
 use function array_map;
 use function array_reverse;
 use function class_exists;
@@ -357,7 +365,24 @@ class SchemaFactory
         $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver = new TypeResolver();
         $namespacedCache = new NamespacedCache($this->cache);
-        $cachedDocBlockFactory = new CachedDocBlockFactory($namespacedCache);
+        $fileBoundCache = new FileBoundCache($this->cache);
+        $nonInheritedClassBoundCache = new ClassBoundCache(
+            fileBoundCache: $fileBoundCache,
+            analyzeParentClasses: false,
+            analyzeTraits: false,
+            analyzeInterfaces: false,
+        );
+        $docBlockContextFactory = new CachedDocBlockContextFactory(
+            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
+            new PhpDocumentorDocBlockContextFactory(new ContextFactory())
+        );
+        $docBlockFactory = new CachedDocBlockFactory(
+            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
+            new PhpDocumentorDocBlockFactory(
+                DocBlockFactory::createInstance(),
+                $docBlockContextFactory,
+            ),
+        );
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $finder = $this->finder ?? new ComposerFinder();
@@ -436,7 +461,8 @@ class SchemaFactory
             $recursiveTypeMapper,
             $argumentResolver,
             $typeResolver,
-            $cachedDocBlockFactory,
+            $docBlockFactory,
+            $docBlockContextFactory,
             $namingStrategy,
             $topRootTypeMapper,
             $parameterMiddlewarePipe,

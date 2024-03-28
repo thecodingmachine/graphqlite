@@ -11,12 +11,17 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\CacheUtils\ClassBoundCache;
+use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
+use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
@@ -24,6 +29,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
@@ -38,14 +44,17 @@ use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
@@ -55,7 +64,6 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-use UnitEnum;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
@@ -278,13 +286,39 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->parameterMiddlewarePipe;
     }
 
-    protected function getCachedDocBlockFactory(): CachedDocBlockFactory
+    protected function getDocBlockFactory(): DocBlockFactory
+    {
+        return new CachedDocBlockFactory(
+            $this->getClassBoundCacheContract(false),
+            new PhpDocumentorDocBlockFactory(
+                \phpDocumentor\Reflection\DocBlockFactory::createInstance(),
+                $this->getDocBlockContextFactory(),
+            )
+        );
+    }
+
+    protected function getDocBlockContextFactory(): DocBlockContextFactory
+    {
+        return new CachedDocBlockContextFactory(
+            $this->getClassBoundCacheContract(false),
+            new PhpDocumentorDocBlockContextFactory(new ContextFactory())
+        );
+    }
+
+    private function getClassBoundCacheContract(bool $analyzeParents): ClassBoundCacheContract
     {
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $psr16Cache = new Psr16Cache($arrayAdapter);
 
-        return new CachedDocBlockFactory($psr16Cache);
+        return new ClassBoundCacheContract(
+            new ClassBoundCache(
+                fileBoundCache: new FileBoundCache($psr16Cache),
+                analyzeParentClasses: $analyzeParents,
+                analyzeTraits: $analyzeParents,
+                analyzeInterfaces: $analyzeParents,
+            ),
+        );
     }
 
     protected function buildFieldsBuilder(): FieldsBuilder
@@ -318,7 +352,8 @@ abstract class AbstractQueryProviderTest extends TestCase
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            $this->getCachedDocBlockFactory(),
+            $this->getDocBlockFactory(),
+            $this->getDocBlockContextFactory(),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $parameterMiddlewarePipe,

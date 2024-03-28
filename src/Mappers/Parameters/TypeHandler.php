@@ -42,7 +42,7 @@ use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
@@ -65,10 +65,10 @@ class TypeHandler implements ParameterHandlerInterface
     private PhpDocumentorTypeResolver $phpDocumentorTypeResolver;
 
     public function __construct(
-        private readonly ArgumentResolver $argumentResolver,
+        private readonly ArgumentResolver        $argumentResolver,
         private readonly RootTypeMapperInterface $rootTypeMapper,
-        private readonly TypeResolver $typeResolver,
-        private readonly CachedDocBlockFactory $cachedDocBlockFactory,
+        private readonly TypeResolver            $typeResolver,
+        private readonly DocBlockFactory   $docBlockFactory,
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
@@ -135,7 +135,7 @@ class TypeHandler implements ParameterHandlerInterface
                     return null;
                 }
 
-                $docBlock = $this->cachedDocBlockFactory->getDocBlock($refConstructor);
+                $docBlock = $this->docBlockFactory->createFromReflector($refConstructor);
                 $paramTags = $docBlock->getTagsByName('param');
                 foreach ($paramTags as $paramTag) {
                     if (! $paramTag instanceof Param) {

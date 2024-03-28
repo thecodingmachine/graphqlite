@@ -7,6 +7,7 @@ use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
@@ -14,6 +15,9 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\CacheUtils\ClassBoundCache;
+use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
+use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
@@ -59,7 +63,12 @@ use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -71,7 +80,6 @@ use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-use UnitEnum;
 
 class IntegrationTestCase extends TestCase
 {
@@ -121,7 +129,8 @@ class IntegrationTestCase extends TestCase
                     $container->get(RecursiveTypeMapperInterface::class),
                     $container->get(ArgumentResolver::class),
                     $container->get(TypeResolver::class),
-                    $container->get(CachedDocBlockFactory::class),
+                    $container->get(DocBlockFactory::class),
+                    $container->get(DocBlockContextFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
                     $parameterMiddlewarePipe,
@@ -287,10 +296,36 @@ class IntegrationTestCase extends TestCase
             NamingStrategyInterface::class => static function () {
                 return new NamingStrategy();
             },
-            CachedDocBlockFactory::class => static function () {
+            'nonInheritedClassBoundCacheContract' => static function () {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
-                return new CachedDocBlockFactory(new Psr16Cache($arrayAdapter));
+                $psr16Cache = new Psr16Cache($arrayAdapter);
+
+                return new ClassBoundCacheContract(
+                    new ClassBoundCache(
+                        fileBoundCache: new FileBoundCache($psr16Cache),
+                        analyzeParentClasses: false,
+                        analyzeTraits: false,
+                        analyzeInterfaces: false,
+                    ),
+                );
+            },
+            DocBlockFactory::class => static function (ContainerInterface $container) {
+                return new CachedDocBlockFactory(
+                    $container->get('nonInheritedClassBoundCacheContract'),
+                    new PhpDocumentorDocBlockFactory(
+                        \phpDocumentor\Reflection\DocBlockFactory::createInstance(),
+                        $container->get(DocBlockContextFactory::class),
+                    )
+                );
+            },
+            DocBlockContextFactory::class => static function (ContainerInterface $container) {
+                return new CachedDocBlockContextFactory(
+                    $container->get('nonInheritedClassBoundCacheContract'),
+                    new PhpDocumentorDocBlockContextFactory(
+                        new ContextFactory(),
+                    )
+                );
             },
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {
                 return new VoidTypeMapper(
