@@ -1150,9 +1150,11 @@ class FieldsBuilder
         $properties = $refClass->getDefaultProperties();
 
         foreach ($refClass->getConstructor()?->getParameters() ?? [] as $parameter) {
-            if ($parameter->isPromoted() && $parameter->isDefaultValueAvailable()) {
-                $properties[$parameter->getName()] = $parameter->getDefaultValue();
+            if (!$parameter->isPromoted() || !$parameter->isDefaultValueAvailable()) {
+                continue;
             }
+
+            $properties[$parameter->getName()] = $parameter->getDefaultValue();
         }
 
         return $properties;
