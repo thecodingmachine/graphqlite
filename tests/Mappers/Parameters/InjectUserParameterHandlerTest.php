@@ -4,18 +4,17 @@ namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use Generator;
 use phpDocumentor\Reflection\DocBlock;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use stdClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Parameters\InjectUserParameter;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 
-class InjectUserParameterHandlerTest extends AbstractQueryProviderTest
+class InjectUserParameterHandlerTest extends AbstractQueryProvider
 {
-    /**
-     * @dataProvider mapParameterProvider
-     */
+    #[DataProvider('mapParameterProvider')]
     public function testMapParameter(bool $optional, string $method): void
     {
         $authenticationService = $this->createMock(AuthenticationServiceInterface::class);
@@ -37,7 +36,7 @@ class InjectUserParameterHandlerTest extends AbstractQueryProviderTest
         );
     }
 
-    public function mapParameterProvider(): Generator
+    public static function mapParameterProvider(): Generator
     {
         yield 'required user' => [false, 'requiredUser'];
         yield 'optional user' => [true, 'optionalUser'];

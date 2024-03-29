@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite\Parameters;
 
 use Generator;
 use GraphQL\Type\Definition\ResolveInfo;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
@@ -11,9 +12,7 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 
 class InjectUserParameterTest extends TestCase
 {
-    /**
-     * @dataProvider resolveReturnsUserProvider
-     */
+    #[DataProvider('resolveReturnsUserProvider')]
     public function testResolveReturnsUser(stdClass|null $user, bool $optional): void
     {
         $authenticationService = $this->createMock(AuthenticationServiceInterface::class);
@@ -30,7 +29,7 @@ class InjectUserParameterTest extends TestCase
         self::assertSame($user, $resolved);
     }
 
-    public function resolveReturnsUserProvider(): Generator
+    public static function resolveReturnsUserProvider(): Generator
     {
         yield 'non optional and has user' => [new stdClass(), false];
         yield 'optional and has user' => [new stdClass(), true];

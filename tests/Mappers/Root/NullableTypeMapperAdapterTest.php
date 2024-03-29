@@ -12,17 +12,16 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Nullable;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
-class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
+class NullableTypeMapperAdapterTest extends AbstractQueryProvider
 {
-    /**
-     * @dataProvider nullableVariationsProvider
-     */
+    #[DataProvider('nullableVariationsProvider')]
     public function testMultipleCompound(callable $type): void
     {
         $compoundTypeMapper = $this->getRootTypeMapper();
@@ -31,14 +30,14 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
         $this->assertNotInstanceOf(NonNull::class, $result);
     }
 
-    public function nullableVariationsProvider(): Generator
+    public static function nullableVariationsProvider(): Generator
     {
         yield 'php documentor generated from phpdoc' => [
-            fn () => $this->resolveType(TestObject::class . '|' . TestObject2::class . '|null'),
+            fn () => self::resolveType(TestObject::class . '|' . TestObject2::class . '|null'),
         ];
 
         yield 'type handler nullable wrapped native reflection union type' => [
-            fn () => new Nullable($this->resolveType(TestObject::class . '|' . TestObject2::class . '|null')),
+            fn () => new Nullable(self::resolveType(TestObject::class . '|' . TestObject2::class . '|null')),
         ];
     }
 
@@ -48,7 +47,7 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('type-hinting against null only in the PHPDoc is not allowed.');
-        $compoundTypeMapper->toGraphQLOutputType($this->resolveType('null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
+        $compoundTypeMapper->toGraphQLOutputType(self::resolveType('null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 
     public function testOnlyNull2(): void
@@ -57,7 +56,7 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('type-hinting against null only in the PHPDoc is not allowed.');
-        $compoundTypeMapper->toGraphQLInputType($this->resolveType('null'), null, 'foo', new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
+        $compoundTypeMapper->toGraphQLInputType(self::resolveType('null'), null, 'foo', new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 
     public function testNonNullableReturnedByWrappedMapper(): void
@@ -85,6 +84,6 @@ class NullableTypeMapperAdapterTest extends AbstractQueryProviderTest
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('a type mapper returned a GraphQL\\Type\\Definition\\NonNull instance.');
-        $typeMapper->toGraphQLOutputType($this->resolveType(TestObject::class . '|' . TestObject2::class . '|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
+        $typeMapper->toGraphQLOutputType(self::resolveType(TestObject::class . '|' . TestObject2::class . '|null'), null, new ReflectionMethod(__CLASS__, 'testMultipleCompound'), new DocBlock());
     }
 }

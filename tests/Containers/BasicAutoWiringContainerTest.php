@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Containers;
 
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 
-class BasicAutoWiringContainerTest extends AbstractQueryProviderTest
+class BasicAutoWiringContainerTest extends AbstractQueryProvider
 {
     private function getContainer(): ContainerInterface
     {

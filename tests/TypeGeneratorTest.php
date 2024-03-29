@@ -8,7 +8,7 @@ use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\TypeFoo;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
-class TypeGeneratorTest extends AbstractQueryProviderTest
+class TypeGeneratorTest extends AbstractQueryProvider
 {
     private ContainerInterface$container;
 

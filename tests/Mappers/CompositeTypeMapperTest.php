@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
@@ -14,7 +14,7 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 
-class CompositeTypeMapperTest extends AbstractQueryProviderTest
+class CompositeTypeMapperTest extends AbstractQueryProvider
 {
     /**
      * @var CompositeTypeMapper

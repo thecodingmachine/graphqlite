@@ -74,7 +74,7 @@ use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGeneri
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\VoidType;
 
-class FieldsBuilderTest extends AbstractQueryProviderTest
+class FieldsBuilderTest extends AbstractQueryProvider
 {
     public function testQueryProvider(): void
     {

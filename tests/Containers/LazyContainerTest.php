@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Containers;
 
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 
-final class LazyContainerTest extends AbstractQueryProviderTest
+final class LazyContainerTest extends AbstractQueryProvider
 {
     private function getContainer(): LazyContainer
     {

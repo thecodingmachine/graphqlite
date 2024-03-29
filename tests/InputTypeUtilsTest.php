@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 
-class InputTypeUtilsTest extends AbstractQueryProviderTest
+class InputTypeUtilsTest extends AbstractQueryProvider
 {
 
     public function testNoReturnType(): void

@@ -10,7 +10,7 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
@@ -22,7 +22,7 @@ use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 
-class PrefetchParameterMiddlewareTest extends AbstractQueryProviderTest
+class PrefetchParameterMiddlewareTest extends AbstractQueryProvider
 {
     public function testIgnoresParametersWithoutPrefetchAttribute(): void
     {

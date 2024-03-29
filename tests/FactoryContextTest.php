@@ -7,7 +7,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 
-class FactoryContextTest extends AbstractQueryProviderTest
+class FactoryContextTest extends AbstractQueryProvider
 {
     const GLOB_TTL_SECONDS = 2;
 

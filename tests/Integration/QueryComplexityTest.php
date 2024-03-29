@@ -6,6 +6,7 @@ use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\QueryComplexity;
+use PHPUnit\Framework\Attributes\DataProvider;
 use TheCodingMachine\GraphQLite\Schema;
 
 class QueryComplexityTest extends IntegrationTestCase
@@ -58,9 +59,7 @@ class QueryComplexityTest extends IntegrationTestCase
         $this->assertSame('Max query complexity should be 5 but got 60.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
-    /**
-     * @dataProvider calculatesCorrectQueryCostProvider
-     */
+    #[DataProvider('calculatesCorrectQueryCostProvider')]
     public function testCalculatesCorrectQueryCost(int $expectedCost, string $query): void
     {
         $schema = $this->mainContainer->get(Schema::class);
@@ -140,9 +139,7 @@ class QueryComplexityTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @dataProvider reportsQueryCostInIntrospectionProvider
-     */
+    #[DataProvider('reportsQueryCostInIntrospectionProvider')]
     public function testReportsQueryCostInIntrospection(string|null $expectedDescription, string $typeName, string $fieldName): void
     {
         $schema = $this->mainContainer->get(Schema::class);
