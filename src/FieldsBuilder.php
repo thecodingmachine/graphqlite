@@ -170,7 +170,7 @@ class FieldsBuilder
         $reflectorByFields = [];
 
         $inputFields = [];
-        $defaultProperties = $refClass->getDefaultProperties();
+        $defaultProperties = $this->getClassDefaultProperties($refClass);
 
         $closestMatchingTypeClass = null;
         $parent = get_parent_class($refClass->getName());
@@ -1142,5 +1142,19 @@ class FieldsBuilder
         }
 
         return $names;
+    }
+
+    /** @return array<string, mixed> */
+    private function getClassDefaultProperties(ReflectionClass $refClass): array
+    {
+        $properties = $refClass->getDefaultProperties();
+
+        foreach ($refClass->getConstructor()?->getParameters() ?? [] as $parameter) {
+            if ($parameter->isPromoted() && $parameter->isDefaultValueAvailable()) {
+                $properties[$parameter->getName()] = $parameter->getDefaultValue();
+            }
+        }
+
+        return $properties;
     }
 }
