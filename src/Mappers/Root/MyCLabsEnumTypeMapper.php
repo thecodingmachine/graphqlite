@@ -30,7 +30,7 @@ use function ltrim;
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<object>, EnumType> */
-    private array $cache = [];
+    private array $cacheByClass = [];
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
 
@@ -40,9 +40,9 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
         private readonly RootTypeMapperInterface $next,
-        private readonly AnnotationReader $annotationReader,
-        private readonly CacheInterface $cacheService,
-        private readonly array $namespaces,
+        private readonly AnnotationReader        $annotationReader,
+        private readonly CacheInterface          $cache,
+        private readonly array                   $namespaces,
     ) {
     }
 
@@ -98,13 +98,13 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         }
         /** @var class-string<Enum> $enumClass */
         $enumClass = ltrim($enumClass, '\\');
-        if (isset($this->cache[$enumClass])) {
-            return $this->cache[$enumClass];
+        if (isset($this->cacheByClass[$enumClass])) {
+            return $this->cacheByClass[$enumClass];
         }
 
         $refClass = new ReflectionClass($enumClass);
         $type = new MyCLabsEnumType($enumClass, $this->getTypeName($refClass));
-        return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
+        return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
     }
 
     private function getTypeName(ReflectionClass $refClass): string
@@ -155,7 +155,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     private function getNameToClassMapping(): array
     {
         if ($this->nameToClassMapping === null) {
-            $this->nameToClassMapping = $this->cacheService->get('myclabsenum_name_to_class', function () {
+            $this->nameToClassMapping = $this->cache->get('myclabsenum_name_to_class', function () {
                 $nameToClassMapping = [];
                 foreach ($this->namespaces as $ns) {
                     /** @var class-string<Enum> $className */

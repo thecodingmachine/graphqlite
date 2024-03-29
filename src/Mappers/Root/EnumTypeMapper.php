@@ -33,7 +33,7 @@ use function ltrim;
 class EnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<UnitEnum>, EnumType> */
-    private array $cache = [];
+    private array $cacheByClass = [];
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
     /** @var array<string, class-string<UnitEnum>> */
@@ -42,9 +42,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
         private readonly RootTypeMapperInterface $next,
-        private readonly AnnotationReader $annotationReader,
-        private readonly CacheInterface $cacheService,
-        private readonly array $namespaces,
+        private readonly AnnotationReader        $annotationReader,
+        private readonly CacheInterface          $cache,
+        private readonly array                   $namespaces,
     ) {
     }
 
@@ -102,8 +102,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
         }
         /** @var class-string<Enum> $enumClass */
         $enumClass = ltrim($enumClass, '\\');
-        if (isset($this->cache[$enumClass])) {
-            return $this->cache[$enumClass];
+        if (isset($this->cacheByClass[$enumClass])) {
+            return $this->cacheByClass[$enumClass];
         }
 
         // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
@@ -155,7 +155,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
         $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
-        return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
+        return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
     }
 
     private function getTypeName(ReflectionClass $reflectionClass): string
@@ -200,7 +200,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
     private function getNameToClassMapping(): array
     {
         if ($this->nameToClassMapping === null) {
-            $this->nameToClassMapping = $this->cacheService->get('enum_name_to_class', function () {
+            $this->nameToClassMapping = $this->cache->get('enum_name_to_class', function () {
                 $nameToClassMapping = [];
                 foreach ($this->namespaces as $ns) {
                     foreach ($ns->getClassList() as $className => $classRef) {
