@@ -6,7 +6,6 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use InvalidArgumentException;
-use Kcs\ClassFinder\Finder\FinderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
@@ -17,6 +16,7 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
 
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use function class_exists;
 use function interface_exists;
 use function is_array;
@@ -40,13 +40,13 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @param ContainerInterface $container The container we will fetch controllers from.
      */
     public function __construct(
-        private readonly string $namespace,
-        private readonly FieldsBuilder $fieldsBuilder,
+        private readonly string             $namespace,
+        private readonly FieldsBuilder      $fieldsBuilder,
         private readonly ContainerInterface $container,
-        private readonly AnnotationReader $annotationReader,
-        private readonly CacheInterface $cache,
-        private readonly FinderInterface $finder,
-        int|null $cacheTtl = null,
+        private readonly AnnotationReader   $annotationReader,
+        private readonly CacheInterface     $cache,
+        private readonly ClassFinder        $classFinder,
+        int|null                            $cacheTtl = null,
     )
     {
         $this->cacheContract = new Psr16Adapter(
@@ -92,7 +92,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function buildInstancesList(): array
     {
         $instances = [];
-        foreach ((clone $this->finder)->inNamespace($this->namespace) as $className => $refClass) {
+        foreach ($this->classFinder as $className => $refClass) {
             if (! class_exists($className) && ! interface_exists($className)) {
                 continue;
             }

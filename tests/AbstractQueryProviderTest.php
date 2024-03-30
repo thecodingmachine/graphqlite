@@ -24,6 +24,10 @@ use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\EmptyClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\OldCachedClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -64,6 +68,7 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
+use Traversable;
 
 abstract class AbstractQueryProviderTest extends TestCase
 {
@@ -397,14 +402,14 @@ abstract class AbstractQueryProviderTest extends TestCase
             $rootTypeMapper,
             $this->getAnnotationReader(),
             $arrayAdapter,
-            []
+            new EmptyClassFinder(),
         );
 
         $rootTypeMapper = new EnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
             $arrayAdapter,
-            []
+            new EmptyClassFinder(),
         );
 
         $rootTypeMapper = new CompoundTypeMapper(
@@ -495,15 +500,14 @@ abstract class AbstractQueryProviderTest extends TestCase
         return (new PhpDocumentorTypeResolver())->resolve($type);
     }
 
-    protected function getNamespaceFactory(): NamespaceFactory
+    protected function getClassFinder(array|string $namespaces): ClassFinder
     {
-        if ($this->namespaceFactory === null) {
-            $arrayAdapter = new ArrayAdapter();
-            $arrayAdapter->setLogger(new ExceptionLogger());
-            $psr16Cache = new Psr16Cache($arrayAdapter);
+        $finder = new ComposerFinder();
 
-            $this->namespaceFactory = new NamespaceFactory($psr16Cache, new ComposerFinder());
+        foreach ((array) $namespaces as $namespace) {
+            $finder->inNamespace($namespace);
         }
-        return $this->namespaceFactory;
+
+        return new KcsClassFinder($finder);
     }
 }

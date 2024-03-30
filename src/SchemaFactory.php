@@ -21,8 +21,13 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\CacheUtils\ClassBoundCache;
 use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
+use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
 use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\EmptyClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\OldCachedClassFinder;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
@@ -68,7 +73,6 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use function array_map;
 use function array_reverse;
 use function class_exists;
@@ -372,26 +376,10 @@ class SchemaFactory
             analyzeTraits: false,
             analyzeInterfaces: false,
         );
-        $docBlockContextFactory = new CachedDocBlockContextFactory(
-            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
-            new PhpDocumentorDocBlockContextFactory(new ContextFactory())
-        );
-        $docBlockFactory = new CachedDocBlockFactory(
-            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
-            new PhpDocumentorDocBlockFactory(
-                DocBlockFactory::createInstance(),
-                $docBlockContextFactory,
-            ),
-        );
+        [$docBlockFactory, $docBlockContextFactory] = $this->createDocBlockFactory($nonInheritedClassBoundCache);
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
-        $finder = $this->finder ?? new ComposerFinder();
-
-        $namespaceFactory = new NamespaceFactory($namespacedCache, $finder, $this->globTTL);
-        $nsList = array_map(
-            static fn (string $namespace) => $namespaceFactory->createNamespace($namespace),
-            $this->namespaces,
-        );
+        $classFinder = $this->createClassFinder($namespacedCache);
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
@@ -422,14 +410,14 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $classFinder);
 
         if (class_exists(Enum::class)) {
             // Annotation support - deprecated
-            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $nsList);
+            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $classFinder);
         }
 
-        if (! empty($this->rootTypeMapperFactories)) {
+        if (!empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
                 $annotationReader,
                 $typeResolver,
@@ -438,7 +426,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
-                $nsList,
+                $classFinder,
                 $this->globTTL,
             );
 
@@ -483,9 +471,9 @@ class SchemaFactory
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
-        foreach ($nsList as $ns) {
+        if ($this->namespaces) {
             $compositeTypeMapper->addTypeMapper(new GlobTypeMapper(
-                $ns,
+                $classFinder,
                 $typeGenerator,
                 $inputTypeGenerator,
                 $inputTypeUtils,
@@ -537,7 +525,7 @@ class SchemaFactory
                 $this->container,
                 $annotationReader,
                 $namespacedCache,
-                $finder,
+                $classFinder,
                 $this->globTTL,
             );
         }
@@ -557,5 +545,51 @@ class SchemaFactory
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
         return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $topRootTypeMapper, $this->schemaConfig);
+    }
+
+    private function createClassFinder(CacheInterface $cache): ClassFinder
+    {
+        // When no namespaces are specified, class finder uses all available namespaces to discover classes.
+        // While this is technically okay, it doesn't follow SchemaFactory's semantics that allow it's
+        // users to manually specify classes (see SchemaFactory::testCreateSchemaOnlyWithFactories()),
+        // without having to specify namespaces to glob. This solves it by providing an empty iterator.
+        if (!$this->namespaces) {
+            return new EmptyClassFinder();
+        }
+
+        $finder = (clone ($this->finder ?? new ComposerFinder()));
+
+        foreach ($this->namespaces as $namespace) {
+            $finder->inNamespace($namespace);
+        }
+
+        return new OldCachedClassFinder(
+            new KcsClassFinder($finder),
+            $cache,
+            $this->globTTL
+        );
+
+//        if ($this->devMode) {
+//            $finder = new FileCachedFinder($finder);
+//        }
+
+        return $finder;
+    }
+
+    private function createDocBlockFactory(ClassBoundCacheInterface $nonInheritedClassBoundCache): array
+    {
+        $docBlockContextFactory = new CachedDocBlockContextFactory(
+            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
+            new PhpDocumentorDocBlockContextFactory(new ContextFactory())
+        );
+        $docBlockFactory = new CachedDocBlockFactory(
+            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
+            new PhpDocumentorDocBlockFactory(
+                DocBlockFactory::createInstance(),
+                $docBlockContextFactory,
+            ),
+        );
+
+        return [$docBlockFactory, $docBlockContextFactory];
     }
 }

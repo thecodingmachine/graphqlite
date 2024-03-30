@@ -19,8 +19,8 @@ use ReflectionMethod;
 use ReflectionProperty;
 use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Types\EnumType;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 use UnitEnum;
 
 use function assert;
@@ -39,12 +39,11 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /** @var array<string, class-string<UnitEnum>> */
     private array|null $nameToClassMapping = null;
 
-    /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
         private readonly RootTypeMapperInterface $next,
         private readonly AnnotationReader        $annotationReader,
         private readonly CacheInterface          $cache,
-        private readonly array                   $namespaces,
+        private readonly ClassFinder                   $classFinder,
     ) {
     }
 
@@ -202,14 +201,12 @@ class EnumTypeMapper implements RootTypeMapperInterface
         if ($this->nameToClassMapping === null) {
             $this->nameToClassMapping = $this->cache->get('enum_name_to_class', function () {
                 $nameToClassMapping = [];
-                foreach ($this->namespaces as $ns) {
-                    foreach ($ns->getClassList() as $className => $classRef) {
-                        if (! enum_exists($className)) {
-                            continue;
-                        }
-
-                        $nameToClassMapping[$this->getTypeName($classRef)] = $className;
+                foreach ($this->classFinder as $className => $classRef) {
+                    if (! enum_exists($className)) {
+                        continue;
                     }
+
+                    $nameToClassMapping[$this->getTypeName($classRef)] = $className;
                 }
                 return $nameToClassMapping;
             });

@@ -8,11 +8,11 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeGenerator;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
 use function str_replace;
 
@@ -26,14 +26,8 @@ use function str_replace;
  */
 final class GlobTypeMapper extends AbstractTypeMapper
 {
-    /**
-     * Constructor
-     *
-     * @param NS $namespace     The namespace that contains the GraphQL types
-     *                          (they must have a `@Type` annotation)
-     */
     public function __construct(
-        private NS $namespace,
+        private ClassFinder $classFinder,
         TypeGenerator $typeGenerator,
         InputTypeGenerator $inputTypeGenerator,
         InputTypeUtils $inputTypeUtils,
@@ -45,14 +39,8 @@ final class GlobTypeMapper extends AbstractTypeMapper
         int|null $globTTL = 2,
         int|null $mapTTL = null,
     ) {
-        $cachePrefix = str_replace(
-            ['\\', '{', '}', '(', ')', '/', '@', ':'],
-            '_',
-            $namespace->getNamespace(),
-        );
-
         parent::__construct(
-            $cachePrefix,
+            '',
             $typeGenerator,
             $inputTypeGenerator,
             $inputTypeUtils,
@@ -74,6 +62,6 @@ final class GlobTypeMapper extends AbstractTypeMapper
      */
     protected function getClassList(): array
     {
-        return $this->namespace->getClassList();
+        return iterator_to_array($this->classFinder);
     }
 }

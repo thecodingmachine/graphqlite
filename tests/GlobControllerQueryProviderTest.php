@@ -9,6 +9,7 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
+use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
 class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
@@ -38,6 +39,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
         };
 
         $finder = new ComposerFinder();
+        $finder->inNamespace('TheCodingMachine\\GraphQLite\\Fixtures');
         $finder->filter(static fn (ReflectionClass $class) => $class->getNamespaceName() === 'TheCodingMachine\\GraphQLite\\Fixtures'); // Fix for recursive:false
         $globControllerQueryProvider = new GlobControllerQueryProvider(
             'TheCodingMachine\\GraphQLite\\Fixtures',
@@ -45,7 +47,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
             $container,
             $this->getAnnotationReader(),
             new Psr16Cache(new NullAdapter()),
-            $finder,
+            new KcsClassFinder($finder),
             0,
         );
 
