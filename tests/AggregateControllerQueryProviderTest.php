@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQLite;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
-class AggregateControllerQueryProviderTest extends AbstractQueryProviderTest
+class AggregateControllerQueryProviderTest extends AbstractQueryProvider
 {
     public function testAggregate(): void
     {

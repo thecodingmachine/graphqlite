@@ -6,13 +6,13 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Parameter;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
-class ContainerParameterMapperTest extends AbstractQueryProviderTest
+class ContainerParameterMapperTest extends AbstractQueryProvider
 {
 
     public function testMapParameter(): void

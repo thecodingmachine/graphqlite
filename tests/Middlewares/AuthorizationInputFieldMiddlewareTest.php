@@ -5,7 +5,7 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use stdClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
@@ -19,7 +19,7 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
-class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProviderTest
+class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProvider
 {
     public function testReturnsResolversValueWhenAuthorized(): void
     {

@@ -2,7 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite;
 
-class SchemaTest extends AbstractQueryProviderTest
+class SchemaTest extends AbstractQueryProvider
 {
 
     public function testEmptyQuery(): void

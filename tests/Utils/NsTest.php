@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Utils;
 use Exception;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -38,7 +39,7 @@ class NsTest extends TestCase
         $this->globTTL = 10;
     }
 
-    /** @dataProvider loadsClassListProvider */
+    #[DataProvider('loadsClassListProvider')]
     public function testLoadsClassList(array $expectedClasses, string $namespace): void
     {
         $ns = new NS(

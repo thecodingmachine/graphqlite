@@ -7,7 +7,7 @@ use GraphQL\Type\Definition\Type;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
@@ -28,7 +28,7 @@ use TheCodingMachine\GraphQLite\NamingStrategy;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
-class GlobTypeMapperTest extends AbstractQueryProviderTest
+class GlobTypeMapperTest extends AbstractQueryProvider
 {
     public function testGlobTypeMapper(): void
     {

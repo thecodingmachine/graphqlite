@@ -3,11 +3,11 @@
 namespace TheCodingMachine\GraphQLite\Mappers;
 
 use ReflectionClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 
-class CannotMapTypeTraitTest extends AbstractQueryProviderTest
+class CannotMapTypeTraitTest extends AbstractQueryProvider
 {
 
     public function testAddParamInfoSupphp74()

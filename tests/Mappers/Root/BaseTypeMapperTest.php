@@ -13,13 +13,14 @@ use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\Resource_;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
-class BaseTypeMapperTest extends AbstractQueryProviderTest
+class BaseTypeMapperTest extends AbstractQueryProvider
 {
     public function testNullableToGraphQLInputType(): void
     {
@@ -60,16 +61,15 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
     /**
      * @param string $phpdocType
      * @param class-string $expectedItemType
-     *
+     * @param string|null $expectedWrappedItemType
      * @return void
-     *
-     * @dataProvider genericIterablesProvider
      */
+    #[DataProvider('genericIterablesProvider')]
     public function testOutputGenericIterables(string $phpdocType, string $expectedItemType, ?string $expectedWrappedItemType = null): void
     {
         $typeMapper = $this->getRootTypeMapper();
 
-        $result = $typeMapper->toGraphQLOutputType($this->resolveType($phpdocType), null, new ReflectionMethod(__CLASS__, 'testOutputGenericIterables'), new DocBlock());
+        $result = $typeMapper->toGraphQLOutputType(self::resolveType($phpdocType), null, new ReflectionMethod(__CLASS__, 'testOutputGenericIterables'), new DocBlock());
 
         $this->assertInstanceOf(NonNull::class, $result);
         $this->assertInstanceOf(ListOfType::class, $result->getWrappedType());
@@ -81,7 +81,7 @@ class BaseTypeMapperTest extends AbstractQueryProviderTest
         }
     }
 
-    public function genericIterablesProvider(): iterable
+    public static function genericIterablesProvider(): iterable
     {
         yield '\ArrayIterator with nullable int item' => ['\ArrayIterator<int|null>', IntType::class];
         yield '\ArrayIterator with int item' => ['\ArrayIterator<int>', NonNull::class, IntType::class];

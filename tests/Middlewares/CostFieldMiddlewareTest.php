@@ -4,9 +4,10 @@ namespace TheCodingMachine\GraphQLite\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\Type;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Runner\Version;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
@@ -39,9 +40,7 @@ class CostFieldMiddlewareTest extends TestCase
         self::assertNull($result);
     }
 
-    /**
-     * @dataProvider setsComplexityFunctionProvider
-     */
+    #[DataProvider('setsComplexityFunctionProvider')]
     public function testSetsComplexityFunction(int $expectedComplexity, Cost $cost): void
     {
         $field = $this->stubField();
@@ -86,9 +85,7 @@ class CostFieldMiddlewareTest extends TestCase
 
     }
 
-    /**
-     * @dataProvider addsCostInDescriptionProvider
-     */
+    #[DataProvider('addsCostInDescriptionProvider')]
     public function testAddsCostInDescription(string $expectedDescription, Cost $cost): void
     {
         if (Version::series() === '8.5') {
