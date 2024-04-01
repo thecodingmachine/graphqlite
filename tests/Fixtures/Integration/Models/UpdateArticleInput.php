@@ -13,6 +13,7 @@ class UpdateArticleInput
         #[Field]
         #[Security("magazine != 'NYTimes'")]
         public readonly string|null $magazine,
+        public readonly string $summary = 'default',
     )
     {
     }
