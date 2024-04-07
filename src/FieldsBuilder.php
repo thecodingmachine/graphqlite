@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NonNull;
@@ -105,6 +104,10 @@ class FieldsBuilder
      * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     public function getQueries(object $controller): array
     {
@@ -115,6 +118,10 @@ class FieldsBuilder
      * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     public function getMutations(object $controller): array
     {
@@ -125,13 +132,25 @@ class FieldsBuilder
      * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     public function getSubscriptions(object $controller): array
     {
         return $this->getFieldsByAnnotations($controller, Subscription::class, false);
     }
 
-    /** @return array<string, FieldDefinition> QueryField indexed by name. */
+    /**
+     * @return array<string, FieldDefinition> QueryField indexed by name.
+     *
+     * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
+     */
     public function getFields(object $controller, string|null $typeName = null): array
     {
         $fieldAnnotations = $this->getFieldsByAnnotations($controller, Annotations\Field::class, true, $typeName);
@@ -159,8 +178,11 @@ class FieldsBuilder
      *
      * @return array<string,InputField>
      *
-     * @throws AnnotationException
      * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     public function getInputFields(string $className, string $inputName, bool $isUpdate = false): array
     {
@@ -247,6 +269,12 @@ class FieldsBuilder
      * @param class-string<object> $className
      *
      * @return array<string, FieldDefinition> QueryField indexed by name.
+     *
+     * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     public function getSelfFields(string $className, string|null $typeName = null): array
     {
@@ -259,7 +287,6 @@ class FieldsBuilder
 
         $refClass = new ReflectionClass($className);
 
-        /** @var SourceFieldInterface[] $sourceFields */
         $sourceFields = $this->annotationReader->getSourceFields($refClass);
 
         $fieldsFromSourceFields = $this->getQueryFieldsFromSourceFields($sourceFields, $refClass);
@@ -277,6 +304,8 @@ class FieldsBuilder
      * @param int $skip Skip first N parameters if those are passed in externally
      *
      * @return array<string, ParameterInterface> Returns an array of parameters.
+     *
+     * @throws InvalidArgumentException
      */
     public function getParameters(ReflectionMethod $refMethod, int $skip = 0): array
     {
@@ -292,6 +321,8 @@ class FieldsBuilder
      * @param ReflectionMethod $refMethod A method annotated with a Decorate annotation.
      *
      * @return array<string, ParameterInterface> Returns an array of parameters.
+     *
+     * @throws InvalidArgumentException
      */
     public function getParametersForDecorator(ReflectionMethod $refMethod): array
     {
@@ -308,6 +339,10 @@ class FieldsBuilder
      * @return array<string, FieldDefinition>
      *
      * @throws ReflectionException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     private function getFieldsByAnnotations($controller, string $annotationName, bool $injectSource, string|null $typeName = null): array
     {
@@ -387,7 +422,10 @@ class FieldsBuilder
      *
      * @return array<string, FieldDefinition>
      *
-     * @throws AnnotationException
+     * @throws InvalidArgumentException
+     * @throws CannotMapTypeExceptionInterface
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     private function getFieldsByMethodAnnotations(
         string|object $controller,
@@ -500,7 +538,10 @@ class FieldsBuilder
      *
      * @return array<string, FieldDefinition>
      *
-     * @throws AnnotationException
+     * @throws InvalidArgumentException
+     * @throws CannotMapTypeException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     private function getFieldsByPropertyAnnotations(
         string|object $controller,
@@ -589,9 +630,12 @@ class FieldsBuilder
      *
      * @return FieldDefinition[]
      *
-     * @throws CannotMapTypeException
      * @throws CannotMapTypeExceptionInterface
      * @throws ReflectionException
+     * @throws FieldNotFoundException
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     private function getQueryFieldsFromSourceFields(
         array $sourceFields,
@@ -744,7 +788,11 @@ class FieldsBuilder
         return $sourceRefClass->getMethod($magicGet);
     }
 
-    /** @param ReflectionClass<object> $refClass */
+    /**
+     * @param ReflectionClass<object> $refClass
+     *
+     * @throws CannotMapTypeExceptionInterface
+     */
     private function resolveOutputType(
         string $outputType,
         ReflectionClass $refClass,
@@ -759,7 +807,11 @@ class FieldsBuilder
         }
     }
 
-    /** @param ReflectionClass<object> $refClass */
+    /**
+     * @param ReflectionClass<object> $refClass
+     *
+     * @throws CannotMapTypeExceptionInterface
+     */
     private function resolvePhpType(
         string $phpTypeStr,
         ReflectionClass $refClass,
@@ -780,6 +832,9 @@ class FieldsBuilder
 
     /**
      * @param ReflectionClass<T> $reflectionClass
+     *
+     * @throws ReflectionException
+     * @throws FieldNotFoundException
      *
      * @template T of object
      */
@@ -804,6 +859,8 @@ class FieldsBuilder
      * @param ReflectionParameter[] $refParameters
      *
      * @return array<string, ParameterInterface>
+     *
+     * @throws InvalidParameterException
      */
     private function mapParameters(
         array $refParameters,
@@ -814,6 +871,7 @@ class FieldsBuilder
         if (empty($refParameters)) {
             return [];
         }
+        $args = [];
 
         $additionalParameterAnnotations = $sourceField?->getParameterAnnotations() ?? [];
 
@@ -933,11 +991,14 @@ class FieldsBuilder
      * Gets input fields by class method annotations.
      *
      * @param class-string<AbstractRequest> $annotationName
-     * @param array<mixed> $defaultProperties
+     * @param array<string, mixed> $defaultProperties
      *
      * @return array<string, InputField>
      *
-     * @throws AnnotationException
+     * @throws CannotMapTypeExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     private function getInputFieldsByMethodAnnotations(
         string|object $controller,
@@ -1039,11 +1100,14 @@ class FieldsBuilder
      * Gets input fields by class property annotations.
      *
      * @param class-string<AbstractRequest> $annotationName
-     * @param array<mixed> $defaultProperties
+     * @param array<string, mixed> $defaultProperties
      *
      * @return array<string, InputField>
      *
-     * @throws AnnotationException
+     * @throws InvalidArgumentException
+     * @throws CannotMapTypeException
+     *
+     * @phpstan-ignore-next-line - simple-cache < 2.0 issue
      */
     private function getInputFieldsByPropertyAnnotations(
         string|object $controller,
@@ -1088,10 +1152,10 @@ class FieldsBuilder
             assert($type instanceof InputType);
             $forConstructorHydration = in_array($name, $constructerParameters);
             $resolver = $forConstructorHydration
-                ? new SourceConstructorParameterResolver(
-                    $refProperty->getDeclaringClass()->getName(),
-                    $refProperty->getName(),
-                )
+            ? new SourceConstructorParameterResolver(
+                $refProperty->getDeclaringClass()->getName(),
+                $refProperty->getName(),
+            )
                 : new SourceInputPropertyResolver($refProperty);
 
             // setters and properties

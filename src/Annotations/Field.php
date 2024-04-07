@@ -10,18 +10,6 @@ use function trigger_error;
 
 use const E_USER_DEPRECATED;
 
-/**
- * @Annotation
- * @Target({"PROPERTY", "METHOD"})
- * @Attributes({
- *   @Attribute("name", type = "string"),
- *   @Attribute("outputType", type = "string"),
- *   @Attribute("prefetchMethod", type = "string"),
- *   @Attribute("for", type = "string[]"),
- *   @Attribute("description", type = "string"),
- *   @Attribute("inputType", type = "string"),
- * })
- */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Field extends AbstractRequest
 {

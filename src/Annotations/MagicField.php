@@ -12,15 +12,6 @@ use function is_array;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.
- *
- * @Annotation
- * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("name", type = "string"),
- *   @Attribute("outputType", type = "string"),
- *   @Attribute("phpType", type = "string"),
- *   @Attribute("annotations", type = "mixed"),
- * })
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class MagicField implements SourceFieldInterface
@@ -59,10 +50,10 @@ class MagicField implements SourceFieldInterface
         $this->sourceName = $attributes['sourceName'] ?? $sourceName ?? null;
 
         if (! $this->name || (! $this->outputType && ! $this->phpType)) {
-            throw new BadMethodCallException('The @MagicField annotation must be passed a name and an output type or a php type. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
+            throw new BadMethodCallException('The #[MagicField] attribute must be passed a name and an output type or a php type. For instance: "#[MagicField(name: \'phone\', outputType: \'String!\')]" or "#[MagicField(name: \'phone\', phpType: \'string\')]"');
         }
         if (isset($this->outputType) && $this->phpType) {
-            throw new BadMethodCallException('In a @MagicField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@MagicField(name=\'phone\', outputType=\'String!\')" or "@MagicField(name=\'phone\', phpType=\'string\')"');
+            throw new BadMethodCallException('In a #[MagicField] attribute, you cannot use the outputType and the phpType at the same time. For instance: "#[MagicField(name: \'phone\', outputType: \'String!\')]" or "#[MagicField(name: \'phone\', phpType: \'string\')]"');
         }
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
@@ -76,7 +67,7 @@ class MagicField implements SourceFieldInterface
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
                 $parameterAnnotations[$annotation->getTarget()][] = $annotation;
             } else {
-                throw new BadMethodCallException('The @MagicField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+                throw new BadMethodCallException('The #[MagicField] attribute\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
             }
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);

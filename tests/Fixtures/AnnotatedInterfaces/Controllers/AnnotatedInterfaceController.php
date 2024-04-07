@@ -15,17 +15,13 @@ use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\WizzInterface
 
 class AnnotatedInterfaceController
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function getClassA(): ClassA
     {
         return new ClassA();
     }
 
-    /**
-     * @Query()
-     */
+    #[Query]
     public function getFoo(): FooInterface
     {
         return new ClassD();
@@ -39,17 +35,13 @@ class AnnotatedInterfaceController
         return new ClassD();
     }*/
 
-    /**
-     * @Query()
-     */
+    #[Query]
     public function getClassDAsWizInterface(): WizzInterface
     {
         return new ClassD();
     }
 
-    /**
-     * @Query()
-     */
+    #[Query]
     public function getQux(): QuxInterface
     {
         return new NotAnnotatedQux();

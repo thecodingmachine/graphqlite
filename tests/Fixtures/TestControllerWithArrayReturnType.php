@@ -8,9 +8,8 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithArrayReturnType
 {
-    /**
-     * @Query()
-     */
+
+    #[Query]
     public function test(): array
     {
         return [];

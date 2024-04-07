@@ -1,36 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 
 use Exception;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 
-/**
- * @Input()
- */
+#[Input]
 class TestOnlyConstruct
 {
+    #[Field]
+    private string $foo;
 
-    /**
-     * @Field()
-     * @var string
-     */
-    private $foo;
+    #[Field]
+    private int $bar;
 
-    /**
-     * @Field()
-     * @var int
-     */
-    private $bar;
+    #[Field]
+    private bool $baz;
 
-    /**
-     * @Field()
-     * @var bool
-     */
-    private $baz;
-
-    public function __construct(string $foo, bool  $baz, int $bar = 100)
+    public function __construct(string $foo, bool $baz, int $bar = 100)
     {
         $this->foo = $foo;
         $this->bar = $bar;
@@ -46,7 +36,7 @@ class TestOnlyConstruct
     {
         throw new Exception('This should not be called!');
     }
-    
+
     public function setBaz(bool $baz): void
     {
         throw new Exception('This should not be called!');

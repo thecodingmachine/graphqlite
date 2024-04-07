@@ -1,24 +1,19 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type(class=TestObject::class)
- */
+#[Type(class: TestObject::class)]
 class TestTypeWithDescriptions
 {
-    /**
-     * @Field()
-     * @param TestObject $test
-     * @param string $arg1 Test argument description
-     * @return string
-     */
+    /** @param string $arg1 Test argument description */
+    #[Field]
     public function customField(TestObject $test, string $arg1): string
     {
-        return $test->getTest().$arg1;
+        return $test->getTest() . $arg1;
     }
 }

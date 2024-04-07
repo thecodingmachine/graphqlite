@@ -34,8 +34,8 @@ class Filter
     /**
      * @param string[] $values
      *
-     * @Factory()
      */
+    #[Factory]
     public static function create(array $values = []): self
     {
         return new self($values);

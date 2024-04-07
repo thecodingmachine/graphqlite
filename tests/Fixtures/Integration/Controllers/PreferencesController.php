@@ -8,11 +8,11 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Preferences;
 class PreferencesController
 {
     /**
-     * @Mutation()
      * @param Preferences $preferences
      *
      * @return Preferences
      */
+    #[Mutation]
     public function updatePreferences(Preferences $preferences): Preferences
     {
         return $preferences;

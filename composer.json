@@ -12,7 +12,6 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
-        "doctrine/annotations": "^1.14 || ^2.0",
         "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
         "phpdocumentor/type-resolver": "^1.4",

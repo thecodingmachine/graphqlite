@@ -13,14 +13,7 @@ use function interface_exists;
 use function ltrim;
 
 /**
- * The ExtendType annotation must be put in a GraphQL type class docblock and is used to add additional fields to the underlying PHP class.
- *
- * @Annotation
- * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("class", type = "string"),
- *   @Attribute("name", type = "string"),
- * })
+ * The ExtendType attribute must be put in a GraphQL type class docblock and is used to add additional fields to the underlying PHP class.
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 class ExtendType
@@ -41,7 +34,7 @@ class ExtendType
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->class = $className;
         if (! $this->class && ! $this->name) {
-            throw new BadMethodCallException('In annotation @ExtendType, missing one of the compulsory parameter "class" or "name".');
+            throw new BadMethodCallException('In attribute #[ExtendType], missing one of the compulsory parameter "class" or "name".');
         }
     }
 

@@ -10,14 +10,6 @@ use BadMethodCallException;
 use function array_key_exists;
 use function is_array;
 
-/**
- * @Annotation
- * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
- * @Attributes({
- *   @Attribute("value", type = "mixed"),
- *   @Attribute("mode", type = "string")
- * })
- */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class FailWith implements MiddlewareAnnotationInterface
 {
@@ -35,8 +27,10 @@ class FailWith implements MiddlewareAnnotationInterface
             $this->value = $value;
         } elseif (is_array($values) && array_key_exists('value', $values)) {
             $this->value = $values['value'];
+        } elseif (! is_array($values)) {
+            $this->value = $values;
         } else {
-            throw new BadMethodCallException('The @FailWith annotation must be passed a defaultValue. For instance: "@FailWith(null)"');
+            throw new BadMethodCallException('The #[FailWith] attribute must be passed a defaultValue. For instance: "#[FailWith(null)]"');
         }
     }
 

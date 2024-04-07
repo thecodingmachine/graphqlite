@@ -14,16 +14,6 @@ use function is_array;
 use function is_string;
 use function sprintf;
 
-/**
- * @Annotation
- * @Target({"PROPERTY", "ANNOTATION", "METHOD"})
- * @Attributes({
- *   @Attribute("expression", type = "string"),
- *   @Attribute("failWith", type = "mixed"),
- *   @Attribute("statusCode", type = "int"),
- *   @Attribute("message", type = "string"),
- * })
- */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Security implements MiddlewareAnnotationInterface
 {
@@ -53,7 +43,7 @@ class Security implements MiddlewareAnnotationInterface
 
         $this->expression = $data['value'] ?? $data['expression'] ?? $expression;
         if (! $this->expression) {
-            throw new BadMethodCallException('The @Security annotation must be passed an expression. For instance: "@Security("is_granted(\'CAN_EDIT_STUFF\')")"');
+            throw new BadMethodCallException('The #[Security] attribute must be passed an expression. For instance: "#[Security("is_granted(\'CAN_EDIT_STUFF\')")]"');
         }
 
         if (array_key_exists('failWith', $data)) {
@@ -66,7 +56,7 @@ class Security implements MiddlewareAnnotationInterface
         $this->message = $message ?? $data['message'] ?? 'Access denied.';
         $this->statusCode = $statusCode ?? $data['statusCode'] ?? 403;
         if ($this->failWithIsSet === true && (($message || isset($data['message'])) || ($statusCode || isset($data['statusCode'])))) {
-            throw new BadMethodCallException('A @Security annotation that has "failWith" attribute set cannot have a message or a statusCode attribute.');
+            throw new BadMethodCallException('A #[Security] attribute that has "failWith" attribute set cannot have a message or a statusCode attribute.');
         }
     }
 

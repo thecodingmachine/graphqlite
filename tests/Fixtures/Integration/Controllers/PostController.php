@@ -10,26 +10,28 @@ class PostController
 {
 
     /**
-     * @Mutation()
      * @param Post $post
      *
      * @return Post
      */
+    #[Mutation]
     public function createPost(Post $post): Post
     {
         return $post;
     }
 
     /**
-     * @Mutation()
-     * @UseInputType(for="$post", inputType="UpdatePostInput")
      *
      * @param int  $id
      * @param Post $post
      *
      * @return Post
      */
-    public function updatePost(int $id, Post $post): Post
+    #[Mutation]
+    public function updatePost(
+        int $id,
+        #[UseInputType('UpdatePostInput')]
+        Post $post): Post
     {
 
         $post->id = $id;

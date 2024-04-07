@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
-use Doctrine\Common\Annotations\PsrCachedReader;
-use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\SchemaConfig;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
 use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -100,8 +96,6 @@ class SchemaFactory
     /** @var ParameterMiddlewareInterface[] */
     private array $parameterMiddlewares = [];
 
-    private Reader|null $doctrineAnnotationReader = null;
-
     private AuthenticationServiceInterface|null $authenticationService = null;
 
     private AuthorizationServiceInterface|null $authorizationService = null;
@@ -126,7 +120,7 @@ class SchemaFactory
 
     private string $cacheNamespace;
 
-    public function __construct(private CacheInterface $cache, private ContainerInterface $container)
+    public function __construct(private readonly CacheInterface $cache, private readonly ContainerInterface $container)
     {
         $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
     }
@@ -209,23 +203,6 @@ class SchemaFactory
         $this->parameterMiddlewares[] = $parameterMiddleware;
 
         return $this;
-    }
-
-    /** @deprecated Use PHP8 Attributes instead */
-    public function setDoctrineAnnotationReader(Reader $annotationReader): self
-    {
-        $this->doctrineAnnotationReader = $annotationReader;
-
-        return $this;
-    }
-
-    /**
-     * Returns a cached Doctrine annotation reader.
-     * Note: we cannot get the annotation reader service in the container as we are in a compiler pass.
-     */
-    private function getDoctrineAnnotationReader(CacheItemPoolInterface $cache): Reader
-    {
-        return $this->doctrineAnnotationReader ?? new PsrCachedReader(new DoctrineAnnotationReader(), $cache, true);
     }
 
     public function setAuthenticationService(AuthenticationServiceInterface $authenticationService): self
@@ -336,7 +313,7 @@ class SchemaFactory
     public function createSchema(): Schema
     {
         $symfonyCache = new Psr16Adapter($this->cache, $this->cacheNamespace);
-        $annotationReader = new AnnotationReader($this->getDoctrineAnnotationReader($symfonyCache), AnnotationReader::LAX_MODE);
+        $annotationReader = new AnnotationReader();
         $authenticationService = $this->authenticationService ?: new FailAuthenticationService();
         $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver = new TypeResolver();

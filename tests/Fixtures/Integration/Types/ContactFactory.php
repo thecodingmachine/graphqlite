@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
-
 
 use DateTimeInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -12,17 +12,15 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 class ContactFactory
 {
-    /**
-     * @Factory()
-     * @UseInputType(for="$relations", inputType="[ContactRef!]!")
-     * @param Contact[] $relations
-     */
+    /** @param Contact[] $relations */
+    #[Factory]
     public function createContact(
         string $name,
         DateTimeInterface $birthDate,
-        ?UploadedFileInterface $photo = null,
-        ?Contact $manager = null,
-        array $relations= [],
+        UploadedFileInterface|null $photo = null,
+        Contact|null $manager = null,
+        #[UseInputType(inputType: '[ContactRef!]!')]
+        array $relations = [],
     ): Contact
     {
         $contact = new Contact($name);
@@ -35,13 +33,9 @@ class ContactFactory
         return $contact;
     }
 
-    /**
-     * @Factory(name="ContactRef", default=false)
-     * @return Contact
-     */
+    #[Factory(name: 'ContactRef', default: false)]
     public function getContact(string $name): Contact
     {
-        $contact = new Contact($name);
-        return $contact;
+        return new Contact($name);
     }
 }

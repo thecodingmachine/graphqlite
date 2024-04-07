@@ -10,13 +10,13 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
- * @Type(class=TestObject::class)
  */
+#[Type(class: TestObject::class)]
 class TestTypeWithInvalidPrefetchMethod
 {
     /**
-     * @Field()
      */
+    #[Field]
     public function test(object $source, #[Prefetch('notExists')] $data): string
     {
         return 'foo';

@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use ArrayObject;
+use DateTimeImmutable;
+use DateTimeInterface;
+use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -14,31 +18,29 @@ use TheCodingMachine\GraphQLite\Types\ID;
 
 class TestController
 {
-    /**
-     * @param TestObject[] $list
-     */
+    /** @param TestObject[] $list */
     #[Query]
     public function test(
         int $int,
         array $list,
-        ?bool $boolean,
-        ?float $float,
-        ?\DateTimeImmutable $dateTimeImmutable,
-        ?\DateTimeInterface $dateTime,
+        bool|null $boolean,
+        float|null $float,
+        DateTimeImmutable|null $dateTimeImmutable,
+        DateTimeInterface|null $dateTime,
         string $withDefault = 'default',
-        ?string $string = null,
-        ID $id = null,
-        TestEnum $enum = null,
+        string|null $string = null,
+        ID|null $id = null,
+        TestEnum|null $enum = null,
     ): TestObject
     {
         $str = '';
         foreach ($list as $test) {
-            if (!$test instanceof TestObject) {
-                throw new \RuntimeException('TestObject instance expected.');
+            if (! $test instanceof TestObject) {
+                throw new RuntimeException('TestObject instance expected.');
             }
             $str .= $test->getTest();
         }
-        return new TestObject($string.$int.$str.($boolean?'true':'false').$float.$dateTimeImmutable->format('YmdHis').$dateTime->format('YmdHis').$withDefault.($id !== null ? $id->val() : '').$enum->getValue());
+        return new TestObject($string . $int . $str . ($boolean ? 'true' : 'false') . $float . $dateTimeImmutable->format('YmdHis') . $dateTime->format('YmdHis') . $withDefault . ($id?->val() ?? '') . $enum->getValue());
     }
 
     #[Query]
@@ -50,7 +52,7 @@ class TestController
     }
 
     #[Query]
-    #[Right(name: "CAN_FOO")]
+    #[Right(name: 'CAN_FOO')]
     #[HideIfUnauthorized]
     public function testRight(): TestObject
     {
@@ -69,47 +71,36 @@ class TestController
         return new TestObject('foo');
     }
 
-    /**
-     * @return ArrayObject|TestObject[]
-     */
+    /** @return ArrayObject|TestObject[] */
     #[Query(name: 'arrayObject')]
     public function testArrayObject(): ArrayObject
     {
         return new ArrayObject([]);
     }
 
-    /**
-     * @return ArrayObject<TestObject>
-     */
+    /** @return ArrayObject<TestObject> */
     #[Query(name: 'arrayObjectGeneric')]
     public function testArrayObjectGeneric(): ArrayObject
     {
         return new ArrayObject([]);
     }
 
-    /**
-     * @return iterable|TestObject[]
-     */
+    /** @return iterable|TestObject[] */
     #[Query(name: 'iterable')]
     public function testIterable(): iterable
     {
-        return array();
+        return [];
     }
 
-    /**
-     * @return iterable<TestObject>
-     */
+    /** @return iterable<TestObject> */
     #[Query(name: 'iterableGeneric')]
     public function testIterableGeneric(): iterable
     {
-        return array();
+        return [];
     }
 
-    /**
-     * @return TestObject|TestObject2
-     */
     #[Query(name: 'union')]
-    public function testUnion()
+    public function testUnion(): TestObject|TestObject2
     {
         return new TestObject2('foo');
     }
@@ -133,9 +124,11 @@ class TestController
 
     #[Subscription(outputType: 'ID')]
     public function testSubscribe(): void
-    {}
+    {
+    }
 
     #[Subscription(outputType: 'ID')]
     public function testSubscribeWithInput(TestObject $testObject): void
-    {}
+    {
+    }
 }

@@ -9,13 +9,6 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 /**
  * Factories are methods used to declare GraphQL input types.
- *
- * @Annotation
- * @Target({"METHOD"})
- * @Attributes({
- *   @Attribute("name", type = "string"),
- *   @Attribute("default", type = "bool")
- * })
  */
 #[Attribute(Attribute::TARGET_METHOD)]
 class Factory
@@ -33,7 +26,7 @@ class Factory
         $this->default = $default ?? $attributes['default'] ?? ! isset($attributes['name']);
 
         if ($this->name === null && $this->default === false) {
-            throw new GraphQLRuntimeException('A @Factory that has "default=false" attribute must be given a name (i.e. add a name="FooBarInput" attribute).');
+            throw new GraphQLRuntimeException('A #[Factory] that has "default=false" attribute must be given a name (i.e. add a name="FooBarInput" attribute).');
         }
     }
 

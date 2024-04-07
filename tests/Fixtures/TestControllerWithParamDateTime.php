@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
@@ -8,9 +9,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithParamDateTime
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function test(DateTime $dateTime): string
     {
         return 'foo';

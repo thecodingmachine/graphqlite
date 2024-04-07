@@ -14,39 +14,25 @@ use function interface_exists;
 use function ltrim;
 
 /**
- * The Type annotation must be put in a GraphQL type class docblock and is used to map to the underlying PHP class
+ * The Type attribute must be put in a GraphQL type class attribute and is used to map to the underlying PHP class
  * this is exposed via this type.
- *
- * @Annotation
- * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("class", type = "string"),
- *   @Attribute("name", type = "string"),
- *   @Attribute("default", type = "bool"),
- *   @Attribute("external", type = "bool"),
- * })
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 class Type implements TypeInterface
 {
     /** @var class-string<object>|null */
-    private $class;
+    private string|null $class = null;
 
-    /** @var string|null */
-    private $name;
+    private string|null $name = null;
 
-    /** @var bool */
-    private $default;
+    private bool $default = true;
 
     /**
-     * Is the class having the annotation a GraphQL type itself?
-     *
-     * @var bool
+     * Is the class having the attribute a GraphQL type itself?
      */
-    private $selfType = false;
+    private bool $selfType = false;
 
-    /** @var bool */
-    private $useEnumValues = false;
+    private bool $useEnumValues = false;
 
     /**
      * @param mixed[] $attributes
@@ -89,27 +75,27 @@ class Type implements TypeInterface
     public function getClass(): string
     {
         if ($this->class === null) {
-            throw new RuntimeException('Empty class for @Type annotation. You MUST create the Type annotation object using the GraphQLite AnnotationReader');
+            throw new RuntimeException('Empty class for #[Type] attribute. You MUST create the Type attribute object using the GraphQLite AnnotationReader');
         }
 
         return $this->class;
     }
 
-    public function setClass(string $class): void
+    public function setClass(string $className): void
     {
-        $class = ltrim($class, '\\');
-        $isInterface = interface_exists($class);
-        if (! class_exists($class) && ! $isInterface) {
-            throw ClassNotFoundException::couldNotFindClass($class);
+        $className = ltrim($className, '\\');
+        $isInterface = interface_exists($className);
+        if (! class_exists($className) && ! $isInterface) {
+            throw ClassNotFoundException::couldNotFindClass($className);
         }
-        $this->class = $class;
+        $this->class = $className;
 
         if (! $isInterface) {
             return;
         }
 
         if ($this->default === false) {
-            throw new GraphQLRuntimeException('Problem in annotation @Type for interface "' . $class . '": you cannot use the default="false" attribute on interfaces');
+            throw new GraphQLRuntimeException('Problem in attribute #[Type] for interface "' . $className . '": you cannot use the default="false" attribute on interfaces');
         }
     }
 
