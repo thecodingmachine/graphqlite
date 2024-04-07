@@ -118,8 +118,9 @@ class AnnotationReader
                     return is_a($annotation->getName(), $annotationClass, true);
                 }),
             );
-
-            $toAddAnnotations[] = $attributes;
+            if (count($attributes) > 0) {
+                $toAddAnnotations[] = $attributes;
+            }
             $refClass = $refClass->getParentClass();
         } while ($inherited && $refClass);
 
