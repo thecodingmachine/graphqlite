@@ -24,14 +24,12 @@ use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
-use function array_diff_key;
 use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
 use function assert;
 use function count;
-use function get_class;
 use function is_a;
 use function reset;
 
