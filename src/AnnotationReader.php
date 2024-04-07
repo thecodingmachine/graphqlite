@@ -257,27 +257,6 @@ class AnnotationReader
         $method = $firstParam->getDeclaringFunction();
         assert($method instanceof ReflectionMethod);
 
-        /** @var ParameterAnnotationInterface[] $parameterAnnotations */
-        $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
-
-        /** @var array<string, array<int,ParameterAnnotations>> $parameterAnnotationsPerParameter */
-        $parameterAnnotationsPerParameter = [];
-        foreach ($parameterAnnotations as $parameterAnnotation) {
-            $parameterAnnotationsPerParameter[$parameterAnnotation->getTarget()][] = $parameterAnnotation;
-        }
-
-        // Let's check that the referenced parameters actually do exist:
-        $parametersByKey = [];
-        foreach ($refParameters as $refParameter) {
-            $parametersByKey[$refParameter->getName()] = true;
-        }
-        $diff = array_diff_key($parameterAnnotationsPerParameter, $parametersByKey);
-        if (count($diff) > 0) {
-            foreach ($diff as $parameterName => $parameterAnnotations) {
-                throw InvalidParameterException::parameterNotFound($parameterName, get_class($parameterAnnotations[0]), $method);
-            }
-        }
-
         foreach ($refParameters as $refParameter) {
             $attributes = $refParameter->getAttributes();
             $parameterAnnotationsPerParameter[$refParameter->getName()] = [...$parameterAnnotationsPerParameter[$refParameter->getName()] ??
