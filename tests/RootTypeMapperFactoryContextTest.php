@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
-class RootTypeMapperFactoryContextTest extends AbstractQueryProviderTest
+class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
 {
     const GLOB_TTL_SECONDS = 2;
 

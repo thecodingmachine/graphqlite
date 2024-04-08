@@ -12,7 +12,7 @@ use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
 use Symfony\Component\Cache\Simple\NullCache;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
 use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA;
@@ -26,7 +26,7 @@ use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 
-class RecursiveTypeMapperTest extends AbstractQueryProviderTest
+class RecursiveTypeMapperTest extends AbstractQueryProvider
 {
 
     public function testMapClassToType(): void

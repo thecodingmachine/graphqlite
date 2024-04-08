@@ -12,7 +12,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
-class GlobControllerQueryProviderTest extends AbstractQueryProviderTest
+class GlobControllerQueryProviderTest extends AbstractQueryProvider
 {
     public function testGlob(): void
     {

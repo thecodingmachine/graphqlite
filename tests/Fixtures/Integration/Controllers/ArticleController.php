@@ -41,6 +41,7 @@ class ArticleController
     {
         $article = new Article('test');
         $article->magazine = $input->magazine;
+        $article->summary = $input->summary;
 
         return $article;
     }

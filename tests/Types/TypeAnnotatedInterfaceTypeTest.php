@@ -4,9 +4,9 @@ namespace TheCodingMachine\GraphQLite\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use InvalidArgumentException;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 
-class TypeAnnotatedInterfaceTypeTest extends AbstractQueryProviderTest
+class TypeAnnotatedInterfaceTypeTest extends AbstractQueryProvider
 {
 
     public function testResolveTypeException()

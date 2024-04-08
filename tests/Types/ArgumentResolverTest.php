@@ -7,9 +7,9 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 
-abstract class ArgumentResolverTest extends AbstractQueryProviderTest
+class ArgumentResolverTest extends AbstractQueryProvider
 {
 
     public function testResolveArrayException(): void
@@ -26,6 +26,11 @@ abstract class ArgumentResolverTest extends AbstractQueryProviderTest
         $argumentResolver = $this->getArgumentResolver();
 
         $this->expectException(RuntimeException::class);
-        $argumentResolver->resolve(null, 42, null, $this->createMock(ResolveInfo::class), new class extends Type implements InputType {});
+        $argumentResolver->resolve(null, 42, null, $this->createMock(ResolveInfo::class), new class extends Type implements InputType {
+            public function toString(): string
+            {
+                return 'foo';
+            }
+        });
     }
 }

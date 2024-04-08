@@ -8,14 +8,14 @@ use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
 
-class TypeMapperTest extends AbstractQueryProviderTest
+class TypeMapperTest extends AbstractQueryProvider
 {
 
     public function testMapScalarUnionException(): void

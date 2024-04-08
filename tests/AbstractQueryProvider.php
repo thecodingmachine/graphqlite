@@ -70,7 +70,7 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 use Traversable;
 
-abstract class AbstractQueryProviderTest extends TestCase
+abstract class AbstractQueryProvider extends TestCase
 {
     private $testObjectType;
     private $testObjectType2;
@@ -495,7 +495,7 @@ abstract class AbstractQueryProviderTest extends TestCase
         return $this->typeRegistry;
     }
 
-    protected function resolveType(string $type): \phpDocumentor\Reflection\Type
+    protected static function resolveType(string $type): \phpDocumentor\Reflection\Type
     {
         return (new PhpDocumentorTypeResolver())->resolve($type);
     }

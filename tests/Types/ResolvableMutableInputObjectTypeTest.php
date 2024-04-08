@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\ResolveInfo;
 use stdClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
@@ -18,7 +18,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\HardCodedParameter;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
-class ResolvableMutableInputObjectTypeTest extends AbstractQueryProviderTest
+class ResolvableMutableInputObjectTypeTest extends AbstractQueryProvider
 {
     public function testResolve(): void
     {

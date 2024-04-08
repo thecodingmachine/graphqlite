@@ -7,8 +7,9 @@ use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
+use PHPUnit\Framework\Attributes\Group;
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputA;
@@ -21,7 +22,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorPromotedPropertie
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
 
-class InputTypeTest extends AbstractQueryProviderTest
+class InputTypeTest extends AbstractQueryProvider
 {
     public function testInputConfiguredCorrectly(): void
     {
@@ -142,9 +143,7 @@ class InputTypeTest extends AbstractQueryProviderTest
         $this->assertEquals(200, $result->getBar());
     }
 
-    /**
-     * @group PR-466
-     */
+    #[Group('PR-466')]
     public function testResolvesCorrectlyWithConstructorAndProperties(): void
     {
         $input = new InputType(

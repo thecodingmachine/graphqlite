@@ -3,6 +3,7 @@
 namespace TheCodingMachine\GraphQLite\Utils;
 
 use Exception;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
@@ -14,9 +15,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\MagicGetterSetterType;
 
 class PropertyAccessorTest extends TestCase
 {
-    /**
-     * @dataProvider findGetterProvider
-     */
+    #[DataProvider('findGetterProvider')]
     public function testFindGetter(mixed $expected, string $class, string $propertyName): void
     {
         self::assertSame($expected, PropertyAccessor::findGetter($class, $propertyName));
@@ -31,9 +30,7 @@ class PropertyAccessorTest extends TestCase
         yield 'undefined property' => [null, MagicGetterSetterType::class, 'twenty'];
     }
 
-    /**
-     * @dataProvider findSetterProvider
-     */
+    #[DataProvider('findSetterProvider')]
     public function testFindSetter(mixed $expected, string $class, string $propertyName): void
     {
         self::assertSame($expected, PropertyAccessor::findSetter($class, $propertyName));
@@ -47,9 +44,7 @@ class PropertyAccessorTest extends TestCase
         yield 'undefined property' => [null, MagicGetterSetterType::class, 'twenty'];
     }
 
-    /**
-     * @dataProvider getValueProvider
-     */
+    #[DataProvider('getValueProvider')]
     public function testGetValue(mixed $expected, object $object, string $propertyName, array $args = []): void
     {
         if ($expected instanceof Exception) {
@@ -70,9 +65,7 @@ class PropertyAccessorTest extends TestCase
         yield 'undefined property' => [AccessPropertyException::createForUnreadableProperty(GetterSetterType::class, 'twenty'), new GetterSetterType(), 'twenty'];
     }
 
-    /**
-     * @dataProvider setValueProvider
-     */
+    #[DataProvider('setValueProvider')]
     public function testSetValue(mixed $expected, object $object, string $propertyName, mixed $value): void
     {
         if ($expected instanceof Exception) {

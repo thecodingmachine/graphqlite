@@ -8,10 +8,10 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
-class MyCLabsEnumTypeMapperTest extends AbstractQueryProviderTest
+class MyCLabsEnumTypeMapperTest extends AbstractQueryProvider
 {
     public function testObjectTypeHint(): void
     {

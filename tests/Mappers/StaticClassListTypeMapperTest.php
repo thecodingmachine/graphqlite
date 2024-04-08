@@ -6,12 +6,12 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 
-class StaticClassListTypeMapperTest extends AbstractQueryProviderTest
+class StaticClassListTypeMapperTest extends AbstractQueryProvider
 {
     public function testClassListException(): void
     {

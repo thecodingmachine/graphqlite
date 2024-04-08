@@ -8,11 +8,11 @@ use GraphQL\Type\Definition\StringType;
 use Porpaginas\Arrays\ArrayResult;
 use Porpaginas\Result;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
-class PorpaginasTypeMapperTest extends AbstractQueryProviderTest
+class PorpaginasTypeMapperTest extends AbstractQueryProvider
 {
     private function getPorpaginasTypeMapper(): PorpaginasTypeMapper
     {

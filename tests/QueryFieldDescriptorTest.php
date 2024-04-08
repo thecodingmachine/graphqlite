@@ -3,15 +3,14 @@
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\Type;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 
 class QueryFieldDescriptorTest extends TestCase
 {
-    /**
-     * @dataProvider withAddedCommentLineProvider
-     */
+    #[DataProvider('withAddedCommentLineProvider')]
     public function testWithAddedCommentLine(string $expected, string|null $previous, string $added): void
     {
         $resolver = fn () => null;

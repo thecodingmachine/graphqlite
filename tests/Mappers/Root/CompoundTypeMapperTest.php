@@ -9,11 +9,11 @@ use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\String_;
 use ReflectionMethod;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\AbstractQueryProviderTest;
+use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 
-class CompoundTypeMapperTest extends AbstractQueryProviderTest
+class CompoundTypeMapperTest extends AbstractQueryProvider
 {
     public function testException1()
     {

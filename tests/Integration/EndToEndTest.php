@@ -1852,6 +1852,7 @@ class EndToEndTest extends IntegrationTestCase
                 magazine: "Test"
             }) {
                 magazine
+                summary
             }
         }
         ';
@@ -1863,6 +1864,7 @@ class EndToEndTest extends IntegrationTestCase
 
         $data = $this->getSuccessResult($result);
         $this->assertSame('Test', $data['updateArticle']['magazine']);
+        $this->assertSame('default', $data['updateArticle']['summary']);
         $queryString = '
         mutation {
             updateArticle(input: {
