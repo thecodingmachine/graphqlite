@@ -44,10 +44,6 @@ class AnnotationReader
     /** @var array<string, array<object>> */
     private array $propertyAnnotationsCache = [];
 
-    public function __construct()
-    {
-    }
-
     /**
      * Returns a class annotation. Does not look in the parent class.
      *
@@ -63,13 +59,12 @@ class AnnotationReader
     private function getClassAnnotation(ReflectionClass $refClass, string $annotationClass): object|null
     {
         $attribute = $refClass->getAttributes($annotationClass)[0] ?? null;
-        if ($attribute) {
-            $instance = $attribute->newInstance();
-            assert($instance instanceof $annotationClass);
-            return $instance;
+        if (! $attribute) {
+            return null;
         }
-
-        return null;
+        $instance = $attribute->newInstance();
+        assert($instance instanceof $annotationClass);
+        return $instance;
     }
 
     /**
@@ -85,11 +80,14 @@ class AnnotationReader
         }
 
         $attribute = $refMethod->getAttributes($annotationClass)[0] ?? null;
-        if ($attribute) {
-            return $this->methodAnnotationCache[$cacheKey] = $attribute->newInstance();
-        }
+        if (! $attribute) {
+            $this->methodAnnotationCache[$cacheKey] = null;
 
-        return $this->methodAnnotationCache[$cacheKey] = null;
+            return null;
+        }
+        $this->methodAnnotationCache[$cacheKey] = $attribute->newInstance();
+
+        return $this->methodAnnotationCache[$cacheKey];
     }
 
     /**

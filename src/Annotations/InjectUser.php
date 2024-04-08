@@ -16,11 +16,10 @@ use function ltrim;
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class InjectUser implements ParameterAnnotationInterface
 {
-    /** @var string */
-    private $for;
+    private string|null $for = null;
 
     /** @param array<string, mixed> $values */
-    public function __construct(array|null $values = [])
+    public function __construct(array $values = [])
     {
         if (! isset($values['for'])) {
             return;

@@ -1152,10 +1152,10 @@ class FieldsBuilder
             assert($type instanceof InputType);
             $forConstructorHydration = in_array($name, $constructerParameters);
             $resolver = $forConstructorHydration
-            ? new SourceConstructorParameterResolver(
-                $refProperty->getDeclaringClass()->getName(),
-                $refProperty->getName(),
-            )
+                ? new SourceConstructorParameterResolver(
+                    $refProperty->getDeclaringClass()->getName(),
+                    $refProperty->getName(),
+                )
                 : new SourceInputPropertyResolver($refProperty);
 
             // setters and properties
