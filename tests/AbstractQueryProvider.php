@@ -409,6 +409,7 @@ abstract class AbstractQueryProvider extends TestCase
         $rootTypeMapper = new EnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
+            $this->getDocBlockFactory(),
             new StaticClassFinder([]),
             new HardClassFinderBoundCache(new Psr16Cache($arrayAdapter)),
         );

@@ -400,7 +400,7 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderBoundCache);
+        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $docBlockFactory, $classFinder, $classFinderBoundCache);
 
         if (class_exists(Enum::class)) {
             // Annotation support - deprecated

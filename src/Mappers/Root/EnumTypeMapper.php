@@ -10,7 +10,6 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
-use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
@@ -20,6 +19,7 @@ use ReflectionProperty;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\EnumType;
 use UnitEnum;
 use function assert;
@@ -41,6 +41,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
     public function __construct(
         private readonly RootTypeMapperInterface $next,
         private readonly AnnotationReader        $annotationReader,
+        private readonly DocBlockFactory $docBlockFactory,
         private readonly ClassFinder             $classFinder,
         private readonly ClassFinderBoundCache   $classFinderBoundCache,
     ) {
@@ -119,14 +120,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
             $reflectionEnum->isBacked() &&
             (string) $reflectionEnum->getBackingType() === 'string';
 
-        $docBlockFactory = DocBlockFactory::createInstance();
-
-        $enumDescription = null;
-        $docComment = $reflectionEnum->getDocComment();
-        if ($docComment) {
-            $docBlock = $docBlockFactory->create($docComment);
-            $enumDescription = $docBlock->getSummary();
-        }
+        $enumDescription = $this->docBlockFactory
+            ->createFromReflector($reflectionEnum)
+            ->getSummary() ?: null;
 
         /** @var array<string, string> $enumCaseDescriptions */
         $enumCaseDescriptions = [];
@@ -134,15 +130,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
         $enumCaseDeprecationReasons = [];
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
-            $docComment = $reflectionEnumCase->getDocComment();
-            if (! $docComment) {
-                continue;
-            }
+            $docBlock = $this->docBlockFactory->createFromReflector($reflectionEnumCase);
 
-            $docBlock = $docBlockFactory->create($docComment);
-            $enumCaseDescription = $docBlock->getSummary();
-
-            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $enumCaseDescription;
+            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $docBlock->getSummary() ?: null;
             $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
 
             // phpcs:ignore
