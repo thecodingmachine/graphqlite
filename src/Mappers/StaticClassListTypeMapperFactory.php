@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\FactoryContext;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 
 /**
- * A type mapper that is passed the list of classes that it must scan (unlike the GlobTypeMapper that find those automatically).
+ * A type mapper that is passed the list of classes that it must scan.
  */
 final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterface
 {
@@ -26,8 +27,8 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
     {
         $inputTypeUtils = new InputTypeUtils($context->getAnnotationReader(), $context->getNamingStrategy());
 
-        return new StaticClassListTypeMapper(
-            $this->classList,
+        return new ClassFinderTypeMapper(
+            new StaticClassFinder($this->classList),
             $context->getTypeGenerator(),
             $context->getInputTypeGenerator(),
             $inputTypeUtils,
@@ -35,9 +36,7 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
             $context->getAnnotationReader(),
             $context->getNamingStrategy(),
             $context->getRecursiveTypeMapper(),
-            $context->getCache(),
-            $context->getGlobTTL(),
-            $context->getMapTTL(),
+            $context->getClassFinderBoundCache(),
         );
     }
 }

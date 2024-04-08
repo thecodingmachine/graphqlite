@@ -8,9 +8,17 @@ use Traversable;
 class KcsClassFinder implements ClassFinder
 {
     public function __construct(
-        private readonly FinderInterface $finder,
+        private FinderInterface $finder,
     )
     {
+    }
+
+    public function withPathFilter(callable $filter): ClassFinder
+    {
+        $that = clone $this;
+        $that->finder = (clone $that->finder)->pathFilter($filter);
+
+        return $that;
     }
 
     public function getIterator(): Traversable

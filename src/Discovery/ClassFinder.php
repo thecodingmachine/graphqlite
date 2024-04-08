@@ -7,5 +7,5 @@ namespace TheCodingMachine\GraphQLite\Discovery;
  */
 interface ClassFinder extends \IteratorAggregate
 {
-
+    public function withPathFilter(callable $filter): self;
 }

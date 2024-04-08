@@ -17,12 +17,11 @@ use ReflectionClass;
 use ReflectionEnum;
 use ReflectionMethod;
 use ReflectionProperty;
-use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
 use TheCodingMachine\GraphQLite\Types\EnumType;
 use UnitEnum;
-
 use function assert;
 use function enum_exists;
 use function ltrim;
@@ -37,13 +36,13 @@ class EnumTypeMapper implements RootTypeMapperInterface
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
     /** @var array<string, class-string<UnitEnum>> */
-    private array|null $nameToClassMapping = null;
+    private array $nameToClassMapping;
 
     public function __construct(
         private readonly RootTypeMapperInterface $next,
         private readonly AnnotationReader        $annotationReader,
-        private readonly CacheInterface          $cache,
-        private readonly ClassFinder                   $classFinder,
+        private readonly ClassFinder             $classFinder,
+        private readonly ClassFinderBoundCache   $classFinderBoundCache,
     ) {
     }
 
@@ -198,19 +197,19 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        if ($this->nameToClassMapping === null) {
-            $this->nameToClassMapping = $this->cache->get('enum_name_to_class', function () {
-                $nameToClassMapping = [];
-                foreach ($this->classFinder as $className => $classRef) {
-                    if (! enum_exists($className)) {
-                        continue;
-                    }
+        $this->nameToClassMapping ??= $this->classFinderBoundCache->reduce(
+           $this->classFinder,
+           'enum_name_to_class',
+           function (ReflectionClass $classReflection): ?array {
+               if (! $classReflection->isEnum()) {
+                   return null;
+               }
 
-                    $nameToClassMapping[$this->getTypeName($classRef)] = $className;
-                }
-                return $nameToClassMapping;
-            });
-        }
+               return [$this->getTypeName($classReflection) => $classReflection->getName()];
+           },
+           fn (array $entries) => array_merge(...array_values(array_filter($entries))),
+       );
+
         return $this->nameToClassMapping;
     }
 }

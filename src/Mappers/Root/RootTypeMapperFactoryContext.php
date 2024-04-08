@@ -8,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
@@ -28,8 +29,7 @@ final class RootTypeMapperFactoryContext
         private readonly ContainerInterface $container,
         private readonly CacheInterface $cache,
         private readonly ClassFinder $classFinder,
-        private readonly int|null $globTTL,
-        private readonly int|null $mapTTL = null,
+        private readonly ClassFinderBoundCache $classFinderBoundCache,
     ) {
     }
 
@@ -73,13 +73,8 @@ final class RootTypeMapperFactoryContext
         return $this->classFinder;
     }
 
-    public function getGlobTTL(): int|null
+    public function getClassFinderBoundCache(): ClassFinderBoundCache
     {
-        return $this->globTTL;
-    }
-
-    public function getMapTTL(): int|null
-    {
-        return $this->mapTTL;
+        return $this->classFinderBoundCache;
     }
 }

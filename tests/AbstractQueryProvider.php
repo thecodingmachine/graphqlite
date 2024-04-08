@@ -24,8 +24,9 @@ use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderBoundCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\EmptyClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\OldCachedClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
@@ -401,15 +402,15 @@ abstract class AbstractQueryProvider extends TestCase
         $rootTypeMapper = new MyCLabsEnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
-            $arrayAdapter,
-            new EmptyClassFinder(),
+            new StaticClassFinder([]),
+            new HardClassFinderBoundCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new EnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
-            $arrayAdapter,
-            new EmptyClassFinder(),
+            new StaticClassFinder([]),
+            new HardClassFinderBoundCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new CompoundTypeMapper(

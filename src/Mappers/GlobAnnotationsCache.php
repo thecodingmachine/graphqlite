@@ -27,6 +27,7 @@ final class GlobAnnotationsCache
      *        An array mapping an input type name to an input name / declaring class
      */
     public function __construct(
+        public readonly string $sourceClass,
         private readonly string|null $typeClassName = null,
         private readonly string|null $typeName = null,
         private readonly bool $default = false,
@@ -108,6 +109,10 @@ final class GlobAnnotationsCache
      */
     public function registerInput(string $name, string $className, Input $input): self
     {
+        if (isset($this->inputs[$name])) {
+            throw DuplicateMappingException::createForTwoInputs($name, $this->inputs[$name][0], $className);
+        }
+
         return $this->with(
             inputs: [
                 ...$this->inputs,

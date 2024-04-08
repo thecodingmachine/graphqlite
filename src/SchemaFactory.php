@@ -24,12 +24,13 @@ use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
 use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
 use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\FileModificationClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderBoundCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\EmptyClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\OldCachedClassFinder;
+use TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
@@ -85,8 +86,6 @@ use function substr;
  */
 class SchemaFactory
 {
-    public const GLOB_CACHE_SECONDS = 2;
-
     /** @var array<int,string> */
     private array $namespaces = [];
 
@@ -122,7 +121,7 @@ class SchemaFactory
 
     private SchemaConfig|null $schemaConfig = null;
 
-    private int|null $globTTL = self::GLOB_CACHE_SECONDS;
+    private bool $devMode = true;
 
     /** @var array<int, FieldMiddlewareInterface> */
     private array $fieldMiddlewares = [];
@@ -299,35 +298,23 @@ class SchemaFactory
     }
 
     /**
-     * Sets the time to live time of the cache for annotations in files.
-     * By default this is set to 2 seconds which is ok for development environments.
-     * Set this to "null" (i.e. infinity) for production environments.
+     * Sets GraphQLite in "prod" mode (cache settings optimized for best performance).
      */
-    public function setGlobTTL(int|null $globTTL): self
+    public function prodMode(): self
     {
-        $this->globTTL = $globTTL;
+        $this->devMode = false;
 
         return $this;
     }
 
     /**
-     * Sets GraphQLite in "prod" mode (cache settings optimized for best performance).
-     *
-     * This is a shortcut for `$schemaFactory->setGlobTTL(null)`
-     */
-    public function prodMode(): self
-    {
-        return $this->setGlobTTL(null);
-    }
-
-    /**
      * Sets GraphQLite in "dev" mode (this is the default mode: cache settings optimized for best developer experience).
-     *
-     * This is a shortcut for `$schemaFactory->setGlobTTL(2)`
      */
     public function devMode(): self
     {
-        return $this->setGlobTTL(self::GLOB_CACHE_SECONDS);
+        $this->devMode = true;
+
+        return $this;
     }
 
     /**
@@ -379,7 +366,10 @@ class SchemaFactory
         [$docBlockFactory, $docBlockContextFactory] = $this->createDocBlockFactory($nonInheritedClassBoundCache);
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
-        $classFinder = $this->createClassFinder($namespacedCache);
+        $classFinder = $this->createClassFinder();
+        $classFinderBoundCache = $this->devMode ?
+            new FileModificationClassFinderBoundCache($this->cache) :
+            new HardClassFinderBoundCache($this->cache);
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
@@ -410,11 +400,11 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $classFinder);
+        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderBoundCache);
 
         if (class_exists(Enum::class)) {
             // Annotation support - deprecated
-            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $symfonyCache, $classFinder);
+            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderBoundCache);
         }
 
         if (!empty($this->rootTypeMapperFactories)) {
@@ -427,7 +417,7 @@ class SchemaFactory
                 $this->container,
                 $namespacedCache,
                 $classFinder,
-                $this->globTTL,
+                $classFinderBoundCache,
             );
 
             $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
@@ -472,7 +462,7 @@ class SchemaFactory
         $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
 
         if ($this->namespaces) {
-            $compositeTypeMapper->addTypeMapper(new GlobTypeMapper(
+            $compositeTypeMapper->addTypeMapper(new ClassFinderTypeMapper(
                 $classFinder,
                 $typeGenerator,
                 $inputTypeGenerator,
@@ -481,8 +471,7 @@ class SchemaFactory
                 $annotationReader,
                 $namingStrategy,
                 $recursiveTypeMapper,
-                $namespacedCache,
-                $this->globTTL,
+                $classFinderBoundCache,
             ));
         }
 
@@ -499,7 +488,8 @@ class SchemaFactory
                 $this->container,
                 $namespacedCache,
                 $this->inputTypeValidator,
-                $this->globTTL,
+                $classFinder,
+                $classFinderBoundCache,
             );
         }
 
@@ -518,15 +508,14 @@ class SchemaFactory
         $compositeTypeMapper->addTypeMapper(new PorpaginasTypeMapper($recursiveTypeMapper));
 
         $queryProviders = [];
-        foreach ($this->namespaces as $namespace) {
+
+        if ($this->namespaces) {
             $queryProviders[] = new GlobControllerQueryProvider(
-                $namespace,
                 $fieldsBuilder,
                 $this->container,
                 $annotationReader,
-                $namespacedCache,
                 $classFinder,
-                $this->globTTL,
+                $classFinderBoundCache,
             );
         }
 
@@ -547,14 +536,14 @@ class SchemaFactory
         return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $topRootTypeMapper, $this->schemaConfig);
     }
 
-    private function createClassFinder(CacheInterface $cache): ClassFinder
+    private function createClassFinder(): ClassFinder
     {
         // When no namespaces are specified, class finder uses all available namespaces to discover classes.
         // While this is technically okay, it doesn't follow SchemaFactory's semantics that allow it's
         // users to manually specify classes (see SchemaFactory::testCreateSchemaOnlyWithFactories()),
         // without having to specify namespaces to glob. This solves it by providing an empty iterator.
         if (!$this->namespaces) {
-            return new EmptyClassFinder();
+            return new StaticClassFinder([]);
         }
 
         $finder = (clone ($this->finder ?? new ComposerFinder()));
@@ -563,17 +552,7 @@ class SchemaFactory
             $finder->inNamespace($namespace);
         }
 
-        return new OldCachedClassFinder(
-            new KcsClassFinder($finder),
-            $cache,
-            $this->globTTL
-        );
-
-//        if ($this->devMode) {
-//            $finder = new FileCachedFinder($finder);
-//        }
-
-        return $finder;
+        return new KcsClassFinder($finder);
     }
 
     private function createDocBlockFactory(ClassBoundCacheInterface $nonInheritedClassBoundCache): array

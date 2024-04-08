@@ -17,6 +17,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
 
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
 use function class_exists;
 use function interface_exists;
 use function is_array;
@@ -30,36 +31,27 @@ use function str_replace;
  */
 final class GlobControllerQueryProvider implements QueryProviderInterface
 {
-    /** @var array<int,string>|null */
-    private array|null $instancesList = null;
+    /** @var array<int,class-string> */
+    private array $classList;
     private AggregateControllerQueryProvider|null $aggregateControllerQueryProvider = null;
-    private CacheContractInterface $cacheContract;
 
     /**
-     * @param string $namespace The namespace that contains the GraphQL types (they must have a `@Type` annotation)
      * @param ContainerInterface $container The container we will fetch controllers from.
      */
     public function __construct(
-        private readonly string             $namespace,
         private readonly FieldsBuilder      $fieldsBuilder,
         private readonly ContainerInterface $container,
         private readonly AnnotationReader   $annotationReader,
-        private readonly CacheInterface     $cache,
         private readonly ClassFinder        $classFinder,
-        int|null                            $cacheTtl = null,
+        private readonly ClassFinderBoundCache     $classFinderBoundCache,
     )
     {
-        $this->cacheContract = new Psr16Adapter(
-            $this->cache,
-            str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $namespace),
-            $cacheTtl ?? 0,
-        );
     }
 
     private function getAggregateControllerQueryProvider(): AggregateControllerQueryProvider
     {
         $this->aggregateControllerQueryProvider ??= new AggregateControllerQueryProvider(
-            $this->getInstancesList(),
+            $this->getClassList(),
             $this->fieldsBuilder,
             $this->container,
         );
@@ -70,46 +62,28 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     /**
      * Returns an array of fully qualified class names.
      *
-     * @return array<int,string>
+     * @return array<int,class-string>
      */
-    private function getInstancesList(): array
+    private function getClassList(): array
     {
-        if ($this->instancesList === null) {
-            $this->instancesList = $this->cacheContract->get(
-                'globQueryProvider',
-                fn () => $this->buildInstancesList(),
-            );
+        $this->classList ??= $this->classFinderBoundCache->reduce(
+            $this->classFinder,
+            'globQueryProvider',
+            function (ReflectionClass $classReflection): ?string {
+                if (
+                    ! $classReflection->isInstantiable() ||
+                    ! $this->hasOperations($classReflection) ||
+                    ! $this->container->has($classReflection->getName())
+                ) {
+                    return null;
+                }
 
-            if (! is_array($this->instancesList)) {
-                throw new InvalidArgumentException('The instance list returned is not an array. There might be an issue with your PSR-16 cache implementation.');
-            }
-        }
+                return $classReflection->getName();
+            },
+            fn (array $entries) => array_values(array_filter($entries)),
+        );
 
-        return $this->instancesList;
-    }
-
-    /** @return array<int,string> */
-    private function buildInstancesList(): array
-    {
-        $instances = [];
-        foreach ($this->classFinder as $className => $refClass) {
-            if (! class_exists($className) && ! interface_exists($className)) {
-                continue;
-            }
-            if (! $refClass instanceof ReflectionClass || ! $refClass->isInstantiable()) {
-                continue;
-            }
-            if (! $this->hasOperations($refClass)) {
-                continue;
-            }
-            if (! $this->container->has($className)) {
-                continue;
-            }
-
-            $instances[] = $className;
-        }
-
-        return $instances;
+        return $this->classList;
     }
 
     /** @param ReflectionClass<object> $reflectionClass */

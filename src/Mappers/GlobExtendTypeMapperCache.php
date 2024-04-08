@@ -19,11 +19,11 @@ class GlobExtendTypeMapperCache
     /**
      * Merges annotations of a given class in the global cache.
      *
-     * @param ReflectionClass<object> $refClass
+     * @param ReflectionClass<object>|class-string $sourceClass
      */
-    public function registerAnnotations(ReflectionClass $refClass, GlobExtendAnnotationsCache $globExtendAnnotationsCache): void
+    public function registerAnnotations(ReflectionClass|string $sourceClass, GlobExtendAnnotationsCache $globExtendAnnotationsCache): void
     {
-        $className = $refClass->getName();
+        $className = $sourceClass instanceof ReflectionClass ? $sourceClass->getName() : $sourceClass;
 
         $typeClassName = $globExtendAnnotationsCache->getExtendTypeClassName();
         if ($typeClassName !== null) {

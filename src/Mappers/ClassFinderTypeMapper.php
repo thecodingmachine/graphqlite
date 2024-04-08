@@ -9,18 +9,12 @@ use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Psr\Container\ContainerInterface;
-use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use Symfony\Component\Cache\Adapter\Psr16Adapter;
-use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
-use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -29,60 +23,28 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
-
 use function assert;
 
 /**
  * Analyzes classes and uses the @Type annotation to find the types automatically.
- *
- * Assumes that the container contains a class whose identifier is the same as the class name.
  */
-abstract class AbstractTypeMapper implements TypeMapperInterface
+class ClassFinderTypeMapper implements TypeMapperInterface
 {
-    /**
-     * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
-     */
-    private ClassBoundCacheContractInterface $mapClassToAnnotationsCache;
-    /**
-     * Cache storing the GlobAnnotationsCache objects linked to a given ReflectionClass.
-     */
-    private ClassBoundCacheContractInterface $mapClassToExtendAnnotationsCache;
-
-    private CacheContractInterface $cacheContract;
     private GlobTypeMapperCache|null $globTypeMapperCache = null;
     private GlobExtendTypeMapperCache|null $globExtendTypeMapperCache = null;
-    /** @var array<string, class-string<object>> */
-    private array $registeredInputs;
 
     public function __construct(
-        string $cachePrefix,
-        private readonly TypeGenerator $typeGenerator,
-        private readonly InputTypeGenerator $inputTypeGenerator,
-        private readonly InputTypeUtils $inputTypeUtils,
-        private readonly ContainerInterface $container,
-        private readonly AnnotationReader $annotationReader,
-        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly ClassFinder                  $classFinder,
+        private readonly TypeGenerator                $typeGenerator,
+        private readonly InputTypeGenerator           $inputTypeGenerator,
+        private readonly InputTypeUtils               $inputTypeUtils,
+        private readonly ContainerInterface           $container,
+        private readonly AnnotationReader             $annotationReader,
+        private readonly NamingStrategyInterface      $namingStrategy,
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private readonly CacheInterface $cache,
-        protected int|null $globTTL = 2,
-        private readonly int|null $mapTTL = null,
+        private readonly ClassFinderBoundCache        $classFinderBoundCache,
     )
     {
-        $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
-
-        $classToAnnotationsCache = new ClassBoundCache(
-            new FileBoundCache($this->cache, 'classToAnnotations_' . $cachePrefix),
-        );
-        $this->mapClassToAnnotationsCache = new ClassBoundCacheContract(
-            new ClassBoundMemoryAdapter($classToAnnotationsCache),
-        );
-
-        $classToExtendedAnnotationsCache = new ClassBoundCache(
-            new FileBoundCache($this->cache, 'classToExtendAnnotations_' . $cachePrefix),
-        );
-        $this->mapClassToExtendAnnotationsCache = new ClassBoundCacheContract(
-            new ClassBoundMemoryAdapter($classToExtendedAnnotationsCache),
-        );
     }
 
     /**
@@ -90,48 +52,17 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
      */
     private function getMaps(): GlobTypeMapperCache
     {
-        if ($this->globTypeMapperCache === null) {
-            $this->globTypeMapperCache = $this->cacheContract->get('fullMapComputed', function () {
-                return $this->buildMap();
-            });
-        }
+        $this->globTypeMapperCache ??= $this->classFinderBoundCache->reduce(
+            $this->classFinder,
+            'classToAnnotations',
+            function (ReflectionClass $refClass): ?GlobAnnotationsCache {
+                if ($refClass->isEnum()) {
+                    return null;
+                }
 
-        return $this->globTypeMapperCache;
-    }
-
-    private function getMapClassToExtendTypeArray(): GlobExtendTypeMapperCache
-    {
-        if ($this->globExtendTypeMapperCache === null) {
-            $this->globExtendTypeMapperCache = $this->cacheContract->get('fullExtendMapComputed', function () {
-                return $this->buildMapClassToExtendTypeArray();
-            });
-        }
-
-        return $this->globExtendTypeMapperCache;
-    }
-
-    /**
-     * Returns the array of globbed classes.
-     * Only instantiable classes are returned.
-     *
-     * @return array<string,ReflectionClass<object>> Key: fully qualified class name
-     */
-    abstract protected function getClassList(): array;
-
-    private function buildMap(): GlobTypeMapperCache
-    {
-        $globTypeMapperCache = new GlobTypeMapperCache();
-
-        /** @var array<class-string<object>,ReflectionClass<object>> $classes */
-        $classes = $this->getClassList();
-
-        foreach ($classes as $className => $refClass) {
-            // Enum's are not types
-            if ($refClass->isEnum()) {
-                continue;
-            }
-            $annotationsCache = $this->mapClassToAnnotationsCache->get($refClass, function () use ($refClass, $className) {
-                $annotationsCache = new GlobAnnotationsCache();
+                $annotationsCache = new GlobAnnotationsCache(
+                    $className = $refClass->getName(),
+                );
 
                 $containsAnnotations = false;
 
@@ -145,11 +76,6 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                 $inputs = $this->annotationReader->getInputAnnotations($refClass);
                 foreach ($inputs as $input) {
                     $inputName = $this->namingStrategy->getInputTypeName($className, $input);
-                    if (isset($this->registeredInputs[$inputName])) {
-                        throw DuplicateMappingException::createForTwoInputs($inputName, $this->registeredInputs[$inputName], $refClass->getName());
-                    }
-
-                    $this->registeredInputs[$inputName] = $refClass->getName();
                     $annotationsCache = $annotationsCache->registerInput($inputName, $className, $input);
                     $containsAnnotations = true;
                 }
@@ -179,71 +105,73 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
                     $containsAnnotations = true;
                 }
 
-                if (! $containsAnnotations) {
-                    return 'nothing';
+                return $containsAnnotations ? $annotationsCache : null;
+            },
+            fn (array $entries) => array_reduce($entries, function (GlobTypeMapperCache $globTypeMapperCache, ?GlobAnnotationsCache $annotationsCache) {
+                if ($annotationsCache === null) {
+                    return $globTypeMapperCache;
                 }
 
-                return $annotationsCache;
-            }, '', $this->mapTTL);
+                $globTypeMapperCache->registerAnnotations($annotationsCache->sourceClass, $annotationsCache);
 
-            if ($annotationsCache === 'nothing') {
-                continue;
-            }
+                return $globTypeMapperCache;
+            }, new GlobTypeMapperCache())
+        );
 
-            $globTypeMapperCache->registerAnnotations($refClass, $annotationsCache);
-        }
-
-        return $globTypeMapperCache;
+        return $this->globTypeMapperCache;
     }
 
-    private function buildMapClassToExtendTypeArray(): GlobExtendTypeMapperCache
+    private function getMapClassToExtendTypeArray(): GlobExtendTypeMapperCache
     {
-        $globExtendTypeMapperCache = new GlobExtendTypeMapperCache();
-
-        $classes = $this->getClassList();
-        foreach ($classes as $refClass) {
-            // Enum's are not types
-            if ($refClass->isEnum()) {
-                continue;
-            }
-            $annotationsCache = $this->mapClassToExtendAnnotationsCache->get($refClass, function () use ($refClass) {
-                $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
-
-                if ($extendType !== null) {
-                    $extendClassName = $extendType->getClass();
-                    if ($extendClassName !== null) {
-                        try {
-                            $targetType = $this->recursiveTypeMapper->mapClassToType($extendClassName, null);
-                        } catch (CannotMapTypeException $e) {
-                            $e->addExtendTypeInfo($refClass, $extendType);
-                            throw $e;
-                        }
-                        $typeName = $targetType->name;
-                    } else {
-                        $typeName = $extendType->getName();
-                        assert($typeName !== null);
-                        $targetType = $this->recursiveTypeMapper->mapNameToType($typeName);
-                        if (! $targetType instanceof MutableObjectType) {
-                            throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendType);
-                        }
-                        $extendClassName = $targetType->getMappedClassName();
-                    }
-
-                    // FIXME: $extendClassName === NULL!!!!!!
-                    return new GlobExtendAnnotationsCache($extendClassName, $typeName);
+        $this->globExtendTypeMapperCache ??= $this->classFinderBoundCache->reduce(
+            $this->classFinder,
+            'classToExtendAnnotations',
+            function (ReflectionClass $refClass): ?GlobExtendAnnotationsCache {
+                // Enum's are not types
+                if ($refClass->isEnum()) {
+                    return null;
                 }
 
-                return 'nothing';
-            }, '', $this->mapTTL);
+                $extendType = $this->annotationReader->getExtendTypeAnnotation($refClass);
 
-            if ($annotationsCache === 'nothing') {
-                continue;
-            }
+                if ($extendType === null) {
+                    return null;
+                }
 
-            $globExtendTypeMapperCache->registerAnnotations($refClass, $annotationsCache);
-        }
+                $extendClassName = $extendType->getClass();
+                if ($extendClassName !== null) {
+                    try {
+                        $targetType = $this->recursiveTypeMapper->mapClassToType($extendClassName, null);
+                    } catch (CannotMapTypeException $e) {
+                        $e->addExtendTypeInfo($refClass, $extendType);
+                        throw $e;
+                    }
+                    $typeName = $targetType->name;
+                } else {
+                    $typeName = $extendType->getName();
+                    assert($typeName !== null);
+                    $targetType = $this->recursiveTypeMapper->mapNameToType($typeName);
+                    if (! $targetType instanceof MutableObjectType) {
+                        throw CannotMapTypeException::extendTypeWithBadTargetedClass($refClass->getName(), $extendType);
+                    }
+                    $extendClassName = $targetType->getMappedClassName();
+                }
 
-        return $globExtendTypeMapperCache;
+                // FIXME: $extendClassName === NULL!!!!!!
+                return new GlobExtendAnnotationsCache($refClass->getName(), $extendClassName, $typeName);
+            },
+            fn (array $entries) => array_reduce($entries, function (GlobExtendTypeMapperCache $globExtendTypeMapperCache, ?GlobExtendAnnotationsCache $annotationsCache) {
+                if ($annotationsCache === null) {
+                    return $globExtendTypeMapperCache;
+                }
+
+                $globExtendTypeMapperCache->registerAnnotations($annotationsCache->sourceClass, $annotationsCache);
+
+                return $globExtendTypeMapperCache;
+            }, new GlobExtendTypeMapperCache())
+        );
+
+        return $this->globExtendTypeMapperCache;
     }
 
     /**
