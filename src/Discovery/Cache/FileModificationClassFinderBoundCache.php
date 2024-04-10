@@ -66,17 +66,30 @@ class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
     ): mixed
     {
         $previousEntries = $this->cache->get($key) ?? [];
-        $entries = [];
         $result = [];
+        $entries = [];
 
-        $classFinder = $classFinder->withPathFilter(function (string $filename) use (&$entries, $previousEntries) {
+        $classFinder = $classFinder->withPathFilter(function (string $filename) use (&$entries, &$result, $previousEntries) {
             $entry = $previousEntries[$filename] ?? null;
 
             // If there's no entry in cache for this filename (new file or previously uncached),
             // or if it the file has been modified since caching, we'll try to autoload
             // the class and collect the cached information (again).
             if (!$entry || $this->dependenciesChanged($entry['dependencies'])) {
+                // In case this file isn't a class, or doesn't match the provided namespace filter,
+                // it will not be emitted in the iterator and won't reach the `foreach()` below.
+                // So to avoid iterating over these files again, we'll mark them as non-matching.
+                // If they are matching, it'll be overwritten in the `foreach` loop below.
+                $entries[$filename] = [
+                    'dependencies' => [$filename => filemtime($filename)],
+                    'matching' => false,
+                ];
+
                 return true;
+            }
+
+            if ($entry['matching']) {
+                $result[$filename] = $entry['data'];
             }
 
             $entries[$filename] = $entry;
@@ -91,6 +104,7 @@ class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
             $entries[$filename] = [
                 'dependencies' => $this->fileDependencies($classReflection),
                 'data' => $result[$filename],
+                'matching' => true,
             ];
         }
 
