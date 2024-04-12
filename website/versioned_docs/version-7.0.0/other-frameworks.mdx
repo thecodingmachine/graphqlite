@@ -38,8 +38,8 @@ use TheCodingMachine\GraphQLite\SchemaFactory;
 // $cache is a PSR-16 compatible cache
 // $container is a PSR-11 compatible container
 $factory = new SchemaFactory($cache, $container);
-$factory->addControllerNamespace('App\\Controllers\\')
-        ->addTypeNamespace('App\\');
+$factory->addControllerNamespace('App\\Controllers')
+        ->addTypeNamespace('App');
 
 $schema = $factory->createSchema();
 ```
@@ -112,8 +112,8 @@ use TheCodingMachine\GraphQLite\Context\Context;
 // $cache is a PSR-16 compatible cache.
 // $container is a PSR-11 compatible container.
 $factory = new SchemaFactory($cache, $container);
-$factory->addControllerNamespace('App\\Controllers\\')
-        ->addTypeNamespace('App\\');
+$factory->addControllerNamespace('App\\Controllers')
+        ->addTypeNamespace('App');
 
 $schema = $factory->createSchema();
 
@@ -266,8 +266,8 @@ return new Picotainer([
     Schema::class => function(ContainerInterface $container) {
         // The magic happens here. We create a schema using GraphQLite SchemaFactory.
         $factory = new SchemaFactory($container->get(CacheInterface::class), $container);
-        $factory->addControllerNamespace('App\\Controllers\\');
-        $factory->addTypeNamespace('App\\');
+        $factory->addControllerNamespace('App\\Controllers');
+        $factory->addTypeNamespace('App');
         return $factory->createSchema();
     }
 ]);
