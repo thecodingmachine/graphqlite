@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use DateTimeInterface;
@@ -8,101 +10,59 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type()
- * @Input(name="PostInput", default=true)
- * @Input(name="UpdatePostInput", update=true)
- */
+#[Type]
+#[Input(name: 'PostInput', default: true)]
+#[Input(name: 'UpdatePostInput', update: true)]
 class Post
 {
+    #[Field(for: 'Post')]
+    public int $id = 1;
 
-    /**
-     * @Field(for="Post")
-     * @var int
-     */
-    public $id = 1;
+    #[Field]
+    public string $title;
 
-    /**
-     * @Field()
-     * @var string
-     */
-    public $title;
+    #[Field(for: ['Post', 'PostInput'])]
+    #[Field(for: 'UpdatePostInput', inputType: 'DateTime')]
+    public DateTimeInterface $publishedAt;
 
-    /**
-     * @Field(for={"Post", "PostInput"})
-     * @Field(for="UpdatePostInput", inputType="DateTime")
-     * @var DateTimeInterface
-     */
-    public $publishedAt;
-
-    /**
-     * @Field(name="comment")
-     * @var string|null
-     */
+    #[Field(name: 'comment')]
     #[Cost(complexity: 5)]
-    private $description = 'foo';
+    private string|null $description = 'foo';
 
-    /**
-     * @Field()
-     * @var string|null
-     */
-    public $summary = 'foo';
+    #[Field]
+    public string|null $summary = 'foo';
 
-    /**
-     * @Field()
-     * @var Contact|null
-     */
+    #[Field]
     #[Cost(complexity: 3)]
-    public $author = null;
+    public Contact|null $author = null;
 
-    /**
-     * @Field(for="UpdatePostInput")
-     * @var int
-     */
-    public $views;
+    #[Field(for: 'UpdatePostInput')]
+    public int $views;
 
-    /**
-     * @Field(for="UpdatePostInput")
-     * @var string|null
-     */
-    private $inaccessible;
+    #[Field(for: 'UpdatePostInput')]
+    private string|null $inaccessible;
 
-    /**
-     * @param string $title
-     */
     public function __construct(string $title, $dummy = null)
     {
         $this->title = $title;
         $this->description = 'bar';
     }
 
-    /**
-     * @return string|null
-     */
-    public function getDescription(): ?string
+    public function getDescription(): string|null
     {
         return $this->description;
     }
 
-    /**
-     * @param string|null $description
-     */
-    public function setDescription(?string $description): void
+    public function setDescription(string|null $description): void
     {
         $this->description = $description;
     }
 
-    /**
-     * @param string|null $summary
-     */
-    public function setSummary(?string $summary): void
+    public function setSummary(string|null $summary): void
     {
         $this->summary = $summary;
     }
 
-    /**
-     * @param string $inaccessible
-     */
     private function setInaccessible(string $inaccessible): void
     {
         $this->inaccessible = $inaccessible;

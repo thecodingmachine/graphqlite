@@ -6,10 +6,8 @@ namespace TheCodingMachine\GraphQLite\Fixtures;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type()
- * @SourceField(name="test")
- */
+#[Type]
+#[SourceField(name: 'test')]
 class TestSelfType
 {
     private $foo = 'foo';

@@ -7,35 +7,23 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type()
- * @Input()
- */
+#[Type, Input]
 class Preferences
 {
-    /**
-     * @Field(inputType="Int!")
-     * @var int
-     */
-    private $id;
+    #[Field(inputType: "Int!")]
+    private int $id;
 
     /**
-     * @Field(inputType="[String!]!")
      * @var string[]
      */
-    private $options;
+    #[Field(inputType: "[String!]!")]
+    private array $options;
 
-    /**
-     * @Field(inputType="Boolean!")
-     * @var bool
-     */
-    private $enabled;
+    #[Field(inputType: "Boolean!")]
+    private bool $enabled;
 
-    /**
-     * @Field(inputType="String!")
-     * @var string
-     */
-    private $name;
+    #[Field(inputType: "String!")]
+    private string $name;
 
     public function __construct(int $id, array $options, bool $enabled, string $name)
     {

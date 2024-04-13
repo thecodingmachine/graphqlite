@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Reflection;
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\DocBlockFactoryInterface;
 use phpDocumentor\Reflection\Types\Context;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\SimpleCache\CacheInterface;
@@ -24,7 +25,7 @@ use function md5;
  */
 class CachedDocBlockFactory
 {
-    private DocBlockFactory $docBlockFactory;
+    private DocBlockFactoryInterface $docBlockFactory;
     /** @var array<string, DocBlock> */
     private array $docBlockArrayCache = [];
     /** @var array<string, Context> */
@@ -32,7 +33,7 @@ class CachedDocBlockFactory
     private ContextFactory $contextFactory;
 
     /** @param CacheInterface $cache The cache we fetch data from. Note this is a SAFE cache. It does not need to be purged. */
-    public function __construct(private readonly CacheInterface $cache, DocBlockFactory|null $docBlockFactory = null)
+    public function __construct(private readonly CacheInterface $cache, DocBlockFactoryInterface|null $docBlockFactory = null)
     {
         $this->docBlockFactory = $docBlockFactory ?: DocBlockFactory::createInstance();
         $this->contextFactory  = new ContextFactory();

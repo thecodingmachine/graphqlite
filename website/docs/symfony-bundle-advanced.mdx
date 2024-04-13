@@ -4,9 +4,6 @@ title: "Symfony bundle: advanced usage"
 sidebar_label: Symfony specific features
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 <div class="alert alert--warning">
     <strong>Be advised!</strong> This documentation will be removed in a future release.  For current and up-to-date Symfony bundle specific documentation, please see the <a href="https://github.com/thecodingmachine/graphqlite-bundle">Github repository</a>.
 </div>
@@ -114,15 +111,7 @@ This interface is automatically mapped to a type with 2 fields:
 - `userName: String!`
 - `roles: [String!]!`
 
-If you want to get more fields, just add the `@Type` annotation to your user class:
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
+If you want to get more fields, just add the `#[Type]` attribute to your user class:
 
 ```php
 #[Type]
@@ -136,29 +125,6 @@ class User implements UserInterface
 
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Type
- */
-class User implements UserInterface
-{
-    /**
-     * @Field
-     */
-    public function getEmail() : string
-    {
-        // ...
-    }
-
-}
-```
-
-  </TabItem>
-</Tabs>
 
 You can now query this field using an [inline fragment](https://graphql.org/learn/queries/#inline-fragments):
 
@@ -192,14 +158,6 @@ Most of the time, getting the request object is irrelevant. Indeed, it is GraphQ
 manage it for you. Sometimes yet, fetching the request can be needed. In those cases, simply type-hint on the request
 in any parameter of your query/mutation/field.
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 use Symfony\Component\HttpFoundation\Request;
 
@@ -209,21 +167,3 @@ public function getUser(int $id, Request $request): User
     // The $request object contains the Symfony Request.
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-use Symfony\Component\HttpFoundation\Request;
-
-/**
- * @Query
- */
-public function getUser(int $id, Request $request): User
-{
-    // The $request object contains the Symfony Request.
-}
-```
-
-  </TabItem>
-</Tabs>

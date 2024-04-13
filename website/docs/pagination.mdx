@@ -4,9 +4,6 @@ title: Paginating large result sets
 sidebar_label: Pagination
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 It is quite common to have to paginate over large result sets.
 
 GraphQLite offers a simple way to do that using [Porpaginas](https://github.com/beberlei/porpaginas).
@@ -29,14 +26,6 @@ $ composer require beberlei/porpaginas
 
 In your query, simply return a class that implements `Porpaginas\Result`:
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 class MyController
 {
@@ -53,29 +42,6 @@ class MyController
     }
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-class MyController
-{
-    /**
-     * @Query
-     * @return Product[]
-     */
-    public function products(): Porpaginas\Result
-    {
-        // Some code that returns a list of products
-
-        // If you are using Doctrine, something like:
-        return new Porpaginas\Doctrine\ORM\ORMQueryResult($doctrineQuery);
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
 
 Notice that:
 

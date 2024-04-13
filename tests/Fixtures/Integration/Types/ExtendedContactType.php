@@ -1,32 +1,26 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
-use function strtoupper;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
-use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
-/**
- * @ExtendType(class=Contact::class)
- */
+use function strtoupper;
+
+#[ExtendType(class: Contact::class)]
 class ExtendedContactType
 {
-    /**
-     * @Field()
-     */
+    #[Field]
     public function uppercaseName(Contact $contact): string
     {
         return strtoupper($contact->getName());
     }
 
-    /**
-     * @Field()
-     * @deprecated use field `uppercaseName`
-     */
+    /** @deprecated use field `uppercaseName` */
+    #[Field]
     public function deprecatedUppercaseName(Contact $contact): string
     {
         return strtoupper($contact->getName());
@@ -34,12 +28,10 @@ class ExtendedContactType
 
     /**
      * Here, we are testing overriding the field in the extend class.
-     *
-     * @Field()
-     * @return string
      */
+    #[Field]
     public function company(Contact $contact): string
     {
-        return $contact->getName().' Ltd';
+            return $contact->getName() . ' Ltd';
     }
 }

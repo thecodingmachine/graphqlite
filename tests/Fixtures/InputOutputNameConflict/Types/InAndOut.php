@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\InputOutputNameConflict\Types;
 
@@ -7,32 +8,20 @@ use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type(name="InAndOut")
- */
+#[Type(name: 'InAndOut')]
 class InAndOut
 {
-    /**
-     * @var string
-     */
-    private $value;
-
-    public function __construct(string $value)
+    public function __construct(private string $value)
     {
-        $this->value = $value;
     }
 
-    /**
-     * @Field()
-     */
+    #[Field]
     public function getValue(): string
     {
         return $this->value;
     }
 
-    /**
-     * @Factory(name="InAndOut")
-     */
+    #[Factory(name: 'InAndOut')]
     public static function create(string $value): self
     {
         return new self($value);

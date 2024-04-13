@@ -1,18 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
+declare(strict_types=1);
 
+namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
 
 class ClassA
 {
-    /**
-     * @var string
-     */
-    private $foo;
-
-    public function __construct(string $foo)
+    public function __construct(private readonly string $foo)
     {
-        $this->foo = $foo;
     }
 
     public function getFoo(): string

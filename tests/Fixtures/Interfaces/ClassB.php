@@ -1,20 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
+declare(strict_types=1);
 
+namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
 
 class ClassB extends ClassA
 {
-    /**
-     * @var string
-     */
-    private $bar;
-
-    public function __construct(string $foo, string $bar)
+    public function __construct(string $foo, private readonly string $bar)
     {
         parent::__construct($foo);
-
-        $this->bar = $bar;
     }
 
     public function getBar(): string

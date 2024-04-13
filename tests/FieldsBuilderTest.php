@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\BooleanType;
@@ -10,52 +12,54 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\UnionType;
 use ReflectionMethod;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputType;
+use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerNoReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithArrayReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidParameterAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithFailWith;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
-use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
-use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithDescriptions;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidReturnType;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithIterableReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
+use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
+use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
+use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingReturnType;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithDescriptions;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithFailWith;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethods;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\TestSourceName;
-use TheCodingMachine\GraphQLite\Fixtures\TestSourceNameType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -68,11 +72,10 @@ use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputType;
-use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\VoidType;
+
+use function reset;
 
 class FieldsBuilderTest extends AbstractQueryProvider
 {
@@ -106,16 +109,19 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $this->assertInstanceOf(EnumType::class, $usersQuery->args[9]->getType());
         $this->assertSame('TestObjectInput', $usersQuery->args[1]->getType()->getWrappedType()->getWrappedType()->getWrappedType()->name);
 
-        $context = ['int' => 42, 'string' => 'foo', 'list' => [
-            ['test' => 42],
-            ['test' => 12],
-        ],
+        $context = [
+            'int' => 42,
+            'string' => 'foo',
+            'list' => [
+                ['test' => '42'],
+                ['test' => '12'],
+            ],
             'boolean' => true,
             'float' => 4.2,
             'dateTimeImmutable' => '2017-01-01 01:01:01',
             'dateTime' => '2017-01-01 01:01:01',
             'id' => 42,
-            'enum' => TestEnum::ON()
+            'enum' => TestEnum::ON(),
         ];
 
         $resolve = $usersQuery->resolveFn;
@@ -147,7 +153,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $resolve = $testReturnMutation->resolveFn;
         $result = $resolve(
             new stdClass(),
-            ['testObject' => ['test' => 42]],
+            ['testObject' => ['test' => '42']],
             null,
             $this->createMock(ResolveInfo::class),
         );
@@ -179,10 +185,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
     public function testErrors(): void
     {
         $controller = new class {
-            /**
-             * @Query
-             * @return string
-             */
+            #[Query]
             public function test($noTypeHint): string
             {
                 return 'foo';
@@ -198,12 +201,8 @@ class FieldsBuilderTest extends AbstractQueryProvider
     public function testTypeInDocBlock(): void
     {
         $controller = new class {
-            /**
-             * @Query
-             * @param int $typeHintInDocBlock
-             * @return string
-             */
-            public function test($typeHintInDocBlock)
+            #[Query]
+            public function test(int $typeHintInDocBlock): string
             {
                 return 'foo';
             }
@@ -344,7 +343,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
                 return true;
             }
 
-            public function getUser(): ?object
+            public function getUser(): object|null
             {
                 return new stdClass();
             }
@@ -360,16 +359,15 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 $authenticationService,
-                new VoidAuthorizationService()
+                new VoidAuthorizationService(),
             ),
-            new InputFieldMiddlewarePipe()
+            new InputFieldMiddlewarePipe(),
         );
 
-        $fields = $queryProvider->getFields(new TestType(), true);
+        $fields = $queryProvider->getFields(new TestType());
         $this->assertCount(4, $fields);
 
         $this->assertSame('testBool', $fields['testBool']->name);
-
     }
 
     public function testRightInSourceField(): void
@@ -392,16 +390,15 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
-                $authorizationService
+                $authorizationService,
             ),
-            new InputFieldMiddlewarePipe()
+            new InputFieldMiddlewarePipe(),
         );
 
-        $fields = $queryProvider->getFields(new TestType(), true);
+        $fields = $queryProvider->getFields(new TestType());
         $this->assertCount(4, $fields);
 
         $this->assertSame('testRight', $fields['testRight']->name);
-
     }
 
     public function testMissingTypeAnnotation(): void
@@ -409,7 +406,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(MissingAnnotationException::class);
-        $queryProvider->getFields(new TestTypeMissingAnnotation(), true);
+        $queryProvider->getFields(new TestTypeMissingAnnotation());
     }
 
     public function testSourceFieldDoesNotExists(): void
@@ -417,8 +414,8 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(FieldNotFoundException::class);
-        $this->expectExceptionMessage("There is an issue with a @SourceField annotation in class \"TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField\": Could not find a getter or a isser for field \"notExists\". Looked for: \"TheCodingMachine\GraphQLite\Fixtures\TestObject::notExists()\", \"TheCodingMachine\GraphQLite\Fixtures\TestObject::getNotExists()\", \"TheCodingMachine\GraphQLite\Fixtures\TestObject::isNotExists()");
-        $queryProvider->getFields(new TestTypeMissingField(), true);
+        $this->expectExceptionMessage('There is an issue with a @SourceField annotation in class "TheCodingMachine\GraphQLite\Fixtures\TestTypeMissingField": Could not find a getter or a isser for field "notExists". Looked for: "TheCodingMachine\GraphQLite\Fixtures\TestObject::notExists()", "TheCodingMachine\GraphQLite\Fixtures\TestObject::getNotExists()", "TheCodingMachine\GraphQLite\Fixtures\TestObject::isNotExists()');
+        $queryProvider->getFields(new TestTypeMissingField());
     }
 
     public function testSourceFieldHasMissingReturnType(): void
@@ -427,13 +424,13 @@ class FieldsBuilderTest extends AbstractQueryProvider
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestObjectMissingReturnType::getTest, a type-hint is missing (or PHPDoc specifies a "mixed" type-hint). Please provide a better type-hint.');
-        $queryProvider->getFields(new TestTypeMissingReturnType(), true);
+        $queryProvider->getFields(new TestTypeMissingReturnType());
     }
 
     public function testSourceFieldIsId(): void
     {
         $queryProvider = $this->buildFieldsBuilder();
-        $fields = $queryProvider->getFields(new TestTypeId(), true);
+        $fields = $queryProvider->getFields(new TestTypeId());
         $this->assertCount(1, $fields);
 
         $this->assertSame('test', $fields['test']->name);
@@ -454,15 +451,14 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getParameterMiddlewarePipe(),
             new AuthorizationFieldMiddleware(
                 new VoidAuthenticationService(),
-                new VoidAuthorizationService()
+                new VoidAuthorizationService(),
             ),
-            new InputFieldMiddlewarePipe()
+            new InputFieldMiddlewarePipe(),
         );
-        $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface(), true);
+        $fields = $queryProvider->getFields(new TestTypeWithSourceFieldInterface());
         $this->assertCount(1, $fields);
 
         $this->assertSame('test', $fields['test']->name);
-
     }
 
     public function testQueryProviderWithIterableClass(): void
@@ -571,7 +567,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For parameter $foo, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType::test, cannot map class "Exception" to a known GraphQL input type. Are you missing a @Factory annotation? If you have a @Factory annotation, is it in a namespace analyzed by GraphQLite?');
+        $this->expectExceptionMessage('For parameter $foo, in TheCodingMachine\GraphQLite\Fixtures\TestControllerWithInvalidInputType::test, cannot map class "Throwable" to a known GraphQL input type. Are you missing a @Factory annotation? If you have a @Factory annotation, is it in a namespace analyzed by GraphQLite?');
         $queryProvider->getQueries($controller);
     }
 
@@ -657,13 +653,12 @@ class FieldsBuilderTest extends AbstractQueryProvider
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $fields = $queryProvider->getFields($controller, true);
+        $fields = $queryProvider->getFields($controller);
 
         $this->assertCount(1, $fields);
 
         $this->assertSame('test', $fields['test']->name);
         $this->assertInstanceOf(StringType::class, $fields['test']->getType());
-
 
         $resolve = $fields['test']->resolveFn;
         $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
@@ -678,7 +673,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
         $this->expectExceptionMessage('For @SourceField "test" declared in "TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType", cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
-        $queryProvider->getFields(new TestSourceFieldBadOutputType(), true);
+        $queryProvider->getFields(new TestSourceFieldBadOutputType());
     }
 
     public function testSourceFieldBadOutputType2Exception(): void
@@ -686,7 +681,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
         $this->expectExceptionMessage('For @SourceField "test" declared in "TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2", Syntax Error: Expected ], found <EOF>');
-        $queryProvider->getFields(new TestSourceFieldBadOutputType2(), true);
+        $queryProvider->getFields(new TestSourceFieldBadOutputType2());
     }
 
     public function testBadOutputTypeException(): void
@@ -694,7 +689,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType::test, cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
-        $queryProvider->getFields(new TestFieldBadOutputType(), true);
+        $queryProvider->getFields(new TestFieldBadOutputType());
     }
 
     public function testBadInputTypeException(): void
@@ -702,7 +697,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(CannotMapTypeExceptionInterface::class);
         $this->expectExceptionMessage('For parameter $input, in TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType::testInput, cannot find GraphQL type "[NotExists]". Check your TypeMapper configuration.');
-        $queryProvider->getFields(new TestFieldBadInputType(), true);
+        $queryProvider->getFields(new TestFieldBadInputType());
     }
 
     public function testDoubleReturnException(): void
@@ -710,7 +705,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
         $this->expectException(InvalidDocBlockRuntimeException::class);
         $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Fixtures\\TestDoubleReturnTag::test has several @return annotations.');
-        $queryProvider->getFields(new TestDoubleReturnTag(), true);
+        $queryProvider->getFields(new TestDoubleReturnTag());
     }
 
     public function testMissingArgument(): void
@@ -855,17 +850,6 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queries = $queryProvider->getQueries($controller);
     }
 
-    public function testParameterAnnotationOnNonExistingParameter(): void
-    {
-        $controller = new TestControllerWithInvalidParameterAnnotation();
-
-        $queryProvider = $this->buildFieldsBuilder();
-
-        $this->expectException(InvalidParameterException::class);
-        $this->expectExceptionMessage('Parameter "id" declared in annotation "TheCodingMachine\\GraphQLite\\Annotations\\HideParameter" of method "TheCodingMachine\\GraphQLite\\Fixtures\\TestControllerWithInvalidParameterAnnotation::test()" does not exist.');
-        $queries = $queryProvider->getQueries($controller);
-    }
-
     public function testParameterAnnotationOnNonExistingParameterInSourceField(): void
     {
         $controller = new TestTypeWithSourceFieldInvalidParameterAnnotation();
@@ -873,7 +857,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $queryProvider = $this->buildFieldsBuilder();
 
         $this->expectException(InvalidParameterException::class);
-        $this->expectExceptionMessage('Could not find parameter "foo" declared in annotation "TheCodingMachine\\GraphQLite\\Annotations\\HideParameter". This annotation is itself declared in a SourceField annotation targeting resolver "TheCodingMachine\\GraphQLite\\Fixtures\\TestObject::getSibling()".');
+        $this->expectExceptionMessage('Could not find parameter "foo" declared in annotation "TheCodingMachine\\GraphQLite\\Annotations\\HideParameter". This annotation is itself declared in a SourceField attribute targeting resolver "TheCodingMachine\\GraphQLite\\Fixtures\\TestObject::getSibling()".');
         $fields = $queryProvider->getFields($controller);
     }
 

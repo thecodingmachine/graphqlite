@@ -1,15 +1,15 @@
 ---
 id: field-middlewares
-title: Adding custom annotations with Field middlewares
-sidebar_label: Custom annotations
+title: Adding custom attributes with Field middlewares
+sidebar_label: Custom attributes
 ---
 
 <small>Available in GraphQLite 4.0+</small>
 
-Just like the `@Logged` or `@Right` annotation, you can develop your own annotation that extends/modifies the behaviour of a field/query/mutation.
+Just like the `#[Logged]` or `#[Right]` attribute, you can develop your own attribute that extends/modifies the behaviour of a field/query/mutation.
 
 <div class="alert alert--warning">
-    If you want to create an annotation that targets a single argument (like <code>@AutoWire(for="$service")</code>), you should rather check the documentation about <a href="argument-resolving">custom argument resolving</a>
+    If you want to create an attribute that targets a single argument (like <code>#[AutoWire]</code>), you should rather check the documentation about <a href="argument-resolving">custom argument resolving</a>
 </div>
 
 ## Field middlewares
@@ -63,16 +63,16 @@ If you want the field to purely disappear, your middleware can return `null`, al
 field middlewares only get called once per Schema instance. If you use a long-running server (like Laravel Octane, Swoole, RoadRunner etc)
 and share the same Schema instance across requests, you will not be able to hide fields based on request data.
 
-## Annotations parsing
+## Attributes parsing
 
 Take a look at the `QueryFieldDescriptor::getMiddlewareAnnotations()`.
 
-It returns the list of annotations applied to your field that implements the `MiddlewareAnnotationInterface`.
+It returns the list of attributes applied to your field that implements the `MiddlewareAnnotationInterface`.
 
-Let's imagine you want to add a `@OnlyDebug` annotation that displays a field/query/mutation only in debug mode (and
+Let's imagine you want to add a `#[OnlyDebug]` attribute that displays a field/query/mutation only in debug mode (and
 hides the field in production). That could be useful, right?
 
-First, we have to define the annotation. Annotations are handled by the great [doctrine/annotations](https://www.doctrine-project.org/projects/doctrine-annotations/en/1.6/index.html) library (for PHP 7+) and/or by PHP 8 attributes.
+First, we have to define the attribute.
 
 ```php title="OnlyDebug.php"
 namespace App\Annotations;
@@ -80,19 +80,15 @@ namespace App\Annotations;
 use Attribute;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 
-/**
- * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
- */
 #[Attribute(Attribute::TARGET_METHOD)]
 class OnlyDebug implements MiddlewareAnnotationInterface
 {
 }
 ```
 
-Apart from being a classical annotation/attribute, this class implements the `MiddlewareAnnotationInterface`. This interface is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this annotation is to be used by middlewares.
+Apart from being a classical attribute, this class implements the `MiddlewareAnnotationInterface`. This interface is a "marker" interface. It does not have any methods. It is just used to tell GraphQLite that this attribute is to be used by middlewares.
 
-Now, we can write a middleware that will act upon this annotation.
+Now, we can write a middleware that will act upon this attribute.
 
 ```php
 namespace App\Middlewares;
@@ -103,7 +99,7 @@ use GraphQL\Type\Definition\FieldDefinition;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 /**
- * Middleware in charge of hiding a field if it is annotated with @OnlyDebug and the DEBUG constant is not set
+ * Middleware in charge of hiding a field if it is annotated with #[OnlyDebug] and the DEBUG constant is not set
  */
 class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
 {
@@ -117,7 +113,7 @@ class OnlyDebugFieldMiddleware implements FieldMiddlewareInterface
         $onlyDebug = $annotations->getAnnotationByType(OnlyDebug::class);
 
         if ($onlyDebug !== null && !DEBUG) {
-            // If the onlyDebug annotation is present, returns null.
+            // If the onlyDebug attribute is present, returns null.
             // Returning null will hide the field.
             return null;
         }

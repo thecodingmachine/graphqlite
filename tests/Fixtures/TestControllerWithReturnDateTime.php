@@ -8,9 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithReturnDateTime
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function test(): DateTime
     {
         return new DateTime();

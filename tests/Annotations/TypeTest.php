@@ -13,7 +13,7 @@ class TypeTest extends TestCase
     {
         $type = new Type([]);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Empty class for @Type annotation. You MUST create the Type annotation object using the GraphQLite AnnotationReader');
+        $this->expectExceptionMessage('Empty class for #[Type] attribute. You MUST create the Type attribute object using the GraphQLite AnnotationReader');
         $type->getClass();
     }
 
@@ -27,7 +27,7 @@ class TypeTest extends TestCase
     {
         $type = new Type(['default'=>false]);
         $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('Problem in annotation @Type for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
+        $this->expectExceptionMessage('Problem in attribute #[Type] for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
         $type->setClass(FooInterface::class);
     }
 }

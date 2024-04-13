@@ -8,9 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithIterableReturnType
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function test(): ArrayObject
     {
         return new ArrayObject();

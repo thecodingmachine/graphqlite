@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
-
+use DateTimeInterface;
 use Porpaginas\Arrays\ArrayResult;
 use Porpaginas\Result;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -14,9 +15,7 @@ use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
 
 class ContactController
 {
-    /**
-     * @return Contact[]
-     */
+    /** @return Contact[] */
     #[Query]
     public function getContacts(): array
     {
@@ -27,9 +26,9 @@ class ContactController
     }
 
     #[Query]
-    public function getContact(string $name): ?Contact
+    public function getContact(string $name): Contact|null
     {
-        return match( $name ) {
+        return match ($name) {
             'Joe' => new Contact('Joe'),
             'Bill' => new Contact('Bill'),
             default => null,
@@ -43,16 +42,15 @@ class ContactController
     }
 
     #[Mutation]
-    public function saveBirthDate(\DateTimeInterface $birthDate): Contact {
+    public function saveBirthDate(DateTimeInterface $birthDate): Contact
+    {
         $contact = new Contact('Bill');
         $contact->setBirthDate($birthDate);
 
         return $contact;
     }
 
-    /**
-     * @return Contact[]
-     */
+    /** @return Contact[] */
     #[Query]
     public function getContactsIterator(): ArrayResult
     {
@@ -62,9 +60,7 @@ class ContactController
         ]);
     }
 
-    /**
-     * @return string[]|ArrayResult
-     */
+    /** @return string[]|ArrayResult */
     #[Query]
     public function getContactsNamesIterator(): ArrayResult
     {
@@ -86,7 +82,7 @@ class ContactController
      * @return Result|Contact[]|null
      */
     #[Query]
-    public function getNullableResult(): ?Result
+    public function getNullableResult(): Result|null
     {
         return null;
     }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Integration;
 
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;

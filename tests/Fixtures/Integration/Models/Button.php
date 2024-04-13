@@ -7,52 +7,26 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type
- */
+#[Type]
 class Button
 {
-    /**
-     * @var Color
-     */
-    private $color;
-
-    /**
-     * @var Size
-     */
-    private $size;
-
-    /**
-     * @var Position
-     */
-    private $state;
-
-    public function __construct(Color $color, Size $size, Position $state)
+    public function __construct(private Color $color, private Size $size, private Position $state)
     {
-        $this->color = $color;
-        $this->size  = $size;
-        $this->state = $state;
     }
 
-    /**
-     * @Field
-     */
+    #[Field]
     public function getColor(): Color
     {
         return $this->color;
     }
 
-    /**
-     * @Field
-     */
+    #[Field]
     public function getSize(): Size
     {
         return $this->size;
     }
 
-    /**
-     * @Field
-     */
+    #[Field]
     public function getState(): Position
     {
         return $this->state;

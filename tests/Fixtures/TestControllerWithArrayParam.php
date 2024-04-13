@@ -9,10 +9,9 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 class TestControllerWithArrayParam
 {
     /**
-     * @Query()
-     *
      * @return string[]
      */
+    #[Query]
     public function test(iterable $params): array
     {
         return $params;

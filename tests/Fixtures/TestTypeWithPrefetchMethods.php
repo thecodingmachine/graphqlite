@@ -1,31 +1,28 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
-use Exception;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
-use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type(class=TestObject::class)
- */
+#[Type(class: TestObject::class)]
 class TestTypeWithPrefetchMethods
 {
-    /**
-     * @Field(prefetchMethod="prefetch1")
-     */
+    #[Field(prefetchMethod: 'prefetch1')]
     public function test(
         TestObject $testObject,
         $prefetchedData1,
-        #[Prefetch('prefetch2')] $prefetchedData2,
+        #[Prefetch('prefetch2')]
+        $prefetchedData2,
         int $arg3,
-        #[Prefetch('prefetch3')] $prefetchedData3,
+        #[Prefetch('prefetch3')]
+        $prefetchedData3,
     ): string
     {
-        return $prefetchedData1[0].$arg3;
+        return $prefetchedData1[0] . $arg3;
     }
 
     public function prefetch1(iterable $testObjects, string $arg1)

@@ -3,13 +3,10 @@
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
-use TheCodingMachine\GraphQLite\Annotations\Right;
-use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
-/**
- * @Type(class=TheCodingMachine\GraphQLite\Fixtures\TestObject::class)
- */
+#[Type(class: TestObject::class)]
 class FooType extends AbstractFooType
 {
 }

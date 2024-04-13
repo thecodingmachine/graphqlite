@@ -4,12 +4,10 @@ title: Extending a type
 sidebar_label: Extending a type
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 Fields exposed in a GraphQL type do not need to be all part of the same class.
 
-Use the `@ExtendType` annotation to add additional fields to a type that is already declared.
+Use the `#[ExtendType]` attribute to add additional fields to a type that is already declared.
 
 <div class="alert alert--info">
     Extending a type has nothing to do with type inheritance.
@@ -19,14 +17,6 @@ Use the `@ExtendType` annotation to add additional fields to a type that is alre
 
 Let's assume you have a `Product` class. In order to get the name of a product, there is no `getName()` method in
 the product because the name needs to be translated in the correct language. You have a `TranslationService` to do that.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 namespace App\Entities;
@@ -53,57 +43,12 @@ class Product
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-namespace App\Entities;
-
-use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\Type;
-
-/**
- * @Type()
- */
-class Product
-{
-    // ...
-
-    /**
-     * @Field()
-     */
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @Field()
-     */
-    public function getPrice(): ?float
-    {
-        return $this->price;
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 ```php
 // You need to use a service to get the name of the product in the correct language.
 $name = $translationService->getProductName($productId, $language);
 ```
 
-Using `@ExtendType`, you can add an additional `name` field to your product:
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
+Using `#[ExtendType]`, you can add an additional `name` field to your product:
 
 ```php
 namespace App\Types;
@@ -130,68 +75,13 @@ class ProductType
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-namespace App\Types;
-
-use TheCodingMachine\GraphQLite\Annotations\ExtendType;
-use TheCodingMachine\GraphQLite\Annotations\Field;
-use App\Entities\Product;
-
-/**
- * @ExtendType(class=Product::class)
- */
-class ProductType
-{
-    private $translationService;
-
-    public function __construct(TranslationServiceInterface $translationService)
-    {
-        $this->translationService = $translationService;
-    }
-
-    /**
-     * @Field()
-     */
-    public function getName(Product $product, string $language): string
-    {
-        return $this->translationService->getProductName($product->getId(), $language);
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 Let's break this sample:
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[ExtendType(class: Product::class)]
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @ExtendType(class=Product::class)
- */
-```
-
-  </TabItem>
-</Tabs>
-
-With the `@ExtendType` annotation, we tell GraphQLite that we want to add fields in the GraphQL type mapped to
+With the `#[ExtendType]` attribute, we tell GraphQLite that we want to add fields in the GraphQL type mapped to
 the `Product` PHP class.
 
 ```php
@@ -218,14 +108,6 @@ If you are using the Symfony bundle (or a framework with autowiring like Laravel
 is usually not an issue as the container will automatically create the controller entry if you do not explicitly
 declare it.</div>
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 #[Field]
 public function getName(Product $product, string $language): string
@@ -234,23 +116,7 @@ public function getName(Product $product, string $language): string
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Field()
- */
-public function getName(Product $product, string $language): string
-{
-    return $this->translationService->getProductName($product->getId(), $language);
-}
-```
-
-  </TabItem>
-</Tabs>
-
-The `@Field` annotation is used to add the "name" field to the `Product` type.
+The `#[Field]` attribute is used to add the "name" field to the `Product` type.
 
 Take a close look at the signature. The first parameter is the "resolved object" we are working on.
 Any additional parameters are used as arguments.

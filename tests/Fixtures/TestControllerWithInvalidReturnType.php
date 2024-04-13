@@ -8,9 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithInvalidReturnType
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function test(): Exception
     {
         return new Exception('foo');

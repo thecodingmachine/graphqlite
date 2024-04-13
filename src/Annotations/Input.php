@@ -8,17 +8,8 @@ use Attribute;
 use RuntimeException;
 
 /**
- * The Input annotation must be put in a GraphQL input type class docblock and is used to map to the underlying PHP class
+ * The Input attribute must be put in a GraphQL input type class docblock and is used to map to the underlying PHP class
  * this is exposed via this input type.
- *
- * @Annotation
- * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("name", type = "string"),
- *   @Attribute("default", type = "bool"),
- *   @Attribute("description", type = "string"),
- *   @Attribute("update", type = "bool"),
- * })
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class Input implements TypeInterface
@@ -56,16 +47,16 @@ class Input implements TypeInterface
     public function getClass(): string
     {
         if ($this->class === null) {
-            throw new RuntimeException('Empty class for @Input annotation. You MUST create the Input annotation object using the GraphQLite AnnotationReader');
+            throw new RuntimeException('Empty class for #[Input] attribute. You MUST create the Input attribute object using the GraphQLite AnnotationReader');
         }
 
         return $this->class;
     }
 
-    /** @param class-string<object> $class */
-    public function setClass(string $class): void
+    /** @param class-string<object> $className */
+    public function setClass(string $className): void
     {
-        $this->class = $class;
+        $this->class = $className;
     }
 
     /**
@@ -103,7 +94,7 @@ class Input implements TypeInterface
 
     /**
      * By default there isn't support for defining the type outside
-     * This is used by the @Type annotation with the "external" attribute.
+     * This is used by the #[Type] attribute with the "external" attribute.
      */
     public function isSelfType(): bool
     {
