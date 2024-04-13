@@ -4,29 +4,19 @@ title: Fine grained security
 sidebar_label: Fine grained security
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
-If the [`@Logged` and `@Right` annotations](authentication-authorization.mdx#logged-and-right-annotations) are not
-granular enough for your needs, you can use the advanced `@Security` annotation.
+If the [`#[Logged]` and `#[Right]` attributes](authentication-authorization.mdx#logged-and-right-annotations) are not
+granular enough for your needs, you can use the advanced `#[Security]` attribute.
 
-Using the `@Security` annotation, you can write an *expression* that can contain custom logic. For instance:
+Using the `#[Security]` attribute, you can write an *expression* that can contain custom logic. For instance:
 
 - Check that a user can access a given resource
 - Check that a user has one right or another right
 - ...
 
-## Using the @Security annotation
+## Using the #[Security] attribute
 
-The `@Security` annotation is very flexible: it allows you to pass an expression that can contains custom logic:
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
+The `#[Security]` attribute is very flexible: it allows you to pass an expression that can contains custom logic:
 
 ```php
 use TheCodingMachine\GraphQLite\Annotations\Security;
@@ -41,33 +31,12 @@ public function getPost(Post $post): array
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-use TheCodingMachine\GraphQLite\Annotations\Security;
-
-// ...
-
-/**
- * @Query
- * @Security("is_granted('ROLE_ADMIN') or is_granted('POST_SHOW', post)")
- */
-public function getPost(Post $post): array
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
-The *expression* defined in the `@Security` annotation must conform to [Symfony's Expression Language syntax](https://symfony.com/doc/4.4/components/expression_language/syntax.html)
+The *expression* defined in the `#[Security]` attribute must conform to [Symfony's Expression Language syntax](https://symfony.com/doc/4.4/components/expression_language/syntax.html)
 
 <div class="alert alert--info">
-    If you are a Symfony user, you might already be used to the <code>@Security</code> annotation. Most of the inspiration
-    of this annotation comes from Symfony. Warning though! GraphQLite's <code>@Security</code> annotation and
-    Symfony's <code>@Security</code> annotation are slightly different. Especially, the two annotations do not live
+    If you are a Symfony user, you might already be used to the <code>#[Security]</code> attribute. Most of the inspiration
+    of this attribute comes from Symfony. Warning though! GraphQLite's <code>#[Security]</code> attribute and
+    Symfony's <code>#[Security]</code> attribute are slightly different. Especially, the two attributes do not live
     in the same namespace!
 </div>
 
@@ -75,61 +44,17 @@ The *expression* defined in the `@Security` annotation must conform to [Symfony'
 
 Use the `is_granted` function to check if a user has a special right.
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 #[Security("is_granted('ROLE_ADMIN')")]
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-@Security("is_granted('ROLE_ADMIN')")
-```
-
-  </TabItem>
-</Tabs>
-
 is similar to
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[Right("ROLE_ADMIN")]
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-@Right("ROLE_ADMIN")
-```
-
-  </TabItem>
-</Tabs>
-
 In addition, the `is_granted` function accepts a second optional parameter: the "scope" of the right.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[Query]
@@ -140,37 +65,12 @@ public function getPost(Post $post): array
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Query
- * @Security("is_granted('POST_SHOW', post)")
- */
-public function getPost(Post $post): array
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
 In the example above, the `getPost` method can be called only if the logged user has the 'POST_SHOW' permission on the
 `$post` object. You can notice that the `$post` object comes from the parameters.
 
 ## Accessing method parameters
 
-All parameters passed to the method can be accessed in the `@Security` expression.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
+All parameters passed to the method can be accessed in the `#[Security]` expression.
 
 ```php
 #[Query]
@@ -181,37 +81,11 @@ public function getPosts(DateTimeImmutable $startDate, DateTimeImmutable $endDat
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Query
- * @Security("startDate < endDate", statusCode=400, message="End date must be after start date")
- */
-public function getPosts(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
-
-In the example above, we tweak a bit the Security annotation purpose to do simple input validation.
+In the example above, we tweak a bit the Security attribute purpose to do simple input validation.
 
 ## Setting HTTP code and error message
 
 You can use the `statusCode` and `message` attributes to set the HTTP code and GraphQL error message.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[Query]
@@ -222,23 +96,6 @@ public function getPost(Post $post): array
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Query
- * @Security("is_granted('POST_SHOW', post)", statusCode=404, message="Post not found (let's pretend the post does not exists!)")
- */
-public function getPost(Post $post): array
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
 Note: since a single GraphQL call contain many errors, 2 errors might have conflicting HTTP status code.
 The resulting status code is up to the GraphQL middleware you use. Most of the time, the status code with the
 higher error code will be returned.
@@ -247,14 +104,6 @@ higher error code will be returned.
 
 If you do not want an error to be thrown when the security condition is not met, you can use the `failWith` attribute
 to set a default value.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[Query]
@@ -265,25 +114,8 @@ public function getMargin(): float
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Field
- * @Security("is_granted('CAN_SEE_MARGIN', this)", failWith=null)
- */
-public function getMargin(): float
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
-The `failWith` attribute behaves just like the [`@FailWith` annotation](authentication-authorization.mdx#not-throwing-errors)
-but for a given `@Security` annotation.
+The `failWith` attribute behaves just like the [`#[FailWith]` attribute](authentication-authorization.mdx#not-throwing-errors)
+but for a given `#[Security]` attribute.
 
 You cannot use the `failWith` attribute along `statusCode` or `message` attributes.
 
@@ -292,13 +124,6 @@ You cannot use the `failWith` attribute along `statusCode` or `message` attribut
 You can use the `user` variable to access the currently logged user.
 You can use the `is_logged()` function to check if a user is logged or not.
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[Query]
@@ -309,34 +134,9 @@ public function getNSFWImages(): array
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Query
- * @Security("is_logged() && user.age > 18")
- */
-public function getNSFWImages(): array
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
 ## Accessing the current object
 
 You can use the `this` variable to access any (public) property / method of the current class.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 class Post {
@@ -354,60 +154,18 @@ class Post {
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-class Post {
-    /**
-     * @Field
-     * @Security("this.canAccessBody(user)")
-     */
-    public function getBody(): array
-    {
-        // ...
-    }
-
-    public function canAccessBody(User $user): bool
-    {
-        // Some custom logic here
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 ## Available scope
 
-The `@Security` annotation can be used in any query, mutation or field, so anywhere you have a `@Query`, `@Mutation`
-or `@Field` annotation.
+The `#[Security]` attribute can be used in any query, mutation or field, so anywhere you have a `#[Query]`, `#[Mutation]`
+or `#[Field]` attribute.
 
 ## How to restrict access to a given resource
 
 The `is_granted` method can be used to restrict access to a specific resource.
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 #[Security("is_granted('POST_SHOW', post)")]
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-@Security("is_granted('POST_SHOW', post)")
-```
-
-  </TabItem>
-</Tabs>
 
 If you are wondering how to configure these fine-grained permissions, this is not something that GraphQLite handles
 itself. Instead, this depends on the framework you are using.

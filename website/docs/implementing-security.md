@@ -50,8 +50,8 @@ You need to write classes that implement these interfaces. Then, you must regist
 It you are [using the `SchemaFactory`](other-frameworks.mdx), you can register your classes using:
 
 ```php
-// Configure an authentication service (to resolve the @Logged annotations).
+// Configure an authentication service (to resolve the #[Logged] attribute).
 $schemaFactory->setAuthenticationService($myAuthenticationService);
-// Configure an authorization service (to resolve the @Right annotations).
+// Configure an authorization service (to resolve the #[Right] attribute).
 $schemaFactory->setAuthorizationService($myAuthorizationService);
 ```

@@ -4,23 +4,12 @@ title: Inheritance and interfaces
 sidebar_label: Inheritance and interfaces
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 ## Modeling inheritance
 
 Some of your entities may extend other entities. GraphQLite will do its best to represent this hierarchy of objects in GraphQL using interfaces.
 
 Let's say you have two classes, `Contact` and `User` (which extends `Contact`):
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 #[Type]
 class Contact
@@ -34,40 +23,8 @@ class User extends Contact
     // ...
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Type
- */
-class Contact
-{
-    // ...
-}
-
-/**
- * @Type
- */
-class User extends Contact
-{
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
 
 Now, let's assume you have a query that returns a contact:
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 class ContactController
@@ -79,25 +36,6 @@ class ContactController
     }
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-class ContactController
-{
-    /**
-     * @Query()
-     */
-    public function getContact(): Contact
-    {
-        // ...
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
 
 When writing your GraphQL query, you are able to use fragments to retrieve fields from the `User` type:
 
@@ -135,15 +73,7 @@ available in the `Contact` type.
 
 ## Mapping interfaces
 
-If you want to create a pure GraphQL interface, you can also add a `@Type` annotation on a PHP interface.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
+If you want to create a pure GraphQL interface, you can also add a `#[Type]` attribute on a PHP interface.
 
 ```php
 #[Type]
@@ -153,25 +83,6 @@ interface UserInterface
     public function getUserName(): string;
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Type
- */
-interface UserInterface
-{
-    /**
-     * @Field
-     */
-    public function getUserName(): string;
-}
-```
-
-  </TabItem>
-</Tabs>
 
 This will automatically create a GraphQL interface whose description is:
 
@@ -186,14 +97,6 @@ interface UserInterface {
 You don't have to do anything special to implement an interface in your GraphQL types.
 Simply "implement" the interface in PHP and you are done!
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 #[Type]
 class User implements UserInterface
@@ -201,22 +104,6 @@ class User implements UserInterface
     public function getUserName(): string;
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Type
- */
-class User implements UserInterface
-{
-    public function getUserName(): string;
-}
-```
-
-  </TabItem>
-</Tabs>
 
 This will translate in GraphQL schema as:
 
@@ -230,20 +117,12 @@ type User implements UserInterface {
 }
 ```
 
-Please note that you do not need to put the `@Field` annotation again in the implementing class.
+Please note that you do not need to put the `#[Field]` attribute again in the implementing class.
 
 ### Interfaces without an explicit implementing type
 
-You don't have to explicitly put a `@Type` annotation on the class implementing the interface (though this
+You don't have to explicitly put a `#[Type]` attribute on the class implementing the interface (though this
 is usually a good idea).
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 /**
@@ -266,39 +145,10 @@ class UserController
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * Look, this class has no @Type annotation
- */
-class User implements UserInterface
-{
-    public function getUserName(): string;
-}
-```
-
-```php
-class UserController
-{
-    /**
-     * @Query()
-     */
-    public function getUser(): UserInterface // This will work!
-    {
-        // ...
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 <div class="alert alert--info">If GraphQLite cannot find a proper GraphQL Object type implementing an interface, it
 will create an object type "on the fly".</div>
 
-In the example above, because the `User` class has no `@Type` annotations, GraphQLite will
+In the example above, because the `User` class has no `#[Type]` attribute, GraphQLite will
 create a `UserImpl` type that implements `UserInterface`.
 
 ```graphql
