@@ -1,0 +1,31 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {
+    "thecodingmachine/graphqlite": "@dev",
+    "laminas/laminas-diactoros": "^2",
+    "laminas/laminas-stratigility": "^3",
+    "laminas/laminas-httphandlerrunner": "^2",
+    "mouf/picotainer": "^1.1",
+    "symfony/cache": "^4.2"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "tmp-graphqlite",
+      "options": {
+          "symlink": true
+      }
+    }
+  ],
+  "scripts": {
+    "symlink-package": [
+      "rm -rf tmp-graphqlite && ln -s -f ../../ tmp-graphqlite"
+    ],
+    "pre-install-cmd": "@symlink-package",
+    "pre-update-cmd": "@symlink-package"
+  }
+}
