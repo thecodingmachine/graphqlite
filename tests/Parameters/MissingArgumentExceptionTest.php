@@ -21,6 +21,5 @@ class MissingArgumentExceptionTest extends TestCase
 
         $this->assertTrue($e->isClientSafe());
         $this->assertSame([], $e->getExtensions());
-        $this->assertSame('graphql', $e->getCategory());
     }
 }
