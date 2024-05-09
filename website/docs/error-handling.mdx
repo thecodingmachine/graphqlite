@@ -12,10 +12,7 @@ In GraphQL, when an error occurs, the server must add an "error" entry in the re
     {
       "message": "Name for character with ID 1002 could not be fetched.",
       "locations": [ { "line": 6, "column": 7 } ],
-      "path": [ "hero", "heroFriends", 1, "name" ],
-      "extensions": {
-        "category": "Exception"
-      }
+      "path": [ "hero", "heroFriends", 1, "name" ]
     }
   ]
 }
@@ -43,30 +40,6 @@ throw new GraphQLException("Not found", 404);
 <div class="alert alert--info">GraphQL allows to have several errors for one request. If you have several
 <code>GraphQLException</code> thrown for the same request, the HTTP status code used will be the highest one.</div>
 
-## Customizing the category
-
-By default, GraphQLite adds a "category" entry in the "extensions section". You can customize the category with the
-4th parameter of the constructor:
-
-```php
-throw new GraphQLException("Not found", 404, null, "NOT_FOUND");
-```
-
-will generate:
-
-```json
-{
-  "errors": [
-    {
-      "message": "Not found",
-      "extensions": {
-        "category": "NOT_FOUND"
-      }
-    }
-  ]
-}
-```
-
 ## Customizing the extensions section
 
 You can customize the whole "extensions" section with the 5th parameter of the constructor:
@@ -83,7 +56,6 @@ will generate:
     {
       "message": "Field required",
       "extensions": {
-        "category": "VALIDATION",
         "field": "name"
       }
     }
@@ -107,16 +79,6 @@ class ValidationException extends Exception implements GraphQLExceptionInterface
     public function isClientSafe(): bool
     {
         return true;
-    }
-
-    /**
-     * Returns string describing a category of the error.
-     *
-     * Value "graphql" is reserved for errors produced by query parsing or validation, do not use it.
-     */
-    public function getCategory(): string
-    {
-        return 'VALIDATION';
     }
 
     /**
