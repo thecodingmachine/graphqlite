@@ -82,16 +82,6 @@ class MissingArgumentException extends BadMethodCallException implements GraphQL
     }
 
     /**
-     * Returns string describing a category of the error.
-     *
-     * Value "graphql" is reserved for errors produced by query parsing or validation, do not use it.
-     */
-    public function getCategory(): string
-    {
-        return 'graphql';
-    }
-
-    /**
      * Returns the "extensions" object attached to the GraphQL error.
      *
      * @return array<string, mixed>
