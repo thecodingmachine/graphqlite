@@ -1394,6 +1394,43 @@ class EndToEndTest extends IntegrationTestCase
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
+    public function testEndToEndSecurityInFieldExternalType(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+        query {
+            productsExternalType {
+                marginOk
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(12.0, $data['productsExternalType']['marginOk']);
+
+
+        $queryString = '
+        query {
+            productsExternalType {
+                marginFails
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(12.0, $data['productsExternalType']['marginOk']);
+    }
+
     public function testEndToEndUnions(): void
     {
         $schema = $this->mainContainer->get(Schema::class);
