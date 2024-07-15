@@ -8,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -44,6 +45,7 @@ final class GlobTypeMapper extends AbstractTypeMapper
         CacheInterface $cache,
         int|null $globTTL = 2,
         int|null $mapTTL = null,
+        ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null,
     ) {
         $cachePrefix = str_replace(
             ['\\', '{', '}', '(', ')', '/', '@', ':'],
@@ -63,6 +65,7 @@ final class GlobTypeMapper extends AbstractTypeMapper
             $cache,
             $globTTL,
             $mapTTL,
+            $classBoundCacheContractFactory,
         );
     }
 

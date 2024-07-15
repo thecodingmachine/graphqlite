@@ -38,6 +38,7 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
             $context->getCache(),
             $context->getGlobTTL(),
             $context->getMapTTL(),
+            $context->getClassBoundCacheContractFactory(),
         );
     }
 }
