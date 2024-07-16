@@ -4,7 +4,8 @@ use GraphQL\Type\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Context\Context;
 
-use Symfony\Component\Cache\Simple\FilesystemCache;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Mouf\Picotainer\Picotainer;
 use GraphQL\Utils\SchemaPrinter;
 use App\Controllers\MyController;
@@ -12,7 +13,7 @@ use App\Controllers\MyController;
 require_once __DIR__ . '/vendor/autoload.php';
 
 // $cache is any PSR-16 compatible cache.
-$cache = new FilesystemCache();
+$cache = new Psr16Cache(new FilesystemAdapter());;
 
 // $container is any PSR-11 compatible container which has
 // been populated with your controller classes.
