@@ -7,7 +7,8 @@
   "require": {
     "thecodingmachine/graphqlite": "@dev",
     "mouf/picotainer": "^1.1",
-    "symfony/cache": "^4.2"
+    "symfony/cache": "^4.3",
+    "psr/simple-cache": "^1.0"
   },
   "repositories": [
     {

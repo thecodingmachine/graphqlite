@@ -13,6 +13,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
@@ -120,7 +121,7 @@ class SchemaFactory
 
     private string $cacheNamespace;
 
-    public function __construct(private readonly CacheInterface $cache, private readonly ContainerInterface $container)
+    public function __construct(private readonly CacheInterface $cache, private readonly ContainerInterface $container, private ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null)
     {
         $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
     }
@@ -255,6 +256,18 @@ class SchemaFactory
     public function setGlobTTL(int|null $globTTL): self
     {
         $this->globTTL = $globTTL;
+
+        return $this;
+    }
+
+    /**
+     * Set a custom ClassBoundCacheContractFactory.
+     * This is used to create CacheContracts that store reflection results.
+     * Set this to "null" to use the default fallback factory.
+     */
+    public function setClassBoundCacheContractFactory(ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory): self
+    {
+        $this->classBoundCacheContractFactory = $classBoundCacheContractFactory;
 
         return $this;
     }
@@ -430,6 +443,7 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $namespacedCache,
                 $this->globTTL,
+                classBoundCacheContractFactory: $this->classBoundCacheContractFactory,
             ));
         }
 
@@ -447,6 +461,7 @@ class SchemaFactory
                 $namespacedCache,
                 $this->inputTypeValidator,
                 $this->globTTL,
+                classBoundCacheContractFactory: $this->classBoundCacheContractFactory,
             );
         }
 

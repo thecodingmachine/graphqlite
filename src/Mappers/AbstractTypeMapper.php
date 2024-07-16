@@ -15,12 +15,10 @@ use ReflectionException;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
-use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
-use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactory;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractInterface;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -66,23 +64,15 @@ abstract class AbstractTypeMapper implements TypeMapperInterface
         private readonly CacheInterface $cache,
         protected int|null $globTTL = 2,
         private readonly int|null $mapTTL = null,
+        ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null,
     )
     {
         $this->cacheContract = new Psr16Adapter($this->cache, $cachePrefix, $this->globTTL ?? 0);
 
-        $classToAnnotationsCache = new ClassBoundCache(
-            new FileBoundCache($this->cache, 'classToAnnotations_' . $cachePrefix),
-        );
-        $this->mapClassToAnnotationsCache = new ClassBoundCacheContract(
-            new ClassBoundMemoryAdapter($classToAnnotationsCache),
-        );
+        $classBoundCacheContractFactory = $classBoundCacheContractFactory ?? new ClassBoundCacheContractFactory();
 
-        $classToExtendedAnnotationsCache = new ClassBoundCache(
-            new FileBoundCache($this->cache, 'classToExtendAnnotations_' . $cachePrefix),
-        );
-        $this->mapClassToExtendAnnotationsCache = new ClassBoundCacheContract(
-            new ClassBoundMemoryAdapter($classToExtendedAnnotationsCache),
-        );
+        $this->mapClassToAnnotationsCache = $classBoundCacheContractFactory->make($cache, 'classToAnnotations_' . $cachePrefix);
+        $this->mapClassToExtendAnnotationsCache = $classBoundCacheContractFactory->make($cache, 'classToExtendAnnotations_' . $cachePrefix);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace TheCodingMachine\GraphQLite;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactory;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 
@@ -16,6 +17,7 @@ class FactoryContextTest extends AbstractQueryProvider
         $namingStrategy = new NamingStrategy();
         $container = new EmptyContainer();
         $arrayCache = new Psr16Cache(new ArrayAdapter());
+        $classBoundCacheContractFactory = new ClassBoundCacheContractFactory();
         $validator = new Validator();
 
         $context = new FactoryContext(
@@ -30,7 +32,8 @@ class FactoryContextTest extends AbstractQueryProvider
             $container,
             $arrayCache,
             $validator,
-            self::GLOB_TTL_SECONDS
+            self::GLOB_TTL_SECONDS,
+            classBoundCacheContractFactory: $classBoundCacheContractFactory,
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());
