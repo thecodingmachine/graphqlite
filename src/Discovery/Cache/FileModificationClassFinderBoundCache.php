@@ -69,7 +69,10 @@ class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
         $result = [];
         $entries = [];
 
-        $classFinder = $classFinder->withPathFilter(function (string $filename) use (&$entries, &$result, $previousEntries) {
+        // The size of the cache may be huge, so let's avoid writes when unnecessary.
+        $changed = false;
+
+        $classFinder = $classFinder->withPathFilter(function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
             $entry = $previousEntries[$filename] ?? null;
 
             // If there's no entry in cache for this filename (new file or previously uncached),
@@ -84,6 +87,8 @@ class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
                     'dependencies' => [$filename => filemtime($filename)],
                     'matching' => false,
                 ];
+
+                $changed = true;
 
                 return true;
             }
@@ -106,9 +111,13 @@ class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
                 'data' => $result[$filename],
                 'matching' => true,
             ];
+
+            $changed = true;
         }
 
-        $this->cache->set($key, $entries);
+        if ($changed) {
+            $this->cache->set($key, $entries);
+        }
 
         return $result;
     }
