@@ -8,6 +8,8 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\PsrCachedReader;
 use Doctrine\Common\Annotations\Reader;
 use GraphQL\Type\SchemaConfig;
+use Kcs\ClassFinder\FileFinder\CachedFileFinder;
+use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
 use MyCLabs\Enum\Enum;
@@ -17,6 +19,7 @@ use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\CacheUtils\ClassBoundCache;
@@ -548,8 +551,13 @@ class SchemaFactory
 
         $finder = (clone ($this->finder ?? new ComposerFinder()));
 
+        // Because this finder may be iterated more than once, we need to make
+        // sure that the filesystem is only hit once in the lifetime of the application,
+        // as that may be expensive for larger projects or non-native filesystems.
+        $finder = $finder->withFileFinder(new CachedFileFinder(new DefaultFileFinder(), new ArrayAdapter()));
+
         foreach ($this->namespaces as $namespace) {
-            $finder->inNamespace($namespace);
+            $finder = $finder->inNamespace($namespace);
         }
 
         return new KcsClassFinder($finder);

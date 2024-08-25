@@ -26,7 +26,7 @@
         "symfony/expression-language": "^4 || ^5 || ^6 || ^7",
         "thecodingmachine/cache-utils": "^1",
         "webonyx/graphql-php": "^v15.0",
-        "kcs/class-finder": "^0.5.0"
+        "kcs/class-finder": "^0.5.1"
     },
     "require-dev": {
         "beberlei/porpaginas": "^1.2 || ^2.0",
