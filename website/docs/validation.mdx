@@ -4,9 +4,6 @@ title: Validation
 sidebar_label: User input validation
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 GraphQLite does not handle user input validation by itself. It is out of its scope.
 
 However, it can integrate with your favorite framework validation mechanism. The way you validate user input will
@@ -31,17 +28,8 @@ GraphQLite provides a bridge to use the [Symfony validator](https://symfony.com/
 
 ### Using the Symfony validator bridge
 
-Usually, when you use the Symfony validator component, you put annotations in your entities and you validate those entities
+Usually, when you use the Symfony validator component, you put attributes in your entities and you validate those entities
 using the `Validator` object.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}
->
-  <TabItem value="php8">
 
 ```php title="UserController.php"
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -73,54 +61,7 @@ class UserController
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php title="UserController.php"
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use TheCodingMachine\GraphQLite\Validator\ValidationFailedException
-
-class UserController
-{
-    private $validator;
-
-    public function __construct(ValidatorInterface $validator)
-    {
-        $this->validator = $validator;
-    }
-
-    /**
-     * @Mutation
-     */
-    public function createUser(string $email, string $password): User
-    {
-        $user = new User($email, $password);
-
-        // Let's validate the user
-        $errors = $this->validator->validate($user);
-
-        // Throw an appropriate GraphQL exception if validation errors are encountered
-        ValidationFailedException::throwException($errors);
-
-        // No errors? Let's continue and save the user
-        // ...
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 Validation rules are added directly to the object in the domain model:
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}
->
-  <TabItem value="php8">
 
 ```php title="User.php"
 use Symfony\Component\Validator\Constraints as Assert;
@@ -146,41 +87,6 @@ class User
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php title="User.php"
-use Symfony\Component\Validator\Constraints as Assert;
-
-class User
-{
-    /**
-     * @Assert\Email(
-     *     message = "The email '{{ value }}' is not a valid email.",
-     *     checkMX = true
-     * )
-     */
-    private $email;
-
-    /**
-     * The NotCompromisedPassword assertion asks the "HaveIBeenPawned" service if your password has already leaked or not.
-     * @Assert\NotCompromisedPassword
-     */
-    private $password;
-
-    public function __construct(string $email, string $password)
-    {
-        $this->email = $email;
-        $this->password = $password;
-    }
-
-    // ...
-}
-```
-
-  </TabItem>
-</Tabs>
-
 If a validation fails, GraphQLite will return the failed validations in the "errors" section of the JSON response:
 
 ```json
@@ -190,8 +96,7 @@ If a validation fails, GraphQLite will return the failed validations in the "err
             "message": "The email '\"foo@thisdomaindoesnotexistatall.com\"' is not a valid email.",
             "extensions": {
                 "code": "bf447c1c-0266-4e10-9c6c-573df282e413",
-                "field": "email",
-                "category": "Validate"
+                "field": "email"
             }
         }
     ]
@@ -212,35 +117,32 @@ on your domain objects. Only use this technique if you want to validate user inp
 in a domain object.
 </div>
 
-Use the `@Assertion` annotation to validate directly the user input.
+Use the `#[Assertion]` attribute to validate directly the user input.
 
 ```php
 use Symfony\Component\Validator\Constraints as Assert;
 use TheCodingMachine\GraphQLite\Validator\Annotations\Assertion;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 
-/**
- * @Query
- * @Assertion(for="email", constraint=@Assert\Email())
- */
+#[Query]
+#[Assertion(for: "email", constraint: new Assert\Email())]
 public function findByMail(string $email): User
 {
     // ...
 }
 ```
 
-Notice that the "constraint" parameter contains an annotation (it is an annotation wrapped in an annotation).
+Notice that the "constraint" parameter contains an attribute (it is an attribute wrapped in an attribute).
 
 You can also pass an array to the `constraint` parameter:
 
 ```php
-@Assertion(for="email", constraint={@Assert\NotBlank(), @Assert\Email()})
+#[Assertion(for: "email", constraint: [new Assert\NotBlack(), new Assert\Email()])]
 ```
-
-<div class="alert alert--warning"><strong>Heads up!</strong> The "@Assertion" annotation is only available as a <strong>Doctrine annotations</strong>. You cannot use it as a PHP 8 attributes</div>
 
 ## Custom InputType Validation
 
-GraphQLite also supports a fully custom validation implementation for all input types defined with an `@Input` annotation or PHP8 `#[Input]` attribute.  This offers a way to validate input types before they're available as a method parameter of your query and mutation controllers.  This way, when you're using your query or mutation controllers, you can feel confident that your input type objects have already been validated.
+GraphQLite also supports a fully custom validation implementation for all input types defined with an `#[Input]` attribute.  This offers a way to validate input types before they're available as a method parameter of your query and mutation controllers.  This way, when you're using your query or mutation controllers, you can feel confident that your input type objects have already been validated.
 
 <div class="alert alert--warning">
   <p>It's important to note that this validation implementation does not validate input types created with a factory.  If you are creating an input type with a factory, or using primitive parameters in your query/mutation controllers, you should be sure to validate these independently.  This is strictly for input type objects.</p>
@@ -248,7 +150,7 @@ GraphQLite also supports a fully custom validation implementation for all input 
   <p>You can use one of the framework validation libraries listed above or implement your own validation for these cases.  If you're using input type objects for most all of your query and mutation controllers, then there is little additional validation concerns with regards to user input.  There are many reasons why you should consider defaulting to an InputType object, as opposed to individual arguments, for your queries and mutations.  This is just one additional perk.</p>
 </div>
 
-To get started with validation on input types defined by an `@Input` annotation, you'll first need to register your validator with the `SchemaFactory`.
+To get started with validation on input types defined by an `#[Input]` attribute, you'll first need to register your validator with the `SchemaFactory`.
 
 ```php
 $factory = new SchemaFactory($cache, $this->container);
@@ -277,7 +179,7 @@ interface InputTypeValidatorInterface
 }
 ```
 
-The interface is quite simple.  Handle all of your own validation logic in the `validate` method.  For example, you might use Symfony's annotation based validation in addition to some other custom validation logic.  It's really up to you on how you wish to handle your own validation.  The `validate` method will receive the input type object populated with the user input.
+The interface is quite simple.  Handle all of your own validation logic in the `validate` method.  For example, you might use Symfony's attribute based validation in addition to some other custom validation logic.  It's really up to you on how you wish to handle your own validation.  The `validate` method will receive the input type object populated with the user input.
 
 You'll notice that the `validate` method has a `void` return.  The purpose here is to encourage you to throw an Exception or handle validation output however you best see fit.  GraphQLite does it's best to stay out of your way and doesn't make attempts to handle validation output.  You can, however, throw an instance of `TheCodingMachine\GraphQLite\Exceptions\GraphQLException` or `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` as usual (see [Error Handling](error-handling) for more details).
 

@@ -1,30 +1,29 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
 
-
-use function array_map;
 use GraphQL\Type\Definition\ResolveInfo;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
 
+use function array_map;
+
 class FilterController
 {
-    /**
-     * @Query()
-     * @return string[]
-     */
+    /** @return string[] */
+    #[Query]
     public function echoFilters(Filter $filter): array
     {
-        return array_map(static function($item) { return (string) $item; }, $filter->getValues());
+        return array_map(static function ($item) {
+            return (string) $item;
+        }, $filter->getValues());
     }
 
-    /**
-     * @Query()
-     * @return string[]|null
-     */
-    public function echoNullableFilters(?Filter $filter): ?array
+    /** @return string[]|null */
+    #[Query]
+    public function echoNullableFilters(Filter|null $filter): array|null
     {
         if ($filter === null) {
             return null;
@@ -32,10 +31,7 @@ class FilterController
         return $this->echoFilters($filter);
     }
 
-    /**
-     * @Query()
-     * @return string
-     */
+    #[Query]
     public function echoResolveInfo(ResolveInfo $info): string
     {
         return $info->fieldName;

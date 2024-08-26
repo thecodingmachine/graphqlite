@@ -6,13 +6,6 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 
-/**
- * @Annotation
- * @Target({"METHOD"})
- * @Attributes({
- *   @Attribute("outputType", type = "string"),
- * })
- */
 #[Attribute(Attribute::TARGET_METHOD)]
 class Query extends AbstractRequest
 {

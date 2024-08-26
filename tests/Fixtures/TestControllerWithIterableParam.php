@@ -8,9 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithIterableParam
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function test(ArrayObject $params): string
     {
         return 'foo';

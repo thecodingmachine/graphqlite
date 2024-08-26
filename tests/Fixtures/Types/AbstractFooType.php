@@ -1,29 +1,23 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
-use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 
-/**
- * @SourceField(name="test")
- * @SourceField(name="testBool", logged=true)
- * @SourceField(name="testRight", right=@Right(name="FOOBAR"))
- */
+#[SourceField(name: 'test')]
+#[SourceField(name: 'testBool', annotations: [new Logged()])]
+#[SourceField(name: 'testRight', annotations: [new Right(name: 'FOOBAR')])]
 abstract class AbstractFooType
 {
-    /**
-     * @Field()
-     * @param TestObject $test
-     * @param string $param
-     * @return string
-     */
+    #[Field]
     public function customField(TestObject $test, string $param = 'foo'): string
     {
-        return $test->getTest().$param;
+        return $test->getTest() . $param;
     }
 }

@@ -34,7 +34,7 @@ parameters:
            message: '#Unreachable statement - code above always terminates.#'
            path: src/Http/WebonyxGraphqlMiddleware.php
         -
-           message: '#Property TheCodingMachine\\GraphQLite\\Annotations\\Type::\$class \(class-string<object>\\|null\) does not accept string.#'
+           message: '#Property TheCodingMachine\\GraphQLite\\Annotations\\Type::\$class \(class-string<object>\|null\) does not accept string.#'
            path: src/Annotations/Type.php
         -
            message: '#Method TheCodingMachine\\GraphQLite\\AnnotationReader::(getMethodAnnotations|getPropertyAnnotations)\(\) should return array<int, T of object> but returns array<object>.#'

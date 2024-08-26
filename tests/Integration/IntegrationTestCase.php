@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite\Integration;
 
-use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use Kcs\ClassFinder\Finder\ComposerFinder;
@@ -276,7 +275,7 @@ class IntegrationTestCase extends TestCase
                 );
             },
             AnnotationReader::class => static function (ContainerInterface $container) {
-                return new AnnotationReader(new DoctrineAnnotationReader());
+                return new AnnotationReader();
             },
             NamingStrategyInterface::class => static function () {
                 return new NamingStrategy();

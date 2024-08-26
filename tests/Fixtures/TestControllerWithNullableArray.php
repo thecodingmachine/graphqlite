@@ -9,10 +9,10 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 class TestControllerWithNullableArray
 {
     /**
-     * @Query()
      * @param array<int|null> $params
      * @return array<int|null>
      */
+    #[Query]
     public function test(array $params): array
     {
         return $params;

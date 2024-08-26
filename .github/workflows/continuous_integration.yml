@@ -84,8 +84,38 @@ jobs:
           path: "build"
           overwrite: true
 
-      - uses: codecov/codecov-action@v4.1.1 # upload the coverage to codecov
+      - uses: codecov/codecov-action@v4.5.0 # upload the coverage to codecov
         with:
           fail_ci_if_error: false # optional (default = false) - Need CODECOV_TOKEN
         # Do not upload in forks, and only on php8.3, latest deps
         if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.3' && matrix.install-args == '' }}
+
+  examples:
+    name: Check Examples
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example: ['no-framework']
+      fail-fast: false
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+      - name: "Install PHP with extensions"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "8.2"
+          tools: composer:v2
+      - name: "Install dependencies with composer"
+        working-directory: "examples/${{ matrix.example }}"
+        run: "composer --version && composer install --no-interaction --no-progress --prefer-dist"
+      - name: "Run example ${{ matrix.example }}"
+        working-directory: "examples/${{ matrix.example }}"
+        run: |
+          php -S localhost:8080 &
+          sleep 3
+          curl --silent -X POST -H "Content-Type: application/json" \
+            -d '{"query":"{ hello(name: \"World\") }"}' \
+            http://localhost:8080/graphql -o output.json
+          grep -q '"data":{"hello":"Hello World"}' output.json || \
+            (cat output.json && false)
+          kill %1

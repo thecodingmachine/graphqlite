@@ -21,14 +21,14 @@ $ composer require ecodev/graphql-upload
 
 If you are a "regular" GraphQLite user, migration to v4 should be straightforward:
 
-- Annotations are mostly untouched. The only annotation that is changed is the `@SourceField` annotation.
-    - Check your code for every places where you use the `@SourceField` annotation:
+- Annotations are mostly untouched. The only annotation that is changed is the `#[SourceField]` annotation.
+    - Check your code for every places where you use the `#[SourceField]` annotation:
     - The "id" attribute has been remove (`@SourceField(id=true)`). Instead, use `@SourceField(outputType="ID")`
     - The "logged", "right" and "failWith" attributes have been removed (`@SourceField(logged=true)`).
-      Instead, use the annotations attribute with the same annotations you use for the `@Field` annotation:
+      Instead, use the annotations attribute with the same annotations you use for the `#[Field]` annotation:
       `@SourceField(annotations={@Logged, @FailWith(null)})`
-    - If you use magic property and were creating a getter for every magic property (to put a `@Field` annotation on it),
-      you can now replace this getter with a `@MagicField` annotation.
+    - If you use magic property and were creating a getter for every magic property (to put a `#[Field]` annotation on it),
+      you can now replace this getter with a `#[MagicField]` annotation.
 - In GraphQLite v3, the default was to hide a field from the schema if a user has no access to it.
   In GraphQLite v4, the default is to still show this field, but to throw an error if the user makes a query on it
   (this way, the schema is the same for all users). If you want the old mode, use the new

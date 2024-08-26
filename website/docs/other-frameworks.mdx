@@ -4,9 +4,6 @@ title: Getting started with any framework
 sidebar_label: "Other frameworks / No framework"
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 ## Installation
 
 Open a terminal in your current project directory and run:
@@ -49,9 +46,9 @@ or the [StandardServer class](https://webonyx.github.io/graphql-php/executing-qu
 The `SchemaFactory` class also comes with a number of methods that you can use to customize your GraphQLite settings.
 
 ```php
-// Configure an authentication service (to resolve the @Logged annotations).
+// Configure an authentication service (to resolve the #[Logged] attributes).
 $factory->setAuthenticationService(new VoidAuthenticationService());
-// Configure an authorization service (to resolve the @Right annotations).
+// Configure an authorization service (to resolve the #[Right] attributes).
 $factory->setAuthorizationService(new VoidAuthorizationService());
 // Change the naming convention of GraphQL types globally.
 $factory->setNamingStrategy(new NamingStrategy());
@@ -298,15 +295,6 @@ The application will look into the `App\Controllers` namespace for GraphQLite co
 
 It assumes that the container has an entry whose name is the controller's fully qualified class name.
 
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php title="src/Controllers/MyController.php"
 namespace App\Controllers;
 
@@ -321,30 +309,6 @@ class MyController
     }
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php title="src/Controllers/MyController.php"
-namespace App\Controllers;
-
-use TheCodingMachine\GraphQLite\Annotations\Query;
-
-class MyController
-{
-    /**
-     * @Query
-     */
-    public function hello(string $name): string
-    {
-        return 'Hello '.$name;
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 
 ```php title="config/container.php"
 use App\Controllers\MyController;

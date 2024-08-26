@@ -1,48 +1,31 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 class TestObject
 {
-    /**
-     * @var string
-     */
-    private $test;
-    /**
-     * @var bool
-     */
-    private $testBool;
-
-    public function __construct(string $test, bool $testBool = false)
+    public function __construct(private string $test, private bool $testBool = false)
     {
-        $this->test = $test;
-        $this->testBool = $testBool;
     }
 
     /**
      * This is a test summary
-     * @return string
      */
     public function getTest(): string
     {
         return $this->test;
     }
 
-    /**
-     * @return bool
-     */
     public function isTestBool(): bool
     {
         return $this->testBool;
     }
 
-    /**
-     * @return ?string
-     */
-    public function testRight()
+    public function testRight(): string|null
     {
-        return "foo";
+        return 'foo';
     }
 
     public function getSibling(self $foo): self

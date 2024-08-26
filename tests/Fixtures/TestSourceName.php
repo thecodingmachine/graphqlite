@@ -1,21 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use Exception;
 
 class TestSourceName
 {
-    /** @var string */
-    private $foo;
-
-    /** @var string */
-    private $bar;
-
-    public function __construct(string $foo, string $bar)
+    public function __construct(private string $foo, private string $bar)
     {
-        $this->foo = $foo;
-        $this->bar = $bar;
     }
 
     public function __get($name)

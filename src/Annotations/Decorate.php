@@ -10,20 +10,13 @@ use BadMethodCallException;
 use function is_string;
 
 /**
- * Methods with this annotation are decorating an input type when the input type is resolved.
+ * Methods with this attribute are decorating an input type when the input type is resolved.
  * This is meant to be used only when the input type is provided by a third-party library and you want to modify it.
- *
- * @Annotation
- * @Target({"METHOD"})
- * @Attributes({
- *   @Attribute("inputTypeName", type = "string"),
- * })
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Decorate
 {
-    /** @var string */
-    private $inputTypeName;
+    private string $inputTypeName;
 
     /**
      * @param array<string, mixed>|string $inputTypeName
@@ -36,7 +29,7 @@ class Decorate
         if (is_string($values)) {
             $this->inputTypeName = $values;
         } elseif (! isset($values['value']) && ! isset($values['inputTypeName'])) {
-            throw new BadMethodCallException('The @Decorate annotation must be passed an input type. For instance: "@Decorate("MyInputType")"');
+            throw new BadMethodCallException('The #[Decorate] attribute must be passed an input type. For instance: "#[Decorate("MyInputType")]"');
         } else {
             $this->inputTypeName = $values['value'] ?? $values['inputTypeName'];
         }

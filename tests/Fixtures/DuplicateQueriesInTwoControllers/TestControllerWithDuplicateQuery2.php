@@ -7,9 +7,7 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class TestControllerWithDuplicateQuery2
 {
-    /**
-     * @Query()
-     */
+    #[Query]
     public function duplicateQuery(): string
     {
         return 'string2';

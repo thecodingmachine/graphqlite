@@ -6,6 +6,9 @@
 /.php_cs/cache
 /.idea
 
+examples/*/vendor/
+examples/*/composer.lock
+
 node_modules
 
 lib/core/metadata.js

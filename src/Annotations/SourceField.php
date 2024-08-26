@@ -12,15 +12,6 @@ use function is_array;
 
 /**
  * SourceFields are fields that are directly source from the base object into GraphQL.
- *
- * @Annotation
- * @Target({"CLASS"})
- * @Attributes({
- *   @Attribute("name", type = "string"),
- *   @Attribute("outputType", type = "string"),
- *   @Attribute("phpType", type = "string"),
- *   @Attribute("annotations", type = "mixed"),
- * })
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class SourceField implements SourceFieldInterface
@@ -48,7 +39,7 @@ class SourceField implements SourceFieldInterface
     {
         $name = $name ?? $attributes['name'] ?? null;
         if ($name === null) {
-            throw new BadMethodCallException('The @SourceField annotation must be passed a name. For instance: "@SourceField(name=\'phone\')"');
+            throw new BadMethodCallException('The #[SourceField] attribute must be passed a name. For instance: "#[SourceField(name: \'phone\')]"');
         }
         $this->name = $name;
 
@@ -58,7 +49,7 @@ class SourceField implements SourceFieldInterface
         $this->sourceName = $sourceName ?? $attributes['sourceName'] ?? null;
 
         if ($this->outputType && $this->phpType) {
-            throw new BadMethodCallException('In a @SourceField annotation, you cannot use the outputType and the phpType at the same time. For instance: "@SourceField(name=\'phone\', outputType=\'String!\')" or "@SourceField(name=\'phone\', phpType=\'string\')"');
+            throw new BadMethodCallException('In a #[SourceField] attribute, you cannot use the outputType and the phpType at the same time. For instance: "#[SourceField(name: \'phone\', outputType: \'String!\')]" or "#[SourceField(name: \'phone\', phpType: \'string\')]"');
         }
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
@@ -72,7 +63,7 @@ class SourceField implements SourceFieldInterface
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
                 $parameterAnnotations[$annotation->getTarget()][] = $annotation;
             } else {
-                throw new BadMethodCallException('The @SourceField annotation\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+                throw new BadMethodCallException('The #[SourceField] attribute\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
             }
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);

@@ -4,14 +4,11 @@ title: Autowiring services
 sidebar_label: Autowiring services
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 GraphQLite can automatically inject services in your fields/queries/mutations signatures.
 
 Some of your fields may be computed. In order to compute these fields, you might need to call a service.
 
-Most of the time, your `@Type` annotation will be put on a model. And models do not have access to services.
+Most of the time, your `#[Type]` attribute will be put on a model. And models do not have access to services.
 Hopefully, if you add a type-hinted service in your field's declaration, GraphQLite will automatically fill it with
 the service instance.
 
@@ -19,14 +16,6 @@ the service instance.
 
 Let's assume you are running an international store. You have a `Product` class. Each product has many names (depending
 on the language of the user).
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 namespace App\Entities;
@@ -52,39 +41,6 @@ class Product
     }
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-namespace App\Entities;
-
-use TheCodingMachine\GraphQLite\Annotations\Autowire;
-use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\Type;
-
-use Symfony\Component\Translation\TranslatorInterface;
-
-/**
- * @Type()
- */
-class Product
-{
-    // ...
-
-    /**
-     * @Field()
-     * @Autowire(for="$translator")
-     */
-    public function getName(TranslatorInterface $translator): string
-    {
-        return $translator->trans('product_name_'.$this->id);
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
 
 When GraphQLite queries the name, it will automatically fetch the translator service.
 
@@ -130,29 +86,9 @@ By type-hinting against an interface, your code remains testable and is decouple
 
 Optionally, you can specify the identifier of the service you want to fetch from the controller:
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 #[Autowire(identifier: "translator")]
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Autowire(for="$translator", identifier="translator")
- */
-```
-
-  </TabItem>
-</Tabs>
 
 <div class="alert alert--danger">While GraphQLite offers the possibility to specify the name of the service to be
 autowired, we would like to emphasize that this is <strong>highly discouraged</strong>. Hard-coding a container

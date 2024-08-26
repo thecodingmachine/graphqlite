@@ -9,13 +9,6 @@ use BadMethodCallException;
 
 use function is_string;
 
-/**
- * @Annotation
- * @Target({"PROPERTY", "ANNOTATION", "METHOD"})
- * @Attributes({
- *   @Attribute("name", type = "string"),
- * })
- */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Right implements MiddlewareAnnotationInterface
 {
@@ -34,7 +27,7 @@ class Right implements MiddlewareAnnotationInterface
             $data = ['name' => $data];
         }
         if (! isset($data['value']) && ! isset($data['name'])) {
-            throw new BadMethodCallException('The @Right annotation must be passed a right name. For instance: "@Right(\'my_right\')"');
+            throw new BadMethodCallException('The #[Right] attribute must be passed a right name. For instance: "#[Right(\'my_right\')]"');
         }
         $this->name = $data['value'] ?? $data['name'];
     }

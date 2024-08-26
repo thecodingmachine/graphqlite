@@ -38,11 +38,6 @@ class HttpCodeDeciderTest extends TestCase
             {
                 return true;
             }
-
-            public function getCategory()
-            {
-                return 'foo';
-            }
         };
         $clientAwareError = new Error('Foo', null, null, [], null, $clientAwareException);
 

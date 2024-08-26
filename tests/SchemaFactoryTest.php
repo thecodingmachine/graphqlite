@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
@@ -69,8 +68,7 @@ class SchemaFactoryTest extends TestCase
         $factory = new SchemaFactory($cache, $container);
 
         $factory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
-        $factory->setDoctrineAnnotationReader(new AnnotationReader())
-                ->setAuthenticationService(new VoidAuthenticationService())
+        $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
                 ->addTypeMapper(new CompositeTypeMapper())

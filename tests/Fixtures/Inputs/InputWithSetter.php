@@ -1,22 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 
-/**
- * @Input()
- * @Input(name="ForcedTypeInput", update=true)
- */
+#[Input]
+#[Input(name: 'ForcedTypeInput', update: true)]
 class InputWithSetter
 {
-
-    /**
-     * @Field()
-     */
+    #[Field]
     private string $foo;
-
 
     private int $bar = 10;
 
@@ -25,25 +21,18 @@ class InputWithSetter
         $this->foo = $foo;
     }
 
-    /**
-     * @Field(for="InputWithSetterInput")
-     * @Field(for="ForcedTypeInput", inputType="Int!")
-     */
-    public function setBar(int $bar): void {
+    #[Field(for: 'InputWithSetterInput')]
+    #[Field(for: 'ForcedTypeInput', inputType: 'Int!')]
+    public function setBar(int $bar): void
+    {
         $this->bar = $bar;
     }
 
-    /**
-     * @return string
-     */
     public function getFoo(): string
     {
         return $this->foo;
     }
 
-    /**
-     * @return int
-     */
     public function getBar(): int
     {
         return $this->bar;

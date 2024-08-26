@@ -11,33 +11,28 @@ use function is_string;
 use function ltrim;
 
 /**
- * Use this annotation to autowire a service from the container into a given parameter of a field/query/mutation.
- *
- * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
- * @Attributes({
- *   @Attribute("for", type = "string"),
- *   @Attribute("identifier", type = "string")
- * })
+ * Use this attribute to autowire a service from the container into a given parameter of a field/query/mutation.
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class Autowire implements ParameterAnnotationInterface
 {
-    /** @var string|null */
-    private $for;
-    /** @var string|null */
-    private $identifier;
+    private string|null $for = null;
+    private string|null $identifier = null;
 
-    /** @param array<string, mixed>|string $identifier */
-    public function __construct(array|string $identifier = [])
+    /** @param array<string, mixed>|string $params */
+    public function __construct(
+        array|string $params = [],
+        string|null $for = null,
+        string|null $identifier = null,
+    )
     {
-        $values = $identifier;
+        $values = $params;
         if (is_string($values)) {
             $this->identifier = $values;
         } else {
-            $this->identifier = $values['identifier'] ?? $values['value'] ?? null;
-            if (isset($values['for'])) {
-                $this->for = ltrim($values['for'], '$');
+            $this->identifier = $identifier ?? $values['identifier'] ?? $values['value'] ?? null;
+            if (isset($values['for']) || $for !== null) {
+                $this->for = ltrim($for ?? $values['for'], '$');
             }
         }
     }
@@ -45,7 +40,7 @@ class Autowire implements ParameterAnnotationInterface
     public function getTarget(): string
     {
         if ($this->for === null) {
-            throw new BadMethodCallException('The @Autowire annotation must be passed a target. For instance: "@Autowire(for="$myService")"');
+            throw new BadMethodCallException('The #[Autowire] attribute must be passed a target. For instance: "#[Autowire(for: "$myService")]"');
         }
         return $this->for;
     }

@@ -12,7 +12,6 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
-        "doctrine/annotations": "^1.14 || ^2.0",
         "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^4.3 || ^5.0",
         "phpdocumentor/type-resolver": "^1.4",
@@ -24,7 +23,6 @@
         "psr/simple-cache": "^1.0.1 || ^2 || ^3",
         "symfony/cache": "^4.3 || ^5 || ^6 || ^7",
         "symfony/expression-language": "^4 || ^5 || ^6 || ^7",
-        "thecodingmachine/cache-utils": "^1",
         "webonyx/graphql-php": "^v15.0",
         "kcs/class-finder": "^0.5.1"
     },

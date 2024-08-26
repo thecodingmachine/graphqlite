@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\WrappingType;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\AST;
+use JsonException;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
@@ -30,7 +31,7 @@ class TypeResolver
         $this->schema = $schema;
     }
 
-    /** @throws CannotMapTypeExceptionInterface */
+    /** @throws CannotMapTypeExceptionInterface|JsonException */
     public function mapNameToType(string $typeName): Type
     {
         if ($this->schema === null) {

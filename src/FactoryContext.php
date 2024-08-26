@@ -8,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -22,17 +23,18 @@ final class FactoryContext
     public function __construct(
         private readonly AnnotationReader $annotationReader,
         private readonly TypeResolver $typeResolver,
-        private readonly NamingStrategyInterface          $namingStrategy,
-        private readonly TypeRegistry                     $typeRegistry,
-        private readonly FieldsBuilder                    $fieldsBuilder,
-        private readonly TypeGenerator                    $typeGenerator,
-        private readonly InputTypeGenerator               $inputTypeGenerator,
-        private readonly RecursiveTypeMapperInterface     $recursiveTypeMapper,
-        private readonly ContainerInterface               $container,
-        private readonly CacheInterface                   $cache,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly TypeRegistry $typeRegistry,
+        private readonly FieldsBuilder $fieldsBuilder,
+        private readonly TypeGenerator $typeGenerator,
+        private readonly InputTypeGenerator $inputTypeGenerator,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly ContainerInterface $container,
+        private readonly CacheInterface $cache,
         private readonly InputTypeValidatorInterface|null $inputTypeValidator,
         private readonly ClassFinder                      $classFinder,
         private readonly ClassFinderComputedCache         $classFinderBoundCache,
+        private readonly ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null,
     ) {
     }
 
@@ -84,6 +86,11 @@ final class FactoryContext
     public function getCache(): CacheInterface
     {
         return $this->cache;
+    }
+
+    public function getClassBoundCacheContractFactory(): ClassBoundCacheContractFactoryInterface|null
+    {
+        return $this->classBoundCacheContractFactory;
     }
 
     public function getInputTypeValidator(): InputTypeValidatorInterface|null

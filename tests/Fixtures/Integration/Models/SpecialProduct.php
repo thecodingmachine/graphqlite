@@ -1,55 +1,32 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * Class SpecialProduct
- * @package TheCodingMachine\GraphQLite\Fixtures\Integration\Models
- * @Type()
- */
+#[Type]
 class SpecialProduct
 {
-    /**
-     * @var string
-     */
-    private $name;
-    /**
-     * @var float
-     */
-    private $price;
-
-    public function __construct(string $name, float $price)
+    public function __construct(private string $name, private float $price)
     {
-        $this->name = $name;
-        $this->price = $price;
     }
 
-    /**
-     * @Field()
-     * @return string
-     */
+    #[Field]
     public function getSpecial(): string
     {
-        return "unicorn";
+        return 'unicorn';
     }
 
-    /**
-     * @Field()
-     * @return string
-     */
+    #[Field]
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @Field()
-     * @return float
-     */
+    #[Field]
     public function getPrice(): float
     {
         return $this->price;

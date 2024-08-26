@@ -1,16 +1,14 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-/**
- * @Type()
- */
+#[Type]
 class ClassA implements FooInterface, BarInterface, BazInterface
 {
-
     public function getBar(): string
     {
         return 'bar';

@@ -24,8 +24,8 @@ As an example, GraphQLite uses *parameter middlewares* internally to:
 
   In the query above, the `$info` argument is filled with the Webonyx `ResolveInfo` class thanks to the
   [`ResolveInfoParameterHandler parameter middleware`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Mappers/Parameters/ResolveInfoParameterHandler.php)
-- Inject a service from the container when you use the `@Autowire` annotation
-- Perform validation with the `@Validate` annotation (in Laravel package)
+- Inject a service from the container when you use the `#[Autowire]` attribute
+- Perform validation with the `#[Validate]` attribute (in Laravel package)
 
 <!-- https://docs.google.com/drawings/d/10zHfWdbvEab6_dyQBcM68_I_bXQkZtO5ePqt4jdDlk8/edit?usp=sharing -->
 
@@ -54,23 +54,22 @@ interface ParameterMiddlewareInterface
 
 Then, resolution actually happen by executing the resolver (this is the second pass).
 
-## Annotations parsing
+## Attributes parsing
 
-If you plan to use annotations while resolving arguments, your annotation should extend the [`ParameterAnnotationInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Annotations/ParameterAnnotationInterface.php)
+If you plan to use attributes while resolving arguments, your attribute class should extend the [`ParameterAnnotationInterface`](https://github.com/thecodingmachine/graphqlite/blob/master/src/Annotations/ParameterAnnotationInterface.php)
 
-For instance, if we want GraphQLite to inject a service in an argument, we can use `@Autowire(for="myService")`.
+For instance, if we want GraphQLite to inject a service in an argument, we can use `#[Autowire]`.
 
-For PHP 8 attributes, we only need to put declare the annotation can target parameters: `#[Attribute(Attribute::TARGET_PARAMETER)]`.
+We only need to put declare the annotation can target parameters: `#[Attribute(Attribute::TARGET_PARAMETER)]`.
 
-The annotation looks like this:
+The class looks like this:
 
 ```php
 use Attribute;
 
 /**
- * Use this annotation to autowire a service from the container into a given parameter of a field/query/mutation.
+ * Use this attribute to autowire a service from the container into a given parameter of a field/query/mutation.
  *
- * @Annotation
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class Autowire implements ParameterAnnotationInterface

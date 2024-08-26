@@ -1,48 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Fixtures\CircularInputReference\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 
-/**
- * @Input()
- */
+#[Input]
 class CircularInputA
 {
-
-    /**
-     * @Field(inputType="CircularInputBInput")
-     * @var CircularInputB
-     */
-    private $circularInputB;
+    #[Field(inputType: 'CircularInputBInput')]
+    private CircularInputB $circularInputB;
 
     private int $bar = 10;
 
-    /** @param CircularInputB $circularInputB */
-    public function setCircularInputB($circularInputB): void
+    public function setCircularInputB(CircularInputB $circularInputB): void
     {
         $this->circularInputB = $circularInputB;
     }
 
-    /**
-     * @Field
-     */
-    public function setBar(int $bar): void {
+    #[Field]
+    public function setBar(int $bar): void
+    {
         $this->bar = $bar;
     }
 
-    /**
-     * @return CircularInputB
-     */
-    public function getCircularInputB()
+    public function getCircularInputB(): CircularInputB
     {
         return $this->circularInputB;
     }
 
-    /**
-     * @return int
-     */
     public function getBar(): int
     {
         return $this->bar;

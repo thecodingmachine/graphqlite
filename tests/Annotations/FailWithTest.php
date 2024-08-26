@@ -12,7 +12,7 @@ class FailWithTest extends TestCase
     public function testException(): void
     {
         $this->expectException(BadMethodCallException::class);
-        $this->expectExceptionMessage('The @FailWith annotation must be passed a defaultValue. For instance: "@FailWith(null)"');
+        $this->expectExceptionMessage('The #[FailWith] attribute must be passed a defaultValue. For instance: "#[FailWith(null)]"');
         new FailWith([]);
     }
 

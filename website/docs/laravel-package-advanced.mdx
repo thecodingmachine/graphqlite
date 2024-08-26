@@ -4,9 +4,6 @@ title: "Laravel package: advanced usage"
 sidebar_label: Laravel specific features
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 <div class="alert alert--warning">
     <strong>Be advised!</strong> This documentation will be removed in a future release.  For current and up-to-date Laravel extension specific documentation, please see the <a href="https://github.com/thecodingmachine/graphqlite-laravel">Github repository</a>.
 </div>
@@ -15,16 +12,8 @@ The Laravel package comes with a number of features to ease the integration of G
 
 ## Support for Laravel validation rules
 
-The GraphQLite Laravel package comes with a special `@Validate` annotation to use Laravel validation rules in your
+The GraphQLite Laravel package comes with a special `#[Validate]` attribute to use Laravel validation rules in your
 input types.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 use TheCodingMachine\GraphQLite\Laravel\Annotations\Validate;
@@ -44,30 +33,7 @@ class MyController
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-use TheCodingMachine\GraphQLite\Laravel\Annotations\Validate;
-
-class MyController
-{
-    /**
-     * @Mutation
-     * @Validate(for="$email", rule="email|unique:users")
-     * @Validate(for="$password", rule="gte:8")
-     */
-    public function createUser(string $email, string $password): User
-    {
-        // ...
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
-You can use the `@Validate` annotation in any query / mutation / field / factory / decorator.
+You can use the `#[Validate]` attribute in any query / mutation / field / factory / decorator.
 
 If a validation fails to pass, the message will be printed in the "errors" section and you will get a HTTP 400 status code:
 
@@ -77,15 +43,13 @@ If a validation fails to pass, the message will be printed in the "errors" secti
         {
             "message": "The email must be a valid email address.",
             "extensions": {
-                "argument": "email",
-                "category": "Validate"
+                "argument": "email"
             }
         },
         {
             "message": "The password must be greater than or equal 8 characters.",
             "extensions": {
-                "argument": "password",
-                "category": "Validate"
+                "argument": "password"
             }
         }
     ]
@@ -98,14 +62,6 @@ You can use any validation rule described in [the Laravel documentation](https:/
 
 In your query, if you explicitly return an object that extends the `Illuminate\Pagination\LengthAwarePaginator` class,
 the query result will be wrapped in a "paginator" type.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 class MyController
@@ -120,27 +76,6 @@ class MyController
     }
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-class MyController
-{
-    /**
-     * @Query
-     * @return Product[]
-     */
-    public function products(): Illuminate\Pagination\LengthAwarePaginator
-    {
-        return Product::paginate(15);
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 
 Notice that:
 
@@ -177,14 +112,6 @@ products {
 
 Note: if you are using `simplePaginate` instead of `paginate`, you can type hint on the `Illuminate\Pagination\Paginator` class.
 
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
-
 ```php
 class MyController
 {
@@ -199,45 +126,17 @@ class MyController
 }
 ```
 
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-class MyController
-{
-    /**
-     * @Query
-     * @return Product[]
-     */
-    public function products(): Illuminate\Pagination\Paginator
-    {
-        return Product::simplePaginate(15);
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
 The behaviour will be exactly the same except you will be missing the `totalCount` and `lastPage` fields.
 
 ## Using GraphQLite with Eloquent efficiently
 
-In GraphQLite, you are supposed to put a `@Field` annotation on each getter.
+In GraphQLite, you are supposed to put a `#[Field]` attribute on each getter.
 
 Eloquent uses PHP magic properties to expose your database records.
 Because Eloquent relies on magic properties, it is quite rare for an Eloquent model to have proper getters and setters.
 
-So we need to find a workaround. GraphQLite comes with a `@MagicField` annotation to help you
+So we need to find a workaround. GraphQLite comes with a `#[MagicField]` attribute to help you
 working with magic properties.
-
-<Tabs
-  defaultValue="php8"
-  values={[
-    {label: 'PHP 8', value: 'php8'},
-    {label: 'PHP 7', value: 'php7'},
-  ]}>
-  <TabItem value="php8">
 
 ```php
 #[Type]
@@ -248,24 +147,6 @@ class Product extends Model
 {
 }
 ```
-
-  </TabItem>
-  <TabItem value="php7">
-
-```php
-/**
- * @Type()
- * @MagicField(name="id", outputType="ID!")
- * @MagicField(name="name", phpType="string")
- * @MagicField(name="categories", phpType="Category[]")
- */
-class Product extends Model
-{
-}
-```
-
-  </TabItem>
-</Tabs>
 
 Please note that since the properties are "magic", they don't have a type. Therefore,
 you need to pass either the "outputType" attribute with the GraphQL type matching the property,
@@ -288,7 +169,7 @@ class User extends Model
 }
 ```
 
-It would be tempting to put a `@Field` annotation on the `phone()` method, but this will not work. Indeed,
+It would be tempting to put a `#[Field]` attribute on the `phone()` method, but this will not work. Indeed,
 the `phone()` method does not return a `App\Phone` object. It is the `phone` magic property that returns it.
 
 In short:
@@ -299,9 +180,8 @@ In short:
 ```php
 class User extends Model
 {
-    /**
-    * @Field
-    */
+
+    #[Field]
     public function phone()
     {
         return $this->hasOne('App\Phone');
@@ -315,9 +195,7 @@ class User extends Model
     This works:
 
 ```php
-/**
- * @MagicField(name="phone", phpType="App\\Phone")
- */
+#[MagicField(name: "phone", phpType:"App\\Phone")]
 class User extends Model
 {
     public function phone()

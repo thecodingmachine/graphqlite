@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use GraphQL\Type\Definition\NonNull;
@@ -15,9 +17,11 @@ use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
 
+use function assert;
+use function count;
+
 class TypeMapperTest extends AbstractQueryProvider
 {
-
     public function testMapScalarUnionException(): void
     {
         $docBlockFactory = $this->getDocBlockFactory();
@@ -33,7 +37,7 @@ class TypeMapperTest extends AbstractQueryProvider
         $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: Int!, String!');
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: String!, Int!');
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
@@ -78,14 +82,13 @@ class TypeMapperTest extends AbstractQueryProvider
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertNotInstanceOf(NonNull::class, $gqType);
-        assert(!($gqType instanceof NonNull));
+        assert(! ($gqType instanceof NonNull));
         $this->assertInstanceOf(UnionType::class, $gqType);
         assert($gqType instanceof UnionType);
         $unionTypes = $gqType->getTypes();
         $this->assertEquals(2, count($unionTypes));
         $this->assertEquals('TestObject', $unionTypes[0]->name);
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
-
     }
 
     public function testHideParameter(): void
@@ -102,7 +105,7 @@ class TypeMapperTest extends AbstractQueryProvider
         $refMethod = new ReflectionMethod($this, 'withDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
         $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
-        $annotations = $this->getAnnotationReader()->getParameterAnnotations($refParameter);
+        $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $param = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $annotations);
 
@@ -127,7 +130,7 @@ class TypeMapperTest extends AbstractQueryProvider
         $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
         $refParameter = $refMethod->getParameters()[0];
 
-        $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $this->getAnnotationReader()->getParameterAnnotations($refParameter));
+        $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo']);
         $this->assertInstanceOf(InputTypeParameter::class, $parameter);
         assert($parameter instanceof InputTypeParameter);
         $this->assertEquals('Foo parameter', $parameter->getDescription());
@@ -147,7 +150,7 @@ class TypeMapperTest extends AbstractQueryProvider
         $refMethod = new ReflectionMethod($this, 'withoutDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
         $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
-        $annotations = $this->getAnnotationReader()->getParameterAnnotations($refParameter);
+        $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $this->expectException(CannotHideParameterRuntimeException::class);
         $this->expectExceptionMessage('For parameter $foo of method TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::withoutDefaultValue(), cannot use the @HideParameter annotation. The parameter needs to provide a default value.');
@@ -155,35 +158,22 @@ class TypeMapperTest extends AbstractQueryProvider
         $typeMapper->mapParameter($refParameter, $docBlockObj, null, $annotations);
     }
 
-    /**
-     * @return int|string
-     */
-    private function dummy()
+    private function dummy(): int|string
     {
-
     }
 
-    /**
-     * @param int $foo Foo parameter
-     */
-    private function withParamDescription(int $foo)
+    /** @param int $foo Foo parameter */
+    private function withParamDescription(int $foo): void
     {
-
     }
 
-    /**
-     * @HideParameter(for="$foo")
-     */
-    private function withDefaultValue($foo = 24)
+    private function withDefaultValue(#[HideParameter]
+    $foo = 24,): void
     {
-
     }
 
-    /**
-     * @HideParameter(for="$foo")
-     */
-    private function withoutDefaultValue($foo)
+    private function withoutDefaultValue(#[HideParameter]
+    $foo,): void
     {
-
     }
 }
