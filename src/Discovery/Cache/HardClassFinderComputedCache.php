@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Discovery\Cache;
 
 use Psr\SimpleCache\CacheInterface;
-use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use ReflectionClass;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
 class HardClassFinderComputedCache implements ClassFinderComputedCache
 {
-
     public function __construct(
         private readonly CacheInterface $cache,
     )
@@ -16,13 +17,13 @@ class HardClassFinderComputedCache implements ClassFinderComputedCache
     }
 
     /**
-     * @template TEntry of mixed
-     * @template TReturn of mixed
-     *
      * @param callable(ReflectionClass<object>): TEntry $map
      * @param callable(array<string, TEntry>): TReturn $reduce
      *
      * @return TReturn
+     *
+     * @template TEntry of mixed
+     * @template TReturn of mixed
      */
     public function compute(
         ClassFinder $classFinder,
@@ -45,11 +46,11 @@ class HardClassFinderComputedCache implements ClassFinderComputedCache
     }
 
     /**
-     * @template TEntry of mixed
-     *
      * @param callable(ReflectionClass<object>): TEntry $map
      *
      * @return array<string, TEntry>
+     *
+     * @template TEntry of mixed
      */
     private function entries(
         ClassFinder $classFinder,

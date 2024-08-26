@@ -15,12 +15,14 @@ use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
-use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
 
+use function array_filter;
+use function array_merge;
+use function array_values;
 use function assert;
 use function is_a;
 use function ltrim;
@@ -39,9 +41,9 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     private array $nameToClassMapping;
 
     public function __construct(
-        private readonly RootTypeMapperInterface  $next,
-        private readonly AnnotationReader         $annotationReader,
-        private readonly ClassFinder              $classFinder,
+        private readonly RootTypeMapperInterface $next,
+        private readonly AnnotationReader $annotationReader,
+        private readonly ClassFinder $classFinder,
         private readonly ClassFinderComputedCache $classFinderBoundCache,
     ) {
     }
@@ -157,14 +159,14 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         $this->nameToClassMapping ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'myclabsenum_name_to_class',
-            function (ReflectionClass $classReflection): ?array {
+            function (ReflectionClass $classReflection): array|null {
                 if (! $classReflection->isSubclassOf(Enum::class)) {
                     return null;
                 }
 
                 return [$this->getTypeName($classReflection) => $classReflection->getName()];
             },
-            fn (array $entries) => array_merge(...array_values(array_filter($entries))),
+            static fn (array $entries) => array_merge(...array_values(array_filter($entries))),
         );
 
         return $this->nameToClassMapping;

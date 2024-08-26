@@ -13,7 +13,6 @@ use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\ContextFactory;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -24,13 +23,13 @@ use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
 use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
 use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
 use TheCodingMachine\GraphQLite\Discovery\Cache\FileModificationClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper;
-use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
@@ -64,6 +63,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -75,11 +75,14 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
-use function array_map;
+
 use function array_reverse;
 use function class_exists;
 use function md5;
 use function substr;
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
 
 /**
  * A class to help getting started with GraphQLite.
@@ -145,7 +148,7 @@ class SchemaFactory
     public function addControllerNamespace(string $namespace): self
     {
         trigger_error(
-            "Using SchemaFactory::addControllerNamespace() is deprecated in favor of SchemaFactory::addNamespace().",
+            'Using SchemaFactory::addControllerNamespace() is deprecated in favor of SchemaFactory::addNamespace().',
             E_USER_DEPRECATED,
         );
 
@@ -160,7 +163,7 @@ class SchemaFactory
     public function addTypeNamespace(string $namespace): self
     {
         trigger_error(
-            "Using SchemaFactory::addTypeNamespace() is deprecated in favor of SchemaFactory::addNamespace().",
+            'Using SchemaFactory::addTypeNamespace() is deprecated in favor of SchemaFactory::addNamespace().',
             E_USER_DEPRECATED,
         );
 
@@ -401,7 +404,7 @@ class SchemaFactory
             $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderBoundCache);
         }
 
-        if (!empty($this->rootTypeMapperFactories)) {
+        if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
                 $annotationReader,
                 $typeResolver,
@@ -538,7 +541,7 @@ class SchemaFactory
         // While this is technically okay, it doesn't follow SchemaFactory's semantics that allow it's
         // users to manually specify classes (see SchemaFactory::testCreateSchemaOnlyWithFactories()),
         // without having to specify namespaces to glob. This solves it by providing an empty iterator.
-        if (!$this->namespaces) {
+        if (! $this->namespaces) {
             return new StaticClassFinder([]);
         }
 
@@ -556,11 +559,12 @@ class SchemaFactory
         return new KcsClassFinder($finder);
     }
 
+    /** @return array{ DocBlockFactory, DocBlockContextFactory } */
     private function createDocBlockFactory(ClassBoundCacheInterface $nonInheritedClassBoundCache): array
     {
         $docBlockContextFactory = new CachedDocBlockContextFactory(
             new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
-            new PhpDocumentorDocBlockContextFactory(new ContextFactory())
+            new PhpDocumentorDocBlockContextFactory(new ContextFactory()),
         );
         $docBlockFactory = new CachedDocBlockFactory(
             new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),

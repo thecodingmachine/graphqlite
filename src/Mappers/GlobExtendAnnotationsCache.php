@@ -11,9 +11,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
  */
 final class GlobExtendAnnotationsCache
 {
-    /**
-     * @param class-string $sourceClass
-     */
+    /** @param class-string $sourceClass */
     public function __construct(
         public readonly string $sourceClass,
         private string|null $extendTypeClassName,

@@ -11,9 +11,11 @@ use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
-
-use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+
+use function array_filter;
+use function array_values;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -27,14 +29,12 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private array $classList;
     private AggregateControllerQueryProvider|null $aggregateControllerQueryProvider = null;
 
-    /**
-     * @param ContainerInterface $container The container we will fetch controllers from.
-     */
+    /** @param ContainerInterface $container The container we will fetch controllers from. */
     public function __construct(
-        private readonly FieldsBuilder            $fieldsBuilder,
-        private readonly ContainerInterface       $container,
-        private readonly AnnotationReader         $annotationReader,
-        private readonly ClassFinder              $classFinder,
+        private readonly FieldsBuilder $fieldsBuilder,
+        private readonly ContainerInterface $container,
+        private readonly AnnotationReader $annotationReader,
+        private readonly ClassFinder $classFinder,
         private readonly ClassFinderComputedCache $classFinderBoundCache,
     )
     {
@@ -61,7 +61,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         $this->classList ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'globQueryProvider',
-            function (ReflectionClass $classReflection): ?string {
+            function (ReflectionClass $classReflection): string|null {
                 if (
                     ! $classReflection->isInstantiable() ||
                     ! $this->hasOperations($classReflection) ||
@@ -72,7 +72,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
 
                 return $classReflection->getName();
             },
-            fn (array $entries) => array_values(array_filter($entries)),
+            static fn (array $entries) => array_values(array_filter($entries)),
         );
 
         return $this->classList;

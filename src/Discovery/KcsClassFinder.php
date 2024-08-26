@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Discovery;
 
 use Kcs\ClassFinder\Finder\FinderInterface;
+use ReflectionClass;
 use Traversable;
 
 class KcsClassFinder implements ClassFinder
@@ -21,6 +24,7 @@ class KcsClassFinder implements ClassFinder
         return $that;
     }
 
+    /** @return Traversable<class-string, ReflectionClass> */
     public function getIterator(): Traversable
     {
         return $this->finder->getIterator();

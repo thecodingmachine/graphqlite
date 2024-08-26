@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Discovery\Cache;
 
 use ReflectionClass;
@@ -22,13 +24,13 @@ interface ClassFinderComputedCache
      * and simply call $map only for classes from file A, leaving all other entries untouched and not having to
      * waste resources on the rest of them. We then only need to call the cheap $reduce and have the final result :)
      *
-     * @template TEntry of mixed
-     * @template TReturn of mixed
-     *
      * @param callable(ReflectionClass<object>): TEntry $map
      * @param callable(array<string, TEntry>): TReturn $reduce
      *
      * @return TReturn
+     *
+     * @template TEntry of mixed
+     * @template TReturn of mixed
      */
     public function compute(
         ClassFinder $classFinder,

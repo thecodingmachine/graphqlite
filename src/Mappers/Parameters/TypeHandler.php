@@ -65,10 +65,10 @@ class TypeHandler implements ParameterHandlerInterface
     private PhpDocumentorTypeResolver $phpDocumentorTypeResolver;
 
     public function __construct(
-        private readonly ArgumentResolver        $argumentResolver,
+        private readonly ArgumentResolver $argumentResolver,
         private readonly RootTypeMapperInterface $rootTypeMapper,
-        private readonly TypeResolver            $typeResolver,
-        private readonly DocBlockFactory   $docBlockFactory,
+        private readonly TypeResolver $typeResolver,
+        private readonly DocBlockFactory $docBlockFactory,
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();

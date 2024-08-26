@@ -6,9 +6,9 @@ namespace TheCodingMachine\GraphQLite;
 
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -32,8 +32,8 @@ final class FactoryContext
         private readonly ContainerInterface $container,
         private readonly CacheInterface $cache,
         private readonly InputTypeValidatorInterface|null $inputTypeValidator,
-        private readonly ClassFinder                      $classFinder,
-        private readonly ClassFinderComputedCache         $classFinderBoundCache,
+        private readonly ClassFinder $classFinder,
+        private readonly ClassFinderComputedCache $classFinderBoundCache,
         private readonly ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null,
     ) {
     }

@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Discovery\Cache;
 
 use Psr\SimpleCache\CacheInterface;
-use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use ReflectionClass;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+
+use function array_merge;
 use function Safe\filemtime;
 
 /**
@@ -32,13 +36,13 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
     }
 
     /**
-     * @template TEntry of mixed
-     * @template TReturn of mixed
-     *
      * @param callable(ReflectionClass<object>): TEntry $map
      * @param callable(array<string, TEntry>): TReturn $reduce
      *
      * @return TReturn
+     *
+     * @template TEntry of mixed
+     * @template TReturn of mixed
      */
     public function compute(
         ClassFinder $classFinder,
@@ -47,17 +51,17 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         callable $reduce,
     ): mixed
     {
-        $entries = $this->entries($classFinder, "$key.entries", $map);
+        $entries = $this->entries($classFinder, $key . '.entries', $map);
 
         return $reduce($entries);
     }
 
     /**
-     * @template TEntry of mixed
-     *
      * @param callable(ReflectionClass<object>): TEntry $map
      *
      * @return array<string, TEntry>
+     *
+     * @template TEntry of mixed
      */
     private function entries(
         ClassFinder $classFinder,
@@ -78,7 +82,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
             // If there's no entry in cache for this filename (new file or previously uncached),
             // or if it the file has been modified since caching, we'll try to autoload
             // the class and collect the cached information (again).
-            if (!$entry || $this->dependenciesChanged($entry['dependencies'])) {
+            if (! $entry || $this->dependenciesChanged($entry['dependencies'])) {
                 // In case this file isn't a class, or doesn't match the provided namespace filter,
                 // it will not be emitted in the iterator and won't reach the `foreach()` below.
                 // So to avoid iterating over these files again, we'll mark them as non-matching.
@@ -122,9 +126,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         return $result;
     }
 
-    /**
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     private function fileDependencies(ReflectionClass $refClass): array
     {
         $filename = $refClass->getFileName();
@@ -150,6 +152,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         return $files;
     }
 
+    /** @param array<string, int> $files */
     private function dependenciesChanged(array $files): bool
     {
         foreach ($files as $filename => $modificationTime) {

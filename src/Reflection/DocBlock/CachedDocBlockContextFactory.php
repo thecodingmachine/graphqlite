@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 
 use phpDocumentor\Reflection\Types\Context;
@@ -11,7 +13,7 @@ class CachedDocBlockContextFactory implements DocBlockContextFactory
 {
     public function __construct(
         private readonly ClassBoundCacheContractInterface $classBoundCacheContract,
-        private readonly DocBlockContextFactory           $contextFactory,
+        private readonly DocBlockContextFactory $contextFactory,
     )
     {
     }

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Discovery;
 
+use ReflectionClass;
 use Traversable;
 
 class StaticClassFinder implements ClassFinder
@@ -9,9 +12,7 @@ class StaticClassFinder implements ClassFinder
     /** @var (callable(string): bool)|null  */
     private mixed $pathFilter = null;
 
-    /**
-     * @param array<int, class-string> $classes
-     */
+    /** @param array<int, class-string> $classes */
     public function __construct(
         private readonly array $classes,
     )
@@ -26,12 +27,13 @@ class StaticClassFinder implements ClassFinder
         return $that;
     }
 
+    /** @return Traversable<class-string, ReflectionClass> */
     public function getIterator(): Traversable
     {
         foreach ($this->classes as $class) {
-            $classReflection = new \ReflectionClass($class);
+            $classReflection = new ReflectionClass($class);
 
-            if ($this->pathFilter && !($this->pathFilter)($classReflection->getFileName())) {
+            if ($this->pathFilter && ! ($this->pathFilter)($classReflection->getFileName())) {
                 continue;
             }
 

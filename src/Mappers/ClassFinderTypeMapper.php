@@ -13,8 +13,8 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AnnotationReader;
-use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -23,6 +23,8 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+
+use function array_reduce;
 use function assert;
 
 /**
@@ -34,15 +36,15 @@ class ClassFinderTypeMapper implements TypeMapperInterface
     private GlobExtendTypeMapperCache|null $globExtendTypeMapperCache = null;
 
     public function __construct(
-        private readonly ClassFinder                  $classFinder,
-        private readonly TypeGenerator                $typeGenerator,
-        private readonly InputTypeGenerator           $inputTypeGenerator,
-        private readonly InputTypeUtils               $inputTypeUtils,
-        private readonly ContainerInterface           $container,
-        private readonly AnnotationReader             $annotationReader,
-        private readonly NamingStrategyInterface      $namingStrategy,
+        private readonly ClassFinder $classFinder,
+        private readonly TypeGenerator $typeGenerator,
+        private readonly InputTypeGenerator $inputTypeGenerator,
+        private readonly InputTypeUtils $inputTypeUtils,
+        private readonly ContainerInterface $container,
+        private readonly AnnotationReader $annotationReader,
+        private readonly NamingStrategyInterface $namingStrategy,
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private readonly ClassFinderComputedCache     $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderBoundCache,
     )
     {
     }
@@ -55,7 +57,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
         $this->globTypeMapperCache ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'classToAnnotations',
-            function (ReflectionClass $refClass): ?GlobAnnotationsCache {
+            function (ReflectionClass $refClass): GlobAnnotationsCache|null {
                 if ($refClass->isEnum()) {
                     return null;
                 }
@@ -107,7 +109,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
 
                 return $containsAnnotations ? $annotationsCache : null;
             },
-            fn (array $entries) => array_reduce($entries, function (GlobTypeMapperCache $globTypeMapperCache, ?GlobAnnotationsCache $annotationsCache) {
+            static fn (array $entries) => array_reduce($entries, static function (GlobTypeMapperCache $globTypeMapperCache, GlobAnnotationsCache|null $annotationsCache) {
                 if ($annotationsCache === null) {
                     return $globTypeMapperCache;
                 }
@@ -115,7 +117,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
                 $globTypeMapperCache->registerAnnotations($annotationsCache->sourceClass, $annotationsCache);
 
                 return $globTypeMapperCache;
-            }, new GlobTypeMapperCache())
+            }, new GlobTypeMapperCache()),
         );
 
         return $this->globTypeMapperCache;
@@ -126,7 +128,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
         $this->globExtendTypeMapperCache ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'classToExtendAnnotations',
-            function (ReflectionClass $refClass): ?GlobExtendAnnotationsCache {
+            function (ReflectionClass $refClass): GlobExtendAnnotationsCache|null {
                 // Enum's are not types
                 if ($refClass->isEnum()) {
                     return null;
@@ -160,7 +162,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
                 // FIXME: $extendClassName === NULL!!!!!!
                 return new GlobExtendAnnotationsCache($refClass->getName(), $extendClassName, $typeName);
             },
-            fn (array $entries) => array_reduce($entries, function (GlobExtendTypeMapperCache $globExtendTypeMapperCache, ?GlobExtendAnnotationsCache $annotationsCache) {
+            static fn (array $entries) => array_reduce($entries, static function (GlobExtendTypeMapperCache $globExtendTypeMapperCache, GlobExtendAnnotationsCache|null $annotationsCache) {
                 if ($annotationsCache === null) {
                     return $globExtendTypeMapperCache;
                 }
@@ -168,7 +170,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
                 $globExtendTypeMapperCache->registerAnnotations($annotationsCache->sourceClass, $annotationsCache);
 
                 return $globExtendTypeMapperCache;
-            }, new GlobExtendTypeMapperCache())
+            }, new GlobExtendTypeMapperCache()),
         );
 
         return $this->globExtendTypeMapperCache;

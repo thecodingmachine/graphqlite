@@ -52,6 +52,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
+
 use function array_diff_key;
 use function array_fill_keys;
 use function array_intersect_key;
@@ -69,6 +70,7 @@ use function reset;
 use function rtrim;
 use function str_starts_with;
 use function trim;
+
 use const PHP_EOL;
 
 /**
@@ -79,16 +81,16 @@ class FieldsBuilder
     private TypeHandler $typeMapper;
 
     public function __construct(
-        private readonly AnnotationReader              $annotationReader,
-        private readonly RecursiveTypeMapperInterface  $recursiveTypeMapper,
-        private readonly ArgumentResolver              $argumentResolver,
-        private readonly TypeResolver                  $typeResolver,
-        private readonly DocBlockFactory      $docBlockFactory,
-        private readonly DocBlockContextFactory        $docBlockContextFactory,
-        private readonly NamingStrategyInterface       $namingStrategy,
-        private readonly RootTypeMapperInterface       $rootTypeMapper,
-        private readonly ParameterMiddlewareInterface  $parameterMapper,
-        private readonly FieldMiddlewareInterface      $fieldMiddleware,
+        private readonly AnnotationReader $annotationReader,
+        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
+        private readonly ArgumentResolver $argumentResolver,
+        private readonly TypeResolver $typeResolver,
+        private readonly DocBlockFactory $docBlockFactory,
+        private readonly DocBlockContextFactory $docBlockContextFactory,
+        private readonly NamingStrategyInterface $namingStrategy,
+        private readonly RootTypeMapperInterface $rootTypeMapper,
+        private readonly ParameterMiddlewareInterface $parameterMapper,
+        private readonly FieldMiddlewareInterface $fieldMiddleware,
         private readonly InputFieldMiddlewareInterface $inputFieldMiddleware,
     )
     {
