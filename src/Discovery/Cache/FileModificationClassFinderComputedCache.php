@@ -70,6 +70,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
     ): mixed
     {
         $previousEntries = $this->cache->get($key) ?? [];
+        /** @var array<string, TEntry> $result */
         $result = [];
         $entries = [];
 
@@ -126,7 +127,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         return $result;
     }
 
-    /** @return array<int, string> */
+    /** @return array<string, int> */
     private function fileDependencies(ReflectionClass $refClass): array
     {
         $filename = $refClass->getFileName();

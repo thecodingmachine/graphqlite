@@ -17,6 +17,7 @@ final class GlobAnnotationsCache
     use Cloneable;
 
     /**
+     * @param class-string $sourceClass
      * @param class-string<object>|null $typeClassName
      * @param array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> $factories
      *        An array mapping a factory method name to an input name / class name / default flag /

@@ -16,7 +16,7 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
     /**
      * StaticClassListTypeMapperFactory constructor.
      *
-     * @param array<int, string> $classList The list of classes to be scanned.
+     * @param array<int, class-string> $classList The list of classes to be scanned.
      */
     public function __construct(
         private array $classList,
@@ -37,7 +37,6 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
             $context->getNamingStrategy(),
             $context->getRecursiveTypeMapper(),
             $context->getClassFinderBoundCache(),
-            $context->getClassBoundCacheContractFactory(),
         );
     }
 }

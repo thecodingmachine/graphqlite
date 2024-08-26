@@ -469,7 +469,6 @@ class SchemaFactory
                 $namingStrategy,
                 $recursiveTypeMapper,
                 $classFinderBoundCache,
-                classBoundCacheContractFactory: $this->classBoundCacheContractFactory,
             ));
         }
 
@@ -559,7 +558,7 @@ class SchemaFactory
         return new KcsClassFinder($finder);
     }
 
-    /** @return array{ DocBlockFactory, DocBlockContextFactory } */
+    /** @return array{ Reflection\DocBlock\DocBlockFactory, DocBlockContextFactory } */
     private function createDocBlockFactory(ClassBoundCacheInterface $nonInheritedClassBoundCache): array
     {
         $docBlockContextFactory = new CachedDocBlockContextFactory(

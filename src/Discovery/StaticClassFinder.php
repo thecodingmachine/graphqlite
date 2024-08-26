@@ -33,6 +33,7 @@ class StaticClassFinder implements ClassFinder
         foreach ($this->classes as $class) {
             $classReflection = new ReflectionClass($class);
 
+            /** @phpstan-ignore-next-line */
             if ($this->pathFilter && ! ($this->pathFilter)($classReflection->getFileName())) {
                 continue;
             }
