@@ -33,7 +33,7 @@ final class FactoryContext
         private readonly CacheInterface $cache,
         private readonly InputTypeValidatorInterface|null $inputTypeValidator,
         private readonly ClassFinder $classFinder,
-        private readonly ClassFinderComputedCache $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
         private readonly ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null,
     ) {
     }
@@ -103,8 +103,8 @@ final class FactoryContext
         return $this->classFinder;
     }
 
-    public function getClassFinderBoundCache(): ClassFinderComputedCache
+    public function getClassFinderComputedCache(): ClassFinderComputedCache
     {
-        return $this->classFinderBoundCache;
+        return $this->classFinderComputedCache;
     }
 }

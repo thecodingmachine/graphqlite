@@ -44,7 +44,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         private readonly RootTypeMapperInterface $next,
         private readonly AnnotationReader $annotationReader,
         private readonly ClassFinder $classFinder,
-        private readonly ClassFinderComputedCache $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     ) {
     }
 
@@ -156,7 +156,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        $this->nameToClassMapping ??= $this->classFinderBoundCache->compute(
+        $this->nameToClassMapping ??= $this->classFinderComputedCache->compute(
             $this->classFinder,
             'myclabsenum_name_to_class',
             function (ReflectionClass $classReflection): array|null {

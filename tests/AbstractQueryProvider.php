@@ -22,6 +22,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\CacheUtils\ClassBoundCache;
 use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
 use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;

@@ -32,7 +32,6 @@ class FactoryContextTest extends AbstractQueryProvider
             $container,
             $arrayCache,
             $validator,
-            self::GLOB_TTL_SECONDS,
             classBoundCacheContractFactory: $classBoundCacheContractFactory,
         );
 

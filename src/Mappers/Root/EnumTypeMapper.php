@@ -47,7 +47,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         private readonly AnnotationReader $annotationReader,
         private readonly DocBlockFactory $docBlockFactory,
         private readonly ClassFinder $classFinder,
-        private readonly ClassFinderComputedCache $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     ) {
     }
 
@@ -191,7 +191,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        $this->nameToClassMapping ??= $this->classFinderBoundCache->compute(
+        $this->nameToClassMapping ??= $this->classFinderComputedCache->compute(
             $this->classFinder,
             'enum_name_to_class',
             function (ReflectionClass $classReflection): array|null {

@@ -35,7 +35,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
         private readonly ContainerInterface $container,
         private readonly AnnotationReader $annotationReader,
         private readonly ClassFinder $classFinder,
-        private readonly ClassFinderComputedCache $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     )
     {
     }
@@ -58,7 +58,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function getClassList(): array
     {
-        $this->classList ??= $this->classFinderBoundCache->compute(
+        $this->classList ??= $this->classFinderComputedCache->compute(
             $this->classFinder,
             'globQueryProvider',
             function (ReflectionClass $classReflection): string|null {

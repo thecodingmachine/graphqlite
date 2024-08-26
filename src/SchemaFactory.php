@@ -364,7 +364,7 @@ class SchemaFactory
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $classFinder = $this->createClassFinder();
-        $classFinderBoundCache = $this->devMode ?
+        $classFinderComputedCache = $this->devMode ?
             new FileModificationClassFinderComputedCache($this->cache) :
             new HardClassFinderComputedCache($this->cache);
 
@@ -397,11 +397,11 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $docBlockFactory, $classFinder, $classFinderBoundCache);
+        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $docBlockFactory, $classFinder, $classFinderComputedCache);
 
         if (class_exists(Enum::class)) {
             // Annotation support - deprecated
-            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderBoundCache);
+            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderComputedCache);
         }
 
         if (! empty($this->rootTypeMapperFactories)) {
@@ -414,7 +414,7 @@ class SchemaFactory
                 $this->container,
                 $namespacedCache,
                 $classFinder,
-                $classFinderBoundCache,
+                $classFinderComputedCache,
             );
 
             $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
@@ -468,7 +468,7 @@ class SchemaFactory
                 $annotationReader,
                 $namingStrategy,
                 $recursiveTypeMapper,
-                $classFinderBoundCache,
+                $classFinderComputedCache,
             ));
         }
 
@@ -486,7 +486,7 @@ class SchemaFactory
                 $namespacedCache,
                 $this->inputTypeValidator,
                 $classFinder,
-                $classFinderBoundCache,
+                $classFinderComputedCache,
                 classBoundCacheContractFactory: $this->classBoundCacheContractFactory,
             );
         }
@@ -513,7 +513,7 @@ class SchemaFactory
                 $this->container,
                 $annotationReader,
                 $classFinder,
-                $classFinderBoundCache,
+                $classFinderComputedCache,
             );
         }
 

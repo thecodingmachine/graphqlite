@@ -36,7 +36,7 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
             $context->getAnnotationReader(),
             $context->getNamingStrategy(),
             $context->getRecursiveTypeMapper(),
-            $context->getClassFinderBoundCache(),
+            $context->getClassFinderComputedCache(),
         );
     }
 }

@@ -44,7 +44,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
         private readonly AnnotationReader $annotationReader,
         private readonly NamingStrategyInterface $namingStrategy,
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private readonly ClassFinderComputedCache $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     )
     {
     }
@@ -54,7 +54,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
      */
     private function getMaps(): GlobTypeMapperCache
     {
-        $this->globTypeMapperCache ??= $this->classFinderBoundCache->compute(
+        $this->globTypeMapperCache ??= $this->classFinderComputedCache->compute(
             $this->classFinder,
             'classToAnnotations',
             function (ReflectionClass $refClass): GlobAnnotationsCache|null {
@@ -125,7 +125,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
 
     private function getMapClassToExtendTypeArray(): GlobExtendTypeMapperCache
     {
-        $this->globExtendTypeMapperCache ??= $this->classFinderBoundCache->compute(
+        $this->globExtendTypeMapperCache ??= $this->classFinderComputedCache->compute(
             $this->classFinder,
             'classToExtendAnnotations',
             function (ReflectionClass $refClass): GlobExtendAnnotationsCache|null {

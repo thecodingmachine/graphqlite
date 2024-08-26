@@ -29,7 +29,7 @@ final class RootTypeMapperFactoryContext
         private readonly ContainerInterface $container,
         private readonly CacheInterface $cache,
         private readonly ClassFinder $classFinder,
-        private readonly ClassFinderComputedCache $classFinderBoundCache,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     ) {
     }
 
@@ -73,8 +73,8 @@ final class RootTypeMapperFactoryContext
         return $this->classFinder;
     }
 
-    public function getClassFinderBoundCache(): ClassFinderComputedCache
+    public function getClassFinderComputedCache(): ClassFinderComputedCache
     {
-        return $this->classFinderBoundCache;
+        return $this->classFinderComputedCache;
     }
 }
