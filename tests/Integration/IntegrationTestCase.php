@@ -22,11 +22,10 @@ use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
-use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\OldCachedClassFinder;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
@@ -34,7 +33,6 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
@@ -109,8 +107,8 @@ class IntegrationTestCase extends TestCase
 
                 return new KcsClassFinder($composerFinder);
             },
-            ClassFinderBoundCache::class => function () {
-                return new HardClassFinderBoundCache(
+            ClassFinderComputedCache::class => function () {
+                return new HardClassFinderComputedCache(
                     new Psr16Cache(new ArrayAdapter()),
                 );
             },
@@ -120,7 +118,7 @@ class IntegrationTestCase extends TestCase
                     $container->get(BasicAutoWiringContainer::class),
                     $container->get(AnnotationReader::class),
                     $container->get(ClassFinder::class),
-                    $container->get(ClassFinderBoundCache::class),
+                    $container->get(ClassFinderComputedCache::class),
                 );
 
                 $queryProvider = new AggregateQueryProvider([
@@ -130,7 +128,7 @@ class IntegrationTestCase extends TestCase
                         $container->get(BasicAutoWiringContainer::class),
                         $container->get(AnnotationReader::class),
                         $container->get(ClassFinder::class),
-                        $container->get(ClassFinderBoundCache::class),
+                        $container->get(ClassFinderComputedCache::class),
                     ),
                 ]);
 
@@ -238,7 +236,7 @@ class IntegrationTestCase extends TestCase
                     $container->get(AnnotationReader::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RecursiveTypeMapperInterface::class),
-                    $container->get(ClassFinderBoundCache::class),
+                    $container->get(ClassFinderComputedCache::class),
                 );
             },
             PorpaginasTypeMapper::class => static function (ContainerInterface $container) {
@@ -249,7 +247,7 @@ class IntegrationTestCase extends TestCase
                     $container->get(RootTypeMapperInterface::class),
                     $container->get(AnnotationReader::class),
                     $container->get(ClassFinder::class),
-                    $container->get(ClassFinderBoundCache::class),
+                    $container->get(ClassFinderComputedCache::class),
                 );
             },
             TypeGenerator::class => static function (ContainerInterface $container) {
@@ -328,8 +326,8 @@ class IntegrationTestCase extends TestCase
                 // These are in reverse order of execution
                 $errorRootTypeMapper = new FinalRootTypeMapper($container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $container->get(RecursiveTypeMapperInterface::class), $container->get(RootTypeMapperInterface::class));
-                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), $container->get(ClassFinder::class), $container->get(ClassFinderBoundCache::class));
-                $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), $container->get(DocBlockFactory::class), $container->get(ClassFinder::class), $container->get(ClassFinderBoundCache::class));
+                $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), $container->get(ClassFinder::class), $container->get(ClassFinderComputedCache::class));
+                $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $container->get(AnnotationReader::class), $container->get(DocBlockFactory::class), $container->get(ClassFinder::class), $container->get(ClassFinderComputedCache::class));
                 $rootTypeMapper = new CompoundTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class), $container->get(NamingStrategyInterface::class), $container->get(TypeRegistry::class), $container->get(RecursiveTypeMapperInterface::class));
                 $rootTypeMapper = new IteratorTypeMapper($rootTypeMapper, $container->get(RootTypeMapperInterface::class));
                 return $rootTypeMapper;

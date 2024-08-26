@@ -27,8 +27,8 @@ use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
 use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
 use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
 use TheCodingMachine\CacheUtils\FileBoundCache;
-use TheCodingMachine\GraphQLite\Discovery\Cache\FileModificationClassFinderBoundCache;
-use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\FileModificationClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
@@ -371,8 +371,8 @@ class SchemaFactory
         $typeRegistry = new TypeRegistry();
         $classFinder = $this->createClassFinder();
         $classFinderBoundCache = $this->devMode ?
-            new FileModificationClassFinderBoundCache($this->cache) :
-            new HardClassFinderBoundCache($this->cache);
+            new FileModificationClassFinderComputedCache($this->cache) :
+            new HardClassFinderComputedCache($this->cache);
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());

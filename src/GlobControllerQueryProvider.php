@@ -5,23 +5,15 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\FieldDefinition;
-use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
-use Symfony\Component\Cache\Adapter\Psr16Adapter;
-use Symfony\Contracts\Cache\CacheInterface as CacheContractInterface;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
 
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
-use function class_exists;
-use function interface_exists;
-use function is_array;
-use function str_replace;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 
 /**
  * Scans all the classes in a given namespace of the main project (not the vendor directory).
@@ -39,11 +31,11 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      * @param ContainerInterface $container The container we will fetch controllers from.
      */
     public function __construct(
-        private readonly FieldsBuilder      $fieldsBuilder,
-        private readonly ContainerInterface $container,
-        private readonly AnnotationReader   $annotationReader,
-        private readonly ClassFinder        $classFinder,
-        private readonly ClassFinderBoundCache     $classFinderBoundCache,
+        private readonly FieldsBuilder            $fieldsBuilder,
+        private readonly ContainerInterface       $container,
+        private readonly AnnotationReader         $annotationReader,
+        private readonly ClassFinder              $classFinder,
+        private readonly ClassFinderComputedCache $classFinderBoundCache,
     )
     {
     }
@@ -66,7 +58,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function getClassList(): array
     {
-        $this->classList ??= $this->classFinderBoundCache->reduce(
+        $this->classList ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'globQueryProvider',
             function (ReflectionClass $classReflection): ?string {

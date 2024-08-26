@@ -23,7 +23,7 @@ use function Safe\filemtime;
  *   - if no cache exists, it iterates over the whole class finder and returns all reflection that match the filter
  *   - if cache does exist, it only iterates over changed classes
  */
-class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
+class FileModificationClassFinderComputedCache implements ClassFinderComputedCache
 {
     public function __construct(
         private readonly CacheInterface $cache,
@@ -40,7 +40,7 @@ class FileModificationClassFinderBoundCache implements ClassFinderBoundCache
      *
      * @return TReturn
      */
-    public function reduce(
+    public function compute(
         ClassFinder $classFinder,
         string $key,
         callable $map,

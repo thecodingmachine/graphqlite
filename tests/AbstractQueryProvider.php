@@ -24,11 +24,10 @@ use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
-use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\OldCachedClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -52,7 +51,6 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
@@ -68,8 +66,6 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-use Traversable;
 
 abstract class AbstractQueryProvider extends TestCase
 {
@@ -88,7 +84,6 @@ abstract class AbstractQueryProvider extends TestCase
     private $typeRegistry;
     private $parameterMiddlewarePipe;
     private $rootTypeMapper;
-    private $namespaceFactory;
 
     protected function getTestObjectType(): MutableObjectType
     {
@@ -403,7 +398,7 @@ abstract class AbstractQueryProvider extends TestCase
             $rootTypeMapper,
             $this->getAnnotationReader(),
             new StaticClassFinder([]),
-            new HardClassFinderBoundCache(new Psr16Cache($arrayAdapter)),
+            new HardClassFinderComputedCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new EnumTypeMapper(
@@ -411,7 +406,7 @@ abstract class AbstractQueryProvider extends TestCase
             $this->getAnnotationReader(),
             $this->getDocBlockFactory(),
             new StaticClassFinder([]),
-            new HardClassFinderBoundCache(new Psr16Cache($arrayAdapter)),
+            new HardClassFinderComputedCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new CompoundTypeMapper(

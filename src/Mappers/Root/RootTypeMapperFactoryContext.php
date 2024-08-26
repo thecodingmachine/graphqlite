@@ -8,7 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
@@ -21,15 +21,15 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 final class RootTypeMapperFactoryContext
 {
     public function __construct(
-        private readonly AnnotationReader $annotationReader,
-        private readonly TypeResolver $typeResolver,
-        private readonly NamingStrategyInterface $namingStrategy,
-        private readonly TypeRegistry $typeRegistry,
+        private readonly AnnotationReader             $annotationReader,
+        private readonly TypeResolver                 $typeResolver,
+        private readonly NamingStrategyInterface      $namingStrategy,
+        private readonly TypeRegistry                 $typeRegistry,
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private readonly ContainerInterface $container,
-        private readonly CacheInterface $cache,
-        private readonly ClassFinder $classFinder,
-        private readonly ClassFinderBoundCache $classFinderBoundCache,
+        private readonly ContainerInterface           $container,
+        private readonly CacheInterface               $cache,
+        private readonly ClassFinder                  $classFinder,
+        private readonly ClassFinderComputedCache     $classFinderBoundCache,
     ) {
     }
 
@@ -73,7 +73,7 @@ final class RootTypeMapperFactoryContext
         return $this->classFinder;
     }
 
-    public function getClassFinderBoundCache(): ClassFinderBoundCache
+    public function getClassFinderBoundCache(): ClassFinderComputedCache
     {
         return $this->classFinderBoundCache;
     }

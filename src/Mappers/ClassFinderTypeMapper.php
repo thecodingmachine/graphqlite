@@ -14,7 +14,7 @@ use ReflectionException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
@@ -42,7 +42,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
         private readonly AnnotationReader             $annotationReader,
         private readonly NamingStrategyInterface      $namingStrategy,
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private readonly ClassFinderBoundCache        $classFinderBoundCache,
+        private readonly ClassFinderComputedCache     $classFinderBoundCache,
     )
     {
     }
@@ -52,7 +52,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
      */
     private function getMaps(): GlobTypeMapperCache
     {
-        $this->globTypeMapperCache ??= $this->classFinderBoundCache->reduce(
+        $this->globTypeMapperCache ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'classToAnnotations',
             function (ReflectionClass $refClass): ?GlobAnnotationsCache {
@@ -123,7 +123,7 @@ class ClassFinderTypeMapper implements TypeMapperInterface
 
     private function getMapClassToExtendTypeArray(): GlobExtendTypeMapperCache
     {
-        $this->globExtendTypeMapperCache ??= $this->classFinderBoundCache->reduce(
+        $this->globExtendTypeMapperCache ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'classToExtendAnnotations',
             function (ReflectionClass $refClass): ?GlobExtendAnnotationsCache {

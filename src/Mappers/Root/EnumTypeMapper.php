@@ -18,7 +18,7 @@ use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\EnumType;
 use UnitEnum;
@@ -39,11 +39,11 @@ class EnumTypeMapper implements RootTypeMapperInterface
     private array $nameToClassMapping;
 
     public function __construct(
-        private readonly RootTypeMapperInterface $next,
-        private readonly AnnotationReader        $annotationReader,
-        private readonly DocBlockFactory $docBlockFactory,
-        private readonly ClassFinder             $classFinder,
-        private readonly ClassFinderBoundCache   $classFinderBoundCache,
+        private readonly RootTypeMapperInterface  $next,
+        private readonly AnnotationReader         $annotationReader,
+        private readonly DocBlockFactory          $docBlockFactory,
+        private readonly ClassFinder              $classFinder,
+        private readonly ClassFinderComputedCache $classFinderBoundCache,
     ) {
     }
 
@@ -187,7 +187,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        $this->nameToClassMapping ??= $this->classFinderBoundCache->reduce(
+        $this->nameToClassMapping ??= $this->classFinderBoundCache->compute(
            $this->classFinder,
            'enum_name_to_class',
            function (ReflectionClass $classReflection): ?array {

@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -22,17 +22,17 @@ final class FactoryContext
     public function __construct(
         private readonly AnnotationReader $annotationReader,
         private readonly TypeResolver $typeResolver,
-        private readonly NamingStrategyInterface $namingStrategy,
-        private readonly TypeRegistry $typeRegistry,
-        private readonly FieldsBuilder $fieldsBuilder,
-        private readonly TypeGenerator $typeGenerator,
-        private readonly InputTypeGenerator $inputTypeGenerator,
-        private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
-        private readonly ContainerInterface $container,
-        private readonly CacheInterface $cache,
+        private readonly NamingStrategyInterface          $namingStrategy,
+        private readonly TypeRegistry                     $typeRegistry,
+        private readonly FieldsBuilder                    $fieldsBuilder,
+        private readonly TypeGenerator                    $typeGenerator,
+        private readonly InputTypeGenerator               $inputTypeGenerator,
+        private readonly RecursiveTypeMapperInterface     $recursiveTypeMapper,
+        private readonly ContainerInterface               $container,
+        private readonly CacheInterface                   $cache,
         private readonly InputTypeValidatorInterface|null $inputTypeValidator,
-        private readonly ClassFinder $classFinder,
-        private readonly ClassFinderBoundCache $classFinderBoundCache,
+        private readonly ClassFinder                      $classFinder,
+        private readonly ClassFinderComputedCache         $classFinderBoundCache,
     ) {
     }
 
@@ -96,7 +96,7 @@ final class FactoryContext
         return $this->classFinder;
     }
 
-    public function getClassFinderBoundCache(): ClassFinderBoundCache
+    public function getClassFinderBoundCache(): ClassFinderComputedCache
     {
         return $this->classFinderBoundCache;
     }

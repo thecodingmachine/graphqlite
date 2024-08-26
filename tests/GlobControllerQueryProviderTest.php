@@ -9,7 +9,7 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
@@ -47,7 +47,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProvider
             $container,
             $this->getAnnotationReader(),
             new KcsClassFinder($finder),
-            new HardClassFinderBoundCache(new Psr16Cache(new NullAdapter()))
+            new HardClassFinderComputedCache(new Psr16Cache(new NullAdapter()))
         );
 
         $queries = $globControllerQueryProvider->getQueries();

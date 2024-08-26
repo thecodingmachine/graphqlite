@@ -18,7 +18,7 @@ use ReflectionProperty;
 use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
 
 use function assert;
@@ -39,10 +39,10 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
     private array $nameToClassMapping;
 
     public function __construct(
-        private readonly RootTypeMapperInterface $next,
-        private readonly AnnotationReader        $annotationReader,
-        private readonly ClassFinder                   $classFinder,
-        private readonly ClassFinderBoundCache   $classFinderBoundCache,
+        private readonly RootTypeMapperInterface  $next,
+        private readonly AnnotationReader         $annotationReader,
+        private readonly ClassFinder              $classFinder,
+        private readonly ClassFinderComputedCache $classFinderBoundCache,
     ) {
     }
 
@@ -154,7 +154,7 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        $this->nameToClassMapping ??= $this->classFinderBoundCache->reduce(
+        $this->nameToClassMapping ??= $this->classFinderBoundCache->compute(
             $this->classFinder,
             'myclabsenum_name_to_class',
             function (ReflectionClass $classReflection): ?array {

@@ -6,7 +6,7 @@ use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use ReflectionClass;
 
-class HardClassFinderBoundCache implements ClassFinderBoundCache
+class HardClassFinderComputedCache implements ClassFinderComputedCache
 {
 
     public function __construct(
@@ -24,7 +24,7 @@ class HardClassFinderBoundCache implements ClassFinderBoundCache
      *
      * @return TReturn
      */
-    public function reduce(
+    public function compute(
         ClassFinder $classFinder,
         string $key,
         callable $map,
