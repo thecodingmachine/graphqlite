@@ -6,7 +6,9 @@ namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionClass;
-use Reflector;
+use ReflectionClassConstant;
+use ReflectionMethod;
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
 
 use function md5;
@@ -23,7 +25,7 @@ class CachedDocBlockFactory implements DocBlockFactory
     {
     }
 
-    public function createFromReflector(Reflector $reflector): DocBlock
+    public function createFromReflector(ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector): DocBlock
     {
         $class = $reflector instanceof ReflectionClass ? $reflector : $reflector->getDeclaringClass();
 

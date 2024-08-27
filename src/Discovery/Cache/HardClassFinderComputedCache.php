@@ -63,6 +63,7 @@ class HardClassFinderComputedCache implements ClassFinderComputedCache
             $entries[$classReflection->getFileName()] = $map($classReflection);
         }
 
+        /** @phpstan-ignore return.type */
         return $entries;
     }
 }

@@ -55,7 +55,7 @@ class GlobTypeMapperCache
         foreach ($globAnnotationsCache->getFactories() as $methodName => [$inputName, $inputClassName, $isDefault, $declaringClass]) {
             if ($isDefault) {
                 if ($inputClassName !== null && isset($this->mapClassToFactory[$inputClassName])) {
-                    throw DuplicateMappingException::createForFactory($inputClassName, $this->mapClassToFactory[$inputClassName][0], $this->mapClassToFactory[$inputClassName][1], $sourceClass, $methodName);
+                    throw DuplicateMappingException::createForFactory($inputClassName, $this->mapClassToFactory[$inputClassName][0], $this->mapClassToFactory[$inputClassName][1], $className, $methodName);
                 }
             } else {
                 // If this is not the default factory, let's not map the class name to the factory.

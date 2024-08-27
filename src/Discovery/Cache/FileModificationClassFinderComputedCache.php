@@ -78,6 +78,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         $changed = false;
 
         $classFinder = $classFinder->withPathFilter(static function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
+            /** @var array{ data: TEntry, dependencies: ClassSnapshot, matching: bool } $entry */
             $entry = $previousEntries[$filename] ?? null;
 
             // If there's no entry in cache for this filename (new file or previously uncached),
@@ -124,6 +125,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
             $this->cache->set($key, $entries);
         }
 
+        /** @phpstan-ignore return.type */
         return $result;
     }
 }

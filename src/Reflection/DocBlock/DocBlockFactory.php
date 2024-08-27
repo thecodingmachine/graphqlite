@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 
 use phpDocumentor\Reflection\DocBlock;
-use Reflector;
+use ReflectionClass;
+use ReflectionClassConstant;
+use ReflectionMethod;
+use ReflectionProperty;
 
 interface DocBlockFactory
 {
-    public function createFromReflector(Reflector $reflector): DocBlock;
+    public function createFromReflector(ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector): DocBlock;
 }

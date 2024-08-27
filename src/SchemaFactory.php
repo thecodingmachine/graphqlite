@@ -116,7 +116,7 @@ class SchemaFactory
 
     private NamingStrategyInterface|null $namingStrategy = null;
 
-    private FinderInterface|null $finder = null;
+    private ClassFinder|FinderInterface|null $finder = null;
 
     private SchemaConfig|null $schemaConfig = null;
 
@@ -275,7 +275,7 @@ class SchemaFactory
         return $this;
     }
 
-    public function setFinder(FinderInterface $finder): self
+    public function setFinder(ClassFinder|FinderInterface $finder): self
     {
         $this->finder = $finder;
 
@@ -405,8 +405,9 @@ class SchemaFactory
                 $recursiveTypeMapper,
                 $this->container,
                 $namespacedCache,
-                $classFinder,
-                $classFinderComputedCache,
+                classFinder: $classFinder,
+                classFinderComputedCache: $classFinderComputedCache,
+                classBoundCache: $classBoundCache,
             );
 
             $reversedRootTypeMapperFactories = array_reverse($this->rootTypeMapperFactories);
@@ -528,6 +529,10 @@ class SchemaFactory
 
     private function createClassFinder(): ClassFinder
     {
+        if ($this->finder instanceof ClassFinder) {
+            return $this->finder;
+        }
+
         // When no namespaces are specified, class finder uses all available namespaces to discover classes.
         // While this is technically okay, it doesn't follow SchemaFactory's semantics that allow it's
         // users to manually specify classes (see SchemaFactory::testCreateSchemaOnlyWithFactories()),
@@ -541,7 +546,9 @@ class SchemaFactory
         // Because this finder may be iterated more than once, we need to make
         // sure that the filesystem is only hit once in the lifetime of the application,
         // as that may be expensive for larger projects or non-native filesystems.
-        $finder = $finder->withFileFinder(new CachedFileFinder(new DefaultFileFinder(), new ArrayAdapter()));
+        if ($finder instanceof ComposerFinder) {
+            $finder = $finder->withFileFinder(new CachedFileFinder(new DefaultFileFinder(), new ArrayAdapter()));
+        }
 
         foreach ($this->namespaces as $namespace) {
             $finder = $finder->inNamespace($namespace);

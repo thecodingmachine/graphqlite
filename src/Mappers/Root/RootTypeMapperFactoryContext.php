@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
@@ -30,6 +31,7 @@ final class RootTypeMapperFactoryContext
         private readonly CacheInterface $cache,
         private readonly ClassFinder $classFinder,
         private readonly ClassFinderComputedCache $classFinderComputedCache,
+        private readonly ClassBoundCache $classBoundCache,
     ) {
     }
 
@@ -76,5 +78,10 @@ final class RootTypeMapperFactoryContext
     public function getClassFinderComputedCache(): ClassFinderComputedCache
     {
         return $this->classFinderComputedCache;
+    }
+
+    public function getClassBoundCache(): ClassBoundCache
+    {
+        return $this->classBoundCache;
     }
 }

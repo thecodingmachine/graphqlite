@@ -58,6 +58,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
      */
     private function getClassList(): array
     {
+        /** @phpstan-ignore assign.propertyType */
         $this->classList ??= $this->classFinderComputedCache->compute(
             $this->classFinder,
             'globQueryProvider',
@@ -75,6 +76,7 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
             static fn (array $entries) => array_values(array_filter($entries)),
         );
 
+        /** @phpstan-ignore return.type */
         return $this->classList;
     }
 

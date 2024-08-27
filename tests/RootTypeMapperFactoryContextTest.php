@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
@@ -20,6 +21,8 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
         $container = new EmptyContainer();
         $arrayCache = new Psr16Cache(new ArrayAdapter());
         $classFinder = $this->getClassFinder('namespace');
+        $classFinderComputedCache = $this->getClassFinderComputedCache();
+        $classBoundCache = new HardClassBoundCache($arrayCache);
 
         $context = new RootTypeMapperFactoryContext(
             $this->getAnnotationReader(),
@@ -30,7 +33,8 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
             $container,
             $arrayCache,
             $classFinder,
-            self::GLOB_TTL_SECONDS
+            $classFinderComputedCache,
+            $classBoundCache,
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());
@@ -41,7 +45,7 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
         $this->assertSame($container, $context->getContainer());
         $this->assertSame($arrayCache, $context->getCache());
         $this->assertSame($classFinder, $context->getClassFinder());
-        $this->assertSame(self::GLOB_TTL_SECONDS, $context->getGlobTTL());
-        $this->assertNull($context->getMapTTL());
+        $this->assertSame($classFinderComputedCache, $context->getClassFinderComputedCache());
+        $this->assertSame($classBoundCache, $context->getClassBoundCache());
     }
 }
