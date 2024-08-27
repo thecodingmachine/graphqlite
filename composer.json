@@ -34,7 +34,7 @@
         "myclabs/php-enum": "^1.6.6",
         "php-coveralls/php-coveralls": "^2.1",
         "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan": "^1.9",
+        "phpstan/phpstan": "^1.11",
         "phpunit/phpunit": "^10.1 || ^11.0",
         "symfony/var-dumper": "^5.4 || ^6.0 || ^7",
         "thecodingmachine/phpstan-strict-rules": "^1.0"
