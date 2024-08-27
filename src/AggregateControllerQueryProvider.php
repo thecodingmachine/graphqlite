@@ -14,6 +14,7 @@ use function array_sum;
 use function array_values;
 use function assert;
 use function count;
+use function sort;
 
 /**
  * A query provider that looks into all controllers of your application to fetch queries.
@@ -90,7 +91,8 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
 
         // We have an issue, let's detect the duplicate
         $queriesByName = [];
-        $duplicate = null;
+        $duplicateClasses = null;
+        $duplicateQueryName = null;
 
         foreach ($list as $class => $queries) {
             foreach ($queries as $query => $field) {
@@ -102,12 +104,15 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
                     continue;
                 }
 
-                $duplicate = [$duplicatedClass, $class, $query];
+                $duplicateClasses = [$duplicatedClass, $class];
+                $duplicateQueryName = $query;
             }
         }
 
-        assert($duplicate !== null);
+        assert($duplicateClasses !== null && $duplicateQueryName !== null);
 
-        throw DuplicateMappingException::createForQueryInTwoControllers($duplicate[0], $duplicate[1], $duplicate[2]);
+        sort($duplicateClasses);
+
+        throw DuplicateMappingException::createForQueryInTwoControllers($duplicateClasses[0], $duplicateClasses[1], $duplicateQueryName);
     }
 }

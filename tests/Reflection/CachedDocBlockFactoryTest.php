@@ -28,10 +28,10 @@ class CachedDocBlockFactoryTest extends TestCase
             )
         );
 
-        $refMethod = new ReflectionMethod(AnnotationReader::class, 'getMethodAnnotation');
+        $refMethod = new ReflectionMethod(DocBlockFactory::class, 'createFromReflector');
 
         $docBlock = $cachedDocBlockFactory->createFromReflector($refMethod);
-        $this->assertSame('Returns a method annotation and handles correctly errors.', $docBlock->getSummary());
+        $this->assertSame('Fetches a DocBlock object from a ReflectionMethod', $docBlock->getSummary());
         $docBlock2 = $cachedDocBlockFactory->createFromReflector($refMethod);
         $this->assertSame($docBlock2, $docBlock);
 

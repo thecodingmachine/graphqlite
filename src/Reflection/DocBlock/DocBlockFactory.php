@@ -12,5 +12,8 @@ use ReflectionProperty;
 
 interface DocBlockFactory
 {
+    /**
+     * Fetches a DocBlock object from a ReflectionMethod
+     */
     public function createFromReflector(ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector): DocBlock;
 }
