@@ -7,12 +7,12 @@ namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 use phpDocumentor\Reflection\Types\Context;
 use ReflectionClass;
 use Reflector;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
 
 class CachedDocBlockContextFactory implements DocBlockContextFactory
 {
     public function __construct(
-        private readonly ClassBoundCacheContractInterface $classBoundCacheContract,
+        private readonly ClassBoundCache $classBoundCache,
         private readonly DocBlockContextFactory $contextFactory,
     )
     {
@@ -22,7 +22,7 @@ class CachedDocBlockContextFactory implements DocBlockContextFactory
     {
         $reflector = $reflector instanceof ReflectionClass ? $reflector : $reflector->getDeclaringClass();
 
-        return $this->classBoundCacheContract->get(
+        return $this->classBoundCache->get(
             $reflector,
             fn () => $this->contextFactory->createFromReflector($reflector),
             'reflection.docBlockContext',

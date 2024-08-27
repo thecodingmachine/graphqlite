@@ -632,7 +632,7 @@ class EndToEndTest extends IntegrationTestCase
             'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
 
-        // Call again to test GlobTypeMapper cache
+        // Call again to test ClassFinderTypeMapper cache
         $result = GraphQL::executeQuery(
             $schema,
             $queryString,

@@ -18,12 +18,9 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\ClassBoundCacheInterface;
-use TheCodingMachine\CacheUtils\ClassBoundMemoryAdapter;
-use TheCodingMachine\CacheUtils\FileBoundCache;
-use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FileModificationClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\FileModificationClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
@@ -135,8 +132,11 @@ class SchemaFactory
 
     private string $cacheNamespace;
 
-    public function __construct(private readonly CacheInterface $cache, private readonly ContainerInterface $container, private ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null)
-    {
+    public function __construct(
+        private readonly CacheInterface $cache,
+        private readonly ContainerInterface $container,
+        private ClassBoundCache|null $classBoundCache = null,
+    ) {
         $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
     }
 
@@ -283,13 +283,11 @@ class SchemaFactory
     }
 
     /**
-     * Set a custom ClassBoundCacheContractFactory.
-     * This is used to create CacheContracts that store reflection results.
-     * Set this to "null" to use the default fallback factory.
+     * Set a custom class bound cache. By default in dev mode it looks at file modification times.
      */
-    public function setClassBoundCacheContractFactory(ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory): self
+    public function setClassBoundCache(ClassBoundCache|null $classBoundCache): self
     {
-        $this->classBoundCacheContractFactory = $classBoundCacheContractFactory;
+        $this->classBoundCache = $classBoundCache;
 
         return $this;
     }
@@ -353,14 +351,8 @@ class SchemaFactory
         $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver = new TypeResolver();
         $namespacedCache = new NamespacedCache($this->cache);
-        $fileBoundCache = new FileBoundCache($this->cache);
-        $nonInheritedClassBoundCache = new ClassBoundCache(
-            fileBoundCache: $fileBoundCache,
-            analyzeParentClasses: false,
-            analyzeTraits: false,
-            analyzeInterfaces: false,
-        );
-        [$docBlockFactory, $docBlockContextFactory] = $this->createDocBlockFactory($nonInheritedClassBoundCache);
+        $classBoundCache = $this->classBoundCache ?: ($this->devMode ? new FileModificationClassBoundCache($this->cache) : new HardClassBoundCache($this->cache));
+        [$docBlockFactory, $docBlockContextFactory] = $this->createDocBlockFactory($classBoundCache);
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $classFinder = $this->createClassFinder();
@@ -485,9 +477,9 @@ class SchemaFactory
                 $this->container,
                 $namespacedCache,
                 $this->inputTypeValidator,
-                $classFinder,
-                $classFinderComputedCache,
-                classBoundCacheContractFactory: $this->classBoundCacheContractFactory,
+                classFinder: $classFinder,
+                classFinderComputedCache:  $classFinderComputedCache,
+                classBoundCache: $classBoundCache,
             );
         }
 
@@ -559,14 +551,14 @@ class SchemaFactory
     }
 
     /** @return array{ Reflection\DocBlock\DocBlockFactory, DocBlockContextFactory } */
-    private function createDocBlockFactory(ClassBoundCacheInterface $nonInheritedClassBoundCache): array
+    private function createDocBlockFactory(ClassBoundCache $classBoundCache): array
     {
         $docBlockContextFactory = new CachedDocBlockContextFactory(
-            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
+            $classBoundCache,
             new PhpDocumentorDocBlockContextFactory(new ContextFactory()),
         );
         $docBlockFactory = new CachedDocBlockFactory(
-            new ClassBoundCacheContract(new ClassBoundMemoryAdapter($nonInheritedClassBoundCache)),
+            $classBoundCache,
             new PhpDocumentorDocBlockFactory(
                 DocBlockFactory::createInstance(),
                 $docBlockContextFactory,

@@ -4,8 +4,10 @@ namespace TheCodingMachine\GraphQLite;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactory;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 
 class FactoryContextTest extends AbstractQueryProvider
@@ -17,7 +19,9 @@ class FactoryContextTest extends AbstractQueryProvider
         $namingStrategy = new NamingStrategy();
         $container = new EmptyContainer();
         $arrayCache = new Psr16Cache(new ArrayAdapter());
-        $classBoundCacheContractFactory = new ClassBoundCacheContractFactory();
+        $classFinder = new StaticClassFinder([]);
+        $classFinderComputedCache = new HardClassFinderComputedCache($arrayCache);
+        $classBoundCache = new HardClassBoundCache($arrayCache);
         $validator = new Validator();
 
         $context = new FactoryContext(
@@ -32,7 +36,9 @@ class FactoryContextTest extends AbstractQueryProvider
             $container,
             $arrayCache,
             $validator,
-            classBoundCacheContractFactory: $classBoundCacheContractFactory,
+            classFinder: $classFinder,
+            classFinderComputedCache: $classFinderComputedCache,
+            classBoundCache: $classBoundCache,
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());
@@ -46,7 +52,8 @@ class FactoryContextTest extends AbstractQueryProvider
         $this->assertSame($container, $context->getContainer());
         $this->assertSame($arrayCache, $context->getCache());
         $this->assertSame($validator, $context->getInputTypeValidator());
-        $this->assertSame(self::GLOB_TTL_SECONDS, $context->getGlobTTL());
-        $this->assertNull($context->getMapTTL());
+        $this->assertSame($classFinder, $context->getClassFinder());
+        $this->assertSame($classFinderComputedCache, $context->getClassFinderComputedCache());
+        $this->assertSame($classBoundCache, $context->getClassBoundCache());
     }
 }

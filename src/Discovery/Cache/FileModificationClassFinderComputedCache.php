@@ -6,9 +6,9 @@ namespace TheCodingMachine\GraphQLite\Discovery\Cache;
 
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
+use TheCodingMachine\GraphQLite\Cache\ClassSnapshot;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
-use function array_merge;
 use function Safe\filemtime;
 
 /**
@@ -77,19 +77,19 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         // The size of the cache may be huge, so let's avoid writes when unnecessary.
         $changed = false;
 
-        $classFinder = $classFinder->withPathFilter(function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
+        $classFinder = $classFinder->withPathFilter(static function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
             $entry = $previousEntries[$filename] ?? null;
 
             // If there's no entry in cache for this filename (new file or previously uncached),
             // or if it the file has been modified since caching, we'll try to autoload
             // the class and collect the cached information (again).
-            if (! $entry || $this->dependenciesChanged($entry['dependencies'])) {
+            if (! $entry || $entry['dependencies']->changed()) {
                 // In case this file isn't a class, or doesn't match the provided namespace filter,
                 // it will not be emitted in the iterator and won't reach the `foreach()` below.
                 // So to avoid iterating over these files again, we'll mark them as non-matching.
                 // If they are matching, it'll be overwritten in the `foreach` loop below.
                 $entries[$filename] = [
-                    'dependencies' => [$filename => filemtime($filename)],
+                    'dependencies' => new ClassSnapshot([$filename => filemtime($filename)]),
                     'matching' => false,
                 ];
 
@@ -112,7 +112,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
 
             $result[$filename] = $map($classReflection);
             $entries[$filename] = [
-                'dependencies' => $this->fileDependencies($classReflection),
+                'dependencies' => ClassSnapshot::fromReflection($classReflection),
                 'data' => $result[$filename],
                 'matching' => true,
             ];
@@ -125,43 +125,5 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         }
 
         return $result;
-    }
-
-    /** @return array<string, int> */
-    private function fileDependencies(ReflectionClass $refClass): array
-    {
-        $filename = $refClass->getFileName();
-
-        if ($filename === false) {
-            return [];
-        }
-
-        $files = [$filename => filemtime($filename)];
-
-        if ($refClass->getParentClass() !== false) {
-            $files = array_merge($files, $this->fileDependencies($refClass->getParentClass()));
-        }
-
-        foreach ($refClass->getTraits() as $trait) {
-            $files = array_merge($files, $this->fileDependencies($trait));
-        }
-
-        foreach ($refClass->getInterfaces() as $interface) {
-            $files = array_merge($files, $this->fileDependencies($interface));
-        }
-
-        return $files;
-    }
-
-    /** @param array<string, int> $files */
-    private function dependenciesChanged(array $files): bool
-    {
-        foreach ($files as $filename => $modificationTime) {
-            if ($modificationTime !== filemtime($filename)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

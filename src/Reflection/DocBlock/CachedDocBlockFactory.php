@@ -7,7 +7,7 @@ namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionClass;
 use Reflector;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContractInterface;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
 
 use function md5;
 
@@ -17,7 +17,7 @@ use function md5;
 class CachedDocBlockFactory implements DocBlockFactory
 {
     public function __construct(
-        private readonly ClassBoundCacheContractInterface $classBoundCacheContract,
+        private readonly ClassBoundCache $classBoundCache,
         private readonly DocBlockFactory $docBlockFactory,
     )
     {
@@ -27,7 +27,7 @@ class CachedDocBlockFactory implements DocBlockFactory
     {
         $class = $reflector instanceof ReflectionClass ? $reflector : $reflector->getDeclaringClass();
 
-        return $this->classBoundCacheContract->get(
+        return $this->classBoundCache->get(
             $class,
             fn () => $this->docBlockFactory->createFromReflector($reflector),
             'reflection.docBlock.' . md5($reflector::class . '.' . $reflector->getName()),

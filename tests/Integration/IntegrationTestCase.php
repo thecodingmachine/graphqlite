@@ -13,11 +13,10 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\FileBoundCache;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
@@ -280,23 +279,16 @@ class IntegrationTestCase extends TestCase
             NamingStrategyInterface::class => static function () {
                 return new NamingStrategy();
             },
-            'nonInheritedClassBoundCacheContract' => static function () {
+            ClassBoundCache::class => static function () {
                 $arrayAdapter = new ArrayAdapter();
                 $arrayAdapter->setLogger(new ExceptionLogger());
                 $psr16Cache = new Psr16Cache($arrayAdapter);
 
-                return new ClassBoundCacheContract(
-                    new ClassBoundCache(
-                        fileBoundCache: new FileBoundCache($psr16Cache),
-                        analyzeParentClasses: false,
-                        analyzeTraits: false,
-                        analyzeInterfaces: false,
-                    ),
-                );
+                return new HardClassBoundCache($psr16Cache);
             },
             DocBlockFactory::class => static function (ContainerInterface $container) {
                 return new CachedDocBlockFactory(
-                    $container->get('nonInheritedClassBoundCacheContract'),
+                    $container->get(ClassBoundCache::class),
                     new PhpDocumentorDocBlockFactory(
                         \phpDocumentor\Reflection\DocBlockFactory::createInstance(),
                         $container->get(DocBlockContextFactory::class),
@@ -305,7 +297,7 @@ class IntegrationTestCase extends TestCase
             },
             DocBlockContextFactory::class => static function (ContainerInterface $container) {
                 return new CachedDocBlockContextFactory(
-                    $container->get('nonInheritedClassBoundCacheContract'),
+                    $container->get(ClassBoundCache::class),
                     new PhpDocumentorDocBlockContextFactory(
                         new ContextFactory(),
                     )

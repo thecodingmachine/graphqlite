@@ -10,6 +10,8 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
+use Kcs\ClassFinder\FileFinder\CachedFileFinder;
+use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use phpDocumentor\Reflection\Types\ContextFactory;
@@ -19,12 +21,12 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use TheCodingMachine\CacheUtils\ClassBoundCache;
-use TheCodingMachine\CacheUtils\ClassBoundCacheContract;
-use TheCodingMachine\CacheUtils\FileBoundCache;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
@@ -279,7 +281,7 @@ abstract class AbstractQueryProvider extends TestCase
     protected function getDocBlockFactory(): DocBlockFactory
     {
         return new CachedDocBlockFactory(
-            $this->getClassBoundCacheContract(false),
+            $this->getClassBoundCache(),
             new PhpDocumentorDocBlockFactory(
                 \phpDocumentor\Reflection\DocBlockFactory::createInstance(),
                 $this->getDocBlockContextFactory(),
@@ -290,25 +292,18 @@ abstract class AbstractQueryProvider extends TestCase
     protected function getDocBlockContextFactory(): DocBlockContextFactory
     {
         return new CachedDocBlockContextFactory(
-            $this->getClassBoundCacheContract(false),
+            $this->getClassBoundCache(),
             new PhpDocumentorDocBlockContextFactory(new ContextFactory())
         );
     }
 
-    private function getClassBoundCacheContract(bool $analyzeParents): ClassBoundCacheContract
+    private function getClassBoundCache(): ClassBoundCache
     {
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $psr16Cache = new Psr16Cache($arrayAdapter);
 
-        return new ClassBoundCacheContract(
-            new ClassBoundCache(
-                fileBoundCache: new FileBoundCache($psr16Cache),
-                analyzeParentClasses: $analyzeParents,
-                analyzeTraits: $analyzeParents,
-                analyzeInterfaces: $analyzeParents,
-            ),
-        );
+        return new HardClassBoundCache($psr16Cache);
     }
 
     protected function buildFieldsBuilder(): FieldsBuilder
@@ -496,6 +491,20 @@ abstract class AbstractQueryProvider extends TestCase
             $finder->inNamespace($namespace);
         }
 
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+
+        $finder = $finder->withFileFinder(new CachedFileFinder(new DefaultFileFinder(), $arrayAdapter));
+
         return new KcsClassFinder($finder);
+    }
+
+    protected function getClassFinderComputedCache(): ClassFinderComputedCache
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $psr16Cache = new Psr16Cache($arrayAdapter);
+
+        return new HardClassFinderComputedCache($psr16Cache);
     }
 }
