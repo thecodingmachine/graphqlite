@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
@@ -28,7 +27,7 @@ class CachedDocBlockFactoryTest extends TestCase
             )
         );
 
-        $refMethod = new ReflectionMethod(DocBlockFactory::class, 'createFromReflector');
+        $refMethod = new ReflectionMethod(DocBlock\DocBlockFactory::class, 'createFromReflector');
 
         $docBlock = $cachedDocBlockFactory->createFromReflector($refMethod);
         $this->assertSame('Fetches a DocBlock object from a ReflectionMethod', $docBlock->getSummary());
