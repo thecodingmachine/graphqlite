@@ -74,7 +74,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\DuplicateTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\DuplicateTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToType(TestType::class);
@@ -90,7 +90,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\DuplicateInputs'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\DuplicateInputs'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $this->expectException(DuplicateMappingException::class);
         $mapper->canMapClassToInputType(TestInput::class);
@@ -106,7 +106,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $caught = false;
         try {
@@ -135,7 +135,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         //$this->expectException(DuplicateMappingException::class);
         //$this->expectExceptionMessage('The class \'TheCodingMachine\GraphQLite\Fixtures\TestObject\' should be mapped to only one GraphQL Input type. Two methods are pointing via the @Factory annotation to this class: \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory::myFactory\' and \'TheCodingMachine\GraphQLite\Fixtures\DuplicateInputTypes\TestFactory2::myFactory\'');
@@ -153,7 +153,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\BadClassType'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\BadClassType'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $this->expectException(ClassNotFoundException::class);
         $this->expectExceptionMessage("Could not autoload class 'Foobar' defined in #[Type] attribute of class 'TheCodingMachine\\GraphQLite\\Fixtures\\BadClassType\\TestType'");
@@ -170,7 +170,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new NullAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $this->expectException(CannotMapTypeException::class);
         $mapper->mapNameToType('NotExists', $this->getTypeMapper());
@@ -294,7 +294,7 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
 
         $typeGenerator = $this->getTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), new Psr16Cache(new ArrayAdapter()));
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $this->assertFalse($mapper->canExtendTypeForName('{}()/\\@:', new MutableObjectType(['name' => 'foo'])));
         $this->assertFalse($mapper->canDecorateInputTypeForName('{}()/\\@:', new MockResolvableInputObjectType(['name' => 'foo'])));

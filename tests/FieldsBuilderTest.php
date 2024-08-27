@@ -22,6 +22,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputType;
 use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
@@ -353,7 +354,8 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            $this->getDocBlockFactory(),
+            $this->getDocBlockContextFactory(),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
@@ -384,7 +386,8 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            $this->getDocBlockFactory(),
+            $this->getDocBlockContextFactory(),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
@@ -445,7 +448,8 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            $this->getDocBlockFactory(),
+            $this->getDocBlockContextFactory(),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),

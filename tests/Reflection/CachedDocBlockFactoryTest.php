@@ -2,31 +2,47 @@
 
 namespace TheCodingMachine\GraphQLite\Reflection;
 
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
+use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 
 class CachedDocBlockFactoryTest extends TestCase
 {
 
     public function testGetDocBlock(): void
     {
-        $arrayCache = new Psr16Cache(new ArrayAdapter());
-        $cachedDocBlockFactory = new CachedDocBlockFactory($arrayCache);
+        $arrayCache = new Psr16Cache(new ArrayAdapter(storeSerialized: false));
+        $cachedDocBlockFactory = new CachedDocBlockFactory(
+            new HardClassBoundCache($arrayCache),
+            new PhpDocumentorDocBlockFactory(
+                DocBlockFactory::createInstance(),
+                new PhpDocumentorDocBlockContextFactory(new ContextFactory()),
+            )
+        );
 
-        $refMethod = new ReflectionMethod(CachedDocBlockFactory::class, 'getDocBlock');
+        $refMethod = new ReflectionMethod(AnnotationReader::class, 'getMethodAnnotation');
 
-        $docBlock = $cachedDocBlockFactory->getDocBlock($refMethod);
-        $this->assertSame('Fetches a DocBlock object from a ReflectionMethod', $docBlock->getSummary());
-        $docBlock2 = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlock = $cachedDocBlockFactory->createFromReflector($refMethod);
+        $this->assertSame('Returns a method annotation and handles correctly errors.', $docBlock->getSummary());
+        $docBlock2 = $cachedDocBlockFactory->createFromReflector($refMethod);
         $this->assertSame($docBlock2, $docBlock);
 
-        $newCachedDocBlockFactory = new CachedDocBlockFactory($arrayCache);
-        $docBlock3 = $newCachedDocBlockFactory->getDocBlock($refMethod);
+        $newCachedDocBlockFactory = new CachedDocBlockFactory(
+            new HardClassBoundCache($arrayCache),
+            new PhpDocumentorDocBlockFactory(
+                DocBlockFactory::createInstance(),
+                new PhpDocumentorDocBlockContextFactory(new ContextFactory()),
+            )
+        );
+        $docBlock3 = $newCachedDocBlockFactory->createFromReflector($refMethod);
         $this->assertEquals($docBlock3, $docBlock);
     }
 }
