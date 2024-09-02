@@ -28,7 +28,7 @@ class CachedDocBlockFactory implements DocBlockFactory
 
     public function create(
         ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector,
-        Context $context = null,
+        Context|null $context = null,
     ): DocBlock {
         $class = $reflector instanceof ReflectionClass ? $reflector : $reflector->getDeclaringClass();
 

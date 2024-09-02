@@ -11,9 +11,7 @@ use function str_replace;
 
 class SnapshotClassBoundCache implements ClassBoundCache
 {
-    /**
-     * @param callable(ReflectionClass, bool $withInheritance): FilesSnapshot $filesSnapshotFactory
-     */
+    /** @param callable(ReflectionClass, bool $withInheritance): FilesSnapshot $filesSnapshotFactory */
     public function __construct(
         private readonly CacheInterface $cache,
         private readonly mixed $filesSnapshotFactory,

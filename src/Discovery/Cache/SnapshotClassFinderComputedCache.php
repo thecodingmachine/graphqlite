@@ -9,8 +9,6 @@ use ReflectionClass;
 use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
-use function Safe\filemtime;
-
 /**
  * Provides cache for a {@see ClassFinder} based on a {@see filemtime()}.
  *

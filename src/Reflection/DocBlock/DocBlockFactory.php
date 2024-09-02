@@ -18,7 +18,7 @@ interface DocBlockFactory
      */
     public function create(
         ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector,
-        Context $context = null,
+        Context|null $context = null,
     ): DocBlock;
 
     public function createContext(ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector): Context;

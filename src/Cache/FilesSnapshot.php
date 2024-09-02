@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQLite\Cache;
 
 use ReflectionClass;
 
-use function array_merge;
+use function array_unique;
 use function Safe\filemtime;
 
 class FilesSnapshot
@@ -18,9 +18,7 @@ class FilesSnapshot
     {
     }
 
-    /**
-     * @param list<string> $files
-     */
+    /** @param list<string> $files */
     public static function for(array $files): self
     {
         $dependencies = [];

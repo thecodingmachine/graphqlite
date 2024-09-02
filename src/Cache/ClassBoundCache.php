@@ -17,8 +17,8 @@ interface ClassBoundCache
      */
     public function get(
         ReflectionClass $reflectionClass,
-        callable        $resolver,
-        string          $key,
-        bool            $withInheritance = false,
+        callable $resolver,
+        string $key,
+        bool $withInheritance = false,
     ): mixed;
 }
