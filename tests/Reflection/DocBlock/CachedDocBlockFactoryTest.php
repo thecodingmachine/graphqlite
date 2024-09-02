@@ -1,21 +1,20 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Reflection;
+namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 
+#[CoversClass(CachedDocBlockFactory::class)]
 class CachedDocBlockFactoryTest extends TestCase
 {
 
-    public function testGetDocBlock(): void
+    public function testCreatesDocBlock(): void
     {
         $arrayCache = new Psr16Cache(new ArrayAdapter(storeSerialized: false));
         $cachedDocBlockFactory = new CachedDocBlockFactory(
@@ -35,6 +34,29 @@ class CachedDocBlockFactoryTest extends TestCase
             PhpDocumentorDocBlockFactory::default(),
         );
         $docBlock3 = $newCachedDocBlockFactory->create($refMethod);
+        $this->assertEquals($docBlock3, $docBlock);
+    }
+
+    public function testCreatesContext(): void
+    {
+        $arrayCache = new Psr16Cache(new ArrayAdapter(storeSerialized: false));
+        $cachedDocBlockFactory = new CachedDocBlockFactory(
+            new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...)),
+            PhpDocumentorDocBlockFactory::default(),
+        );
+
+        $refMethod = new ReflectionMethod(DocBlockFactory::class, 'create');
+
+        $docBlock = $cachedDocBlockFactory->createContext($refMethod);
+        $this->assertSame('TheCodingMachine\GraphQLite\Reflection\DocBlock', $docBlock->getNamespace());
+        $docBlock2 = $cachedDocBlockFactory->createContext($refMethod);
+        $this->assertSame($docBlock2, $docBlock);
+
+        $newCachedDocBlockFactory = new CachedDocBlockFactory(
+            new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...)),
+            PhpDocumentorDocBlockFactory::default(),
+        );
+        $docBlock3 = $newCachedDocBlockFactory->createContext($refMethod);
         $this->assertEquals($docBlock3, $docBlock);
     }
 }
