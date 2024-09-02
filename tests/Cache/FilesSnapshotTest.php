@@ -5,8 +5,10 @@ namespace TheCodingMachine\GraphQLite\Cache;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
+
+use function Safe\touch;
+use function Safe\filemtime;
 
 #[CoversClass(FilesSnapshot::class)]
 class FilesSnapshotTest extends TestCase
@@ -69,7 +71,7 @@ class FilesSnapshotTest extends TestCase
 
     private function touch(string $fileName): void
     {
-        \Safe\touch($fileName, \Safe\filemtime($fileName) + 1);
+        touch($fileName, filemtime($fileName) + 1);
         clearstatcache();
     }
 }

@@ -5,13 +5,12 @@ namespace TheCodingMachine\GraphQLite\Cache;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
-use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\NoTypeAnnotation;
+
+use function Safe\touch;
+use function Safe\filemtime;
 
 #[CoversClass(SnapshotClassBoundCache::class)]
 class SnapshotClassBoundCacheTest extends TestCase
@@ -28,18 +27,18 @@ class SnapshotClassBoundCacheTest extends TestCase
         $fooKeyResult = $classBoundCache->get($fooReflection, fn () => 'foo_key', 'key', true);
 
         self::assertSame('foo_key', $fooKeyResult);
-        self::assertSame('foo_key',  $classBoundCache->get($fooReflection, fn () => self::fail('should not be called'), 'key', true));
+        self::assertSame('foo_key',  $classBoundCache->get($fooReflection, fn () => self::fail('Should not be called.'), 'key', true));
 
         $fooDifferentKeyResult = $classBoundCache->get($fooReflection, fn () => 'foo_different_key', 'different_key', true);
 
         self::assertSame('foo_different_key', $fooDifferentKeyResult);
-        self::assertSame('foo_different_key',  $classBoundCache->get($fooReflection, fn () => self::fail('should not be called'), 'different_key', true));
+        self::assertSame('foo_different_key',  $classBoundCache->get($fooReflection, fn () => self::fail('Should not be called.'), 'different_key', true));
 
         $barReflection = new \ReflectionClass(NoTypeAnnotation::class);
         $barKeyResult = $classBoundCache->get($barReflection, fn () => 'bar_key', 'key', true);
 
         self::assertSame('bar_key', $barKeyResult);
-        self::assertSame('bar_key',  $classBoundCache->get($barReflection, fn () => self::fail('should not be called'), 'key', true));
+        self::assertSame('bar_key',  $classBoundCache->get($barReflection, fn () => self::fail('Should not be called.'), 'key', true));
 
         self::assertCount(3, $arrayCache->getValues());
 
@@ -53,7 +52,7 @@ class SnapshotClassBoundCacheTest extends TestCase
 
     private function touch(string $fileName): void
     {
-        \Safe\touch($fileName, \Safe\filemtime($fileName) + 1);
+        touch($fileName, filemtime($fileName) + 1);
         clearstatcache();
     }
 }
