@@ -6,7 +6,7 @@ namespace TheCodingMachine\GraphQLite\Discovery\Cache;
 
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
-use TheCodingMachine\GraphQLite\Cache\ClassSnapshot;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
 use function Safe\filemtime;
@@ -27,7 +27,7 @@ use function Safe\filemtime;
  *   - if no cache exists, it iterates over the whole class finder and returns all reflection that match the filter
  *   - if cache does exist, it only iterates over changed classes
  */
-class FileModificationClassFinderComputedCache implements ClassFinderComputedCache
+class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
 {
     public function __construct(
         private readonly CacheInterface $cache,
@@ -78,7 +78,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
         $changed = false;
 
         $classFinder = $classFinder->withPathFilter(static function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
-            /** @var array{ data: TEntry, dependencies: ClassSnapshot, matching: bool } $entry */
+            /** @var array{ data: TEntry, dependencies: FilesSnapshot, matching: bool } $entry */
             $entry = $previousEntries[$filename] ?? null;
 
             // If there's no entry in cache for this filename (new file or previously uncached),
@@ -90,7 +90,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
                 // So to avoid iterating over these files again, we'll mark them as non-matching.
                 // If they are matching, it'll be overwritten in the `foreach` loop below.
                 $entries[$filename] = [
-                    'dependencies' => new ClassSnapshot([$filename => filemtime($filename)]),
+                    'dependencies' => FilesSnapshot::for([$filename]),
                     'matching' => false,
                 ];
 
@@ -113,7 +113,7 @@ class FileModificationClassFinderComputedCache implements ClassFinderComputedCac
 
             $result[$filename] = $map($classReflection);
             $entries[$filename] = [
-                'dependencies' => ClassSnapshot::fromReflection($classReflection),
+                'dependencies' => FilesSnapshot::forClass($classReflection, true),
                 'data' => $result[$filename],
                 'matching' => true,
             ];

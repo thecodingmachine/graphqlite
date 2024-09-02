@@ -9,7 +9,6 @@ use ReflectionClass;
 interface ClassBoundCache
 {
     /**
-     * @param string $key An optional key to differentiate between cache items attached to the same class.
      * @param callable(): TReturn $resolver
      *
      * @return TReturn
@@ -18,8 +17,8 @@ interface ClassBoundCache
      */
     public function get(
         ReflectionClass $reflectionClass,
-        callable $resolver,
-        string $key = '',
-        bool $useInheritance = false,
+        callable        $resolver,
+        string          $key,
+        bool            $withInheritance = false,
     ): mixed;
 }

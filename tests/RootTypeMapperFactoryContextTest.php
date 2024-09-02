@@ -5,11 +5,10 @@ namespace TheCodingMachine\GraphQLite;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
 class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
 {
@@ -22,7 +21,7 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
         $arrayCache = new Psr16Cache(new ArrayAdapter());
         $classFinder = $this->getClassFinder('namespace');
         $classFinderComputedCache = $this->getClassFinderComputedCache();
-        $classBoundCache = new HardClassBoundCache($arrayCache);
+        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged());
 
         $context = new RootTypeMapperFactoryContext(
             $this->getAnnotationReader(),

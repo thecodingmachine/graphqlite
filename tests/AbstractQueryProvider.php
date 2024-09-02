@@ -22,7 +22,8 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
@@ -303,7 +304,7 @@ abstract class AbstractQueryProvider extends TestCase
         $arrayAdapter->setLogger(new ExceptionLogger());
         $psr16Cache = new Psr16Cache($arrayAdapter);
 
-        return new HardClassBoundCache($psr16Cache);
+        return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged());
     }
 
     protected function buildFieldsBuilder(): FieldsBuilder

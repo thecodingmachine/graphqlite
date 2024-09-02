@@ -9,14 +9,18 @@ use ReflectionClass;
 
 use function str_replace;
 
-class FileModificationClassBoundCache implements ClassBoundCache
+class SnapshotClassBoundCache implements ClassBoundCache
 {
+    /**
+     * @param callable(ReflectionClass, bool $withInheritance): FilesSnapshot $filesSnapshotFactory
+     */
     public function __construct(
         private readonly CacheInterface $cache,
+        private readonly mixed $filesSnapshotFactory,
     ) {
     }
 
-    public function get(ReflectionClass $reflectionClass, callable $resolver, string $key = '', bool $useInheritance = false): mixed
+    public function get(ReflectionClass $reflectionClass, callable $resolver, string $key = '', bool $withInheritance = false): mixed
     {
         $cacheKey = $reflectionClass->getName() . '__' . $key;
         $cacheKey = str_replace(['\\', '{', '}', '(', ')', '/', '@', ':'], '_', $cacheKey);
@@ -29,7 +33,7 @@ class FileModificationClassBoundCache implements ClassBoundCache
 
         $item = [
             'data' => $resolver(),
-            'snapshot' => ClassSnapshot::fromReflection($reflectionClass),
+            'snapshot' => ($this->filesSnapshotFactory)($reflectionClass, $withInheritance),
         ];
 
         $this->cache->set($cacheKey, $item);

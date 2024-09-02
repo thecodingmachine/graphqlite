@@ -19,9 +19,9 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
-use TheCodingMachine\GraphQLite\Cache\FileModificationClassBoundCache;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
-use TheCodingMachine\GraphQLite\Discovery\Cache\FileModificationClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\SnapshotClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
@@ -351,13 +351,16 @@ class SchemaFactory
         $authorizationService = $this->authorizationService ?: new FailAuthorizationService();
         $typeResolver = new TypeResolver();
         $namespacedCache = new NamespacedCache($this->cache);
-        $classBoundCache = $this->classBoundCache ?: ($this->devMode ? new FileModificationClassBoundCache($this->cache) : new HardClassBoundCache($this->cache));
+        $classBoundCache = $this->classBoundCache ?: new SnapshotClassBoundCache(
+            $this->cache,
+            $this->devMode ? FilesSnapshot::forClass(...) : FilesSnapshot::alwaysUnchanged(...),
+        );
         [$docBlockFactory, $docBlockContextFactory] = $this->createDocBlockFactory($classBoundCache);
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $classFinder = $this->createClassFinder();
         $classFinderComputedCache = $this->devMode ?
-            new FileModificationClassFinderComputedCache($this->cache) :
+            new SnapshotClassFinderComputedCache($this->cache) :
             new HardClassFinderComputedCache($this->cache);
 
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);

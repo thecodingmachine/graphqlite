@@ -4,7 +4,8 @@ namespace TheCodingMachine\GraphQLite;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
@@ -21,7 +22,7 @@ class FactoryContextTest extends AbstractQueryProvider
         $arrayCache = new Psr16Cache(new ArrayAdapter());
         $classFinder = new StaticClassFinder([]);
         $classFinderComputedCache = new HardClassFinderComputedCache($arrayCache);
-        $classBoundCache = new HardClassBoundCache($arrayCache);
+        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged());
         $validator = new Validator();
 
         $context = new FactoryContext(

@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
@@ -20,7 +21,7 @@ class CachedDocBlockFactoryTest extends TestCase
     {
         $arrayCache = new Psr16Cache(new ArrayAdapter(storeSerialized: false));
         $cachedDocBlockFactory = new CachedDocBlockFactory(
-            new HardClassBoundCache($arrayCache),
+            new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged()),
             new PhpDocumentorDocBlockFactory(
                 DocBlockFactory::createInstance(),
                 new PhpDocumentorDocBlockContextFactory(new ContextFactory()),
@@ -35,7 +36,7 @@ class CachedDocBlockFactoryTest extends TestCase
         $this->assertSame($docBlock2, $docBlock);
 
         $newCachedDocBlockFactory = new CachedDocBlockFactory(
-            new HardClassBoundCache($arrayCache),
+            new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged()),
             new PhpDocumentorDocBlockFactory(
                 DocBlockFactory::createInstance(),
                 new PhpDocumentorDocBlockContextFactory(new ContextFactory()),

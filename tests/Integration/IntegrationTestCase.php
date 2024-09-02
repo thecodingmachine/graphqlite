@@ -16,7 +16,8 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
@@ -284,7 +285,7 @@ class IntegrationTestCase extends TestCase
                 $arrayAdapter->setLogger(new ExceptionLogger());
                 $psr16Cache = new Psr16Cache($arrayAdapter);
 
-                return new HardClassBoundCache($psr16Cache);
+                return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged());
             },
             DocBlockFactory::class => static function (ContainerInterface $container) {
                 return new CachedDocBlockFactory(

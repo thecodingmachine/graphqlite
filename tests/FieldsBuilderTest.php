@@ -22,7 +22,6 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Cache\HardClassBoundCache;
 use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputType;
 use TheCodingMachine\GraphQLite\Fixtures\PropertyPromotionInputTypeWithoutGenericDoc;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
