@@ -35,7 +35,7 @@ class TypeMapperTest extends AbstractQueryProvider
         );
 
         $refMethod = new ReflectionMethod($this, 'dummy');
-        $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: String!, Int!');
@@ -54,7 +54,7 @@ class TypeMapperTest extends AbstractQueryProvider
         );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'objectUnion');
-        $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertInstanceOf(NonNull::class, $gqType);
@@ -79,7 +79,7 @@ class TypeMapperTest extends AbstractQueryProvider
         );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'nullableObjectUnion');
-        $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertNotInstanceOf(NonNull::class, $gqType);
@@ -105,7 +105,7 @@ class TypeMapperTest extends AbstractQueryProvider
 
         $refMethod = new ReflectionMethod($this, 'withDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
-        $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
         $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $param = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $annotations);
@@ -128,7 +128,7 @@ class TypeMapperTest extends AbstractQueryProvider
         );
 
         $refMethod = new ReflectionMethod($this, 'withParamDescription');
-        $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
         $refParameter = $refMethod->getParameters()[0];
 
         $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo']);
@@ -150,7 +150,7 @@ class TypeMapperTest extends AbstractQueryProvider
 
         $refMethod = new ReflectionMethod($this, 'withoutDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
-        $docBlockObj = $docBlockFactory->createFromReflector($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
         $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $this->expectException(CannotHideParameterRuntimeException::class);

@@ -5,7 +5,6 @@ namespace TheCodingMachine\GraphQLite\Integration;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use Kcs\ClassFinder\Finder\ComposerFinder;
-use phpDocumentor\Reflection\Types\ContextFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
@@ -65,11 +64,8 @@ use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -141,7 +137,6 @@ class IntegrationTestCase extends TestCase
                     $container->get(ArgumentResolver::class),
                     $container->get(TypeResolver::class),
                     $container->get(DocBlockFactory::class),
-                    $container->get(DocBlockContextFactory::class),
                     $container->get(NamingStrategyInterface::class),
                     $container->get(RootTypeMapperInterface::class),
                     $parameterMiddlewarePipe,
@@ -285,23 +280,12 @@ class IntegrationTestCase extends TestCase
                 $arrayAdapter->setLogger(new ExceptionLogger());
                 $psr16Cache = new Psr16Cache($arrayAdapter);
 
-                return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged());
+                return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged(...));
             },
             DocBlockFactory::class => static function (ContainerInterface $container) {
                 return new CachedDocBlockFactory(
                     $container->get(ClassBoundCache::class),
-                    new PhpDocumentorDocBlockFactory(
-                        \phpDocumentor\Reflection\DocBlockFactory::createInstance(),
-                        $container->get(DocBlockContextFactory::class),
-                    )
-                );
-            },
-            DocBlockContextFactory::class => static function (ContainerInterface $container) {
-                return new CachedDocBlockContextFactory(
-                    $container->get(ClassBoundCache::class),
-                    new PhpDocumentorDocBlockContextFactory(
-                        new ContextFactory(),
-                    )
+                    PhpDocumentorDocBlockFactory::default(),
                 );
             },
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {

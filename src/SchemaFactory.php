@@ -58,10 +58,7 @@ use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockContextFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -355,7 +352,10 @@ class SchemaFactory
             $this->cache,
             $this->devMode ? FilesSnapshot::forClass(...) : FilesSnapshot::alwaysUnchanged(...),
         );
-        [$docBlockFactory, $docBlockContextFactory] = $this->createDocBlockFactory($classBoundCache);
+        $docBlockFactory = new CachedDocBlockFactory(
+            $classBoundCache,
+            PhpDocumentorDocBlockFactory::default(),
+        );
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $classFinder = $this->createClassFinder();
@@ -433,7 +433,6 @@ class SchemaFactory
             $argumentResolver,
             $typeResolver,
             $docBlockFactory,
-            $docBlockContextFactory,
             $namingStrategy,
             $topRootTypeMapper,
             $parameterMiddlewarePipe,
@@ -558,23 +557,5 @@ class SchemaFactory
         }
 
         return new KcsClassFinder($finder);
-    }
-
-    /** @return array{ Reflection\DocBlock\DocBlockFactory, DocBlockContextFactory } */
-    private function createDocBlockFactory(ClassBoundCache $classBoundCache): array
-    {
-        $docBlockContextFactory = new CachedDocBlockContextFactory(
-            $classBoundCache,
-            new PhpDocumentorDocBlockContextFactory(new ContextFactory()),
-        );
-        $docBlockFactory = new CachedDocBlockFactory(
-            $classBoundCache,
-            new PhpDocumentorDocBlockFactory(
-                DocBlockFactory::createInstance(),
-                $docBlockContextFactory,
-            ),
-        );
-
-        return [$docBlockFactory, $docBlockContextFactory];
     }
 }

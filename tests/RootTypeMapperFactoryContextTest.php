@@ -21,7 +21,7 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
         $arrayCache = new Psr16Cache(new ArrayAdapter());
         $classFinder = $this->getClassFinder('namespace');
         $classFinderComputedCache = $this->getClassFinderComputedCache();
-        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged());
+        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...));
 
         $context = new RootTypeMapperFactoryContext(
             $this->getAnnotationReader(),

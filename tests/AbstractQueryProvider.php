@@ -14,7 +14,6 @@ use Kcs\ClassFinder\FileFinder\CachedFileFinder;
 use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
-use phpDocumentor\Reflection\Types\ContextFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -56,11 +55,8 @@ use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockContextFactory;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
@@ -283,18 +279,7 @@ abstract class AbstractQueryProvider extends TestCase
     {
         return new CachedDocBlockFactory(
             $this->getClassBoundCache(),
-            new PhpDocumentorDocBlockFactory(
-                \phpDocumentor\Reflection\DocBlockFactory::createInstance(),
-                $this->getDocBlockContextFactory(),
-            )
-        );
-    }
-
-    protected function getDocBlockContextFactory(): DocBlockContextFactory
-    {
-        return new CachedDocBlockContextFactory(
-            $this->getClassBoundCache(),
-            new PhpDocumentorDocBlockContextFactory(new ContextFactory())
+            PhpDocumentorDocBlockFactory::default(),
         );
     }
 
@@ -304,7 +289,7 @@ abstract class AbstractQueryProvider extends TestCase
         $arrayAdapter->setLogger(new ExceptionLogger());
         $psr16Cache = new Psr16Cache($arrayAdapter);
 
-        return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged());
+        return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged(...));
     }
 
     protected function buildFieldsBuilder(): FieldsBuilder
@@ -341,7 +326,6 @@ abstract class AbstractQueryProvider extends TestCase
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
             $this->getDocBlockFactory(),
-            $this->getDocBlockContextFactory(),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $parameterMiddlewarePipe,

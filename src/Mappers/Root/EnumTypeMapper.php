@@ -125,7 +125,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
             (string) $reflectionEnum->getBackingType() === 'string';
 
         $enumDescription = $this->docBlockFactory
-            ->createFromReflector($reflectionEnum)
+            ->create($reflectionEnum)
             ->getSummary() ?: null;
 
         /** @var array<string, string> $enumCaseDescriptions */
@@ -134,7 +134,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         $enumCaseDeprecationReasons = [];
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
-            $docBlock = $this->docBlockFactory->createFromReflector($reflectionEnumCase);
+            $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
 
             $enumCaseDescriptions[$reflectionEnumCase->getName()] = $docBlock->getSummary() ?: null;
             $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;

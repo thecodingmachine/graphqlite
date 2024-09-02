@@ -135,7 +135,7 @@ class TypeHandler implements ParameterHandlerInterface
                     return null;
                 }
 
-                $docBlock = $this->docBlockFactory->createFromReflector($refConstructor);
+                $docBlock = $this->docBlockFactory->create($refConstructor);
                 $paramTags = $docBlock->getTagsByName('param');
                 foreach ($paramTags as $paramTag) {
                     if (! $paramTag instanceof Param) {

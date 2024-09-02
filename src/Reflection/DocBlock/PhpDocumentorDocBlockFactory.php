@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
 
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlockFactory as DocBlockFactoryConcrete;
 use phpDocumentor\Reflection\DocBlockFactoryInterface;
+use phpDocumentor\Reflection\Types\Context;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use ReflectionClass;
 use ReflectionClassConstant;
 use ReflectionMethod;
@@ -15,16 +18,34 @@ class PhpDocumentorDocBlockFactory implements DocBlockFactory
 {
     public function __construct(
         private readonly DocBlockFactoryInterface $docBlockFactory,
-        private readonly DocBlockContextFactory $docBlockContextFactory,
+        private readonly ContextFactory $contextFactory,
     )
     {
     }
 
-    public function createFromReflector(ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector): DocBlock
+    public static function default(): self
+    {
+        return new self(
+            DocBlockFactoryConcrete::createInstance(),
+            new ContextFactory(),
+        );
+    }
+
+    public function create(
+        ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector,
+        Context $context = null,
+    ): DocBlock
     {
         $docblock = $reflector->getDocComment() ?: '/** */';
-        $context = $this->docBlockContextFactory->createFromReflector($reflector);
 
-        return $this->docBlockFactory->create($docblock, $context);
+        return $this->docBlockFactory->create(
+            $docblock,
+            $context ?? $this->createContext($reflector),
+        );
+    }
+
+    public function createContext(ReflectionClass|ReflectionMethod|ReflectionProperty|ReflectionClassConstant $reflector): Context
+    {
+        return $this->contextFactory->createFromReflector($reflector);
     }
 }

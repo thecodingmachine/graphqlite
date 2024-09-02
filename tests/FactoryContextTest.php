@@ -22,7 +22,7 @@ class FactoryContextTest extends AbstractQueryProvider
         $arrayCache = new Psr16Cache(new ArrayAdapter());
         $classFinder = new StaticClassFinder([]);
         $classFinderComputedCache = new HardClassFinderComputedCache($arrayCache);
-        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged());
+        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...));
         $validator = new Validator();
 
         $context = new FactoryContext(
