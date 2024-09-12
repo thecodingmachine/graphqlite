@@ -278,6 +278,19 @@ class SchemaFactory
     }
 
     /**
+     * @deprecated setGlobTTL(null) or setGlobTTL(0) is equivalent to prodMode(), and any other values are equivalent to devMode()
+     */
+    public function setGlobTTL(int|null $globTTL): self
+    {
+        trigger_error(
+            'Using SchemaFactory::setGlobTTL() is deprecated in favor of SchemaFactory::devMode() and SchemaFactory::prodMode().',
+            E_USER_DEPRECATED,
+        );
+
+        return $globTTL ? $this->devMode() : $this->prodMode();
+    }
+
+    /**
      * Set a custom class bound cache. By default in dev mode it looks at file modification times.
      */
     public function setClassBoundCache(ClassBoundCache|null $classBoundCache): self
