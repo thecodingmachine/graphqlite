@@ -4,6 +4,23 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 7.1.0
+
+### Breaking Changes
+
+- #698 Removes some methods and classes, namely:
+  - Combined `SchemaFactory::addControllerNamespace()` and `SchemaFactory::addTypeNamespace()` into one `SchemaFactory::addNamespace()`
+  - Removed `SchemaFactory::setGlobTTL()`, `FactoryContext::get*TTL()` and `RootTypeMapperFactoryContext::get*TTL()` as GraphQLite no longer uses TTLs to invalidate caches
+  - Removed `StaticClassListTypeMapper` in favor of `ClassFinderTypeMapper` used with `StaticClassFinder`
+  - Renamed `GlobTypeMapper` to `ClassFinderTypeMapper`
+  - Renamed `SchemaFactory::setClassBoundCacheContractFactory()` to `SchemaFactory::setClassBoundCache()`, 
+    `FactoryContext::getClassBoundCacheContractFactory()` to `FactoryContext::getClassBoundCache()` and changed their signatures
+  - Removed `RootTypeMapperFactoryContext::getTypeNamespaces()` in favor of `RootTypeMapperFactoryContext::getClassFinder()`
+
+### Improvements
+
+- #698 Performance optimizations and caching in development environments (`devMode()`). @oprypkhantc
+
 ## 7.0.0
 
 ### Breaking Changes
