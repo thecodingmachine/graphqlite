@@ -277,9 +277,7 @@ class SchemaFactory
         return $this;
     }
 
-    /**
-     * @deprecated setGlobTTL(null) or setGlobTTL(0) is equivalent to prodMode(), and any other values are equivalent to devMode()
-     */
+    /** @deprecated setGlobTTL(null) or setGlobTTL(0) is equivalent to prodMode(), and any other values are equivalent to devMode() */
     public function setGlobTTL(int|null $globTTL): self
     {
         trigger_error(
