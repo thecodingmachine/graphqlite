@@ -52,6 +52,7 @@ class PrefetchParameterMiddleware implements ParameterMiddlewareInterface
             fieldName: $method->getName(),
             resolver: $resolver,
             parameters: $parameters,
+            returnRequested: $prefetch->returnRequested,
         );
     }
 }

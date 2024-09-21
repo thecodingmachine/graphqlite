@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\PrefetchBuffer;
 use TheCodingMachine\GraphQLite\QueryField;
 
+use function array_key_exists;
 use function assert;
 
 /**
@@ -27,6 +28,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         private readonly string $fieldName,
         private readonly mixed $resolver,
         public readonly array $parameters,
+        public readonly bool $returnRequested = false,
     )
     {
     }
@@ -52,24 +54,40 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         // So we record all of these ->resolve() calls, collect them together and when a value is actually
         // needed, GraphQL calls the callback of Deferred below. That's when we call the prefetch method,
         // already knowing all the requested fields (source-arguments combinations).
-        return new Deferred(function () use ($info, $context, $args, $prefetchBuffer) {
-            if (! $prefetchBuffer->hasResult($args, $info)) {
-                $prefetchResult = $this->computePrefetch($args, $context, $info, $prefetchBuffer);
-
-                $prefetchBuffer->storeResult($prefetchResult, $args, $info);
+        return new Deferred(function () use ($source, $info, $context, $args, $prefetchBuffer) {
+            if (! $prefetchBuffer->hasResult($source)) {
+                $this->computePrefetch($args, $context, $info, $prefetchBuffer);
             }
 
-            return $prefetchResult ?? $prefetchBuffer->getResult($args, $info);
+            return $prefetchBuffer->getResult($source);
         });
     }
 
     /** @param array<string, mixed> $args */
-    private function computePrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): mixed
+    private function computePrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): void
     {
         $sources = $prefetchBuffer->getObjectsByArguments($args, $info);
+        $prefetchBuffer->purge($args, $info);
         $toPassPrefetchArgs = QueryField::paramsToArguments($this->fieldName, $this->parameters, null, $args, $context, $info, $this->resolver);
 
-        return ($this->resolver)($sources, ...$toPassPrefetchArgs);
+        $resolvedValues = ($this->resolver)($sources, ...$toPassPrefetchArgs);
+        if ($this->returnRequested) {
+            foreach ($resolvedValues as $key => $resolvedValue) {
+                if (! array_key_exists($key, $sources)) {
+                    throw new GraphQLRuntimeException(
+                        'Called by Prefetch function should accept ' .
+                        'Array<key> and return Array<value>, but the function did ' .
+                        'not return an Array of the same length as the Array of keys.',
+                    );
+                }
+                $prefetchBuffer->storeResult($sources[$key], $resolvedValue);
+            }
+        } else {
+            foreach ($sources as $source) {
+                // map results to each source to support old prefetch behavior
+                $prefetchBuffer->storeResult($source, $resolvedValues);
+            }
+        }
     }
 
     /** @inheritDoc */

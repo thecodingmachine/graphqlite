@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use SplObjectStorage;
 
-use function array_key_exists;
 use function md5;
 use function serialize;
 
@@ -18,8 +18,13 @@ class PrefetchBuffer
     /** @var array<string, array<int, object>> An array of buffered, indexed by hash of arguments. */
     private array $objects = [];
 
-    /** @var array<string, mixed> An array of prefetch method results, indexed by hash of arguments. */
-    private array $results = [];
+    /** @var SplObjectStorage A Storage of prefetch method results, holds source to resolved values. */
+    private SplObjectStorage $results;
+
+    public function __construct()
+    {
+        $this->results = new SplObjectStorage();
+    }
 
     /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function register(
@@ -66,28 +71,22 @@ class PrefetchBuffer
         unset($this->objects[$this->computeHash($arguments, $info)]);
     }
 
-    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function storeResult(
+        object $source,
         mixed $result,
-        array $arguments,
-        ResolveInfo|null $info = null,
     ): void {
-        $this->results[$this->computeHash($arguments, $info)] = $result;
+        $this->results->offsetSet($source, $result);
     }
 
-    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function hasResult(
-        array $arguments,
-        ResolveInfo|null $info = null,
+        object $source,
     ): bool {
-        return array_key_exists($this->computeHash($arguments, $info), $this->results);
+        return $this->results->offsetExists($source);
     }
 
-    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function getResult(
-        array $arguments,
-        ResolveInfo|null $info = null,
+        object $source,
     ): mixed {
-        return $this->results[$this->computeHash($arguments, $info)];
+        return $this->results->offsetGet($source);
     }
 }
