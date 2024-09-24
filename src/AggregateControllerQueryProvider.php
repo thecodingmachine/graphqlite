@@ -8,16 +8,12 @@ use GraphQL\Type\Definition\FieldDefinition;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 
-use function array_filter;
-use function array_intersect_key;
-use function array_keys;
 use function array_map;
 use function array_merge;
 use function array_sum;
 use function array_values;
 use function assert;
 use function count;
-use function reset;
 use function sort;
 
 /**
@@ -94,18 +90,29 @@ class AggregateControllerQueryProvider implements QueryProviderInterface
         }
 
         // We have an issue, let's detect the duplicate
-        $duplicates = array_intersect_key(...array_values($list));
-        // Let's display an error from the first one.
-        $firstDuplicate = reset($duplicates);
-        assert($firstDuplicate instanceof FieldDefinition);
+        $queriesByName = [];
+        $duplicateClasses = null;
+        $duplicateQueryName = null;
 
-        $duplicateName = $firstDuplicate->name;
+        foreach ($list as $class => $queries) {
+            foreach ($queries as $query => $field) {
+                $duplicatedClass = $queriesByName[$query] ?? null;
 
-        $classes = array_keys(array_filter($list, static function (array $fields) use ($duplicateName) {
-            return isset($fields[$duplicateName]);
-        }));
-        sort($classes);
+                if (! $duplicatedClass) {
+                    $queriesByName[$query] = $class;
 
-        throw DuplicateMappingException::createForQueryInTwoControllers($classes[0], $classes[1], $duplicateName);
+                    continue;
+                }
+
+                $duplicateClasses = [$duplicatedClass, $class];
+                $duplicateQueryName = $query;
+            }
+        }
+
+        assert($duplicateClasses !== null && $duplicateQueryName !== null);
+
+        sort($duplicateClasses);
+
+        throw DuplicateMappingException::createForQueryInTwoControllers($duplicateClasses[0], $duplicateClasses[1], $duplicateQueryName);
     }
 }

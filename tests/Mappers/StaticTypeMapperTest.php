@@ -137,7 +137,7 @@ class StaticTypeMapperTest extends AbstractQueryProvider
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\StaticTypeMapper\\Controllers');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\StaticTypeMapper\\Controllers');
 
         // Let's register a type that maps by default to the "MyClass" PHP class
         $staticTypeMapper = new StaticTypeMapper(

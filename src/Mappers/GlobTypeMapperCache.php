@@ -31,11 +31,11 @@ class GlobTypeMapperCache
     /**
      * Merges annotations of a given class in the global cache.
      *
-     * @param ReflectionClass<object> $refClass
+     * @param ReflectionClass<object>|class-string $sourceClass
      */
-    public function registerAnnotations(ReflectionClass $refClass, GlobAnnotationsCache $globAnnotationsCache): void
+    public function registerAnnotations(ReflectionClass|string $sourceClass, GlobAnnotationsCache $globAnnotationsCache): void
     {
-        $className = $refClass->getName();
+        $className = $sourceClass instanceof ReflectionClass ? $sourceClass->getName() : $sourceClass;
 
         $typeClassName = $globAnnotationsCache->getTypeClassName();
         if ($typeClassName !== null) {
@@ -55,7 +55,7 @@ class GlobTypeMapperCache
         foreach ($globAnnotationsCache->getFactories() as $methodName => [$inputName, $inputClassName, $isDefault, $declaringClass]) {
             if ($isDefault) {
                 if ($inputClassName !== null && isset($this->mapClassToFactory[$inputClassName])) {
-                    throw DuplicateMappingException::createForFactory($inputClassName, $this->mapClassToFactory[$inputClassName][0], $this->mapClassToFactory[$inputClassName][1], $refClass->getName(), $methodName);
+                    throw DuplicateMappingException::createForFactory($inputClassName, $this->mapClassToFactory[$inputClassName][0], $this->mapClassToFactory[$inputClassName][1], $className, $methodName);
                 }
             } else {
                 // If this is not the default factory, let's not map the class name to the factory.
@@ -72,10 +72,14 @@ class GlobTypeMapperCache
         foreach ($globAnnotationsCache->getInputs() as $inputName => [$inputClassName, $isDefault, $description, $isUpdate]) {
             if ($isDefault) {
                 if (isset($this->mapClassToInput[$inputClassName])) {
-                    throw DuplicateMappingException::createForDefaultInput($refClass->getName());
+                    throw DuplicateMappingException::createForDefaultInput($className);
                 }
 
                 $this->mapClassToInput[$inputClassName] = [$className, $inputName, $description, $isUpdate];
+            }
+
+            if (isset($this->mapNameToInput[$inputName])) {
+                throw DuplicateMappingException::createForTwoInputs($inputName, $this->mapNameToInput[$inputName][0], $inputClassName);
             }
 
             $this->mapNameToInput[$inputName] = [$inputClassName, $description, $isUpdate];

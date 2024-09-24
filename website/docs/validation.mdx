@@ -154,8 +154,7 @@ To get started with validation on input types defined by an `#[Input]` attribute
 
 ```php
 $factory = new SchemaFactory($cache, $this->container);
-$factory->addControllerNamespace('App\\Controllers');
-$factory->addTypeNamespace('App');
+$factory->addNamespace('App');
 // Register your validator
 $factory->setInputTypeValidator($this->container->get('your_validator'));
 $factory->createSchema();

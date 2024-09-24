@@ -24,7 +24,7 @@
         "symfony/cache": "^4.3 || ^5 || ^6 || ^7",
         "symfony/expression-language": "^4 || ^5 || ^6 || ^7",
         "webonyx/graphql-php": "^v15.0",
-        "kcs/class-finder": "^0.5.0"
+        "kcs/class-finder": "^0.5.1"
     },
     "require-dev": {
         "beberlei/porpaginas": "^1.2 || ^2.0",
@@ -34,7 +34,7 @@
         "myclabs/php-enum": "^1.6.6",
         "php-coveralls/php-coveralls": "^2.1",
         "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan": "^1.9",
+        "phpstan/phpstan": "^1.11",
         "phpunit/phpunit": "^10.1 || ^11.0",
         "symfony/var-dumper": "^5.4 || ^6.0 || ^7",
         "thecodingmachine/phpstan-strict-rules": "^1.0"

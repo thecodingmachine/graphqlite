@@ -10,19 +10,22 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
-use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionEnum;
 use ReflectionMethod;
 use ReflectionProperty;
-use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\EnumType;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 use UnitEnum;
 
+use function array_filter;
+use function array_merge;
+use function array_values;
 use function assert;
 use function enum_exists;
 use function ltrim;
@@ -33,18 +36,18 @@ use function ltrim;
 class EnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<UnitEnum>, EnumType> */
-    private array $cache = [];
+    private array $cacheByClass = [];
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
     /** @var array<string, class-string<UnitEnum>> */
-    private array|null $nameToClassMapping = null;
+    private array $nameToClassMapping;
 
-    /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
         private readonly RootTypeMapperInterface $next,
         private readonly AnnotationReader $annotationReader,
-        private readonly CacheInterface $cacheService,
-        private readonly array $namespaces,
+        private readonly DocBlockFactory $docBlockFactory,
+        private readonly ClassFinder $classFinder,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     ) {
     }
 
@@ -102,8 +105,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
         }
         /** @var class-string<Enum> $enumClass */
         $enumClass = ltrim($enumClass, '\\');
-        if (isset($this->cache[$enumClass])) {
-            return $this->cache[$enumClass];
+        if (isset($this->cacheByClass[$enumClass])) {
+            return $this->cacheByClass[$enumClass];
         }
 
         // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
@@ -121,14 +124,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
             $reflectionEnum->isBacked() &&
             (string) $reflectionEnum->getBackingType() === 'string';
 
-        $docBlockFactory = DocBlockFactory::createInstance();
-
-        $enumDescription = null;
-        $docComment = $reflectionEnum->getDocComment();
-        if ($docComment) {
-            $docBlock = $docBlockFactory->create($docComment);
-            $enumDescription = $docBlock->getSummary();
-        }
+        $enumDescription = $this->docBlockFactory
+            ->create($reflectionEnum)
+            ->getSummary() ?: null;
 
         /** @var array<string, string> $enumCaseDescriptions */
         $enumCaseDescriptions = [];
@@ -136,15 +134,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
         $enumCaseDeprecationReasons = [];
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
-            $docComment = $reflectionEnumCase->getDocComment();
-            if (! $docComment) {
-                continue;
-            }
+            $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
 
-            $docBlock = $docBlockFactory->create($docComment);
-            $enumCaseDescription = $docBlock->getSummary();
-
-            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $enumCaseDescription;
+            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $docBlock->getSummary() ?: null;
             $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
 
             // phpcs:ignore
@@ -155,7 +147,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
         $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
-        return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
+        return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
     }
 
     private function getTypeName(ReflectionClass $reflectionClass): string
@@ -199,21 +191,19 @@ class EnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        if ($this->nameToClassMapping === null) {
-            $this->nameToClassMapping = $this->cacheService->get('enum_name_to_class', function () {
-                $nameToClassMapping = [];
-                foreach ($this->namespaces as $ns) {
-                    foreach ($ns->getClassList() as $className => $classRef) {
-                        if (! enum_exists($className)) {
-                            continue;
-                        }
-
-                        $nameToClassMapping[$this->getTypeName($classRef)] = $className;
-                    }
+        $this->nameToClassMapping ??= $this->classFinderComputedCache->compute(
+            $this->classFinder,
+            'enum_name_to_class',
+            function (ReflectionClass $classReflection): array|null {
+                if (! $classReflection->isEnum()) {
+                    return null;
                 }
-                return $nameToClassMapping;
-            });
-        }
+
+                return [$this->getTypeName($classReflection) => $classReflection->getName()];
+            },
+            static fn (array $entries) => array_merge(...array_values(array_filter($entries))),
+        );
+
         return $this->nameToClassMapping;
     }
 }

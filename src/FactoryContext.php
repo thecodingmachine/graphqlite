@@ -6,7 +6,9 @@ namespace TheCodingMachine\GraphQLite;
 
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
-use TheCodingMachine\GraphQLite\Cache\ClassBoundCacheContractFactoryInterface;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -30,9 +32,9 @@ final class FactoryContext
         private readonly ContainerInterface $container,
         private readonly CacheInterface $cache,
         private readonly InputTypeValidatorInterface|null $inputTypeValidator,
-        private readonly int|null $globTTL,
-        private readonly int|null $mapTTL = null,
-        private readonly ClassBoundCacheContractFactoryInterface|null $classBoundCacheContractFactory = null,
+        private readonly ClassFinder $classFinder,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
+        private readonly ClassBoundCache $classBoundCache,
     ) {
     }
 
@@ -86,23 +88,23 @@ final class FactoryContext
         return $this->cache;
     }
 
-    public function getClassBoundCacheContractFactory(): ClassBoundCacheContractFactoryInterface|null
-    {
-        return $this->classBoundCacheContractFactory;
-    }
-
     public function getInputTypeValidator(): InputTypeValidatorInterface|null
     {
         return $this->inputTypeValidator;
     }
 
-    public function getGlobTTL(): int|null
+    public function getClassFinder(): ClassFinder
     {
-        return $this->globTTL;
+        return $this->classFinder;
     }
 
-    public function getMapTTL(): int|null
+    public function getClassFinderComputedCache(): ClassFinderComputedCache
     {
-        return $this->mapTTL;
+        return $this->classFinderComputedCache;
+    }
+
+    public function getClassBoundCache(): ClassBoundCache|null
+    {
+        return $this->classBoundCache;
     }
 }

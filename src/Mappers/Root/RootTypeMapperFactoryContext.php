@@ -7,11 +7,13 @@ namespace TheCodingMachine\GraphQLite\Mappers\Root;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
 use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
 /**
  * A context class containing a number of classes created on the fly by SchemaFactory.
@@ -19,11 +21,6 @@ use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
  */
 final class RootTypeMapperFactoryContext
 {
-    /**
-     * Constructor
-     *
-     * @param iterable<NS> $typeNamespaces
-     */
     public function __construct(
         private readonly AnnotationReader $annotationReader,
         private readonly TypeResolver $typeResolver,
@@ -32,9 +29,9 @@ final class RootTypeMapperFactoryContext
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
         private readonly ContainerInterface $container,
         private readonly CacheInterface $cache,
-        private readonly iterable $typeNamespaces,
-        private readonly int|null $globTTL,
-        private readonly int|null $mapTTL = null,
+        private readonly ClassFinder $classFinder,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
+        private readonly ClassBoundCache $classBoundCache,
     ) {
     }
 
@@ -73,19 +70,18 @@ final class RootTypeMapperFactoryContext
         return $this->cache;
     }
 
-    /** @return iterable<NS> */
-    public function getTypeNamespaces(): iterable
+    public function getClassFinder(): ClassFinder
     {
-        return $this->typeNamespaces;
+        return $this->classFinder;
     }
 
-    public function getGlobTTL(): int|null
+    public function getClassFinderComputedCache(): ClassFinderComputedCache
     {
-        return $this->globTTL;
+        return $this->classFinderComputedCache;
     }
 
-    public function getMapTTL(): int|null
+    public function getClassBoundCache(): ClassBoundCache
     {
-        return $this->mapTTL;
+        return $this->classBoundCache;
     }
 }

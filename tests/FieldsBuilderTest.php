@@ -67,7 +67,7 @@ use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingMagicGetException;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
@@ -353,7 +353,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            $this->getDocBlockFactory(),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
@@ -384,7 +384,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            $this->getDocBlockFactory(),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),
@@ -445,7 +445,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter())),
+            $this->getDocBlockFactory(),
             new NamingStrategy(),
             $this->getRootTypeMapper(),
             $this->getParameterMiddlewarePipe(),

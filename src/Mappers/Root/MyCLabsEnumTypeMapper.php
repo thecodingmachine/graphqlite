@@ -15,11 +15,14 @@ use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use Symfony\Contracts\Cache\CacheInterface;
 use TheCodingMachine\GraphQLite\AnnotationReader;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Types\MyCLabsEnumType;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
+use function array_filter;
+use function array_merge;
+use function array_values;
 use function assert;
 use function is_a;
 use function ltrim;
@@ -30,19 +33,18 @@ use function ltrim;
 class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
 {
     /** @var array<class-string<object>, EnumType> */
-    private array $cache = [];
+    private array $cacheByClass = [];
     /** @var array<string, EnumType> */
     private array $cacheByName = [];
 
     /** @var array<string, class-string<Enum>> */
-    private array|null $nameToClassMapping = null;
+    private array $nameToClassMapping;
 
-    /** @param NS[] $namespaces List of namespaces containing enums. Used when searching an enum by name. */
     public function __construct(
         private readonly RootTypeMapperInterface $next,
         private readonly AnnotationReader $annotationReader,
-        private readonly CacheInterface $cacheService,
-        private readonly array $namespaces,
+        private readonly ClassFinder $classFinder,
+        private readonly ClassFinderComputedCache $classFinderComputedCache,
     ) {
     }
 
@@ -98,13 +100,13 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
         }
         /** @var class-string<Enum> $enumClass */
         $enumClass = ltrim($enumClass, '\\');
-        if (isset($this->cache[$enumClass])) {
-            return $this->cache[$enumClass];
+        if (isset($this->cacheByClass[$enumClass])) {
+            return $this->cacheByClass[$enumClass];
         }
 
         $refClass = new ReflectionClass($enumClass);
         $type = new MyCLabsEnumType($enumClass, $this->getTypeName($refClass));
-        return $this->cacheByName[$type->name] = $this->cache[$enumClass] = $type;
+        return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
     }
 
     private function getTypeName(ReflectionClass $refClass): string
@@ -154,23 +156,18 @@ class MyCLabsEnumTypeMapper implements RootTypeMapperInterface
      */
     private function getNameToClassMapping(): array
     {
-        if ($this->nameToClassMapping === null) {
-            $this->nameToClassMapping = $this->cacheService->get('myclabsenum_name_to_class', function () {
-                $nameToClassMapping = [];
-                foreach ($this->namespaces as $ns) {
-                    /** @var class-string<Enum> $className */
-                    foreach ($ns->getClassList() as $className => $classRef) {
-                        if (! $classRef->isSubclassOf(Enum::class)) {
-                            continue;
-                        }
-
-                        $nameToClassMapping[$this->getTypeName($classRef)] = $className;
-                    }
+        $this->nameToClassMapping ??= $this->classFinderComputedCache->compute(
+            $this->classFinder,
+            'myclabsenum_name_to_class',
+            function (ReflectionClass $classReflection): array|null {
+                if (! $classReflection->isSubclassOf(Enum::class)) {
+                    return null;
                 }
 
-                return $nameToClassMapping;
-            });
-        }
+                return [$this->getTypeName($classReflection) => $classReflection->getName()];
+            },
+            static fn (array $entries) => array_merge(...array_values(array_filter($entries))),
+        );
 
         return $this->nameToClassMapping;
     }

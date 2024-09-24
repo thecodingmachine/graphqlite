@@ -5,23 +5,16 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Integration;
 
 use GraphQL\Error\DebugFlag;
-use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use GraphQL\Server\Helper;
 use GraphQL\Server\OperationParams;
 use GraphQL\Server\ServerConfig;
-use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use TheCodingMachine\GraphQLite\AggregateQueryProvider;
-use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
@@ -30,73 +23,25 @@ use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Color;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Position;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Size;
-use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
-use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewareInterface;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
-use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
-use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
-use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
-use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
-use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
-use TheCodingMachine\GraphQLite\Middlewares\CostFieldMiddleware;
-use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
-use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
-use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
-use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
-use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
-use TheCodingMachine\GraphQLite\NamingStrategy;
-use TheCodingMachine\GraphQLite\NamingStrategyInterface;
-use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
-use TheCodingMachine\GraphQLite\QueryProviderInterface;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
-use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
-use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
-use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
-use TheCodingMachine\GraphQLite\TypeRegistry;
-use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
-use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
-use UnitEnum;
-
 use function array_filter;
 use function assert;
 use function count;
 use function in_array;
-use function interface_exists;
 use function json_encode;
-
 use const JSON_PRETTY_PRINT;
 
 class EndToEndTest extends IntegrationTestCase
@@ -687,7 +632,7 @@ class EndToEndTest extends IntegrationTestCase
             'echoFilters' => ['foo', 'bar', '12', '42', '62'],
         ], $this->getSuccessResult($result));
 
-        // Call again to test GlobTypeMapper cache
+        // Call again to test ClassFinderTypeMapper cache
         $result = GraphQL::executeQuery(
             $schema,
             $queryString,
@@ -1548,8 +1493,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict');
 
         $schema = $schemaFactory->createSchema();
 
@@ -1872,9 +1816,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
         $schemaFactory->setAuthenticationService($container->get(AuthenticationServiceInterface::class));
         $schemaFactory->setAuthorizationService($container->get(AuthorizationServiceInterface::class));
         $schemaFactory->setInputTypeValidator($validator);
@@ -2250,8 +2192,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Controllers');
-        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference\\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference');
 
         $schema = $schemaFactory->createSchema();
 

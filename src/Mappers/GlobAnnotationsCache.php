@@ -17,6 +17,7 @@ final class GlobAnnotationsCache
     use Cloneable;
 
     /**
+     * @param class-string $sourceClass
      * @param class-string<object>|null $typeClassName
      * @param array<string, array{0: string, 1:class-string<object>|null, 2:bool, 3:class-string<object>}> $factories
      *        An array mapping a factory method name to an input name / class name / default flag /
@@ -27,6 +28,7 @@ final class GlobAnnotationsCache
      *        An array mapping an input type name to an input name / declaring class
      */
     public function __construct(
+        public readonly string $sourceClass,
         private readonly string|null $typeClassName = null,
         private readonly string|null $typeName = null,
         private readonly bool $default = false,
@@ -108,6 +110,10 @@ final class GlobAnnotationsCache
      */
     public function registerInput(string $name, string $className, Input $input): self
     {
+        if (isset($this->inputs[$name])) {
+            throw DuplicateMappingException::createForTwoInputs($name, $this->inputs[$name][0], $className);
+        }
+
         return $this->with(
             inputs: [
                 ...$this->inputs,

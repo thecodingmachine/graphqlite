@@ -133,7 +133,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProvider
 
             $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry(), $this->typeMapper, $this->getFieldsBuilder());
 
-            $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(), $namingStrategy, $this->typeMapper, new Psr16Cache(new NullAdapter()));
+            $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(), $namingStrategy, $this->typeMapper, $this->getClassFinderComputedCache());
             $compositeMapper->addTypeMapper($mapper);
         }
         return $this->typeMapper;
@@ -230,9 +230,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProvider
         $typeGenerator = $this->getTypeGenerator();
         $inputTypeGenerator = $this->getInputTypeGenerator();
 
-        $cache = new Psr16Cache(new ArrayAdapter());
-
-        $mapper = new GlobTypeMapper($this->getNamespaceFactory()->createNamespace('TheCodingMachine\GraphQLite\Fixtures\Integration'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $cache);
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Integration'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $recursiveTypeMapper = new RecursiveTypeMapper(
             $mapper,

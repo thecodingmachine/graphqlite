@@ -16,7 +16,7 @@ use TheCodingMachine\GraphQLite\Fixtures\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
 
 use function assert;
 use function count;
@@ -25,17 +25,17 @@ class TypeMapperTest extends AbstractQueryProvider
 {
     public function testMapScalarUnionException(): void
     {
+        $docBlockFactory = $this->getDocBlockFactory();
+
         $typeMapper = new TypeHandler(
             $this->getArgumentResolver(),
             $this->getRootTypeMapper(),
             $this->getTypeResolver(),
-            $this->getCachedDocBlockFactory(),
+            $docBlockFactory,
         );
 
-        $cachedDocBlockFactory = new CachedDocBlockFactory(new Psr16Cache(new ArrayAdapter()));
-
         $refMethod = new ReflectionMethod($this, 'dummy');
-        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: String!, Int!');
@@ -44,17 +44,17 @@ class TypeMapperTest extends AbstractQueryProvider
 
     public function testMapObjectUnionWorks(): void
     {
-        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
+        $docBlockFactory = $this->getDocBlockFactory();
 
         $typeMapper = new TypeHandler(
             $this->getArgumentResolver(),
             $this->getRootTypeMapper(),
             $this->getTypeResolver(),
-            $cachedDocBlockFactory,
+            $docBlockFactory,
         );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'objectUnion');
-        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertInstanceOf(NonNull::class, $gqType);
@@ -69,17 +69,17 @@ class TypeMapperTest extends AbstractQueryProvider
 
     public function testMapObjectNullableUnionWorks(): void
     {
-        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
+        $docBlockFactory = $this->getDocBlockFactory();
 
         $typeMapper = new TypeHandler(
             $this->getArgumentResolver(),
             $this->getRootTypeMapper(),
             $this->getTypeResolver(),
-            $cachedDocBlockFactory,
+            $docBlockFactory,
         );
 
         $refMethod = new ReflectionMethod(UnionOutputType::class, 'nullableObjectUnion');
-        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
 
         $gqType = $typeMapper->mapReturnType($refMethod, $docBlockObj);
         $this->assertNotInstanceOf(NonNull::class, $gqType);
@@ -94,18 +94,18 @@ class TypeMapperTest extends AbstractQueryProvider
 
     public function testHideParameter(): void
     {
-        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
+        $docBlockFactory = $this->getDocBlockFactory();
 
         $typeMapper = new TypeHandler(
             $this->getArgumentResolver(),
             $this->getRootTypeMapper(),
             $this->getTypeResolver(),
-            $cachedDocBlockFactory,
+            $docBlockFactory,
         );
 
         $refMethod = new ReflectionMethod($this, 'withDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
-        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
         $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $param = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $annotations);
@@ -118,17 +118,17 @@ class TypeMapperTest extends AbstractQueryProvider
 
     public function testParameterWithDescription(): void
     {
-        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
+        $docBlockFactory = $this->getDocBlockFactory();
 
         $typeMapper = new TypeHandler(
             $this->getArgumentResolver(),
             $this->getRootTypeMapper(),
             $this->getTypeResolver(),
-            $cachedDocBlockFactory,
+            $docBlockFactory,
         );
 
         $refMethod = new ReflectionMethod($this, 'withParamDescription');
-        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
         $refParameter = $refMethod->getParameters()[0];
 
         $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, null, $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo']);
@@ -139,18 +139,18 @@ class TypeMapperTest extends AbstractQueryProvider
 
     public function testHideParameterException(): void
     {
-        $cachedDocBlockFactory = $this->getCachedDocBlockFactory();
+        $docBlockFactory = $this->getDocBlockFactory();
 
         $typeMapper = new TypeHandler(
             $this->getArgumentResolver(),
             $this->getRootTypeMapper(),
             $this->getTypeResolver(),
-            $cachedDocBlockFactory,
+            $docBlockFactory,
         );
 
         $refMethod = new ReflectionMethod($this, 'withoutDefaultValue');
         $refParameter = $refMethod->getParameters()[0];
-        $docBlockObj = $cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $docBlockFactory->create($refMethod);
         $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $this->expectException(CannotHideParameterRuntimeException::class);

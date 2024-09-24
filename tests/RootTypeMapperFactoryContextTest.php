@@ -5,10 +5,10 @@ namespace TheCodingMachine\GraphQLite;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\Cache\Simple\ArrayCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NS;
 
 class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
 {
@@ -19,7 +19,9 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
         $namingStrategy = new NamingStrategy();
         $container = new EmptyContainer();
         $arrayCache = new Psr16Cache(new ArrayAdapter());
-        $nsList = [$this->getNamespaceFactory()->createNamespace('namespace')];
+        $classFinder = $this->getClassFinder('namespace');
+        $classFinderComputedCache = $this->getClassFinderComputedCache();
+        $classBoundCache = new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...));
 
         $context = new RootTypeMapperFactoryContext(
             $this->getAnnotationReader(),
@@ -29,8 +31,9 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
             $this->getTypeMapper(),
             $container,
             $arrayCache,
-            $nsList,
-            self::GLOB_TTL_SECONDS
+            $classFinder,
+            $classFinderComputedCache,
+            $classBoundCache,
         );
 
         $this->assertSame($this->getAnnotationReader(), $context->getAnnotationReader());
@@ -40,9 +43,8 @@ class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
         $this->assertSame($this->getTypeMapper(), $context->getRecursiveTypeMapper());
         $this->assertSame($container, $context->getContainer());
         $this->assertSame($arrayCache, $context->getCache());
-        $this->assertSame($nsList, $context->getTypeNamespaces());
-        $this->assertContainsOnlyInstancesOf(NS::class, $context->getTypeNamespaces());
-        $this->assertSame(self::GLOB_TTL_SECONDS, $context->getGlobTTL());
-        $this->assertNull($context->getMapTTL());
+        $this->assertSame($classFinder, $context->getClassFinder());
+        $this->assertSame($classFinderComputedCache, $context->getClassFinderComputedCache());
+        $this->assertSame($classBoundCache, $context->getClassBoundCache());
     }
 }

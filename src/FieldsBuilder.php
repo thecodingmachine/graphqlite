@@ -46,7 +46,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
@@ -84,7 +84,7 @@ class FieldsBuilder
         private readonly RecursiveTypeMapperInterface $recursiveTypeMapper,
         private readonly ArgumentResolver $argumentResolver,
         private readonly TypeResolver $typeResolver,
-        private readonly CachedDocBlockFactory $cachedDocBlockFactory,
+        private readonly DocBlockFactory $docBlockFactory,
         private readonly NamingStrategyInterface $namingStrategy,
         private readonly RootTypeMapperInterface $rootTypeMapper,
         private readonly ParameterMiddlewareInterface $parameterMapper,
@@ -96,7 +96,7 @@ class FieldsBuilder
             $this->argumentResolver,
             $this->rootTypeMapper,
             $this->typeResolver,
-            $this->cachedDocBlockFactory,
+            $this->docBlockFactory,
         );
     }
 
@@ -309,7 +309,7 @@ class FieldsBuilder
      */
     public function getParameters(ReflectionMethod $refMethod, int $skip = 0): array
     {
-        $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+        $docBlockObj = $this->docBlockFactory->create($refMethod);
         //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = array_slice($refMethod->getParameters(), $skip);
@@ -455,7 +455,7 @@ class FieldsBuilder
                 $description = $queryAnnotation->getDescription();
             }
 
-            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+            $docBlockObj = $this->docBlockFactory->create($refMethod);
 
             $name = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
@@ -565,7 +565,7 @@ class FieldsBuilder
                 $description = $queryAnnotation->getDescription();
             }
 
-            $docBlock = $this->cachedDocBlockFactory->getDocBlock($refProperty);
+            $docBlock = $this->docBlockFactory->create($refProperty);
 
             $name = $queryAnnotation->getName() ?: $refProperty->getName();
 
@@ -684,7 +684,7 @@ class FieldsBuilder
                     throw FieldNotFoundException::wrapWithCallerInfo($e, $refClass->getName());
                 }
 
-                $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+                $docBlockObj = $this->docBlockFactory->create($refMethod);
                 $docBlockComment = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
 
                 $deprecated = $docBlockObj->getTagsByName('deprecated');
@@ -820,7 +820,7 @@ class FieldsBuilder
     {
         $typeResolver = new \phpDocumentor\Reflection\TypeResolver();
 
-        $context = $this->cachedDocBlockFactory->getContextFromClass($refClass);
+        $context = $this->docBlockFactory->createContext($refClass);
         $phpdocType = $typeResolver->resolve($phpTypeStr, $context);
         assert($phpdocType !== null);
 
@@ -969,7 +969,7 @@ class FieldsBuilder
                 $prefetchParameters = $prefetchRefMethod->getParameters();
                 array_shift($prefetchParameters);
 
-                $prefetchDocBlockObj = $this->cachedDocBlockFactory->getDocBlock($prefetchRefMethod);
+                $prefetchDocBlockObj = $this->docBlockFactory->create($prefetchRefMethod);
                 $prefetchArgs = $this->mapParameters($prefetchParameters, $prefetchDocBlockObj);
 
                 return new PrefetchDataParameter(
@@ -1025,7 +1025,7 @@ class FieldsBuilder
                 continue;
             }
 
-            $docBlockObj = $this->cachedDocBlockFactory->getDocBlock($refMethod);
+            $docBlockObj = $this->docBlockFactory->create($refMethod);
             $methodName = $refMethod->getName();
             if (! str_starts_with($methodName, 'set')) {
                 continue;
@@ -1122,7 +1122,7 @@ class FieldsBuilder
         $fields = [];
 
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
-        $docBlock = $this->cachedDocBlockFactory->getDocBlock($refProperty);
+        $docBlock = $this->docBlockFactory->create($refProperty);
         foreach ($annotations as $annotation) {
             $description = null;
 

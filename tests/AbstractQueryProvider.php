@@ -10,6 +10,8 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
+use Kcs\ClassFinder\FileFinder\CachedFileFinder;
+use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
@@ -18,9 +20,17 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
+use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -45,7 +55,9 @@ use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
-use TheCodingMachine\GraphQLite\Reflection\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
@@ -54,7 +66,6 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
-use TheCodingMachine\GraphQLite\Utils\Namespaces\NamespaceFactory;
 
 abstract class AbstractQueryProvider extends TestCase
 {
@@ -73,7 +84,6 @@ abstract class AbstractQueryProvider extends TestCase
     private $typeRegistry;
     private $parameterMiddlewarePipe;
     private $rootTypeMapper;
-    private $namespaceFactory;
 
     protected function getTestObjectType(): MutableObjectType
     {
@@ -265,13 +275,21 @@ abstract class AbstractQueryProvider extends TestCase
         return $this->parameterMiddlewarePipe;
     }
 
-    protected function getCachedDocBlockFactory(): CachedDocBlockFactory
+    protected function getDocBlockFactory(): DocBlockFactory
+    {
+        return new CachedDocBlockFactory(
+            $this->getClassBoundCache(),
+            PhpDocumentorDocBlockFactory::default(),
+        );
+    }
+
+    private function getClassBoundCache(): ClassBoundCache
     {
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $psr16Cache = new Psr16Cache($arrayAdapter);
 
-        return new CachedDocBlockFactory($psr16Cache);
+        return new SnapshotClassBoundCache($psr16Cache, FilesSnapshot::alwaysUnchanged(...));
     }
 
     protected function buildFieldsBuilder(): FieldsBuilder
@@ -307,7 +325,7 @@ abstract class AbstractQueryProvider extends TestCase
             $this->getTypeMapper(),
             $this->getArgumentResolver(),
             $this->getTypeResolver(),
-            $this->getCachedDocBlockFactory(),
+            $this->getDocBlockFactory(),
             new NamingStrategy(),
             $this->buildRootTypeMapper(),
             $parameterMiddlewarePipe,
@@ -350,15 +368,16 @@ abstract class AbstractQueryProvider extends TestCase
         $rootTypeMapper = new MyCLabsEnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
-            $arrayAdapter,
-            [],
+            new StaticClassFinder([]),
+            new HardClassFinderComputedCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new EnumTypeMapper(
             $rootTypeMapper,
             $this->getAnnotationReader(),
-            $arrayAdapter,
-            [],
+            $this->getDocBlockFactory(),
+            new StaticClassFinder([]),
+            new HardClassFinderComputedCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new CompoundTypeMapper(
@@ -449,15 +468,28 @@ abstract class AbstractQueryProvider extends TestCase
         return (new PhpDocumentorTypeResolver())->resolve($type);
     }
 
-    protected function getNamespaceFactory(): NamespaceFactory
+    protected function getClassFinder(array|string $namespaces): ClassFinder
     {
-        if ($this->namespaceFactory === null) {
-            $arrayAdapter = new ArrayAdapter();
-            $arrayAdapter->setLogger(new ExceptionLogger());
-            $psr16Cache = new Psr16Cache($arrayAdapter);
+        $finder = new ComposerFinder();
 
-            $this->namespaceFactory = new NamespaceFactory($psr16Cache, new ComposerFinder());
+        foreach ((array) $namespaces as $namespace) {
+            $finder->inNamespace($namespace);
         }
-        return $this->namespaceFactory;
+
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+
+        $finder = $finder->withFileFinder(new CachedFileFinder(new DefaultFileFinder(), $arrayAdapter));
+
+        return new KcsClassFinder($finder);
+    }
+
+    protected function getClassFinderComputedCache(): ClassFinderComputedCache
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $psr16Cache = new Psr16Cache($arrayAdapter);
+
+        return new HardClassFinderComputedCache($psr16Cache);
     }
 }

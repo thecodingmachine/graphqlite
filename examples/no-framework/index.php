@@ -24,8 +24,7 @@ $container = new Picotainer([
 ]);
 
 $factory = new SchemaFactory($cache, $container);
-$factory->addControllerNamespace('App\\Controllers')
-        ->addTypeNamespace('App');
+$factory->addNamespace('App');
 
 $schema = $factory->createSchema();
 
