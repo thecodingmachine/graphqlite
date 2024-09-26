@@ -194,14 +194,17 @@ final class QueryField extends FieldDefinition
      */
     public static function deferred(array $toPassArgs, Closure $callResolver): mixed
     {
+        $deferredArgument = null;
         foreach ($toPassArgs as $position => $toPassArg) {
             if ($toPassArg instanceof SyncPromise) {
-                return $toPassArg->then(static function ($resolvedValue) use ($toPassArgs, $position, $callResolver) {
+                $deferredArgument = $toPassArg->then(static function ($resolvedValue) use ($toPassArgs, $position, $callResolver) {
                     $toPassArgs[$position] = $resolvedValue;
                     return self::deferred($toPassArgs, $callResolver);
                 });
+                break;
             }
         }
-        return $callResolver(...$toPassArgs);
+
+        return $deferredArgument ?? $callResolver(...$toPassArgs);
     }
 }

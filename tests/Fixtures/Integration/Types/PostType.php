@@ -29,17 +29,17 @@ class PostType
     }
 
     /**
-     * @param Comment[] $prefetchedComments
+     * @param Comment[][] $prefetchedComments
      *
      * @return Comment[]
      */
     #[Field]
     public function getComments(
         Post $post,
-        #[Prefetch('prefetchComments', true)]
+        #[Prefetch('prefetchComments')]
         array $prefetchedComments,
     ): array {
-        return $prefetchedComments;
+        return $prefetchedComments[$post->title];
     }
 
     /**
@@ -49,11 +49,14 @@ class PostType
      *
      * @throws Exception
      */
-    public static function prefetchComments(array $posts): iterable
+    public static function prefetchComments(array $posts): Promise
     {
         $syncPromiseAdapter = new SyncPromiseAdapter();
-        foreach ($posts as $key => $post) {
-            yield $key => $syncPromiseAdapter->createFulfilled([new Comment('comment for ' . $post->title)]);
+        $result = [];
+        foreach ($posts as $post) {
+            $result[$post->title] = [new Comment('comment for ' . $post->title)];
         }
+
+        return $syncPromiseAdapter->createFulfilled($result);
     }
 }

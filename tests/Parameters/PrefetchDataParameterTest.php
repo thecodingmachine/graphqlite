@@ -71,7 +71,7 @@ class PrefetchDataParameterTest extends TestCase
         self::assertFalse($buffer->hasResult($source));
         self::assertSame([$source], $buffer->getObjectsByArguments($args));
         self::assertSame($prefetchResult, $this->deferredValue($resolvedParameterPromise));
-        self::assertTrue($buffer->hasResult($source));
+        self::assertFalse($buffer->hasResult($source));
     }
 
     private function deferredValue(Deferred $promise): mixed

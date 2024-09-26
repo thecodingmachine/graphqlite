@@ -44,29 +44,4 @@ class CompanyType
 
         return $contacts;
     }
-
-    #[Field]
-    public function getContactRequested(
-        Company $company,
-        #[Prefetch('prefetchContactsExact', true)]
-        Contact $contact,
-    ): Contact|null {
-        return $contact;
-    }
-
-    /**
-     * @param Company[] $companies
-     *
-     * @return Contact[]
-     */
-    public static function prefetchContactsExact(array $companies): array
-    {
-        $contacts = [];
-
-        foreach ($companies as $key => $company) {
-            $contacts[$key] = new Contact('Kate');
-        }
-
-        return $contacts;
-    }
 }

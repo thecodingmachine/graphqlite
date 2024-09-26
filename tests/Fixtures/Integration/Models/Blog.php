@@ -23,29 +23,29 @@ class Blog
     }
 
     /**
-     * @param Post[] $prefetchedPosts
+     * @param Post[][] $prefetchedPosts
      *
      * @return Post[]
      */
     #[Field]
     public function getPosts(
-        #[Prefetch('prefetchPosts', true)]
+        #[Prefetch('prefetchPosts')]
         array $prefetchedPosts,
     ): array {
-        return $prefetchedPosts;
+        return $prefetchedPosts[$this->id];
     }
 
     /**
-     * @param Blog[] $prefetchedSubBlogs
+     * @param Blog[][] $prefetchedSubBlogs
      *
      * @return Blog[]
      */
     #[Field]
     public function getSubBlogs(
-        #[Prefetch('prefetchSubBlogs', true)]
+        #[Prefetch('prefetchSubBlogs')]
         array $prefetchedSubBlogs,
     ): array {
-        return $prefetchedSubBlogs;
+        return $prefetchedSubBlogs[$this->id];
     }
 
     /**
@@ -56,9 +56,9 @@ class Blog
     public static function prefetchPosts(iterable $blogs): array
     {
         $posts = [];
-        foreach ($blogs as $key => $blog) {
+        foreach ($blogs as $blog) {
             $blogId = $blog->getId();
-            $posts[$key] = [
+            $posts[$blog->getId()] = [
                 new Post('post-' . $blogId . '.1'),
                 new Post('post-' . $blogId . '.2'),
             ];
@@ -75,10 +75,10 @@ class Blog
     public static function prefetchSubBlogs(iterable $blogs): array
     {
         $subBlogs = [];
-        foreach ($blogs as $key => $blog) {
+        foreach ($blogs as $blog) {
             $blogId = $blog->getId();
             $subBlogId = $blogId * 10;
-            $subBlogs[$key] = [new Blog($subBlogId)];
+            $subBlogs[$blog->id] = [new Blog($subBlogId)];
         }
 
         return $subBlogs;

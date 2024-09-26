@@ -89,4 +89,10 @@ class PrefetchBuffer
     ): mixed {
         return $this->results->offsetGet($source);
     }
+
+    public function purgeResult(
+        object $source,
+    ): void {
+        $this->results->offsetUnset($source);
+    }
 }

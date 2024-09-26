@@ -52,83 +52,19 @@ class PostType {
     {
         // This method will receive the $prefetchedUsers as first argument. This is the return value of the "prefetchUsers" method below.
         // Using this prefetched list, it should be easy to map it to the post
-        return $prefetchedUsers[$this->getUserId()];
     }
 
     /**
      * @param Post[] $posts
      * @return mixed
      */
-    public static function prefetchUsers(iterable $posts, #[Autowire] UserProvider $loader)
+    public static function prefetchUsers(iterable $posts)
     {
         // This function is called only once per GraphQL request
         // with the list of posts. You can fetch the list of users
         // associated with this posts in a single request,
         // for instance using a "IN" query in SQL or a multi-fetch
         // in your cache back-end.
-        $userIds = [];
-        foreach($posts as $post){
-            $userIds[] = $post->getUserId();
-        }
-        return $loader->loadMany($userIds)
-    }
-}
-```
-
-When a `#[Prefetch]` attribute is constructed with returnRequested: true $prefetchedUser argument will be the mapped
-value resolved for concrete PostType, so you dont need to extract value from prefetched values
-
-```php
-#[Type]
-class PostType {
-    /**
-     * @param User $prefetchedUser
-     * @return User
-     */
-    #[Field]
-    public function getUser(#[Prefetch("prefetchUsers", returnRequested: true)] $prefetchedUser): User
-    {
-        return $prefetchedUser;
-    }
-
-    /**
-     * @param Post[] $posts
-     * @return iterable
-     */
-    public static function prefetchUsers(iterable $posts): iterable
-    {
-        foreach($posts as $post){
-            yield new User(...);
-        }
-    }
-}
-```
-
-
-`#[Prefetch('prefetchUsers', true)]` callable can also return Promise[], so you can use for example Overblog DataLoader
-
-```php
-#[Type]
-class PostType {
-    /**
-     * @param User $prefetchedUser
-     * @return User
-     */
-    #[Field]
-    public function getUser(#[Prefetch("prefetchUsers", returnRequested: true)] $prefetchedUser): User
-    {
-        return $prefetchedUser;
-    }
-
-    /**
-     * @param Post[] $posts
-     * @return iterable
-     */
-    public static function prefetchUsers(iterable $posts, #[Autowire] DataLoader $dataloader): iterable
-    {
-        foreach($posts as $post){
-            yield $dataloader->load($post->getId());
-        }
     }
 }
 ```
