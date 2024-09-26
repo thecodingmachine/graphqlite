@@ -74,15 +74,7 @@ final class QueryField extends FieldDefinition
             $callResolver = function (...$args) use ($originalResolver, $source, $resolver) {
                 $result = $resolver($source, ...$args);
 
-                try {
-                    $this->assertReturnType($result);
-                } catch (TypeMismatchRuntimeException $e) {
-                    $e->addInfo($this->name, $originalResolver->toString());
-
-                    throw $e;
-                }
-
-                return $result;
+                return $this->unwrapReturnType($result, $originalResolver);
             };
 
             // GraphQL allows deferring resolving the field's value using promises, i.e. they call the resolve
@@ -96,6 +88,21 @@ final class QueryField extends FieldDefinition
         $config += $additionalConfig;
 
         parent::__construct($config);
+    }
+
+    private function unwrapReturnType(mixed $result, ResolverInterface $originalResolver): mixed
+    {
+        if ($result instanceof SyncPromise) {
+            return $result->then(fn ($resolvedValue) => $this->unwrapReturnType($resolvedValue, $originalResolver));
+        }
+        try {
+            $this->assertReturnType($result);
+        } catch (TypeMismatchRuntimeException $e) {
+            $e->addInfo($this->name, $originalResolver->toString());
+
+            throw $e;
+        }
+        return $result;
     }
 
     /**

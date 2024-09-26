@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
+use GraphQL\Deferred;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -35,17 +36,13 @@ class Blog
         return $prefetchedPosts[$this->id];
     }
 
-    /**
-     * @param Blog[][] $prefetchedSubBlogs
-     *
-     * @return Blog[]
-     */
-    #[Field]
+    /** @param Blog[][] $prefetchedSubBlogs */
+    #[Field(outputType: '[Blog!]!')]
     public function getSubBlogs(
         #[Prefetch('prefetchSubBlogs')]
         array $prefetchedSubBlogs,
-    ): array {
-        return $prefetchedSubBlogs[$this->id];
+    ): Deferred {
+        return new Deferred(fn () => $prefetchedSubBlogs[$this->id]);
     }
 
     /**
