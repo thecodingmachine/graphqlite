@@ -72,6 +72,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         $toPassPrefetchArgs = QueryField::paramsToArguments($this->fieldName, $this->parameters, null, $args, $context, $info, $this->resolver);
 
         $resolvedValues = ($this->resolver)($sources, ...$toPassPrefetchArgs);
+
         foreach ($sources as $source) {
             // map results to each source to support old prefetch behavior
             $prefetchBuffer->storeResult($source, $resolvedValues);
