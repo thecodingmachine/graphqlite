@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: ['no-framework']
+        example: ['no-framework', 'psr-15']
       fail-fast: false
     steps:
       - name: "Checkout"
