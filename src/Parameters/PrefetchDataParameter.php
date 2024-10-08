@@ -54,7 +54,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         // already knowing all the requested fields (source-arguments combinations).
         return new Deferred(function () use ($source, $info, $context, $args, $prefetchBuffer) {
             if (! $prefetchBuffer->hasResult($source)) {
-                $this->computePrefetch($args, $context, $info, $prefetchBuffer);
+                $this->processPrefetch($args, $context, $info, $prefetchBuffer);
             }
 
             $result = $prefetchBuffer->getResult($source);
@@ -65,7 +65,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
     }
 
     /** @param array<string, mixed> $args */
-    private function computePrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): void
+    private function processPrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): void
     {
         $sources = $prefetchBuffer->getObjectsByArguments($args, $info);
         $prefetchBuffer->purge($args, $info);
