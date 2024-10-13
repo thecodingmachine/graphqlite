@@ -330,6 +330,47 @@ query {
 }
 ```
 
+## Promise mapping
+
+GraphQL includes a native \GraphQL\Deferred type.
+You can map the return type by adding a detailed `@return` statement in the PHPDoc.
+An alternative to the `@return` statement is using `#[Field(outputType: SomeGQLType)]`.
+
+All the previously mentioned mappings work with Promises, except when a return type is explicitly declared
+in the method signature.
+
+This allows you to use \Overblog\DataLoader\DataLoader as an alternative
+for resolving N+1 query issues and caching intermediate results.
+
+```php
+#[Type]
+class Product
+{
+    // ...
+
+    /**
+     * @return string
+     */
+    #[Field]
+    public function getName(): Deferred
+    {
+        return new Deferred(fn() => $this->name);
+    }
+
+    #[Field(outputType: "Float")]
+    public function getPrice(): Deferred
+    {
+        return new Deferred(fn() => $this->price);
+    }
+
+    #[Field(outputType: "[String!]!")]
+    public function getCategories(#[Autowire('categoryDataLoader')] DataLoader $categoryDataLoader): SyncPromise
+    {
+        return $categoryDataLoader->load($this->id)->adoptedPromise;
+    }
+}
+```
+
 ## More scalar types
 
 <small>Available in GraphQLite 4.0+</small>

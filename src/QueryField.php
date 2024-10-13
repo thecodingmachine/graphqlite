@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use GraphQL\Deferred;
+use Closure;
 use GraphQL\Error\ClientAware;
 use GraphQL\Executor\Promise\Adapter\SyncPromise;
-use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
-use GraphQL\Executor\Promise\Promise;
 use GraphQL\Language\AST\FieldDefinitionNode;
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ListOfType;
@@ -21,9 +19,6 @@ use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
-
-use function array_filter;
-use function array_map;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -79,40 +74,37 @@ final class QueryField extends FieldDefinition
             $callResolver = function (...$args) use ($originalResolver, $source, $resolver) {
                 $result = $resolver($source, ...$args);
 
-                try {
-                    $this->assertReturnType($result);
-                } catch (TypeMismatchRuntimeException $e) {
-                    $e->addInfo($this->name, $originalResolver->toString());
-
-                    throw $e;
-                }
-
-                return $result;
+                return $this->resolveWithPromise($result, $originalResolver);
             };
-
-            $deferred = (bool) array_filter($toPassArgs, static fn (mixed $value) => $value instanceof SyncPromise);
 
             // GraphQL allows deferring resolving the field's value using promises, i.e. they call the resolve
             // function ahead of time for all of the fields (allowing us to gather all calls and do something
             // in batch, like prefetch) and then resolve the promises as needed. To support that for prefetch,
             // we're checking if any of the resolved parameters returned a promise. If they did, we know
             // that the value should also be resolved using a promise, so we're wrapping it in one.
-            return $deferred ? new Deferred(static function () use ($toPassArgs, $callResolver) {
-                $syncPromiseAdapter = new SyncPromiseAdapter();
-
-                // Wait for every deferred parameter.
-                $toPassArgs = array_map(
-                    static fn (mixed $value) => $value instanceof SyncPromise ? $syncPromiseAdapter->wait(new Promise($value, $syncPromiseAdapter)) : $value,
-                    $toPassArgs,
-                );
-
-                return $callResolver(...$toPassArgs);
-            }) : $callResolver(...$toPassArgs);
+            return $this->deferred($toPassArgs, $callResolver);
         };
 
         $config += $additionalConfig;
 
         parent::__construct($config);
+    }
+
+    private function resolveWithPromise(mixed $result, ResolverInterface $originalResolver): mixed
+    {
+        if ($result instanceof SyncPromise) {
+            return $result->then(fn ($resolvedValue) => $this->resolveWithPromise($resolvedValue, $originalResolver));
+        }
+
+        try {
+            $this->assertReturnType($result);
+        } catch (TypeMismatchRuntimeException $e) {
+            $e->addInfo($this->name, $originalResolver->toString());
+
+            throw $e;
+        }
+
+        return $result;
     }
 
     /**
@@ -203,5 +195,25 @@ final class QueryField extends FieldDefinition
         GraphQLAggregateException::throwExceptions($exceptions);
 
         return $toPassArgs;
+    }
+
+    /**
+     * @param array<int, mixed> $toPassArgs
+     * Create Deferred if any of arguments contain promise
+     */
+    public static function deferred(array $toPassArgs, Closure $callResolver): mixed
+    {
+        $deferredArgument = null;
+        foreach ($toPassArgs as $position => $toPassArg) {
+            if ($toPassArg instanceof SyncPromise) {
+                $deferredArgument = $toPassArg->then(static function ($resolvedValue) use ($toPassArgs, $position, $callResolver) {
+                    $toPassArgs[$position] = $resolvedValue;
+                    return self::deferred($toPassArgs, $callResolver);
+                });
+                break;
+            }
+        }
+
+        return $deferredArgument ?? $callResolver(...$toPassArgs);
     }
 }

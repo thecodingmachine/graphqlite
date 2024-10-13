@@ -52,24 +52,31 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         // So we record all of these ->resolve() calls, collect them together and when a value is actually
         // needed, GraphQL calls the callback of Deferred below. That's when we call the prefetch method,
         // already knowing all the requested fields (source-arguments combinations).
-        return new Deferred(function () use ($info, $context, $args, $prefetchBuffer) {
-            if (! $prefetchBuffer->hasResult($args, $info)) {
-                $prefetchResult = $this->computePrefetch($args, $context, $info, $prefetchBuffer);
-
-                $prefetchBuffer->storeResult($prefetchResult, $args, $info);
+        return new Deferred(function () use ($source, $info, $context, $args, $prefetchBuffer) {
+            if (! $prefetchBuffer->hasResult($source)) {
+                $this->processPrefetch($args, $context, $info, $prefetchBuffer);
             }
 
-            return $prefetchResult ?? $prefetchBuffer->getResult($args, $info);
+            $result = $prefetchBuffer->getResult($source);
+            // clear internal storage
+            $prefetchBuffer->purgeResult($source);
+            return $result;
         });
     }
 
     /** @param array<string, mixed> $args */
-    private function computePrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): mixed
+    private function processPrefetch(array $args, mixed $context, ResolveInfo $info, PrefetchBuffer $prefetchBuffer): void
     {
         $sources = $prefetchBuffer->getObjectsByArguments($args, $info);
+        $prefetchBuffer->purge($args, $info);
         $toPassPrefetchArgs = QueryField::paramsToArguments($this->fieldName, $this->parameters, null, $args, $context, $info, $this->resolver);
 
-        return ($this->resolver)($sources, ...$toPassPrefetchArgs);
+        $resolvedValues = ($this->resolver)($sources, ...$toPassPrefetchArgs);
+
+        foreach ($sources as $source) {
+            // map results to each source to support old prefetch behavior
+            $prefetchBuffer->storeResult($source, $resolvedValues);
+        }
     }
 
     /** @inheritDoc */

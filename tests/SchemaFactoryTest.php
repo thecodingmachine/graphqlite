@@ -18,6 +18,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers\ContactController;
+use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Comment;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
@@ -118,6 +119,7 @@ class SchemaFactoryTest extends TestCase
             ContactFactory::class,
             ContactOtherType::class,
             ContactType::class,
+            Comment::class,
             Post::class,
             PostType::class,
             Company::class,

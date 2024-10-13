@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite\Parameters;
 
-use Generator;
 use GraphQL\Deferred;
 use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
 use GraphQL\Executor\Promise\Promise;
@@ -11,8 +10,6 @@ use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use TheCodingMachine\GraphQLite\Context\Context;
-use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
-use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 
 class PrefetchDataParameterTest extends TestCase
@@ -32,7 +29,7 @@ class PrefetchDataParameterTest extends TestCase
         ];
         $buffer = $context->getPrefetchBuffer($parameter);
 
-        $buffer->storeResult($prefetchResult, $args);
+        $buffer->storeResult($source, $prefetchResult);
 
         $resolvedParameterPromise = $parameter->resolve($source, $args, $context, $this->createStub(ResolveInfo::class));
 
@@ -71,10 +68,10 @@ class PrefetchDataParameterTest extends TestCase
 
         $resolvedParameterPromise = $parameter->resolve($source, $args, $context, $this->createStub(ResolveInfo::class));
 
-        self::assertFalse($buffer->hasResult($args));
+        self::assertFalse($buffer->hasResult($source));
         self::assertSame([$source], $buffer->getObjectsByArguments($args));
         self::assertSame($prefetchResult, $this->deferredValue($resolvedParameterPromise));
-        self::assertTrue($buffer->hasResult($args));
+        self::assertFalse($buffer->hasResult($source));
     }
 
     private function deferredValue(Deferred $promise): mixed
