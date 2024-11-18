@@ -29,8 +29,8 @@ use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
-use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
@@ -66,6 +66,9 @@ use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+
+use function implode;
+use function md5;
 
 abstract class AbstractQueryProvider extends TestCase
 {
@@ -481,7 +484,9 @@ abstract class AbstractQueryProvider extends TestCase
 
         $finder = $finder->withFileFinder(new CachedFileFinder(new DefaultFileFinder(), $arrayAdapter));
 
-        return new KcsClassFinder($finder);
+        $hash = md5(implode(',', (array) $namespaces));
+
+        return new KcsClassFinder($finder, $hash);
     }
 
     protected function getClassFinderComputedCache(): ClassFinderComputedCache

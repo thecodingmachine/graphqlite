@@ -8,12 +8,13 @@ use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
+use function sprintf;
+
 class HardClassFinderComputedCache implements ClassFinderComputedCache
 {
     public function __construct(
         private readonly CacheInterface $cache,
-    )
-    {
+    ) {
     }
 
     /**
@@ -32,6 +33,7 @@ class HardClassFinderComputedCache implements ClassFinderComputedCache
         callable $reduce,
     ): mixed
     {
+        $key = sprintf('%s.%s', $key, $classFinder->hash());
         $result = $this->cache->get($key);
 
         if ($result !== null) {

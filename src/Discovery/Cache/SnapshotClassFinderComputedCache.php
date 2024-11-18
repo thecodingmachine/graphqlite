@@ -9,6 +9,8 @@ use ReflectionClass;
 use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
+use function sprintf;
+
 /**
  * Provides cache for a {@see ClassFinder} based on a {@see filemtime()}.
  *
@@ -49,6 +51,7 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
         callable $reduce,
     ): mixed
     {
+        $key = sprintf('%s.%s', $key, $classFinder->hash());
         $entries = $this->entries($classFinder, $key . '.entries', $map);
 
         return $reduce($entries);

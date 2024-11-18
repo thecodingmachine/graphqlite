@@ -95,12 +95,19 @@ class IntegrationTestCase extends TestCase
                 return new Schema($container->get(QueryProviderInterface::class), $container->get(RecursiveTypeMapperInterface::class), $container->get(TypeResolver::class), $container->get(RootTypeMapperInterface::class));
             },
             ClassFinder::class => function () {
-                $composerFinder = new ComposerFinder();
-                $composerFinder->inNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types');
-                $composerFinder->inNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models');
-                $composerFinder->inNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers');
+                $namespaces = [
+                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
+                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
+                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers',
+                ];
 
-                return new KcsClassFinder($composerFinder);
+                $hash = md5(implode(',', $namespaces));
+                $composerFinder = new ComposerFinder();
+                foreach ($namespaces as $namespace) {
+                    $composerFinder->inNamespace($namespace);
+                }
+
+                return new KcsClassFinder($composerFinder, $hash);
             },
             ClassFinderComputedCache::class => function () {
                 return new HardClassFinderComputedCache(
