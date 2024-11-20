@@ -20,9 +20,10 @@ class KcsClassFinderTest extends TestCase
 {
     public function testYieldsGivenClasses(): void
     {
+        $namespaces = 'TheCodingMachine\GraphQLite\Fixtures\Types';
         $finder = new KcsClassFinder(
-            (new ComposerFinder())
-                ->inNamespace('TheCodingMachine\GraphQLite\Fixtures\Types')
+            (new ComposerFinder())->inNamespace($namespaces),
+            md5($namespaces)
         );
 
         $finderWithPath = $finder->withPathFilter(fn (string $path) => str_contains($path, 'FooExtendType.php'));

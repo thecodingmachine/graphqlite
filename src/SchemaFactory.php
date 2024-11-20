@@ -70,6 +70,7 @@ use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 
 use function array_reverse;
 use function class_exists;
+use function implode;
 use function md5;
 use function substr;
 use function trigger_error;
@@ -565,6 +566,8 @@ class SchemaFactory
             $finder = $finder->inNamespace($namespace);
         }
 
-        return new KcsClassFinder($finder);
+        $hash = md5(implode(',', $this->namespaces));
+
+        return new KcsClassFinder($finder, $hash);
     }
 }

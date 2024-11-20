@@ -13,6 +13,8 @@ use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\TestController;
 
+use function md5;
+
 class GlobControllerQueryProviderTest extends AbstractQueryProvider
 {
     public function testGlob(): void
@@ -39,15 +41,18 @@ class GlobControllerQueryProviderTest extends AbstractQueryProvider
             }
         };
 
+        $namespace = 'TheCodingMachine\\GraphQLite\\Fixtures';
         $finder = new ComposerFinder();
-        $finder->inNamespace('TheCodingMachine\\GraphQLite\\Fixtures');
-        $finder->filter(static fn (ReflectionClass $class) => $class->getNamespaceName() === 'TheCodingMachine\\GraphQLite\\Fixtures'); // Fix for recursive:false
+        $finder->inNamespace($namespace);
+        $finder->filter(static fn (ReflectionClass $class) => $class->getNamespaceName() === $namespace); // Fix for recursive:false
+        $hash = md5($namespace);
+
         $globControllerQueryProvider = new GlobControllerQueryProvider(
             $this->getFieldsBuilder(),
             $container,
             $this->getAnnotationReader(),
-            new KcsClassFinder($finder),
-            new HardClassFinderComputedCache(new Psr16Cache(new NullAdapter()))
+            new KcsClassFinder($finder, $hash),
+            new HardClassFinderComputedCache(new Psr16Cache(new NullAdapter())),
         );
 
         $queries = $globControllerQueryProvider->getQueries();

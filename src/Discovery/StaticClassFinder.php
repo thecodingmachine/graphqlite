@@ -7,10 +7,15 @@ namespace TheCodingMachine\GraphQLite\Discovery;
 use ReflectionClass;
 use Traversable;
 
+use function md5;
+use function serialize;
+
 class StaticClassFinder implements ClassFinder
 {
     /** @var (callable(string): bool)|null  */
     private mixed $pathFilter = null;
+
+    private string|null $hash = null;
 
     /** @param list<class-string> $classes */
     public function __construct(
@@ -40,5 +45,10 @@ class StaticClassFinder implements ClassFinder
 
             yield $class => $classReflection;
         }
+    }
+
+    public function hash(): string
+    {
+        return $this->hash ??= md5(serialize($this->classes));
     }
 }

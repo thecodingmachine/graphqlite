@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Mappers;
 
+use GraphQL\Error\DebugFlag;
+use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
+use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType\BadExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\BadExtendType2\BadExtendType2;
+use TheCodingMachine\GraphQLite\Fixtures\ClassFinderCustomTypeMapper\Types\TestCustomMapperObject;
 use TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes\ChildTestFactory;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\FilterDecorator;
 use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
@@ -28,7 +32,9 @@ use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
 use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class ClassFinderTypeMapperTest extends AbstractQueryProvider
@@ -400,5 +406,70 @@ class ClassFinderTypeMapperTest extends AbstractQueryProvider
         $this->expectException(FailedResolvingInputType::class);
         $this->expectExceptionMessage("Class 'TheCodingMachine\GraphQLite\Fixtures\NonInstantiableInput\AbstractFoo' annotated with @Input must be instantiable.");
         $mapper->mapClassToInputType(AbstractFoo::class);
+    }
+
+    public function testEndToEnd(): void
+    {
+        $container = new LazyContainer([
+            FooType::class => static function () {
+                return new FooType();
+            },
+            FooExtendType::class => static function () {
+                return new FooExtendType();
+            },
+        ]);
+
+        $typeGenerator = $this->getTypeGenerator();
+        $inputTypeGenerator = $this->getInputTypeGenerator();
+
+        $classFinderComputedCache = $this->getClassFinderComputedCache();
+
+        // todo
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addNamespace('TheCodingMachine\GraphQLite\Fixtures\ClassFinderTypeMapper\Types');
+        $schemaFactory->addNamespace('TheCodingMachine\GraphQLite\Fixtures\ClassFinderTypeMapper\Controllers');
+        $schemaFactory->addNamespace('TheCodingMachine\GraphQLite\Fixtures\ClassFinderCustomTypeMapper\Controllers');
+
+        $classFinder = $this->getClassFinder([
+//            'TheCodingMachine\GraphQLite\Fixtures\ClassFinderCustomTypeMapper\Controllers',
+            'TheCodingMachine\GraphQLite\Fixtures\ClassFinderCustomTypeMapper\Types',
+        ]);
+        $mapper = new ClassFinderTypeMapper($classFinder, $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $container, new AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $classFinderComputedCache);
+
+        // Register the class finder type mapper in your application using the SchemaFactory instance
+//        $schemaFactory->addTypeMapper($mapper);
+
+        // ----
+        $schemaFactory->addTypeMapperFactory(new StaticClassListTypeMapperFactory([TestCustomMapperObject::class]));
+
+        $schema = $schemaFactory->createSchema();
+
+        $schema->validate();
+
+        $queryString = '
+            query {
+                legacyObject {
+                    foo
+                }
+                customMapperObject {
+                    foo
+                }
+            }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $this->assertSame([
+            'data' => [
+                'legacyObject' => ['foo' => 42],
+                'customMapperObject' => ['foo' => 42],
+            ],
+//            'legacyObject' => ['foo' => 42],
+        ], $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS));
     }
 }

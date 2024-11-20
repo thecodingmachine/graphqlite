@@ -11,4 +11,9 @@ use ReflectionClass;
 interface ClassFinder extends IteratorAggregate
 {
     public function withPathFilter(callable $filter): self;
+
+    /**
+     * Path filter does not affect the hash.
+     */
+    public function hash(): string;
 }

@@ -12,8 +12,8 @@ class KcsClassFinder implements ClassFinder
 {
     public function __construct(
         private FinderInterface $finder,
-    )
-    {
+        private readonly string $hash,
+    ) {
     }
 
     public function withPathFilter(callable $filter): ClassFinder
@@ -28,5 +28,10 @@ class KcsClassFinder implements ClassFinder
     public function getIterator(): Traversable
     {
         return $this->finder->getIterator();
+    }
+
+    public function hash(): string
+    {
+        return $this->hash;
     }
 }
