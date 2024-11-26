@@ -24,14 +24,19 @@ use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
 
+use function array_diff_key;
 use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
 use function assert;
 use function count;
+use function get_class;
 use function is_a;
 use function reset;
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
 
 class AnnotationReader
 {
@@ -248,11 +253,41 @@ class AnnotationReader
         if (empty($refParameters)) {
             return [];
         }
-        $firstParam = reset($refParameters);
 
+        /** @var array<string, array<int,ParameterAnnotationInterface>> $parameterAnnotationsPerParameter */
+        $parameterAnnotationsPerParameter = [];
+
+        // resolve parameter annotations targeted to method
+        $firstParam = reset($refParameters);
         $method = $firstParam->getDeclaringFunction();
         assert($method instanceof ReflectionMethod);
 
+        $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
+        foreach ($parameterAnnotations as $parameterAnnotation) {
+            trigger_error(
+                "Using '" . ParameterAnnotationInterface::class . "' over methods is deprecated. " .
+                "Found attribute '" . $parameterAnnotation::class .
+                "' over '" . $method->getDeclaringClass()->getName() . ':' . $method->getName() . "'. " .
+                "Please target annotation to the parameter '$" . $parameterAnnotation->getTarget() . "' instead",
+                E_USER_DEPRECATED,
+            );
+
+            $parameterAnnotationsPerParameter[$parameterAnnotation->getTarget()][] = $parameterAnnotation;
+        }
+
+        // Let's check that the referenced parameters actually do exist:
+        $parametersByKey = [];
+        foreach ($refParameters as $refParameter) {
+            $parametersByKey[$refParameter->getName()] = true;
+        }
+        $diff = array_diff_key($parameterAnnotationsPerParameter, $parametersByKey);
+        if (count($diff) > 0) {
+            foreach ($diff as $parameterName => $parameterAnnotations) {
+                throw InvalidParameterException::parameterNotFound($parameterName, get_class($parameterAnnotations[0]), $method);
+            }
+        }
+
+        // resolve parameter annotations targeted to parameter
         foreach ($refParameters as $refParameter) {
             $attributes = $refParameter->getAttributes();
             $parameterAnnotationsPerParameter[$refParameter->getName()] = [...$parameterAnnotationsPerParameter[$refParameter->getName()] ??
