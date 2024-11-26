@@ -34,6 +34,9 @@ use function count;
 use function get_class;
 use function is_a;
 use function reset;
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
 
 class AnnotationReader
 {
@@ -261,6 +264,14 @@ class AnnotationReader
 
         $parameterAnnotations = $this->getMethodAnnotations($method, ParameterAnnotationInterface::class);
         foreach ($parameterAnnotations as $parameterAnnotation) {
+            trigger_error(
+                "Using '" . ParameterAnnotationInterface::class . "' over methods is deprecated. " .
+                "Found attribute '" . $parameterAnnotation::class .
+                "' over '" . $method->getDeclaringClass()->getName() . ':' . $method->getName() . "'. " .
+                "Please target annotation to the parameter '$" . $parameterAnnotation->getTarget() . "' instead",
+                E_USER_DEPRECATED,
+            );
+
             $parameterAnnotationsPerParameter[$parameterAnnotation->getTarget()][] = $parameterAnnotation;
         }
 
