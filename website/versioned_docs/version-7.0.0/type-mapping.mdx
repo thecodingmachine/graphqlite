@@ -559,7 +559,7 @@ query users($status: StatusEnum!) {}
 ```
 
 By default, the name of the GraphQL enum type will be the name of the class. If you have a naming conflict (two classes
-that live in different namespaces with the same class name), you can solve it using the `@EnumType` annotation:
+that live in different namespaces with the same class name), you can solve it using the `name` argument of the `Type` attribute:
 
 <Tabs
   defaultValue="php8"
@@ -570,9 +570,9 @@ that live in different namespaces with the same class name), you can solve it us
   <TabItem value="php8">
 
 ```php
-use TheCodingMachine\GraphQLite\Annotations\EnumType;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
-#[EnumType(name: "UserStatus")]
+#[Type(name: "UserStatus")]
 class StatusEnum extends Enum
 {
     // ...
@@ -583,10 +583,10 @@ class StatusEnum extends Enum
   <TabItem value="php7">
 
 ```php
-use TheCodingMachine\GraphQLite\Annotations\EnumType;
+use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
- * @EnumType(name="UserStatus")
+ * @Type(name="UserStatus")
  */
 class StatusEnum extends Enum
 {
