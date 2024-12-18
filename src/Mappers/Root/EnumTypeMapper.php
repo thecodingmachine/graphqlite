@@ -17,7 +17,7 @@ use ReflectionEnum;
 use ReflectionMethod;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\AnnotationReader;
-use TheCodingMachine\GraphQLite\Annotations\EnumType as EnumTypeAnnotation;
+use TheCodingMachine\GraphQLite\Annotations\Type as TypeAnnotation;
 use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
@@ -121,8 +121,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
 
         // Expose values instead of names if specifically configured to and if enum is string-backed
         $useValues = $typeAnnotation !== null
-            && $typeAnnotation instanceof EnumTypeAnnotation
-            && $typeAnnotation->useValues()
+            && $typeAnnotation instanceof TypeAnnotation
+            && $typeAnnotation->useEnumValues()
             && $reflectionEnum->isBacked()
             && (string) $reflectionEnum->getBackingType() === 'string';
 

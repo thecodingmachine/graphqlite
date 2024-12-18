@@ -29,7 +29,6 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
-use TheCodingMachine\GraphQLite\Middlewares\PrefetchFieldMiddleware;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
