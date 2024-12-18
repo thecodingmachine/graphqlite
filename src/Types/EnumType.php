@@ -19,7 +19,7 @@ class EnumType extends BaseEnumType
 {
     /**
      * @param class-string<UnitEnum> $enumName
-     * @param array<string, string> $caseDescriptions
+     * @param array<string, string|null> $caseDescriptions
      * @param array<string, string> $caseDeprecationReasons
      */
     public function __construct(

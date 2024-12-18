@@ -27,17 +27,16 @@
         "kcs/class-finder": "^0.6.0"
     },
     "require-dev": {
-        "beberlei/porpaginas": "^1.2 || ^2.0",
-        "doctrine/coding-standard": "^11.0 || ^12.0",
+        "beberlei/porpaginas": "^2.0",
+        "doctrine/coding-standard": "^12.0",
         "ecodev/graphql-upload": "^7.0",
-        "laminas/laminas-diactoros": "^2 || ^3",
+        "laminas/laminas-diactoros": "^3.5",
         "myclabs/php-enum": "^1.6.6",
-        "php-coveralls/php-coveralls": "^2.1",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan": "^1.11",
-        "phpunit/phpunit": "^10.1 || ^11.0",
-        "symfony/var-dumper": "^5.4 || ^6.0 || ^7",
-        "thecodingmachine/phpstan-strict-rules": "^1.0"
+        "php-coveralls/php-coveralls": "^2.7",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "symfony/var-dumper": "^6.4"
     },
     "suggest": {
         "beberlei/porpaginas": "If you want automatic pagination in your GraphQL types",

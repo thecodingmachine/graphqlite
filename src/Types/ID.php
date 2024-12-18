@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite\Types;
 use InvalidArgumentException;
 
 use function is_bool;
-use function is_object;
 use function is_scalar;
 use function method_exists;
 
@@ -21,7 +20,7 @@ class ID
      */
     public function __construct(private readonly bool|float|int|string|object $value)
     {
-        if (! is_scalar($value) && (! is_object($value) || ! method_exists($value, '__toString'))) {
+        if (! is_scalar($value) && ! method_exists($value, '__toString')) {
             throw new InvalidArgumentException('ID constructor cannot be passed a non scalar value.');
         }
     }

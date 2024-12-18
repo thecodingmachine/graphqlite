@@ -16,7 +16,7 @@ final class StaticClassListTypeMapperFactory implements TypeMapperFactoryInterfa
     /**
      * StaticClassListTypeMapperFactory constructor.
      *
-     * @param array<int, class-string> $classList The list of classes to be scanned.
+     * @param list<class-string> $classList The list of classes to be scanned.
      */
     public function __construct(
         private array $classList,

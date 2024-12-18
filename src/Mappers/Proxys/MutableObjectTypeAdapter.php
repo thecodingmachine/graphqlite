@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Mappers\Proxys;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
+use TheCodingMachine\GraphQLite\Mappers\Proxys\MutableAdapterTrait;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use function assert;
 
@@ -16,7 +17,6 @@ use function assert;
  */
 final class MutableObjectTypeAdapter extends MutableObjectType
 {
-    /** @use MutableAdapterTrait */
     use MutableAdapterTrait;
 
     public function __construct(ObjectType $type, ?string $className = null)

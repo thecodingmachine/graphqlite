@@ -4,12 +4,7 @@ parameters:
     tmpDir: .phpstan-cache
     paths:
         - src
-    excludePaths:
-         # TODO: exlude only for PHP < 8.1
-        - src/Mappers/Root/EnumTypeMapper.php
-        - src/Types/EnumType.php
     level: 8
-    checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: false
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
@@ -42,3 +37,5 @@ parameters:
         -
            message: '#Call to an undefined method object::__toString\(\)#'
            path : src/Types/ID.php
+        -
+           identifier: missingType.generics

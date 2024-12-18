@@ -11,8 +11,6 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
-use function assert;
-
 /**
  * A GraphQL schema that takes into constructor argument a QueryProvider.
  *
@@ -112,9 +110,7 @@ class Schema extends \GraphQL\Type\Schema
                 return $subscription;
             }
 
-            $type = $rootTypeMapper->mapNameToType($name);
-            assert($type instanceof Type);
-            return $type;
+            return $rootTypeMapper->mapNameToType($name);
         });
 
         $typeResolver->registerSchema($this);

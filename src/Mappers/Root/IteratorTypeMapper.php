@@ -146,7 +146,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
                     // By convention, we trim the NonNull part of the "$subGraphQlType"
                     if ($subGraphQlType instanceof NonNull) {
                         $subGraphQlType = $subGraphQlType->getWrappedType();
-                        assert($subGraphQlType instanceof OutputType && $subGraphQlType instanceof GraphQLType);
+                        assert($subGraphQlType instanceof OutputType);
                     }
                 } else {
                     $subGraphQlType = null;

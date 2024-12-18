@@ -237,7 +237,6 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
     {
         $interfaces = [];
 
-        /** @var array<int, class-string<object>> $implements */
         $implements = class_implements($className);
         foreach ($implements as $interface) {
             if (! $this->typeMapper->canMapClassToType($interface)) {
@@ -359,7 +358,7 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
             $supportedClasses = $this->getClassTree();
             if ($objectType instanceof ObjectFromInterfaceType) {
                 $this->interfaces[$cacheKey] = $objectType->getInterfaces()[0];
-            } elseif ($objectType instanceof MutableObjectType && isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())) {
+            } elseif (isset($supportedClasses[$closestClassName]) && ! empty($supportedClasses[$closestClassName]->getChildren())) {
                 // Cast as an interface
                 $this->interfaces[$cacheKey] = new InterfaceFromObjectType($this->namingStrategy->getInterfaceNameFromConcreteName($objectType->name), $objectType, $subType, $this);
                 $this->typeRegistry->registerType($this->interfaces[$cacheKey]);

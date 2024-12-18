@@ -15,8 +15,6 @@ use Throwable;
 
 use function array_combine;
 use function array_keys;
-use function assert;
-use function is_array;
 
 /**
  * A field input middleware that reads "Security" Symfony annotations.
@@ -85,7 +83,6 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
-        assert(is_array($argsByName));
 
         return $variables + $argsByName;
     }

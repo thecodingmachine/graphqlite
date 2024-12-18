@@ -73,7 +73,6 @@ class InputTypeUtils
         $typeResolver = new TypeResolver();
 
         $phpdocType = $typeResolver->resolve($type);
-        assert($phpdocType !== null);
         $phpdocType = $this->resolveSelf($phpdocType, $refMethod->getDeclaringClass());
         if (! $phpdocType instanceof Object_) {
             throw MissingTypeHintRuntimeException::invalidReturnType($refMethod);

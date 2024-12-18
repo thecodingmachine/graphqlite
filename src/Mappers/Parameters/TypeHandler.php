@@ -53,7 +53,6 @@ use function count;
 use function explode;
 use function in_array;
 use function iterator_to_array;
-use function method_exists;
 use function reset;
 use function trim;
 
@@ -74,7 +73,10 @@ class TypeHandler implements ParameterHandlerInterface
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
     }
 
-    public function mapReturnType(ReflectionMethod $refMethod, DocBlock $docBlockObj): GraphQLType&OutputType
+    public function mapReturnType(
+        ReflectionMethod $refMethod,
+        DocBlock $docBlockObj,
+    ): GraphQLType&OutputType
     {
         $returnType = $refMethod->getReturnType();
         if ($returnType !== null) {
@@ -94,7 +96,7 @@ class TypeHandler implements ParameterHandlerInterface
                 $refMethod,
                 $docBlockObj,
             );
-            assert($type instanceof GraphQLType && $type instanceof OutputType);
+            assert(! $type instanceof InputType);
         } catch (CannotMapTypeExceptionInterface $e) {
             $e->addReturnInfo($refMethod);
             throw $e;
@@ -318,21 +320,14 @@ class TypeHandler implements ParameterHandlerInterface
         }
 
         if ($isNullable === null) {
-            $isNullable = false;
-            // getType function on property reflection is available only since PHP 7.4
-            if (method_exists($refProperty, 'getType')) {
-                $refType = $refProperty->getType();
-                if ($refType !== null) {
-                    $isNullable = $refType->allowsNull();
-                }
-            }
+            $isNullable = $refProperty->getType()?->allowsNull() ?? false;
         }
 
         if ($inputTypeName) {
             $inputType = $this->typeResolver->mapNameToInputType($inputTypeName);
         } else {
             $inputType = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
-            assert($inputType instanceof InputType && $inputType instanceof GraphQLType);
+            assert(! $inputType instanceof OutputType);
         }
 
         $hasDefault = $defaultValue !== null || $isNullable;
@@ -452,8 +447,6 @@ class TypeHandler implements ParameterHandlerInterface
         assert($type instanceof ReflectionNamedType || $type instanceof ReflectionUnionType);
         if ($type instanceof ReflectionNamedType) {
             $phpdocType = $this->phpDocumentorTypeResolver->resolve($type->getName());
-            assert($phpdocType !== null);
-
             $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
 
             if ($type->allowsNull()) {
@@ -467,8 +460,6 @@ class TypeHandler implements ParameterHandlerInterface
                 function ($namedType) use ($reflectionClass): Type {
                     assert($namedType instanceof ReflectionNamedType);
                     $phpdocType = $this->phpDocumentorTypeResolver->resolve($namedType->getName());
-                    assert($phpdocType !== null);
-
                     $phpdocType = $this->resolveSelf($phpdocType, $reflectionClass);
 
                     if ($namedType->allowsNull()) {

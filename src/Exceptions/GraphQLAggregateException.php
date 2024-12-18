@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Exceptions;
 
 use Exception;
 use GraphQL\Error\ClientAware;
+use RuntimeException;
 use Throwable;
 
 use function array_map;
@@ -22,7 +23,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
     /** @param (ClientAware&Throwable)[] $exceptions */
     public function __construct(iterable $exceptions = [])
     {
-        parent::__construct('Many exceptions have be thrown:');
+        parent::__construct('Many exceptions have been thrown:');
 
         foreach ($exceptions as $exception) {
             $this->add($exception);
@@ -56,6 +57,11 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
         $codes = array_map(static function (Throwable $t) {
             return $t->getCode();
         }, $this->exceptions);
+
+        if (count($codes) === 0) {
+            throw new RuntimeException('Unable to determine code for exception');
+        }
+
         $this->code = max($codes);
     }
 
