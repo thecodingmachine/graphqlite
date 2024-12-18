@@ -53,7 +53,6 @@ use function count;
 use function explode;
 use function in_array;
 use function iterator_to_array;
-use function method_exists;
 use function reset;
 use function trim;
 

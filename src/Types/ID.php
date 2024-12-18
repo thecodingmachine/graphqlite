@@ -7,7 +7,6 @@ namespace TheCodingMachine\GraphQLite\Types;
 use InvalidArgumentException;
 
 use function is_bool;
-use function is_object;
 use function is_scalar;
 use function method_exists;
 

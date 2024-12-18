@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Exceptions;
 
 use Exception;
 use GraphQL\Error\ClientAware;
+use RuntimeException;
 use Throwable;
 
 use function array_map;
@@ -58,7 +59,7 @@ class GraphQLAggregateException extends Exception implements GraphQLAggregateExc
         }, $this->exceptions);
 
         if (count($codes) === 0) {
-            throw new \RuntimeException('Unable to determine code for exception');
+            throw new RuntimeException('Unable to determine code for exception');
         }
 
         $this->code = max($codes);

@@ -19,7 +19,6 @@ use Throwable;
 use function array_combine;
 use function array_keys;
 use function assert;
-use function is_array;
 
 /**
  * A field middleware that reads "Security" Symfony annotations.
@@ -30,11 +29,12 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         private readonly ExpressionLanguage $language,
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly AuthorizationServiceInterface $authorizationService,
-    ) {}
+    ) {
+    }
 
     public function process(
         QueryFieldDescriptor $queryFieldDescriptor,
-        FieldHandlerInterface $fieldHandler
+        FieldHandlerInterface $fieldHandler,
     ): FieldDefinition|null
     {
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();

@@ -6,13 +6,9 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use Attribute;
 use BadMethodCallException;
-use TypeError;
 
 use function array_key_exists;
-use function gettype;
-use function is_array;
 use function is_string;
-use function sprintf;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Security implements MiddlewareAnnotationInterface
