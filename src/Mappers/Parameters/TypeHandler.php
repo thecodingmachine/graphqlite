@@ -96,7 +96,7 @@ class TypeHandler implements ParameterHandlerInterface
                 $refMethod,
                 $docBlockObj,
             );
-            assert(! $type instanceof InputType);
+            assert($type instanceof OutputType);
         } catch (CannotMapTypeExceptionInterface $e) {
             $e->addReturnInfo($refMethod);
             throw $e;
@@ -160,7 +160,12 @@ class TypeHandler implements ParameterHandlerInterface
         return reset($varTags)->getType();
     }
 
-    public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, Type|null $paramTagType, ParameterAnnotations $parameterAnnotations): ParameterInterface
+    public function mapParameter(
+        ReflectionParameter $parameter,
+        DocBlock $docBlock,
+        Type|null $paramTagType,
+        ParameterAnnotations $parameterAnnotations,
+    ): ParameterInterface
     {
         $hideParameter = $parameterAnnotations->getAnnotationByType(HideParameter::class);
         if ($hideParameter) {
@@ -327,7 +332,7 @@ class TypeHandler implements ParameterHandlerInterface
             $inputType = $this->typeResolver->mapNameToInputType($inputTypeName);
         } else {
             $inputType = $this->mapPropertyType($refProperty, $docBlock, true, $argumentName, $isNullable);
-            assert(! $inputType instanceof OutputType);
+            assert($inputType instanceof InputType);
         }
 
         $hasDefault = $defaultValue !== null || $isNullable;
