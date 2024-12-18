@@ -50,5 +50,5 @@ The [versioning section of the Docusaurus documentation](https://docusaurus.io/d
     ```bash
     $ docusaurus docs:version 1.1
     ```
-    *Be sure to include the X.X in the version, not just X.*
+    *Be sure to include the X.X.X in the version, not just X.*
 3. Technically, you're done, just commit these changes and the CI workflow will deploy when merged into `master`.
