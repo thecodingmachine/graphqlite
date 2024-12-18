@@ -103,7 +103,7 @@ final class FactoryContext
         return $this->classFinderComputedCache;
     }
 
-    public function getClassBoundCache(): ClassBoundCache|null
+    public function getClassBoundCache(): ClassBoundCache
     {
         return $this->classBoundCache;
     }

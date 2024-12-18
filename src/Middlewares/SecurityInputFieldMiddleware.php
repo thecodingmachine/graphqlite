@@ -85,7 +85,6 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
 
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
-        assert(is_array($argsByName));
 
         return $variables + $argsByName;
     }

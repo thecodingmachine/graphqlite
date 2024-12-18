@@ -497,6 +497,7 @@ class FieldsBuilder
 
             $resolver = is_string($controller)
                 ? new SourceMethodResolver($refMethod)
+                /** @phpstan-ignore argument.type */
                 : new ServiceResolver([$controller, $methodName]);
 
             $fieldDescriptor = new QueryFieldDescriptor(
@@ -512,7 +513,7 @@ class FieldsBuilder
             );
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
-                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
+                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
@@ -605,7 +606,7 @@ class FieldsBuilder
             );
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
-                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
+                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
@@ -744,7 +745,7 @@ class FieldsBuilder
                 ->withMiddlewareAnnotations($sourceField->getMiddlewareAnnotations());
 
             $field = $this->fieldMiddleware->process($fieldDescriptor, new class implements FieldHandlerInterface {
-                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition|null
+                public function handle(QueryFieldDescriptor $fieldDescriptor): FieldDefinition
                 {
                     return QueryField::fromFieldDescriptor($fieldDescriptor);
                 }
@@ -822,7 +823,6 @@ class FieldsBuilder
 
         $context = $this->docBlockFactory->createContext($refClass);
         $phpdocType = $typeResolver->resolve($phpTypeStr, $context);
-        assert($phpdocType !== null);
 
         $fakeDocBlock = new DocBlock('', null, [new DocBlock\Tags\Return_($phpdocType)], $context);
         return $this->typeMapper->mapReturnType($refMethod, $fakeDocBlock);
@@ -1080,7 +1080,7 @@ class FieldsBuilder
             );
 
             $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
+                public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField
                 {
                     return InputField::fromFieldDescriptor($inputFieldDescriptor);
                 }
@@ -1175,7 +1175,7 @@ class FieldsBuilder
             );
 
             $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
-                public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField|null
+                public function handle(InputFieldDescriptor $inputFieldDescriptor): InputField
                 {
                     return InputField::fromFieldDescriptor($inputFieldDescriptor);
                 }

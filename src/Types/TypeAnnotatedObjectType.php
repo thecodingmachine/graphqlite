@@ -61,7 +61,6 @@ class TypeAnnotatedObjectType extends MutableObjectType
                 // FIXME: add an interface with a @Type that is implemented by noone.
                 // Check that it does not trigger an exception.
 
-                /** @var array<int, class-string<object>> $interfaces */
                 $interfaces = class_implements($className);
                 foreach ($interfaces as $interface) {
                     if (! $recursiveTypeMapper->canMapClassToType($interface)) {

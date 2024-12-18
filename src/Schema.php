@@ -113,7 +113,6 @@ class Schema extends \GraphQL\Type\Schema
             }
 
             $type = $rootTypeMapper->mapNameToType($name);
-            assert($type instanceof Type);
             return $type;
         });
 

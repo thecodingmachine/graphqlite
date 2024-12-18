@@ -99,11 +99,7 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
             }, $result);
         }
 
-        if ($result instanceof Promise) {
-            throw new RuntimeException('Only SyncPromiseAdapter is supported');
-        }
-
-        throw new RuntimeException('Unexpected response from StandardServer::executePsrRequest'); // @codeCoverageIgnore
+        throw new RuntimeException('Only SyncPromiseAdapter is supported');
     }
 
     /** @param ExecutionResult|array<int,ExecutionResult>|Promise $result */
@@ -118,19 +114,14 @@ final class WebonyxGraphqlMiddleware implements MiddlewareInterface
                 return $this->httpCodeDecider->decideHttpStatusCode($executionResult);
             }, $result);
 
+            if (count($codes) === 0) {
+                throw new RuntimeException('Unable to determine HTTP status code');
+            }
+
             return (int) max($codes);
         }
 
-        // @codeCoverageIgnoreStart
-        // Code unreachable because exceptions will be triggered in processResult first.
-        // We keep it for defensive programming purpose
-        if ($result instanceof Promise) {
-            throw new RuntimeException('Only SyncPromiseAdapter is supported');
-        }
-
-        throw new RuntimeException('Unexpected response from StandardServer::executePsrRequest');
-
-        // @codeCoverageIgnoreEnd
+        throw new RuntimeException('Only SyncPromiseAdapter is supported');
     }
 
     private function isGraphqlRequest(ServerRequestInterface $request): bool

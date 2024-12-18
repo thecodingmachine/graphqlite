@@ -26,12 +26,16 @@ use function is_array;
  */
 class SecurityFieldMiddleware implements FieldMiddlewareInterface
 {
-    public function __construct(private readonly ExpressionLanguage $language, private readonly AuthenticationServiceInterface $authenticationService, private readonly AuthorizationServiceInterface $authorizationService/*, ?LoggerInterface $logger = null*/)
-    {
-        /*$this->logger = $logger;*/
-    }
+    public function __construct(
+        private readonly ExpressionLanguage $language,
+        private readonly AuthenticationServiceInterface $authenticationService,
+        private readonly AuthorizationServiceInterface $authorizationService,
+    ) {}
 
-    public function process(QueryFieldDescriptor $queryFieldDescriptor, FieldHandlerInterface $fieldHandler): FieldDefinition|null
+    public function process(
+        QueryFieldDescriptor $queryFieldDescriptor,
+        FieldHandlerInterface $fieldHandler
+    ): FieldDefinition|null
     {
         $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
         /** @var Security[] $securityAnnotations */
@@ -116,24 +120,6 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
 
         $argsName = array_keys($parameters);
         $argsByName = array_combine($argsName, $args);
-        assert(is_array($argsByName));
-
-        /*if ($diff = array_intersect(array_keys($variables), array_keys($argsName))) {
-            foreach ($diff as $key => $variableName) {
-                if ($variables[$variableName] !== $argsByName[$variableName]) {
-                    continue;
-                }
-
-                unset($diff[$key]);
-            }
-
-            if ($diff) {
-                $singular = count($diff) === 1;
-                if ($this->logger !== null) {
-                    $this->logger->warning(sprintf('Controller argument%s "%s" collided with the built-in security expression variables. The built-in value%s are being used for the @Security expression.', $singular ? '' : 's', implode('", "', $diff), $singular ? 's' : ''));
-                }
-            }
-        }*/
 
         return $variables + $argsByName;
     }

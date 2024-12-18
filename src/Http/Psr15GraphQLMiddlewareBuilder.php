@@ -51,6 +51,7 @@ class Psr15GraphQLMiddlewareBuilder
         $this->config->setSchema($schema);
         $this->config->setDebugFlag(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
         $this->config->setErrorFormatter([WebonyxErrorHandler::class, 'errorFormatter']);
+        /** @phpstan-ignore argument.type */
         $this->config->setErrorsHandler([WebonyxErrorHandler::class, 'errorHandler']);
         $this->config->setContext(new Context());
         $this->config->setPersistedQueryLoader(new NotSupportedPersistedQueryLoader());

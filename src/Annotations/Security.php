@@ -37,8 +37,6 @@ class Security implements MiddlewareAnnotationInterface
     {
         if (is_string($data)) {
             $data = ['expression' => $data];
-        } elseif (! is_array($data)) {
-            throw new TypeError(sprintf('"%s": Argument $data is expected to be a string or array, got "%s".', __METHOD__, gettype($data)));
         }
 
         $this->expression = $data['value'] ?? $data['expression'] ?? $expression;
