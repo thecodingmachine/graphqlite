@@ -78,9 +78,9 @@ jobs:
         run: "composer cs-check"
 
       - name: "Archive code coverage results"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: "codeCoverage"
+          name: codeCoverage-${{ matrix.php-version }}
           path: "build"
           overwrite: true
 
