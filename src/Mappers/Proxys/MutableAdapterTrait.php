@@ -39,13 +39,13 @@ trait MutableAdapterTrait
         $this->type->assertValid();
     }
 
-    public function jsonSerialize():string
+    public function jsonSerialize(): string
     {
         return $this->type->jsonSerialize();
     }
 
 
-    public function toString():string
+    public function toString(): string
     {
         return $this->type->toString();
     }
