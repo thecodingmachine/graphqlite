@@ -81,7 +81,7 @@ jobs:
       - name: "Archive code coverage results"
         uses: actions/upload-artifact@v4
         with:
-          name: "codeCoverage"
+          name: codeCoverage-${{ matrix.php-version }}
           path: "build"
 
       - uses: codecov/codecov-action@v3.1.4 # upload the coverage to codecov
