@@ -56,7 +56,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader();
 
         $type = $annotationReader->getRequestAnnotation(
-            ReflectionMethod::createFromMethodName(ClassWithInvalidClassAnnotation::class . '::testMethod'),
+            new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'),
             Field::class,
         );
         $this->assertNull($type);
@@ -78,7 +78,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader();
 
         $type = $annotationReader->getMethodAnnotations(
-            ReflectionMethod::createFromMethodName(ClassWithInvalidClassAnnotation::class . '::testMethod'),
+            new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'),
             Field::class,
         );
 
@@ -118,7 +118,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader();
 
         $type = $annotationReader->getRequestAnnotation(
-            ReflectionMethod::createFromMethodName(TestType::class . '::getField'),
+            new ReflectionMethod(TestType::class, 'getField'),
             Field::class,
         );
 
@@ -130,7 +130,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader();
 
         $middlewareAnnotations = $annotationReader->getMiddlewareAnnotations(
-            ReflectionMethod::createFromMethodName(TestType::class . '::getField'),
+            new ReflectionMethod(TestType::class, 'getField'),
         );
 
         /** @var Security[] $securitys */
@@ -146,7 +146,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader();
 
         $parameterAnnotations = $annotationReader->getParameterAnnotationsPerParameter(
-            ReflectionMethod::createFromMethodName(self::class . '::method1')->getParameters(),
+            (new ReflectionMethod(self::class, 'method1'))->getParameters(),
         );
 
         $this->assertInstanceOf(
