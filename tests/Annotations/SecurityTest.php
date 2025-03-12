@@ -4,8 +4,6 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use TypeError;
 
 class SecurityTest extends TestCase
 {

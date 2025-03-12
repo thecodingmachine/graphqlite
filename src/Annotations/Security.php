@@ -35,10 +35,12 @@ class Security implements MiddlewareAnnotationInterface
             $data = ['expression' => $data];
         }
 
-        $this->expression = $data['value'] ?? $data['expression'] ?? $expression;
-        if (! $this->expression) {
+        $expression = $data['value'] ?? $data['expression'] ?? $expression;
+        if (! $expression) {
             throw new BadMethodCallException('The #[Security] attribute must be passed an expression. For instance: "#[Security("is_granted(\'CAN_EDIT_STUFF\')")]"');
         }
+
+        $this->expression = $expression;
 
         if (array_key_exists('failWith', $data)) {
             $this->failWith = $data['failWith'];

@@ -40,17 +40,32 @@ class MagicField implements SourceFieldInterface
         string|null $sourceName = null,
         array $annotations = [],
     ) {
-        $this->name = $attributes['name'] ?? $name;
+        $name = $attributes['name'] ?? $name;
+        if (! $name) {
+            throw new BadMethodCallException(
+                'The #[MagicField] attribute must be passed a name. For instance: #[MagicField(name: "phone")]',
+            );
+        }
+
+        $this->name = $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
         $this->phpType = $attributes['phpType'] ?? $phpType ?? null;
         $this->description = $attributes['description'] ?? $description ?? null;
         $this->sourceName = $attributes['sourceName'] ?? $sourceName ?? null;
 
-        if (! $this->name || (! $this->outputType && ! $this->phpType)) {
-            throw new BadMethodCallException('The #[MagicField] attribute must be passed a name and an output type or a php type. For instance: "#[MagicField(name: \'phone\', outputType: \'String!\')]" or "#[MagicField(name: \'phone\', phpType: \'string\')]"');
+        if (! $this->outputType && ! $this->phpType) {
+            throw new BadMethodCallException(
+                "The #[MagicField] attribute must be passed an output type or a php type.
+                For instance: #[MagicField(name: 'phone', outputType: 'String!')]
+                or #[MagicField(name: 'phone', phpType: 'string')]",
+            );
         }
         if (isset($this->outputType) && $this->phpType) {
-            throw new BadMethodCallException('In a #[MagicField] attribute, you cannot use the outputType and the phpType at the same time. For instance: "#[MagicField(name: \'phone\', outputType: \'String!\')]" or "#[MagicField(name: \'phone\', phpType: \'string\')]"');
+            throw new BadMethodCallException(
+                "In a #[MagicField] attribute, you cannot use the outputType and the phpType at the
+                same time. For instance: #[MagicField(name: 'phone', outputType: 'String!')]
+                or #[MagicField(name: 'phone', phpType: 'string')]",
+            );
         }
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
@@ -64,13 +79,19 @@ class MagicField implements SourceFieldInterface
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
                 $parameterAnnotations[$annotation->getTarget()][] = $annotation;
             } else {
-                throw new BadMethodCallException('The #[MagicField] attribute\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+                throw new BadMethodCallException(
+                    "The #[MagicField] attribute's 'annotation' attribute must be passed an array
+                    of annotations implementing either MiddlewareAnnotationInterface or
+                    ParameterAnnotationInterface.",
+                );
             }
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);
-        $this->parameterAnnotations = array_map(static function (array $parameterAnnotationsForAttribute): ParameterAnnotations {
-            return new ParameterAnnotations($parameterAnnotationsForAttribute);
-        }, $parameterAnnotations);
+        $this->parameterAnnotations = array_map(
+            fn (array $parameterAnnotationsForAttribute): ParameterAnnotations =>
+                new ParameterAnnotations($parameterAnnotationsForAttribute),
+            $parameterAnnotations,
+        );
     }
 
     /**
