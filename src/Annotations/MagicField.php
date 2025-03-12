@@ -88,8 +88,7 @@ class MagicField implements SourceFieldInterface
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);
         $this->parameterAnnotations = array_map(
-            fn (array $parameterAnnotationsForAttribute): ParameterAnnotations =>
-                new ParameterAnnotations($parameterAnnotationsForAttribute),
+            static fn (array $parameterAnnotationsForAttribute): ParameterAnnotations => new ParameterAnnotations($parameterAnnotationsForAttribute),
             $parameterAnnotations,
         );
     }
