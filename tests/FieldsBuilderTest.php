@@ -37,11 +37,13 @@ use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithNullableArray;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithParamDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithReturnDateTime;
 use TheCodingMachine\GraphQLite\Fixtures\TestControllerWithUnionInputParam;
+use TheCodingMachine\GraphQLite\Fixtures\TestDeprecatedField;
 use TheCodingMachine\GraphQLite\Fixtures\TestDoubleReturnTag;
 use TheCodingMachine\GraphQLite\Fixtures\TestEnum;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadInputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestObjectWithDeprecatedField;
 use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType;
 use TheCodingMachine\GraphQLite\Fixtures\TestSourceFieldBadOutputType2;
@@ -921,5 +923,21 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $resolve = $query->resolveFn;
         $result = $resolve($source, [], null, $this->createMock(ResolveInfo::class));
         $this->assertSame('bar value', $result);
+    }
+
+    public function testDeprecationInDocblock(): void
+    {
+        $fieldsBuilder = $this->buildFieldsBuilder();
+        $inputFields = $fieldsBuilder->getFields(
+            new TestDeprecatedField(),
+            'Test',
+        );
+
+        $this->assertCount(2, $inputFields);
+
+        $this->assertEquals('this is deprecated', $inputFields['deprecatedField']->deprecationReason);
+        $this->assertTrue( $inputFields['deprecatedField']->isDeprecated());
+        $this->assertNull( $inputFields['name']->deprecationReason);
+        $this->assertFalse( $inputFields['name']->isDeprecated());
     }
 }

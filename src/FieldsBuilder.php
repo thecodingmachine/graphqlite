@@ -689,6 +689,7 @@ class FieldsBuilder
                 $docBlockComment = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
 
                 $deprecated = $docBlockObj->getTagsByName('deprecated');
+                $deprecationReason = null;
                 if (count($deprecated) >= 1) {
                     $deprecationReason = trim((string) $deprecated[0]);
                 }
