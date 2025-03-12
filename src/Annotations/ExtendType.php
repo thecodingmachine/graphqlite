@@ -19,13 +19,15 @@ use function ltrim;
 class ExtendType
 {
     /** @var class-string<object>|null */
-    private $class;
-    /** @var string|null */
-    private $name;
+    private string|null $class;
+    private string|null $name;
 
     /** @param mixed[] $attributes */
-    public function __construct(array $attributes = [], string|null $class = null, string|null $name = null)
-    {
+    public function __construct(
+        array $attributes = [],
+        string|null $class = null,
+        string|null $name = null,
+    ) {
         $className = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
         $className = $className ?? $class;
         if ($className !== null && ! class_exists($className) && ! interface_exists($className)) {

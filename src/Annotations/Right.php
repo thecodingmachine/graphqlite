@@ -12,8 +12,7 @@ use function is_string;
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Right implements MiddlewareAnnotationInterface
 {
-    /** @var string */
-    private $name;
+    private string $name;
 
     /**
      * @param array<string, mixed>|string $name

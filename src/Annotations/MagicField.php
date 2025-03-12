@@ -16,33 +16,30 @@ use function is_array;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class MagicField implements SourceFieldInterface
 {
-    /** @var string */
-    private $name;
+    private string $name;
+    private string|null $outputType;
+    private string|null $phpType;
+    private string|null $description;
+    private string|null $sourceName;
 
-    /** @var string|null */
-    private $outputType;
-
-    /** @var string|null */
-    private $phpType;
-
-    /** @var string|null */
-    private $description;
-
-    /** @var string|null */
-    private $sourceName;
-
-    /** @var MiddlewareAnnotations */
-    private $middlewareAnnotations;
+    private MiddlewareAnnotations $middlewareAnnotations;
 
     /** @var array<string, ParameterAnnotations> */
-    private $parameterAnnotations;
+    private array $parameterAnnotations;
 
     /**
      * @param mixed[] $attributes
      * @param array<MiddlewareAnnotationInterface|ParameterAnnotationInterface> $annotations
      */
-    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null, array $annotations = [])
-    {
+    public function __construct(
+        array $attributes = [],
+        string|null $name = null,
+        string|null $outputType = null,
+        string|null $phpType = null,
+        string|null $description = null,
+        string|null $sourceName = null,
+        array $annotations = [],
+    ) {
         $this->name = $attributes['name'] ?? $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
         $this->phpType = $attributes['phpType'] ?? $phpType ?? null;

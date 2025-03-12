@@ -20,11 +20,8 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 class EnumType
 {
-    /** @var string|null */
-    private $name;
-
-    /** @var bool */
-    private $useValues;
+    private string|null $name;
+    private bool $useValues;
 
     /** @param mixed[] $attributes */
     public function __construct(array $attributes = [], string|null $name = null, bool|null $useValues = null)

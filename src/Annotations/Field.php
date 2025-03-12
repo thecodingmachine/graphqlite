@@ -13,28 +13,31 @@ use const E_USER_DEPRECATED;
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Field extends AbstractRequest
 {
-    /** @var string|null */
-    private $prefetchMethod;
+    private string|null $prefetchMethod;
 
     /**
      * Input/Output type names for which this fields should be applied to.
      *
      * @var string[]|null
      */
-    private $for = null;
+    private array|null $for = null;
 
-    /** @var string|null */
-    private $description;
-
-    /** @var string|null */
-    private $inputType;
+    private string|null $description;
+    private string|null $inputType;
 
     /**
      * @param mixed[] $attributes
      * @param string|string[] $for
      */
-    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $prefetchMethod = null, string|array|null $for = null, string|null $description = null, string|null $inputType = null)
-    {
+    public function __construct(
+        array $attributes = [],
+        string|null $name = null,
+        string|null $outputType = null,
+        string|null $prefetchMethod = null,
+        string|array|null $for = null,
+        string|null $description = null,
+        string|null $inputType = null,
+    ) {
         parent::__construct($attributes, $name, $outputType);
 
         $this->prefetchMethod = $prefetchMethod ?? $attributes['prefetchMethod'] ?? null;
