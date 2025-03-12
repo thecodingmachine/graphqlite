@@ -12,14 +12,6 @@
   processIsolation="false"
   stopOnFailure="false"
   backupStaticProperties="false"
-
-  displayDetailsOnIncompleteTests="true"
-  displayDetailsOnSkippedTests="true"
-  displayDetailsOnPhpunitDeprecations="true"
-  displayDetailsOnTestsThatTriggerDeprecations="true"
-  displayDetailsOnTestsThatTriggerErrors="true"
-  displayDetailsOnTestsThatTriggerNotices="true"
-  displayDetailsOnTestsThatTriggerWarnings="true"
 >
   <coverage>
     <report>
