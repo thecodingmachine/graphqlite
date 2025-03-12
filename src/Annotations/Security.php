@@ -13,32 +13,34 @@ use function is_string;
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Security implements MiddlewareAnnotationInterface
 {
-    /** @var string */
-    private $expression;
-    /** @var mixed */
-    private $failWith;
-    /** @var bool */
-    private $failWithIsSet = false;
-    /** @var int */
-    private $statusCode;
-    /** @var string */
-    private $message;
+    private string $expression;
+    private mixed $failWith;
+    private bool $failWithIsSet = false;
+    private int $statusCode;
+    private string $message;
 
     /**
      * @param array<string, mixed>|string $data  data array managed by the Doctrine Annotations library or the expression
      *
      * @throws BadMethodCallException
      */
-    public function __construct(array|string $data = [], string|null $expression = null, mixed $failWith = '__fail__with__magic__key__', string|null $message = null, int|null $statusCode = null)
-    {
+    public function __construct(
+        array|string $data = [],
+        string|null $expression = null,
+        mixed $failWith = '__fail__with__magic__key__',
+        string|null $message = null,
+        int|null $statusCode = null,
+    ) {
         if (is_string($data)) {
             $data = ['expression' => $data];
         }
 
-        $this->expression = $data['value'] ?? $data['expression'] ?? $expression;
-        if (! $this->expression) {
+        $expression = $data['value'] ?? $data['expression'] ?? $expression;
+        if (! $expression) {
             throw new BadMethodCallException('The #[Security] attribute must be passed an expression. For instance: "#[Security("is_granted(\'CAN_EDIT_STUFF\')")]"');
         }
+
+        $this->expression = $expression;
 
         if (array_key_exists('failWith', $data)) {
             $this->failWith = $data['failWith'];

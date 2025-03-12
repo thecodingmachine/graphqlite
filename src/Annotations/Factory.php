@@ -13,10 +13,8 @@ use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 #[Attribute(Attribute::TARGET_METHOD)]
 class Factory
 {
-    /** @var string|null */
-    private $name;
-    /** @var bool */
-    private $default;
+    private string|null $name;
+    private bool $default;
 
     /** @param mixed[] $attributes */
     public function __construct(array $attributes = [], string|null $name = null, bool|null $default = null)

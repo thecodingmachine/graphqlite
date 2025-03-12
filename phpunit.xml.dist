@@ -1,18 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd" backupGlobals="false" colors="true" processIsolation="false" stopOnFailure="false" bootstrap="tests/Bootstrap.php" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+  bootstrap="tests/Bootstrap.php"
+
+  cacheDirectory=".phpunit.cache"
+  cacheResult="true"
+
+  backupGlobals="false"
+  colors="true"
+  processIsolation="false"
+  stopOnFailure="false"
+  backupStaticProperties="false"
+>
   <coverage>
     <report>
       <clover outputFile="build/logs/clover.xml"/>
       <html outputDirectory="build/coverage"/>
     </report>
   </coverage>
+
   <testsuites>
     <testsuite name="GraphQLite Test Suite">
       <directory>./tests/</directory>
       <exclude>./tests/Bootstrap.php</exclude>
     </testsuite>
   </testsuites>
+
   <logging/>
+
   <source>
     <include>
       <directory suffix=".php">src/</directory>

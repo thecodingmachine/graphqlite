@@ -9,15 +9,12 @@ use ReflectionClass;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
-use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithTargetMethodParameterAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\Annotations\TargetMethodParameterAnnotation;
 use TheCodingMachine\GraphQLite\Fixtures\Attributes\TestType;
 
 class AnnotationReaderTest extends TestCase
@@ -26,7 +23,10 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $type = $annotationReader->getTypeAnnotation(new ReflectionClass(ClassWithInvalidClassAnnotation::class));
+        $type = $annotationReader->getTypeAnnotation(
+            new ReflectionClass(ClassWithInvalidClassAnnotation::class),
+        );
+
         $this->assertNull($type);
     }
 
@@ -34,14 +34,20 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $this->assertNull($annotationReader->getTypeAnnotation(new ReflectionClass(ClassWithInvalidTypeAnnotation::class)));
+        $this->assertNull($annotationReader->getTypeAnnotation(
+            new ReflectionClass(ClassWithInvalidTypeAnnotation::class)),
+        );
     }
 
     public function testGetAnnotationsWithBadAnnotation(): void
     {
         $annotationReader = new AnnotationReader();
 
-        $types = $annotationReader->getClassAnnotations(new ReflectionClass(ClassWithInvalidClassAnnotation::class), Type::class);
+        $types = $annotationReader->getClassAnnotations(
+            new ReflectionClass(ClassWithInvalidClassAnnotation::class),
+            Type::class,
+        );
+
         $this->assertSame([], $types);
     }
 
@@ -49,7 +55,10 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $type = $annotationReader->getRequestAnnotation(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
+        $type = $annotationReader->getRequestAnnotation(
+            new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'),
+            Field::class,
+        );
         $this->assertNull($type);
     }
 
@@ -59,14 +68,20 @@ class AnnotationReaderTest extends TestCase
 
         $this->expectException(ClassNotFoundException::class);
         $this->expectExceptionMessage("Could not autoload class 'foo' defined in #[ExtendType] attribute of class 'TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
-        $annotationReader->getExtendTypeAnnotation(new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class));
+        $annotationReader->getExtendTypeAnnotation(
+            new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class),
+        );
     }
 
     public function testMethodsWithBadAnnotation(): void
     {
         $annotationReader = new AnnotationReader();
 
-        $type = $annotationReader->getMethodAnnotations(new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'), Field::class);
+        $type = $annotationReader->getMethodAnnotations(
+            new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'),
+            Field::class,
+        );
+
         $this->assertSame([], $type);
     }
 
@@ -102,7 +117,11 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $type = $annotationReader->getRequestAnnotation(new ReflectionMethod(TestType::class, 'getField'), Field::class);
+        $type = $annotationReader->getRequestAnnotation(
+            new ReflectionMethod(TestType::class, 'getField'),
+            Field::class,
+        );
+
         $this->assertInstanceOf(Field::class, $type);
     }
 
@@ -110,7 +129,9 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $middlewareAnnotations = $annotationReader->getMiddlewareAnnotations(new ReflectionMethod(TestType::class, 'getField'));
+        $middlewareAnnotations = $annotationReader->getMiddlewareAnnotations(
+            new ReflectionMethod(TestType::class, 'getField'),
+        );
 
         /** @var Security[] $securitys */
         $securitys = $middlewareAnnotations->getAnnotationsByType(Security::class);
@@ -124,34 +145,14 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $parameterAnnotations = $annotationReader->getParameterAnnotationsPerParameter((new ReflectionMethod(self::class, 'method1'))->getParameters());
+        $parameterAnnotations = $annotationReader->getParameterAnnotationsPerParameter(
+            (new ReflectionMethod(self::class, 'method1'))->getParameters(),
+        );
 
-        $this->assertInstanceOf(Autowire::class, $parameterAnnotations['dao']->getAnnotationByType(Autowire::class));
-    }
-
-    /**
-     * This functionality can be dropped with next major release (8.0) with added explicit deprecations before release.
-     */
-    public function testPhp8AttributeParameterAnnotationsForTargetMethod(): void
-    {
-        $annotationReader = new AnnotationReader();
-
-        $parameterAnnotations = $annotationReader->getParameterAnnotationsPerParameter((new ReflectionMethod(ClassWithTargetMethodParameterAnnotation::class, 'method'))->getParameters());
-
-        $this->assertInstanceOf(TargetMethodParameterAnnotation::class, $parameterAnnotations['bar']->getAnnotationByType(TargetMethodParameterAnnotation::class));
-    }
-
-    /**
-     * This functionality can be dropped with next major release (8.0) with added explicit deprecations before release.
-     */
-    public function testPhp8AttributeParameterAnnotationsForTargetMethodWithInvalidTargetParameter(): void
-    {
-        $annotationReader = new AnnotationReader();
-
-        $this->expectException(InvalidParameterException::class);
-        $this->expectExceptionMessage('Parameter "unexistent" declared in annotation "TheCodingMachine\GraphQLite\Fixtures\Annotations\TargetMethodParameterAnnotation" of method "TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithTargetMethodParameterAnnotation::methodWithInvalidAnnotation()" does not exist.');
-
-        $annotationReader->getParameterAnnotationsPerParameter((new ReflectionMethod(ClassWithTargetMethodParameterAnnotation::class, 'methodWithInvalidAnnotation'))->getParameters());
+        $this->assertInstanceOf(
+            Autowire::class,
+            $parameterAnnotations['dao']->getAnnotationByType(Autowire::class),
+        );
     }
 
     /** @noinspection PhpUnusedPrivateMethodInspection Used in {@see testPhp8AttributeParameterAnnotations} */

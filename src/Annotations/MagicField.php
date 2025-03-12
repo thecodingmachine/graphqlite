@@ -16,44 +16,56 @@ use function is_array;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class MagicField implements SourceFieldInterface
 {
-    /** @var string */
-    private $name;
+    private string $name;
+    private string|null $outputType;
+    private string|null $phpType;
+    private string|null $description;
+    private string|null $sourceName;
 
-    /** @var string|null */
-    private $outputType;
-
-    /** @var string|null */
-    private $phpType;
-
-    /** @var string|null */
-    private $description;
-
-    /** @var string|null */
-    private $sourceName;
-
-    /** @var MiddlewareAnnotations */
-    private $middlewareAnnotations;
+    private MiddlewareAnnotations $middlewareAnnotations;
 
     /** @var array<string, ParameterAnnotations> */
-    private $parameterAnnotations;
+    private array $parameterAnnotations;
 
     /**
      * @param mixed[] $attributes
      * @param array<MiddlewareAnnotationInterface|ParameterAnnotationInterface> $annotations
      */
-    public function __construct(array $attributes = [], string|null $name = null, string|null $outputType = null, string|null $phpType = null, string|null $description = null, string|null $sourceName = null, array $annotations = [])
-    {
-        $this->name = $attributes['name'] ?? $name;
+    public function __construct(
+        array $attributes = [],
+        string|null $name = null,
+        string|null $outputType = null,
+        string|null $phpType = null,
+        string|null $description = null,
+        string|null $sourceName = null,
+        array $annotations = [],
+    ) {
+        $name = $attributes['name'] ?? $name;
+        if (! $name) {
+            throw new BadMethodCallException(
+                'The #[MagicField] attribute must be passed a name. For instance: #[MagicField(name: "phone")]',
+            );
+        }
+
+        $this->name = $name;
         $this->outputType = $attributes['outputType'] ?? $outputType ?? null;
         $this->phpType = $attributes['phpType'] ?? $phpType ?? null;
         $this->description = $attributes['description'] ?? $description ?? null;
         $this->sourceName = $attributes['sourceName'] ?? $sourceName ?? null;
 
-        if (! $this->name || (! $this->outputType && ! $this->phpType)) {
-            throw new BadMethodCallException('The #[MagicField] attribute must be passed a name and an output type or a php type. For instance: "#[MagicField(name: \'phone\', outputType: \'String!\')]" or "#[MagicField(name: \'phone\', phpType: \'string\')]"');
+        if (! $this->outputType && ! $this->phpType) {
+            throw new BadMethodCallException(
+                "The #[MagicField] attribute must be passed an output type or a php type.
+                For instance: #[MagicField(name: 'phone', outputType: 'String!')]
+                or #[MagicField(name: 'phone', phpType: 'string')]",
+            );
         }
         if (isset($this->outputType) && $this->phpType) {
-            throw new BadMethodCallException('In a #[MagicField] attribute, you cannot use the outputType and the phpType at the same time. For instance: "#[MagicField(name: \'phone\', outputType: \'String!\')]" or "#[MagicField(name: \'phone\', phpType: \'string\')]"');
+            throw new BadMethodCallException(
+                "In a #[MagicField] attribute, you cannot use the outputType and the phpType at the
+                same time. For instance: #[MagicField(name: 'phone', outputType: 'String!')]
+                or #[MagicField(name: 'phone', phpType: 'string')]",
+            );
         }
         $middlewareAnnotations = [];
         $parameterAnnotations = [];
@@ -67,13 +79,18 @@ class MagicField implements SourceFieldInterface
             } elseif ($annotation instanceof ParameterAnnotationInterface) {
                 $parameterAnnotations[$annotation->getTarget()][] = $annotation;
             } else {
-                throw new BadMethodCallException('The #[MagicField] attribute\'s "annotations" attribute must be passed an array of annotations implementing either MiddlewareAnnotationInterface or ParameterAnnotationInterface."');
+                throw new BadMethodCallException(
+                    "The #[MagicField] attribute's 'annotation' attribute must be passed an array
+                    of annotations implementing either MiddlewareAnnotationInterface or
+                    ParameterAnnotationInterface.",
+                );
             }
         }
         $this->middlewareAnnotations = new MiddlewareAnnotations($middlewareAnnotations);
-        $this->parameterAnnotations = array_map(static function (array $parameterAnnotationsForAttribute): ParameterAnnotations {
-            return new ParameterAnnotations($parameterAnnotationsForAttribute);
-        }, $parameterAnnotations);
+        $this->parameterAnnotations = array_map(
+            static fn (array $parameterAnnotationsForAttribute): ParameterAnnotations => new ParameterAnnotations($parameterAnnotationsForAttribute),
+            $parameterAnnotations,
+        );
     }
 
     /**
