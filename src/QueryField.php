@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use Closure;
+use GraphQL\Deferred;
 use GraphQL\Error\ClientAware;
 use GraphQL\Executor\Promise\Adapter\SyncPromise;
 use GraphQL\Language\AST\FieldDefinitionNode;
@@ -19,6 +20,8 @@ use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+
+use function is_callable;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -92,6 +95,13 @@ final class QueryField extends FieldDefinition
 
     private function resolveWithPromise(mixed $result, ResolverInterface $originalResolver): mixed
     {
+        // Shorthand for deferring field execution. This does two things:
+        // - removes the dependency on `GraphQL\Deferred` from user land code
+        // - allows inferring the type from PHPDoc (callable(): Type), unlike Deferred, which is not generic
+        if (is_callable($result)) {
+            $result = new Deferred($result);
+        }
+
         if ($result instanceof SyncPromise) {
             return $result->then(fn ($resolvedValue) => $this->resolveWithPromise($resolvedValue, $originalResolver));
         }

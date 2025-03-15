@@ -16,6 +16,7 @@ use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Callable_;
 use phpDocumentor\Reflection\Types\Collection;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
@@ -375,6 +376,7 @@ class TypeHandler implements ParameterHandlerInterface
             $innerType instanceof Array_
             || $innerType instanceof Iterable_
             || $innerType instanceof Mixed_
+            || $innerType instanceof Callable_
             // Try to match generic phpdoc-provided iterables with non-generic return-type-provided iterables
             // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
             || ($innerType instanceof Object_
