@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use phpDocumentor\Reflection\Type as PhpDocumentorType;
 use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Callable_;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Object_;
@@ -124,7 +125,7 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('For ' . self::extendTypeToString($extendType) . ' annotation declared in class "' . $className . '", the pointed at GraphQL type cannot be extended. You can only target types extending the MutableObjectType (like types created with the @Type annotation).');
     }
 
-    /** @param Array_|Iterable_|Object_|Mixed_             $type */
+    /** @param Array_|Iterable_|Object_|Mixed_|Callable_             $type */
     public static function createForMissingPhpDoc(PhpDocumentorType $type, ReflectionMethod|ReflectionProperty $reflector, string|null $argumentName = null): self
     {
         $typeStr = '';
@@ -136,6 +137,8 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
             $typeStr = sprintf('object ("%s")', $type->getFqsen());
         } elseif ($type instanceof Mixed_) {
             $typeStr = 'mixed';
+        } elseif ($type instanceof Callable_) {
+            $typeStr = 'callable';
         }
         assert($typeStr !== '');
         if ($argumentName === null) {
@@ -176,5 +179,20 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
     public static function createForNonNullReturnByTypeMapper(): self
     {
         return new self('a type mapper returned a GraphQL\Type\Definition\NonNull instance. All instances returned by type mappers should be nullable. It is the role of the NullableTypeMapperAdapter class to make a GraphQL type in a "NonNull". Note: this is an error in the TypeMapper code or in GraphQLite itself. Please check your custom type mappers or open an issue on GitHub if you don\'t have any custom type mapper.');
+    }
+
+    public static function createForUnexpectedCallableParameters(): self
+    {
+        return new self('callable() type-hint must not specify any parameters.');
+    }
+
+    public static function createForMissingCallableReturnType(): self
+    {
+        return new self('callable() type-hint must specify its return type. For instance: callable(): int');
+    }
+
+    public static function createForCallableAsInput(): self
+    {
+        return new self('callable() type-hint can only be used as output type.');
     }
 }
