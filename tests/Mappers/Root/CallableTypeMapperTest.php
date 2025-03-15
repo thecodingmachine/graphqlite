@@ -26,6 +26,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 #[CoversClass(CallableTypeMapper::class)]
+#[CoversClass(CannotMapTypeException::class)]
 class CallableTypeMapperTest extends AbstractQueryProvider
 {
     public function testMapsCallableReturnTypeUsingTopRootMapper(): void
