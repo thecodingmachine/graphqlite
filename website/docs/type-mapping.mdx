@@ -332,12 +332,11 @@ query {
 
 ## Promise mapping
 
-GraphQL includes a native \GraphQL\Deferred type.
-You can map the return type by adding a detailed `@return` statement in the PHPDoc.
-An alternative to the `@return` statement is using `#[Field(outputType: SomeGQLType)]`.
+You can defer execution of fields by returning a callable. To specify the field type, add a `@return` PHPDoc annotation
+with a return type, like so: `@return callable(): YourTypeHere`. The callable must not have any parameters.
 
-All the previously mentioned mappings work with Promises, except when a return type is explicitly declared
-in the method signature.
+An alternative way is to return `\GraphQL\Deferred` instances, along with specifying the type through the
+`outputType` parameter of field attributes: `#[Field(outputType: SomeGQLType)]`.
 
 This allows you to use \Overblog\DataLoader\DataLoader as an alternative
 for resolving N+1 query issues and caching intermediate results.
@@ -349,12 +348,12 @@ class Product
     // ...
 
     /**
-     * @return string
+     * @return callable(): string
      */
     #[Field]
-    public function getName(): Deferred
+    public function getName(): callable
     {
-        return new Deferred(fn() => $this->name);
+        return fn() => $this->name;
     }
 
     #[Field(outputType: "Float")]

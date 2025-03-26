@@ -36,13 +36,17 @@ class Blog
         return $prefetchedPosts[$this->id];
     }
 
-    /** @param Blog[][] $prefetchedSubBlogs */
-    #[Field(outputType: '[Blog!]!')]
+    /**
+     * @param Blog[][] $prefetchedSubBlogs
+     *
+     * @return callable(): Blog[]
+     */
+    #[Field]
     public function getSubBlogs(
         #[Prefetch('prefetchSubBlogs')]
         array $prefetchedSubBlogs,
-    ): Deferred {
-        return new Deferred(fn () => $prefetchedSubBlogs[$this->id]);
+    ): callable {
+        return fn () => $prefetchedSubBlogs[$this->id];
     }
 
     /**
