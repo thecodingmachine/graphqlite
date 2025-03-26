@@ -75,10 +75,8 @@ jobs:
         run: "composer phpstan"
 
       - name: "Run coding standard checks with squizlabs/php_codesniffer"
-        run: |
-          php_version=$(php -r 'echo PHP_MAJOR_VERSION * 10000 + PHP_MINOR_VERSION * 100 + PHP_RELEASE_VERSION;')
-          echo "Detected PHP version: $php_version"
-          vendor/bin/phpcs --runtime-set php_version $php_version
+        if: matrix.php-version == '8.1'
+        run: composer cs-check
 
       - name: "Archive code coverage results"
         uses: actions/upload-artifact@v4
@@ -90,8 +88,8 @@ jobs:
       - uses: codecov/codecov-action@v5.1.2 # upload the coverage to codecov
         with:
           fail_ci_if_error: false # optional (default = false) - Need CODECOV_TOKEN
-        # Do not upload in forks, and only on php8.3, latest deps
-        if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.3' && matrix.install-args == '' }}
+        # Do not upload in forks, and only on php8.4, latest deps
+        if: ${{ github.repository == 'thecodingmachine/graphqlite' && matrix.php-version == '8.4' && matrix.install-args == '' }}
 
   examples:
     name: Check Examples
