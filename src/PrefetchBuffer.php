@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\ResolveInfo;
-use SplObjectStorage;
+use WeakMap;
 
 use function md5;
 use function serialize;
@@ -18,12 +18,12 @@ class PrefetchBuffer
     /** @var array<string, array<int, object>> An array of buffered, indexed by hash of arguments. */
     private array $objects = [];
 
-    /** @var SplObjectStorage A Storage of prefetch method results, holds source to resolved values. */
-    private SplObjectStorage $results;
+    /** @var WeakMap A Storage of prefetch method results, holds source to resolved values. */
+    private WeakMap $results;
 
     public function __construct()
     {
-        $this->results = new SplObjectStorage();
+        $this->results = new WeakMap();
     }
 
     /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
