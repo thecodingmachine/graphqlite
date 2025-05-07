@@ -2359,6 +2359,9 @@ class EndToEndTest extends IntegrationTestCase
                         }
                     }
                 }
+                author {
+                    email
+                }
                 posts {
                     title
                     comments {
@@ -2399,6 +2402,9 @@ class EndToEndTest extends IntegrationTestCase
                             ],
                         ],
                     ],
+                    'author' => [
+                        'email' => 'author@graphqlite',
+                    ],
                     'posts' => [
                         [
                             'title' => 'post-1.1',
@@ -2434,6 +2440,9 @@ class EndToEndTest extends IntegrationTestCase
                                 ],
                             ],
                         ],
+                    ],
+                    'author' => [
+                        'email' => 'author@graphqlite',
                     ],
                     'posts' => [
                         [

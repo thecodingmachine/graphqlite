@@ -36,17 +36,13 @@ class Blog
         return $prefetchedPosts[$this->id];
     }
 
-    /**
-     * @param Blog[][] $prefetchedSubBlogs
-     *
-     * @return callable(): Blog[]
-     */
-    #[Field]
+    /** @param Blog[][] $prefetchedSubBlogs */
+    #[Field(outputType: '[Blog!]!')]
     public function getSubBlogs(
         #[Prefetch('prefetchSubBlogs')]
         array $prefetchedSubBlogs,
-    ): callable {
-        return fn () => $prefetchedSubBlogs[$this->id];
+    ): Deferred {
+        return new Deferred(fn () => $prefetchedSubBlogs[$this->id]);
     }
 
     /**
@@ -83,5 +79,11 @@ class Blog
         }
 
         return $subBlogs;
+    }
+
+    /** @return callable(): User  */
+    #[Field]
+    public function author(): callable {
+        return fn () => new User('Author', 'author@graphqlite');
     }
 }
