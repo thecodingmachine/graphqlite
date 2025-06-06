@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Error\Error;
+use GraphQL\Executor\Promise\Adapter\SyncPromise;
+use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
+use GraphQL\Executor\Promise\Promise;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
@@ -44,5 +47,22 @@ class QueryFieldTest extends TestCase
         ], $sourceResolver, $sourceResolver, null, null, []);
 
         $this->assertEquals('Foo argument', $queryField->args[0]->description);
+    }
+
+    public function testWrapsCallableInDeferred(): void
+    {
+        $sourceResolver = new ServiceResolver(static fn () => function () {
+            return 123;
+        });
+        $queryField = new QueryField('foo', Type::string(), [], $sourceResolver, $sourceResolver, null, null, []);
+
+        $deferred = ($queryField->resolveFn)(null, [], null, $this->createStub(ResolveInfo::class));
+
+        $this->assertInstanceOf(SyncPromise::class, $deferred);
+
+        $syncPromiseAdapter = new SyncPromiseAdapter();
+        $syncPromiseAdapter->wait(new Promise($deferred, $syncPromiseAdapter));
+
+        $this->assertSame(123, $deferred->result);
     }
 }

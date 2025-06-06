@@ -80,4 +80,10 @@ class Blog
 
         return $subBlogs;
     }
+
+    /** @return callable(): User  */
+    #[Field]
+    public function author(): callable {
+        return fn () => new User('Author', 'author@graphqlite');
+    }
 }

@@ -35,6 +35,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\CallableTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
@@ -399,6 +400,7 @@ class SchemaFactory
         $lastTopRootTypeMapper = new LastDelegatingTypeMapper();
         $topRootTypeMapper = new NullableTypeMapperAdapter($lastTopRootTypeMapper);
         $topRootTypeMapper = new VoidTypeMapper($topRootTypeMapper);
+        $topRootTypeMapper = new CallableTypeMapper($topRootTypeMapper, $lastTopRootTypeMapper);
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
