@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Context;
 
-use SplObjectStorage;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\PrefetchBuffer;
+use WeakMap;
 
 /**
  * A context class that should be passed to the Webonyx executor.
  */
 class Context implements ContextInterface, ResetableContextInterface
 {
-    private SplObjectStorage $prefetchBuffers;
+    private WeakMap $prefetchBuffers;
 
     public function __construct()
     {
-        $this->prefetchBuffers = new SplObjectStorage();
+        $this->prefetchBuffers = new WeakMap();
     }
 
     /**
@@ -38,6 +38,6 @@ class Context implements ContextInterface, ResetableContextInterface
 
     public function reset(): void
     {
-        $this->prefetchBuffers = new SplObjectStorage();
+        $this->prefetchBuffers = new WeakMap();
     }
 }
