@@ -181,18 +181,23 @@ class CannotMapTypeException extends Exception implements CannotMapTypeException
         return new self('a type mapper returned a GraphQL\Type\Definition\NonNull instance. All instances returned by type mappers should be nullable. It is the role of the NullableTypeMapperAdapter class to make a GraphQL type in a "NonNull". Note: this is an error in the TypeMapper code or in GraphQLite itself. Please check your custom type mappers or open an issue on GitHub if you don\'t have any custom type mapper.');
     }
 
-    public static function createForUnexpectedCallableParameters(): self
+    public static function createForUnexpectedCallable(): self
     {
-        return new self('callable() type-hint must not specify any parameters.');
+        return new self('callable() type-hint is not supported. Use Closure: Closure(): int');
     }
 
-    public static function createForMissingCallableReturnType(): self
+    public static function createForUnexpectedClosureParameters(): self
     {
-        return new self('callable() type-hint must specify its return type. For instance: callable(): int');
+        return new self('Closure() type-hint must not specify any parameters.');
     }
 
-    public static function createForCallableAsInput(): self
+    public static function createForMissingClosureReturnType(): self
     {
-        return new self('callable() type-hint can only be used as output type.');
+        return new self('Closure() type-hint must specify its return type. For instance: Closure(): int');
+    }
+
+    public static function createForClosureAsInput(): self
+    {
+        return new self('Closure() type-hint can only be used as output type.');
     }
 }

@@ -41,7 +41,7 @@ use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CallableTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\ClosureTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
@@ -297,7 +297,7 @@ class IntegrationTestCase extends TestCase
                 );
             },
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {
-                return new CallableTypeMapper(
+                return new ClosureTypeMapper(
                     new VoidTypeMapper(
                         new NullableTypeMapperAdapter(
                             $container->get('topRootTypeMapper')

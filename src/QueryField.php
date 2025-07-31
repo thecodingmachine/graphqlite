@@ -21,8 +21,6 @@ use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 
-use function is_callable;
-
 /**
  * A GraphQL field that maps to a PHP method automatically.
  *
