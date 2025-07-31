@@ -332,8 +332,22 @@ query {
 
 ## Promise mapping
 
-You can defer execution of fields by returning a callable. To specify the field type, add a `@return` PHPDoc annotation
-with a return type, like so: `@return callable(): YourTypeHere`. The callable must not have any parameters.
+You can defer execution of fields by returning a `Closure`. To specify the field type, add a `@return` PHPDoc annotation
+with a return type, like so: `@return Closure(): YourTypeHere`. The closure must not have any parameters.
+
+:::caution
+
+Only `Closure` type is supported, which means that all of the following will work:
+- arrow functions: `fn () => 123`
+- anonymous functions: `function () { return 123; }`
+- first-class callables: `random_int(...)`, `Integer::random(...)` etc
+
+But other callables **will not**:
+- callable strings: `'random_int'`, `'Integer::random'`
+- callable arrays: `[Integer::class, 'random']`, `[$object, 'method']`
+- invokable objects: `new class { function __invoke() { return 123; } }`
+
+:::
 
 An alternative way is to return `\GraphQL\Deferred` instances, along with specifying the type through the
 `outputType` parameter of field attributes: `#[Field(outputType: SomeGQLType)]`.
@@ -348,10 +362,10 @@ class Product
     // ...
 
     /**
-     * @return callable(): string
+     * @return Closure(): string
      */
     #[Field]
-    public function getName(): callable
+    public function getName(): Closure
     {
         return fn() => $this->name;
     }

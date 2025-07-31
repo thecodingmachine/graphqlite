@@ -42,6 +42,16 @@ class CallableTypeMapper implements RootTypeMapperInterface
             throw CannotMapTypeException::createForMissingCallableReturnType();
         }
 
+        // It would also be a good idea to check if the type-hint is actually `Closure(): something`,
+        // not `callable(): something`, because the latter is currently not supported. But to do so,
+        // `phpDocumentor` would need to pass in the type of callable, which it doesn't. All
+        // types that look like callables - are reported as `callable` by phpDocumentor.
+        // The reason for such a check is that any string may be a callable (referring to a global function),
+        // so if a string that looks like a callable is returned from a resolver, it will get wrapped
+        // in `Deferred`, even though it wasn't supposed to be a deferred value. This could be fixed
+        // by combining `QueryField`'s resolver and `CallableTypeMapper` into one place, but
+        // that's not currently possible with GraphQLite's design.
+
         return $this->topRootTypeMapper->toGraphQLOutputType($returnType, null, $reflector, $docBlockObj);
     }
 
