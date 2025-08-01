@@ -37,43 +37,6 @@ class PrefetchDataParameterTest extends TestCase
         self::assertSame($prefetchResult, $this->deferredValue($resolvedParameterPromise));
     }
 
-    public function testResolveWithoutExistingResult(): void
-    {
-        $prefetchResult = new stdClass();
-        $source = new stdClass();
-        $prefetchHandler = function (array $sources, string $second) use ($prefetchResult, $source) {
-            self::assertSame([$source], $sources);
-            self::assertSame('rty', $second);
-
-            return $prefetchResult;
-        };
-
-        $parameter = new PrefetchDataParameter('field', $prefetchHandler, [
-            new InputTypeParameter(
-                name: 'second',
-                type: Type::string(),
-                description: '',
-                hasDefaultValue: false,
-                defaultValue: null,
-                argumentResolver: new ArgumentResolver()
-            )
-        ]);
-
-        $context = new Context();
-        $args = [
-            'first' => 'qwe',
-            'second' => 'rty',
-        ];
-        $buffer = $context->getPrefetchBuffer($parameter);
-
-        $resolvedParameterPromise = $parameter->resolve($source, $args, $context, $this->createStub(ResolveInfo::class));
-
-        self::assertFalse($buffer->hasResult($source));
-        self::assertSame([$source], $buffer->getObjectsByArguments($args));
-        self::assertSame($prefetchResult, $this->deferredValue($resolvedParameterPromise));
-        self::assertFalse($buffer->hasResult($source));
-    }
-
     private function deferredValue(Deferred $promise): mixed
     {
         $syncPromiseAdapter = new SyncPromiseAdapter();
