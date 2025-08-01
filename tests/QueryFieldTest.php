@@ -49,7 +49,7 @@ class QueryFieldTest extends TestCase
         $this->assertEquals('Foo argument', $queryField->args[0]->description);
     }
 
-    public function testWrapsCallableInDeferred(): void
+    public function testWrapsClosureInDeferred(): void
     {
         $sourceResolver = new ServiceResolver(static fn () => function () {
             return 123;

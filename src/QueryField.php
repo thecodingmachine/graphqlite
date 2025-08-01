@@ -21,8 +21,6 @@ use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
 
-use function is_callable;
-
 /**
  * A GraphQL field that maps to a PHP method automatically.
  *
@@ -97,8 +95,8 @@ final class QueryField extends FieldDefinition
     {
         // Shorthand for deferring field execution. This does two things:
         // - removes the dependency on `GraphQL\Deferred` from user land code
-        // - allows inferring the type from PHPDoc (callable(): Type), unlike Deferred, which is not generic
-        if (is_callable($result)) {
+        // - allows inferring the type from PHPDoc (Closure(): Type), unlike Deferred, which is not generic
+        if ($result instanceof Closure) {
             $result = new Deferred($result);
         }
 

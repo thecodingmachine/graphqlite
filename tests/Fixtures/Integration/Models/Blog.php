@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
+use Closure;
 use GraphQL\Deferred;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
@@ -81,9 +82,9 @@ class Blog
         return $subBlogs;
     }
 
-    /** @return callable(): User  */
+    /** @return Closure(): User  */
     #[Field]
-    public function author(): callable {
+    public function author(): Closure {
         return fn () => new User('Author', 'author@graphqlite');
     }
 }

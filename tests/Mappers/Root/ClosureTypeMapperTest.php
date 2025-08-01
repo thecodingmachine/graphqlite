@@ -2,6 +2,7 @@
 
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
+use Closure;
 use Generator;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
@@ -10,10 +11,12 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Callable_;
 use phpDocumentor\Reflection\Types\CallableParameter;
+use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
@@ -25,9 +28,9 @@ use TheCodingMachine\GraphQLite\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
-#[CoversClass(CallableTypeMapper::class)]
+#[CoversClass(ClosureTypeMapper::class)]
 #[CoversClass(CannotMapTypeException::class)]
-class CallableTypeMapperTest extends AbstractQueryProvider
+class ClosureTypeMapperTest extends AbstractQueryProvider
 {
     public function testMapsCallableReturnTypeUsingTopRootMapper(): void
     {
@@ -42,39 +45,26 @@ class CallableTypeMapperTest extends AbstractQueryProvider
             ->with($returnType, null, $reflection, $docBlock)
             ->willReturn(GraphQLType::string());
 
-        $mapper = new CallableTypeMapper(
+        $mapper = new ClosureTypeMapper(
             $this->createMock(RootTypeMapperInterface::class),
             $topRootMapper,
         );
 
-        $result = $mapper->toGraphQLOutputType(new Callable_(returnType: $returnType), null, $reflection, $docBlock);
+        $type = new Compound([
+            new Callable_(returnType: $returnType),
+            new Object_(new Fqsen('\\' . Closure::class))
+        ]);
+
+        $result = $mapper->toGraphQLOutputType($type, null, $reflection, $docBlock);
 
         $this->assertSame(GraphQLType::string(), $result);
     }
 
-    public function testThrowsWhenUsingCallableWithParameters(): void
+    public function testThrowsWhenUsingCallable(): void
     {
-        $this->expectExceptionObject(CannotMapTypeException::createForUnexpectedCallableParameters());
+        $this->expectExceptionObject(CannotMapTypeException::createForUnexpectedCallable());
 
-        $mapper = new CallableTypeMapper(
-            $this->createMock(RootTypeMapperInterface::class),
-            $this->createMock(RootTypeMapperInterface::class)
-        );
-
-        $type = new Callable_(
-            parameters: [
-                new CallableParameter(new String_())
-            ]
-        );
-
-        $mapper->toGraphQLOutputType($type, null, new ReflectionMethod(__CLASS__, 'testSkipsNonCallables'), new DocBlock());
-    }
-
-    public function testThrowsWhenUsingCallableWithoutReturnType(): void
-    {
-        $this->expectExceptionObject(CannotMapTypeException::createForMissingCallableReturnType());
-
-        $mapper = new CallableTypeMapper(
+        $mapper = new ClosureTypeMapper(
             $this->createMock(RootTypeMapperInterface::class),
             $this->createMock(RootTypeMapperInterface::class)
         );
@@ -82,11 +72,50 @@ class CallableTypeMapperTest extends AbstractQueryProvider
         $mapper->toGraphQLOutputType(new Callable_(), null, new ReflectionMethod(__CLASS__, 'testSkipsNonCallables'), new DocBlock());
     }
 
-    public function testThrowsWhenUsingCallableAsInputType(): void
+    public function testThrowsWhenUsingClosureWithParameters(): void
     {
-        $this->expectExceptionObject(CannotMapTypeException::createForCallableAsInput());
+        $this->expectExceptionObject(CannotMapTypeException::createForUnexpectedClosureParameters());
 
-        $mapper = new CallableTypeMapper(
+        $mapper = new ClosureTypeMapper(
+            $this->createMock(RootTypeMapperInterface::class),
+            $this->createMock(RootTypeMapperInterface::class)
+        );
+
+        $type = new Compound([
+            new Callable_(
+                parameters: [
+                    new CallableParameter(new String_())
+                ],
+                returnType: new String_()
+            ),
+            new Object_(new Fqsen('\\' . Closure::class))
+        ]);
+
+        $mapper->toGraphQLOutputType($type, null, new ReflectionMethod(__CLASS__, 'testSkipsNonCallables'), new DocBlock());
+    }
+
+    public function testThrowsWhenUsingClosureWithoutReturnType(): void
+    {
+        $this->expectExceptionObject(CannotMapTypeException::createForMissingClosureReturnType());
+
+        $mapper = new ClosureTypeMapper(
+            $this->createMock(RootTypeMapperInterface::class),
+            $this->createMock(RootTypeMapperInterface::class)
+        );
+
+        $type = new Compound([
+            new Callable_(),
+            new Object_(new Fqsen('\\' . Closure::class))
+        ]);
+
+        $mapper->toGraphQLOutputType($type, null, new ReflectionMethod(__CLASS__, 'testSkipsNonCallables'), new DocBlock());
+    }
+
+    public function testThrowsWhenUsingClosureAsInputType(): void
+    {
+        $this->expectExceptionObject(CannotMapTypeException::createForClosureAsInput());
+
+        $mapper = new ClosureTypeMapper(
             $this->createMock(RootTypeMapperInterface::class),
             $this->createMock(RootTypeMapperInterface::class)
         );
@@ -115,7 +144,7 @@ class CallableTypeMapperTest extends AbstractQueryProvider
             ->with('Name')
             ->willReturn(GraphQLType::float());
 
-        $mapper = new CallableTypeMapper($next, $this->createMock(RootTypeMapperInterface::class));
+        $mapper = new ClosureTypeMapper($next, $this->createMock(RootTypeMapperInterface::class));
 
         $this->assertSame(GraphQLType::string(), $mapper->toGraphQLOutputType($type, null, $reflection, $docBlock));
         $this->assertSame(GraphQLType::int(), $mapper->toGraphQLInputType($type, null, 'arg1', $reflection, $docBlock));

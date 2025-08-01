@@ -41,7 +41,7 @@ use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ResolveInfoParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\BaseTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\CallableTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\ClosureTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
@@ -360,7 +360,7 @@ abstract class AbstractQueryProvider extends TestCase
         $lastTopRootTypeMapper = new LastDelegatingTypeMapper();
         $topRootTypeMapper = new NullableTypeMapperAdapter($lastTopRootTypeMapper);
         $topRootTypeMapper = new VoidTypeMapper($topRootTypeMapper);
-        $topRootTypeMapper = new CallableTypeMapper($topRootTypeMapper, $lastTopRootTypeMapper);
+        $topRootTypeMapper = new ClosureTypeMapper($topRootTypeMapper, $lastTopRootTypeMapper);
 
         $errorRootTypeMapper = new FinalRootTypeMapper($this->getTypeMapper());
         $rootTypeMapper = new BaseTypeMapper(
