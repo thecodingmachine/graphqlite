@@ -12,6 +12,7 @@ class ResolveUtilsTest extends TestCase
     public function testAssertNull(): void
     {
         $this->expectException(TypeMismatchRuntimeException::class);
+        $this->expectExceptionMessage('Unexpected null value for non nullable field. Expected: "String!"');
         ResolveUtils::assertInnerReturnType(null, Type::nonNull(Type::string()));
     }
 
@@ -30,6 +31,7 @@ class ResolveUtilsTest extends TestCase
     public function testAssertInputNull(): void
     {
         $this->expectException(TypeMismatchRuntimeException::class);
+        $this->expectExceptionMessage('Unexpected null value for non nullable field. Expected: "String!"');
         ResolveUtils::assertInnerInputType(null, Type::nonNull(Type::string()));
     }
 

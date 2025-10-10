@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\Type;
+
 use function gettype;
 
 /**
@@ -11,9 +13,15 @@ use function gettype;
  */
 class TypeMismatchRuntimeException extends GraphQLRuntimeException
 {
-    public static function unexpectedNullValue(): self
+    public static function unexpectedNullValue(Type|null $expectedType = null): self
     {
-        return new self('Unexpected null value for non nullable field.');
+        $expectedMessageTail = '';
+        if ($expectedType !== null) {
+            $expectedMessageTail = ' Expected: "' . $expectedType->toString() . '"';
+            // ToDo: support for NULL $expectedType should be dropped in the next major
+        }
+
+        return new self('Unexpected null value for non nullable field.' . $expectedMessageTail);
     }
 
     public static function expectedIterable(mixed $result): self
