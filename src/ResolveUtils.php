@@ -24,7 +24,7 @@ final class ResolveUtils
     public static function assertInnerReturnType(mixed $result, Type $type): void
     {
         if ($type instanceof NonNull && $result === null) {
-            throw TypeMismatchRuntimeException::unexpectedNullValue();
+            throw TypeMismatchRuntimeException::unexpectedNullValue($type);
         }
         if ($result === null) {
             return;
@@ -56,7 +56,7 @@ final class ResolveUtils
     public static function assertInnerInputType(mixed $input, Type $type): void
     {
         if ($type instanceof NonNull && $input === null) {
-            throw TypeMismatchRuntimeException::unexpectedNullValue();
+            throw TypeMismatchRuntimeException::unexpectedNullValue($type);
         }
         if ($input === null) {
             return;
