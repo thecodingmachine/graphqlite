@@ -43,7 +43,7 @@ class QueryFieldTest extends TestCase
     {
         $sourceResolver = new ServiceResolver(static fn () => null);
         $queryField = new QueryField('foo', Type::string(), [
-            'arg' => new InputTypeParameter('arg', Type::string(), 'Foo argument', false, null, new ArgumentResolver()),
+             'arg' => new InputTypeParameter('arg', Type::string(), 'Foo argument', false, null, false, new ArgumentResolver()),
         ], $sourceResolver, $sourceResolver, null, null, []);
 
         $this->assertEquals('Foo argument', $queryField->args[0]->description);

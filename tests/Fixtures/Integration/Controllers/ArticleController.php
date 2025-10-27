@@ -9,6 +9,7 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Article;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\UpdateArticleInput;
+use TheCodingMachine\GraphQLite\Undefined;
 
 class ArticleController
 {
@@ -32,8 +33,13 @@ class ArticleController
     public function updateArticle(UpdateArticleInput $input): Article
     {
         $article = new Article('test');
-        $article->magazine = $input->magazine;
+        $article->magazine = 'The New Yorker';
+
         $article->summary = $input->summary;
+
+        if ($input->magazine !== Undefined::VALUE) {
+            $article->magazine = $input->magazine;
+        }
 
         return $article;
     }

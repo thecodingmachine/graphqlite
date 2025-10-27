@@ -39,6 +39,7 @@ use TheCodingMachine\GraphQLite\InvalidDocBlockRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\UndefinedTypeMapper;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeProperty;
@@ -46,6 +47,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Undefined;
 
 use function array_map;
 use function array_unique;
@@ -177,6 +179,19 @@ class TypeHandler implements ParameterHandlerInterface
             return new DefaultValueParameter($parameter->getDefaultValue());
         }
 
+        $parameterType = $parameter->getType();
+        $allowsNull = $parameterType === null || $parameterType->allowsNull();
+
+        if ($parameterType === null) {
+            $phpdocType = new Mixed_();
+            $allowsNull = false;
+            //throw MissingTypeHintException::missingTypeHint($parameter);
+        } else {
+            $declaringClass = $parameter->getDeclaringClass();
+            assert($declaringClass !== null);
+            $phpdocType = $this->reflectionTypeToPhpDocType($parameterType, $declaringClass);
+        }
+
         $useInputType = $parameterAnnotations->getAnnotationByType(UseInputType::class);
         if ($useInputType !== null) {
             try {
@@ -186,19 +201,6 @@ class TypeHandler implements ParameterHandlerInterface
                 throw $e;
             }
         } else {
-            $parameterType = $parameter->getType();
-            $allowsNull = $parameterType === null || $parameterType->allowsNull();
-
-            if ($parameterType === null) {
-                $phpdocType = new Mixed_();
-                $allowsNull = false;
-                //throw MissingTypeHintException::missingTypeHint($parameter);
-            } else {
-                $declaringClass = $parameter->getDeclaringClass();
-                assert($declaringClass !== null);
-                $phpdocType = $this->reflectionTypeToPhpDocType($parameterType, $declaringClass);
-            }
-
             try {
                 $declaringFunction = $parameter->getDeclaringFunction();
                 if (! $declaringFunction instanceof ReflectionMethod) {
@@ -220,17 +222,25 @@ class TypeHandler implements ParameterHandlerInterface
             }
         }
 
-        $description = $this->getParameterDescriptionFromDocBlock($docBlock, $parameter);
-
         $hasDefaultValue = false;
         $defaultValue = null;
-        if ($parameter->allowsNull()) {
-            $hasDefaultValue = true;
-        }
+
         if ($parameter->isDefaultValueAvailable()) {
             $hasDefaultValue = true;
             $defaultValue = $parameter->getDefaultValue();
         }
+
+        if (! $hasDefaultValue && UndefinedTypeMapper::containsUndefined($phpdocType)) {
+            $hasDefaultValue = true;
+            $defaultValue = Undefined::VALUE;
+        }
+
+        if (! $hasDefaultValue && $parameter->allowsNull()) {
+            $hasDefaultValue = true;
+            $defaultValue = null;
+        }
+
+        $description = $this->getParameterDescriptionFromDocBlock($docBlock, $parameter);
 
         return new InputTypeParameter(
             name: $parameter->getName(),
@@ -238,6 +248,7 @@ class TypeHandler implements ParameterHandlerInterface
             description: $description,
             hasDefaultValue: $hasDefaultValue,
             defaultValue: $defaultValue,
+            defaultValueImplicit: $defaultValue === Undefined::VALUE,
             argumentResolver: $this->argumentResolver,
         );
     }
@@ -307,6 +318,7 @@ class TypeHandler implements ParameterHandlerInterface
         string|null $inputTypeName = null,
         mixed $defaultValue = null,
         bool|null $isNullable = null,
+        bool $hasDefaultValue = false,
     ): InputTypeProperty
     {
         $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
@@ -329,6 +341,13 @@ class TypeHandler implements ParameterHandlerInterface
             $isNullable = $refProperty->getType()?->allowsNull() ?? false;
         }
 
+        $propertyType = $refProperty->getType();
+        if ($propertyType !== null) {
+            $phpdocType = $this->reflectionTypeToPhpDocType($propertyType, $refProperty->getDeclaringClass());
+        } else {
+            $phpdocType = new Mixed_();
+        }
+
         if ($inputTypeName) {
             $inputType = $this->typeResolver->mapNameToInputType($inputTypeName);
         } else {
@@ -336,7 +355,16 @@ class TypeHandler implements ParameterHandlerInterface
             assert($inputType instanceof InputType);
         }
 
-        $hasDefault = $defaultValue !== null || $isNullable;
+        if (! $hasDefaultValue && $isNullable) {
+            $hasDefaultValue = true;
+            $defaultValue = null;
+        }
+
+        if (! $hasDefaultValue && UndefinedTypeMapper::containsUndefined($phpdocType)) {
+            $hasDefaultValue = true;
+            $defaultValue = Undefined::VALUE;
+        }
+
         $fieldName = $argumentName ?? $refProperty->getName();
 
         return new InputTypeProperty(
@@ -344,8 +372,9 @@ class TypeHandler implements ParameterHandlerInterface
             fieldName: $fieldName,
             type: $inputType,
             description: trim($docBlockComment),
-            hasDefaultValue: $hasDefault,
+            hasDefaultValue: $hasDefaultValue,
             defaultValue: $defaultValue,
+            defaultValueImplicit: $defaultValue === Undefined::VALUE,
             argumentResolver: $this->argumentResolver,
         );
     }

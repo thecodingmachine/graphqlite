@@ -157,6 +157,56 @@ In example above if you use the class as `UpdateUserInput` and set only `usernam
 In PHP 7 they will be set to `null`, while in PHP 8 they will be in not initialized state - this can be used as a trick
 to check if user actually passed a value for a certain field.
 
+### Optional input fields
+
+In some cases, you might need to know whether a property was explicitly provided in a GraphQL request or simply omitted.
+This is important when performing **partial updates** — e.g., updating only some fields without resetting others to `null`.
+
+To support this behavior, you can use a special enum called `Undefined`, which acts as a **marker type** distinguishing between:
+
+- `Undefined::VALUE` → field was **not provided** in the input
+- `null` → field was **explicitly set to `null`**
+- any other value → field was **explicitly provided**
+
+Consider this example:
+
+```php
+#[Input]
+class UpdateUserInput
+{
+	#[Field]
+	public string $username;
+
+    #[Field]
+	protected int|null|Undefined $age;
+}
+```
+
+Then, when processing your input:
+
+```php
+// Update the age, even if `$input->age` is `null`. But don't update if not provided at all
+if ($input->age !== Undefined::VALUE) {
+	$user->age = $input->age;
+}
+```
+
+Although this is less useful, parameters are also supported:
+
+```php
+#[Type]
+class Article
+{
+    #[Field]
+	public function title(string|null|Undefined $locale): string
+    {
+        if ($locale === Undefined::VALUE) {
+            return
+        }
+    }
+}
+```
+
 ## Factory
 
 A **Factory** is a method that takes in parameter all the fields of the input type and return an object.
