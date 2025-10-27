@@ -21,7 +21,7 @@ use TheCodingMachine\GraphQLite\Undefined;
 use function array_map;
 use function array_values;
 use function iterator_to_array;
-use function mb_ltrim;
+use function ltrim;
 
 /**
  * A root type mapper for {@see Undefined} that maps replaces those with `null` as if Undefined wasn't part of the type at all.
@@ -55,7 +55,7 @@ class UndefinedTypeMapper implements RootTypeMapperInterface
      */
     public static function replaceUndefinedWith(Type $type, Type $replaceWith = new Null_()): Type
     {
-        if ($type instanceof Object_ && mb_ltrim((string) $type->getFqsen(), '\\') === Undefined::class) {
+        if ($type instanceof Object_ && ltrim((string) $type->getFqsen(), '\\') === Undefined::class) {
             return $replaceWith;
         }
 
