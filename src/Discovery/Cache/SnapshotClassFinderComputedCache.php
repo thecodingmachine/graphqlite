@@ -79,8 +79,12 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
         $changed = false;
 
         $classFinder = $classFinder->withPathFilter(static function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
+
+            // Normalize filename to avoid issues on Windows.
+            $normalizedFilename = str_replace('\\', '/', $filename);
+
             /** @var array{ data: TEntry, dependencies: FilesSnapshot, matching: bool } $entry */
-            $entry = $previousEntries[$filename] ?? null;
+            $entry = $previousEntries[$normalizedFilename] ?? null;
 
             // If there's no entry in cache for this filename (new file or previously uncached),
             // or if it the file has been modified since caching, we'll try to autoload
@@ -90,7 +94,7 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
                 // it will not be emitted in the iterator and won't reach the `foreach()` below.
                 // So to avoid iterating over these files again, we'll mark them as non-matching.
                 // If they are matching, it'll be overwritten in the `foreach` loop below.
-                $entries[$filename] = [
+                $entries[$normalizedFilename] = [
                     'dependencies' => FilesSnapshot::for([$filename]),
                     'matching' => false,
                 ];
@@ -101,10 +105,10 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
             }
 
             if ($entry['matching']) {
-                $result[$filename] = $entry['data'];
+                $result[$normalizedFilename] = $entry['data'];
             }
 
-            $entries[$filename] = $entry;
+            $entries[$normalizedFilename] = $entry;
 
             return false;
         });
@@ -112,10 +116,14 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
         foreach ($classFinder as $classReflection) {
             $filename = $classReflection->getFileName();
 
-            $result[$filename] = $map($classReflection);
-            $entries[$filename] = [
+            // Normalize filename to avoid issues on Windows.
+            $normalizedFilename = str_replace('\\', '/', $filename);
+
+
+            $result[$normalizedFilename] = $map($classReflection);
+            $entries[$normalizedFilename] = [
                 'dependencies' => FilesSnapshot::forClass($classReflection, true),
-                'data' => $result[$filename],
+                'data' => $result[$normalizedFilename],
                 'matching' => true,
             ];
 
