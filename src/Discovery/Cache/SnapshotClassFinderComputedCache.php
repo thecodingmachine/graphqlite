@@ -79,7 +79,6 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
         $changed = false;
 
         $classFinder = $classFinder->withPathFilter(static function (string $filename) use (&$entries, &$result, &$changed, $previousEntries) {
-
             // Normalize filename to avoid issues on Windows.
             $normalizedFilename = str_replace('\\', '/', $filename);
 
@@ -123,7 +122,6 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
 
             // Normalize filename to avoid issues on Windows.
             $normalizedFilename = str_replace('\\', '/', $filename);
-
 
             $result[$normalizedFilename] = $map($classReflection);
             $entries[$normalizedFilename] = [
