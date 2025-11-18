@@ -116,6 +116,11 @@ class SnapshotClassFinderComputedCache implements ClassFinderComputedCache
         foreach ($classFinder as $classReflection) {
             $filename = $classReflection->getFileName();
 
+            // Skip internal classes or classes without a file
+            if ($filename === false) {
+                continue;
+            }
+
             // Normalize filename to avoid issues on Windows.
             $normalizedFilename = str_replace('\\', '/', $filename);
 
