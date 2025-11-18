@@ -10,6 +10,7 @@ use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 
 use function sprintf;
+use function str_replace;
 
 /**
  * Provides cache for a {@see ClassFinder} based on a {@see filemtime()}.
