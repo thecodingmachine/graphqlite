@@ -21,8 +21,8 @@
         "psr/http-server-handler": "^1",
         "psr/http-server-middleware": "^1",
         "psr/simple-cache": "^1.0.1 || ^2 || ^3",
-        "symfony/cache": "^4.3 || ^5 || ^6 || ^7",
-        "symfony/expression-language": "^4 || ^5 || ^6 || ^7",
+        "symfony/cache": "^4.3 || ^5 || ^6 || ^7 || ^8",
+        "symfony/expression-language": "^4 || ^5 || ^6 || ^7 || ^8",
         "webonyx/graphql-php": "^v15.0",
         "kcs/class-finder": "^0.6.0"
     },
@@ -35,7 +35,7 @@
         "php-coveralls/php-coveralls": "^2.7",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^10.5 || ^11.0",
+        "phpunit/phpunit": "^10.5 || ^11.0 || ^12.0",
         "symfony/var-dumper": "^6.4"
     },
     "suggest": {
