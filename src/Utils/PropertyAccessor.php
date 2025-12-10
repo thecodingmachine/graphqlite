@@ -94,6 +94,7 @@ class PropertyAccessor
         throw AccessPropertyException::createForUnwritableProperty($class, $propertyName);
     }
 
+    /** @param class-string $class */
     private static function isPublicProperty(string $class, string $propertyName): bool
     {
         if (! property_exists($class, $propertyName)) {
