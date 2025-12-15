@@ -39,3 +39,9 @@ parameters:
            path : src/Types/ID.php
         -
            identifier: missingType.generics
+        -
+           message: '#^Possibly invalid array key type string\|null\.$#'
+           path: src/FieldsBuilder.php
+        -
+           message: '#^Possibly invalid array key type string\|null\.$#'
+           path: src/Mappers/GlobTypeMapperCache.php
