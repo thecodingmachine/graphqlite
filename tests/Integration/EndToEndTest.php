@@ -9,6 +9,7 @@ use GraphQL\GraphQL;
 use GraphQL\Server\Helper;
 use GraphQL\Server\OperationParams;
 use GraphQL\Server\ServerConfig;
+use GraphQL\Utils\SchemaPrinter;
 use Psr\Container\ContainerInterface;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -1880,6 +1881,90 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testEndToEndInputUndefinedValue(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+        mutation {
+            updateArticle(input: {
+                summary: "Magazine not provided"
+            }) {
+                magazine
+                summary
+                localizedTitle
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('The New Yorker', $data['updateArticle']['magazine']);
+        $this->assertSame('Magazine not provided', $data['updateArticle']['summary']);
+        $this->assertSame('Localized (en_US): test', $data['updateArticle']['localizedTitle']);
+
+        $queryString = '
+        mutation {
+            updateArticle(input: {
+                magazine: "Only magazine provided"
+            }) {
+                magazine
+                summary
+                localizedTitle(locale: "es_ES")
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Only magazine provided', $data['updateArticle']['magazine']);
+        $this->assertSame('default', $data['updateArticle']['summary']);
+        $this->assertSame('Localized (es_ES): test', $data['updateArticle']['localizedTitle']);
+
+        $queryString = '
+        mutation {
+            updateArticle(input: {
+                magazine: null,
+            }) {
+                magazine
+                summary
+                localizedTitle(locale: null)
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+        );
+
+        $data = $this->getSuccessResult($result);
+        $this->assertNull($data['updateArticle']['magazine']);
+        $this->assertSame('default', $data['updateArticle']['summary']);
+        $this->assertSame('test', $data['updateArticle']['localizedTitle']);
+    }
+
+    public function testEndToEndSchemaIsPrintable(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        // This may fail if, for example, a default value is not serializable. This is the case with
+        // values like Undefined::VALUE, for example, so this test guards us from such cases.
+        SchemaPrinter::doPrint($schema);
     }
 
     public function testEndToEndSetterWithSecurity(): void

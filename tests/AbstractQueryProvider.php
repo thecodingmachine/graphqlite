@@ -50,6 +50,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\UndefinedTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -359,6 +360,7 @@ abstract class AbstractQueryProvider extends TestCase
 
         $lastTopRootTypeMapper = new LastDelegatingTypeMapper();
         $topRootTypeMapper = new NullableTypeMapperAdapter($lastTopRootTypeMapper);
+        $topRootTypeMapper = new UndefinedTypeMapper($topRootTypeMapper);
         $topRootTypeMapper = new VoidTypeMapper($topRootTypeMapper);
         $topRootTypeMapper = new ClosureTypeMapper($topRootTypeMapper, $lastTopRootTypeMapper);
 
