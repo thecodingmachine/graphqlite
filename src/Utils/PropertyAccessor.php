@@ -22,7 +22,7 @@ class PropertyAccessor
      */
     public static function findGetter(string $class, string $propertyName): string|null
     {
-        foreach (['get', 'is'] as $prefix) {
+        foreach (['get', 'is', 'has'] as $prefix) {
             $methodName = self::propertyToMethodName($prefix, $propertyName);
 
             if (self::isPublicMethod($class, $methodName)) {
