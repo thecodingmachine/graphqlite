@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Cache;
 use ReflectionClass;
 
 use function array_unique;
+use function is_file;
 use function Safe\filemtime;
 
 class FilesSnapshot
@@ -24,6 +25,10 @@ class FilesSnapshot
         $dependencies = [];
 
         foreach (array_unique($files) as $file) {
+            if (! is_file($file)) {
+                continue;
+            }
+
             $dependencies[$file] = filemtime($file);
         }
 
