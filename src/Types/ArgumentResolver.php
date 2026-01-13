@@ -32,7 +32,12 @@ class ArgumentResolver
      */
     public function resolve(object|null $source, mixed $val, mixed $context, ResolveInfo $resolveInfo, InputType&Type $type): mixed
     {
+        if ($val === null && ! $type instanceof NonNull) {
+            return null;
+        }
+
         $type = $this->stripNonNullType($type);
+
         if ($type instanceof ListOfType) {
             if (! is_array($val)) {
                 throw new InvalidArgumentException('Expected GraphQL List but value passed is not an array.');

@@ -1140,7 +1140,7 @@ class FieldsBuilder
             $name = $annotation->getName() ?: $refProperty->getName();
             $inputType = $annotation->getInputType();
             $constructerParameters = $this->getClassConstructParameterNames($refClass);
-            $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
+            $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null, isset($defaultProperties[$refProperty->getName()]));
 
             if (! $description) {
                 $description = $inputProperty->getDescription();
