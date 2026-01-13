@@ -444,9 +444,6 @@ class FieldsBuilder
             $methodName = $refMethod->getName();
 
             if ($queryAnnotation instanceof Field) {
-                if (str_starts_with($methodName, 'set')) {
-                    continue;
-                }
                 $for = $queryAnnotation->getFor();
                 if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
