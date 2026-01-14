@@ -229,7 +229,9 @@ class IteratorTypeMapper implements RootTypeMapperInterface
         }
 
         // One of the classes in the compound is an iterator. Let's remove it from the list and let's test all other values as potential subTypes.
-        unset($types[$key]);
+        if ($key !== null) {
+            unset($types[$key]);
+        }
 
         return $iteratorType;
     }
