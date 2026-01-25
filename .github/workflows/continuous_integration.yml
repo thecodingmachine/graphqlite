@@ -8,6 +8,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
 
   continuous-integration:
@@ -22,12 +26,6 @@ jobs:
       fail-fast: false
 
     steps:
-      # Cancel previous runs of the same branch
-      - name: cancel
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
-
       - name: "Checkout"
         uses: "actions/checkout@v5"
 
