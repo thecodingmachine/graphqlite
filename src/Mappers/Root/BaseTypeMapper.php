@@ -107,7 +107,9 @@ class BaseTypeMapper implements RootTypeMapperInterface
      *
      * @throws CannotMapTypeException
      */
-    private function mapBaseType(Type $type): BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|ScalarType|null
+    private function mapBaseType(
+        Type $type,
+    ): BooleanType|FloatType|IDType|IntType|StringType|UploadType|DateTimeType|ScalarType|null
     {
         if ($type instanceof Integer) {
             return GraphQLType::int();
@@ -180,11 +182,15 @@ class BaseTypeMapper implements RootTypeMapperInterface
      */
     public function mapNameToType(string $typeName): NamedType&GraphQLType
     {
-        // No need to map base types, only types added by us.
         return match ($typeName) {
-            'Upload'=>self::getUploadType(),
-            'DateTime'=>self::getDateTimeType(),
-            default=>$this->next->mapNameToType($typeName)
+            'ID' => GraphQLType::id(),
+            'String' => GraphQLType::string(),
+            'Int' => GraphQLType::int(),
+            'Float' => GraphQLType::float(),
+            'Boolean' => GraphQLType::boolean(),
+            'Upload' => self::getUploadType(),
+            'DateTime' => self::getDateTimeType(),
+            default => $this->next->mapNameToType($typeName),
         };
     }
 }
