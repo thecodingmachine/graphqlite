@@ -538,6 +538,8 @@ class SchemaFactory
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
+        $typeRegistry->finalizeTypes();
+
         return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $topRootTypeMapper, $this->schemaConfig);
     }
 

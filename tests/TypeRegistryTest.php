@@ -1,19 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\ObjectType;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeRegistryTest extends TestCase
 {
-
     public function testRegisterTypeException(): void
     {
         $type = new ObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -27,7 +32,9 @@ class TypeRegistryTest extends TestCase
     {
         $type = new ObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -43,7 +50,9 @@ class TypeRegistryTest extends TestCase
     {
         $type = new ObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -51,18 +60,21 @@ class TypeRegistryTest extends TestCase
 
         $this->assertTrue($registry->hasType('Foo'));
         $this->assertFalse($registry->hasType('Bar'));
-
     }
 
     public function testGetMutableObjectType(): void
     {
         $type = new MutableObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
         $type2 = new ObjectType([
             'name' => 'FooBar',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -79,11 +91,15 @@ class TypeRegistryTest extends TestCase
     {
         $type = new MutableObjectType([
             'name' => 'Foo',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
         $type2 = new ObjectType([
             'name' => 'FooBar',
-            'fields' => function() {return [];}
+            'fields' => static function () {
+                return [];
+            },
         ]);
 
         $registry = new TypeRegistry();
@@ -94,5 +110,48 @@ class TypeRegistryTest extends TestCase
 
         $this->expectException(GraphQLRuntimeException::class);
         $this->assertSame($type, $registry->getMutableInterface('FooBar'));
+    }
+
+    public function testFinalizeTypesFreezesMutableTypesOnly(): void
+    {
+        $mutableObjectType = $this->getMockBuilder(MutableObjectType::class)
+            ->setConstructorArgs([
+                [
+                    'name' => 'Foo',
+                    'fields' => static function () {
+                        return [];
+                    },
+                ],
+            ])
+            ->onlyMethods(['freeze'])
+            ->getMock();
+
+        $mutableObjectType->expects($this->once())
+            ->method('freeze');
+
+        $mutableInterfaceType = $this->getMockBuilder(MutableInterfaceType::class)
+            ->setConstructorArgs([
+                [
+                    'name' => 'Bar',
+                    'fields' => static fn () => [],
+                ],
+            ])
+            ->onlyMethods(['freeze'])
+            ->getMock();
+
+        $mutableInterfaceType->expects($this->once())
+            ->method('freeze');
+
+        $regularObjectType = new ObjectType([
+            'name' => 'Baz',
+            'fields' => static fn () => [],
+        ]);
+
+        $registry = new TypeRegistry();
+        $registry->registerType($mutableObjectType);
+        $registry->registerType($mutableInterfaceType);
+        $registry->registerType($regularObjectType);
+
+        $registry->finalizeTypes();
     }
 }

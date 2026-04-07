@@ -97,4 +97,15 @@ class TypeRegistry
 
         return $type;
     }
+
+    public function finalizeTypes(): void
+    {
+        foreach ($this->types as $type) {
+            if (! ($type instanceof MutableObjectType) && ! ($type instanceof MutableInterfaceType)) {
+                continue;
+            }
+
+            $type->freeze();
+        }
+    }
 }
