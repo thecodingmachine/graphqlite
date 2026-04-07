@@ -243,6 +243,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 continue;
             }
 
+            // Map through RecursiveTypeMapper's pipeline to ensure the interface
+            // is registered in the TypeRegistry, extended, and frozen.
+            // Calling the underlying typeMapper directly would create an orphaned,
+            // unfrozen instance that is never registered in the TypeRegistry.
+            $this->mapClassToType($interface, null);
+
+            // Now retrieve the frozen MutableInterfaceType. TypeGenerator returns
+            // the same instance from the TypeRegistry that mapClassToType registered.
             $interfaceType = $this->typeMapper->mapClassToType($interface, null);
 
             assert($interfaceType instanceof MutableInterfaceType);
@@ -489,14 +497,14 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
                 if ($cachedType !== $type) {
                     throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
                 }
-                if ($cachedType instanceof MutableObjectType && $cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
+                if ($cachedType instanceof MutableInterface && $cachedType->getStatus() === MutableInterface::STATUS_FROZEN) {
                     return $type;
                 }
             }
 
             $this->typeRegistry->registerType($type);
 
-            if ($type instanceof MutableObjectType) {
+            if ($type instanceof MutableObjectType || $type instanceof MutableInterfaceType) {
                 if ($this->typeMapper->canExtendTypeForName($typeName, $type)) {
                     $this->typeMapper->extendTypeForName($typeName, $type);
                 }
