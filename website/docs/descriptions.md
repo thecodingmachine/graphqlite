@@ -148,6 +148,14 @@ flip so the migration path is mechanical: add `#[EnumValue]` to every case you w
 No runtime behaviour changes today — the notice only signals what the future default will
 require.
 
+**Runtime implication after the flip.** Cases without `#[EnumValue]` will not exist in the
+GraphQL schema, so a resolver that returns such a case will trigger webonyx/graphql-php's
+standard enum serialization error (the value is not listed in the enum type's `values`
+config). This is the same spec-compliant behaviour that applies to any unknown enum value and
+is the mechanism that makes selective exposure safe: internal cases cannot accidentally leak
+via a resolver. Developers who want a case to remain returnable must keep `#[EnumValue]` on
+it; omitting the attribute is a deliberate "do not expose this value" signal.
+
 ## Description uniqueness on `#[ExtendType]`
 
 A GraphQL type has exactly one description, so GraphQLite enforces that the description for a
