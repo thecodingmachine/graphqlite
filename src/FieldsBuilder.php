@@ -17,7 +17,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
-use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Annotations\AbstractGraphQLElement;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -50,6 +50,7 @@ use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
 use function array_diff_key;
@@ -90,6 +91,7 @@ class FieldsBuilder
         private readonly ParameterMiddlewareInterface $parameterMapper,
         private readonly FieldMiddlewareInterface $fieldMiddleware,
         private readonly InputFieldMiddlewareInterface $inputFieldMiddleware,
+        private readonly DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
     )
     {
         $this->typeMapper = new TypeHandler(
@@ -97,6 +99,7 @@ class FieldsBuilder
             $this->rootTypeMapper,
             $this->typeResolver,
             $this->docBlockFactory,
+            $this->descriptionResolver,
         );
     }
 
@@ -310,7 +313,6 @@ class FieldsBuilder
     public function getParameters(ReflectionMethod $refMethod, int $skip = 0): array
     {
         $docBlockObj = $this->docBlockFactory->create($refMethod);
-        //$docBlockComment = $docBlockObj->getSummary()."\n".$docBlockObj->getDescription()->render();
 
         $parameters = array_slice($refMethod->getParameters(), $skip);
 
@@ -332,7 +334,7 @@ class FieldsBuilder
 
     /**
      * @param object|class-string<object> $controller The controller instance, or the name of the source class name
-     * @param class-string<AbstractRequest> $annotationName
+     * @param class-string<AbstractGraphQLElement> $annotationName
      * @param bool $injectSource Whether to inject the source object or not as the first argument. True for @Field (unless @Type has no class attribute), false for @Query, @Mutation, and @Subscription.
      * @param string|null $typeName Type name for which fields should be extracted for.
      *
@@ -418,7 +420,7 @@ class FieldsBuilder
     /**
      * Gets fields by class method annotations.
      *
-     * @param class-string<AbstractRequest> $annotationName
+     * @param class-string<AbstractGraphQLElement> $annotationName
      *
      * @return array<string, FieldDefinition>
      *
@@ -440,7 +442,6 @@ class FieldsBuilder
 
         $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
         foreach ($annotations as $queryAnnotation) {
-            $description = null;
             $methodName = $refMethod->getName();
 
             if ($queryAnnotation instanceof Field) {
@@ -448,17 +449,16 @@ class FieldsBuilder
                 if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
                 }
-
-                $description = $queryAnnotation->getDescription();
             }
 
             $docBlockObj = $this->docBlockFactory->create($refMethod);
 
             $name = $queryAnnotation->getName() ?: $this->namingStrategy->getFieldNameFromMethodName($methodName);
 
-            if (! $description) {
-                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
-            }
+            $description = $this->descriptionResolver->resolve(
+                $queryAnnotation->getDescription(),
+                $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render(),
+            );
 
             $outputType = $queryAnnotation->getOutputType();
             if ($outputType) {
@@ -504,7 +504,7 @@ class FieldsBuilder
                 originalResolver: $resolver,
                 parameters: $args,
                 injectSource: $injectSource,
-                comment: trim($description),
+                description: $description !== null ? trim($description) : null,
                 deprecationReason: $this->getDeprecationReason($docBlockObj),
                 middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refMethod),
             );
@@ -532,7 +532,7 @@ class FieldsBuilder
     /**
      * Gets fields by class property annotations.
      *
-     * @param class-string<AbstractRequest> $annotationName
+     * @param class-string<AbstractGraphQLElement> $annotationName
      *
      * @return array<string, FieldDefinition>
      *
@@ -552,31 +552,30 @@ class FieldsBuilder
         $fields = [];
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
         foreach ($annotations as $queryAnnotation) {
-            $description = null;
-
             if ($queryAnnotation instanceof Field) {
                 $for = $queryAnnotation->getFor();
                 if ($typeName && $for && ! in_array($typeName, $for)) {
                     continue;
                 }
-
-                $description = $queryAnnotation->getDescription();
             }
 
             $docBlock = $this->docBlockFactory->create($refProperty);
 
             $name = $queryAnnotation->getName() ?: $refProperty->getName();
 
-            if (! $description) {
-                $description = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
+            $docblockDescription = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
-                /** @var Var_[] $varTags */
-                $varTags = $docBlock->getTagsByName('var');
-                $varTag = reset($varTags);
-                if ($varTag) {
-                    $description .= PHP_EOL . $varTag->getDescription();
-                }
+            /** @var Var_[] $varTags */
+            $varTags = $docBlock->getTagsByName('var');
+            $varTag = reset($varTags);
+            if ($varTag) {
+                $docblockDescription .= PHP_EOL . $varTag->getDescription();
             }
+
+            $description = $this->descriptionResolver->resolve(
+                $queryAnnotation->getDescription(),
+                $docblockDescription,
+            );
 
             $outputType = $queryAnnotation->getOutputType();
             if ($outputType) {
@@ -597,7 +596,7 @@ class FieldsBuilder
                 resolver: $resolver,
                 originalResolver: $originalResolver,
                 injectSource: false,
-                comment: trim($description),
+                description: $description !== null ? trim($description) : null,
                 deprecationReason: $this->getDeprecationReason($docBlock),
                 middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refProperty),
             );
@@ -683,7 +682,7 @@ class FieldsBuilder
                 }
 
                 $docBlockObj = $this->docBlockFactory->create($refMethod);
-                $docBlockComment = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
+                $docBlockDescription = rtrim($docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render());
 
                 $deprecated = $docBlockObj->getTagsByName('deprecated');
                 $deprecationReason = null;
@@ -691,7 +690,10 @@ class FieldsBuilder
                     $deprecationReason = trim((string) $deprecated[0]);
                 }
 
-                $description = $sourceField->getDescription() ?? $docBlockComment;
+                $description = $this->descriptionResolver->resolve(
+                    $sourceField->getDescription(),
+                    $docBlockDescription,
+                );
                 $args = $this->mapParameters($refMethod->getParameters(), $docBlockObj, $sourceField);
 
                 $outputType = $sourceField->getOutputType();
@@ -712,7 +714,7 @@ class FieldsBuilder
                     resolver: $resolver,
                     originalResolver: $resolver,
                     parameters: $args,
-                    comment: $description,
+                    description: $description,
                     deprecationReason: $deprecationReason ?? null,
                 );
             } else {
@@ -734,7 +736,7 @@ class FieldsBuilder
                     type: $type,
                     resolver: $resolver,
                     originalResolver: $resolver,
-                    comment: $sourceField->getDescription(),
+                    description: $sourceField->getDescription(),
                 );
             }
 
@@ -994,7 +996,7 @@ class FieldsBuilder
     /**
      * Gets input fields by class method annotations.
      *
-     * @param class-string<AbstractRequest> $annotationName
+     * @param class-string<AbstractGraphQLElement> $annotationName
      * @param array<string, mixed> $defaultProperties
      *
      * @return array<string, InputField>
@@ -1019,7 +1021,6 @@ class FieldsBuilder
 
         $annotations = $this->annotationReader->getMethodAnnotations($refMethod, $annotationName);
         foreach ($annotations as $fieldAnnotations) {
-            $description = null;
             if (! ($fieldAnnotations instanceof Field)) {
                 continue;
             }
@@ -1036,10 +1037,10 @@ class FieldsBuilder
             }
 
             $name = $fieldAnnotations->getName() ?: $this->namingStrategy->getInputFieldNameFromMethodName($methodName);
-            $description = $fieldAnnotations->getDescription();
-            if (! $description) {
-                $description = $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render();
-            }
+            $description = $this->descriptionResolver->resolve(
+                $fieldAnnotations->getDescription(),
+                $docBlockObj->getSummary() . "\n" . $docBlockObj->getDescription()->render(),
+            );
 
             $parameters = $refMethod->getParameters();
             if ($injectSource === true) {
@@ -1076,7 +1077,7 @@ class FieldsBuilder
                 originalResolver: $resolver,
                 parameters: $args,
                 injectSource: $injectSource,
-                comment: trim($description),
+                description: $description !== null ? trim($description) : null,
                 middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refMethod),
                 isUpdate: $isUpdate,
                 hasDefaultValue: $isUpdate,
@@ -1103,7 +1104,7 @@ class FieldsBuilder
     /**
      * Gets input fields by class property annotations.
      *
-     * @param class-string<AbstractRequest> $annotationName
+     * @param class-string<AbstractGraphQLElement> $annotationName
      * @param array<string, mixed> $defaultProperties
      *
      * @return array<string, InputField>
@@ -1128,8 +1129,6 @@ class FieldsBuilder
         $annotations = $this->annotationReader->getPropertyAnnotations($refProperty, $annotationName);
         $docBlock = $this->docBlockFactory->create($refProperty);
         foreach ($annotations as $annotation) {
-            $description = null;
-
             if (! ($annotation instanceof Field)) {
                 continue;
             }
@@ -1139,15 +1138,15 @@ class FieldsBuilder
                 continue;
             }
 
-            $description = $annotation->getDescription();
             $name = $annotation->getName() ?: $refProperty->getName();
             $inputType = $annotation->getInputType();
             $constructerParameters = $this->getClassConstructParameterNames($refClass);
             $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null);
 
-            if (! $description) {
-                $description = $inputProperty->getDescription();
-            }
+            $description = $this->descriptionResolver->resolve(
+                $annotation->getDescription(),
+                $inputProperty->getDescription(),
+            );
 
             $type = $inputProperty->getType();
             if (! $inputType && $isUpdate && $type instanceof NonNull) {
@@ -1171,7 +1170,7 @@ class FieldsBuilder
                 parameters: [$inputProperty->getName() => $inputProperty],
                 injectSource: false,
                 forConstructorHydration: $forConstructorHydration,
-                comment: trim($description),
+                description: $description !== null ? trim($description) : null,
                 middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refProperty),
                 isUpdate: $isUpdate,
                 hasDefaultValue: $inputProperty->hasDefaultValue(),

@@ -47,8 +47,9 @@ class QueryFieldDescriptor
     public function withTargetMethodOnSource(?string $targetMethodOnSource): self { /* ... */ }
     public function isInjectSource(): bool { /* ... */ }
     public function withInjectSource(bool $injectSource): self { /* ... */ }
-    public function getComment(): ?string { /* ... */ }
-    public function withComment(?string $comment): self { /* ... */ }
+    public function getDescription(): ?string { /* ... */ }
+    public function withDescription(?string $description): self { /* ... */ }
+    public function withAddedDescriptionLines(string $description): self { /* ... */ }
     public function getMiddlewareAnnotations(): MiddlewareAnnotations { /* ... */ }
     public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): self { /* ... */ }
     public function getOriginalResolver(): ResolverInterface { /* ... */ }

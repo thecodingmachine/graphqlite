@@ -8,7 +8,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
-use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
+use TheCodingMachine\GraphQLite\Annotations\AbstractGraphQLElement;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\EnumType;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
@@ -201,11 +201,11 @@ class AnnotationReader
         return $this->getClassAnnotation($refClass, EnumType::class);
     }
 
-    /** @param class-string<AbstractRequest> $annotationClass */
-    public function getRequestAnnotation(ReflectionMethod $refMethod, string $annotationClass): AbstractRequest|null
+    /** @param class-string<AbstractGraphQLElement> $annotationClass */
+    public function getGraphQLElementAnnotation(ReflectionMethod $refMethod, string $annotationClass): AbstractGraphQLElement|null
     {
         $queryAnnotation = $this->getMethodAnnotation($refMethod, $annotationClass);
-        assert($queryAnnotation instanceof AbstractRequest || $queryAnnotation === null);
+        assert($queryAnnotation instanceof AbstractGraphQLElement || $queryAnnotation === null);
 
         return $queryAnnotation;
     }

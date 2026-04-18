@@ -45,7 +45,7 @@ final class InputField extends InputObjectField
         ResolverInterface $originalResolver,
         callable $resolver,
         private bool $forConstructorHydration,
-        string|null $comment,
+        string|null $description,
         bool $isUpdate,
         bool $hasDefaultValue,
         mixed $defaultValue,
@@ -54,7 +54,7 @@ final class InputField extends InputObjectField
         $config = [
             'name' => $name,
             'type' => $type,
-            'description' => $comment,
+            'description' => $description,
         ];
 
         if (! (! $hasDefaultValue || $isUpdate)) {
@@ -133,7 +133,7 @@ final class InputField extends InputObjectField
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
             $fieldDescriptor->isForConstructorHydration(),
-            $fieldDescriptor->getComment(),
+            $fieldDescriptor->getDescription(),
             $fieldDescriptor->isUpdate(),
             $fieldDescriptor->hasDefaultValue(),
             $fieldDescriptor->getDefaultValue(),

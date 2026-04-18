@@ -67,6 +67,7 @@ use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 
 use function array_reverse;
@@ -118,6 +119,14 @@ class SchemaFactory
     private SchemaConfig|null $schemaConfig = null;
 
     private bool $devMode = true;
+
+    /**
+     * When true (default), docblock summaries are used as a fallback description for any schema
+     * element whose attribute did not specify an explicit description. When false, only explicit
+     * descriptions populate the schema, preventing internal developer docblocks from leaking to
+     * public API consumers.
+     */
+    private bool $useDocblockDescriptions = true;
 
     /** @var array<int, FieldMiddlewareInterface> */
     private array $fieldMiddlewares = [];
@@ -321,6 +330,21 @@ class SchemaFactory
     }
 
     /**
+     * Controls whether docblock summaries are used as a fallback description for schema elements
+     * whose attributes did not provide an explicit `description` argument.
+     *
+     * Enabled by default for backwards compatibility. Disable this to ensure only explicit
+     * descriptions populate the GraphQL schema, preventing internal developer docblocks
+     * (implementation notes, @see references, reminders) from leaking to API consumers.
+     */
+    public function setDocblockDescriptionsEnabled(bool $enabled): self
+    {
+        $this->useDocblockDescriptions = $enabled;
+
+        return $this;
+    }
+
+    /**
      * Registers a field middleware (used to parse custom annotations that modify the GraphQLite behaviour in Fields/Queries/Mutations.
      */
     public function addFieldMiddleware(FieldMiddlewareInterface $fieldMiddleware): self
@@ -367,6 +391,7 @@ class SchemaFactory
             $classBoundCache,
             PhpDocumentorDocBlockFactory::default(),
         );
+        $descriptionResolver = new DescriptionResolver($this->useDocblockDescriptions);
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy();
         $typeRegistry = new TypeRegistry();
         $classFinder = $this->createClassFinder();
@@ -404,7 +429,7 @@ class SchemaFactory
 
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
-        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $docBlockFactory, $classFinder, $classFinderComputedCache);
+        $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $docBlockFactory, $classFinder, $classFinderComputedCache, $descriptionResolver);
 
         if (class_exists(Enum::class)) {
             // Annotation support - deprecated
@@ -450,6 +475,7 @@ class SchemaFactory
             $parameterMiddlewarePipe,
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe,
+            $descriptionResolver,
         );
         $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $this->container);
 
@@ -461,9 +487,9 @@ class SchemaFactory
         $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
         $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
-        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder);
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder, $docBlockFactory, $descriptionResolver);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator, $annotationReader, $docBlockFactory, $descriptionResolver);
 
         if ($this->namespaces) {
             $compositeTypeMapper->addTypeMapper(new ClassFinderTypeMapper(

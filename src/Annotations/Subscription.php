@@ -7,6 +7,6 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class Subscription extends AbstractRequest
+class Subscription extends AbstractGraphQLElement
 {
 }

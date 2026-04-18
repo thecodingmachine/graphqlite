@@ -11,7 +11,7 @@ use function trigger_error;
 use const E_USER_DEPRECATED;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-class Field extends AbstractRequest
+class Field extends AbstractGraphQLElement
 {
     private string|null $prefetchMethod;
 

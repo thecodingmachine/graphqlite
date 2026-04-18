@@ -22,6 +22,7 @@ use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\EnumType;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 use UnitEnum;
 
 use function array_filter;
@@ -49,6 +50,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         private readonly DocBlockFactory $docBlockFactory,
         private readonly ClassFinder $classFinder,
         private readonly ClassFinderComputedCache $classFinderComputedCache,
+        private readonly DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
     ) {
     }
 
@@ -126,9 +128,16 @@ class EnumTypeMapper implements RootTypeMapperInterface
             && $reflectionEnum->isBacked()
             && (string) $reflectionEnum->getBackingType() === 'string';
 
-        $enumDescription = $this->docBlockFactory
-            ->create($reflectionEnum)
-            ->getSummary() ?: null;
+        $explicitEnumDescription = $typeAnnotation instanceof TypeAnnotation
+            ? $typeAnnotation->getDescription()
+            : null;
+
+        $enumDescription = $this->descriptionResolver->resolve(
+            $explicitEnumDescription,
+            $this->descriptionResolver->isDocblockFallbackEnabled()
+                ? ($this->docBlockFactory->create($reflectionEnum)->getSummary() ?: null)
+                : null,
+        );
 
         /** @var array<string, string> $enumCaseDescriptions */
         $enumCaseDescriptions = [];
@@ -138,7 +147,9 @@ class EnumTypeMapper implements RootTypeMapperInterface
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
 
-            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $docBlock->getSummary() ?: null;
+            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->isDocblockFallbackEnabled()
+                ? ($docBlock->getSummary() ?: null)
+                : null;
             $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
 
             // phpcs:ignore

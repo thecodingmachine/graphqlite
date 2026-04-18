@@ -4,6 +4,11 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## >8.0.0
+
+**For all future changelog details, refer to the [Releases](https://github.com/thecodingmachine/graphqlite/releases).
+This CHANGELOG.md will no longer be independently maintained.**
+
 ## 8.0.0
 
 ### Breaking Changes
