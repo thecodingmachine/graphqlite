@@ -15,6 +15,8 @@ use Throwable;
 
 use function array_combine;
 use function array_keys;
+use function array_slice;
+use function count;
 
 /**
  * A field input middleware that reads "Security" Symfony annotations.
@@ -43,9 +45,13 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         $originalResolver = $inputFieldDescriptor->getOriginalResolver();
 
         $parameters = $inputFieldDescriptor->getParameters();
+        // InputField::fromFieldDescriptor prepends a SourceParameter to the parameters list when
+        // `injectSource` is true, but that injection happens AFTER this middleware runs. See the
+        // sibling SecurityFieldMiddleware for the detailed comment.
+        $injectSource = $inputFieldDescriptor->isInjectSource();
 
-        $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $parameters, $inputFieldDescriptor) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));
+        $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $parameters, $inputFieldDescriptor, $injectSource) {
+            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source), $injectSource);
 
             foreach ($securityAnnotations as $annotation) {
                 try {
@@ -71,7 +77,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, object|null $source): array
+    private function getVariables(array $args, array $parameters, object|null $source, bool $injectSource = false): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier
@@ -81,8 +87,12 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
             'this' => $source,
         ];
 
+        if ($injectSource && count($args) > count($parameters)) {
+            $args = array_slice($args, 1);
+        }
+
         $argsName = array_keys($parameters);
-        $argsByName = array_combine($argsName, $args);
+        $argsByName = $argsName ? array_combine($argsName, $args) : [];
 
         return $variables + $argsByName;
     }

@@ -1338,6 +1338,63 @@ class EndToEndTest extends IntegrationTestCase
         $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
+    /**
+     * Regression test for #[Security] on an #[ExtendType] field method.
+     *
+     * SecurityFieldMiddleware captures $parameters at process() time, but
+     * QueryField::fromFieldDescriptor prepends an implicit SourceParameter
+     * AFTER the middleware runs when isInjectSource() is true. At runtime the
+     * resolver receives N+1 args for N captured parameter names, which used
+     * to blow array_combine() up with "Argument #1 ($keys) and argument #2
+     * ($values) must have the same number of elements".
+     */
+    public function testEndToEndSecurityOnExtendTypeField(): void
+    {
+        // No logged-in user → the Security expression `user.bar == 42` fails, failWith returns null.
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+        query {
+            contacts {
+                name
+                extendedSecretName
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery($schema, $queryString);
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Joe', $data['contacts'][0]['name']);
+        $this->assertNull($data['contacts'][0]['extendedSecretName']);
+
+        // Logged-in user with bar=42 → the Security expression passes and the field returns the name.
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function () {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): object|null
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+        ]);
+
+        $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, $queryString);
+        $data = $this->getSuccessResult($result);
+        $this->assertSame('Joe', $data['contacts'][0]['extendedSecretName']);
+    }
+
     public function testEndToEndUnions(): void
     {
         $schema = $this->mainContainer->get(Schema::class);
