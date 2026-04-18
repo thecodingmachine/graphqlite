@@ -878,7 +878,13 @@ class FieldsBuilder
 
         $docBlockTypes = [];
         foreach ($paramTags as $paramTag) {
-            $docBlockTypes[$paramTag->getVariableName()] = $paramTag->getType();
+            $variableName = $paramTag->getVariableName();
+            // Skip malformed @param tags with no variable name (phpdocumentor returns null for
+            // those). PHPStan 8.5 rejects the implicit null-to-empty-string coercion.
+            if ($variableName === null) {
+                continue;
+            }
+            $docBlockTypes[$variableName] = $paramTag->getType();
         }
 
         $parameterAnnotationsPerParameter = $this->annotationReader->getParameterAnnotationsPerParameter($refParameters);

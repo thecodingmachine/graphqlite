@@ -18,7 +18,9 @@ use Throwable;
 
 use function array_combine;
 use function array_keys;
+use function array_slice;
 use function assert;
+use function count;
 
 /**
  * A field middleware that reads "Security" Symfony annotations.
@@ -73,9 +75,15 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         $originalResolver = $queryFieldDescriptor->getOriginalResolver();
 
         $parameters = $queryFieldDescriptor->getParameters();
+        // QueryField::fromFieldDescriptor prepends a SourceParameter to the parameters list when
+        // `injectSource` is true, but that injection happens AFTER this middleware runs. At resolver
+        // invocation time the runtime $args therefore includes the source as its first element while
+        // $parameters captured here does not. Track the flag so getVariables() can strip the leading
+        // source arg before zipping args to parameter names.
+        $injectSource = $queryFieldDescriptor->isInjectSource();
 
-        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source));
+        $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor, $injectSource) {
+            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source), $injectSource);
 
             foreach ($securityAnnotations as $annotation) {
                 try {
@@ -108,7 +116,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
      *
      * @return array<string, mixed>
      */
-    private function getVariables(array $args, array $parameters, object|null $source): array
+    private function getVariables(array $args, array $parameters, object|null $source, bool $injectSource = false): array
     {
         $variables = [
             // If a user is not logged, we provide an empty user object to make usage easier
@@ -118,8 +126,15 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             'this' => $source,
         ];
 
+        // Strip the source arg prepended by QueryField::fromFieldDescriptor so the remaining
+        // user-supplied args line up positionally with the captured parameter names. The source
+        // is always exposed via `this`, so there's no loss of information for the expression.
+        if ($injectSource && count($args) > count($parameters)) {
+            $args = array_slice($args, 1);
+        }
+
         $argsName = array_keys($parameters);
-        $argsByName = array_combine($argsName, $args);
+        $argsByName = $argsName ? array_combine($argsName, $args) : [];
 
         return $variables + $argsByName;
     }

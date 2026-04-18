@@ -6,6 +6,7 @@ namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
 
 use function strtoupper;
@@ -33,5 +34,18 @@ class ExtendedContactType
     public function company(Contact $contact): string
     {
             return $contact->getName() . ' Ltd';
+    }
+
+    /**
+     * Regression: #[Security] on an ExtendType field used to blow up with
+     * "array_combine(): ... must have the same number of elements" because
+     * SecurityFieldMiddleware didn't mirror the source-injection that
+     * QueryField::fromFieldDescriptor performs.
+     */
+    #[Field]
+    #[Security("user && user.bar == 42", failWith: null)]
+    public function extendedSecretName(Contact $contact): string|null
+    {
+        return $contact->getName();
     }
 }
