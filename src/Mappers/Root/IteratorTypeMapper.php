@@ -206,8 +206,6 @@ class IteratorTypeMapper implements RootTypeMapperInterface
      */
     private function splitIteratorFromOtherTypes(array &$types): Type|null
     {
-        $iteratorType = null;
-        $key = null;
         foreach ($types as $key => $singleDocBlockType) {
             if (! ($singleDocBlockType instanceof Object_)) {
                 continue;
@@ -216,21 +214,17 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             /** @var class-string<object> $fqcn */
             $fqcn     = (string) $singleDocBlockType->getFqsen();
             $refClass = new ReflectionClass($fqcn);
-            // Note : $refClass->isIterable() is only accessible in PHP 7.2
             if (! $refClass->implementsInterface(Iterator::class) && ! $refClass->implementsInterface(IteratorAggregate::class)) {
                 continue;
             }
-            $iteratorType = $singleDocBlockType;
-            break;
+
+            // One of the classes in the compound is an iterator. Remove it and let the caller
+            // test the remaining values as potential subTypes.
+            unset($types[$key]);
+
+            return $singleDocBlockType;
         }
 
-        if ($iteratorType === null) {
-            return null;
-        }
-
-        // One of the classes in the compound is an iterator. Let's remove it from the list and let's test all other values as potential subTypes.
-        unset($types[$key]);
-
-        return $iteratorType;
+        return null;
     }
 }

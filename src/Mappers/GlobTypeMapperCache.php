@@ -48,7 +48,11 @@ class GlobTypeMapperCache
                 $this->mapClassToTypeArray[$objectClassName] = $className;
             }
 
+            // GlobAnnotationsCache::withType() sets typeClassName and typeName together, so
+            // inside this branch typeName is guaranteed non-null. Assert the invariant for PHPStan
+            // 8.5+, which is stricter about nullable array offsets.
             $typeName = $globAnnotationsCache->getTypeName();
+            assert($typeName !== null);
             $this->mapNameToType[$typeName] = $className;
         }
 
