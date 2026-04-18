@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite;
 
 use ReflectionClass;
+use ReflectionEnumUnitCase;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\AbstractGraphQLElement;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\EnumType;
+use TheCodingMachine\GraphQLite\Annotations\EnumValue;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
@@ -199,6 +201,24 @@ class AnnotationReader
     public function getEnumTypeAnnotation(ReflectionClass $refClass): EnumType|null
     {
         return $this->getClassAnnotation($refClass, EnumType::class);
+    }
+
+    /**
+     * Returns the {@see EnumValue} attribute declared on a PHP enum case, or null when no
+     * attribute is present. Callers use this to resolve the explicit description and deprecation
+     * reason before falling back to docblock parsing.
+     */
+    public function getEnumValueAnnotation(ReflectionEnumUnitCase $refCase): EnumValue|null
+    {
+        $attribute = $refCase->getAttributes(EnumValue::class)[0] ?? null;
+        if ($attribute === null) {
+            return null;
+        }
+
+        $instance = $attribute->newInstance();
+        assert($instance instanceof EnumValue);
+
+        return $instance;
     }
 
     /** @param class-string<AbstractGraphQLElement> $annotationClass */

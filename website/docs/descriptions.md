@@ -37,6 +37,7 @@ The attributes that accept `description`:
 - `#[Type]`, `#[ExtendType]` — object and enum types
 - `#[Factory]` — input types produced by factories
 - `#[Field]`, `#[Input]`, `#[SourceField]`, `#[MagicField]` — fields on output and input types
+- `#[EnumValue]` — individual cases of an enum type (see [Enum value descriptions](#enum-value-descriptions))
 
 ## Docblock fallback
 
@@ -87,6 +88,46 @@ disabling the whole fallback, pass an empty string:
 #[Query(description: '')]
 public function internalOnly(): Foo { /* ... */ }
 ```
+
+## Enum value descriptions
+
+Native PHP 8.1 enums mapped to GraphQL enum types get per-case metadata via the `#[EnumValue]`
+attribute applied to individual cases:
+
+```php
+use TheCodingMachine\GraphQLite\Annotations\EnumValue;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
+#[Type]
+enum Genre: string
+{
+    #[EnumValue(description: 'Fiction works including novels and short stories.')]
+    case Fiction = 'fiction';
+
+    #[EnumValue(deprecationReason: 'Use Fiction::Verse instead.')]
+    case Poetry = 'poetry';
+
+    /**
+     * Works grounded in verifiable facts.
+     */
+    case NonFiction = 'non-fiction'; // no attribute — description comes from the docblock
+}
+```
+
+The attribute name mirrors the GraphQL specification's term ("enum values", see
+[spec §3.5.2](https://spec.graphql.org/October2021/#sec-Enum-Values)) and matches webonyx/graphql-php's
+`EnumValueDefinition`. The underlying PHP construct is a `case`; the GraphQL element it produces
+is an enum value.
+
+`#[EnumValue]` accepts:
+
+- `description` — schema description for this enum value. Omitting it falls back to the case
+  docblock summary, subject to the same precedence rules as every other attribute's
+  `description` argument. An explicit empty string `''` deliberately suppresses the docblock
+  fallback.
+- `deprecationReason` — published as the enum value's `deprecationReason` in the schema.
+  Omitting it falls back to the `@deprecated` tag on the case docblock. An explicit empty string
+  `''` deliberately clears any inherited `@deprecated` tag.
 
 ## Description uniqueness on `#[ExtendType]`
 

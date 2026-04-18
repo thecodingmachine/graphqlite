@@ -96,6 +96,54 @@ class DescriptionTest extends TestCase
         $this->assertSame('Editorial classification of a book.', $genreType->description);
     }
 
+    public function testEnumValueAttributeProvidesCaseDescription(): void
+    {
+        $schema = $this->buildSchema(Book::class);
+
+        $genreType = $schema->getType('Genre');
+        $fictionValue = $genreType->getValue('Fiction');
+        $this->assertSame('Fiction works including novels and short stories.', $fictionValue->description);
+    }
+
+    public function testEnumCaseWithoutAttributeFallsBackToDocblock(): void
+    {
+        $schema = $this->buildSchema(Book::class);
+
+        $genreType = $schema->getType('Genre');
+        $nonFictionValue = $genreType->getValue('NonFiction');
+        // The NonFiction case has no #[EnumValue] attribute, so its description comes from the docblock.
+        $this->assertNotNull($nonFictionValue->description);
+        $this->assertStringContainsString(
+            'This docblock description should appear on the NonFiction enum value',
+            $nonFictionValue->description,
+        );
+    }
+
+    public function testEnumValueAttributeProvidesDeprecationReason(): void
+    {
+        $schema = $this->buildSchema(Book::class);
+
+        $genreType = $schema->getType('Genre');
+        $poetryValue = $genreType->getValue('Poetry');
+        $this->assertSame('Use Fiction::Verse instead.', $poetryValue->deprecationReason);
+    }
+
+    public function testDisablingDocblockFallbackSuppressesEnumCaseDescription(): void
+    {
+        $schema = $this->buildSchema(Book::class, docblockDescriptions: false);
+
+        $genreType = $schema->getType('Genre');
+
+        // Fiction has an explicit #[EnumValue] description — still present.
+        $this->assertSame(
+            'Fiction works including novels and short stories.',
+            $genreType->getValue('Fiction')->description,
+        );
+
+        // NonFiction relied on its docblock summary — with the toggle off, it must disappear.
+        $this->assertNull($genreType->getValue('NonFiction')->description);
+    }
+
     public function testExtendTypeSuppliesDescriptionWhenBaseTypeHasNone(): void
     {
         $schema = $this->buildSchema(Book::class);

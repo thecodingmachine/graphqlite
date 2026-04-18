@@ -311,6 +311,30 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *constraint*   | *yes       | annotation | One (or many) Symfony validation attributes.
 
+## #[EnumValue]
+
+The `#[EnumValue]` attribute attaches GraphQL schema metadata (description, deprecation reason)
+to an individual case of a PHP 8.1+ native enum that is exposed as a GraphQL enum type.
+
+**Applies on**: cases of an enum annotated (directly or indirectly) with `#[Type]`.
+
+Attribute         | Compulsory | Type   | Definition
+------------------|------------|--------|-----------
+description       | *no*       | string | Description of the enum value. When omitted, the case's PHP docblock summary is used (see [schema descriptions](descriptions.md#enum-value-descriptions)). An explicit empty string `''` deliberately suppresses the docblock fallback.
+deprecationReason | *no*       | string | Deprecation reason published to the schema. When omitted, the `@deprecated` tag on the case docblock is used. An explicit empty string `''` deliberately clears any inherited `@deprecated` tag.
+
+```php
+#[Type]
+enum Genre: string
+{
+    #[EnumValue(description: 'Fiction works including novels and short stories.')]
+    case Fiction = 'fiction';
+
+    #[EnumValue(deprecationReason: 'Use Fiction::Verse instead.')]
+    case Poetry = 'poetry';
+}
+```
+
 ## ~~@EnumType~~
 
 *Deprecated: Use [PHP 8.1's native Enums](https://www.php.net/manual/en/language.types.enumerations.php) instead with a [#[Type]](#type-annotation).*

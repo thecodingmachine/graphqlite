@@ -139,17 +139,31 @@ class EnumTypeMapper implements RootTypeMapperInterface
                 : null,
         );
 
-        /** @var array<string, string> $enumCaseDescriptions */
+        /** @var array<string, string|null> $enumCaseDescriptions */
         $enumCaseDescriptions = [];
         /** @var array<string, string> $enumCaseDeprecationReasons */
         $enumCaseDeprecationReasons = [];
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
+            $enumValueAttribute = $this->annotationReader->getEnumValueAnnotation($reflectionEnumCase);
 
-            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->isDocblockFallbackEnabled()
-                ? ($docBlock->getSummary() ?: null)
-                : null;
+            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->resolve(
+                $enumValueAttribute?->description,
+                $docBlock->getSummary() ?: null,
+            );
+
+            $explicitDeprecation = $enumValueAttribute?->deprecationReason;
+            if ($explicitDeprecation !== null) {
+                // Explicit `deprecationReason` always wins; an empty string deliberately clears
+                // any @deprecated tag on the case docblock the same way an empty description
+                // blocks the docblock fallback.
+                if ($explicitDeprecation !== '') {
+                    $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = $explicitDeprecation;
+                }
+                continue;
+            }
+
             $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
 
             // phpcs:ignore
