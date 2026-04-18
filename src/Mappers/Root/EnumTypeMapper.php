@@ -147,14 +147,14 @@ class EnumTypeMapper implements RootTypeMapperInterface
         $enumCaseDescriptions = [];
         /** @var array<string, string> $enumCaseDeprecationReasons */
         $enumCaseDeprecationReasons = [];
-        $sawAnyEnumValueAttribute = false;
+        $hasEnumValueAttribute = false;
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
             $enumValueAttribute = $this->annotationReader->getEnumValueAnnotation($reflectionEnumCase);
 
             if ($enumValueAttribute !== null) {
-                $sawAnyEnumValueAttribute = true;
+                $hasEnumValueAttribute = true;
             }
 
             $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->resolve(
@@ -181,8 +181,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
             }
         }
 
-        if (! $sawAnyEnumValueAttribute) {
-            $this->warnEnumHasNoEnumValueAttributes($enumClass);
+        if (! $hasEnumValueAttribute) {
+            $this->warnEnumHasNoEnumValueAttribute($enumClass);
         }
 
         $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
@@ -206,7 +206,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
      *
      * @param class-string<UnitEnum> $enumClass
      */
-    private function warnEnumHasNoEnumValueAttributes(string $enumClass): void
+    private function warnEnumHasNoEnumValueAttribute(string $enumClass): void
     {
         trigger_error(
             sprintf(
