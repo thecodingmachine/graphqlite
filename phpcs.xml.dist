@@ -29,6 +29,9 @@
         <exclude name="Squiz.Commenting.FunctionComment.InvalidNoReturn" />
         <exclude name="Generic.Formatting.MultipleStatementAlignment" />
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.NewlineBeforeOpenBrace" />
+        <!-- Requires PHP 8.3 typed class constants; our minimum supported PHP is 8.2 so this
+             rule can't be satisfied without a runtime bump. Re-enable when min PHP >= 8.3. -->
+        <exclude name="SlevomatCodingStandard.TypeHints.ClassConstantTypeHint" />
     </rule>
 
     <!-- Do not align assignments -->

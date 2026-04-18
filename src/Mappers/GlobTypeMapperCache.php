@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Mappers;
 use ReflectionClass;
 
 use function array_keys;
+use function assert;
 
 /**
  * The cached results of a GlobTypeMapper
