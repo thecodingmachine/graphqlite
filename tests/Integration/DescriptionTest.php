@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Description\Book;
 use TheCodingMachine\GraphQLite\Fixtures\DescriptionDuplicate\Book as DuplicateBook;
+use TheCodingMachine\GraphQLite\Fixtures\DescriptionLegacyEnum\Era;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
@@ -105,18 +106,47 @@ class DescriptionTest extends TestCase
         $this->assertSame('Fiction works including novels and short stories.', $fictionValue->description);
     }
 
-    public function testEnumWithCasesMissingEnumValueAttributeTriggersDeprecation(): void
+    public function testEnumWithZeroEnumValueAttributesTriggersDeprecation(): void
     {
-        // The Genre fixture deliberately leaves NonFiction without #[EnumValue] to exercise the
-        // docblock-fallback path and to surface the deprecation announcing the future opt-in
-        // migration. PHPUnit 11's expectUserDeprecationMessageMatches hooks into the library's
-        // own error handler so the assertion works consistently with how deprecations surface
-        // in CI output.
-        $this->expectUserDeprecationMessageMatches('/#\[EnumValue\].*future major.*NonFiction/s');
+        // The Era fixture deliberately declares zero #[EnumValue] attributes — the signal that
+        // the developer has not yet engaged with the opt-in migration. That is the scenario the
+        // advisory targets; partial annotation on other enums (like Genre in the Description
+        // namespace) is deliberately silent because it already acknowledges the new model.
+        $this->expectUserDeprecationMessageMatches('/declares no #\[EnumValue\] attributes.*future major/s');
 
-        $schema = $this->buildSchema(Book::class);
+        $schema = $this->buildSchema(Era::class);
         // Force enum resolution — types are lazy-mapped until referenced.
-        $schema->getType('Genre');
+        $schema->getType('Era');
+    }
+
+    public function testEnumWithPartialEnumValueAttributesIsSilent(): void
+    {
+        // Genre has #[EnumValue] on Fiction and Poetry but not NonFiction. Partial annotation is
+        // deliberately OK: leaving a case unannotated is the mechanism for hiding it from the
+        // public schema after the future default flip, and therefore must not itself produce an
+        // advisory. Asserting no deprecation here locks that contract in.
+        $captured = [];
+        set_error_handler(
+            static function (int $errno, string $errstr) use (&$captured): bool {
+                if ($errno === E_USER_DEPRECATED && str_contains($errstr, 'EnumValue')) {
+                    $captured[] = $errstr;
+
+                    return true;
+                }
+
+                return false;
+            },
+            E_USER_DEPRECATED,
+        );
+
+        try {
+            $schema = $this->buildSchema(Book::class);
+            $schema->getType('Genre');
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $captured, 'Partial #[EnumValue] annotation must not trigger the advisory notice.');
     }
 
     public function testEnumCaseWithoutAttributeFallsBackToDocblock(): void
