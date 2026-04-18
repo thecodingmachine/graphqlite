@@ -105,6 +105,20 @@ class DescriptionTest extends TestCase
         $this->assertSame('Fiction works including novels and short stories.', $fictionValue->description);
     }
 
+    public function testEnumWithCasesMissingEnumValueAttributeTriggersDeprecation(): void
+    {
+        // The Genre fixture deliberately leaves NonFiction without #[EnumValue] to exercise the
+        // docblock-fallback path and to surface the deprecation announcing the future opt-in
+        // migration. PHPUnit 11's expectUserDeprecationMessageMatches hooks into the library's
+        // own error handler so the assertion works consistently with how deprecations surface
+        // in CI output.
+        $this->expectUserDeprecationMessageMatches('/#\[EnumValue\].*future major.*NonFiction/s');
+
+        $schema = $this->buildSchema(Book::class);
+        // Force enum resolution — types are lazy-mapped until referenced.
+        $schema->getType('Genre');
+    }
+
     public function testEnumCaseWithoutAttributeFallsBackToDocblock(): void
     {
         $schema = $this->buildSchema(Book::class);

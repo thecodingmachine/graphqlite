@@ -30,7 +30,12 @@ use function array_merge;
 use function array_values;
 use function assert;
 use function enum_exists;
+use function implode;
 use function ltrim;
+use function sprintf;
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
 
 /**
  * Maps an enum class to a GraphQL type (only available in PHP>=8.1)
@@ -143,10 +148,16 @@ class EnumTypeMapper implements RootTypeMapperInterface
         $enumCaseDescriptions = [];
         /** @var array<string, string> $enumCaseDeprecationReasons */
         $enumCaseDeprecationReasons = [];
+        /** @var list<string> $casesMissingEnumValueAttribute */
+        $casesMissingEnumValueAttribute = [];
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
             $enumValueAttribute = $this->annotationReader->getEnumValueAnnotation($reflectionEnumCase);
+
+            if ($enumValueAttribute === null) {
+                $casesMissingEnumValueAttribute[] = $reflectionEnumCase->getName();
+            }
 
             $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->resolve(
                 $enumValueAttribute?->description,
@@ -172,9 +183,43 @@ class EnumTypeMapper implements RootTypeMapperInterface
             }
         }
 
+        $this->warnAboutCasesMissingEnumValueAttribute($enumClass, $casesMissingEnumValueAttribute);
+
         $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
         return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
+    }
+
+    /**
+     * Emits a deprecation notice when a GraphQL-mapped enum exposes one or more cases without a
+     * matching {@see EnumValue} attribute.
+     *
+     * Today every case is automatically exposed in the schema — this call site keeps that
+     * behaviour intact. The notice announces the planned migration: a future major release will
+     * require `#[EnumValue]` on each case that should participate in the schema, mirroring
+     * `#[Field]`'s opt-in model on classes. Until then, adopters can start annotating cases
+     * incrementally; the warning lists the specific cases that would be dropped after the
+     * future default flip so the migration path is mechanical.
+     *
+     * @param class-string<UnitEnum>  $enumClass
+     * @param list<string>            $casesMissingAttribute
+     */
+    private function warnAboutCasesMissingEnumValueAttribute(string $enumClass, array $casesMissingAttribute): void
+    {
+        if ($casesMissingAttribute === []) {
+            return;
+        }
+
+        trigger_error(
+            sprintf(
+                'Enum "%s" is mapped to a GraphQL enum type but exposes one or more cases without a #[EnumValue] attribute. '
+                . 'Today every case is automatically exposed; a future major release will require #[EnumValue] on each case that should participate in the schema, mirroring #[Field]\'s opt-in model. '
+                . 'Add #[EnumValue] to each case you want to keep exposed. Cases currently exposed without an attribute: %s.',
+                $enumClass,
+                implode(', ', $casesMissingAttribute),
+            ),
+            E_USER_DEPRECATED,
+        );
     }
 
     private function getTypeName(ReflectionClass $reflectionClass): string

@@ -129,6 +129,25 @@ is an enum value.
   Omitting it falls back to the `@deprecated` tag on the case docblock. An explicit empty string
   `''` deliberately clears any inherited `@deprecated` tag.
 
+### Future migration: `#[EnumValue]` will become required per case
+
+Today every case of a `#[Type]`-mapped enum is automatically exposed in the GraphQL schema. A
+future major release will flip this to an opt-in model: **only cases carrying an explicit
+`#[EnumValue]` attribute will be exposed**, mirroring the way `#[Field]` opts individual
+methods and properties into an object type.
+
+The benefit is selective exposure — today there is no way to map a subset of a PHP enum into
+GraphQL, which forces schema authors to split an enum into two or rename cases. Under the
+opt-in model, an internal enum case can simply omit `#[EnumValue]` to stay out of the public
+schema.
+
+To surface the upcoming change, GraphQLite already emits a PHP `E_USER_DEPRECATED` notice at
+schema build time when an enum annotated with `#[Type]` exposes any case without an
+`#[EnumValue]` attribute. The notice names the specific cases that would be dropped after the
+flip so the migration path is mechanical: add `#[EnumValue]` to every case you want to keep.
+No runtime behaviour changes today — the notice only signals what the future default will
+require.
+
 ## Description uniqueness on `#[ExtendType]`
 
 A GraphQL type has exactly one description, so GraphQLite enforces that the description for a
