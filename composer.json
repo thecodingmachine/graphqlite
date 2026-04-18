@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-json": "*",
         "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.4",
@@ -35,7 +35,7 @@
         "php-coveralls/php-coveralls": "^2.7",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^10.5 || ^11.0 || ^12.0",
+        "phpunit/phpunit": "^11.0",
         "symfony/var-dumper": "^6.4"
     },
     "suggest": {
@@ -68,6 +68,11 @@
             "composer/package-versions-deprecated": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-5jz8-6tcw-pbk4": "PHPUnit argument-injection via newline in INI values forwarded to child PHP processes (GHSA-qrr6-mg7r-m243). phpunit is a require-dev dependency; the attack surface is INI values in phpunit config or CLI args, which are authored by maintainers/CI and carry the same trust as any other committed code. No fix available for PHPUnit 10.x or 11.x yet — revisit when backport ships or when we bump min PHP to 8.3 and can move to ^12.5.22."
+            }
         }
     }
 }
