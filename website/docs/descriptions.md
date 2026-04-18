@@ -129,48 +129,16 @@ is an enum value.
   Omitting it falls back to the `@deprecated` tag on the case docblock. An explicit empty string
   `''` deliberately clears any inherited `@deprecated` tag.
 
-### Future migration: `#[EnumValue]` will become required per `#[Type]`-mapped enum
+### Future migration
 
-Today every case of a `#[Type]`-mapped enum is automatically exposed in the GraphQL schema. A
-future major release will flip this to an opt-in model: **`#[Type]`-mapped enums will need at
-least one `#[EnumValue]`-annotated case, and only annotated cases will participate in the
-schema**, mirroring the way `#[Field]` opts individual methods and properties into an object
-type.
+A future major release will require at least one `#[EnumValue]`-annotated case per
+`#[Type]`-mapped enum; only annotated cases will be exposed in the schema (mirroring
+`#[Field]`'s opt-in model). Today every case is still auto-exposed, so nothing breaks.
 
-The benefit is selective exposure — today there is no way to map a subset of a PHP enum into
-GraphQL, which forces schema authors to split an enum into two or rename cases. Under the
-opt-in model, an internal enum case can simply omit `#[EnumValue]` to stay out of the public
-schema. **Partial annotation is intentional and deliberately silent**: leaving some cases
-unannotated is the mechanism for hiding them from the public schema once the default flips,
-not a migration oversight.
-
-To surface the upcoming change, GraphQLite emits a PHP `E_USER_DEPRECATED` notice at schema
-build time only when a `#[Type]`-mapped enum declares **zero** `#[EnumValue]` attributes
-across its cases — the signal that the developer has not yet engaged with the opt-in model at
-all. Annotating at least one case acknowledges the new model and silences the notice; after
-that, any combination of annotated and unannotated cases is correct and intentional.
-
-Adopters who aren't ready to decide which cases to expose can silence the advisory with a
-bare `#[EnumValue]` on a single case — no description, no deprecation, just the acknowledgement:
-
-```php
-#[Type]
-enum Size
-{
-    #[EnumValue] // acknowledges the opt-in migration; runtime behaviour unchanged
-    case S;
-    case M;
-    case L;
-}
-```
-
-**Runtime implication after the flip.** Cases without `#[EnumValue]` will not exist in the
-GraphQL schema, so a resolver that returns such a case will trigger webonyx/graphql-php's
-standard enum serialization error (the value is not listed in the enum type's `values`
-config). This is the same spec-compliant behaviour that applies to any unknown enum value and
-is the mechanism that makes selective exposure safe: internal cases cannot accidentally leak
-via a resolver. Developers who want a case to remain returnable must keep `#[EnumValue]` on
-it; omitting the attribute is a deliberate "do not expose this value" signal.
+GraphQLite emits a deprecation notice only when a `#[Type]`-mapped enum has **zero**
+`#[EnumValue]` attributes — annotating any single case silences it and acknowledges the
+model. Partial annotation is intentional: an unannotated case is how you hide a value from
+the public schema once the default flips.
 
 ## Description uniqueness on `#[ExtendType]`
 
