@@ -197,12 +197,10 @@ class EnumTypeMapper implements RootTypeMapperInterface
      *
      * Today every case is automatically exposed in the schema regardless of `#[EnumValue]` —
      * this call site keeps that behaviour intact. The notice announces the planned migration:
-     * a future major release will require at least one `#[EnumValue]`-annotated case per
-     * `#[Type]`-mapped enum, and only annotated cases will participate in the schema
-     * (mirroring `#[Field]`'s opt-in model on classes). Partial annotation is deliberately
-     * allowed and intentionally silent — leaving some cases unannotated is the mechanism that
-     * hides internal cases from the public schema once the default flips, so it must not
-     * itself produce a warning.
+     * a future major release will require `#[EnumValue]` on each case that should participate
+     * in the schema, and unannotated cases will be hidden (mirroring `#[Field]`'s opt-in
+     * model on classes). Partial annotation is deliberately allowed and intentionally silent
+     * so that leaving some cases unannotated can be used to hide them once the default flips.
      *
      * @param class-string<UnitEnum> $enumClass
      */
@@ -211,8 +209,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
         trigger_error(
             sprintf(
                 'Enum "%s" is mapped to a GraphQL enum type but declares no #[EnumValue] attributes on any case. '
-                . 'Today every case is automatically exposed; a future major release will require at least one #[EnumValue]-annotated case per #[Type]-mapped enum, and only annotated cases will participate in the schema (mirroring #[Field]\'s opt-in model on classes). '
-                . 'Add #[EnumValue] to the case(s) you want to expose — annotating at least one case acknowledges the opt-in model and silences this notice. Cases left unannotated will be hidden from the schema after the future default flip, which is the intended way to keep internal values out of the public API.',
+                . 'Today every case is automatically exposed; a future major release will require #[EnumValue] on each case that should participate in the schema, and unannotated cases will be hidden (mirroring #[Field]\'s opt-in model on classes). '
+                . 'Add #[EnumValue] to every case you want to keep exposed. Omit it only from cases you want hidden from the public schema after the future default flip.',
                 $enumClass,
             ),
             E_USER_DEPRECATED,

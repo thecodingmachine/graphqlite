@@ -131,14 +131,14 @@ is an enum value.
 
 ### Future migration
 
-A future major release will require at least one `#[EnumValue]`-annotated case per
-`#[Type]`-mapped enum; only annotated cases will be exposed in the schema (mirroring
-`#[Field]`'s opt-in model). Today every case is still auto-exposed, so nothing breaks.
+A future major release will require `#[EnumValue]` on each case that should participate in
+the schema; unannotated cases will be hidden (mirroring `#[Field]`'s opt-in model). Today
+every case is still auto-exposed, so nothing breaks. Add `#[EnumValue]` to every case you
+want to keep exposed — omitting it from a case is the mechanism for hiding internal values
+once the default flips.
 
-GraphQLite emits a deprecation notice only when a `#[Type]`-mapped enum has **zero**
-`#[EnumValue]` attributes — annotating any single case silences it and acknowledges the
-model. Partial annotation is intentional: an unannotated case is how you hide a value from
-the public schema once the default flips.
+GraphQLite emits a deprecation notice when a `#[Type]`-mapped enum has **zero**
+`#[EnumValue]` attributes at all (partial annotation is intentional and stays silent).
 
 ## Description uniqueness on `#[ExtendType]`
 

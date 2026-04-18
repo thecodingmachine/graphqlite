@@ -12,6 +12,8 @@ enum Size
 {
     #[EnumValue]
     case S;
+    #[EnumValue]
     case M;
+    #[EnumValue]
     case L;
 }

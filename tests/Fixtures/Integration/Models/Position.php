@@ -12,5 +12,6 @@ enum Position: int
 {
     #[EnumValue]
     case Off = 0;
+    #[EnumValue]
     case On  = 1;
 }
