@@ -10,7 +10,6 @@ use ReflectionParameter;
 use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Annotations\AbstractRequest;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
-use TheCodingMachine\GraphQLite\Annotations\EnumType;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\InvalidParameterException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
@@ -194,11 +193,6 @@ class AnnotationReader
         }
 
         return $extendType;
-    }
-
-    public function getEnumTypeAnnotation(ReflectionClass $refClass): EnumType|null
-    {
-        return $this->getClassAnnotation($refClass, EnumType::class);
     }
 
     /** @param class-string<AbstractRequest> $annotationClass */

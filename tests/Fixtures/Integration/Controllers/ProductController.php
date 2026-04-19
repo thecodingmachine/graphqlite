@@ -22,7 +22,7 @@ class ProductController
     public function getProducts(): ArrayResult
     {
         return new ArrayResult([
-            new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
+            new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD),
         ]);
     }
 
@@ -37,8 +37,8 @@ class ProductController
     {
         return [
             [
-                new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
-                new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD()),
+                new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD),
+                new Product('Foo', 42.0, ProductTypeEnum::NON_FOOD),
             ],
         ];
     }
@@ -52,7 +52,7 @@ class ProductController
     #[Query]
     public function echoSomeProductType(): ProductTypeEnum
     {
-        return ProductTypeEnum::FOOD();
+        return ProductTypeEnum::FOOD;
     }
 
     #[Query]

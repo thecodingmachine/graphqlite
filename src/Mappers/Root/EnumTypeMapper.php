@@ -8,7 +8,6 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use MyCLabs\Enum\Enum;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Object_;
@@ -104,15 +103,11 @@ class EnumTypeMapper implements RootTypeMapperInterface
         if (! enum_exists($enumClass)) {
             return null;
         }
-        /** @var class-string<Enum> $enumClass */
+        /** @var class-string<UnitEnum> $enumClass */
         $enumClass = ltrim($enumClass, '\\');
         if (isset($this->cacheByClass[$enumClass])) {
             return $this->cacheByClass[$enumClass];
         }
-
-        // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
-        /** @var class-string<UnitEnum> $enumClass */
-        // phpcs:enable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
 
         $reflectionEnum = new ReflectionEnum($enumClass);
 

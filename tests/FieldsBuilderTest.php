@@ -124,7 +124,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
             'dateTimeImmutable' => '2017-01-01 01:01:01',
             'dateTime' => '2017-01-01 01:01:01',
             'id' => 42,
-            'enum' => TestEnum::ON(),
+            'enum' => TestEnum::ON,
         ];
 
         $resolve = $usersQuery->resolveFn;

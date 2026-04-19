@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
 
-use MyCLabs\Enum\Enum;
-use TheCodingMachine\GraphQLite\Annotations\EnumType;
-#[EnumType(name: "ProductTypes")]
-class ProductTypeEnum extends Enum
+use TheCodingMachine\GraphQLite\Annotations\Type;
+
+#[Type(name: 'ProductTypes')]
+enum ProductTypeEnum: string
 {
-    const FOOD = 'food';
-    const NON_FOOD = 'non food';
+    case FOOD = 'food';
+    case NON_FOOD = 'non food';
 }
