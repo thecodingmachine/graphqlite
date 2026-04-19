@@ -22,8 +22,6 @@ use Throwable;
 /**
  * A GraphQL input field that maps to a PHP method automatically.
  *
- * @internal
- *
  * @phpstan-import-type InputObjectFieldConfig from InputObjectField
  * @phpstan-import-type ArgumentType from InputObjectField
  */
