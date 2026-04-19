@@ -47,7 +47,6 @@ use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
@@ -367,14 +366,6 @@ abstract class AbstractQueryProvider extends TestCase
             $errorRootTypeMapper,
             $this->getTypeMapper(),
             $topRootTypeMapper,
-        );
-
-        // Annotation support - deprecated
-        $rootTypeMapper = new MyCLabsEnumTypeMapper(
-            $rootTypeMapper,
-            $this->getAnnotationReader(),
-            new StaticClassFinder([]),
-            new HardClassFinderComputedCache(new Psr16Cache($arrayAdapter)),
         );
 
         $rootTypeMapper = new EnumTypeMapper(

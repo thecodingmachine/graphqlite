@@ -9,7 +9,6 @@ use Kcs\ClassFinder\FileFinder\CachedFileFinder;
 use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
-use MyCLabs\Enum\Enum;
 use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -41,7 +40,6 @@ use TheCodingMachine\GraphQLite\Mappers\Root\EnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
-use TheCodingMachine\GraphQLite\Mappers\Root\MyCLabsEnumTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryInterface;
@@ -70,7 +68,6 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 
 use function array_reverse;
-use function class_exists;
 use function implode;
 use function md5;
 use function substr;
@@ -405,11 +402,6 @@ class SchemaFactory
         $errorRootTypeMapper = new FinalRootTypeMapper($recursiveTypeMapper);
         $rootTypeMapper = new BaseTypeMapper($errorRootTypeMapper, $recursiveTypeMapper, $topRootTypeMapper);
         $rootTypeMapper = new EnumTypeMapper($rootTypeMapper, $annotationReader, $docBlockFactory, $classFinder, $classFinderComputedCache);
-
-        if (class_exists(Enum::class)) {
-            // Annotation support - deprecated
-            $rootTypeMapper = new MyCLabsEnumTypeMapper($rootTypeMapper, $annotationReader, $classFinder, $classFinderComputedCache);
-        }
 
         if (! empty($this->rootTypeMapperFactories)) {
             $rootSchemaFactoryContext = new RootTypeMapperFactoryContext(
