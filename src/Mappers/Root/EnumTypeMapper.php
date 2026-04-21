@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\EnumType;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 use UnitEnum;
 
 use function array_filter;
@@ -29,6 +30,10 @@ use function array_values;
 use function assert;
 use function enum_exists;
 use function ltrim;
+use function sprintf;
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
 
 /**
  * Maps an enum class to a GraphQL type (only available in PHP>=8.1)
@@ -48,6 +53,7 @@ class EnumTypeMapper implements RootTypeMapperInterface
         private readonly DocBlockFactory $docBlockFactory,
         private readonly ClassFinder $classFinder,
         private readonly ClassFinderComputedCache $classFinderComputedCache,
+        private readonly DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
     ) {
     }
 
@@ -121,19 +127,47 @@ class EnumTypeMapper implements RootTypeMapperInterface
             && $reflectionEnum->isBacked()
             && (string) $reflectionEnum->getBackingType() === 'string';
 
-        $enumDescription = $this->docBlockFactory
-            ->create($reflectionEnum)
-            ->getSummary() ?: null;
+        $explicitEnumDescription = $typeAnnotation instanceof TypeAnnotation
+            ? $typeAnnotation->getDescription()
+            : null;
 
-        /** @var array<string, string> $enumCaseDescriptions */
+        $enumDescription = $this->descriptionResolver->resolve(
+            $explicitEnumDescription,
+            $this->descriptionResolver->isDocblockFallbackEnabled()
+                ? ($this->docBlockFactory->create($reflectionEnum)->getSummary() ?: null)
+                : null,
+        );
+
+        /** @var array<string, string|null> $enumCaseDescriptions */
         $enumCaseDescriptions = [];
         /** @var array<string, string> $enumCaseDeprecationReasons */
         $enumCaseDeprecationReasons = [];
+        $hasEnumValueAttribute = false;
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
             $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
+            $enumValueAttribute = $this->annotationReader->getEnumValueAnnotation($reflectionEnumCase);
 
-            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $docBlock->getSummary() ?: null;
+            if ($enumValueAttribute !== null) {
+                $hasEnumValueAttribute = true;
+            }
+
+            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->resolve(
+                $enumValueAttribute?->description,
+                $docBlock->getSummary() ?: null,
+            );
+
+            $explicitDeprecation = $enumValueAttribute?->deprecationReason;
+            if ($explicitDeprecation !== null) {
+                // Explicit `deprecationReason` always wins; an empty string deliberately clears
+                // any @deprecated tag on the case docblock the same way an empty description
+                // blocks the docblock fallback.
+                if ($explicitDeprecation !== '') {
+                    $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = $explicitDeprecation;
+                }
+                continue;
+            }
+
             $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
 
             // phpcs:ignore
@@ -142,9 +176,40 @@ class EnumTypeMapper implements RootTypeMapperInterface
             }
         }
 
+        if (! $hasEnumValueAttribute) {
+            $this->warnEnumHasNoEnumValueAttribute($enumClass);
+        }
+
         $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
 
         return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
+    }
+
+    /**
+     * Emits a deprecation notice when a GraphQL-mapped enum declares zero {@see EnumValue}
+     * attributes across its cases — the signal that the developer has not yet engaged with
+     * the opt-in model that a future major release will require.
+     *
+     * Today every case is automatically exposed in the schema regardless of `#[EnumValue]` —
+     * this call site keeps that behaviour intact. The notice announces the planned migration:
+     * a future major release will require `#[EnumValue]` on each case that should participate
+     * in the schema, and unannotated cases will be hidden (mirroring `#[Field]`'s opt-in
+     * model on classes). Partial annotation is deliberately allowed and intentionally silent
+     * so that leaving some cases unannotated can be used to hide them once the default flips.
+     *
+     * @param class-string<UnitEnum> $enumClass
+     */
+    private function warnEnumHasNoEnumValueAttribute(string $enumClass): void
+    {
+        trigger_error(
+            sprintf(
+                'Enum "%s" is mapped to a GraphQL enum type but declares no #[EnumValue] attributes on any case. '
+                . 'Today every case is automatically exposed; a future major release will require #[EnumValue] on each case that should participate in the schema, and unannotated cases will be hidden (mirroring #[Field]\'s opt-in model on classes). '
+                . 'Add #[EnumValue] to every case you want to keep exposed. Omit it only from cases you want hidden from the public schema after the future default flip.',
+                $enumClass,
+            ),
+            E_USER_DEPRECATED,
+        );
     }
 
     private function getTypeName(ReflectionClass $reflectionClass): string

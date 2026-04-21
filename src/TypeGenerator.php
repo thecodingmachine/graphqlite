@@ -7,13 +7,19 @@ namespace TheCodingMachine\GraphQLite;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
+use TheCodingMachine\GraphQLite\Annotations\Exceptions\DuplicateDescriptionOnTypeException;
+use TheCodingMachine\GraphQLite\Annotations\ExtendType;
+use TheCodingMachine\GraphQLite\Annotations\Type as TypeAnnotation;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedInterfaceType;
 use TheCodingMachine\GraphQLite\Types\TypeAnnotatedObjectType;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 
+use function assert;
 use function interface_exists;
 
 /**
@@ -22,6 +28,18 @@ use function interface_exists;
  */
 class TypeGenerator
 {
+    /**
+     * Tracks every GraphQL type name for which an explicit description has already been contributed
+     * via a #[Type] or #[ExtendType] attribute. Used to reject ambiguous multi-source descriptions
+     * on the same type with a clear error.
+     *
+     * Keys are the resolved GraphQL type name, values are a human-readable source label (e.g. the
+     * annotated class name) so the resulting exception points at both offending sources.
+     *
+     * @var array<string, string>
+     */
+    private array $explicitDescriptionSources = [];
+
     public function __construct(
         private AnnotationReader $annotationReader,
         private NamingStrategyInterface $namingStrategy,
@@ -29,6 +47,8 @@ class TypeGenerator
         private ContainerInterface $container,
         private RecursiveTypeMapperInterface $recursiveTypeMapper,
         private FieldsBuilder $fieldsBuilder,
+        private DocBlockFactory|null $docBlockFactory = null,
+        private DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
     )
     {
     }
@@ -50,6 +70,12 @@ class TypeGenerator
             throw MissingAnnotationException::missingTypeException($annotatedObjectClassName);
         }
 
+        // AnnotationReader::getTypeAnnotation only resolves #[Type] attributes, so the concrete
+        // Type class is the only possible implementation of TypeInterface returned here. The
+        // narrower type grants access to the Type-specific description API without widening
+        // TypeInterface (which would be a BC break for external implementations).
+        assert($typeField instanceof TypeAnnotation);
+
         $typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $typeField);
 
         if ($this->typeRegistry->hasType($typeName)) {
@@ -67,34 +93,39 @@ class TypeGenerator
             $isInterface = $refTypeClass->isInterface();
         }
 
-        if ($isInterface) {
-            return TypeAnnotatedInterfaceType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper);
+        $resolvedDescription = $this->descriptionResolver->resolve(
+            $typeField->getDescription(),
+            $this->extractClassDocblockSummary($refTypeClass),
+        );
+
+        if ($typeField->getDescription() !== null) {
+            $this->explicitDescriptionSources[$typeName] = '#[Type] on ' . $refTypeClass->getName();
         }
 
-        return TypeAnnotatedObjectType::createFromAnnotatedClass($typeName, $typeField->getClass(), $annotatedObject, $this->fieldsBuilder, $this->recursiveTypeMapper, ! $typeField->isDefault());
+        if ($isInterface) {
+            $type = TypeAnnotatedInterfaceType::createFromAnnotatedClass(
+                $typeName,
+                $typeField->getClass(),
+                $annotatedObject,
+                $this->fieldsBuilder,
+                $this->recursiveTypeMapper,
+            );
+        } else {
+            $type = TypeAnnotatedObjectType::createFromAnnotatedClass(
+                $typeName,
+                $typeField->getClass(),
+                $annotatedObject,
+                $this->fieldsBuilder,
+                $this->recursiveTypeMapper,
+                ! $typeField->isDefault(),
+            );
+        }
 
-        /*return new ObjectType([
-            'name' => $typeName,
-            'fields' => function() use ($annotatedObject, $recursiveTypeMapper, $typeField) {
-                $parentClass = get_parent_class($typeField->getClass());
-                $parentType = null;
-                if ($parentClass !== false) {
-                    if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
-                        $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
-                    }
-                }
+        if ($resolvedDescription !== null) {
+            $type->description = $resolvedDescription;
+        }
 
-                $fieldProvider = $this->controllerQueryProviderFactory->buildFieldsBuilder($recursiveTypeMapper);
-                $fields = $fieldProvider->getFields($annotatedObject);
-                if ($parentType !== null) {
-                    $fields = $parentType->getFields() + $fields;
-                }
-                return $fields;
-            },
-            'interfaces' => function() use ($typeField, $recursiveTypeMapper) {
-                return $recursiveTypeMapper->findInterfaces($typeField->getClass());
-            }
-        ]);*/
+        return $type;
     }
 
     /**
@@ -113,27 +144,64 @@ class TypeGenerator
             throw MissingAnnotationException::missingExtendTypeException();
         }
 
-        //$typeName = $this->namingStrategy->getOutputTypeName($refTypeClass->getName(), $extendTypeAnnotation);
         $typeName = $type->name;
 
-        /*if ($this->typeRegistry->hasType($typeName)) {
-            throw new GraphQLException(sprintf('Tried to extend GraphQL type "%s" that is already stored in the type registry.', $typeName));
-        }
-        */
+        $this->applyExtendTypeDescription($refTypeClass, $extendTypeAnnotation, $type, $typeName);
 
         $type->addFields(function () use ($annotatedObject, $typeName) {
-            /*$parentClass = get_parent_class($extendTypeAnnotation->getClass());
-            $parentType = null;
-            if ($parentClass !== false) {
-                if ($recursiveTypeMapper->canMapClassToType($parentClass)) {
-                    $parentType = $recursiveTypeMapper->mapClassToType($parentClass, null);
-                }
-            }*/
             return $this->fieldsBuilder->getFields($annotatedObject, $typeName);
-
-            /*if ($parentType !== null) {
-                $fields = $parentType->getFields() + $fields;
-            }*/
         });
+    }
+
+    /**
+     * Enforces the rule that a GraphQL type description may live on the base #[Type] OR on at most
+     * one #[ExtendType], never both, and applies the #[ExtendType] description to the underlying
+     * type when valid.
+     *
+     * @param ReflectionClass<object> $refTypeClass
+     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     */
+    private function applyExtendTypeDescription(
+        ReflectionClass $refTypeClass,
+        ExtendType $extendTypeAnnotation,
+        MutableInterface $type,
+        string $typeName,
+    ): void {
+        $explicitDescription = $extendTypeAnnotation->getDescription();
+        if ($explicitDescription === null) {
+            return;
+        }
+
+        $sourceLabel = '#[ExtendType] on ' . $refTypeClass->getName();
+
+        if (isset($this->explicitDescriptionSources[$typeName])) {
+            $targetClass = $extendTypeAnnotation->getClass() ?? $refTypeClass->getName();
+            throw DuplicateDescriptionOnTypeException::forType(
+                $targetClass,
+                [$this->explicitDescriptionSources[$typeName], $sourceLabel],
+            );
+        }
+
+        $this->explicitDescriptionSources[$typeName] = $sourceLabel;
+        $type->description = $explicitDescription;
+    }
+
+    /**
+     * Returns the docblock summary for a class, or null when:
+     *   - docblock fallback is disabled on the resolver,
+     *   - no DocBlockFactory was injected,
+     *   - the class has no docblock summary.
+     *
+     * @param ReflectionClass<object> $refTypeClass
+     */
+    private function extractClassDocblockSummary(ReflectionClass $refTypeClass): string|null
+    {
+        if (! $this->descriptionResolver->isDocblockFallbackEnabled() || $this->docBlockFactory === null) {
+            return null;
+        }
+
+        $summary = $this->docBlockFactory->create($refTypeClass)->getSummary();
+
+        return $summary === '' ? null : $summary;
     }
 }

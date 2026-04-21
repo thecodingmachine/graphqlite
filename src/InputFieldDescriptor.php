@@ -36,7 +36,7 @@ class InputFieldDescriptor
         private readonly array $parameters = [],
         private readonly bool $injectSource = false,
         private readonly bool $forConstructorHydration = false,
-        private readonly string|null $comment = null,
+        private readonly string|null $description = null,
         private readonly MiddlewareAnnotations $middlewareAnnotations = new MiddlewareAnnotations([]),
         private readonly bool $isUpdate = false,
         private readonly bool $hasDefaultValue = false,
@@ -127,14 +127,14 @@ class InputFieldDescriptor
         return $this->with(forConstructorHydration: $forConstructorHydration);
     }
 
-    public function getComment(): string|null
+    public function getDescription(): string|null
     {
-        return $this->comment;
+        return $this->description;
     }
 
-    public function withComment(string|null $comment): self
+    public function withDescription(string|null $description): self
     {
-        return $this->with(comment: $comment);
+        return $this->with(description: $description);
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

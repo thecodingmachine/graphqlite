@@ -46,6 +46,7 @@ use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 
 use function array_map;
 use function array_unique;
@@ -69,6 +70,7 @@ class TypeHandler implements ParameterHandlerInterface
         private readonly RootTypeMapperInterface $rootTypeMapper,
         private readonly TypeResolver $typeResolver,
         private readonly DocBlockFactory $docBlockFactory,
+        private readonly DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
     )
     {
         $this->phpDocumentorTypeResolver = new PhpDocumentorTypeResolver();
@@ -220,7 +222,9 @@ class TypeHandler implements ParameterHandlerInterface
             }
         }
 
-        $description = $this->getParameterDescriptionFromDocBlock($docBlock, $parameter);
+        $description = $this->descriptionResolver->isDocblockFallbackEnabled()
+            ? $this->getParameterDescriptionFromDocBlock($docBlock, $parameter)
+            : null;
 
         $hasDefaultValue = false;
         $defaultValue = null;
@@ -309,13 +313,13 @@ class TypeHandler implements ParameterHandlerInterface
         bool|null $isNullable = null,
     ): InputTypeProperty
     {
-        $docBlockComment = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
+        $docBlockDescription = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
 
         /** @var Var_[] $varTags */
         $varTags = $docBlock->getTagsByName('var');
         $varTag = reset($varTags);
         if ($varTag) {
-            $docBlockComment .= PHP_EOL . $varTag->getDescription();
+            $docBlockDescription .= PHP_EOL . $varTag->getDescription();
 
             if ($isNullable === null) {
                 $varType = $varTag->getType();
@@ -339,11 +343,13 @@ class TypeHandler implements ParameterHandlerInterface
         $hasDefault = $defaultValue !== null || $isNullable;
         $fieldName = $argumentName ?? $refProperty->getName();
 
+        $resolvedDescription = $this->descriptionResolver->resolve(null, $docBlockDescription);
+
         return new InputTypeProperty(
             propertyName: $refProperty->getName(),
             fieldName: $fieldName,
             type: $inputType,
-            description: trim($docBlockComment),
+            description: $resolvedDescription !== null ? trim($resolvedDescription) : '',
             hasDefaultValue: $hasDefault,
             defaultValue: $defaultValue,
             argumentResolver: $this->argumentResolver,

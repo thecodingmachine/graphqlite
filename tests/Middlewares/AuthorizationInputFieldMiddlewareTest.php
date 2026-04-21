@@ -109,7 +109,7 @@ class AuthorizationInputFieldMiddlewareTest extends AbstractQueryProvider
                     originalResolver: $inputFieldDescriptor->getOriginalResolver(),
                     resolver: $inputFieldDescriptor->getResolver(),
                     forConstructorHydration: false,
-                    comment: null,
+                    description: null,
                     isUpdate: false,
                     hasDefaultValue: false,
                     defaultValue: null,

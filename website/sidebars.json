@@ -15,6 +15,7 @@
       "mutations",
       "subscriptions",
       "type-mapping",
+      "descriptions",
       "autowiring",
       "extend-type",
       "external-type-declaration",

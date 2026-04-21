@@ -17,6 +17,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the query. If skipped, the name of the method is used instead.
 [outputType](custom-types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
+description    | *no*       | string | Description of the query in the documentation. When omitted, the method's PHP docblock summary is used (see [schema descriptions](descriptions.md)). An explicit empty string `''` deliberately suppresses the docblock fallback.
 
 ## #[Mutation]
 
@@ -28,6 +29,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the mutation. If skipped, the name of the method is used instead.
 [outputType](custom-types.mdx)     | *no*       | string | Forces the GraphQL output type of a query.
+description    | *no*       | string | Description of the mutation in the documentation. When omitted, the method's PHP docblock summary is used (see [schema descriptions](descriptions.md)). An explicit empty string `''` deliberately suppresses the docblock fallback.
 
 ## #[Subscription]
 
@@ -39,6 +41,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the subscription. If skipped, the name of the method is used instead.
 [outputType](custom-types.mdx)     | *no*       | string | Defines the GraphQL output type that will be sent for the subscription.
+description    | *no*       | string | Description of the subscription in the documentation. When omitted, the method's PHP docblock summary is used (see [schema descriptions](descriptions.md)). An explicit empty string `''` deliberately suppresses the docblock fallback.
 
 ## #[Type]
 
@@ -53,6 +56,7 @@ class          | *no*       | string | The targeted class/enum for the actual ty
 name           | *no*       | string | The name of the GraphQL type generated. If not passed, the name of the class is used. If the class ends with "Type", the "Type" suffix is removed
 default        | *no*       | bool   | Defaults to *true*. Whether the targeted PHP class should be mapped by default to this type.
 external       | *no*       | bool   | Whether this is an [external type declaration](external-type-declaration.mdx) or not. You usually do not need to use this attribute since this value defaults to true if a "class" attribute is set. This is only useful if you are declaring a type with no PHP class mapping using the "name" attribute.
+description    | *no*       | string | Description of the GraphQL type in the schema documentation. When omitted, the class docblock summary is used (see [schema descriptions](descriptions.md)). An explicit empty string `''` deliberately suppresses the docblock fallback.
 
 ## #[ExtendType]
 
@@ -64,6 +68,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 class          | see below  | string | The targeted class. [The class annotated with `#[ExtendType]` is a service](extend-type.mdx).
 name           | see below  | string | The targeted GraphQL output type.
+description    | *no*       | string | Description of the extended GraphQL type. Use this only when the base `#[Type]` does not already declare a description — see [description uniqueness on `#[ExtendType]`](descriptions.md#description-uniqueness-on-extendtype). Cannot be combined with a `description` on the base `#[Type]` or on another `#[ExtendType]` targeting the same class.
 
 One and only one of "class" and "name" parameter can be passed at the same time.
 
@@ -219,6 +224,7 @@ Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 name           | *no*       | string | The name of the input type. If skipped, the name of class returned by the factory is used instead.
 default        | *no*       | bool | If `true`, this factory will be used by default for its PHP return type. If set to `false`, you must explicitly [reference this factory using the `#[Parameter]` attribute](input-types.mdx#declaring-several-input-types-for-the-same-php-class).
+description    | *no*       | string | Description of the GraphQL input type produced by this factory. When omitted, the factory method's docblock summary is used (see [schema descriptions](descriptions.md)). An explicit empty string `''` deliberately suppresses the docblock fallback.
 
 ## #[UseInputType]
 
@@ -305,3 +311,26 @@ Attribute      | Compulsory | Type | Definition
 *for*          | *yes*      | string | The name of the PHP parameter
 *constraint*   | *yes       | annotation | One (or many) Symfony validation attributes.
 
+## #[EnumValue]
+
+The `#[EnumValue]` attribute attaches GraphQL schema metadata (description, deprecation reason)
+to an individual case of a PHP 8.1+ native enum that is exposed as a GraphQL enum type.
+
+**Applies on**: cases of an enum annotated (directly or indirectly) with `#[Type]`.
+
+Attribute         | Compulsory | Type   | Definition
+------------------|------------|--------|-----------
+description       | *no*       | string | Description of the enum value. When omitted, the case's PHP docblock summary is used (see [schema descriptions](descriptions.md#enum-value-descriptions)). An explicit empty string `''` deliberately suppresses the docblock fallback.
+deprecationReason | *no*       | string | Deprecation reason published to the schema. When omitted, the `@deprecated` tag on the case docblock is used. An explicit empty string `''` deliberately clears any inherited `@deprecated` tag.
+
+```php
+#[Type]
+enum Genre: string
+{
+    #[EnumValue(description: 'Fiction works including novels and short stories.')]
+    case Fiction = 'fiction';
+
+    #[EnumValue(deprecationReason: 'Use Fiction::Verse instead.')]
+    case Poetry = 'poetry';
+}
+```

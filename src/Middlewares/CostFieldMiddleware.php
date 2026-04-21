@@ -25,7 +25,7 @@ class CostFieldMiddleware implements FieldMiddlewareInterface
         }
 
         $field = $fieldHandler->handle(
-            $queryFieldDescriptor->withAddedCommentLines($this->buildQueryComment($costAttribute)),
+            $queryFieldDescriptor->withAddedDescriptionLines($this->buildCostDescription($costAttribute)),
         );
 
         if (! $field) {
@@ -61,7 +61,7 @@ class CostFieldMiddleware implements FieldMiddlewareInterface
         return $field;
     }
 
-    private function buildQueryComment(Cost $costAttribute): string
+    private function buildCostDescription(Cost $costAttribute): string
     {
         return "\nCost: " .
             implode(', ', [

@@ -70,6 +70,11 @@ $factory->addQueryProviderFactory($queryProviderFactory);
 $factory->setInputTypeValidator($validator);
 // Add custom options to the Webonyx underlying Schema.
 $factory->setSchemaConfig($schemaConfig);
+// Control whether PHP docblock summaries are used as a fallback description for schema elements
+// that do not provide an explicit `description` on their attribute. Enabled by default for
+// backwards compatibility. See [Schema descriptions](descriptions.md) for the precedence rule
+// and security rationale.
+$factory->setDocblockDescriptionsEnabled(false);
 // Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.
 $factory->setGlobTtl(2);
 // Enables prod-mode (cache settings optimized for best performance).

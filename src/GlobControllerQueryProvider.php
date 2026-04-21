@@ -84,15 +84,15 @@ final class GlobControllerQueryProvider implements QueryProviderInterface
     private function hasOperations(ReflectionClass $reflectionClass): bool
     {
         foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
-            $queryAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Query::class);
+            $queryAnnotation = $this->annotationReader->getGraphQLElementAnnotation($refMethod, Query::class);
             if ($queryAnnotation !== null) {
                 return true;
             }
-            $mutationAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Mutation::class);
+            $mutationAnnotation = $this->annotationReader->getGraphQLElementAnnotation($refMethod, Mutation::class);
             if ($mutationAnnotation !== null) {
                 return true;
             }
-            $subscriptionAnnotation = $this->annotationReader->getRequestAnnotation($refMethod, Subscription::class);
+            $subscriptionAnnotation = $this->annotationReader->getGraphQLElementAnnotation($refMethod, Subscription::class);
             if ($subscriptionAnnotation !== null) {
                 return true;
             }
