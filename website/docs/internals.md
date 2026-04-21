@@ -23,8 +23,7 @@ graph TD;
     NullableTypeMapperAdapter-->CompoundTypeMapper
     IteratorTypeMapper-->YourCustomRootTypeMapper
     CompoundTypeMapper-->IteratorTypeMapper
-    YourCustomRootTypeMapper-->MyCLabsEnumTypeMapper
-    MyCLabsEnumTypeMapper-->EnumTypeMapper
+    YourCustomRootTypeMapper-->EnumTypeMapper
     EnumTypeMapper-->BaseTypeMapper
     BaseTypeMapper-->FinalRootTypeMapper
   end
@@ -56,13 +55,12 @@ They are responsible for:
 Root type mappers have access to the *context* of a type: they can access the PHP DocBlock and read annotations.
 If you want to write a custom type mapper that needs access to annotations, it needs to be a "root type mapper".
 
-GraphQLite provides 6 classes implementing `RootTypeMapperInterface`:
+GraphQLite provides 5 classes implementing `RootTypeMapperInterface`:
 
 - `NullableTypeMapperAdapter`: a type mapper in charge of making GraphQL types non-nullable if the PHP type is non-nullable
 - `IteratorTypeMapper`: a type mapper in charge of iterable types (for instance: `MyIterator|User[]`)
 - `CompoundTypeMapper`: a type mapper in charge of union types
-- `MyCLabsEnumTypeMapper`: maps MyCLabs/enum types to GraphQL enum types (Deprecated: use native enums)
-- `EnumTypeMapper`: maps PHP enums to GraphQL enum types
+- `EnumTypeMapper`: maps PHP native enums to GraphQL enum types
 - `BaseTypeMapper`: maps scalar types and lists. Passes the control to the "recursive type mappers" if an object is encountered.
 - `FinalRootTypeMapper`: the last type mapper of the chain, used to throw error if no other type mapper managed to handle the type.
 
@@ -75,8 +73,7 @@ graph TD;
     NullableTypeMapperAdapter-->CompoundTypeMapper
     CompoundTypeMapper-->IteratorTypeMapper
     IteratorTypeMapper-->YourCustomRootTypeMapper
-    YourCustomRootTypeMapper-->MyCLabsEnumTypeMapper
-    MyCLabsEnumTypeMapper-->EnumTypeMapper
+    YourCustomRootTypeMapper-->EnumTypeMapper
     EnumTypeMapper-->BaseTypeMapper
     BaseTypeMapper-->FinalRootTypeMapper
   end

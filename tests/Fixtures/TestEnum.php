@@ -1,17 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
-
-use MyCLabs\Enum\Enum;
-
-/**
- * @method static TestEnum ON()
- * @method static TestEnum OFF()
- */
-class TestEnum extends Enum
+enum TestEnum: string
 {
-    private const ON = 'on';
-    private const OFF = 'off';
+    case ON = 'on';
+    case OFF = 'off';
 }

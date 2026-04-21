@@ -31,7 +31,6 @@
         "doctrine/coding-standard": "^13.0",
         "ecodev/graphql-upload": "^7.0",
         "laminas/laminas-diactoros": "^3.5",
-        "myclabs/php-enum": "^1.6.6",
         "php-coveralls/php-coveralls": "^2.7",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.0",

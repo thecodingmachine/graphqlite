@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
 
       - name: "Install PHP with extensions"
         uses: "shivammathur/setup-php@v2"
@@ -83,7 +83,7 @@ jobs:
           path: "build"
           overwrite: true
 
-      - uses: codecov/codecov-action@v5.5.3 # upload the coverage to codecov
+      - uses: codecov/codecov-action@v6.0.0 # upload the coverage to codecov
         with:
           fail_ci_if_error: false # optional (default = false) - Need CODECOV_TOKEN
         # Do not upload in forks, and only on php8.4, latest deps
@@ -98,7 +98,7 @@ jobs:
       fail-fast: false
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Install PHP with extensions"
         uses: "shivammathur/setup-php@v2"
         with:
