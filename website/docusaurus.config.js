@@ -50,7 +50,19 @@ module.exports={
       }
     ]
   ],
-  "plugins": [],
+  "plugins": [
+    [
+      "@docusaurus/plugin-client-redirects",
+      {
+        "redirects": [
+          {
+            "from": "/docs/annotations-reference",
+            "to": "/docs/attributes-reference"
+          }
+        ]
+      }
+    ]
+  ],
   "themeConfig": {
     "navbar": {
       "title": "GraphQLite",

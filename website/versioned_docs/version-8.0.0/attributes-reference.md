@@ -1,5 +1,5 @@
 ---
-id: annotations-reference
+id: attributes-reference
 title: Attributes reference
 sidebar_label: Attributes reference
 ---

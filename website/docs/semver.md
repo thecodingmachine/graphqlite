@@ -16,8 +16,8 @@ To avoid being bound to our backward compatibility promise, such features can be
 
 As a rule of thumb:
 
-- If you are a GraphQLite user (using GraphQLite mainly through its annotations), we guarantee strict semantic versioning
-- If you are extending GraphQLite features (if you are developing custom annotations, or if you are developing a GraphQlite integration
+- If you are a GraphQLite user (using GraphQLite mainly through its attributes), we guarantee strict semantic versioning
+- If you are extending GraphQLite features (if you are developing custom attributes, or if you are developing a GraphQlite integration
   with a framework...), be sure to check the tags.
 
 Said otherwise:

@@ -60,7 +60,7 @@ If you plan to use attributes while resolving arguments, your attribute class sh
 
 For instance, if we want GraphQLite to inject a service in an argument, we can use `#[Autowire]`.
 
-We only need to put declare the annotation can target parameters: `#[Attribute(Attribute::TARGET_PARAMETER)]`.
+We only need to declare that the attribute can target parameters: `#[Attribute(Attribute::TARGET_PARAMETER)]`.
 
 The class looks like this:
 
@@ -106,16 +106,16 @@ class ContainerParameterHandler implements ParameterMiddlewareInterface
 
     public function mapParameter(ReflectionParameter $parameter, DocBlock $docBlock, ?Type $paramTagType, ParameterAnnotations $parameterAnnotations, ParameterHandlerInterface $next): ParameterInterface
     {
-        // The $parameterAnnotations object can be used to fetch any annotation implementing ParameterAnnotationInterface
+        // The $parameterAnnotations object can be used to fetch any attribute implementing ParameterAnnotationInterface
         $autowire = $parameterAnnotations->getAnnotationByType(Autowire::class);
 
         if ($autowire === null) {
-            // If there are no annotation, this middleware cannot handle the parameter. Let's ask
+            // If there is no matching attribute, this middleware cannot handle the parameter. Let's ask
             // the next middleware in the chain (using the $next object)
             return $next->mapParameter($parameter, $docBlock, $paramTagType, $parameterAnnotations);
         }
 
-        // We found a @Autowire annotation, let's return a parameter resolver.
+        // We found a #[Autowire] attribute, let's return a parameter resolver.
         return new ContainerParameter($this->container, $parameter->getType());
     }
 }

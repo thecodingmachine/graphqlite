@@ -181,8 +181,8 @@ public function toGraphQLInputType(Type $type, ?InputType $subType, string $argu
 
 ### New features
 
-- [@Input](annotations-reference.md#input-annotation) annotation is introduced as an alternative to `#[Factory]`. Now GraphQL input type can be created in the same manner as `#[Type]` in combination with `#[Field]` - [example](input-types.mdx#input-attribute).
-- New attributes has been added to [@Field](annotations-reference.md#field-annotation) annotation: `for`, `inputType` and `description`.
+- [@Input](attributes-reference.md#input) annotation is introduced as an alternative to `#[Factory]`. Now GraphQL input type can be created in the same manner as `#[Type]` in combination with `#[Field]` - [example](input-types.mdx#input-attribute).
+- New attributes has been added to [@Field](attributes-reference.md#field) annotation: `for`, `inputType` and `description`.
 - The following annotations now can be applied to class properties directly: `#[Field]`, `#[Logged]`, `#[Right]`, `@FailWith`, `@HideIfUnauthorized` and `#[Security]`.
 
 ## 4.1.0

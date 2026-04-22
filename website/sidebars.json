@@ -51,7 +51,7 @@
     ],
     "Reference": [
       "doctrine-annotations-attributes",
-      "annotations-reference",
+      "attributes-reference",
       "semver",
       "changelog"
     ]

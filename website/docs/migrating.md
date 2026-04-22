@@ -32,7 +32,7 @@ If you are a "regular" GraphQLite user, migration to v4 should be straightforwar
 - In GraphQLite v3, the default was to hide a field from the schema if a user has no access to it.
   In GraphQLite v4, the default is to still show this field, but to throw an error if the user makes a query on it
   (this way, the schema is the same for all users). If you want the old mode, use the new
-  [`@HideIfUnauthorized` annotation](annotations-reference.md#hideifunauthorized-annotation)
+  [`@HideIfUnauthorized` annotation](attributes-reference.md#hideifunauthorized)
 - If you are using the Symfony bundle, the Laravel package or the Universal module, you must also upgrade those to 4.0.
   These package will take care of the wiring for you. Apart for upgrading the packages, you have nothing to do.
 - If you are relying on the `SchemaFactory` to bootstrap GraphQLite, you have nothing to do.
