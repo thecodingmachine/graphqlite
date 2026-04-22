@@ -4,8 +4,8 @@ title: Attributes reference
 sidebar_label: Attributes reference
 ---
 
-Note: all annotations are available in PHP 8 attribute format (`#[Query]`), support of Doctrine annotation format was dropped.
-See [Doctrine annotations vs PHP 8 attributes](doctrine-annotations-attributes.mdx) for more details.
+All attributes use PHP 8 native attribute syntax (e.g., `#[Query]`). The legacy Doctrine annotations format (`@Query`) is no longer supported.
+See [migrating from Doctrine annotations to PHP 8 attributes](doctrine-annotations-attributes.mdx) for details.
 
 Attributes are listed in alphabetical order.
 
@@ -21,7 +21,7 @@ It is available out of the box if you use the Symfony bundle.
 Attribute      | Compulsory | Type | Definition
 ---------------|------------|------|--------
 *for*          | *yes*      | string | The name of the PHP parameter
-*constraint*   | *yes       | annotation | One (or many) Symfony validation attributes.
+*constraint*   | *yes       | attribute | One (or many) Symfony validation attributes.
 
 ## #[Autowire]
 
@@ -294,7 +294,7 @@ description    | *no*       | string | Description of the subscription in the do
 ## #[Type]
 
 The `#[Type]` attribute is used to declare a GraphQL object type.  This is used with standard output
-types, as well as enum types.  For input types, use the [#[Input] attribute](#input-annotation) directly on the input type or a [#[Factory] attribute](#factory-annotation) to make/return an input type.
+types, as well as enum types.  For input types, use the [#[Input] attribute](#input) directly on the input type or a [#[Factory] attribute](#factory) to make/return an input type.
 
 **Applies on**: classes.
 
