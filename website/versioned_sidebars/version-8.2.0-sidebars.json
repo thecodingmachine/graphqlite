@@ -15,6 +15,7 @@
       "mutations",
       "subscriptions",
       "type-mapping",
+      "descriptions",
       "autowiring",
       "extend-type",
       "external-type-declaration",
@@ -50,7 +51,7 @@
     ],
     "Reference": [
       "doctrine-annotations-attributes",
-      "annotations-reference",
+      "attributes-reference",
       "semver",
       "changelog"
     ]
