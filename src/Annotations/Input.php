@@ -7,6 +7,10 @@ namespace TheCodingMachine\GraphQLite\Annotations;
 use Attribute;
 use RuntimeException;
 
+use function array_key_exists;
+
+use const E_USER_DEPRECATED;
+
 /**
  * The Input attribute must be put in a GraphQL input type class docblock and is used to map to the underlying PHP class
  * this is exposed via this input type.
@@ -33,6 +37,14 @@ class Input implements TypeInterface
         string|null $description = null,
         bool|null $update = null,
     ) {
+        if ($update !== null || array_key_exists('update', $attributes)) {
+            trigger_error(
+                'Using #[Input(update: ...)] is deprecated and will be removed in a future major version. '
+                . 'For partial updates, prefer nullable fields with Undefined to distinguish omitted values from explicit nulls.',
+                E_USER_DEPRECATED,
+            );
+        }
+
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->default = $default ?? $attributes['default'] ?? $this->name === null;
         $this->description = $description ?? $attributes['description'] ?? null;
@@ -86,6 +98,8 @@ class Input implements TypeInterface
     /**
      * Returns true if this type should behave as update resource.
      * Such input type has all fields optional and without default value in the documentation.
+     *
+     * @deprecated Using #[Input(update: ...)] is deprecated; prefer nullable fields with Undefined.
      */
     public function isUpdate(): bool
     {

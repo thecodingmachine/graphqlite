@@ -15,4 +15,11 @@ class InputTest extends TestCase
         $this->expectExceptionMessage('Empty class for #[Input] attribute. You MUST create the Input attribute object using the GraphQLite AnnotationReader');
         (new Input())->getClass();
     }
+
+    public function testUpdateArgumentTriggersDeprecation(): void
+    {
+        $this->expectUserDeprecationMessageMatches('/Using #\[Input\(update: \.\.\.\)\] is deprecated/');
+
+        new Input(update: true);
+    }
 }
