@@ -3,9 +3,11 @@
 namespace TheCodingMachine\GraphQLite\Mappers\Root;
 
 use GraphQL\Type\Definition\BooleanType;
+use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\WrappingType;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Fqsen;
@@ -79,6 +81,34 @@ class BaseTypeMapperTest extends AbstractQueryProvider
             $this->assertInstanceOf(WrappingType::class, $itemType);
             $this->assertInstanceOf($expectedWrappedItemType, $itemType->getWrappedType());
         }
+    }
+
+    /**
+     * Built-in scalars (ID, String, Int, Float, Boolean) must be resolved by
+     * mapNameToType so that webonyx/graphql-php's Schema::getType() — which
+     * calls the typeLoader before checking builtInScalars — doesn't throw.
+     */
+    #[DataProvider('builtInScalarNamesProvider')]
+    public function testMapNameToTypeResolvesBuiltInScalars(string $scalarName, string $expectedType): void
+    {
+        $baseTypeMapper = new BaseTypeMapper(
+            new FinalRootTypeMapper($this->getTypeMapper()),
+            $this->getTypeMapper(),
+            $this->getRootTypeMapper(),
+        );
+
+        $result = $baseTypeMapper->mapNameToType($scalarName);
+
+        $this->assertInstanceOf($expectedType, $result);
+    }
+
+    public static function builtInScalarNamesProvider(): iterable
+    {
+        yield 'ID' => ['ID', IDType::class];
+        yield 'String' => ['String', StringType::class];
+        yield 'Int' => ['Int', IntType::class];
+        yield 'Float' => ['Float', \GraphQL\Type\Definition\FloatType::class];
+        yield 'Boolean' => ['Boolean', BooleanType::class];
     }
 
     public static function genericIterablesProvider(): iterable

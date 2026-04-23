@@ -30,4 +30,30 @@ class TypeTest extends TestCase
         $this->expectExceptionMessage('Problem in attribute #[Type] for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
         $type->setClass(FooInterface::class);
     }
+
+    public function testDescriptionDefaultsToNull(): void
+    {
+        $type = new Type([]);
+        $this->assertNull($type->getDescription());
+    }
+
+    public function testDescriptionFromConstructor(): void
+    {
+        $type = new Type([], description: 'Explicit description');
+        $this->assertSame('Explicit description', $type->getDescription());
+    }
+
+    public function testDescriptionFromAttributesArray(): void
+    {
+        $type = new Type(['description' => 'From attributes']);
+        $this->assertSame('From attributes', $type->getDescription());
+    }
+
+    public function testDescriptionPreservesEmptyString(): void
+    {
+        // An empty string is a deliberate "explicit empty" signal that suppresses the docblock
+        // fallback further down the pipeline; it must round-trip unchanged through the attribute.
+        $type = new Type([], description: '');
+        $this->assertSame('', $type->getDescription());
+    }
 }

@@ -35,7 +35,7 @@ class QueryFieldDescriptor
         private readonly SourcePropertyResolver|MagicPropertyResolver|SourceMethodResolver|ServiceResolver $originalResolver,
         private readonly array $parameters = [],
         private readonly bool $injectSource = false,
-        private readonly string|null $comment = null,
+        private readonly string|null $description = null,
         private readonly string|null $deprecationReason = null,
         private readonly MiddlewareAnnotations $middlewareAnnotations = new MiddlewareAnnotations([]),
     )
@@ -84,23 +84,23 @@ class QueryFieldDescriptor
         return $this->with(injectSource: $injectSource);
     }
 
-    public function getComment(): string|null
+    public function getDescription(): string|null
     {
-        return $this->comment;
+        return $this->description;
     }
 
-    public function withComment(string|null $comment): self
+    public function withDescription(string|null $description): self
     {
-        return $this->with(comment: $comment);
+        return $this->with(description: $description);
     }
 
-    public function withAddedCommentLines(string $comment): self
+    public function withAddedDescriptionLines(string $description): self
     {
-        if (! $this->comment) {
-            return $this->withComment($comment);
+        if (! $this->description) {
+            return $this->withDescription($description);
         }
 
-        return $this->withComment($this->comment . "\n" . $comment);
+        return $this->withDescription($this->description . "\n" . $description);
     }
 
     public function getDeprecationReason(): string|null

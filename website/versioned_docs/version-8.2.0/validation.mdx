@@ -1,0 +1,188 @@
+---
+id: validation
+title: Validation
+sidebar_label: User input validation
+---
+
+GraphQLite does not handle user input validation by itself. It is out of its scope.
+
+However, it can integrate with your favorite framework validation mechanism. The way you validate user input will
+therefore depend on the framework you are using.
+
+## Validating user input with Laravel
+
+If you are using Laravel, jump directly to the [GraphQLite Laravel package advanced documentation](laravel-package-advanced.mdx#support-for-laravel-validation-rules)
+to learn how to use the Laravel validation with GraphQLite.
+
+## Validating user input with Symfony validator
+
+GraphQLite provides a bridge to use the [Symfony validator](https://symfony.com/doc/current/validation.html) directly in your application.
+
+- If you are using Symfony and the Symfony GraphQLite bundle, the bridge is available out of the box
+- If you are using another framework, the "Symfony validator" component can be used in standalone mode. If you want to
+  add it to your project, you can require the *thecodingmachine/graphqlite-symfony-validator-bridge* package:
+
+  ```bash
+  $ composer require thecodingmachine/graphqlite-symfony-validator-bridge
+  ```
+
+### Using the Symfony validator bridge
+
+Usually, when you use the Symfony validator component, you put attributes in your entities and you validate those entities
+using the `Validator` object.
+
+```php title="UserController.php"
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use TheCodingMachine\GraphQLite\Validator\ValidationFailedException
+
+class UserController
+{
+    private $validator;
+
+    public function __construct(ValidatorInterface $validator)
+    {
+        $this->validator = $validator;
+    }
+
+    #[Mutation]
+    public function createUser(string $email, string $password): User
+    {
+        $user = new User($email, $password);
+
+        // Let's validate the user
+        $errors = $this->validator->validate($user);
+
+        // Throw an appropriate GraphQL exception if validation errors are encountered
+        ValidationFailedException::throwException($errors);
+
+        // No errors? Let's continue and save the user
+        // ...
+    }
+}
+```
+
+Validation rules are added directly to the object in the domain model:
+
+```php title="User.php"
+use Symfony\Component\Validator\Constraints as Assert;
+
+class User
+{
+    #[Assert\Email(message: "The email '{{ value }}' is not a valid email.", checkMX: true)]
+    private $email;
+
+    /**
+     * The NotCompromisedPassword assertion asks the "HaveIBeenPawned" service if your password has already leaked or not.
+     */
+    #[Assert\NotCompromisedPassword]
+    private $password;
+
+    public function __construct(string $email, string $password)
+    {
+        $this->email = $email;
+        $this->password = $password;
+    }
+
+    // ...
+}
+```
+
+If a validation fails, GraphQLite will return the failed validations in the "errors" section of the JSON response:
+
+```json
+{
+    "errors": [
+        {
+            "message": "The email '\"foo@thisdomaindoesnotexistatall.com\"' is not a valid email.",
+            "extensions": {
+                "code": "bf447c1c-0266-4e10-9c6c-573df282e413",
+                "field": "email"
+            }
+        }
+    ]
+}
+```
+
+
+### Using the validator directly on a query / mutation / subscription / factory ...
+
+If the data entered by the user is mapped to an object, please use the "validator" instance directly as explained in
+the last chapter. It is a best practice to put your validation layer as close as possible to your domain model.
+
+If the data entered by the user is **not** mapped to an object, you can directly annotate your query, mutation, factory...
+
+<div class="alert alert--warning">
+    You generally don't want to do this. It is a best practice to put your validation constraints
+on your domain objects. Only use this technique if you want to validate user input and user input will not be stored
+in a domain object.
+</div>
+
+Use the `#[Assertion]` attribute to validate directly the user input.
+
+```php
+use Symfony\Component\Validator\Constraints as Assert;
+use TheCodingMachine\GraphQLite\Validator\Annotations\Assertion;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+#[Query]
+#[Assertion(for: "email", constraint: new Assert\Email())]
+public function findByMail(string $email): User
+{
+    // ...
+}
+```
+
+Notice that the "constraint" parameter contains an attribute (it is an attribute wrapped in an attribute).
+
+You can also pass an array to the `constraint` parameter:
+
+```php
+#[Assertion(for: "email", constraint: [new Assert\NotBlack(), new Assert\Email()])]
+```
+
+## Custom InputType Validation
+
+GraphQLite also supports a fully custom validation implementation for all input types defined with an `#[Input]` attribute.  This offers a way to validate input types before they're available as a method parameter of your query and mutation controllers.  This way, when you're using your query or mutation controllers, you can feel confident that your input type objects have already been validated.
+
+<div class="alert alert--warning">
+  <p>It's important to note that this validation implementation does not validate input types created with a factory.  If you are creating an input type with a factory, or using primitive parameters in your query/mutation controllers, you should be sure to validate these independently.  This is strictly for input type objects.</p>
+
+  <p>You can use one of the framework validation libraries listed above or implement your own validation for these cases.  If you're using input type objects for most all of your query and mutation controllers, then there is little additional validation concerns with regards to user input.  There are many reasons why you should consider defaulting to an InputType object, as opposed to individual arguments, for your queries and mutations.  This is just one additional perk.</p>
+</div>
+
+To get started with validation on input types defined by an `#[Input]` attribute, you'll first need to register your validator with the `SchemaFactory`.
+
+```php
+$factory = new SchemaFactory($cache, $this->container);
+$factory->addNamespace('App');
+// Register your validator
+$factory->setInputTypeValidator($this->container->get('your_validator'));
+$factory->createSchema();
+```
+
+Your input type validator must implement the `TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface`, as shown below:
+
+```php
+interface InputTypeValidatorInterface
+{
+    /**
+     * Checks to see if the Validator is currently enabled.
+     */
+    public function isEnabled(): bool;
+
+    /**
+     * Performs the validation of the InputType.
+     *
+     * @param object $input     The input type object to validate
+     */
+    public function validate(object $input): void;
+}
+```
+
+The interface is quite simple.  Handle all of your own validation logic in the `validate` method.  For example, you might use Symfony's attribute based validation in addition to some other custom validation logic.  It's really up to you on how you wish to handle your own validation.  The `validate` method will receive the input type object populated with the user input.
+
+You'll notice that the `validate` method has a `void` return.  The purpose here is to encourage you to throw an Exception or handle validation output however you best see fit.  GraphQLite does it's best to stay out of your way and doesn't make attempts to handle validation output.  You can, however, throw an instance of `TheCodingMachine\GraphQLite\Exceptions\GraphQLException` or `TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException` as usual (see [Error Handling](error-handling) for more details).
+
+Also available is the `isEnabled` method.  This method is checked before executing validation on an InputType being resolved.  You can work out your own logic to selectively enable or disable validation through this method.  In most cases, you can simply return `true` to keep it always enabled.
+
+And that's it, now, anytime an input type is resolved, the validator will be executed on that input type immediately after it has been hydrated with user input.

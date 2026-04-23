@@ -40,7 +40,7 @@ class TestController
             }
             $str .= $test->getTest();
         }
-        return new TestObject($string . $int . $str . ($boolean ? 'true' : 'false') . $float . $dateTimeImmutable->format('YmdHis') . $dateTime->format('YmdHis') . $withDefault . ($id?->val() ?? '') . $enum->getValue());
+        return new TestObject($string . $int . $str . ($boolean ? 'true' : 'false') . $float . $dateTimeImmutable->format('YmdHis') . $dateTime->format('YmdHis') . $withDefault . ($id?->val() ?? '') . $enum->value);
     }
 
     #[Query]

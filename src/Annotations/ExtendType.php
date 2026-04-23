@@ -21,12 +21,14 @@ class ExtendType
     /** @var class-string<object>|null */
     private string|null $class;
     private string|null $name;
+    private string|null $description;
 
     /** @param mixed[] $attributes */
     public function __construct(
         array $attributes = [],
         string|null $class = null,
         string|null $name = null,
+        string|null $description = null,
     ) {
         $className = isset($attributes['class']) ? ltrim($attributes['class'], '\\') : null;
         $className = $className ?? $class;
@@ -35,6 +37,7 @@ class ExtendType
         }
         $this->name = $name ?? $attributes['name'] ?? null;
         $this->class = $className;
+        $this->description = $description ?? $attributes['description'] ?? null;
         if (! $this->class && ! $this->name) {
             throw new BadMethodCallException('In attribute #[ExtendType], missing one of the compulsory parameter "class" or "name".');
         }
@@ -54,5 +57,18 @@ class ExtendType
     public function getName(): string|null
     {
         return $this->name;
+    }
+
+    /**
+     * Returns the explicit description contributed by this type extension, or null if none was provided.
+     *
+     * A GraphQL type carries exactly one description. If both the base #[Type] and this #[ExtendType]
+     * (or multiple #[ExtendType] attributes targeting the same class) provide a description, the
+     * schema builder throws DuplicateDescriptionOnTypeException. Descriptions may therefore live on
+     * #[Type] OR on at most one #[ExtendType], never on both.
+     */
+    public function getDescription(): string|null
+    {
+        return $this->description;
     }
 }

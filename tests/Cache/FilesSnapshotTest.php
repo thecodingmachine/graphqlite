@@ -69,6 +69,34 @@ class FilesSnapshotTest extends TestCase
         self::assertTrue($snapshot->changed());
     }
 
+    public function testIgnoresNonExistentFiles(): void
+    {
+        $nonExistentFile = '/path/to/non/existent/file.php';
+
+        $snapshot = FilesSnapshot::for([$nonExistentFile]);
+
+        self::assertFalse($snapshot->changed());
+    }
+
+    public function testIgnoresNonExistentFilesInMixedList(): void
+    {
+        $existingFile = (new \ReflectionClass(FooType::class))->getFileName();
+        $nonExistentFile1 = '/path/to/non/existent/file1.php';
+        $nonExistentFile2 = '/path/to/non/existent/file2.php';
+
+        $snapshot = FilesSnapshot::for([
+            $nonExistentFile1,
+            $existingFile,
+            $nonExistentFile2,
+        ]);
+
+        self::assertFalse($snapshot->changed());
+        
+        $this->touch($existingFile);
+
+        self::assertTrue($snapshot->changed());
+    }
+
     private function touch(string $fileName): void
     {
         touch($fileName, filemtime($fileName) + 1);

@@ -48,9 +48,16 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
      */
     private array $decoratorsParameters = [];
 
-    /** @param array{name?: string|null,description?: string|null,parseValue?: callable(array<string, mixed>): mixed,astNode?: InputObjectTypeDefinitionNode|null,extensionASTNodes?: array<int, InputObjectTypeExtensionNode>|null} $additionalConfig */
-    public function __construct(string $name, private FieldsBuilder $fieldsBuilder, object|string $factory, string $methodName, string|null $comment, private bool $canBeInstantiatedWithoutParameters, array $additionalConfig = [])
-    {
+    /** @param array{name?: string|null, description?: string|null, parseValue?: callable(array<string, mixed>): mixed, astNode?: InputObjectTypeDefinitionNode|null, extensionASTNodes?: array<int, InputObjectTypeExtensionNode>|null} $additionalConfig */
+    public function __construct(
+        string $name,
+        private FieldsBuilder $fieldsBuilder,
+        object|string $factory,
+        string $methodName,
+        string|null $description,
+        private bool $canBeInstantiatedWithoutParameters,
+        array $additionalConfig = [],
+    ) {
         $resolve = [$factory, $methodName];
         assert(is_callable($resolve));
         $this->resolve = $resolve;
@@ -68,8 +75,8 @@ class ResolvableMutableInputObjectType extends MutableInputObjectType implements
             'name' => $name,
             'fields' => $fields,
         ];
-        if ($comment) {
-            $config['description'] = $comment;
+        if ($description) {
+            $config['description'] = $description;
         }
 
         $config += $additionalConfig;

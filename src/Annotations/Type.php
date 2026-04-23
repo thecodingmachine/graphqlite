@@ -34,6 +34,8 @@ class Type implements TypeInterface
 
     private bool $useEnumValues = false;
 
+    private string|null $description = null;
+
     /**
      * @param mixed[] $attributes
      * @param class-string<object>|null $class
@@ -45,6 +47,7 @@ class Type implements TypeInterface
         bool|null $default = null,
         bool|null $external = null,
         bool|null $useEnumValues = null,
+        string|null $description = null,
     ) {
         $external = $external ?? $attributes['external'] ?? null;
         $class = $class ?? $attributes['class'] ?? null;
@@ -59,6 +62,7 @@ class Type implements TypeInterface
         // If no value is passed for default, "default" = true
         $this->default = $default ?? $attributes['default'] ?? true;
         $this->useEnumValues = $useEnumValues ?? $attributes['useEnumValues'] ?? false;
+        $this->description = $description ?? $attributes['description'] ?? null;
 
         if ($external === null) {
             return;
@@ -126,5 +130,17 @@ class Type implements TypeInterface
     public function useEnumValues(): bool
     {
         return $this->useEnumValues;
+    }
+
+    /**
+     * Returns the explicit description for this GraphQL type, or null if none was provided.
+     *
+     * A null return means "no explicit description" and the schema builder may fall back to the
+     * docblock summary (if docblock descriptions are enabled on the SchemaFactory). An explicit
+     * empty string blocks the docblock fallback and produces an empty description.
+     */
+    public function getDescription(): string|null
+    {
+        return $this->description;
     }
 }

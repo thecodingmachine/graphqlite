@@ -60,6 +60,7 @@ use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithInvalidPrefetchMethod;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicPropertyType;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithPrefetchMethods;
+use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSetPrefix;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInterface;
 use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithSourceFieldInvalidParameterAnnotation;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
@@ -123,7 +124,7 @@ class FieldsBuilderTest extends AbstractQueryProvider
             'dateTimeImmutable' => '2017-01-01 01:01:01',
             'dateTime' => '2017-01-01 01:01:01',
             'id' => 42,
-            'enum' => TestEnum::ON(),
+            'enum' => TestEnum::ON,
         ];
 
         $resolve = $usersQuery->resolveFn;
@@ -438,6 +439,16 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $this->assertSame('test', $fields['test']->name);
         $this->assertInstanceOf(NonNull::class, $fields['test']->getType());
         $this->assertInstanceOf(IDType::class, $fields['test']->getType()->getWrappedType());
+    }
+
+    public function testFieldWithSetPrefixPresence(): void
+    {
+        $queryProvider = $this->buildFieldsBuilder();
+        $fields = $queryProvider->getFields(new TestTypeWithSetPrefix());
+        $this->assertCount(2, $fields);
+
+        $this->assertSame('settings', $fields['settings']->name);
+        $this->assertSame('numberOfParameters', $fields['numberOfParameters']->name);
     }
 
     public function testFromSourceFieldsInterface(): void

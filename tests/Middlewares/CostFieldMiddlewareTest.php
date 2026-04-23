@@ -96,7 +96,7 @@ class CostFieldMiddlewareTest extends TestCase
         $queryFieldDescriptor->method('getMiddlewareAnnotations')
             ->willReturn(new MiddlewareAnnotations([$cost]));
         $queryFieldDescriptor->expects($this->once())
-            ->method('withAddedCommentLines')
+            ->method('withAddedDescriptionLines')
             ->with($expectedDescription)
             ->willReturnSelf();
 

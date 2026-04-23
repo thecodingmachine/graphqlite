@@ -55,7 +55,7 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $type = $annotationReader->getRequestAnnotation(
+        $type = $annotationReader->getGraphQLElementAnnotation(
             new ReflectionMethod(ClassWithInvalidClassAnnotation::class, 'testMethod'),
             Field::class,
         );
@@ -117,7 +117,7 @@ class AnnotationReaderTest extends TestCase
     {
         $annotationReader = new AnnotationReader();
 
-        $type = $annotationReader->getRequestAnnotation(
+        $type = $annotationReader->getGraphQLElementAnnotation(
             new ReflectionMethod(TestType::class, 'getField'),
             Field::class,
         );

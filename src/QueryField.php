@@ -45,7 +45,7 @@ final class QueryField extends FieldDefinition
         array $arguments,
         ResolverInterface $originalResolver,
         callable $resolver,
-        string|null $comment,
+        string|null $description,
         string|null $deprecationReason,
         array $additionalConfig = [],
     )
@@ -55,8 +55,8 @@ final class QueryField extends FieldDefinition
             'type' => $type,
             'args' => InputTypeUtils::getInputTypeArgs($arguments),
         ];
-        if ($comment) {
-            $config['description'] = $comment;
+        if ($description) {
+            $config['description'] = $description;
         }
         if ($deprecationReason) {
             $config['deprecationReason'] = $deprecationReason;
@@ -163,7 +163,7 @@ final class QueryField extends FieldDefinition
             $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
-            $fieldDescriptor->getComment(),
+            $fieldDescriptor->getDescription(),
             $fieldDescriptor->getDeprecationReason(),
         );
     }
