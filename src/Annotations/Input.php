@@ -8,6 +8,7 @@ use Attribute;
 use RuntimeException;
 
 use function array_key_exists;
+use function trigger_error;
 
 use const E_USER_DEPRECATED;
 
