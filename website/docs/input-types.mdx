@@ -151,11 +151,70 @@ There are 2 input types added to the `UserInput` class: `CreateUserInput` and `U
 - Field `password` will appear for both. For `CreateUserInput` it'll be the required field and for `UpdateUserInput` optional.
 - Field `age` is optional for both input types.
 
-Note that `update: true` argument for `UpdateUserInput`. It should be used when input type is used for a partial update,
-It makes all fields optional and removes all default values from thus prevents setting default values via setters or directly to public properties.
-In example above if you use the class as `UpdateUserInput` and set only `username` the other ones will be ignored.
-In PHP 7 they will be set to `null`, while in PHP 8 they will be in not initialized state - this can be used as a trick
-to check if user actually passed a value for a certain field.
+`update: true` is deprecated and will be removed in a future major version.
+For partial updates, prefer nullable fields with `Undefined` so you can distinguish omitted values from explicit `null`.
+
+### Optional input fields
+
+In some cases, you might need to know whether a property was explicitly provided in a GraphQL request or simply omitted.
+This is important when performing **partial updates** — e.g., updating only some fields without resetting others to `null`.
+
+To support this behavior, you can use a special enum called `Undefined`, which acts as a **marker type** distinguishing between:
+
+- `Undefined::VALUE` → field was **not provided** in the input
+- `null` → field was **explicitly set to `null`**
+- any other value → field was **explicitly provided**
+
+Consider this example:
+
+```php
+#[Input]
+class UpdateUserInput
+{
+	#[Field]
+	public string $username;
+
+    #[Field]
+	protected int|null|Undefined $age;
+}
+```
+
+Then, when processing your input:
+
+```php
+// Update the age, even if `$input->age` is `null`. But don't update if not provided at all
+if ($input->age !== Undefined::VALUE) {
+	$user->age = $input->age;
+}
+```
+
+Although this is less useful, parameters are also supported:
+
+```php
+#[Type]
+class Article
+{
+    #[Field]
+	public function title(string|null|Undefined $locale): string
+    {
+        if ($locale === Undefined::VALUE) {
+            return $this->title;
+        }
+
+        if ($locale === null) {
+            throw new InvalidArgumentException('Locale cannot be null.');
+        }
+
+        return $this->translateTitle($locale);
+    }
+}
+```
+
+For field parameters and input field properties, an explicit `= Undefined::VALUE` default is not required:
+when the type includes `Undefined`, GraphQLite resolves omitted values as `Undefined::VALUE`. Adding the
+default explicitly is optional and can still be useful for clarity. Constructor parameters and promoted
+properties are different: if you want an omitted value there to resolve to `Undefined::VALUE`, you still
+need a real PHP default such as `= Undefined::VALUE`.
 
 ## Factory
 

@@ -49,6 +49,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\IteratorTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\UndefinedTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
@@ -298,8 +299,10 @@ class IntegrationTestCase extends TestCase
             RootTypeMapperInterface::class => static function (ContainerInterface $container) {
                 return new ClosureTypeMapper(
                     new VoidTypeMapper(
-                        new NullableTypeMapperAdapter(
-                            $container->get('topRootTypeMapper')
+                        new UndefinedTypeMapper(
+                            new NullableTypeMapperAdapter(
+                                $container->get('topRootTypeMapper')
+                            )
                         )
                     ),
                     $container->get('topRootTypeMapper')

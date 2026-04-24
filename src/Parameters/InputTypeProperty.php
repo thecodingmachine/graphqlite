@@ -17,6 +17,7 @@ class InputTypeProperty extends InputTypeParameter
         string $description,
         bool $hasDefaultValue,
         mixed $defaultValue,
+        bool $defaultValueImplicit,
         ArgumentResolver $argumentResolver,
     )
     {
@@ -26,6 +27,7 @@ class InputTypeProperty extends InputTypeParameter
             $description,
             $hasDefaultValue,
             $defaultValue,
+            $defaultValueImplicit,
             $argumentResolver,
         );
     }

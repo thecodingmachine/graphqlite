@@ -43,6 +43,7 @@ use TheCodingMachine\GraphQLite\Mappers\Root\LastDelegatingTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\UndefinedTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Root\VoidTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperFactoryInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
@@ -421,6 +422,7 @@ class SchemaFactory
 
         $lastTopRootTypeMapper = new LastDelegatingTypeMapper();
         $topRootTypeMapper = new NullableTypeMapperAdapter($lastTopRootTypeMapper);
+        $topRootTypeMapper = new UndefinedTypeMapper($topRootTypeMapper);
         $topRootTypeMapper = new VoidTypeMapper($topRootTypeMapper);
         $topRootTypeMapper = new ClosureTypeMapper($topRootTypeMapper, $lastTopRootTypeMapper);
 
