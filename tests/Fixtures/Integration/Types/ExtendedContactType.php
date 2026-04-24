@@ -48,4 +48,15 @@ class ExtendedContactType
     {
         return $contact->getName();
     }
+
+    /**
+     * Regression: in #[Security] on an #[ExtendType] field, `this` must be
+     * the source object, not the resolver instance.
+     */
+    #[Field]
+    #[Security("user && this.getName() == 'Joe'", failWith: null)]
+    public function sourceAwareSecretName(Contact $contact): string|null
+    {
+        return $contact->getName();
+    }
 }

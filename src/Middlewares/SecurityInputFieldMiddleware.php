@@ -51,7 +51,12 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         $injectSource = $inputFieldDescriptor->isInjectSource();
 
         $inputFieldDescriptor = $inputFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $parameters, $inputFieldDescriptor, $injectSource) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source), $injectSource);
+            $variables = $this->getVariables(
+                $args,
+                $parameters,
+                $injectSource ? $source : $originalResolver->executionSource($source),
+                $injectSource,
+            );
 
             foreach ($securityAnnotations as $annotation) {
                 try {
