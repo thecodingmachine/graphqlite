@@ -1360,6 +1360,7 @@ class EndToEndTest extends IntegrationTestCase
             contacts {
                 name
                 extendedSecretName
+                sourceAwareSecretName
             }
         }
         ';
@@ -1368,6 +1369,7 @@ class EndToEndTest extends IntegrationTestCase
         $data = $this->getSuccessResult($result);
         $this->assertSame('Joe', $data['contacts'][0]['name']);
         $this->assertNull($data['contacts'][0]['extendedSecretName']);
+        $this->assertNull($data['contacts'][0]['sourceAwareSecretName']);
 
         // Logged-in user with bar=42 → the Security expression passes and the field returns the name.
         $container = $this->createContainer([
@@ -1394,6 +1396,7 @@ class EndToEndTest extends IntegrationTestCase
         $result = GraphQL::executeQuery($schema, $queryString);
         $data = $this->getSuccessResult($result);
         $this->assertSame('Joe', $data['contacts'][0]['extendedSecretName']);
+        $this->assertSame('Joe', $data['contacts'][0]['sourceAwareSecretName']);
     }
 
     public function testEndToEndUnions(): void

@@ -83,7 +83,12 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         $injectSource = $queryFieldDescriptor->isInjectSource();
 
         $queryFieldDescriptor = $queryFieldDescriptor->withResolver(function (object|null $source, ...$args) use ($originalResolver, $securityAnnotations, $resolver, $failWith, $parameters, $queryFieldDescriptor, $injectSource) {
-            $variables = $this->getVariables($args, $parameters, $originalResolver->executionSource($source), $injectSource);
+            $variables = $this->getVariables(
+                $args,
+                $parameters,
+                $injectSource ? $source : $originalResolver->executionSource($source),
+                $injectSource,
+            );
 
             foreach ($securityAnnotations as $annotation) {
                 try {
