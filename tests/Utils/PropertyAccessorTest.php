@@ -26,6 +26,7 @@ class PropertyAccessorTest extends TestCase
         yield 'regular property' => [null, MagicGetterSetterType::class, 'one'];
         yield 'getter' => ['getTwo', MagicGetterSetterType::class, 'two'];
         yield 'isser' => ['isThree', MagicGetterSetterType::class, 'three'];
+        yield 'hasser' => ['hasFive', MagicGetterSetterType::class, 'five'];
         yield 'private getter' => [null, MagicGetterSetterType::class, 'four'];
         yield 'undefined property' => [null, MagicGetterSetterType::class, 'twenty'];
     }
@@ -60,6 +61,8 @@ class PropertyAccessorTest extends TestCase
         yield 'getter' => ['result', new MagicGetterSetterType(), 'two', ['result']];
         yield 'isser #1' => [true, new MagicGetterSetterType(), 'three', ['foo']];
         yield 'isser #2' => [false, new MagicGetterSetterType(), 'three', ['bar']];
+        yield 'hasser #1' => [true, new MagicGetterSetterType(), 'five', ['foo']];
+        yield 'hasser #2' => [false, new MagicGetterSetterType(), 'five', ['bar']];
         yield 'private getter' => ['result', new MagicGetterSetterType(four: 'result'), 'four'];
         yield 'magic getter' => ['magic', new MagicGetterSetterType(), 'twenty'];
         yield 'undefined property' => [AccessPropertyException::createForUnreadableProperty(GetterSetterType::class, 'twenty'), new GetterSetterType(), 'twenty'];
