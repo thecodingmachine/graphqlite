@@ -51,7 +51,7 @@ class ProductsController
     #[Query]
     public function products(ResolveInfo $info): array
     {
-        if (isset($info->getFieldSelection()['manufacturer']) {
+        if (isset($info->getFieldSelection()['manufacturer'])) {
             // Let's perform a request with a JOIN on manufacturer
         } else {
             // Let's perform a request without a JOIN on manufacturer
