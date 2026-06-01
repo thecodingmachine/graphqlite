@@ -12,8 +12,8 @@ use function implode;
 use function sprintf;
 
 /**
- * Thrown at schema build time when a directive declaration is invalid, e.g. a bad PHP target,
- * repeatable mismatch, missing interface/location, an unsupported argument type, or a name clash.
+ * Thrown at schema build time when a directive declaration is invalid, e.g. a bad PHP target, a
+ * missing interface/location, an unsupported argument type, or a name clash.
  */
 final class InvalidDirectiveException extends GraphQLRuntimeException
 {
@@ -25,17 +25,6 @@ final class InvalidDirectiveException extends GraphQLRuntimeException
             $directiveClass,
             $location->value,
             $requiredTarget,
-        ));
-    }
-
-    public static function repeatableMismatch(string $directiveClass, bool $phpRepeatable, bool $definitionRepeatable): self
-    {
-        return new self(sprintf(
-            'Directive "%s" has inconsistent repeatable settings: PHP IS_REPEATABLE=%s but DirectiveDefinition::$repeatable=%s. ' .
-            'They must agree so introspection and PHP usage stay in sync.',
-            $directiveClass,
-            $phpRepeatable ? 'true' : 'false',
-            $definitionRepeatable ? 'true' : 'false',
         ));
     }
 

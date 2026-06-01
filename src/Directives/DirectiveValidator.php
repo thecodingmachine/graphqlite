@@ -5,26 +5,19 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Directives;
 
 use Attribute;
-use GraphQL\Type\Definition\NonNull;
-use GraphQL\Type\Definition\Type;
 use ReflectionClass;
-use ReflectionNamedType;
-use ReflectionParameter;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
 
 use function in_array;
 
 /**
- * Validates a discovered directive class and resolves its constructor into a list of
- * {@see ResolvedDirectiveArgument}s. Checks:
+ * Validates a discovered directive class. Checks:
  *
  *   1. The `#[Attribute(...)]` PHP target covers every declared GraphQL location.
- *   2. PHP `IS_REPEATABLE` matches `DirectiveDefinition::$repeatable`.
- *   3. Each family interface has a matching location declared, and vice versa.
- *   4. Every constructor parameter maps to a supported input type (scalars only for now).
+ *   2. Each family interface has a matching location declared, and vice versa.
  *
- * Name uniqueness is checked separately in {@see DirectiveRegistry}, which has the full set to
- * compare against.
+ * Producing the arguments, repeatability, and webonyx directive is {@see DirectiveResolver}'s job;
+ * name uniqueness is checked in {@see DirectiveRegistry}.
  *
  * @internal
  */
@@ -33,27 +26,18 @@ final class DirectiveValidator
     /**
      * @param class-string<TypeSystemDirective> $directiveClass
      *
-     * @return list<ResolvedDirectiveArgument>
-     *
      * @throws InvalidDirectiveException
      */
-    public static function validate(string $directiveClass, DirectiveDefinition $definition): array
+    public static function validate(string $directiveClass, DirectiveDefinition $definition): void
     {
         $reflection = new ReflectionClass($directiveClass);
 
-        $attributeAttributes = $reflection->getAttributes(Attribute::class);
-        if ($attributeAttributes === []) {
+        if ($reflection->getAttributes(Attribute::class) === []) {
             throw InvalidDirectiveException::notAttribute($directiveClass);
         }
 
-        $attributeArgs = $attributeAttributes[0]->getArguments();
-        $phpFlags = $attributeArgs[0] ?? $attributeArgs['flags'] ?? Attribute::TARGET_ALL;
-
-        self::checkPhpTargets($directiveClass, $definition, $phpFlags);
-        self::checkRepeatableParity($directiveClass, $definition, $phpFlags);
+        self::checkPhpTargets($directiveClass, $definition, DirectiveReflection::attributeFlags($reflection));
         self::checkInterfaceAndLocationAgreement($directiveClass, $definition, $reflection);
-
-        return self::resolveArguments($directiveClass, $reflection);
     }
 
     private static function checkPhpTargets(string $directiveClass, DirectiveDefinition $definition, int $phpFlags): void
@@ -67,16 +51,6 @@ final class DirectiveValidator
                 throw InvalidDirectiveException::phpTargetMissingForLocation($directiveClass, $location, $label);
             }
         }
-    }
-
-    private static function checkRepeatableParity(string $directiveClass, DirectiveDefinition $definition, int $phpFlags): void
-    {
-        $phpRepeatable = ($phpFlags & Attribute::IS_REPEATABLE) === Attribute::IS_REPEATABLE;
-        if ($phpRepeatable === $definition->repeatable) {
-            return;
-        }
-
-        throw InvalidDirectiveException::repeatableMismatch($directiveClass, $phpRepeatable, $definition->repeatable);
     }
 
     /** @param ReflectionClass<TypeSystemDirective> $reflection */
@@ -102,71 +76,6 @@ final class DirectiveValidator
                 throw InvalidDirectiveException::locationWithoutMatchingInterface($directiveClass, $expectedLocation, $interface);
             }
         }
-    }
-
-    /**
-     * @param ReflectionClass<TypeSystemDirective> $reflection
-     *
-     * @return list<ResolvedDirectiveArgument>
-     */
-    private static function resolveArguments(string $directiveClass, ReflectionClass $reflection): array
-    {
-        $constructor = $reflection->getConstructor();
-        if ($constructor === null) {
-            return [];
-        }
-
-        $arguments = [];
-        foreach ($constructor->getParameters() as $parameter) {
-            $arguments[] = self::resolveArgument($directiveClass, $parameter);
-        }
-
-        return $arguments;
-    }
-
-    private static function resolveArgument(string $directiveClass, ReflectionParameter $parameter): ResolvedDirectiveArgument
-    {
-        $type = $parameter->getType();
-        if (! $type instanceof ReflectionNamedType) {
-            throw InvalidDirectiveException::unsupportedArgumentType(
-                $directiveClass,
-                $parameter->getName(),
-                'union/intersection types are not supported',
-            );
-        }
-
-        if ($type->isBuiltin() === false) {
-            throw InvalidDirectiveException::unsupportedArgumentType(
-                $directiveClass,
-                $parameter->getName(),
-                'only scalar types (string, int, float, bool) are supported in this release',
-            );
-        }
-
-        $graphQlType = match ($type->getName()) {
-            'string' => Type::string(),
-            'int' => Type::int(),
-            'float' => Type::float(),
-            'bool' => Type::boolean(),
-            default => throw InvalidDirectiveException::unsupportedArgumentType(
-                $directiveClass,
-                $parameter->getName(),
-                'PHP type "' . $type->getName() . '" cannot be mapped to a GraphQL scalar',
-            ),
-        };
-
-        $nullable = $type->allowsNull();
-        $finalType = $nullable ? $graphQlType : new NonNull($graphQlType);
-
-        $hasDefault = $parameter->isDefaultValueAvailable();
-        $default = $hasDefault ? $parameter->getDefaultValue() : null;
-
-        return new ResolvedDirectiveArgument(
-            name: $parameter->getName(),
-            type: $finalType,
-            hasDefaultValue: $hasDefault,
-            defaultValue: $default,
-        );
     }
 
     /** @return array<int, string> map of Attribute::TARGET_* flag → human-readable label */

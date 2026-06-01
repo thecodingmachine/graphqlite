@@ -10,31 +10,23 @@ use TheCodingMachine\GraphQLite\Directives\Discovery\DirectiveClassFinder;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
 
 use function array_key_exists;
-use function array_map;
-use function array_values;
 use function assert;
 use function in_array;
 use function method_exists;
 
 /**
- * Holds the custom directives for a schema. Built once in
- * {@see \TheCodingMachine\GraphQLite\SchemaFactory::createSchema()}: it discovers directive classes
- * via {@see DirectiveClassFinder}, validates them with {@see DirectiveValidator}, and caches the
- * {@see DirectiveDefinition}, argument shape, and webonyx {@see WebonyxDirective} for each.
+ * Holds the custom directives for a schema, built once in
+ * {@see \TheCodingMachine\GraphQLite\SchemaFactory::createSchema()}. For each discovered class it
+ * runs {@see DirectiveValidator}, caches what {@see DirectiveResolver} produces, and enforces name
+ * uniqueness across the set.
  *
- * The dispatcher middlewares also query it at apply time to get a directive's argument shape, which
- * the AST builder needs to encode each arg as a GraphQL value.
+ * The dispatcher middlewares query it at apply time for a directive's argument shape, which the AST
+ * builder needs to encode each arg as a GraphQL value.
  */
 final class DirectiveRegistry
 {
-    /** @var array<class-string<DirectiveInterface>, DirectiveDefinition> */
-    private array $definitionsByClass = [];
-
-    /** @var array<class-string<DirectiveInterface>, list<ResolvedDirectiveArgument>> */
-    private array $argumentsByClass = [];
-
-    /** @var array<class-string<DirectiveInterface>, WebonyxDirective> */
-    private array $webonyxByClass = [];
+    /** @var array<class-string<DirectiveInterface>, ResolvedDirective> */
+    private array $resolvedByClass = [];
 
     /** @var array<string, class-string<DirectiveInterface>> */
     private array $classByName = [];
@@ -80,7 +72,7 @@ final class DirectiveRegistry
     {
         // Registering the same class twice is a no-op; discovery and the built-in list share this
         // registry, so duplicates are expected.
-        if (isset($this->definitionsByClass[$directiveClass])) {
+        if (isset($this->resolvedByClass[$directiveClass])) {
             return;
         }
 
@@ -91,7 +83,7 @@ final class DirectiveRegistry
         $definition = $directiveClass::definition();
         assert($definition instanceof DirectiveDefinition);
 
-        $arguments = DirectiveValidator::validate($directiveClass, $definition);
+        DirectiveValidator::validate($directiveClass, $definition);
 
         if (! $definition->builtIn && in_array($definition->name, self::RESERVED_NAMES, true)) {
             throw InvalidDirectiveException::reservedName($definition->name, $directiveClass);
@@ -110,56 +102,33 @@ final class DirectiveRegistry
             );
         }
 
-        $this->definitionsByClass[$directiveClass] = $definition;
-        $this->argumentsByClass[$directiveClass] = $arguments;
+        $this->resolvedByClass[$directiveClass] = DirectiveResolver::resolve($directiveClass, $definition);
         $this->classByName[$definition->name] = $directiveClass;
-
-        // webonyx already declares built-in directives, so don't add a duplicate definition to
-        // SchemaConfig::$directives.
-        if ($definition->builtIn) {
-            return;
-        }
-
-        $this->webonyxByClass[$directiveClass] = self::buildWebonyxDirective($definition, $arguments);
-    }
-
-    /** @param list<ResolvedDirectiveArgument> $arguments */
-    private static function buildWebonyxDirective(DirectiveDefinition $definition, array $arguments): WebonyxDirective
-    {
-        $argsConfig = [];
-        foreach ($arguments as $argument) {
-            $config = ['type' => $argument->type];
-            if ($argument->hasDefaultValue) {
-                $config['defaultValue'] = $argument->defaultValue;
-            }
-            if ($argument->description !== null) {
-                $config['description'] = $argument->description;
-            }
-            $argsConfig[$argument->name] = $config;
-        }
-
-        $config = [
-            'name' => $definition->name,
-            'locations' => array_map(static fn (DirectiveLocation $loc) => $loc->value, $definition->locations),
-            'isRepeatable' => $definition->repeatable,
-            'args' => $argsConfig,
-        ];
-        if ($definition->description !== null) {
-            $config['description'] = $definition->description;
-        }
-
-        return new WebonyxDirective($config);
     }
 
     public function hasAny(): bool
     {
-        return $this->webonyxByClass !== [];
+        foreach ($this->resolvedByClass as $resolved) {
+            if ($resolved->webonyxDirective !== null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** @return list<WebonyxDirective> */
     public function webonyxDirectives(): array
     {
-        return array_values($this->webonyxByClass);
+        $directives = [];
+        foreach ($this->resolvedByClass as $resolved) {
+            if ($resolved->webonyxDirective === null) {
+                continue;
+            }
+            $directives[] = $resolved->webonyxDirective;
+        }
+
+        return $directives;
     }
 
     /**
@@ -171,7 +140,9 @@ final class DirectiveRegistry
      */
     public function argumentsFor(string $directiveClass): array
     {
-        return $this->argumentsByClass[$directiveClass] ?? [];
+        $resolved = $this->resolvedByClass[$directiveClass] ?? null;
+
+        return $resolved === null ? [] : $resolved->arguments;
     }
 
     /**
@@ -181,6 +152,6 @@ final class DirectiveRegistry
      */
     public function definitionFor(string $directiveClass): DirectiveDefinition|null
     {
-        return $this->definitionsByClass[$directiveClass] ?? null;
+        return ($this->resolvedByClass[$directiveClass] ?? null)?->definition;
     }
 }

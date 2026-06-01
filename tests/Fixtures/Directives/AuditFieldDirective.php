@@ -21,7 +21,6 @@ final class AuditFieldDirective implements FieldDirective
         return new DirectiveDefinition(
             name: 'audit',
             locations: [DirectiveLocation::FIELD_DEFINITION],
-            repeatable: true,
             description: 'Marks a field as needing audit-log treatment.',
         );
     }
