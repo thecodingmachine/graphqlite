@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\SchemaConfig;
@@ -18,12 +19,17 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
  */
 class Schema extends \GraphQL\Type\Schema
 {
+    /**
+     * @param array<Directive> $directives Custom (non-built-in) directive definitions to expose in
+     *                                      the schema, alongside webonyx's standard directives.
+     */
     public function __construct(
         QueryProviderInterface $queryProvider,
         RecursiveTypeMapperInterface $recursiveTypeMapper,
         TypeResolver $typeResolver,
         RootTypeMapperInterface $rootTypeMapper,
         SchemaConfig|null $config = null,
+        array $directives = [],
     ) {
         if ($config === null) {
             $config = SchemaConfig::create();
@@ -112,6 +118,16 @@ class Schema extends \GraphQL\Type\Schema
 
             return $rootTypeMapper->mapNameToType($name);
         });
+
+        // Expose custom directive definitions (introspection + SDL). webonyx replaces the standard
+        // directive set the moment `directives` is non-null, so merge onto the existing list —
+        // the user's own config directives if they supplied any, otherwise webonyx's standard set.
+        if ($directives !== []) {
+            $config->setDirectives([
+                ...($config->getDirectives() ?? Directive::builtInDirectives()),
+                ...$directives,
+            ]);
+        }
 
         $typeResolver->registerSchema($this);
 
