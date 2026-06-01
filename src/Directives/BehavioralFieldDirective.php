@@ -9,9 +9,8 @@ use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 /**
- * A {@see FieldDirective} that also has PHP-side behavior. Each behavioral directive's
- * {@see applyToField} runs in declaration order as a sub-chain leading into the outer field pipe,
- * with the standard `(descriptor, next)` middleware shape.
+ * A {@see FieldDirective} that also runs behavior. The {@see applyToField} hooks run in declaration
+ * order, chained ahead of the rest of the field pipe.
  */
 interface BehavioralFieldDirective extends FieldDirective
 {

@@ -9,8 +9,8 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\OneOf;
 
 /**
- * Uses the built-in `@oneOf` directive — flips webonyx's `isOneOf` flag so exactly one of `sku`
- * or `id` is required at execution time.
+ * Uses the built-in `@oneOf` directive, which sets webonyx's `isOneOf` flag so callers pass either
+ * `sku` or `id`, not both.
  */
 #[Input]
 #[OneOf]

@@ -8,12 +8,11 @@ use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\Type;
 
 /**
- * A single directive argument resolved from a directive class's constructor parameter.
+ * One directive argument, resolved from a constructor parameter of the directive class. The
+ * parameter name doubles as the GraphQL argument name.
  *
- * Stores the GraphQL input type, the PHP parameter name (which is also the GraphQL argument name),
- * an optional description, and the default value (if any). The {@see DirectiveRegistry} builds one
- * of these per constructor parameter at validation time, then uses the list to construct the
- * webonyx {@see \GraphQL\Type\Definition\Directive} that's registered with the schema.
+ * {@see DirectiveRegistry} builds one per parameter and uses the list to construct the webonyx
+ * {@see \GraphQL\Type\Definition\Directive}.
  *
  * @internal
  */

@@ -17,15 +17,13 @@ use function in_array;
 use function method_exists;
 
 /**
- * The single source of truth for custom directives in a schema. Built once during
- * {@see \TheCodingMachine\GraphQLite\SchemaFactory::createSchema()} by discovering directive
- * classes via {@see DirectiveClassFinder}, validating them with {@see DirectiveValidator}, and
- * caching the resolved {@see DirectiveDefinition}, the constructor-argument shape, and the
- * webonyx-side {@see WebonyxDirective} per class.
+ * Holds the custom directives for a schema. Built once in
+ * {@see \TheCodingMachine\GraphQLite\SchemaFactory::createSchema()}: it discovers directive classes
+ * via {@see DirectiveClassFinder}, validates them with {@see DirectiveValidator}, and caches the
+ * {@see DirectiveDefinition}, argument shape, and webonyx {@see WebonyxDirective} for each.
  *
- * The registry is also consulted at apply time by the dispatcher middlewares to look up an
- * argument shape from a directive instance's class (so the AST node builder knows how to encode
- * each arg as a GraphQL value).
+ * The dispatcher middlewares also query it at apply time to get a directive's argument shape, which
+ * the AST builder needs to encode each arg as a GraphQL value.
  */
 final class DirectiveRegistry
 {
@@ -63,8 +61,8 @@ final class DirectiveRegistry
     /** Run discovery + validation once. Idempotent. */
     public function discover(): void
     {
-        // User classes first so a user-supplied override of a built-in (a class with `builtIn:
-        // true` and the same name) lands before our bundled copy gets a chance to register.
+        // User classes first: an override of a built-in (same name, builtIn: true) needs to land
+        // before our bundled copy registers.
         foreach ($this->classFinder->findDirectives() as $directiveClass) {
             $this->register($directiveClass);
         }
@@ -80,8 +78,8 @@ final class DirectiveRegistry
      */
     private function register(string $directiveClass): void
     {
-        // Same FQCN registered twice is a no-op — discovery, the built-in list, and user code all
-        // share the registry, so collisions on the same class are expected.
+        // Registering the same class twice is a no-op; discovery and the built-in list share this
+        // registry, so duplicates are expected.
         if (isset($this->definitionsByClass[$directiveClass])) {
             return;
         }
@@ -100,9 +98,8 @@ final class DirectiveRegistry
         }
 
         if (array_key_exists($definition->name, $this->classByName)) {
-            // A name clash with a built-in is allowed when this side is also a built-in: it means
-            // the user has supplied their own implementation and we defer. Two non-built-ins with
-            // the same name remain an error.
+            // A name clash is fine when this side is also built-in: the user supplied their own
+            // implementation and we defer to it. Two custom directives sharing a name is an error.
             if ($definition->builtIn) {
                 return;
             }
@@ -117,8 +114,8 @@ final class DirectiveRegistry
         $this->argumentsByClass[$directiveClass] = $arguments;
         $this->classByName[$definition->name] = $directiveClass;
 
-        // Built-in directives are declared by webonyx itself — don't contribute a duplicate
-        // definition to SchemaConfig::$directives.
+        // webonyx already declares built-in directives, so don't add a duplicate definition to
+        // SchemaConfig::$directives.
         if ($definition->builtIn) {
             return;
         }
@@ -166,8 +163,7 @@ final class DirectiveRegistry
     }
 
     /**
-     * Look up the argument shape for a directive class. Accepts any {@see DirectiveInterface} class
-     * so it composes with future executable-directive lookups.
+     * The argument shape for a directive class.
      *
      * @param class-string<DirectiveInterface> $directiveClass
      *
@@ -179,8 +175,7 @@ final class DirectiveRegistry
     }
 
     /**
-     * Look up the declarative metadata for a directive class. Accepts any
-     * {@see DirectiveInterface} class for the same reason as {@see argumentsFor}.
+     * The metadata for a directive class, or null if it isn't registered.
      *
      * @param class-string<DirectiveInterface> $directiveClass
      */

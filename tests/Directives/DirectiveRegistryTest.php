@@ -70,8 +70,8 @@ final class DirectiveRegistryTest extends TestCase
 
     public function testWebonyxDirectivesIsolatedFromBuiltins(): void
     {
-        // Sanity-check that the directives we built do NOT include webonyx's built-ins — they are
-        // merged in at the Schema layer, not here.
+        // The built directives shouldn't include webonyx's built-ins; those get merged in at the
+        // Schema layer, not here.
         $registry = self::buildRegistry([UppercaseFieldDirective::class]);
         $registry->discover();
 

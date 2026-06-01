@@ -14,10 +14,9 @@ use function array_reverse;
 use function array_values;
 
 /**
- * Dispatches every {@see \TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective} declared
- * on a class with `#[Input]` (or via `#[Factory]`). Only the subset implementing
- * {@see BehavioralInputObjectTypeDirective} runs its `applyToInputObjectType` hook; metadata-only
- * directives still get an `astNode` for SDL emission.
+ * Dispatches the {@see \TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective}s on an
+ * `#[Input]` (or `#[Factory]`) class. The ones implementing {@see BehavioralInputObjectTypeDirective}
+ * run their `applyToInputObjectType` hook; metadata-only directives still get an `astNode` for SDL.
  *
  * @internal
  */

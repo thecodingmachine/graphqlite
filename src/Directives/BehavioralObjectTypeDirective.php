@@ -9,8 +9,8 @@ use TheCodingMachine\GraphQLite\ObjectTypeDescriptor;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 /**
- * An {@see ObjectTypeDirective} that also has PHP-side behavior — typically a metadata mutation
- * applied to the built {@see MutableObjectType}. Dispatched through the new object-type pipe in
+ * An {@see ObjectTypeDirective} that also runs behavior, usually tweaking the built
+ * {@see MutableObjectType}. Dispatched through the object-type pipe in
  * {@see \TheCodingMachine\GraphQLite\TypeGenerator}.
  */
 interface BehavioralObjectTypeDirective extends ObjectTypeDirective

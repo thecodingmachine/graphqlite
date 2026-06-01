@@ -10,9 +10,8 @@ use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
 
 /**
- * Carries an in-progress {@see MutableObjectType} through the {@see Middlewares\ObjectTypeMiddlewarePipe}
- * so {@see Directives\ObjectTypeDirective}s (and any future object-type middleware) can inspect and
- * decorate the type before it is registered.
+ * Carries a {@see MutableObjectType} through the {@see Middlewares\ObjectTypeMiddlewarePipe} so
+ * {@see Directives\ObjectTypeDirective}s can decorate the type before it's registered.
  */
 class ObjectTypeDescriptor
 {

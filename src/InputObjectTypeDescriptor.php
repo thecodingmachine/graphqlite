@@ -10,14 +10,12 @@ use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
 
 /**
- * Carries an in-progress {@see MutableInputObjectType} through the
- * {@see Middlewares\InputObjectTypeMiddlewarePipe} so {@see Directives\InputObjectTypeDirective}s
- * (and any future input-object middleware) can inspect and decorate the type before it is
- * registered.
+ * Carries a {@see MutableInputObjectType} through the
+ * {@see Middlewares\InputObjectTypeMiddlewarePipe} so {@see Directives\InputObjectTypeDirective}s can
+ * decorate the type before it's registered.
  *
- * Both `#[Input]`-driven (`InputType`) and `#[Factory]`-driven
- * (`ResolvableMutableInputObjectType`) types extend `MutableInputObjectType`, so the descriptor
- * accepts either.
+ * Both `#[Input]` types (`InputType`) and `#[Factory]` types (`ResolvableMutableInputObjectType`)
+ * extend `MutableInputObjectType`, so either works here.
  */
 class InputObjectTypeDescriptor
 {

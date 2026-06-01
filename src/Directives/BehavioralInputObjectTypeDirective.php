@@ -9,8 +9,8 @@ use TheCodingMachine\GraphQLite\Middlewares\InputObjectTypeHandlerInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 
 /**
- * An {@see InputObjectTypeDirective} that also has PHP-side behavior. Used for things like
- * `@oneOf` that flip a flag on the built input type.
+ * An {@see InputObjectTypeDirective} that also runs behavior, e.g. `@oneOf` flipping a flag on the
+ * built input type.
  */
 interface BehavioralInputObjectTypeDirective extends InputObjectTypeDirective
 {

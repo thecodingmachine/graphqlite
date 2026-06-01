@@ -15,10 +15,9 @@ use function array_reverse;
 use function array_values;
 
 /**
- * Dispatches every {@see FieldDirective} attached to a field. Only the subset that also implements
- * {@see BehavioralFieldDirective} runs its `applyToField` hook as a sub-chain leading into the
- * outer pipe's `$next`; pure-metadata directives are skipped at apply time but still contribute
- * their `astNode` so the directive appears in SDL output.
+ * Dispatches the {@see FieldDirective}s on a field. The ones implementing
+ * {@see BehavioralFieldDirective} run their `applyToField` hook; metadata-only directives don't run
+ * anything but still get their `astNode` so they show up in SDL.
  *
  * @internal
  */

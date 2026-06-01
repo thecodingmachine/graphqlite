@@ -9,8 +9,7 @@ use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
 
 /**
- * An {@see InputFieldDirective} that also has PHP-side behavior. Dispatched through the input-field
- * pipe.
+ * An {@see InputFieldDirective} that also runs behavior, dispatched through the input-field pipe.
  */
 interface BehavioralInputFieldDirective extends InputFieldDirective
 {

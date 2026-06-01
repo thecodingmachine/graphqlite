@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Directives;
 
 /**
- * Marker contract for a custom directive that decorates an object type (GraphQL `OBJECT`
- * location). Pure metadata — implement {@see BehavioralObjectTypeDirective} to mutate or wrap the
- * type at build time.
+ * Marker for a directive on an object type (`OBJECT` location). This alone is metadata only;
+ * implement {@see BehavioralObjectTypeDirective} to act on the type at build time.
  */
 interface ObjectTypeDirective extends TypeSystemDirective
 {

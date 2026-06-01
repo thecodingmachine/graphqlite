@@ -14,13 +14,12 @@ use TheCodingMachine\GraphQLite\Middlewares\InputObjectTypeHandlerInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 
 /**
- * Binds PHP code to GraphQL's built-in `@oneOf` directive (defined by webonyx). Applying
- * `#[OneOf]` to an `#[Input]` class flips the resulting input object's `isOneOf` flag, which both
- * tightens validation (exactly one field must be supplied) and makes webonyx's schema printer emit
- * `@oneOf` on the SDL element automatically.
+ * Binds `#[OneOf]` to webonyx's built-in `@oneOf` directive. Putting it on an `#[Input]` class sets
+ * the input object's `isOneOf` flag, which makes validation require one field and gets webonyx to
+ * print `@oneOf` in the SDL.
  *
- * The directive itself does not need a custom schema-level registration — webonyx already provides
- * the canonical definition — so {@see DirectiveDefinition::$builtIn} is `true`.
+ * webonyx already defines `@oneOf`, so we don't register our own definition for it
+ * ({@see DirectiveDefinition::$builtIn} is `true`).
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class OneOf implements BehavioralInputObjectTypeDirective

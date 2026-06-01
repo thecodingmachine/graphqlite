@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Directives;
 
 /**
- * GraphQL directive locations as defined in the spec.
+ * GraphQL directive locations from the spec, both type-system and executable.
  *
- * Both type-system locations (used to annotate the schema) and executable locations (used inside
- * client queries) are listed. Only the four type-system locations FIELD_DEFINITION,
- * INPUT_FIELD_DEFINITION, OBJECT and INPUT_OBJECT have an apply hook in the current branch — the
- * rest are reserved so future work can plug in without an enum extension.
- *
- * Backing values match the spec strings exactly, so they round-trip through SDL and webonyx's
- * directive-location strings without conversion.
+ * Only FIELD_DEFINITION, INPUT_FIELD_DEFINITION, OBJECT and INPUT_OBJECT have apply hooks so far;
+ * the rest are listed but not yet wired. Backing values match the spec strings, so they line up
+ * with webonyx's location strings without conversion.
  */
 enum DirectiveLocation: string
 {

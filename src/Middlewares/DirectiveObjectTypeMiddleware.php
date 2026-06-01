@@ -14,9 +14,9 @@ use function array_reverse;
 use function array_values;
 
 /**
- * Dispatches every {@see \TheCodingMachine\GraphQLite\Directives\ObjectTypeDirective} declared on a
- * class with `#[Type]`. Only the subset implementing {@see BehavioralObjectTypeDirective} runs its
- * `applyToObjectType` hook; metadata-only directives still get an `astNode` for SDL emission.
+ * Dispatches the {@see \TheCodingMachine\GraphQLite\Directives\ObjectTypeDirective}s on a `#[Type]`
+ * class. The ones implementing {@see BehavioralObjectTypeDirective} run their `applyToObjectType`
+ * hook; metadata-only directives still get an `astNode` for SDL.
  *
  * @internal
  */

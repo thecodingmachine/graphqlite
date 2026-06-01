@@ -19,17 +19,13 @@ use function assert;
 use function is_array;
 
 /**
- * End-to-end verification of custom directive support. Boots a schema via {@see SchemaFactory}
- * against the `tests/Fixtures/DirectivesIntegration` namespaces, then asserts:
+ * End-to-end test for custom directives. Builds a schema from the
+ * `tests/Fixtures/DirectivesIntegration` namespaces and checks that directive definitions show up
+ * in SDL and introspection, and that behavioral directives wrap their resolver at runtime.
  *
- *   - SDL emits the directive definitions (`directive @uppercase on FIELD_DEFINITION`, ...).
- *   - Introspection reports each custom directive alongside the webonyx built-ins.
- *   - A field carrying `@uppercase` actually has its resolver wrapped at runtime.
- *
- * Directive *applications* (`tagline: String! @uppercase`) are intentionally NOT asserted: GraphQLite
- * mirrors webonyx, whose {@see \GraphQL\Utils\SchemaPrinter} prints directive definitions but not
- * arbitrary applications. Applications stay attached to each element's `astNode->directives`, so a
- * downstream/custom printer can still render them when needed (e.g. Apollo Federation's `@key`).
+ * We don't assert directive applications in SDL (e.g. `tagline: String! @uppercase`): webonyx's
+ * SchemaPrinter doesn't render those, and we follow its behavior. The applications are still on each
+ * element's `astNode->directives` for anyone who wants to print them with their own printer.
  */
 final class DirectivesEndToEndTest extends TestCase
 {
@@ -48,8 +44,8 @@ final class DirectivesEndToEndTest extends TestCase
         $schema = $this->buildSchema();
         $sdl = SchemaPrinter::doPrint($schema);
 
-        // Definitions — the built-in webonyx printer emits these once the directives are registered
-        // on the schema (see SchemaFactory wiring of DirectiveRegistry::webonyxDirectives()).
+        // Definitions: the webonyx printer emits these once the directives are registered on the
+        // schema (see SchemaFactory's wiring of DirectiveRegistry::webonyxDirectives()).
         $this->assertStringContainsString('directive @uppercase on FIELD_DEFINITION', $sdl);
         $this->assertStringContainsString('Marks a field for audit-log tracking.', $sdl);
         $this->assertStringContainsString('directive @audit(reason: String!) repeatable on FIELD_DEFINITION', $sdl);
@@ -58,13 +54,11 @@ final class DirectivesEndToEndTest extends TestCase
         $this->assertStringContainsString('Marks an input with a schema version for backwards-compat tracking.', $sdl);
         $this->assertStringContainsString('directive @versioned(version: Int!) on INPUT_OBJECT', $sdl);
 
-        // Directive *applications* (`tagline: String! @uppercase`, `@audit(reason: "pii")`, ...) are
-        // intentionally NOT asserted — webonyx's SchemaPrinter does not render arbitrary directive
-        // applications, and GraphQLite mirrors that. See the class docblock.
+        // No assertions on directive applications here; webonyx's SchemaPrinter doesn't render them.
+        // See the class docblock.
 
-        // `#[OneOf]` binds PHP behavior to webonyx's built-in `@oneOf` directive — webonyx prints
-        // the application from its own `isOneOf` flag, and we must NOT re-declare the directive
-        // alongside the custom list.
+        // @oneOf is webonyx's built-in: it prints the application from the isOneOf flag, and we
+        // don't re-declare it in the custom list.
         $this->assertStringNotContainsString('directive @oneOf ', $sdl);
         $this->assertStringContainsString('input OneOfLookupInput @oneOf', $sdl);
     }
@@ -116,7 +110,7 @@ final class DirectivesEndToEndTest extends TestCase
         )->toArray();
 
         $this->assertArrayNotHasKey('errors', $result);
-        // The UppercaseDirective on getLabel() should uppercase the returned string.
+        // getLabel() carries @uppercase, so "abc" comes back uppercased.
         $this->assertSame('ABC', $result['data']['findWidget']['label']);
     }
 }

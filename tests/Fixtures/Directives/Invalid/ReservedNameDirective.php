@@ -10,8 +10,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective;
 
 /**
- * Reuses webonyx's built-in `@oneOf` directive name — should be rejected by the registry's
- * reserved-name check.
+ * Reuses webonyx's built-in `@oneOf` name, so the registry's reserved-name check rejects it.
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class ReservedNameDirective implements InputObjectTypeDirective

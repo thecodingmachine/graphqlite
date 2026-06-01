@@ -13,9 +13,8 @@ use TheCodingMachine\GraphQLite\Middlewares\InputObjectTypeHandlerInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 
 /**
- * Simulates a user-supplied replacement for the bundled `OneOf` built-in attribute. Claims the
- * same `@oneOf` name and marks itself as `builtIn: true` so the registry treats it as the active
- * binder for that directive name.
+ * Stands in for a user-supplied replacement of the bundled `OneOf`. Same `@oneOf` name, marked
+ * `builtIn: true`, so the registry uses it instead of ours.
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class CustomOneOfOverride implements BehavioralInputObjectTypeDirective

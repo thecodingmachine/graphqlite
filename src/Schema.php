@@ -20,8 +20,8 @@ use TheCodingMachine\GraphQLite\Types\TypeResolver;
 class Schema extends \GraphQL\Type\Schema
 {
     /**
-     * @param array<Directive> $directives Custom (non-built-in) directive definitions to expose in
-     *                                      the schema, alongside webonyx's standard directives.
+     * @param array<Directive> $directives Custom directive definitions to add alongside webonyx's
+     *                                      standard ones.
      */
     public function __construct(
         QueryProviderInterface $queryProvider,
@@ -119,9 +119,9 @@ class Schema extends \GraphQL\Type\Schema
             return $rootTypeMapper->mapNameToType($name);
         });
 
-        // Expose custom directive definitions (introspection + SDL). webonyx replaces the standard
-        // directive set the moment `directives` is non-null, so merge onto the existing list —
-        // the user's own config directives if they supplied any, otherwise webonyx's standard set.
+        // Register custom directives so they show up in introspection and SDL. webonyx drops its
+        // standard directives once this list is set, so include them too: whatever the config
+        // already had, or webonyx's defaults.
         if ($directives !== []) {
             $config->setDirectives([
                 ...($config->getDirectives() ?? Directive::builtInDirectives()),

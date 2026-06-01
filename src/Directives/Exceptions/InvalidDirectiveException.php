@@ -12,9 +12,8 @@ use function implode;
 use function sprintf;
 
 /**
- * Thrown at schema build time when a custom directive declaration violates one of the validator's
- * rules: target/location mismatch, repeatable parity, interface/location agreement, unmappable
- * argument types, or a directive-name collision.
+ * Thrown at schema build time when a directive declaration is invalid, e.g. a bad PHP target,
+ * repeatable mismatch, missing interface/location, an unsupported argument type, or a name clash.
  */
 final class InvalidDirectiveException extends GraphQLRuntimeException
 {

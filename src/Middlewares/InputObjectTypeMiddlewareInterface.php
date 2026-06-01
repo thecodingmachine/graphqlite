@@ -8,9 +8,9 @@ use TheCodingMachine\GraphQLite\InputObjectTypeDescriptor;
 use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 
 /**
- * A middleware in the {@see InputObjectTypeMiddlewarePipe} used to decorate
- * {@see MutableInputObjectType} instances right after construction. Covers both `#[Input]` classes
- * and `#[Factory]`-produced types.
+ * A middleware in the {@see InputObjectTypeMiddlewarePipe} that decorates
+ * {@see MutableInputObjectType} instances right after they're built (both `#[Input]` and
+ * `#[Factory]` types).
  *
  * @unstable See https://graphqlite.thecodingmachine.io/docs/semver.html
  */

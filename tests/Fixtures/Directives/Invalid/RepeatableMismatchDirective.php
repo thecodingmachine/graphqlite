@@ -10,8 +10,8 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
 /**
- * PHP IS_REPEATABLE is set but DirectiveDefinition::$repeatable is false — should be rejected by
- * the validator's repeatable-parity rule.
+ * PHP IS_REPEATABLE is set but DirectiveDefinition::$repeatable is false, so the validator rejects
+ * the mismatch.
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
 final class RepeatableMismatchDirective implements FieldDirective

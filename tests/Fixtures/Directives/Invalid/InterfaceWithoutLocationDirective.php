@@ -9,9 +9,8 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
 /**
- * Implements FieldDirective but declares no FIELD_DEFINITION location — should be rejected by the
- * validator's interface/location agreement rule. The empty locations list avoids tripping the PHP
- * target rule first.
+ * Implements FieldDirective but declares no FIELD_DEFINITION location, so the validator's
+ * interface/location check rejects it. Empty locations keeps the PHP-target check from firing first.
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY)]
 final class InterfaceWithoutLocationDirective implements FieldDirective

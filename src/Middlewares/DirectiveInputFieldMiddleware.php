@@ -15,10 +15,9 @@ use function array_reverse;
 use function array_values;
 
 /**
- * Dispatches every {@see InputFieldDirective} attached to an input field. Only directives that
- * also implement {@see BehavioralInputFieldDirective} run their `applyToInputField` hook;
- * pure-metadata directives still contribute their `astNode` so SDL output reflects every
- * application.
+ * Dispatches the {@see InputFieldDirective}s on an input field. The ones implementing
+ * {@see BehavioralInputFieldDirective} run their `applyToInputField` hook; metadata-only directives
+ * still get their `astNode` so they show up in SDL.
  *
  * @internal
  */

@@ -330,7 +330,7 @@ class AnnotationReader
     }
 
     /**
-     * Returns every {@see ObjectTypeDirective} attached to a class.
+     * The {@see ObjectTypeDirective}s on a class.
      *
      * @param ReflectionClass<T> $refClass
      *
@@ -344,7 +344,7 @@ class AnnotationReader
     }
 
     /**
-     * Returns every {@see InputObjectTypeDirective} attached to a class.
+     * The {@see InputObjectTypeDirective}s on a class.
      *
      * @param ReflectionClass<T> $refClass
      *

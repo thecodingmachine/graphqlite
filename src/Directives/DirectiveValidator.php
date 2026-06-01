@@ -15,18 +15,16 @@ use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
 use function in_array;
 
 /**
- * Validates a discovered directive class against the four design-time rules and resolves its
- * constructor signature into a list of {@see ResolvedDirectiveArgument}s.
+ * Validates a discovered directive class and resolves its constructor into a list of
+ * {@see ResolvedDirectiveArgument}s. Checks:
  *
- * Rules:
- *   1. The class declares a `#[Attribute(...)]` PHP attribute whose target is a superset of every
- *      declared GraphQL location.
- *   2. PHP `IS_REPEATABLE` agrees with `DirectiveDefinition::$repeatable`.
- *   3. Every implemented family interface has its corresponding location declared (and vice versa).
- *   4. Every constructor parameter resolves to a supported GraphQL input type (scalars only in v1).
+ *   1. The `#[Attribute(...)]` PHP target covers every declared GraphQL location.
+ *   2. PHP `IS_REPEATABLE` matches `DirectiveDefinition::$repeatable`.
+ *   3. Each family interface has a matching location declared, and vice versa.
+ *   4. Every constructor parameter maps to a supported input type (scalars only for now).
  *
- * A fifth check — name uniqueness vs. webonyx built-ins and vs. other custom directives — lives on
- * {@see DirectiveRegistry::add()} so it can compare against the in-progress registry.
+ * Name uniqueness is checked separately in {@see DirectiveRegistry}, which has the full set to
+ * compare against.
  *
  * @internal
  */
@@ -186,8 +184,7 @@ final class DirectiveValidator
             ],
             DirectiveLocation::OBJECT => [Attribute::TARGET_CLASS => 'TARGET_CLASS'],
             DirectiveLocation::INPUT_OBJECT => [Attribute::TARGET_CLASS => 'TARGET_CLASS'],
-            // Deferred locations have no enforced PHP target here yet — they'll be added when their
-            // apply hooks are wired.
+            // Other locations don't have apply hooks yet, so there's nothing to enforce.
             default => [],
         };
     }

@@ -10,9 +10,8 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective;
 
 /**
- * Demonstrates a custom (non-built-in) input-object directive carrying a constructor argument.
- * Used in tests to exercise the full custom-directive pipeline for `INPUT_OBJECT`: schema-level
- * declaration, SDL application rendering, and argument encoding. Pure metadata — no apply method.
+ * A custom input-object directive with a constructor argument. Metadata only (no apply method),
+ * used to exercise the `INPUT_OBJECT` path: definition, argument encoding, and SDL output.
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class VersionedInputObjectDirective implements InputObjectTypeDirective

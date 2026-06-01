@@ -17,13 +17,11 @@ use GraphQL\Utils\AST;
 use ReflectionClass;
 
 /**
- * Builds the AST nodes that make directive applications visible in printed SDL.
+ * Builds the AST nodes that let directive applications show up in printed SDL.
  *
- * webonyx renders directive applications via `astNode->directives` on the parent definition node
- * (FieldDefinitionNode, InputValueDefinitionNode, ObjectTypeDefinitionNode,
- * InputObjectTypeDefinitionNode). GraphQLite does not populate `astNode` anywhere else today, so
- * this builder constructs the minimal node graph required for SDL output to include each applied
- * directive, with its arguments encoded via {@see AST::astFromValue}.
+ * webonyx reads applications from `astNode->directives` on the definition node (FieldDefinitionNode,
+ * InputValueDefinitionNode, etc.). GraphQLite doesn't otherwise set `astNode`, so this builds just
+ * enough of the node to carry the directives, with arguments encoded via {@see AST::astFromValue}.
  *
  * @internal
  */

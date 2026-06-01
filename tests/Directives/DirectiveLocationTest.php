@@ -43,7 +43,7 @@ final class DirectiveLocationTest extends TestCase
     public function testIsExecutableAndIsTypeSystemArePartitions(): void
     {
         foreach (DirectiveLocation::cases() as $location) {
-            $this->assertNotSame($location->isExecutable(), $location->isTypeSystem(), "Location {$location->value} should be exactly one of executable/type-system.");
+            $this->assertNotSame($location->isExecutable(), $location->isTypeSystem(), "Location {$location->value} should be executable or type-system, not both.");
         }
     }
 }
