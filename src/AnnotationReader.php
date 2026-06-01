@@ -24,12 +24,15 @@ use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\SourceFieldInterface;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
+use TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective;
+use TheCodingMachine\GraphQLite\Directives\ObjectTypeDirective;
 
 use function array_diff_key;
 use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
+use function array_values;
 use function assert;
 use function count;
 use function get_class;
@@ -324,6 +327,34 @@ class AnnotationReader
             },
             $parameterAnnotationsPerParameter,
         );
+    }
+
+    /**
+     * Returns every {@see ObjectTypeDirective} attached to a class.
+     *
+     * @param ReflectionClass<T> $refClass
+     *
+     * @return list<ObjectTypeDirective>
+     *
+     * @template T of object
+     */
+    public function getObjectTypeDirectives(ReflectionClass $refClass): array
+    {
+        return array_values($this->getClassAnnotations($refClass, ObjectTypeDirective::class, false));
+    }
+
+    /**
+     * Returns every {@see InputObjectTypeDirective} attached to a class.
+     *
+     * @param ReflectionClass<T> $refClass
+     *
+     * @return list<InputObjectTypeDirective>
+     *
+     * @template T of object
+     */
+    public function getInputObjectTypeDirectives(ReflectionClass $refClass): array
+    {
+        return array_values($this->getClassAnnotations($refClass, InputObjectTypeDirective::class, false));
     }
 
     public function getMiddlewareAnnotations(ReflectionMethod|ReflectionProperty $reflection): MiddlewareAnnotations
