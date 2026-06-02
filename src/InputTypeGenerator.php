@@ -6,11 +6,16 @@ namespace TheCodingMachine\GraphQLite;
 
 use GraphQL\Type\Definition\InputObjectType;
 use Psr\Container\ContainerInterface;
+use ReflectionClass;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Directives\DirectiveRegistry;
+use TheCodingMachine\GraphQLite\Middlewares\InputObjectTypeHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputObjectTypeMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\InputType;
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
+use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
@@ -36,6 +41,8 @@ class InputTypeGenerator
         private AnnotationReader|null $annotationReader = null,
         private DocBlockFactory|null $docBlockFactory = null,
         private DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
+        private InputObjectTypeMiddlewareInterface|null $inputObjectTypeMiddleware = null,
+        private DirectiveRegistry|null $directiveRegistry = null,
     ) {
     }
 
@@ -52,7 +59,7 @@ class InputTypeGenerator
         [$inputName, $className] = $this->inputTypeUtils->getInputTypeNameAndClassName($method);
 
         if (! isset($this->factoryCache[$inputName])) {
-            $this->factoryCache[$inputName] = new ResolvableMutableInputObjectType(
+            $type = new ResolvableMutableInputObjectType(
                 $inputName,
                 $this->fieldsBuilder,
                 $object,
@@ -60,6 +67,12 @@ class InputTypeGenerator
                 $this->resolveFactoryDescription($method),
                 $this->canBeInstantiatedWithoutParameter($method, false),
             );
+
+            /** @var class-string $factoryClass */
+            $factoryClass = $factory;
+            $decorated = $this->runInputObjectMiddleware(new ReflectionClass($factoryClass), $type);
+            assert($decorated instanceof ResolvableMutableInputObjectType);
+            $this->factoryCache[$inputName] = $decorated;
         }
 
         return $this->factoryCache[$inputName];
@@ -96,7 +109,7 @@ class InputTypeGenerator
     public function mapInput(string $className, string $inputName, string|null $description, bool $isUpdate): InputType
     {
         if (! isset($this->inputCache[$inputName])) {
-            $this->inputCache[$inputName] = new InputType(
+            $type = new InputType(
                 $className,
                 $inputName,
                 $description,
@@ -104,9 +117,38 @@ class InputTypeGenerator
                 $this->fieldsBuilder,
                 $this->inputTypeValidator,
             );
+
+            $decorated = $this->runInputObjectMiddleware(new ReflectionClass($className), $type);
+            assert($decorated instanceof InputType);
+            $this->inputCache[$inputName] = $decorated;
         }
 
         return $this->inputCache[$inputName];
+    }
+
+    /** @param ReflectionClass<object> $refClass */
+    private function runInputObjectMiddleware(ReflectionClass $refClass, MutableInputObjectType $type): MutableInputObjectType
+    {
+        if ($this->inputObjectTypeMiddleware === null || $this->directiveRegistry === null) {
+            return $type;
+        }
+
+        $directives = $this->directiveRegistry->inputObjectTypeDirectives($refClass);
+        if ($directives === []) {
+            return $type;
+        }
+
+        $descriptor = new InputObjectTypeDescriptor($refClass, $type, $directives);
+
+        return $this->inputObjectTypeMiddleware->process(
+            $descriptor,
+            new class implements InputObjectTypeHandlerInterface {
+                public function handle(InputObjectTypeDescriptor $descriptor): MutableInputObjectType
+                {
+                    return $descriptor->getType();
+                }
+            },
+        );
     }
 
     public static function canBeInstantiatedWithoutParameter(ReflectionFunctionAbstract $refMethod, bool $skipFirstArgument): bool
