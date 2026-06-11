@@ -6,6 +6,8 @@ namespace TheCodingMachine\GraphQLite\Http;
 
 use DateInterval;
 use GraphQL\Error\DebugFlag;
+use GraphQL\Language\AST\DocumentNode;
+use GraphQL\Server\OperationParams;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Type\Schema;
 use GraphQL\Validator\DocumentValidator;
@@ -133,13 +135,17 @@ class Psr15GraphQLMiddlewareBuilder
         // So if we only added given rule, all of the default rules would not be validated, so we must also provide them.
         $originalValidationRules = $this->config->getValidationRules() ?? DocumentValidator::allRules();
 
-        $this->config->setValidationRules(function (...$args) use ($originalValidationRules) {
-            if (is_callable($originalValidationRules)) {
-                $originalValidationRules = $originalValidationRules(...$args);
-            }
+        $this->config->setValidationRules(function (
+            OperationParams $operation,
+            DocumentNode $doc,
+            string $operationType,
+        ) use ($originalValidationRules): array {
+            $validationRules = is_callable($originalValidationRules)
+                ? $originalValidationRules($operation, $doc, $operationType)
+                : $originalValidationRules;
 
             return [
-                ...$originalValidationRules,
+                ...$validationRules,
                 ...$this->addedValidationRules,
             ];
         });
