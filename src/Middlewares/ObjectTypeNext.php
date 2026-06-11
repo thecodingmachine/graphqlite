@@ -29,7 +29,9 @@ final class ObjectTypeNext implements ObjectTypeHandlerInterface
         }
 
         $middleware = $this->queue->dequeue();
+
         assert($middleware instanceof ObjectTypeMiddlewareInterface);
+
         return $middleware->process($descriptor, $this);
     }
 }

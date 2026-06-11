@@ -29,7 +29,9 @@ final class InputObjectTypeNext implements InputObjectTypeHandlerInterface
         }
 
         $middleware = $this->queue->dequeue();
+
         assert($middleware instanceof InputObjectTypeMiddlewareInterface);
+
         return $middleware->process($descriptor, $this);
     }
 }

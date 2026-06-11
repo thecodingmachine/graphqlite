@@ -37,6 +37,7 @@ final class OneOf implements BehavioralInputObjectTypeDirective
     {
         $type = $next->handle($descriptor);
         $type->isOneOf = true;
+
         return $type;
     }
 }

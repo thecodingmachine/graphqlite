@@ -24,12 +24,12 @@ class Schema extends \GraphQL\Type\Schema
      *                                      standard ones.
      */
     public function __construct(
-        QueryProviderInterface       $queryProvider,
+        QueryProviderInterface $queryProvider,
         RecursiveTypeMapperInterface $recursiveTypeMapper,
-        TypeResolver                 $typeResolver,
-        RootTypeMapperInterface      $rootTypeMapper,
-        SchemaConfig|null            $config = null,
-        array                        $directives = [],
+        TypeResolver $typeResolver,
+        RootTypeMapperInterface $rootTypeMapper,
+        SchemaConfig|null $config = null,
+        array $directives = [],
     )
     {
         if ($config === null) {
@@ -125,9 +125,9 @@ class Schema extends \GraphQL\Type\Schema
         // already had, or webonyx's defaults.
         if ($directives !== []) {
             $config->setDirectives([
-                    ...($config->getDirectives() ?? Directive::builtInDirectives()),
-                    ...$directives
-                ]);
+                ...($config->getDirectives() ?? Directive::builtInDirectives()),
+                ...$directives,
+            ]);
         }
 
         $typeResolver->registerSchema($this);

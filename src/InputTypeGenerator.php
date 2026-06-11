@@ -70,6 +70,7 @@ class InputTypeGenerator
 
             /** @var class-string $factoryClass */
             $factoryClass = $factory;
+
             $decorated = $this->runInputObjectMiddleware(new ReflectionClass($factoryClass), $type);
             assert($decorated instanceof ResolvableMutableInputObjectType);
             $this->factoryCache[$inputName] = $decorated;
