@@ -18,7 +18,7 @@ use function is_string;
  * It can be later extended with the "Decorate" annotation
  *
  * @phpstan-import-type InputObjectConfig from InputObjectType
- * @phpstan-import-type ArgumentType from InputObjectField
+ * @phpstan-import-type InputObjectFieldConfig from InputObjectField
  */
 class MutableInputObjectType extends InputObjectType implements MutableInputInterface
 {
@@ -89,14 +89,15 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
             $this->finalFields = parent::getFields();
             foreach ($this->fieldsCallables as $fieldsCallable) {
                 $fieldDefinitions = $fieldsCallable();
-                /** @var (ArgumentType)[] $fieldDefinitions */
                 foreach ($fieldDefinitions as $name => $fieldDefinition) {
-                    if ($fieldDefinition instanceof Type) {
-                        $fieldDefinition = ['type' => $fieldDefinition];
-                    }
                     assert(is_string($name));
-                    $fieldDefinition['name'] = $name;
-                    $this->finalFields[$name] = new InputObjectField($fieldDefinition);
+                    if ($fieldDefinition instanceof Type) {
+                        $this->finalFields[$name] = new InputObjectField(['name' => $name, 'type' => $fieldDefinition]);
+                    } else {
+                        /** @phpstan-var InputObjectFieldConfig $fieldDefinition */
+                        $fieldDefinition['name'] = $name;
+                        $this->finalFields[$name] = new InputObjectField($fieldDefinition);
+                    }
                 }
             }
             if (empty($this->finalFields)) {
