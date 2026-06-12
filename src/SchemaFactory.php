@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use Composer\InstalledVersions;
 use GraphQL\Type\SchemaConfig;
 use Kcs\ClassFinder\FileFinder\CachedFileFinder;
 use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Kcs\ClassFinder\Finder\FinderInterface;
-use PackageVersions\Versions;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -141,7 +141,7 @@ class SchemaFactory
         private readonly ContainerInterface $container,
         private ClassBoundCache|null $classBoundCache = null,
     ) {
-        $this->cacheNamespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
+        $this->cacheNamespace = substr(md5(InstalledVersions::getVersion('thecodingmachine/graphqlite') ?? ''), 0, 8);
     }
 
     /**

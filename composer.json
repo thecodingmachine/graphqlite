@@ -10,9 +10,9 @@
         }
     ],
     "require": {
+        "composer-runtime-api": "^2.0",
         "php": ">=8.2",
         "ext-json": "*",
-        "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.4",
         "phpdocumentor/type-resolver": "^1.7",
         "psr/container": "^1.1 || ^2",
@@ -64,7 +64,6 @@
     },
     "config": {
         "allow-plugins": {
-            "composer/package-versions-deprecated": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true
         },

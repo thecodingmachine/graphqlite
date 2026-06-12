@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Utils;
 
+use Composer\InstalledVersions;
 use DateInterval;
-use PackageVersions\Versions;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use function md5;
@@ -22,7 +22,7 @@ class NamespacedCache implements CacheInterface
 
     public function __construct(private readonly CacheInterface $cache)
     {
-        $this->namespace = substr(md5(Versions::getVersion('thecodingmachine/graphqlite')), 0, 8);
+        $this->namespace = substr(md5(InstalledVersions::getVersion('thecodingmachine/graphqlite') ?? ''), 0, 8);
     }
 
     /**
