@@ -19,7 +19,6 @@ use function is_string;
  *
  * @phpstan-import-type InputObjectConfig from InputObjectType
  * @phpstan-import-type ArgumentType from InputObjectField
- * @phpstan-import-type InputObjectFieldConfig from InputObjectField
  */
 class MutableInputObjectType extends InputObjectType implements MutableInputInterface
 {
@@ -96,10 +95,8 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
                         $fieldDefinition = ['type' => $fieldDefinition];
                     }
                     assert(is_string($name));
-                    /** @var InputObjectFieldConfig $config */
-                    $config = $fieldDefinition;
-                    $config['name'] = $name;
-                    $this->finalFields[$name] = new InputObjectField($config);
+                    $fieldDefinition['name'] = $name;
+                    $this->finalFields[$name] = new InputObjectField($fieldDefinition);
                 }
             }
             if (empty($this->finalFields)) {
