@@ -96,12 +96,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
                         $fieldDefinition = ['type' => $fieldDefinition];
                     }
                     assert(is_string($name));
-                    // @codingStandardsIgnoreStart
-                    /**
-                     * @var InputObjectFieldConfig $config
-                     */
-                    // @codingStandardsIgnoreEnd
-
+                    /** @var InputObjectFieldConfig $config */
                     $config = $fieldDefinition;
                     $config['name'] = $name;
                     $this->finalFields[$name] = new InputObjectField($config);
