@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\Type;
 use RuntimeException;
 
@@ -92,6 +93,7 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
                 foreach ($fieldDefinitions as $name => $fieldDefinition) {
                     assert(is_string($name));
                     if ($fieldDefinition instanceof Type) {
+                        assert($fieldDefinition instanceof InputType);
                         $this->finalFields[$name] = new InputObjectField(['name' => $name, 'type' => $fieldDefinition]);
                     } else {
                         /** @phpstan-var InputObjectFieldConfig $fieldDefinition */
