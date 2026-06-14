@@ -28,7 +28,7 @@
     },
     "require-dev": {
         "beberlei/porpaginas": "^2.0",
-        "doctrine/coding-standard": "^13.0",
+        "doctrine/coding-standard": "^13.0 || ^14.0",
         "ecodev/graphql-upload": "^7.0",
         "laminas/laminas-diactoros": "^3.5",
         "php-coveralls/php-coveralls": "^2.7",
