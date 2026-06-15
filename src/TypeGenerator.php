@@ -11,6 +11,8 @@ use TheCodingMachine\GraphQLite\Annotations\Exceptions\DuplicateDescriptionOnTyp
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Type as TypeAnnotation;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ObjectTypeHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ObjectTypeMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
@@ -49,6 +51,7 @@ class TypeGenerator
         private FieldsBuilder $fieldsBuilder,
         private DocBlockFactory|null $docBlockFactory = null,
         private DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
+        private ObjectTypeMiddlewareInterface|null $objectTypeMiddleware = null,
     )
     {
     }
@@ -123,6 +126,22 @@ class TypeGenerator
 
         if ($resolvedDescription !== null) {
             $type->description = $resolvedDescription;
+        }
+
+        if ($type instanceof MutableObjectType && $this->objectTypeMiddleware !== null) {
+            $directives = $this->annotationReader->getObjectTypeDirectives($refTypeClass);
+            if ($directives !== []) {
+                $descriptor = new ObjectTypeDescriptor($refTypeClass, $type, $directives);
+                $type = $this->objectTypeMiddleware->process(
+                    $descriptor,
+                    new class implements ObjectTypeHandlerInterface {
+                        public function handle(ObjectTypeDescriptor $descriptor): MutableObjectType
+                        {
+                            return $descriptor->getType();
+                        }
+                    },
+                );
+            }
         }
 
         return $type;
