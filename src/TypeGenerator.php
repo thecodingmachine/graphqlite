@@ -130,6 +130,19 @@ class TypeGenerator
             $type->description = $resolvedDescription;
         }
 
+        // Instantiating the annotated object via the container (above) can reentrantly resolve and
+        // register this very type — e.g. a dependency in the container graph references it. If so,
+        // reuse that instance rather than return the duplicate we just built, which would later trip
+        // the registry identity check in RecursiveTypeMapper (the first-request crash in long-lived
+        // workers). mapFactoryMethod() guards its own cache the same way after its container->get.
+        // See https://github.com/thecodingmachine/graphqlite/issues/531
+        //
+        // The reentrant call already ran the directive middleware below, so returning here keeps the
+        // directives without applying them twice.
+        if ($this->typeRegistry->hasType($type->name)) {
+            return $this->typeRegistry->getMutableInterface($type->name);
+        }
+
         if ($type instanceof MutableObjectType && $this->objectTypeMiddleware !== null && $this->directiveRegistry !== null) {
             $directives = $this->directiveRegistry->objectTypeDirectives($refTypeClass);
             if ($directives !== []) {

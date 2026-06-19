@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Types;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\InputObjectField;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\Type;
 use RuntimeException;
 
@@ -18,7 +19,6 @@ use function is_string;
  * It can be later extended with the "Decorate" annotation
  *
  * @phpstan-import-type InputObjectConfig from InputObjectType
- * @phpstan-import-type ArgumentType from InputObjectField
  * @phpstan-import-type InputObjectFieldConfig from InputObjectField
  */
 class MutableInputObjectType extends InputObjectType implements MutableInputInterface
@@ -90,21 +90,16 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
             $this->finalFields = parent::getFields();
             foreach ($this->fieldsCallables as $fieldsCallable) {
                 $fieldDefinitions = $fieldsCallable();
-                /** @var (ArgumentType)[] $fieldDefinitions */
                 foreach ($fieldDefinitions as $name => $fieldDefinition) {
-                    if ($fieldDefinition instanceof Type) {
-                        $fieldDefinition = ['type' => $fieldDefinition];
-                    }
                     assert(is_string($name));
-                    // @codingStandardsIgnoreStart
-                    /**
-                     * @var InputObjectFieldConfig $config
-                     */
-                    // @codingStandardsIgnoreEnd
-
-                    $config = $fieldDefinition;
-                    $config['name'] = $name;
-                    $this->finalFields[$name] = new InputObjectField($config);
+                    if ($fieldDefinition instanceof Type) {
+                        assert($fieldDefinition instanceof InputType);
+                        $this->finalFields[$name] = new InputObjectField(['name' => $name, 'type' => $fieldDefinition]);
+                    } else {
+                        /** @phpstan-var InputObjectFieldConfig $fieldDefinition */
+                        $fieldDefinition['name'] = $name;
+                        $this->finalFields[$name] = new InputObjectField($fieldDefinition);
+                    }
                 }
             }
             if (empty($this->finalFields)) {

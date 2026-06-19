@@ -10,9 +10,9 @@
         }
     ],
     "require": {
+        "composer-runtime-api": "^2.0",
         "php": ">=8.2",
         "ext-json": "*",
-        "composer/package-versions-deprecated": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.4",
         "phpdocumentor/type-resolver": "^1.7",
         "psr/container": "^1.1 || ^2",
@@ -28,7 +28,7 @@
     },
     "require-dev": {
         "beberlei/porpaginas": "^2.0",
-        "doctrine/coding-standard": "^13.0",
+        "doctrine/coding-standard": "^13.0 || ^14.0",
         "ecodev/graphql-upload": "^7.0",
         "laminas/laminas-diactoros": "^3.5",
         "php-coveralls/php-coveralls": "^2.7",
@@ -64,7 +64,6 @@
     },
     "config": {
         "allow-plugins": {
-            "composer/package-versions-deprecated": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true
         },
