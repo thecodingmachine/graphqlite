@@ -15,6 +15,7 @@ class GetterSetterType
         public bool $three = false,
         #[Field]
         public string $four = '',
+        public bool $five = true,
     )
     {
     }
@@ -37,6 +38,11 @@ class GetterSetterType
     private function getFour(string $arg = ''): string
     {
         throw new \RuntimeException('Should not be called');
+    }
+
+    public function hasFive(string $arg = ''): bool
+    {
+        return $arg === 'foo';
     }
 
     private function setFour(string $value, string $arg): void
