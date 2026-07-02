@@ -16,7 +16,8 @@ use TheCodingMachine\GraphQLite\Types\MutableInputObjectType;
 /**
  * Binds `#[OneOf]` to webonyx's built-in `@oneOf` directive. Putting it on an `#[Input]` class sets
  * the input object's `isOneOf` flag, which makes validation require one field and gets webonyx to
- * print `@oneOf` in the SDL.
+ * print `@oneOf` in the SDL. The flag also tells {@see MutableInputObjectType::getFields()} to drop
+ * field default values, which OneOf inputs must not have (they break variable coercion otherwise).
  *
  * webonyx already defines `@oneOf`, so we don't register our own definition for it
  * ({@see DirectiveDefinition::$builtIn} is `true`).

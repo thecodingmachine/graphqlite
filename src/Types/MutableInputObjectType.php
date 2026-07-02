@@ -105,6 +105,13 @@ class MutableInputObjectType extends InputObjectType implements MutableInputInte
             if (empty($this->finalFields)) {
                 throw NoFieldsException::create($this->name);
             }
+
+            if ($this->isOneOf) {
+                foreach ($this->finalFields as $field) {
+                    unset($field->config['defaultValue']);
+                    $field->defaultValue = null;
+                }
+            }
         }
 
         return $this->finalFields;

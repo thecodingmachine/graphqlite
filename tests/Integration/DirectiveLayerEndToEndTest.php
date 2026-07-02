@@ -109,6 +109,26 @@ final class DirectiveLayerEndToEndTest extends TestCase
         $this->assertSame(['data' => ['lookup' => 'abc']], $result);
     }
 
+    public function testOneOfResolvesTheOtherBranch(): void
+    {
+        $result = $this->execute('query { lookup(lookup: {id: 1}) }');
+
+        $this->assertSame(['data' => ['lookup' => '1']], $result);
+    }
+
+    public function testOneOfAcceptsInputPassedThroughAVariable(): void
+    {
+        $result = GraphQL::executeQuery(
+            $this->schema,
+            'query ($lookup: LookupInput!) { lookup(lookup: $lookup) }',
+            null,
+            new Context(),
+            ['lookup' => ['sku' => 'abc']],
+        )->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE);
+
+        $this->assertSame(['data' => ['lookup' => 'abc']], $result);
+    }
+
     public function testOneOfRejectsMoreThanOneField(): void
     {
         $result = $this->execute('query { lookup(lookup: {sku: "abc", id: 1}) }');
@@ -127,6 +147,21 @@ final class DirectiveLayerEndToEndTest extends TestCase
         $this->assertArrayNotHasKey('data', $result);
         $this->assertStringContainsString(
             "OneOf input object 'LookupInput' must specify exactly one field",
+            $result['errors'][0]['message'],
+        );
+    }
+
+    /**
+     * Passing a single field explicitly set to null is distinct from passing no fields: the one field
+     * is present but its value is null, which a OneOf input still forbids.
+     */
+    public function testOneOfRejectsAnExplicitNullField(): void
+    {
+        $result = $this->execute('query { lookup(lookup: {sku: null}) }');
+
+        $this->assertArrayNotHasKey('data', $result);
+        $this->assertStringContainsString(
+            "OneOf input object 'LookupInput' field 'sku' must be non-null",
             $result['errors'][0]['message'],
         );
     }
