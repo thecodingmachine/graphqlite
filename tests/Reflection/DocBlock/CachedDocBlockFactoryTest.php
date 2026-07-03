@@ -16,7 +16,9 @@ class CachedDocBlockFactoryTest extends TestCase
 
     public function testCreatesDocBlock(): void
     {
-        $arrayCache = new Psr16Cache(new ArrayAdapter(storeSerialized: false));
+        // Second arg false so the adapter stores by reference and returns the same instance for
+        // assertSame. Passed positionally, not named: symfony/cache renamed it storeSerialized -> deepClone.
+        $arrayCache = new Psr16Cache(new ArrayAdapter(deepClone: false));
         $cachedDocBlockFactory = new CachedDocBlockFactory(
             new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...)),
             PhpDocumentorDocBlockFactory::default(),
@@ -39,7 +41,9 @@ class CachedDocBlockFactoryTest extends TestCase
 
     public function testCreatesContext(): void
     {
-        $arrayCache = new Psr16Cache(new ArrayAdapter(storeSerialized: false));
+        // Second arg false so the adapter stores by reference and returns the same instance for
+        // assertSame. Passed positionally, not named: symfony/cache renamed it storeSerialized -> deepClone.
+        $arrayCache = new Psr16Cache(new ArrayAdapter(0, false));
         $cachedDocBlockFactory = new CachedDocBlockFactory(
             new SnapshotClassBoundCache($arrayCache, FilesSnapshot::alwaysUnchanged(...)),
             PhpDocumentorDocBlockFactory::default(),
