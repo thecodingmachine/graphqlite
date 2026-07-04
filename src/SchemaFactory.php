@@ -18,6 +18,8 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Cache\ClassBoundCache;
 use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
+use TheCodingMachine\GraphQLite\Directives\DirectiveAstBuilder;
+use TheCodingMachine\GraphQLite\Directives\DirectiveRegistry;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\SnapshotClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
@@ -50,10 +52,16 @@ use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\CostFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\DirectiveFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\DirectiveInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\DirectiveInputObjectTypeMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\DirectiveObjectTypeMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\InputObjectTypeMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\ObjectTypeMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
@@ -400,6 +408,11 @@ class SchemaFactory
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
 
+        $directiveRegistry = new DirectiveRegistry($annotationReader);
+        $directiveRegistry->discover();
+
+        $directiveAstBuilder = new DirectiveAstBuilder($directiveRegistry);
+
         $fieldMiddlewarePipe = new FieldMiddlewarePipe();
         foreach ($this->fieldMiddlewares as $fieldMiddleware) {
             $fieldMiddlewarePipe->pipe($fieldMiddleware);
@@ -408,6 +421,7 @@ class SchemaFactory
         $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new CostFieldMiddleware());
+        $fieldMiddlewarePipe->pipe(new DirectiveFieldMiddleware($directiveAstBuilder));
 
         $inputFieldMiddlewarePipe = new InputFieldMiddlewarePipe();
         foreach ($this->inputFieldMiddlewares as $inputFieldMiddleware) {
@@ -416,6 +430,13 @@ class SchemaFactory
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityInputFieldMiddleware)
         $inputFieldMiddlewarePipe->pipe(new SecurityInputFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
         $inputFieldMiddlewarePipe->pipe(new AuthorizationInputFieldMiddleware($authenticationService, $authorizationService));
+        $inputFieldMiddlewarePipe->pipe(new DirectiveInputFieldMiddleware($directiveAstBuilder));
+
+        $objectTypeMiddlewarePipe = new ObjectTypeMiddlewarePipe();
+        $objectTypeMiddlewarePipe->pipe(new DirectiveObjectTypeMiddleware($directiveAstBuilder));
+
+        $inputObjectTypeMiddlewarePipe = new InputObjectTypeMiddlewarePipe();
+        $inputObjectTypeMiddlewarePipe->pipe(new DirectiveInputObjectTypeMiddleware($directiveAstBuilder));
 
         $compositeTypeMapper = new CompositeTypeMapper();
         $recursiveTypeMapper = new RecursiveTypeMapper($compositeTypeMapper, $namingStrategy, $namespacedCache, $typeRegistry, $annotationReader);
@@ -481,9 +502,9 @@ class SchemaFactory
         $parameterMiddlewarePipe->pipe(new ContainerParameterHandler($this->container));
         $parameterMiddlewarePipe->pipe(new InjectUserParameterHandler($authenticationService));
 
-        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder, $docBlockFactory, $descriptionResolver);
+        $typeGenerator = new TypeGenerator($annotationReader, $namingStrategy, $typeRegistry, $this->container, $recursiveTypeMapper, $fieldsBuilder, $docBlockFactory, $descriptionResolver, $objectTypeMiddlewarePipe, $directiveRegistry);
         $inputTypeUtils = new InputTypeUtils($annotationReader, $namingStrategy);
-        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator, $annotationReader, $docBlockFactory, $descriptionResolver);
+        $inputTypeGenerator = new InputTypeGenerator($inputTypeUtils, $fieldsBuilder, $this->inputTypeValidator, $annotationReader, $docBlockFactory, $descriptionResolver, $inputObjectTypeMiddlewarePipe, $directiveRegistry);
 
         if ($this->namespaces) {
             $compositeTypeMapper->addTypeMapper(new ClassFinderTypeMapper(
@@ -558,7 +579,14 @@ class SchemaFactory
 
         $aggregateQueryProvider = new AggregateQueryProvider($queryProviders);
 
-        return new Schema($aggregateQueryProvider, $recursiveTypeMapper, $typeResolver, $topRootTypeMapper, $this->schemaConfig);
+        return new Schema(
+            $aggregateQueryProvider,
+            $recursiveTypeMapper,
+            $typeResolver,
+            $topRootTypeMapper,
+            $this->schemaConfig,
+            $directiveRegistry->webonyxDirectives(),
+        );
     }
 
     private function createClassFinder(): ClassFinder

@@ -10,7 +10,10 @@ use ReflectionException;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\DuplicateDescriptionOnTypeException;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Type as TypeAnnotation;
+use TheCodingMachine\GraphQLite\Directives\DirectiveRegistry;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ObjectTypeHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ObjectTypeMiddlewareInterface;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
@@ -49,6 +52,8 @@ class TypeGenerator
         private FieldsBuilder $fieldsBuilder,
         private DocBlockFactory|null $docBlockFactory = null,
         private DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
+        private ObjectTypeMiddlewareInterface|null $objectTypeMiddleware = null,
+        private DirectiveRegistry|null $directiveRegistry = null,
     )
     {
     }
@@ -131,8 +136,27 @@ class TypeGenerator
         // the registry identity check in RecursiveTypeMapper (the first-request crash in long-lived
         // workers). mapFactoryMethod() guards its own cache the same way after its container->get.
         // See https://github.com/thecodingmachine/graphqlite/issues/531
+        //
+        // The reentrant call already ran the directive middleware below, so returning here keeps the
+        // directives without applying them twice.
         if ($this->typeRegistry->hasType($type->name)) {
             return $this->typeRegistry->getMutableInterface($type->name);
+        }
+
+        if ($type instanceof MutableObjectType && $this->objectTypeMiddleware !== null && $this->directiveRegistry !== null) {
+            $directives = $this->directiveRegistry->objectTypeDirectives($refTypeClass);
+            if ($directives !== []) {
+                $descriptor = new ObjectTypeDescriptor($refTypeClass, $type, $directives);
+                $type = $this->objectTypeMiddleware->process(
+                    $descriptor,
+                    new class implements ObjectTypeHandlerInterface {
+                        public function handle(ObjectTypeDescriptor $descriptor): MutableObjectType
+                        {
+                            return $descriptor->getType();
+                        }
+                    },
+                );
+            }
         }
 
         return $type;
