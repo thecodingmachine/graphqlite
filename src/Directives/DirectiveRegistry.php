@@ -13,8 +13,7 @@ use TheCodingMachine\GraphQLite\Directives\Discovery\DirectiveClassFinder;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
 
 use function array_key_exists;
-use function assert;
-use function method_exists;
+use function in_array;
 
 /**
  * Holds the directives known to a schema: the user-defined directives discovered in the configured
@@ -42,6 +41,17 @@ final class DirectiveRegistry
     private const BUILT_IN_ATTRIBUTES = [
         OneOf::class,
         Deprecated::class,
+    ];
+
+    /**
+     * Directive names webonyx declares itself that GraphQLite doesn't bind (the execution directives
+     * and @specifiedBy). A custom directive can't claim these: there's no bundled binding to override
+     * and emitting our own would clash with webonyx's at schema build.
+     */
+    private const RESERVED_WEBONYX_NAMES = [
+        WebonyxDirective::SKIP_NAME,
+        WebonyxDirective::INCLUDE_NAME,
+        WebonyxDirective::SPECIFIED_BY_NAME,
     ];
 
     public function __construct(
@@ -76,14 +86,13 @@ final class DirectiveRegistry
             return;
         }
 
-        if (! method_exists($directiveClass, 'definition')) {
-            throw InvalidDirectiveException::noDefinitionMethod($directiveClass);
-        }
-
         $definition = $directiveClass::definition();
-        assert($definition instanceof DirectiveDefinition);
 
         DirectiveValidator::validate($directiveClass, $definition);
+
+        if (! $definition->builtIn && in_array($definition->name, self::RESERVED_WEBONYX_NAMES, true)) {
+            throw InvalidDirectiveException::reservedName($definition->name, $directiveClass);
+        }
 
         if (! $definition->builtIn && $this->isReservedBuiltInName($definition->name)) {
             throw InvalidDirectiveException::reservedName($definition->name, $directiveClass);

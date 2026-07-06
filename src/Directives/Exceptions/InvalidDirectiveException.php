@@ -103,17 +103,9 @@ final class InvalidDirectiveException extends GraphQLRuntimeException
     public static function reservedName(string $name, string $directiveClass): self
     {
         return new self(sprintf(
-            'Directive "%s" declares the name "@%s" which is reserved for a webonyx built-in directive (@skip, @include, @deprecated). Pick a different name.',
+            'Directive "%s" declares the name "@%s", which is reserved for a built-in directive. Pick a different name, or set builtIn: true on its definition to intentionally override the built-in.',
             $directiveClass,
             $name,
-        ));
-    }
-
-    public static function noDefinitionMethod(string $directiveClass): self
-    {
-        return new self(sprintf(
-            'Directive "%s" implements DirectiveInterface but does not declare a static `definition(): DirectiveDefinition` method.',
-            $directiveClass,
         ));
     }
 }

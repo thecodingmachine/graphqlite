@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
 use TheCodingMachine\GraphQLite\Fixtures\Directives\InternalFieldDirective;
 use TheCodingMachine\GraphQLite\Fixtures\Directives\Invalid\ReservedNameDirective;
+use TheCodingMachine\GraphQLite\Fixtures\Directives\Invalid\WebonyxReservedNameDirective;
 use TheCodingMachine\GraphQLite\Fixtures\Directives\MisusedOneOfOnType;
 use TheCodingMachine\GraphQLite\Fixtures\Directives\NoteFieldDirective;
 use TheCodingMachine\GraphQLite\Fixtures\Directives\RevisionInputObjectDirective;
@@ -102,6 +103,17 @@ final class DirectiveRegistryTest extends TestCase
     public function testRejectsCustomDirectiveUsingReservedName(): void
     {
         $registry = self::buildRegistry([ReservedNameDirective::class]);
+
+        $this->expectException(InvalidDirectiveException::class);
+        $this->expectExceptionMessageMatches('/reserved/');
+
+        $registry->discover();
+    }
+
+    public function testRejectsCustomDirectiveUsingWebonyxReservedName(): void
+    {
+        // @skip is a webonyx built-in GraphQLite doesn't bind, so it can't be claimed at all.
+        $registry = self::buildRegistry([WebonyxReservedNameDirective::class]);
 
         $this->expectException(InvalidDirectiveException::class);
         $this->expectExceptionMessageMatches('/reserved/');
