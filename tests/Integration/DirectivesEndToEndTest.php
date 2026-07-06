@@ -24,13 +24,9 @@ use function count;
 use function is_array;
 
 /**
- * End-to-end test for custom directives. Builds a schema from the
- * `tests/Fixtures/DirectivesIntegration` namespaces and checks that directive definitions show up
- * in SDL and introspection, and that behavioral directives wrap their resolver at runtime.
- *
- * We don't assert directive applications in SDL (e.g. `tagline: String! @uppercase`): webonyx's
- * SchemaPrinter doesn't render those, and we follow its behavior. The applications are still on each
- * element's `astNode->directives` for anyone who wants to print them with their own printer.
+ * End-to-end custom directives: builds a schema from the `DirectivesIntegration` fixtures and checks
+ * definitions (SDL/introspection), runtime behavior, and applications on each element's AST node.
+ * webonyx's SchemaPrinter doesn't render applications, so those are checked via `astNode->directives`.
  */
 final class DirectivesEndToEndTest extends TestCase
 {
@@ -49,8 +45,6 @@ final class DirectivesEndToEndTest extends TestCase
         $schema = $this->buildSchema();
         $sdl = SchemaPrinter::doPrint($schema);
 
-        // Definitions: the webonyx printer emits these once the directives are registered on the
-        // schema (see SchemaFactory's wiring of DirectiveRegistry::webonyxDirectives()).
         $this->assertStringContainsString('directive @uppercase on FIELD_DEFINITION', $sdl);
         $this->assertStringContainsString('Marks a field for audit-log tracking.', $sdl);
         $this->assertStringContainsString('directive @audit(reason: String!) repeatable on FIELD_DEFINITION', $sdl);
@@ -59,11 +53,7 @@ final class DirectivesEndToEndTest extends TestCase
         $this->assertStringContainsString('Marks an input with a schema version for backwards-compat tracking.', $sdl);
         $this->assertStringContainsString('directive @versioned(version: Int!) on INPUT_OBJECT', $sdl);
 
-        // No assertions on directive applications here; webonyx's SchemaPrinter doesn't render them.
-        // See the class docblock.
-
-        // @oneOf is webonyx's built-in: it prints the application from the isOneOf flag, and we
-        // don't re-declare it in the custom list.
+        // @oneOf is webonyx's: printed from the isOneOf flag, not re-declared in the custom list.
         $this->assertStringNotContainsString('directive @oneOf ', $sdl);
         $this->assertStringContainsString('input OneOfLookupInput @oneOf', $sdl);
     }
@@ -83,12 +73,11 @@ final class DirectivesEndToEndTest extends TestCase
             $names[] = $directive['name'];
         }
 
-        // Built-ins remain present alongside custom directives.
+        // Built-ins present alongside custom directives.
         $this->assertContains('skip', $names);
         $this->assertContains('include', $names);
         $this->assertContains('deprecated', $names);
 
-        // Custom directives present.
         $this->assertContains('uppercase', $names);
         $this->assertContains('audit', $names);
         $this->assertContains('tagged', $names);
@@ -115,7 +104,7 @@ final class DirectivesEndToEndTest extends TestCase
         )->toArray();
 
         $this->assertArrayNotHasKey('errors', $result);
-        // getLabel() carries @uppercase, so "abc" comes back uppercased.
+        // getLabel() carries @uppercase.
         $this->assertSame('ABC', $result['data']['findWidget']['label']);
     }
 
@@ -145,8 +134,7 @@ final class DirectivesEndToEndTest extends TestCase
             $names[] = $directive->name->value;
         }
 
-        // getLabel() carries @uppercase once and the repeatable @audit twice; every application
-        // survives onto the field's AST node.
+        // @uppercase once, repeatable @audit twice.
         $this->assertContains('uppercase', $names);
         $this->assertSame(2, count(array_filter($names, static fn (string $name) => $name === 'audit')));
     }
@@ -155,8 +143,7 @@ final class DirectivesEndToEndTest extends TestCase
     {
         $schema = $this->buildSchema();
 
-        // Object, input-object and input-field placements land on each element's AST node with their
-        // arguments, even though the SDL printer doesn't render applications.
+        // Applications land on each element's AST node, though the printer omits them.
         $widget = $schema->getType('Widget');
         assert($widget instanceof ObjectType);
         $this->assertSame(['tagged' => ['name' => 'primary']], self::astDirectives($widget->astNode?->directives ?? []));
@@ -174,7 +161,7 @@ final class DirectivesEndToEndTest extends TestCase
     {
         $schema = $this->buildSchema();
 
-        // Exactly one field resolves (and @uppercase still applies to the returned label).
+        // One field resolves; @uppercase still applies to the label.
         $ok = GraphQL::executeQuery($schema, '{ findOneOf(lookup: { sku: "widget-1" }) { label } }')->toArray();
         $this->assertArrayNotHasKey('errors', $ok);
         $this->assertSame('WIDGET-1', $ok['data']['findOneOf']['label']);
@@ -192,7 +179,7 @@ final class DirectivesEndToEndTest extends TestCase
     /**
      * @param iterable<DirectiveNode> $directives
      *
-     * @return array<string, array<string, string>> directive name => [argument name => literal value]
+     * @return array<string, array<string, string>> name => [arg => value]
      */
     private static function astDirectives(iterable $directives): array
     {

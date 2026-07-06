@@ -9,10 +9,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
-/**
- * A well-formed field directive that claims webonyx's `@skip` name, so the registry's reserved-name
- * check rejects it even though it passes validation.
- */
+/** Well-formed but claims webonyx's `@skip` name; rejected by the reserved-name check. */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY)]
 final class WebonyxReservedNameDirective implements FieldDirective
 {

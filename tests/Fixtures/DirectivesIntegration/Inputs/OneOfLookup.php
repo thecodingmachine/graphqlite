@@ -8,10 +8,7 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\OneOf;
 
-/**
- * Uses the built-in `@oneOf` directive, which sets webonyx's `isOneOf` flag so callers pass either
- * `sku` or `id`, not both.
- */
+/** Uses `@oneOf` so callers pass either `sku` or `id`, not both. */
 #[Input]
 #[OneOf]
 final class OneOfLookup

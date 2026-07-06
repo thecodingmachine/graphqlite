@@ -32,7 +32,7 @@ final class BuiltInDirectivesTest extends TestCase
         $registry = self::buildRegistry([]);
         $registry->discover();
 
-        // @oneOf is a webonyx built-in, so the registry shouldn't add it to the custom list.
+        // @oneOf is a webonyx built-in, not part of the custom list.
         $names = array_map(static fn (WebonyxDirective $d) => $d->name, $registry->webonyxDirectives());
 
         $this->assertSame([], $names);
@@ -50,8 +50,7 @@ final class BuiltInDirectivesTest extends TestCase
 
     public function testDiscoveryFindingTheBundledBuiltInClassIsIdempotent(): void
     {
-        // If discovery finds our own built-in class (same FQCN as BUILT_IN_ATTRIBUTES), registering
-        // it twice shouldn't throw.
+        // Discovery finding our own built-in shouldn't double-register.
         $registry = self::buildRegistry([OneOf::class]);
         $registry->discover();
 
@@ -60,7 +59,7 @@ final class BuiltInDirectivesTest extends TestCase
 
     public function testUserOverrideOfBuiltInWinsOverBundled(): void
     {
-        // User binds their own class to @oneOf (builtIn: true); ours should defer to it.
+        // User override wins over the bundled OneOf.
         $registry = self::buildRegistry([CustomOneOfOverride::class]);
         $registry->discover();
 

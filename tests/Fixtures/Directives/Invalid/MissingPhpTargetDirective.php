@@ -9,10 +9,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
-/**
- * Declares FIELD_DEFINITION but the PHP target is TARGET_CLASS only, so the validator rejects it:
- * the PHP target has to cover the GraphQL locations.
- */
+/** FIELD_DEFINITION with a TARGET_CLASS-only attribute; rejected by the target check. */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class MissingPhpTargetDirective implements FieldDirective
 {

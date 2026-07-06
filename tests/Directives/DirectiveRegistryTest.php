@@ -37,8 +37,7 @@ final class DirectiveRegistryTest extends TestCase
 
     public function testBuiltInsAreNotAddedToTheSchemaDirectiveList(): void
     {
-        // webonyx already declares @oneOf and @deprecated, so the registry contributes nothing to
-        // SchemaConfig::$directives.
+        // webonyx already declares these, so the registry adds nothing to the schema.
         $registry = $this->registry();
 
         $this->assertSame([], $registry->webonyxDirectives());
@@ -112,7 +111,7 @@ final class DirectiveRegistryTest extends TestCase
 
     public function testRejectsCustomDirectiveUsingWebonyxReservedName(): void
     {
-        // @skip is a webonyx built-in GraphQLite doesn't bind, so it can't be claimed at all.
+        // @skip is a webonyx built-in we don't bind.
         $registry = self::buildRegistry([WebonyxReservedNameDirective::class]);
 
         $this->expectException(InvalidDirectiveException::class);
@@ -132,8 +131,7 @@ final class DirectiveRegistryTest extends TestCase
 
     public function testWebonyxDirectivesIsolatedFromBuiltins(): void
     {
-        // The built directives shouldn't include webonyx's built-ins; those get merged in at the
-        // Schema layer, not here.
+        // Built-ins merge in at the Schema layer, not here.
         $registry = self::buildRegistry([InternalFieldDirective::class]);
         $registry->discover();
 

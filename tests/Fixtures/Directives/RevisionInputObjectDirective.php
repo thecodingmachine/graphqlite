@@ -9,10 +9,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective;
 
-/**
- * A custom input-object directive with a constructor argument. Metadata only (no apply method),
- * used to exercise the `INPUT_OBJECT` path: definition, argument encoding, and SDL output.
- */
+/** Input-object directive with one arg; specimen for the `INPUT_OBJECT` path. */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class RevisionInputObjectDirective implements InputObjectTypeDirective
 {

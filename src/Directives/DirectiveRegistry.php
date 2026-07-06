@@ -16,13 +16,8 @@ use function array_key_exists;
 use function in_array;
 
 /**
- * Holds the directives known to a schema: the user-defined directives discovered in the configured
- * namespaces plus the built-ins that bind PHP behavior to directives webonyx already declares
- * (`@oneOf`, `@deprecated`). For each discovered class it runs {@see DirectiveValidator}, caches what
- * {@see DirectiveResolver} produces, and enforces name uniqueness across the set.
- *
- * The dispatcher middlewares query it at apply time for a directive's argument shape, which the AST
- * builder needs to encode each arg as a GraphQL value.
+ * Discovers, validates and holds a schema's directives: the user-defined ones plus the built-ins
+ * (`@oneOf`, `@deprecated`). Middlewares query it at apply time for a directive's argument shape.
  */
 final class DirectiveRegistry
 {
@@ -32,22 +27,13 @@ final class DirectiveRegistry
     /** @var array<string, class-string<DirectiveInterface>> */
     private array $classByName = [];
 
-    /**
-     * Attribute classes that bind PHP behavior to webonyx's pre-existing built-in directives.
-     * Also the source of truth for reserved names: a custom (non-built-in) directive can't claim
-     * one of these names unless it declares `builtIn: true` to override the bundled binding.
-     * Registered after user discovery so such an override wins.
-     */
+    /** Attributes we bind to webonyx's built-ins; a custom directive reuses these names only via `builtIn: true`. */
     private const BUILT_IN_ATTRIBUTES = [
         OneOf::class,
         Deprecated::class,
     ];
 
-    /**
-     * Directive names webonyx declares itself that GraphQLite doesn't bind (the execution directives
-     * and @specifiedBy). A custom directive can't claim these: there's no bundled binding to override
-     * and emitting our own would clash with webonyx's at schema build.
-     */
+    /** webonyx directives we don't bind; no custom directive may take these names. */
     private const RESERVED_WEBONYX_NAMES = [
         WebonyxDirective::SKIP_NAME,
         WebonyxDirective::INCLUDE_NAME,
@@ -60,11 +46,9 @@ final class DirectiveRegistry
     ) {
     }
 
-    /** Discover + validate the user directives, then the built-ins. Idempotent. */
+    /** Idempotent. User directives first, so a `builtIn: true` override lands before the bundled copy. */
     public function discover(): void
     {
-        // User classes first: an override of a built-in (same name, builtIn: true) needs to land
-        // before our bundled copy registers.
         foreach ($this->classFinder->findDirectives() as $directiveClass) {
             $this->register($directiveClass);
         }
@@ -73,15 +57,10 @@ final class DirectiveRegistry
         }
     }
 
-    /**
-     * @param class-string<TypeSystemDirective> $directiveClass
-     *
-     * @throws InvalidDirectiveException
-     */
+    /** @param class-string<TypeSystemDirective> $directiveClass */
     private function register(string $directiveClass): void
     {
-        // Registering the same class twice is a no-op; discovery and the built-in list share this
-        // registry, so duplicates are expected.
+        // Discovery and the built-in list overlap, so a repeat is expected.
         if (isset($this->resolvedByClass[$directiveClass])) {
             return;
         }
@@ -99,8 +78,7 @@ final class DirectiveRegistry
         }
 
         if (array_key_exists($definition->name, $this->classByName)) {
-            // A name clash is fine when this side is also built-in: the user supplied their own
-            // implementation and we defer to it. Two custom directives sharing a name is an error.
+            // A builtIn override defers to the already-registered user class; two customs is an error.
             if ($definition->builtIn) {
                 return;
             }
@@ -115,7 +93,6 @@ final class DirectiveRegistry
         $this->classByName[$definition->name] = $directiveClass;
     }
 
-    /** Whether $name is bound by one of our built-in attributes, so only a `builtIn: true` override may take it. */
     private function isReservedBuiltInName(string $name): bool
     {
         foreach (self::BUILT_IN_ATTRIBUTES as $builtInClass) {

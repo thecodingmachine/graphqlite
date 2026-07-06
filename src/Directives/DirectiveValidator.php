@@ -14,29 +14,14 @@ use function in_array;
 use function is_a;
 
 /**
- * Validates directives at two points:
- *
- *   - {@see self::validate()} at discovery time, delegating to {@see AttributeTargetValidator} (the
- *     `#[Attribute(...)]` PHP targets cover every declared GraphQL location) and
- *     {@see InterfaceLocationValidator} (each family interface has a matching location, and vice
- *     versa).
- *   - {@see self::assertDirectivesUsableAt()} at apply time: a directive placed on a class is
- *     allowed at that class's location. PHP's `#[Attribute]` targets can't tell a `#[Type]` class
- *     from an `#[Input]` class (both are `TARGET_CLASS`), so `#[OneOf]` could be placed on the wrong
- *     kind of class; this reports it instead of letting the collectors drop it silently.
- *
- * Producing the arguments, repeatability, and webonyx directive is {@see DirectiveResolver}'s job;
- * name uniqueness is checked in {@see DirectiveRegistry}.
+ * Validates a directive at discovery time ({@see self::validate()}, delegating target and
+ * interface/location checks) and its placement at apply time ({@see self::assertDirectivesUsableAt()}).
  *
  * @internal
  */
 final class DirectiveValidator
 {
-    /**
-     * @param class-string<TypeSystemDirective> $directiveClass
-     *
-     * @throws InvalidDirectiveException
-     */
+    /** @param class-string<TypeSystemDirective> $directiveClass */
     public static function validate(string $directiveClass, DirectiveDefinition $definition): void
     {
         $reflection = new ReflectionClass($directiveClass);
@@ -49,11 +34,7 @@ final class DirectiveValidator
         InterfaceLocationValidator::validate($directiveClass, $definition, $reflection);
     }
 
-    /**
-     * @param ReflectionClass<object> $refClass
-     *
-     * @throws InvalidDirectiveException when a directive on $refClass isn't allowed at $location.
-     */
+    /** @param ReflectionClass<object> $refClass */
     public static function assertDirectivesUsableAt(ReflectionClass $refClass, DirectiveLocation $location): void
     {
         foreach ($refClass->getAttributes() as $attribute) {

@@ -10,14 +10,12 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
 
 /**
- * Checks that a directive's `#[Attribute(...)]` PHP targets cover every GraphQL location it declares
- * (e.g. a FIELD_DEFINITION directive must allow both TARGET_METHOD and TARGET_PROPERTY).
+ * Checks a directive's `#[Attribute(...)]` targets cover every GraphQL location it declares.
  *
  * @internal
  */
 final class AttributeTargetValidator
 {
-    /** @throws InvalidDirectiveException */
     public static function validate(string $directiveClass, DirectiveDefinition $definition, int $phpFlags): void
     {
         foreach ($definition->locations as $location) {
@@ -31,7 +29,7 @@ final class AttributeTargetValidator
         }
     }
 
-    /** @return array<int, string> map of Attribute::TARGET_* flag → human-readable label */
+    /** @return array<int, string> required TARGET_* flag => label */
     private static function requiredPhpTargetsFor(DirectiveLocation $location): array
     {
         return match ($location) {
@@ -46,7 +44,7 @@ final class AttributeTargetValidator
             ],
             DirectiveLocation::OBJECT => [Attribute::TARGET_CLASS => 'TARGET_CLASS'],
             DirectiveLocation::INPUT_OBJECT => [Attribute::TARGET_CLASS => 'TARGET_CLASS'],
-            // Other locations don't have apply hooks yet, so there's nothing to enforce.
+            // No apply hooks for the other locations yet.
             default => [],
         };
     }

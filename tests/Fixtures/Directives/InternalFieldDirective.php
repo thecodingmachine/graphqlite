@@ -9,10 +9,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
-/**
- * A no-argument marker field directive. Unit specimen for the "no args, not repeatable" resolver
- * path; deliberately not behavioral (nothing invokes it, we only resolve it).
- */
+/** No-arg, non-repeatable marker; specimen for the no-args resolver path. */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY)]
 final class InternalFieldDirective implements FieldDirective
 {

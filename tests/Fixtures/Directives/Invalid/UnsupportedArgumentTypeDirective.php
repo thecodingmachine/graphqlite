@@ -10,10 +10,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
-/**
- * Constructor parameter is a non-scalar object, which the validator rejects (args must map to a
- * scalar).
- */
+/** Non-scalar constructor arg; rejected by the resolver. */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY)]
 final class UnsupportedArgumentTypeDirective implements FieldDirective
 {

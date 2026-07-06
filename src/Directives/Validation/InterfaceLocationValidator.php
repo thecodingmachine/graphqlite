@@ -17,19 +17,14 @@ use TheCodingMachine\GraphQLite\Directives\TypeSystemDirective;
 use function in_array;
 
 /**
- * Checks that a directive's family interfaces and its declared GraphQL locations agree: implementing
- * FieldDirective requires the FIELD_DEFINITION location, and vice versa (same for the input-field,
- * object and input-object families).
+ * Checks a directive's family interfaces and declared locations agree (FieldDirective and
+ * FIELD_DEFINITION imply each other, likewise for the input-field, object and input-object families).
  *
  * @internal
  */
 final class InterfaceLocationValidator
 {
-    /**
-     * @param ReflectionClass<TypeSystemDirective> $reflection
-     *
-     * @throws InvalidDirectiveException
-     */
+    /** @param ReflectionClass<TypeSystemDirective> $reflection */
     public static function validate(string $directiveClass, DirectiveDefinition $definition, ReflectionClass $reflection): void
     {
         $locations = $definition->locations;

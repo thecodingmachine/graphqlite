@@ -9,10 +9,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\InputObjectTypeDirective;
 
-/**
- * Marks an input object with a schema version. A custom input-object directive used in the
- * integration test to check the custom path runs alongside the bundled `#[OneOf]`.
- */
+/** Input-object directive tagging a schema version; runs alongside the bundled `#[OneOf]`. */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class VersionedDirective implements InputObjectTypeDirective
 {

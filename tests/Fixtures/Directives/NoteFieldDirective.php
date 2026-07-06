@@ -9,10 +9,7 @@ use TheCodingMachine\GraphQLite\Directives\DirectiveDefinition;
 use TheCodingMachine\GraphQLite\Directives\DirectiveLocation;
 use TheCodingMachine\GraphQLite\Directives\FieldDirective;
 
-/**
- * A repeatable field directive carrying a single required scalar argument. Unit specimen for the
- * resolver's argument encoding and repeatable inference.
- */
+/** Repeatable field directive with one required scalar arg; resolver specimen. */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
 final class NoteFieldDirective implements FieldDirective
 {

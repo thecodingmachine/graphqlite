@@ -12,11 +12,8 @@ use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use function array_reduce;
 
 /**
- * Finds the classes in the configured namespaces that implement {@see TypeSystemDirective}.
- *
- * Same pattern as {@see \TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper}: map each class
- * from {@see ClassFinder} to a {@see GlobDirectivesCache} entry (or null), then collect the FQCNs.
- * {@see ClassFinderComputedCache} handles cache invalidation in dev mode.
+ * Finds classes in the configured namespaces that implement {@see TypeSystemDirective}, cached the
+ * same way as {@see \TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper}.
  *
  * @internal
  */
