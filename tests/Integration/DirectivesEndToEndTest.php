@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Integration;
 
 use GraphQL\GraphQL;
+use GraphQL\Language\AST\DirectiveNode;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Introspection;
 use GraphQL\Utils\SchemaPrinter;
@@ -147,5 +149,62 @@ final class DirectivesEndToEndTest extends TestCase
         // survives onto the field's AST node.
         $this->assertContains('uppercase', $names);
         $this->assertSame(2, count(array_filter($names, static fn (string $name) => $name === 'audit')));
+    }
+
+    public function testMetadataDirectivesAttachToTheirElementsAst(): void
+    {
+        $schema = $this->buildSchema();
+
+        // Object, input-object and input-field placements land on each element's AST node with their
+        // arguments, even though the SDL printer doesn't render applications.
+        $widget = $schema->getType('Widget');
+        assert($widget instanceof ObjectType);
+        $this->assertSame(['tagged' => ['name' => 'primary']], self::astDirectives($widget->astNode?->directives ?? []));
+
+        $lookup = $schema->getType('WidgetLookupInput');
+        assert($lookup instanceof InputObjectType);
+        $this->assertSame(['versioned' => ['version' => '2']], self::astDirectives($lookup->astNode?->directives ?? []));
+
+        $sku = $lookup->getField('sku')->astNode;
+        $this->assertNotNull($sku);
+        $this->assertSame(['sanitized' => []], self::astDirectives($sku->directives));
+    }
+
+    public function testOneOfInputEnforcesExactlyOneField(): void
+    {
+        $schema = $this->buildSchema();
+
+        // Exactly one field resolves (and @uppercase still applies to the returned label).
+        $ok = GraphQL::executeQuery($schema, '{ findOneOf(lookup: { sku: "widget-1" }) { label } }')->toArray();
+        $this->assertArrayNotHasKey('errors', $ok);
+        $this->assertSame('WIDGET-1', $ok['data']['findOneOf']['label']);
+
+        // Two fields violates @oneOf.
+        $both = GraphQL::executeQuery($schema, '{ findOneOf(lookup: { sku: "a", id: 1 }) { label } }')->toArray();
+        $this->assertArrayHasKey('errors', $both);
+        $this->assertStringContainsString('exactly one field', $both['errors'][0]['message']);
+
+        // Zero fields also violates @oneOf.
+        $none = GraphQL::executeQuery($schema, '{ findOneOf(lookup: {}) { label } }')->toArray();
+        $this->assertArrayHasKey('errors', $none);
+    }
+
+    /**
+     * @param iterable<DirectiveNode> $directives
+     *
+     * @return array<string, array<string, string>> directive name => [argument name => literal value]
+     */
+    private static function astDirectives(iterable $directives): array
+    {
+        $result = [];
+        foreach ($directives as $directive) {
+            $args = [];
+            foreach ($directive->arguments as $argument) {
+                $args[$argument->name->value] = $argument->value->value;
+            }
+            $result[$directive->name->value] = $args;
+        }
+
+        return $result;
     }
 }
