@@ -308,15 +308,19 @@ class RecursiveTypeMapper implements RecursiveTypeMapperInterface
 
         // In the event this type was already part of cache, let's not extend it.
         if ($this->typeRegistry->hasType($type->name)) {
+            // Already-registered interface: return its concrete companion (as the non-cached path
+            // does below), else getMutableObjectType() throws on it.
+            if ($type instanceof MutableInterfaceType) {
+                return $this->classToTypeCache[$cacheKey]
+                    ??= $this->getGeneratedObjectTypeFromInterfaceType($type);
+            }
+
             $cachedType = $this->typeRegistry->getMutableObjectType($type->name);
             if ($cachedType !== $type) {
                 throw new RuntimeException('Cached type in registry is not the type returned by type mapper.');
             }
 
-            //if ($cachedType->getStatus() === MutableObjectType::STATUS_FROZEN) {
-                return $type;
-
-            //}
+            return $type;
         }
 
         $this->typeRegistry->registerType($type);
