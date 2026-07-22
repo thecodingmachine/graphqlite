@@ -16,10 +16,11 @@ use TheCodingMachine\GraphQLite\Fixtures\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
-use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Undefined;
 
 use function assert;
 use function count;
+use function reset;
 
 class TypeMapperTest extends AbstractQueryProvider
 {
@@ -92,6 +93,36 @@ class TypeMapperTest extends AbstractQueryProvider
         $this->assertEquals('TestObject2', $unionTypes[1]->name);
     }
 
+    public function testMapUndefinedListParameterDoesNotCreateForbiddenUnion(): void
+    {
+        $docBlockFactory = $this->getDocBlockFactory();
+
+        $typeMapper = new TypeHandler(
+            $this->getArgumentResolver(),
+            $this->getRootTypeMapper(),
+            $this->getTypeResolver(),
+            $docBlockFactory,
+        );
+
+        $refMethod = new ReflectionMethod($this, 'withUndefinedList');
+        $refParameter = $refMethod->getParameters()[0];
+        $docBlockObj = $docBlockFactory->create($refMethod);
+        $paramTags = $docBlockObj->getTagsByName('param');
+        $paramTagType = reset($paramTags)->getType();
+        $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
+
+        $parameter = $typeMapper->mapParameter($refParameter, $docBlockObj, $paramTagType, $annotations);
+
+        $this->assertInstanceOf(InputTypeParameter::class, $parameter);
+        assert($parameter instanceof InputTypeParameter);
+        // The reflection `array` and the phpdoc `list<string>` must resolve to a single `[String!]`,
+        // not an illegal `array | list<string>` input union once `Undefined` is in the type.
+        $this->assertSame('[String!]', $parameter->getType()->toString());
+        // The `Undefined` default is the "optional field" marker: GraphQL prints no default for it.
+        $this->assertFalse($parameter->hasDefaultValue());
+        $this->assertNull($parameter->getDefaultValue());
+    }
+
     public function testHideParameter(): void
     {
         $docBlockFactory = $this->getDocBlockFactory();
@@ -160,6 +191,11 @@ class TypeMapperTest extends AbstractQueryProvider
     }
 
     private function dummy(): int|string
+    {
+    }
+
+    /** @param list<string>|null $foo */
+    private function withUndefinedList(array|Undefined|null $foo = Undefined::VALUE): void
     {
     }
 
