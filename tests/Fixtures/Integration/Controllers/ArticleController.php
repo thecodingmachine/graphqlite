@@ -41,6 +41,10 @@ class ArticleController
             $article->magazine = $input->magazine;
         }
 
+        if ($input->tags !== Undefined::VALUE) {
+            $article->tags = $input->tags;
+        }
+
         return $article;
     }
 }
