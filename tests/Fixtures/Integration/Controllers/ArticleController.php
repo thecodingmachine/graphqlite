@@ -34,6 +34,7 @@ class ArticleController
     {
         $article = new Article('test');
         $article->magazine = 'The New Yorker';
+        $article->tags = ['tech', 'news'];
 
         $article->summary = $input->summary;
 
