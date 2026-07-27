@@ -2031,27 +2031,21 @@ class EndToEndTest extends IntegrationTestCase
         $data = $this->getSuccessResult($result);
         $this->assertSame(['news', 'tech'], $data['updateArticle']['tags']);
 
-        // An omitted list is Undefined, so the controller leaves the default untouched.
+        // Same seeded default (['tech', 'news']), two inputs in one operation: omitting tags leaves it
+        // untouched, while an explicit null nullifies it.
         $result = GraphQL::executeQuery($schema, '
         mutation {
-            updateArticle(input: { magazine: "The Verge" }) {
+            untouched: updateArticle(input: { magazine: "The Verge" }) {
+                tags
+            }
+            nullified: updateArticle(input: { tags: null }) {
                 tags
             }
         }
         ');
         $data = $this->getSuccessResult($result);
-        $this->assertSame(['tech', 'news'], $data['updateArticle']['tags']);
-
-        // An explicit null nullifies the default, proving null is distinct from Undefined.
-        $result = GraphQL::executeQuery($schema, '
-        mutation {
-            updateArticle(input: { tags: null }) {
-                tags
-            }
-        }
-        ');
-        $data = $this->getSuccessResult($result);
-        $this->assertNull($data['updateArticle']['tags']);
+        $this->assertSame(['tech', 'news'], $data['untouched']['tags']);
+        $this->assertNull($data['nullified']['tags']);
     }
 
     public function testEndToEndSchemaIsPrintable(): void
