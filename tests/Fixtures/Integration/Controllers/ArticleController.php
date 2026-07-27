@@ -34,11 +34,16 @@ class ArticleController
     {
         $article = new Article('test');
         $article->magazine = 'The New Yorker';
+        $article->tags = ['tech', 'news'];
 
         $article->summary = $input->summary;
 
         if ($input->magazine !== Undefined::VALUE) {
             $article->magazine = $input->magazine;
+        }
+
+        if ($input->tags !== Undefined::VALUE) {
+            $article->tags = $input->tags;
         }
 
         return $article;

@@ -38,6 +38,7 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 use TheCodingMachine\GraphQLite\InvalidDocBlockRuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\NullableTypeMapperAdapter;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\Root\UndefinedTypeMapper;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
@@ -408,6 +409,12 @@ class TypeHandler implements ParameterHandlerInterface
             $type = new Nullable($type);
         }
         $innerType = $type instanceof Nullable ? $type->getActualType() : $type;
+
+        if ($innerType instanceof Compound && UndefinedTypeMapper::containsUndefined($innerType)) {
+            $innerType = NullableTypeMapperAdapter::getNonNullableType(
+                UndefinedTypeMapper::replaceUndefinedWith($innerType),
+            ) ?? $innerType;
+        }
 
         if (
             $innerType instanceof Array_

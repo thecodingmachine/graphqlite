@@ -43,7 +43,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         $isNullable = $this->isNullable($type);
 
         if ($isNullable) {
-            $nonNullableType = $this->getNonNullable($type);
+            $nonNullableType = self::getNonNullableType($type);
             if ($nonNullableType === null) {
                 throw CannotMapTypeException::createForNull();
             }
@@ -69,7 +69,7 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         $isNullable = $this->isNullable($type);
 
         if ($isNullable) {
-            $nonNullableType = $this->getNonNullable($type);
+            $nonNullableType = self::getNonNullableType($type);
             if ($nonNullableType === null) {
                 throw CannotMapTypeException::createForNull();
             }
@@ -119,16 +119,21 @@ class NullableTypeMapperAdapter implements RootTypeMapperInterface
         return false;
     }
 
-    private function getNonNullable(Type $type): Type|null
+    /**
+     * Reduces a type to its non-nullable form: strips `Nullable`/`Null_` wrappers and, for a Compound,
+     * drops every null member. Returns the single remaining type, a Compound of the survivors when more
+     * than one remains, or null when the type was purely null.
+     */
+    public static function getNonNullableType(Type $type): Type|null
     {
         if ($type instanceof Null_) {
             return null;
         }
         if ($type instanceof Nullable) {
-            return $this->getNonNullable($type->getActualType());
+            return self::getNonNullableType($type->getActualType());
         }
         if ($type instanceof Compound) {
-            $types = array_map([$this, 'getNonNullable'], iterator_to_array($type));
+            $types = array_map([self::class, 'getNonNullableType'], iterator_to_array($type));
             // Remove null values
             $types = array_values(array_filter($types));
             if (count($types) > 1) {

@@ -2015,6 +2015,39 @@ class EndToEndTest extends IntegrationTestCase
         $this->assertSame('test', $data['updateArticle']['localizedTitle']);
     }
 
+    public function testEndToEndInputUndefinedListValue(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        // A provided list round-trips.
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateArticle(input: { tags: ["news", "tech"] }) {
+                tags
+            }
+        }
+        ');
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(['news', 'tech'], $data['updateArticle']['tags']);
+
+        // Same seeded default (['tech', 'news']), two inputs in one operation: omitting tags leaves it
+        // untouched, while an explicit null nullifies it.
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            untouched: updateArticle(input: { magazine: "The Verge" }) {
+                tags
+            }
+            nullified: updateArticle(input: { tags: null }) {
+                tags
+            }
+        }
+        ');
+        $data = $this->getSuccessResult($result);
+        $this->assertSame(['tech', 'news'], $data['untouched']['tags']);
+        $this->assertNull($data['nullified']['tags']);
+    }
+
     public function testEndToEndSchemaIsPrintable(): void
     {
         $this->expectNotToPerformAssertions();

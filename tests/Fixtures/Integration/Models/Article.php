@@ -19,6 +19,10 @@ class Article extends Post
     #[Field]
     public ?string $magazine = null;
 
+    /** @var list<string>|null */
+    #[Field]
+    public ?array $tags = null;
+
     #[Field(for: 'Article')]
     public function localizedTitle(string|null|Undefined $locale): string
     {
