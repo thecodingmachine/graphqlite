@@ -172,10 +172,14 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
     {
         $names = [...self::VARIABLE_NAMES, ...array_keys($parameters)];
 
-        // Linting initialises the parser, and an ExpressionLanguage refuses further register() calls
-        // once that has happened. Linting a clone keeps every function the consumer registered
-        // visible to the linter while leaving the real instance open to registration afterwards,
-        // which is how it behaved before expressions were checked at build time.
+        // parse(), not lint(): lint() only exists from Symfony 6.1, and the --prefer-lowest CI cells
+        // resolve symfony/expression-language down to 4.4. parse() has been there since 2.4 and
+        // rejects exactly the same things — bad syntax, unknown variables, unknown functions.
+        //
+        // Parsing initialises the parser, and an ExpressionLanguage refuses further register() calls
+        // once that has happened. Parsing a clone keeps every function the consumer registered
+        // visible while leaving the real instance open to registration afterwards, which is how it
+        // behaved before expressions were checked at build time.
         $linter = clone $this->language;
 
         foreach ($annotations as $annotation) {
@@ -186,7 +190,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
             $expression = $annotation->getExpression();
 
             try {
-                $linter->lint($expression, $names);
+                $linter->parse($expression, $names);
             } catch (SyntaxError $e) {
                 throw BadExpressionInSecurityException::fromSyntaxError($e, $descriptor, $expression);
             }
