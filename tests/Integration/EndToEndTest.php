@@ -30,6 +30,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\NonBooleanSecurityResultException;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
@@ -1137,6 +1138,197 @@ class EndToEndTest extends IntegrationTestCase
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
+    public function testEndToEndSecurityRule(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretPhraseByRule(secret: "foo")
+        }
+        ');
+
+        $this->assertSame(['secretPhraseByRule' => 'you can see this secret only if passed parameter is "foo"'], $this->getSuccessResult($result));
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretPhraseByRule(secret: "bar")
+        }
+        ');
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Wrong secret passed');
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    /**
+     * An invokable object is how a rule is parameterized: attribute arguments are constant
+     * expressions, so a callable written in an attribute cannot capture or partially apply.
+     */
+    public function testEndToEndSecurityRuleAsInvokableObject(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            nullableSecretPhraseByRule(secret: "foo")
+        }
+        ');
+
+        $this->assertSame(['nullableSecretPhraseByRule' => 'you can see this secret only if passed parameter is "foo"'], $this->getSuccessResult($result));
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            nullableSecretPhraseByRule(secret: "bar")
+        }
+        ');
+
+        $this->assertSame(['nullableSecretPhraseByRule' => null], $this->getSuccessResult($result));
+    }
+
+    /**
+     * A rule parameterized by its constructor makes the authorization decision.
+     *
+     * #[Security(rule: new PageSizeWithin(100))] guards this field. The two queries below differ
+     * only in the requested page size, and the 100 passed to the constructor is the only thing
+     * that separates them: 50 is served, 500 is refused.
+     */
+    public function testEndToEndSecurityRuleParameterizedByItsConstructor(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            pagedSecret(first: 50)
+        }
+        ');
+
+        $this->assertSame(
+            ['pagedSecret' => 'you can see this secret only if first is within the configured limit'],
+            $this->getSuccessResult($result),
+        );
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            pagedSecret(first: 500)
+        }
+        ');
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Page size too large');
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    /**
+     * The boundary itself: 100 is allowed, 101 is not.
+     */
+    public function testEndToEndSecurityRuleEnforcesItsConstructorBoundaryExactly(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            pagedSecret(first: 100)
+        }
+        ');
+
+        $this->assertSame(
+            ['pagedSecret' => 'you can see this secret only if first is within the configured limit'],
+            $this->getSuccessResult($result),
+        );
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            pagedSecret(first: 101)
+        }
+        ');
+
+        $this->expectException(MissingAuthorizationException::class);
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    /**
+     * The rule equivalent of the `this` expression variable.
+     */
+    public function testEndToEndSecurityRuleReadingTheSource(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingSourceByRule(secret:"41")
+        }
+        ');
+
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingSourceByRule(secret:"42")
+        }
+        ');
+
+        $this->assertSame('you can see this secret only if isAllowed() returns true', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingSourceByRule']);
+    }
+
+    public function testEndToEndSecurityRuleDeniesWithoutUser(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingUserByRule
+        }
+        ');
+
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    /**
+     * A rule must return a bool. Expressions are evaluated loosely; rules deliberately are not.
+     */
+    public function testEndToEndSecurityRuleRejectsNonBooleanReturn(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretWithNonBooleanRule
+        }
+        ');
+
+        $this->expectException(NonBooleanSecurityResultException::class);
+        $this->expectExceptionMessage('must return a bool, but returned string');
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    /**
+     * Expressions are held to the same contract as rules: a truthy non-bool is rejected rather
+     * than silently granting access.
+     */
+    public function testEndToEndSecurityExpressionRejectsNonBooleanResult(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretWithNonBooleanExpression
+        }
+        ');
+
+        $this->expectException(NonBooleanSecurityResultException::class);
+        $this->expectExceptionMessage('must evaluate to a bool, but evaluated to string');
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
     public function testEndToEndSecurityFailWithAnnotation(): void
     {
         $schema = $this->mainContainer->get(Schema::class);
@@ -1267,6 +1459,76 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGranted']);
+    }
+
+    /**
+     * The rule equivalents of `user`, `is_granted()` and `is_logged()`, proving a rule reaches the
+     * same authentication and authorization services the expression functions do.
+     */
+    public function testEndToEndSecurityRuleWithUserConnected(): void
+    {
+        $container = $this->createContainer([
+            AuthenticationServiceInterface::class => static function () {
+                return new class implements AuthenticationServiceInterface {
+                    public function isLogged(): bool
+                    {
+                        return true;
+                    }
+
+                    public function getUser(): object|null
+                    {
+                        $user = new stdClass();
+                        $user->bar = 42;
+                        return $user;
+                    }
+                };
+            },
+            AuthorizationServiceInterface::class => static function () {
+                return new class implements AuthorizationServiceInterface {
+                    public function isAllowed(string $right, $subject = null): bool
+                    {
+                        return $right === 'CAN_EDIT' && $subject->bar === 42;
+                    }
+                };
+            },
+        ]);
+
+        $schema = $container->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingUserByRule
+        }
+        ');
+
+        $this->assertSame('you can see this secret only if user.bar is set to 42', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingUserByRule']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingIsGrantedByRule
+        }
+        ');
+
+        $this->assertSame('you can see this secret only if user has right "CAN_EDIT"', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingIsGrantedByRule']);
+
+        // #[Security] is repeatable and every annotation must pass, whichever form each one uses.
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingExpressionAndRule(secret: "foo")
+        }
+        ');
+
+        $this->assertSame('you can see this secret only if both checks pass', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['data']['secretUsingExpressionAndRule']);
+
+        // The expression half denies.
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretUsingExpressionAndRule(secret: "bar")
+        }
+        ');
+
+        $this->assertSame('Access denied.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
     public function testEndToEndSecurityWithThis(): void

@@ -4,57 +4,47 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
-use Psr\Container\ContainerInterface;
+use Closure;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-
-use function assert;
-use function is_callable;
-use function is_string;
 
 class ParameterizedCallableResolver
 {
     public function __construct(
         private readonly FieldsBuilder $fieldsBuilder,
-        private readonly ContainerInterface $container,
+        private readonly CallableResolver $callableResolver,
     )
     {
     }
 
     /**
-     * @param string|array{class-string, string} $callable
+     * Resolves a callable and maps the GraphQL parameters it declares.
      *
-     * @return array{callable, array<string, ParameterInterface>}
+     * @param string|array{class-string, string}|object $callable
+     * @param class-string|ReflectionClass<object> $classContext
+     *
+     * @return array{Closure, array<string, ParameterInterface>}
+     *
+     * @throws InvalidCallableRuntimeException
      */
-    public function resolve(string|array $callable, string|ReflectionClass $classContext, int $skip = 0): array
+    public function resolve(string|array|object $callable, string|ReflectionClass $classContext, int $skip = 0): array
     {
         if ($classContext instanceof ReflectionClass) {
             $classContext = $classContext->getName();
         }
 
-        // If string method is given, it's equivalent to [self::class, 'method']
-        if (is_string($callable)) {
-            $callable = [$classContext, $callable];
+        [$resolved, $refFunction] = $this->callableResolver->resolve($callable, $classContext);
+
+        // Parameters become GraphQL arguments and their descriptions come from the method docblock,
+        // so the target has to be a real method. First-class callable syntax keeps that origin and
+        // reflects as a ReflectionMethod; an inline closure does not and cannot be mapped.
+        // Callers add their own context by catching InvalidCallableRuntimeException, the way
+        // PrefetchParameterMiddleware rewraps it as InvalidPrefetchMethodRuntimeException.
+        if (! $refFunction instanceof ReflectionMethod) {
+            throw InvalidCallableRuntimeException::notAMethod();
         }
 
-        try {
-            $refMethod = new ReflectionMethod($callable[0], $callable[1]);
-        } catch (ReflectionException $e) {
-            throw InvalidCallableRuntimeException::methodNotFound($callable[0], $callable[1], $e);
-        }
-
-        // If method isn't static, then we should try to resolve the class name through the container.
-        if (! $refMethod->isStatic()) {
-            $callable = fn (...$args) => $this->container->get($callable[0])->{$callable[1]}(...$args);
-        }
-
-        assert(is_callable($callable));
-
-        // Map all parameters of the callable.
-        $parameters = $this->fieldsBuilder->getParameters($refMethod, $skip);
-
-        return [$callable, $parameters];
+        return [$resolved, $this->fieldsBuilder->getParameters($refFunction, $skip)];
     }
 }

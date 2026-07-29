@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite;
 
+use TheCodingMachine\GraphQLite\CallableResolver;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\ObjectType;
@@ -319,6 +320,7 @@ abstract class AbstractQueryProvider extends TestCase
                 $expressionLanguage,
                 new VoidAuthenticationService(),
                 new VoidAuthorizationService(),
+                new CallableResolver($container),
             ),
         );
 
@@ -336,7 +338,7 @@ abstract class AbstractQueryProvider extends TestCase
             $fieldMiddlewarePipe,
             $inputFieldMiddlewarePipe,
         );
-        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container);
+        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, new CallableResolver($container));
 
         $parameterMiddlewarePipe->pipe(new ResolveInfoParameterHandler());
         $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));

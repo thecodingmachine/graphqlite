@@ -63,6 +63,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
 use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\NamingStrategyInterface;
+use TheCodingMachine\GraphQLite\CallableResolver;
 use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
 use TheCodingMachine\GraphQLite\QueryProviderInterface;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
@@ -151,7 +152,7 @@ class IntegrationTestCase extends TestCase
                     $container->get(FieldMiddlewareInterface::class),
                     $container->get(InputFieldMiddlewareInterface::class),
                 );
-                $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container);
+                $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $container->get(CallableResolver::class));
 
                 $parameterMiddlewarePipe->pipe(new PrefetchParameterMiddleware($parameterizedCallableResolver));
 
@@ -181,6 +182,7 @@ class IntegrationTestCase extends TestCase
                     new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class),
+                    $container->get(CallableResolver::class),
                 );
             },
             AuthorizationFieldMiddleware::class => static function (ContainerInterface $container) {
@@ -194,9 +196,13 @@ class IntegrationTestCase extends TestCase
                     new ExpressionLanguage(new Psr16Adapter(new Psr16Cache(new ArrayAdapter())), [new SecurityExpressionLanguageProvider()]),
                     $container->get(AuthenticationServiceInterface::class),
                     $container->get(AuthorizationServiceInterface::class),
+                    $container->get(CallableResolver::class),
                 );
             },
             CostFieldMiddleware::class => fn () => new CostFieldMiddleware(),
+            CallableResolver::class => static function (ContainerInterface $container) {
+                return new CallableResolver($container);
+            },
             ArgumentResolver::class => static function (ContainerInterface $container) {
                 return new ArgumentResolver();
             },
