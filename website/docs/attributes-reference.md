@@ -264,12 +264,12 @@ Attribute      | Compulsory | Type           | Definition
 expression     | see below  | string         | A security expression, evaluated by Symfony ExpressionLanguage. Also accepted as the attribute's first positional argument: `#[Security("is_granted('X')")]`
 rule           | see below  | array \| object | A callable receiving a `SecurityRuleContext`, or the `SecurityRuleContextInterface` it implements, and returning `bool`. Must be passed by name (`rule:`) — the first positional argument is the expression, so a positional callable is either a `TypeError` or silently read as a legacy data array. Prefer first-class callable syntax (`self::canShow(...)`, PHP 8.5+); `[Rules::class, 'canShow']` works on 8.2+ and is the only form that can name a container-resolved method. A bare method-name string is **not** accepted here, unlike `#[Prefetch]`
 failWith       | *no*       | mixed          | Value returned instead of denying. Cannot be combined with *message* or *statusCode*
-message        | *no*       | string         | Error message when access is denied. Defaults to `Access denied.`
+message        | *no*       | string         | Error message when access is denied. Always wins when given. When omitted, the message the rule states if it implements `SecurityRuleMessageInterface` (opt in), otherwise `Access denied.`
 statusCode     | *no*       | int            | Status code when access is denied. Defaults to `403`
 
 Exactly one of `expression` and `rule` must be given; passing both throws, as does passing neither.
 Both forms are fully supported — see [fine grained security](fine-grained-security.mdx) for when to
-use which.
+use which, and for [a rule that states its own message](fine-grained-security.mdx#a-rule-that-states-its-own-message).
 
 ## #[SourceField]
 

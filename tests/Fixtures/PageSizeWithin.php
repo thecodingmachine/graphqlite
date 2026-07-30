@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Fixtures;
 
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;
 
 use function is_int;
 
@@ -15,8 +16,11 @@ use function is_int;
  * capture or partially apply on any PHP version. Constructing the rule in the attribute can, which
  * is why a threshold like this needs no "extra arguments" array: `new PageSizeWithin(100)` carries
  * the limit, and static analysis checks the constructor call.
+ *
+ * It also states its own refusal message, which is the case for the contract: the limit is known
+ * here and nowhere else, so no field guarded by this rule has to repeat it in a `message:`.
  */
-final class PageSizeWithin
+final class PageSizeWithin implements SecurityRuleMessageInterface
 {
     public function __construct(private readonly int $max)
     {
@@ -27,5 +31,10 @@ final class PageSizeWithin
         $requested = $context->argument('first');
 
         return is_int($requested) && $requested <= $this->max;
+    }
+
+    public function getRefusalMessage(): string
+    {
+        return 'Page size must be at most ' . $this->max . '.';
     }
 }

@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;
 use Throwable;
 
 use function array_combine;
@@ -147,7 +148,7 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
                         return $failWith->getValue();
                     }
 
-                    throw new MissingAuthorizationException($annotation->getMessage(), $annotation->getStatusCode());
+                    throw new MissingAuthorizationException($this->resolveMessage($annotation), $annotation->getStatusCode());
                 }
             }
 
@@ -219,6 +220,31 @@ class SecurityFieldMiddleware implements FieldMiddlewareInterface
         }
 
         return $rules;
+    }
+
+    /**
+     * The message a denied field is reported with.
+     *
+     * A message written on the attribute is the field author's decision about this field, so it
+     * always wins. Failing that, a rule stating its own message supplies one; failing that too,
+     * getMessage() returns "Access denied.", which keeps the default written in a single place.
+     *
+     * The rule is read back from the annotation rather than from the normalized Closure. Rules are
+     * normalized to Closures at schema build, and a Closure can be called but not asked anything;
+     * the annotation still holds the rule exactly as the attribute wrote it, which is where an
+     * invokable rule object remains reachable. Nothing about the normalization needs to change.
+     */
+    private function resolveMessage(Security $annotation): string
+    {
+        if (! $annotation->hasMessage()) {
+            $rule = $annotation->getRule();
+
+            if ($rule instanceof SecurityRuleMessageInterface) {
+                return $rule->getRefusalMessage();
+            }
+        }
+
+        return $annotation->getMessage();
     }
 
     /**

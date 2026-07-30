@@ -22,7 +22,16 @@ class Security implements MiddlewareAnnotationInterface
     private mixed $failWith;
     private bool $failWithIsSet = false;
     private int $statusCode;
-    private string $message;
+
+    /**
+     * The message exactly as it was written in the attribute, or null when none was written.
+     *
+     * The default is applied by {@see getMessage()} rather than here, so that "no message given"
+     * stays distinguishable from "a message was given, and it happens to read like the default".
+     * A middleware with a better message available, such as one the rule states itself, can only
+     * prefer it over the default if it can tell those two apart. See {@see hasMessage()}.
+     */
+    private string|null $message;
 
     /**
      * @param array<string, mixed>|string $data data array managed by the Doctrine Annotations library or the expression
@@ -78,8 +87,11 @@ class Security implements MiddlewareAnnotationInterface
             $this->failWith = $failWith;
             $this->failWithIsSet = true;
         }
-        $this->message = $message ?? $data['message'] ?? 'Access denied.';
+        $this->message = $message ?? $data['message'] ?? null;
         $this->statusCode = $statusCode ?? $data['statusCode'] ?? 403;
+        // Deliberately reads the raw arguments rather than $this->message: an attribute passing
+        // failWith together with a message has always been an error, and storing the message
+        // unresolved must not change which combinations are rejected.
         if ($this->failWithIsSet === true && (($message || isset($data['message'])) || ($statusCode || isset($data['statusCode'])))) {
             throw new BadMethodCallException('A #[Security] attribute that has "failWith" attribute set cannot have a message or a statusCode attribute.');
         }
@@ -134,8 +146,26 @@ class Security implements MiddlewareAnnotationInterface
         return $this->statusCode;
     }
 
+    /**
+     * Whether a message was written in the attribute.
+     *
+     * A middleware holding a better message than the default, such as one a rule states itself,
+     * branches on this: an explicit message is the field author's decision and always wins, while
+     * an absent one leaves the middleware free to supply its own before falling back to
+     * {@see getMessage()}.
+     */
+    public function hasMessage(): bool
+    {
+        return $this->message !== null;
+    }
+
+    /**
+     * The message to deny with, defaulting to "Access denied." when the attribute gave none.
+     *
+     * Always a string, so a middleware that has nothing better to offer can call this alone.
+     */
     public function getMessage(): string
     {
-        return $this->message;
+        return $this->message ?? 'Access denied.';
     }
 }

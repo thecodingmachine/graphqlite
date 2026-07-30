@@ -228,6 +228,9 @@ pieces of data the context carries appear on the interface as methods:
 properties stay on `SecurityRuleContext`, so a rule already type-hinting the concrete class needs no
 change.
 
+That interface describes what a rule is *given*. A second, equally optional one describes what a
+rule *says* when it refuses: see [a rule that states its own message](#a-rule-that-states-its-own-message).
+
 ## Setting HTTP code and error message
 
 You can use the `statusCode` and `message` attributes to set the HTTP code and GraphQL error message.
@@ -244,6 +247,78 @@ public function getPost(Post $post): Post
 Note: since a single GraphQL call contain many errors, 2 errors might have conflicting HTTP status code.
 The resulting status code is up to the GraphQL middleware you use. Most of the time, the status code with the
 higher error code will be returned.
+
+### A rule that states its own message
+
+A rule usually knows why it refuses better than the field it guards does. Repeating that reason in a
+`message:` on every field the rule guards is what makes the two drift apart: the check is edited in
+one place and the sentence explaining it in ten. A rule can state the message itself by implementing
+`SecurityRuleMessageInterface`, which is the [`PageSizeWithin` rule above](#parameterizing-a-rule)
+with one method added:
+
+```php
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;
+
+final class PageSizeWithin implements SecurityRuleMessageInterface
+{
+    public function __construct(private readonly int $max)
+    {
+    }
+
+    public function __invoke(SecurityRuleContextInterface $context): bool
+    {
+        return $context->argument('first') <= $this->max;
+    }
+
+    public function getRefusalMessage(): string
+    {
+        return "Page size must be at most {$this->max}.";
+    }
+}
+```
+
+```php
+#[Query]
+#[Security(rule: new PageSizeWithin(100), statusCode: 400)]
+public function getPosts(int $first): array
+{
+    // ...
+}
+```
+
+Denying that field reports `Page size must be at most 100.` with no `message:` written anywhere.
+The limit is stated once, and so is the sentence quoting it.
+
+The message is chosen in this order:
+
+1. the `message:` written on the `#[Security]` attribute, whenever there is one;
+2. the message the rule states, when the rule implements `SecurityRuleMessageInterface`;
+3. `Access denied.`
+
+An explicit `message:` therefore always wins, so a single field can still say something the shared
+rule has no way to know:
+
+```php
+#[Query]
+#[Security(rule: new PageSizeWithin(100), statusCode: 400, message: 'This report is capped at 100 rows')]
+public function getReportRows(int $first): array
+{
+    // ...
+}
+```
+
+Three things to know:
+
+* **It is opt in.** A field guarded by a rule that does not implement the interface is denied with
+  the attribute's message, or with `Access denied.` when the attribute wrote none, exactly as before.
+* **A rule states a message, not a status.** `statusCode` is untouched by the interface, and
+  `failWith` is unaffected too: a field with `failWith` returns a value instead of denying, so no
+  message is read at all.
+* **Only a rule that is an object can carry a message.** An array callable names a static method and
+  first-class callable syntax produces a `Closure`, and neither has an instance to ask. Write the
+  rule as an [invokable object](#parameterizing-a-rule), which is also what lets the message quote
+  the value the rule was constructed with.
 
 ## Setting a default value
 

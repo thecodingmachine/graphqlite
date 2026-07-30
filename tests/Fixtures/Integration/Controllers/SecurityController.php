@@ -95,6 +95,17 @@ class SecurityController
         return 'you can see this secret only if first is within the configured limit';
     }
 
+    /**
+     * The same rule, with no message written in the attribute: the refusal is reported with the
+     * one the rule states, which quotes the limit only the rule knows.
+     */
+    #[Query]
+    #[Security(rule: new PageSizeWithin(10))]
+    public function getPagedSecretUsingTheRuleMessage(int $first): string
+    {
+        return 'you can see this secret only if first is within the configured limit';
+    }
+
     #[Query]
     #[Security(rule: [self::class, 'userBarIs42'])]
     public function getSecretUsingUserByRule(): string

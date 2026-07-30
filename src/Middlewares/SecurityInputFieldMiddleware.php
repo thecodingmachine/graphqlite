@@ -16,6 +16,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;
 use Throwable;
 
 use function array_combine;
@@ -104,7 +105,7 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
                 }
 
                 if (! $authorized) {
-                    throw new MissingAuthorizationException($annotation->getMessage(), $annotation->getStatusCode());
+                    throw new MissingAuthorizationException($this->resolveMessage($annotation), $annotation->getStatusCode());
                 }
             }
 
@@ -174,6 +175,27 @@ class SecurityInputFieldMiddleware implements InputFieldMiddlewareInterface
         }
 
         return $rules;
+    }
+
+    /**
+     * The message a denied input field is reported with. See the sibling SecurityFieldMiddleware.
+     *
+     * A message written on the attribute always wins; failing that, a rule stating its own message
+     * supplies one; failing that too, getMessage() returns the default. The rule is read back from
+     * the annotation because normalization has replaced it with a Closure by this point, and only
+     * the annotation still holds the object the attribute wrote.
+     */
+    private function resolveMessage(Security $annotation): string
+    {
+        if (! $annotation->hasMessage()) {
+            $rule = $annotation->getRule();
+
+            if ($rule instanceof SecurityRuleMessageInterface) {
+                return $rule->getRefusalMessage();
+            }
+        }
+
+        return $annotation->getMessage();
     }
 
     /**

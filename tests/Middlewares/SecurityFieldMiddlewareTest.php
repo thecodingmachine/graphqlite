@@ -20,6 +20,7 @@ use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
@@ -224,6 +225,99 @@ class SecurityFieldMiddlewareTest extends TestCase
     public static function denyEverything(SecurityRuleContext $context): bool
     {
         return false;
+    }
+
+    /**
+     * A rule stating its own message is denied with it, with nothing written in the attribute.
+     *
+     * This is what the contract buys: the reason lives beside the check that produces it, so no
+     * field guarded by the rule repeats it.
+     */
+    public function testRuleSuppliesTheRefusalMessageWhenTheAttributeGivesNone(): void
+    {
+        $field = $this->process([new Security(rule: $this->refusingRule('Page size must be at most 100.'))]);
+
+        self::assertNotNull($field);
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Page size must be at most 100.');
+        ($field->resolveFn)(null);
+    }
+
+    /** A message on the attribute is about this field specifically, so it outranks the rule's. */
+    public function testExplicitMessageWinsOverTheRuleSuppliedOne(): void
+    {
+        $field = $this->process([
+            new Security(rule: $this->refusingRule('From the rule'), message: 'From the attribute'),
+        ]);
+
+        self::assertNotNull($field);
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('From the attribute');
+        ($field->resolveFn)(null);
+    }
+
+    /**
+     * Including when what the attribute wrote happens to be the default word for word. Resolving
+     * the default in the annotation's constructor made this case indistinguishable from an absent
+     * message, which is what stopped a rule from supplying one at all.
+     */
+    public function testExplicitMessageWinsEvenWhenItReadsLikeTheDefault(): void
+    {
+        $field = $this->process([
+            new Security(rule: $this->refusingRule('From the rule'), message: 'Access denied.'),
+        ]);
+
+        self::assertNotNull($field);
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Access denied.');
+        ($field->resolveFn)(null);
+    }
+
+    /** Opt in: a rule that does not implement the contract is denied exactly as it always was. */
+    public function testRuleWithoutTheContractIsDeniedWithTheDefaultMessage(): void
+    {
+        $field = $this->process([new Security(rule: static fn (SecurityRuleContext $context): bool => false)]);
+
+        self::assertNotNull($field);
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Access denied.');
+        ($field->resolveFn)(null);
+    }
+
+    /** An expression has no object to ask, so it keeps the default too. */
+    public function testExpressionIsDeniedWithTheDefaultMessage(): void
+    {
+        $field = $this->process([new Security('user != null')]);
+
+        self::assertNotNull($field);
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Access denied.');
+        ($field->resolveFn)(null);
+    }
+
+    /** A rule that refuses everything, stating $message as the reason. */
+    private function refusingRule(string $message): SecurityRuleMessageInterface
+    {
+        return new class ($message) implements SecurityRuleMessageInterface {
+            public function __construct(private readonly string $message)
+            {
+            }
+
+            public function __invoke(SecurityRuleContextInterface $context): bool
+            {
+                return false;
+            }
+
+            public function getRefusalMessage(): string
+            {
+                return $this->message;
+            }
+        };
     }
 
     /** @param MiddlewareAnnotationInterface[] $annotations */

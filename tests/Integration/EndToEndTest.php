@@ -1286,6 +1286,39 @@ class EndToEndTest extends IntegrationTestCase
     }
 
     /**
+     * A rule stating its own refusal message is denied with it, with no `message:` on the field.
+     *
+     * The same rule guards `pagedSecret`, which does write a `message:` and is refused with that
+     * one instead: the field author's message outranks the rule's.
+     */
+    public function testEndToEndSecurityRuleSuppliesItsOwnRefusalMessage(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            pagedSecretUsingTheRuleMessage(first: 5)
+        }
+        ');
+
+        $this->assertSame(
+            ['pagedSecretUsingTheRuleMessage' => 'you can see this secret only if first is within the configured limit'],
+            $this->getSuccessResult($result),
+        );
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            pagedSecretUsingTheRuleMessage(first: 11)
+        }
+        ');
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Page size must be at most 10.');
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    /**
      * The rule equivalent of the `this` expression variable.
      */
     public function testEndToEndSecurityRuleReadingTheSource(): void
