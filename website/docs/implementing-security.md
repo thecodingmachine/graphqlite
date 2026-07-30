@@ -23,6 +23,11 @@ To plug GraphQLite to your framework's security mechanism, you will have to prov
     <code>SecurityRuleContext::isLogged()</code> rather than depending on these interfaces directly.
     They give a rule the same reach through a surface GraphQLite controls, so your rules keep
     compiling as these interfaces evolve.
+    <br /><br />
+    That surface is itself declared by <code>SecurityRuleContextInterface</code>, in the same
+    namespace. Type-hint it in a rule and the rule can be unit tested against a fake context and
+    called from outside GraphQL, where an HTTP middleware or a console command supplies the
+    context. See <a href="fine-grained-security#the-rule-contract">the rule contract</a>.
 </div>
 
 Those two interfaces act as adapters between GraphQLite and your framework:

@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
 
@@ -149,6 +150,29 @@ class SecurityFieldMiddlewareTest extends TestCase
 
         ($field->resolveFn)(null);
 
+        self::assertInstanceOf(SecurityRuleContext::class, $seen);
+    }
+
+    /**
+     * A rule may type-hint the contract rather than the concrete context.
+     *
+     * The middleware declares no parameter type on the rule, so this needs nothing from the library
+     * beyond SecurityRuleContext implementing the interface. The test pins that, since a rule
+     * written this way is what makes the rule unit testable and reusable outside a resolution.
+     */
+    public function testRuleMayTypeHintTheContract(): void
+    {
+        $seen = null;
+
+        $field = $this->process([
+            new Security(rule: static function (SecurityRuleContextInterface $context) use (&$seen): bool {
+                $seen = $context;
+
+                return $context->getArguments() === [];
+            }),
+        ]);
+
+        self::assertSame('resolved', ($field->resolveFn)(null));
         self::assertInstanceOf(SecurityRuleContext::class, $seen);
     }
 

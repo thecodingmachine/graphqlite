@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Fixtures\PageSizeWithin;
 use TheCodingMachine\GraphQLite\Fixtures\SecretIs;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
 
 class SecurityController
 {
@@ -61,6 +62,17 @@ class SecurityController
     #[Query]
     #[Security(rule: [self::class, 'secretIsFoo'], message: 'Wrong secret passed')]
     public function getSecretPhraseByRule(string $secret): string
+    {
+        return 'you can see this secret only if passed parameter is "foo"';
+    }
+
+    /**
+     * The rule type-hints the contract rather than the concrete context, and reads the arguments
+     * through the accessor an interface can declare on PHP 8.2.
+     */
+    #[Query]
+    #[Security(rule: [self::class, 'secretIsFooByContract'], message: 'Wrong secret passed')]
+    public function getSecretPhraseByContractRule(string $secret): string
     {
         return 'you can see this secret only if passed parameter is "foo"';
     }
@@ -152,6 +164,11 @@ class SecurityController
     public static function secretIsFoo(SecurityRuleContext $context): bool
     {
         return $context->argument('secret') === 'foo';
+    }
+
+    public static function secretIsFooByContract(SecurityRuleContextInterface $context): bool
+    {
+        return ($context->getArguments()['secret'] ?? null) === 'foo';
     }
 
     public static function userBarIs42(SecurityRuleContext $context): bool

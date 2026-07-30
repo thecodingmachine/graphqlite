@@ -1163,6 +1163,40 @@ class EndToEndTest extends IntegrationTestCase
     }
 
     /**
+     * A rule type-hinting SecurityRuleContextInterface rather than the concrete context is invoked
+     * exactly like any other, through a real schema and a real query.
+     *
+     * The rule reads its arguments with getArguments(), the accessor that exists because an
+     * interface cannot declare the readonly properties on PHP 8.2.
+     */
+    public function testEndToEndSecurityRuleTypeHintingTheContract(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretPhraseByContractRule(secret: "foo")
+        }
+        ');
+
+        $this->assertSame(
+            ['secretPhraseByContractRule' => 'you can see this secret only if passed parameter is "foo"'],
+            $this->getSuccessResult($result),
+        );
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            secretPhraseByContractRule(secret: "bar")
+        }
+        ');
+
+        $this->expectException(MissingAuthorizationException::class);
+        $this->expectExceptionMessage('Wrong secret passed');
+        $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+    }
+
+    /**
      * An invokable object is how a rule is parameterized: attribute arguments are constant
      * expressions, so a callable written in an attribute cannot capture or partially apply.
      */

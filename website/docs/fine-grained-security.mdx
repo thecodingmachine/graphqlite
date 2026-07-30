@@ -76,8 +76,9 @@ you would with any `mixed` input.
 
 ### Ways to write a rule
 
-Every form below receives the same `SecurityRuleContext` and must return `bool`. They differ only in
-what they can express and which PHP version accepts them.
+Every form below receives the same `SecurityRuleContext` and must return `bool`. (A rule may also
+type-hint the interface that class implements; see [the rule contract](#the-rule-contract).) They
+differ only in what they can express and which PHP version accepts them.
 
 | Form | PHP | Use it when |
 |---|---|---|
@@ -184,6 +185,48 @@ version — and the constructor call is type-checked by static analysis like any
 
 This is the one job first-class callable syntax cannot do: `self::pageSizeWithin(...)` has nowhere to
 put the `100`. Construct the rule instead of naming it.
+
+## The rule contract
+
+Everything the context offers is declared by
+`TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface`, which `SecurityRuleContext`
+implements. A rule may type-hint the interface instead of the class:
+
+```php
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
+
+final class PostRules
+{
+    public static function canShow(SecurityRuleContextInterface $context): bool
+    {
+        return $context->isGranted('ROLE_ADMIN')
+            || $context->isGranted('POST_SHOW', $context->argument('post'));
+    }
+}
+```
+
+GraphQLite passes the same object either way, so nothing about how the rule is invoked changes.
+What changes is what else can call it:
+
+* **The rule is unit testable with a fake context.** Implement the interface over the user, subject
+  and values a case needs, then call the rule directly. No schema to build, no query to execute and
+  no authentication or authorization service to stand up.
+* **The rule is reusable outside GraphQL.** An HTTP middleware, a console command or a message
+  handler can implement the interface over what it already has and reach the same decision, so the
+  rule stays the single place that check is written.
+
+A PHP interface cannot declare properties before 8.4 and GraphQLite supports 8.2, so the three
+pieces of data the context carries appear on the interface as methods:
+
+| On `SecurityRuleContext` | On the interface |
+|---|---|
+| `$context->user` | `$context->getUser()` |
+| `$context->source` | `$context->getSource()` |
+| `$context->arguments` | `$context->getArguments()` |
+
+`isGranted()`, `isLogged()`, `argument()` and `hasArgument()` are identical on both. The readonly
+properties stay on `SecurityRuleContext`, so a rule already type-hinting the concrete class needs no
+change.
 
 ## Setting HTTP code and error message
 

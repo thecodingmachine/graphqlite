@@ -17,8 +17,12 @@ use function array_key_exists;
  * information is added as new readonly properties or new methods so that existing rules keep
  * compiling; the constructor is called only by GraphQLite's own Security middlewares and should be
  * treated as internal.
+ *
+ * A rule needing nothing GraphQL-specific can type-hint {@see SecurityRuleContextInterface}
+ * instead, which is this same surface expressed as a contract, so the rule can be unit tested
+ * against a fake context and reused outside a field resolution.
  */
-final class SecurityRuleContext
+final class SecurityRuleContext implements SecurityRuleContextInterface
 {
     /**
      * @param object|null $user The currently authenticated user, or null when nobody is logged in.
@@ -32,6 +36,38 @@ final class SecurityRuleContext
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly AuthorizationServiceInterface $authorizationService,
     ) {
+    }
+
+    /**
+     * The currently authenticated user, or null when nobody is logged in.
+     *
+     * The contract's equivalent of the `$user` property.
+     */
+    public function getUser(): object|null
+    {
+        return $this->user;
+    }
+
+    /**
+     * The object the field is being resolved on, if there is one.
+     *
+     * The contract's equivalent of the `$source` property.
+     */
+    public function getSource(): object|null
+    {
+        return $this->source;
+    }
+
+    /**
+     * The field's resolved PHP arguments, keyed by parameter name.
+     *
+     * The contract's equivalent of the `$arguments` property.
+     *
+     * @return array<string, mixed>
+     */
+    public function getArguments(): array
+    {
+        return $this->arguments;
     }
 
     /**
