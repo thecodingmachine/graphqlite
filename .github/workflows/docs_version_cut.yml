@@ -1,0 +1,170 @@
+# Snapshots website/docs into a new versioned_docs entry when a release is published AND the docs
+# have actually changed since the last snapshot.
+#
+# Docusaurus versioning here is a manual `docusaurus docs:version <version>` commit, and it has
+# drifted: 8.0.0, 8.2.0 and 8.3.0 were cut while 8.1.0 and every patch release were not. So anyone
+# reading the docs for a released version can be reading a snapshot several releases stale.
+#
+# The rule is exactly one condition: cut a version if, and only if, website/docs differs from the
+# most recent snapshot. A release that changed no documentation gets no new version, whatever its
+# version number, because a snapshot identical to the one before it is noise in the version picker.
+#
+# The comparison is against the previous snapshot directory rather than against the previous
+# release's tag, and that distinction is load-bearing. The 8.3.0 snapshot was committed in
+# 0335865b56, which also carried doc edits, after v8.3.0 had been tagged. Diffing against the tag
+# therefore reports three files as changed that the snapshot already contains. The snapshot is what
+# readers actually see, so the snapshot is the thing to compare against.
+#
+# The result is opened as a pull request rather than pushed to master. A cut is roughly 41 files and
+# 6,000 lines, which deserves a human glance, and a PR avoids both the protected-branch question and
+# re-triggering the deploy workflow from a push this workflow made.
+
+name: "Docs version cut"
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to cut, without a leading v (e.g. 8.4.0). Defaults to the release tag."
+        required: false
+        type: string
+      force:
+        description: "Cut even when website/docs is unchanged since the last snapshot."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  docs-version-cut:
+
+    name: "Docs version cut"
+    runs-on: "ubuntu-latest"
+
+    steps:
+
+      - name: "Checkout"
+        uses: "actions/checkout@v6"
+        with:
+          ref: "master"
+
+      - name: "Resolve the version to cut"
+        id: "resolve"
+        # The tag name and the dispatch input are both attacker-shaped strings: they reach the shell
+        # through env rather than through ${{ }} interpolation, so a value carrying shell syntax is
+        # data here instead of script. The regex below is what makes everything downstream safe.
+        #
+        # Requiring a plain X.Y.Z also keeps prereleases out. A v9.0.0-beta1 snapshot would sit in
+        # the version picker forever, and the release it describes is meant to be temporary.
+        env:
+          INPUT_VERSION: "${{ inputs.version || '' }}"
+          RELEASE_TAG: "${{ github.event.release.tag_name || '' }}"
+        run: |
+          set -euo pipefail
+
+          if [ -n "$INPUT_VERSION" ]; then
+            version="$INPUT_VERSION"
+          else
+            version="$RELEASE_TAG"
+          fi
+          version="${version#v}"
+
+          if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::notice::'$version' is not a plain X.Y.Z version, skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "previous=$(jq -r '.[0]' website/versions.json)" >> "$GITHUB_OUTPUT"
+
+      - name: "Decide whether the docs changed"
+        id: "decide"
+        if: "steps.resolve.outputs.skip != 'true'"
+        # VERSION is already known to match X.Y.Z, but it and the rest come through env anyway: one
+        # rule for reaching the shell is easier to keep than a per-value judgement about which
+        # interpolation happens to be safe today.
+        env:
+          VERSION: "${{ steps.resolve.outputs.version }}"
+          PREVIOUS: "${{ steps.resolve.outputs.previous }}"
+          FORCE: "${{ inputs.force || 'false' }}"
+        run: |
+          set -euo pipefail
+
+          skip() { echo "::notice::$1"; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          if jq -e --arg v "$VERSION" 'index($v)' website/versions.json > /dev/null; then
+            skip "$VERSION is already in versions.json, nothing to cut."
+          fi
+
+          if [ "$FORCE" != "true" ]; then
+            snapshot="website/versioned_docs/version-${PREVIOUS}"
+
+            # No previous snapshot to compare against means there is nothing to be identical to.
+            if [ -d "$snapshot" ]; then
+              if diff -rq "website/docs" "$snapshot" > /dev/null 2>&1; then
+                skip "website/docs is identical to the version-${PREVIOUS} snapshot, so $VERSION needs no cut."
+              fi
+
+              echo "Changed since the version-${PREVIOUS} snapshot:"
+              diff -rq "website/docs" "$snapshot" 2>&1 | sed 's/^/  /'
+            fi
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: "Setup NodeJS"
+        if: "steps.decide.outputs.skip == 'false'"
+        uses: "actions/setup-node@v7"
+        with:
+          node-version: "20.x"
+
+      - name: "Yarn install"
+        if: "steps.decide.outputs.skip == 'false'"
+        run: "yarn install"
+        working-directory: "website"
+
+      - name: "Cut the version"
+        if: "steps.decide.outputs.skip == 'false'"
+        env:
+          VERSION: "${{ steps.resolve.outputs.version }}"
+        run: 'yarn docusaurus docs:version "$VERSION"'
+        working-directory: "website"
+
+      - name: "Build the site to prove the snapshot is valid"
+        if: "steps.decide.outputs.skip == 'false'"
+        run: "yarn run build"
+        working-directory: "website"
+
+      - name: "Open the pull request"
+        if: "steps.decide.outputs.skip == 'false'"
+        uses: "peter-evans/create-pull-request@v7"
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          branch: "docs/version-${{ steps.resolve.outputs.version }}"
+          base: "master"
+          commit-message: "docs: cut the ${{ steps.resolve.outputs.version }} docs version"
+          title: "docs: cut the ${{ steps.resolve.outputs.version }} docs version"
+          add-paths: |
+            website/versions.json
+            website/versioned_docs/**
+            website/versioned_sidebars/**
+          body: |
+            Snapshots `website/docs` into `versioned_docs/version-${{ steps.resolve.outputs.version }}`,
+            opened automatically because ${{ steps.resolve.outputs.version }} was released and
+            `website/docs` differs from the version-${{ steps.resolve.outputs.previous }} snapshot.
+            The changed files are listed in the "Decide whether the docs changed" step of the run
+            that opened this.
+
+            Generated by `docusaurus docs:version`; the site was built from the result before this was
+            opened, so the snapshot is known to compile. Nothing outside `website/versions.json`,
+            `versioned_docs/` and `versioned_sidebars/` is touched.
+
+            Close this if ${{ steps.resolve.outputs.version }} was not meant to carry a docs snapshot.
