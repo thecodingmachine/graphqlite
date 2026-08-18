@@ -59,9 +59,15 @@ name           | *yes*      | string | The GraphQL input type name extended by t
 ## #[EnumValue]
 
 The `#[EnumValue]` attribute attaches GraphQL schema metadata (description, deprecation reason)
-to an individual case of a PHP 8.1+ native enum that is exposed as a GraphQL enum type.
+to an individual case of a PHP 8.1+ native enum, and controls whether that case is exposed as a
+GraphQL enum value.
 
 **Applies on**: cases of an enum annotated (directly or indirectly) with `#[Type]`.
+
+**Schema exposure**: the moment any case of a `#[Type]`-mapped enum carries `#[EnumValue]`, the
+enum is in opt-in mode and only annotated cases are exposed; unannotated cases are hidden. An
+enum with no `#[EnumValue]` on any case stays in legacy mode (every case exposed) and triggers a
+deprecation notice. See [enum value descriptions](descriptions.md#enum-value-descriptions).
 
 Attribute         | Compulsory | Type   | Definition
 ------------------|------------|--------|-----------
@@ -77,6 +83,8 @@ enum Genre: string
 
     #[EnumValue(deprecationReason: 'Use Fiction::Verse instead.')]
     case Poetry = 'poetry';
+
+    case NonFiction = 'non-fiction'; // no #[EnumValue], so it is hidden from the schema
 }
 ```
 

@@ -108,11 +108,11 @@ class DescriptionTest extends TestCase
 
     public function testEnumWithZeroEnumValueAttributesTriggersDeprecation(): void
     {
-        // The Era fixture deliberately declares zero #[EnumValue] attributes — the signal that
-        // the developer has not yet engaged with the opt-in migration. That is the scenario the
+        // The Era fixture deliberately declares zero #[EnumValue] attributes, so it stays in
+        // legacy mode (every case exposed) and the advisory fires. That is the scenario the
         // advisory targets; partial annotation on other enums (like Genre in the Description
-        // namespace) is deliberately silent because it already acknowledges the new model.
-        $this->expectUserDeprecationMessageMatches('/declares no #\[EnumValue\] attributes.*future major/s');
+        // namespace) is deliberately silent because it has already opted in.
+        $this->expectUserDeprecationMessageMatches('/declares no #\[EnumValue\] attributes.*legacy mode/s');
 
         $schema = $this->buildSchema(Era::class);
         // Force enum resolution — types are lazy-mapped until referenced.
@@ -149,18 +149,19 @@ class DescriptionTest extends TestCase
         $this->assertSame([], $captured, 'Partial #[EnumValue] annotation must not trigger the advisory notice.');
     }
 
-    public function testEnumCaseWithoutAttributeFallsBackToDocblock(): void
+    public function testUnannotatedCaseIsHiddenInOptInMode(): void
     {
         $schema = $this->buildSchema(Book::class);
 
         $genreType = $schema->getType('Genre');
-        $nonFictionValue = $genreType->getValue('NonFiction');
-        // The NonFiction case has no #[EnumValue] attribute, so its description comes from the docblock.
-        $this->assertNotNull($nonFictionValue->description);
-        $this->assertStringContainsString(
-            'This docblock description should appear on the NonFiction enum value',
-            $nonFictionValue->description,
-        );
+
+        // Genre carries #[EnumValue] on Fiction and Poetry, which puts it in opt-in mode. The
+        // NonFiction case has no #[EnumValue] attribute, so it is now hidden from the schema
+        // entirely rather than falling back to its docblock description.
+        $this->assertNull($genreType->getValue('NonFiction'));
+
+        $exposedNames = array_map(static fn ($value) => $value->name, $genreType->getValues());
+        $this->assertSame(['Fiction', 'Poetry'], $exposedNames);
     }
 
     public function testEnumValueAttributeProvidesDeprecationReason(): void
@@ -172,20 +173,20 @@ class DescriptionTest extends TestCase
         $this->assertSame('Use Fiction::Verse instead.', $poetryValue->deprecationReason);
     }
 
-    public function testDisablingDocblockFallbackSuppressesEnumCaseDescription(): void
+    public function testDisablingDocblockFallbackKeepsExplicitDescriptionOnExposedCase(): void
     {
         $schema = $this->buildSchema(Book::class, docblockDescriptions: false);
 
         $genreType = $schema->getType('Genre');
 
-        // Fiction has an explicit #[EnumValue] description — still present.
+        // Fiction has an explicit #[EnumValue] description — still present with the toggle off.
         $this->assertSame(
             'Fiction works including novels and short stories.',
             $genreType->getValue('Fiction')->description,
         );
 
-        // NonFiction relied on its docblock summary — with the toggle off, it must disappear.
-        $this->assertNull($genreType->getValue('NonFiction')->description);
+        // NonFiction is unannotated, so opt-in mode hides it regardless of the docblock toggle.
+        $this->assertNull($genreType->getValue('NonFiction'));
     }
 
     public function testExtendTypeSuppliesDescriptionWhenBaseTypeHasNone(): void

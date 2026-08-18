@@ -91,8 +91,9 @@ public function internalOnly(): Foo { /* ... */ }
 
 ## Enum value descriptions
 
-Native PHP 8.1 enums mapped to GraphQL enum types get per-case metadata via the `#[EnumValue]`
-attribute applied to individual cases:
+Native PHP 8.1 enums mapped to GraphQL enum types use the `#[EnumValue]` attribute on individual
+cases both to attach per-case metadata (description, deprecation reason) and to control which
+cases appear in the schema:
 
 ```php
 use TheCodingMachine\GraphQLite\Annotations\EnumValue;
@@ -110,7 +111,7 @@ enum Genre: string
     /**
      * Works grounded in verifiable facts.
      */
-    case NonFiction = 'non-fiction'; // no attribute — description comes from the docblock
+    case NonFiction = 'non-fiction'; // no #[EnumValue], so it is hidden from the schema
 }
 ```
 
@@ -129,16 +130,20 @@ is an enum value.
   Omitting it falls back to the `@deprecated` tag on the case docblock. An explicit empty string
   `''` deliberately clears any inherited `@deprecated` tag.
 
-### Future migration
+### Schema exposure
 
-A future major release will require `#[EnumValue]` on each case that should participate in
-the schema; unannotated cases will be hidden (mirroring `#[Field]`'s opt-in model). Today
-every case is still auto-exposed, so nothing breaks. Add `#[EnumValue]` to every case you
-want to keep exposed — omitting it from a case is the mechanism for hiding internal values
-once the default flips.
+`#[EnumValue]` also controls which cases appear in the schema, following the same opt-in model
+as `#[Field]` on classes:
 
-GraphQLite emits a deprecation notice when a `#[Type]`-mapped enum has **zero**
-`#[EnumValue]` attributes at all (partial annotation is intentional and stays silent).
+- **Opt-in mode**: as soon as **any** case of a `#[Type]`-mapped enum carries `#[EnumValue]`,
+  only the annotated cases are exposed; every case without the attribute is hidden. In the
+  `Genre` example above, `NonFiction` has no `#[EnumValue]`, so it does not appear in the schema.
+- **Legacy mode**: a mapped enum with **zero** `#[EnumValue]` attributes keeps every case
+  exposed, and GraphQLite emits a deprecation notice recommending you annotate the cases you
+  want exposed. (Partial annotation triggers no notice; it is the supported way to hide a case.)
+
+Add `#[EnumValue]` to every case you want in the public schema; omit it only from cases you want
+hidden, such as internal values that should never reach API consumers.
 
 ## Description uniqueness on `#[ExtendType]`
 
