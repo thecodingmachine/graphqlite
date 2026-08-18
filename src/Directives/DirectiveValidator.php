@@ -4,27 +4,37 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Directives;
 
+use Attribute;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
+use TheCodingMachine\GraphQLite\Directives\Validation\AttributeTargetValidator;
+use TheCodingMachine\GraphQLite\Directives\Validation\InterfaceLocationValidator;
 
 use function in_array;
 use function is_a;
 
 /**
- * Validates that directives are applied where they're allowed. PHP's `#[Attribute]` targets can't
- * tell a `#[Type]` class from an `#[Input]` class (both are `TARGET_CLASS`), so a class-level
- * directive like `#[OneOf]` could be placed on the wrong kind of class. This reports that instead
- * of letting the interface-based collectors drop the misplaced directive silently.
+ * Validates a directive at discovery time ({@see self::validate()}, delegating target and
+ * interface/location checks) and its placement at apply time ({@see self::assertDirectivesUsableAt()}).
  *
  * @internal
  */
 final class DirectiveValidator
 {
-    /**
-     * @param ReflectionClass<object> $refClass
-     *
-     * @throws InvalidDirectiveException when a directive on $refClass isn't allowed at $location.
-     */
+    /** @param class-string<TypeSystemDirective> $directiveClass */
+    public static function validate(string $directiveClass, DirectiveDefinition $definition): void
+    {
+        $reflection = new ReflectionClass($directiveClass);
+
+        if ($reflection->getAttributes(Attribute::class) === []) {
+            throw InvalidDirectiveException::notAttribute($directiveClass);
+        }
+
+        AttributeTargetValidator::validate($directiveClass, $definition, DirectiveReflection::attributeFlags($reflection));
+        InterfaceLocationValidator::validate($directiveClass, $definition, $reflection);
+    }
+
+    /** @param ReflectionClass<object> $refClass */
     public static function assertDirectivesUsableAt(ReflectionClass $refClass, DirectiveLocation $location): void
     {
         foreach ($refClass->getAttributes() as $attribute) {
