@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Utils\FieldAccessorPrefixes;
 
 class NamingStrategyTest extends TestCase
 {
@@ -31,6 +32,42 @@ class NamingStrategyTest extends TestCase
         $this->assertSame('foo', $namingStrategy->getFieldNameFromMethodName('foo'));
         $this->assertSame('name', $namingStrategy->getInputFieldNameFromMethodName('setName'));
         $this->assertSame('set', $namingStrategy->getInputFieldNameFromMethodName('set'));
+    }
+
+    public function testGetFieldNameFromMethodNameOnlyStripsOnCamelCaseBoundary(): void
+    {
+        $namingStrategy = new NamingStrategy();
+
+        // A prefix is only stripped when the next character is uppercase (a real accessor boundary).
+        $this->assertSame('enabled', $namingStrategy->getFieldNameFromMethodName('isEnabled'));
+        // Ordinary words that merely start with the prefix letters are left untouched.
+        $this->assertSame('issue', $namingStrategy->getFieldNameFromMethodName('issue'));
+        $this->assertSame('getaway', $namingStrategy->getFieldNameFromMethodName('getaway'));
+        $this->assertSame('settings', $namingStrategy->getInputFieldNameFromMethodName('settings'));
+        // "has" is not a getter prefix by default, so hassers pass through unchanged.
+        $this->assertSame('hasAccess', $namingStrategy->getFieldNameFromMethodName('hasAccess'));
+    }
+
+    public function testGetFieldNameFromMethodNameWithCustomPrefixes(): void
+    {
+        $namingStrategy = new NamingStrategy(new FieldAccessorPrefixes(getters: ['get', 'is', 'has']));
+
+        // "has" is now a recognised getter prefix on a camelCase boundary.
+        $this->assertSame('access', $namingStrategy->getFieldNameFromMethodName('hasAccess'));
+        $this->assertSame('hKey', $namingStrategy->getFieldNameFromMethodName('hasHKey'));
+        // ...but words that only start with the letters "has" are still left untouched.
+        $this->assertSame('hashKey', $namingStrategy->getFieldNameFromMethodName('hashKey'));
+    }
+
+    public function testGetInputFieldNameFromMethodNameWithCustomSetterPrefixes(): void
+    {
+        $namingStrategy = new NamingStrategy(new FieldAccessorPrefixes(setters: ['assign']));
+
+        $this->assertSame('name', $namingStrategy->getInputFieldNameFromMethodName('assignName'));
+        // A word that only starts with the letters "assign" is left untouched...
+        $this->assertSame('assignup', $namingStrategy->getInputFieldNameFromMethodName('assignup'));
+        // ...and "set" is no longer a configured setter prefix here, so it passes through.
+        $this->assertSame('setName', $namingStrategy->getInputFieldNameFromMethodName('setName'));
     }
 
     public function testGetFieldNameFromTypeAnnotation(): void

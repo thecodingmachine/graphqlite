@@ -67,6 +67,10 @@ By doing so, you let GraphQLite know that the type exposes the `getName` method 
 Internally, GraphQLite will look for methods named `name()`, `getName()` and `isName()`).
 You can set different name to look for with `sourceName` attribute.
 
+The getter prefixes that are tried (`get`, `is` by default) are configurable through
+[`SchemaFactory::stripFieldPrefixes()`](other-frameworks.mdx). For instance, adding `has` lets a
+`#[SourceField(name: 'stock')]` resolve against a `hasStock()` hasser.
+
 ## `#[MagicField]` attribute
 
 If your object has no getters, but instead uses magic properties (using the magic `__get` method), you should use the `#[MagicField]` attribute:

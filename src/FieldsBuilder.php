@@ -51,6 +51,7 @@ use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
+use TheCodingMachine\GraphQLite\Utils\FieldAccessorPrefixes;
 use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
 use function array_diff_key;
@@ -68,7 +69,6 @@ use function is_string;
 use function key;
 use function reset;
 use function rtrim;
-use function str_starts_with;
 use function trim;
 
 use const PHP_EOL;
@@ -92,6 +92,7 @@ class FieldsBuilder
         private readonly FieldMiddlewareInterface $fieldMiddleware,
         private readonly InputFieldMiddlewareInterface $inputFieldMiddleware,
         private readonly DescriptionResolver $descriptionResolver = new DescriptionResolver(true),
+        private readonly FieldAccessorPrefixes $fieldAccessorPrefixes = new FieldAccessorPrefixes(),
     )
     {
         $this->typeMapper = new TypeHandler(
@@ -846,7 +847,7 @@ class FieldsBuilder
         if ($reflectionClass->hasMethod($propertyName)) {
             $methodName = $propertyName;
         } else {
-            $methodName = PropertyAccessor::findGetter($reflectionClass->getName(), $propertyName);
+            $methodName = PropertyAccessor::findGetter($reflectionClass->getName(), $propertyName, $this->fieldAccessorPrefixes);
             if (! $methodName) {
                 throw FieldNotFoundException::missingField($reflectionClass->getName(), $propertyName);
             }
@@ -1032,7 +1033,7 @@ class FieldsBuilder
 
             $docBlockObj = $this->docBlockFactory->create($refMethod);
             $methodName = $refMethod->getName();
-            if (! str_starts_with($methodName, 'set')) {
+            if (! $this->fieldAccessorPrefixes->hasSetterPrefix($methodName)) {
                 continue;
             }
 

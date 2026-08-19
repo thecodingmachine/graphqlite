@@ -26,8 +26,44 @@ class PropertyAccessorTest extends TestCase
         yield 'regular property' => [null, MagicGetterSetterType::class, 'one'];
         yield 'getter' => ['getTwo', MagicGetterSetterType::class, 'two'];
         yield 'isser' => ['isThree', MagicGetterSetterType::class, 'three'];
+        yield 'hasser without has prefix' => [null, MagicGetterSetterType::class, 'five'];
         yield 'private getter' => [null, MagicGetterSetterType::class, 'four'];
         yield 'undefined property' => [null, MagicGetterSetterType::class, 'twenty'];
+    }
+
+    public function testFindGetterResolvesHasserWhenConfigured(): void
+    {
+        self::assertSame(
+            'hasFive',
+            PropertyAccessor::findGetter(
+                MagicGetterSetterType::class,
+                'five',
+                new FieldAccessorPrefixes(getters: ['get', 'is', 'has']),
+            ),
+        );
+    }
+
+    public function testFindSetterUsesConfiguredPrefixes(): void
+    {
+        // A custom setter prefix resolves against a matching method...
+        self::assertSame(
+            'assignTwo',
+            PropertyAccessor::findSetter(
+                MagicGetterSetterType::class,
+                'two',
+                new FieldAccessorPrefixes(setters: ['assign']),
+            ),
+        );
+        // ...but a configured prefix with no matching method resolves to null...
+        self::assertNull(
+            PropertyAccessor::findSetter(
+                MagicGetterSetterType::class,
+                'three',
+                new FieldAccessorPrefixes(setters: ['assign']),
+            ),
+        );
+        // ...while the default "set" prefix still finds the setter.
+        self::assertSame('setTwo', PropertyAccessor::findSetter(MagicGetterSetterType::class, 'two'));
     }
 
     #[DataProvider('findSetterProvider')]

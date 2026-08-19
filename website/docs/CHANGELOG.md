@@ -14,12 +14,24 @@ sidebar_label: Changelog
   mapped enum still exposes every case and emits a deprecation notice. **Migration**: any enum that
   intentionally left some cases unannotated (for example, for docblock-only descriptions) must now
   add `#[EnumValue]` to every case it wants exposed.
+- Accessor prefixes are now stripped only on a camelCase boundary (the character after the prefix
+  must be uppercase). Method names such as `getaway()`, `issue()`, `settings()` or `setup()` (a
+  prefix followed by a lowercase letter) are no longer mis-stripped and keep their full name as the
+  field name. **Migration**: if a `#[Field]`/`#[SourceField]` method relied on the old behavior (for
+  example `issue()` exposing a field named `sue`), set an explicit field name with `#[Field(name:)]`
+  or the source field's `name`.
 
 ### New Features
 
 - `#[EnumValue]` is now the per-case schema-exposure toggle, so internal enum cases can be kept out
   of the public schema by omitting the attribute.
   ([#826](https://github.com/thecodingmachine/graphqlite/pull/826))
+- `SchemaFactory::stripFieldPrefixes(getters:, setters:)` configures the method-name prefixes
+  stripped to derive field names and matched when resolving property accessors. Adding `has` to the
+  getters exposes hassers such as `hasStock()` via `#[SourceField]`; the defaults (`get`/`is`, `set`)
+  preserve the previous behavior.
+  ([#827](https://github.com/thecodingmachine/graphqlite/pull/827), generalizing
+  [#766](https://github.com/thecodingmachine/graphqlite/pull/766)) @oojacoboo @adynemo
 - [#822 Accept PHP callables as `#[Security]` rules](https://github.com/thecodingmachine/graphqlite/pull/822)
   @oojacoboo, alongside the existing expression form, with access to the field context and custom
   refusal messages.

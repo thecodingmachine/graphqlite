@@ -7,18 +7,21 @@ namespace TheCodingMachine\GraphQLite;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 use TheCodingMachine\GraphQLite\Annotations\TypeInterface;
+use TheCodingMachine\GraphQLite\Utils\FieldAccessorPrefixes;
 
 use function implode;
-use function lcfirst;
 use function str_ends_with;
 use function str_replace;
-use function str_starts_with;
-use function strlen;
 use function strrpos;
 use function substr;
 
 class NamingStrategy implements NamingStrategyInterface
 {
+    public function __construct(
+        private readonly FieldAccessorPrefixes $fieldAccessorPrefixes = new FieldAccessorPrefixes(),
+    ) {
+    }
+
     /**
      * Returns the name of the GraphQL interface from a name of a concrete class (when the interface is created
      * automatically to manage inheritance)
@@ -88,15 +91,7 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getFieldNameFromMethodName(string $methodName): string
     {
-        // Let's remove any "get" or "is".
-        if (str_starts_with($methodName, 'get') && strlen($methodName) > 3) {
-            return lcfirst(substr($methodName, 3));
-        }
-        if (str_starts_with($methodName, 'is') && strlen($methodName) > 2) {
-            return lcfirst(substr($methodName, 2));
-        }
-
-        return $methodName;
+        return $this->fieldAccessorPrefixes->stripGetterPrefix($methodName);
     }
 
     /**
@@ -104,11 +99,7 @@ class NamingStrategy implements NamingStrategyInterface
      */
     public function getInputFieldNameFromMethodName(string $methodName): string
     {
-        if (str_starts_with($methodName, 'set') && strlen($methodName) > 3) {
-            return lcfirst(substr($methodName, 3));
-        }
-
-        return $methodName;
+        return $this->fieldAccessorPrefixes->stripSetterPrefix($methodName);
     }
 
     /**
