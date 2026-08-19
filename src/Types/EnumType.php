@@ -14,30 +14,30 @@ use function is_string;
 
 /**
  * An extension of the EnumType to support native enums.
+ *
+ * @internal The constructor shape (an explicit list of exposed cases with resolved metadata) is a
+ *     framework-internal contract with EnumTypeMapper, not a public API.
  */
 class EnumType extends BaseEnumType
 {
     /**
-     * @param class-string<UnitEnum> $enumName
-     * @param array<string, string|null> $caseDescriptions
-     * @param array<string, string> $caseDeprecationReasons
+     * @param list<ExposedEnumCase> $cases The enum cases that participate in the schema, each
+     *     paired with its resolved metadata.
      */
     public function __construct(
-        string $enumName,
+        array $cases,
         string $typeName,
         string|null $description,
-        array $caseDescriptions,
-        array $caseDeprecationReasons,
         private readonly bool $useValues = false,
     ) {
         $typeValues = [];
-        foreach ($enumName::cases() as $case) {
-            $key = $this->serialize($case);
+        foreach ($cases as $exposed) {
+            $key = $this->serialize($exposed->case);
             $typeValues[$key] = [
                 'name' => $key,
-                'value' => $case,
-                'description' => $caseDescriptions[$case->name] ?? null,
-                'deprecationReason' => $caseDeprecationReasons[$case->name] ?? null,
+                'value' => $exposed->case,
+                'description' => $exposed->description,
+                'deprecationReason' => $exposed->deprecationReason,
             ];
         }
 

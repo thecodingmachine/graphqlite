@@ -21,6 +21,7 @@ use TheCodingMachine\GraphQLite\Discovery\Cache\ClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
 use TheCodingMachine\GraphQLite\Types\EnumType;
+use TheCodingMachine\GraphQLite\Types\ExposedEnumCase;
 use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 use UnitEnum;
 
@@ -138,64 +139,73 @@ class EnumTypeMapper implements RootTypeMapperInterface
                 : null,
         );
 
-        /** @var array<string, string|null> $enumCaseDescriptions */
-        $enumCaseDescriptions = [];
-        /** @var array<string, string> $enumCaseDeprecationReasons */
-        $enumCaseDeprecationReasons = [];
-        $hasEnumValueAttribute = false;
+        // Single pass: build an ExposedEnumCase for every case, resolving its metadata, and bucket
+        // it by whether it carries #[EnumValue]. The moment any case is annotated the enum is in
+        // opt-in mode and only the annotated bucket is exposed; otherwise every case is exposed.
+        /** @var list<ExposedEnumCase> $annotatedCases */
+        $annotatedCases = [];
+        /** @var list<ExposedEnumCase> $unannotatedCases */
+        $unannotatedCases = [];
 
         foreach ($reflectionEnum->getCases() as $reflectionEnumCase) {
+            $attribute = $this->annotationReader->getEnumValueAnnotation($reflectionEnumCase);
             $docBlock = $this->docBlockFactory->create($reflectionEnumCase);
-            $enumValueAttribute = $this->annotationReader->getEnumValueAnnotation($reflectionEnumCase);
 
-            if ($enumValueAttribute !== null) {
-                $hasEnumValueAttribute = true;
-            }
-
-            $enumCaseDescriptions[$reflectionEnumCase->getName()] = $this->descriptionResolver->resolve(
-                $enumValueAttribute?->description,
+            $description = $this->descriptionResolver->resolve(
+                $attribute?->description,
                 $docBlock->getSummary() ?: null,
             );
 
-            $explicitDeprecation = $enumValueAttribute?->deprecationReason;
+            $deprecationReason = null;
+            $explicitDeprecation = $attribute?->deprecationReason;
             if ($explicitDeprecation !== null) {
                 // Explicit `deprecationReason` always wins; an empty string deliberately clears
                 // any @deprecated tag on the case docblock the same way an empty description
                 // blocks the docblock fallback.
                 if ($explicitDeprecation !== '') {
-                    $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = $explicitDeprecation;
+                    $deprecationReason = $explicitDeprecation;
                 }
-                continue;
+            } else {
+                $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
+                if ($deprecation) {
+                    $deprecationReason = (string) $deprecation;
+                }
             }
 
-            $deprecation = $docBlock->getTagsByName('deprecated')[0] ?? null;
+            $exposedCase = new ExposedEnumCase($reflectionEnumCase->getValue(), $description, $deprecationReason);
 
-            // phpcs:ignore
-            if ($deprecation) {
-                $enumCaseDeprecationReasons[$reflectionEnumCase->getName()] = (string) $deprecation;
+            if ($attribute !== null) {
+                $annotatedCases[] = $exposedCase;
+            } else {
+                $unannotatedCases[] = $exposedCase;
             }
         }
 
-        if (! $hasEnumValueAttribute) {
+        $exposedCases = $annotatedCases !== [] ? $annotatedCases : $unannotatedCases;
+
+        if ($annotatedCases === []) {
             $this->warnEnumHasNoEnumValueAttribute($enumClass);
         }
 
-        $type = new EnumType($enumClass, $typeName, $enumDescription, $enumCaseDescriptions, $enumCaseDeprecationReasons, $useValues);
+        $type = new EnumType($exposedCases, $typeName, $enumDescription, $useValues);
 
         return $this->cacheByName[$type->name] = $this->cacheByClass[$enumClass] = $type;
     }
 
     /**
      * Emits a deprecation notice when a GraphQL-mapped enum declares zero {@see EnumValue}
-     * attributes across its cases — the signal that the developer has not yet engaged with
-     * the opt-in model that a future major release will require.
+     * attributes across its cases — the signal that the developer has not yet engaged with the
+     * per-case opt-in model.
      *
-     * Today every case is automatically exposed in the schema regardless of `#[EnumValue]` —
-     * this call site keeps that behaviour intact. The notice announces the planned migration:
-     * a future major release will require `#[EnumValue]` on each case that should participate
-     * in the schema, and unannotated cases will be hidden (mirroring `#[Field]`'s opt-in
-     * model on classes). Partial annotation is deliberately allowed and intentionally silent
-     * so that leaving some cases unannotated can be used to hide them once the default flips.
+     * `#[EnumValue]` is now the per-case exposure toggle. As soon as an enum carries the attribute
+     * on at least one case it enters opt-in mode: only the annotated cases are exposed and every
+     * unannotated case is hidden from the schema (mirroring `#[Field]`'s opt-in model on classes).
+     * A fully-unannotated enum stays in legacy mode — every case is still exposed — and this notice
+     * fires to flag that the enum has not opted in, so a future major release that makes the
+     * attribute mandatory would otherwise hide all of its cases.
+     *
+     * Partial annotation is deliberately silent: leaving a case unannotated is now the supported
+     * mechanism for keeping it out of the public schema, so it must not itself produce an advisory.
      *
      * @param class-string<UnitEnum> $enumClass
      */
@@ -204,8 +214,8 @@ class EnumTypeMapper implements RootTypeMapperInterface
         trigger_error(
             sprintf(
                 'Enum "%s" is mapped to a GraphQL enum type but declares no #[EnumValue] attributes on any case. '
-                . 'Today every case is automatically exposed; a future major release will require #[EnumValue] on each case that should participate in the schema, and unannotated cases will be hidden (mirroring #[Field]\'s opt-in model on classes). '
-                . 'Add #[EnumValue] to every case you want to keep exposed. Omit it only from cases you want hidden from the public schema after the future default flip.',
+                . 'Every case is exposed in legacy mode; adding #[EnumValue] to any case switches the enum to opt-in mode, where only annotated cases are exposed and unannotated ones are hidden (mirroring #[Field]\'s opt-in model on classes). '
+                . 'Add #[EnumValue] to every case you want exposed. Omit it only from cases you want hidden from the public schema.',
                 $enumClass,
             ),
             E_USER_DEPRECATED,

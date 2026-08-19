@@ -4,6 +4,31 @@ title: Changelog
 sidebar_label: Changelog
 ---
 
+## 8.4.0
+
+### Breaking Changes
+
+- `#[EnumValue]` now controls enum case exposure. Once any case of a `#[Type]`-mapped enum carries
+  `#[EnumValue]`, the enum is in opt-in mode: only annotated cases are exposed and unannotated cases
+  are hidden from the schema (mirroring `#[Field]`'s opt-in model on classes). A fully-unannotated
+  mapped enum still exposes every case and emits a deprecation notice. **Migration**: any enum that
+  intentionally left some cases unannotated (for example, for docblock-only descriptions) must now
+  add `#[EnumValue]` to every case it wants exposed.
+
+### New Features
+
+- `#[EnumValue]` is now the per-case schema-exposure toggle, so internal enum cases can be kept out
+  of the public schema by omitting the attribute.
+  ([#826](https://github.com/thecodingmachine/graphqlite/pull/826))
+- [#822 Accept PHP callables as `#[Security]` rules](https://github.com/thecodingmachine/graphqlite/pull/822)
+  @oojacoboo, alongside the existing expression form, with access to the field context and custom
+  refusal messages.
+
+### Bug Fixes
+
+- [#819 Fix undefined array input type](https://github.com/thecodingmachine/graphqlite/pull/819)
+  @michael-georgiadis
+
 ## >8.0.0
 
 **For all future changelog details, refer to the [Releases](https://github.com/thecodingmachine/graphqlite/releases).
