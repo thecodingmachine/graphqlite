@@ -8,7 +8,7 @@ sidebar_label: Fine grained security
 If the [`#[Logged]` and `#[Right]` attributes](authentication-authorization.mdx#logged-and-right-attributes) are not
 granular enough for your needs, you can use the advanced `#[Security]` attribute.
 
-Using the `#[Security]` attribute, you can write an *expression* that can contain custom logic. For instance:
+Using the `#[Security]` attribute, you can write a *rule* containing custom logic. For instance:
 
 - Check that a user can access a given resource
 - Check that a user has one right or another right
@@ -16,36 +16,93 @@ Using the `#[Security]` attribute, you can write an *expression* that can contai
 
 ## Using the #[Security] attribute
 
-The `#[Security]` attribute is very flexible: it allows you to pass an expression that can contains custom logic:
+A rule is an ordinary PHP callable. It receives a `SecurityRuleContext` and returns a `bool`. The
+clearest way to write one is first-class callable syntax, which lets the rule live as a private
+method right beside the field it guards:
 
 ```php
 use TheCodingMachine\GraphQLite\Annotations\Security;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
 
-// ...
-
-#[Query]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('POST_SHOW', post)")]
-public function getPost(Post $post): array
+class PostController
 {
-    // ...
+    #[Query]
+    #[Security(rule: self::canShow(...))]
+    public function getPost(Post $post): Post
+    {
+        // ...
+    }
+
+    private static function canShow(SecurityRuleContext $context): bool
+    {
+        return $context->isGranted('ROLE_ADMIN')
+            || $context->isGranted('POST_SHOW', $context->argument('post'));
+    }
 }
 ```
 
-The *expression* defined in the `#[Security]` attribute must conform to [Symfony's Expression Language syntax](https://symfony.com/doc/4.4/components/expression_language/syntax.html)
+Nothing is called when the attribute is read. `self::canShow(...)` produces a `Closure`; GraphQLite
+invokes it during resolution, once per field, with the context.
 
-<div class="alert alert--info">
-    If you are a Symfony user, you might already be used to the <code>#[Security]</code> attribute. Most of the inspiration
-    of this attribute comes from Symfony. Warning though! GraphQLite's <code>#[Security]</code> attribute and
-    Symfony's <code>#[Security]</code> attribute are slightly different. Especially, the two attributes do not live
-    in the same namespace!
+<div class="alert alert--warning">
+    <strong>First-class callable syntax in an attribute requires PHP 8.5.</strong> On PHP 8.2, 8.3
+    and 8.4 it is a <em>compile-time</em> fatal — <code>Constant expression contains invalid
+    operations</code> — that no runtime check can catch. If you support those versions, use the
+    array form, which works everywhere:
+    <code>#[Security(rule: [PostController::class, 'canShow'])]</code>.
+    <br /><br />
+    One difference matters when you downgrade: the array form is resolved by reflection, so the
+    method must be <strong>public</strong>. A rule kept <code>private</code> under
+    <code>self::canShow(...)</code> has to be widened to <code>public static</code>, or moved to a
+    shared rules class. Leave it private and the schema fails to build with
+    <em>"must be public to be used as a callable"</em>.
+    See <a href="#ways-to-write-a-rule">ways to write a rule</a>.
 </div>
 
-## The `is_granted` function
+Because a rule is plain PHP, it is found by "find usages", renamed safely by an IDE, steppable in a
+debugger, and unit testable without building a schema or executing a query.
 
-Use the `is_granted` function to check if a user has a special right.
+Note that static analysis checks the *reference* to the rule, not its body: `SecurityRuleContext`
+exposes `$user` and `$source` as `object|null` and `argument()` as `mixed`, so reaching through them
+is unchecked. Narrow them yourself when it matters — an `instanceof` or a typed local — the same way
+you would with any `mixed` input.
+
+<div class="alert alert--info">
+    <code>#[Security]</code> also accepts an <em>expression</em> string, evaluated by Symfony's
+    Expression Language. Both forms are fully supported. Reach for an expression when the check is a
+    short predicate you want to read at the field; reach for a rule when the logic is worth typing,
+    testing, reusing or parameterizing. See <a href="#the-expression-form">the expression form</a>.
+</div>
+
+### Ways to write a rule
+
+Every form below receives the same `SecurityRuleContext` and must return `bool`. (A rule may also
+type-hint the interface that class implements; see [the rule contract](#the-rule-contract).) They
+differ only in what they can express and which PHP version accepts them.
+
+| Form | PHP | Use it when |
+|---|---|---|
+| `self::canShow(...)` | 8.5+ | **Preferred.** The rule belongs to the class it guards. Written inside the class body it keeps class scope, so the method can stay `private` — no new public surface. Only this form can reach a private method. |
+| `PostRules::canShow(...)` | 8.5+ | **Preferred** when the rule is shared across controllers. Refactor-safe: renaming the method updates the attribute. |
+| `[PostRules::class, 'canShow']` | 8.2+ | You support PHP below 8.5, **or** the rule needs collaborators — a non-static method here is resolved through the container. Resolved by reflection, so the method must be **public**. |
+| `new PageSizeWithin(100)` | 8.2+ | The rule is parameterized by a constant. See [parameterizing a rule](#parameterizing-a-rule). |
+| `static function (SecurityRuleContext $c) { ... }` | 8.5+ | A genuine one-off. Must be `static`; arrow functions and `use (...)` are rejected in attributes. |
+
+Two limits worth knowing before you choose:
+
+* **First-class callable syntax cannot name a container-resolved method.** `Service::method(...)` on a
+  non-static method compiles and then throws when the attribute is read. A rule that needs injected
+  dependencies must use the array form — that is not a legacy fallback, it is the only syntax that
+  can express it.
+* **Nothing in an attribute can capture a variable.** Attribute arguments are constant expressions on
+  every PHP version, so to parameterize a rule you construct it — see below.
+
+## Checking rights
+
+Use `isGranted()` to check whether the current user holds a right.
 
 ```php
-#[Security("is_granted('ROLE_ADMIN')")]
+$context->isGranted('ROLE_ADMIN')
 ```
 
 is similar to
@@ -54,34 +111,125 @@ is similar to
 #[Right("ROLE_ADMIN")]
 ```
 
-In addition, the `is_granted` function accepts a second optional parameter: the "scope" of the right.
+For a global, subject-free permission check, prefer `#[Right]` — it says what it means with less
+ceremony. Reach for `#[Security]` when the decision depends on the field's arguments or its source
+object, which `#[Right]` structurally cannot see.
+
+`isGranted()` accepts a second optional parameter: the "scope" of the right.
 
 ```php
 #[Query]
-#[Security("is_granted('POST_SHOW', post)")]
-public function getPost(Post $post): array
+#[Security(rule: self::canShow(...))]
+public function getPost(Post $post): Post
 {
     // ...
 }
 ```
 
-In the example above, the `getPost` method can be called only if the logged user has the 'POST_SHOW' permission on the
-`$post` object. You can notice that the `$post` object comes from the parameters.
+In the example above, `getPost` can be called only if the logged user has the `POST_SHOW` permission
+on the `$post` object, which the rule reads with `$context->argument('post')`.
 
 ## Accessing method parameters
 
-All parameters passed to the method can be accessed in the `#[Security]` expression.
+All parameters passed to the method are available on the context, by name, already resolved to their
+PHP values.
 
 ```php
 #[Query]
-#[Security(expression: "startDate < endDate", statusCode: 400, message: "End date must be after start date")]
+#[Security(rule: self::startsBeforeItEnds(...), statusCode: 400, message: "End date must be after start date")]
 public function getPosts(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
 {
     // ...
 }
+
+private static function startsBeforeItEnds(SecurityRuleContext $context): bool
+{
+    return $context->argument('startDate') < $context->argument('endDate');
+}
 ```
 
 In the example above, we tweak a bit the Security attribute purpose to do simple input validation.
+
+Use `hasArgument()` when you need to tell an argument that was genuinely `null` from one that was
+not supplied at all.
+
+## Parameterizing a rule
+
+PHP attribute arguments are constant expressions, so a callable written inside an attribute cannot
+capture a variable or partially apply — on any PHP version. Rather than writing one method per
+constant, use an invokable object:
+
+```php
+final class PageSizeWithin
+{
+    public function __construct(private readonly int $max)
+    {
+    }
+
+    public function __invoke(SecurityRuleContext $context): bool
+    {
+        return $context->argument('first') <= $this->max;
+    }
+}
+
+#[Query]
+#[Security(rule: new PageSizeWithin(100), statusCode: 400, message: 'Page size too large')]
+public function getPosts(int $first): array
+{
+    // ...
+}
+```
+
+`new` in an attribute argument has been legal since PHP 8.1, so this form works on every supported
+version — and the constructor call is type-checked by static analysis like any other.
+
+This is the one job first-class callable syntax cannot do: `self::pageSizeWithin(...)` has nowhere to
+put the `100`. Construct the rule instead of naming it.
+
+## The rule contract
+
+Everything the context offers is declared by
+`TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface`, which `SecurityRuleContext`
+implements. A rule may type-hint the interface instead of the class:
+
+```php
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
+
+final class PostRules
+{
+    public static function canShow(SecurityRuleContextInterface $context): bool
+    {
+        return $context->isGranted('ROLE_ADMIN')
+            || $context->isGranted('POST_SHOW', $context->argument('post'));
+    }
+}
+```
+
+GraphQLite passes the same object either way, so nothing about how the rule is invoked changes.
+What changes is what else can call it:
+
+* **The rule is unit testable with a fake context.** Implement the interface over the user, subject
+  and values a case needs, then call the rule directly. No schema to build, no query to execute and
+  no authentication or authorization service to stand up.
+* **The rule is reusable outside GraphQL.** An HTTP middleware, a console command or a message
+  handler can implement the interface over what it already has and reach the same decision, so the
+  rule stays the single place that check is written.
+
+A PHP interface cannot declare properties before 8.4 and GraphQLite supports 8.2, so the three
+pieces of data the context carries appear on the interface as methods:
+
+| On `SecurityRuleContext` | On the interface |
+|---|---|
+| `$context->user` | `$context->getUser()` |
+| `$context->source` | `$context->getSource()` |
+| `$context->arguments` | `$context->getArguments()` |
+
+`isGranted()`, `isLogged()`, `argument()` and `hasArgument()` are identical on both. The readonly
+properties stay on `SecurityRuleContext`, so a rule already type-hinting the concrete class needs no
+change.
+
+That interface describes what a rule is *given*. A second, equally optional one describes what a
+rule *says* when it refuses: see [a rule that states its own message](#a-rule-that-states-its-own-message).
 
 ## Setting HTTP code and error message
 
@@ -89,8 +237,8 @@ You can use the `statusCode` and `message` attributes to set the HTTP code and G
 
 ```php
 #[Query]
-#[Security(expression: "is_granted('POST_SHOW', post)", statusCode: 404, message: "Post not found (let's pretend the post does not exists!)")]
-public function getPost(Post $post): array
+#[Security(rule: self::canShow(...), statusCode: 404, message: "Post not found (let's pretend the post does not exists!)")]
+public function getPost(Post $post): Post
 {
     // ...
 }
@@ -100,6 +248,78 @@ Note: since a single GraphQL call contain many errors, 2 errors might have confl
 The resulting status code is up to the GraphQL middleware you use. Most of the time, the status code with the
 higher error code will be returned.
 
+### A rule that states its own message
+
+A rule usually knows why it refuses better than the field it guards does. Repeating that reason in a
+`message:` on every field the rule guards is what makes the two drift apart: the check is edited in
+one place and the sentence explaining it in ten. A rule can state the message itself by implementing
+`SecurityRuleMessageInterface`, which is the [`PageSizeWithin` rule above](#parameterizing-a-rule)
+with one method added:
+
+```php
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;
+
+final class PageSizeWithin implements SecurityRuleMessageInterface
+{
+    public function __construct(private readonly int $max)
+    {
+    }
+
+    public function __invoke(SecurityRuleContextInterface $context): bool
+    {
+        return $context->argument('first') <= $this->max;
+    }
+
+    public function getRefusalMessage(): string
+    {
+        return "Page size must be at most {$this->max}.";
+    }
+}
+```
+
+```php
+#[Query]
+#[Security(rule: new PageSizeWithin(100), statusCode: 400)]
+public function getPosts(int $first): array
+{
+    // ...
+}
+```
+
+Denying that field reports `Page size must be at most 100.` with no `message:` written anywhere.
+The limit is stated once, and so is the sentence quoting it.
+
+The message is chosen in this order:
+
+1. the `message:` written on the `#[Security]` attribute, whenever there is one;
+2. the message the rule states, when the rule implements `SecurityRuleMessageInterface`;
+3. `Access denied.`
+
+An explicit `message:` therefore always wins, so a single field can still say something the shared
+rule has no way to know:
+
+```php
+#[Query]
+#[Security(rule: new PageSizeWithin(100), statusCode: 400, message: 'This report is capped at 100 rows')]
+public function getReportRows(int $first): array
+{
+    // ...
+}
+```
+
+Three things to know:
+
+* **It is opt in.** A field guarded by a rule that does not implement the interface is denied with
+  the attribute's message, or with `Access denied.` when the attribute wrote none, exactly as before.
+* **A rule states a message, not a status.** `statusCode` is untouched by the interface, and
+  `failWith` is unaffected too: a field with `failWith` returns a value instead of denying, so no
+  message is read at all.
+* **Only a rule that is an object can carry a message.** An array callable names a static method and
+  first-class callable syntax produces a `Closure`, and neither has an instance to ask. Write the
+  rule as an [invokable object](#parameterizing-a-rule), which is also what lets the message quote
+  the value the rule was constructed with.
+
 ## Setting a default value
 
 If you do not want an error to be thrown when the security condition is not met, you can use the `failWith` attribute
@@ -107,7 +327,7 @@ to set a default value.
 
 ```php
 #[Query]
-#[Security(expression: "is_granted('CAN_SEE_MARGIN', this)", failWith: null)]
+#[Security(rule: self::canSeeMargin(...), failWith: null)]
 public function getMargin(): float
 {
     // ...
@@ -121,28 +341,32 @@ You cannot use the `failWith` attribute along `statusCode` or `message` attribut
 
 ## Accessing the user
 
-You can use the `user` variable to access the currently logged user.
-You can use the `is_logged()` function to check if a user is logged or not.
-
+Use `$context->user` to access the currently logged user, and `$context->isLogged()` to check
+whether anybody is logged in at all.
 
 ```php
 #[Query]
-#[Security("is_logged() && user.age > 18")]
+#[Security(rule: self::isAdult(...))]
 public function getNSFWImages(): array
 {
     // ...
+}
+
+private static function isAdult(SecurityRuleContext $context): bool
+{
+    return $context->isLogged() && $context->user->age > 18;
 }
 ```
 
 ## Accessing the current object
 
-You can use the `this` variable to access any (public) property / method of the current class.
+Use `$context->source` to access the object the field is being resolved on.
 
 ```php
 class Post {
     #[Field]
-    #[Security("this.canAccessBody(user)")]
-    public function getBody(): array
+    #[Security(rule: self::userCanAccessBody(...))]
+    public function getBody(): string
     {
         // ...
     }
@@ -151,20 +375,43 @@ class Post {
     {
         // Some custom logic here
     }
+
+    private static function userCanAccessBody(SecurityRuleContext $context): bool
+    {
+        return $context->source->canAccessBody($context->user);
+    }
 }
 ```
+
+## Combining several checks
+
+`#[Security]` is repeatable, and every attribute must pass. Declare one attribute per check rather
+than building one large rule:
+
+```php
+#[Query]
+#[Security(rule: self::canShow(...))]
+#[Security(rule: new PageSizeWithin(100), statusCode: 400)]
+public function getPosts(Post $post, int $first): array
+{
+    // ...
+}
+```
+
+Passing both a rule and an expression to the *same* `#[Security]` attribute is an error, so that a
+half-finished migration can never silently drop one of the two checks.
 
 ## Available scope
 
 The `#[Security]` attribute can be used in any query, mutation or field, so anywhere you have a `#[Query]`, `#[Mutation]`
-or `#[Field]` attribute.
+or `#[Field]` attribute. It also applies to input fields.
 
 ## How to restrict access to a given resource
 
-The `is_granted` method can be used to restrict access to a specific resource.
+`isGranted()` can be used to restrict access to a specific resource.
 
 ```php
-#[Security("is_granted('POST_SHOW', post)")]
+$context->isGranted('POST_SHOW', $context->argument('post'))
 ```
 
 If you are wondering how to configure these fine-grained permissions, this is not something that GraphQLite handles
@@ -174,6 +421,42 @@ If you are using Symfony, you will [create a custom voter](https://symfony.com/d
 
 If you are using Laravel, you will [create a Gate or a Policy](https://laravel.com/docs/6.x/authorization).
 
-If you are using another framework, you need to know that the `is_granted` function simply forwards the call to
-the `isAllowed` method of the configured `AuthorizationSerice`. See [Connecting GraphQLite to your framework's security module
+If you are using another framework, you need to know that `isGranted()` simply forwards the call to
+the `isAllowed` method of the configured `AuthorizationService`. See [Connecting GraphQLite to your framework's security module
 ](implementing-security.md) for more details
+
+## The expression form
+
+`#[Security]` also accepts a string evaluated by
+[Symfony's Expression Language](https://symfony.com/doc/current/components/expression_language/syntax.html):
+
+```php
+#[Query]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('POST_SHOW', post)")]
+public function getPost(Post $post): array
+{
+    // ...
+}
+```
+
+This is the terser option for a short predicate, and it keeps the check readable at the field it
+guards. The available variables and functions map one to one onto the rule context:
+
+| Expression | Rule |
+|---|---|
+| `user` | `$context->user` |
+| `this` | `$context->source` |
+| a field argument, for example `post` | `$context->argument('post')` |
+| `is_granted('X', y)` | `$context->isGranted('X', $y)` |
+| `is_logged()` | `$context->isLogged()` |
+
+Two things to know about expressions specifically:
+
+* They are parsed when the schema is built, so a malformed expression is a startup error naming the
+  field rather than a surprise on the first request that touches it.
+* They must evaluate to a `bool`, exactly like rules. Write `user !== null`, not `user` — an
+  authorization decision should not ride on PHP's truthiness table.
+
+An expression is evaluated inside Symfony's Expression Language, which does not run under
+`declare(strict_types=1)`. A method called from an expression therefore receives coerced arguments
+where a rule would raise a `TypeError`. If a check depends on argument types being exact, use a rule.

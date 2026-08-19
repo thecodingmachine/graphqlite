@@ -408,6 +408,8 @@ class SchemaFactory
         $expressionLanguage = $this->expressionLanguage ?: new ExpressionLanguage($symfonyCache);
         $expressionLanguage->registerProvider(new SecurityExpressionLanguageProvider());
 
+        $callableResolver = new CallableResolver($this->container);
+
         $directiveRegistry = new DirectiveRegistry($annotationReader);
         $directiveRegistry->discover();
 
@@ -418,7 +420,7 @@ class SchemaFactory
             $fieldMiddlewarePipe->pipe($fieldMiddleware);
         }
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityFieldMiddleware)
-        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
+        $fieldMiddlewarePipe->pipe(new SecurityFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService, $callableResolver));
         $fieldMiddlewarePipe->pipe(new AuthorizationFieldMiddleware($authenticationService, $authorizationService));
         $fieldMiddlewarePipe->pipe(new CostFieldMiddleware());
         $fieldMiddlewarePipe->pipe(new DirectiveFieldMiddleware($directiveAstBuilder));
@@ -428,7 +430,7 @@ class SchemaFactory
             $inputFieldMiddlewarePipe->pipe($inputFieldMiddleware);
         }
         // TODO: add a logger to the SchemaFactory and make use of it everywhere (and most particularly in SecurityInputFieldMiddleware)
-        $inputFieldMiddlewarePipe->pipe(new SecurityInputFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService));
+        $inputFieldMiddlewarePipe->pipe(new SecurityInputFieldMiddleware($expressionLanguage, $authenticationService, $authorizationService, $callableResolver));
         $inputFieldMiddlewarePipe->pipe(new AuthorizationInputFieldMiddleware($authenticationService, $authorizationService));
         $inputFieldMiddlewarePipe->pipe(new DirectiveInputFieldMiddleware($directiveAstBuilder));
 
@@ -492,7 +494,7 @@ class SchemaFactory
             $inputFieldMiddlewarePipe,
             $descriptionResolver,
         );
-        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $this->container);
+        $parameterizedCallableResolver = new ParameterizedCallableResolver($fieldsBuilder, $callableResolver);
 
         foreach ($this->parameterMiddlewares as $parameterMapper) {
             $parameterMiddlewarePipe->pipe($parameterMapper);

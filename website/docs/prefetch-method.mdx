@@ -72,8 +72,19 @@ class PostType {
 When a `#[Prefetch]` attribute is detected on a parameter of `#[Field]` attribute, the method is called automatically.
 The prefetch callable must be one of the following:
   - a static method in the same class: `#[Prefetch('prefetchMethod')]`
-  - a static method in a different class: `#[Prefetch([OtherClass::class, 'prefetchMethod')]`
+  - a static method in a different class: `#[Prefetch([OtherClass::class, 'prefetchMethod'])]`
   - a non-static method in a different class, resolvable through the container: `#[Prefetch([OtherService::class, 'prefetchMethod'])]`
+  - an invokable object: `#[Prefetch(new CommentLoader())]`
+  - on PHP 8.5 and later, first-class callable syntax: `#[Prefetch(OtherClass::prefetchMethod(...))]`
+
+First-class callable syntax **cannot** name a non-static method resolved through the container: it
+compiles, and then fails when the attribute is read. Keep using the array form for that case — it is
+not a workaround for older PHP, it is the only syntax that can express it.
+
+The callable must name a real method, because its own parameters become GraphQL arguments and their
+descriptions are read from the method docblock. An inline closure has no such method and is rejected
+when the schema is built.
+
 The first argument of the method is always an array of instances of the main type. It can return absolutely anything (mixed).
 
 ## Input arguments

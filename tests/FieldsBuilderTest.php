@@ -791,23 +791,20 @@ class FieldsBuilderTest extends AbstractQueryProvider
         $this->assertSame('Test argument description', $testField->args[0]->description);
     }
 
+    /**
+     * A malformed expression is now rejected while the schema is built, rather than on the first
+     * request that happens to touch the field.
+     */
     public function testSecurityBadQuery(): void
     {
         $controller = new TestControllerWithBadSecurity();
 
         $queryProvider = $this->buildFieldsBuilder();
 
-        $queries = $queryProvider->getQueries($controller);
-
-        $this->assertCount(1, $queries);
-        $query = $queries['testBadSecurity'];
-        $this->assertSame('testBadSecurity', $query->name);
-
-        $resolve = $query->resolveFn;
-
         $this->expectException(BadExpressionInSecurityException::class);
-        $this->expectExceptionMessage('An error occurred while evaluating expression in @Security annotation of method "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity()": Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`.');
-        $result = $resolve(new stdClass(), [], null, $this->createMock(ResolveInfo::class));
+        $this->expectExceptionMessage('The expression in the #[Security] attribute of "TheCodingMachine\GraphQLite\Fixtures\TestControllerWithBadSecurity::testBadSecurity()" is not valid: Unexpected token "name" of value "is" around position 6 for expression `this is not valid expression language`. Expression: "this is not valid expression language".');
+
+        $queryProvider->getQueries($controller);
     }
 
     public function testQueryProviderWithNullableArray(): void
