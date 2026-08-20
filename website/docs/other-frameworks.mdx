@@ -52,6 +52,11 @@ $factory->setAuthenticationService(new VoidAuthenticationService());
 $factory->setAuthorizationService(new VoidAuthorizationService());
 // Change the naming convention of GraphQL types globally.
 $factory->setNamingStrategy(new NamingStrategy());
+// Configure the method-name prefixes stripped to derive field names and matched when resolving
+// property accessors (e.g. `#[SourceField]`). Add "has" to expose hassers such as `hasStock()`.
+// A prefix is only stripped on a camelCase boundary, so `isEnabled()` becomes `enabled` while
+// `issue()` is left untouched. Defaults preserve the historical behavior (`get`/`is`, `set`).
+$factory->stripFieldPrefixes(getters: ['get', 'is', 'has'], setters: ['set']);
 // Add a custom type mapper.
 $factory->addTypeMapper($typeMapper);
 // Add a custom type mapper using a factory to create it.

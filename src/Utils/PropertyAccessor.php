@@ -20,9 +20,9 @@ class PropertyAccessor
     /**
      * Finds a getter for a property.
      */
-    public static function findGetter(string $class, string $propertyName): string|null
+    public static function findGetter(string $class, string $propertyName, FieldAccessorPrefixes $prefixes = new FieldAccessorPrefixes()): string|null
     {
-        foreach (['get', 'is'] as $prefix) {
+        foreach ($prefixes->getters as $prefix) {
             $methodName = self::propertyToMethodName($prefix, $propertyName);
 
             if (self::isPublicMethod($class, $methodName)) {
@@ -36,12 +36,14 @@ class PropertyAccessor
     /**
      * Finds a setter for a property.
      */
-    public static function findSetter(string $class, string $propertyName): string|null
+    public static function findSetter(string $class, string $propertyName, FieldAccessorPrefixes $prefixes = new FieldAccessorPrefixes()): string|null
     {
-        $methodName = self::propertyToMethodName('set', $propertyName);
+        foreach ($prefixes->setters as $prefix) {
+            $methodName = self::propertyToMethodName($prefix, $propertyName);
 
-        if (self::isPublicMethod($class, $methodName)) {
-            return $methodName;
+            if (self::isPublicMethod($class, $methodName)) {
+                return $methodName;
+            }
         }
 
         return null;
