@@ -23,7 +23,7 @@
         "psr/simple-cache": "^1.0.1 || ^2 || ^3",
         "symfony/cache": "^4.3 || ^5 || ^6 || ^7 || ^8",
         "symfony/expression-language": "^4 || ^5 || ^6 || ^7 || ^8",
-        "webonyx/graphql-php": "^v15.0",
+        "webonyx/graphql-php": "^15.33.0",
         "kcs/class-finder": "^0.6.0"
     },
     "require-dev": {

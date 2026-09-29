@@ -20,6 +20,7 @@ use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Directives\DirectiveAstBuilder;
 use TheCodingMachine\GraphQLite\Directives\DirectiveRegistry;
+use TheCodingMachine\GraphQLite\Directives\Discovery\DirectiveClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\SnapshotClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
@@ -431,7 +432,10 @@ class SchemaFactory
 
         $callableResolver = new CallableResolver($this->container);
 
-        $directiveRegistry = new DirectiveRegistry($annotationReader);
+        $directiveRegistry = new DirectiveRegistry(
+            $annotationReader,
+            new DirectiveClassFinder($classFinder, $classFinderComputedCache),
+        );
         $directiveRegistry->discover();
 
         $directiveAstBuilder = new DirectiveAstBuilder($directiveRegistry);

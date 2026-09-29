@@ -9,43 +9,99 @@ use ReflectionClass;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\Deprecated;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\OneOf;
+use TheCodingMachine\GraphQLite\Directives\Discovery\DirectiveClassFinder;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
 
+use function array_key_exists;
+use function in_array;
+
 /**
- * Holds the directives known to a schema. In this layer that's the built-ins that bind PHP behavior
- * to directives webonyx already declares (`@oneOf`, `@deprecated`); a later layer adds user-defined
- * directives on top.
- *
- * The dispatcher middlewares query it at apply time for a directive's argument shape, which the AST
- * builder needs to encode each arg as a GraphQL value.
+ * Discovers, validates and holds a schema's directives: the user-defined ones plus the built-ins
+ * (`@oneOf`, `@deprecated`). Middlewares query it at apply time for a directive's argument shape.
  */
 final class DirectiveRegistry
 {
     /** @var array<class-string<DirectiveInterface>, ResolvedDirective> */
     private array $resolvedByClass = [];
 
-    /** Attribute classes that bind PHP behavior to webonyx's built-in directives. */
+    /** @var array<string, class-string<DirectiveInterface>> */
+    private array $classByName = [];
+
+    /** Attributes we bind to webonyx's built-ins; a custom directive reuses these names only via `builtIn: true`. */
     private const BUILT_IN_ATTRIBUTES = [
         OneOf::class,
         Deprecated::class,
     ];
 
+    /** webonyx directives we don't bind; no custom directive may take these names. */
+    private const RESERVED_WEBONYX_NAMES = [
+        WebonyxDirective::SKIP_NAME,
+        WebonyxDirective::INCLUDE_NAME,
+        WebonyxDirective::SPECIFIED_BY_NAME,
+    ];
+
     public function __construct(
         private readonly AnnotationReader $annotationReader,
+        private readonly DirectiveClassFinder $classFinder,
     ) {
     }
 
-    /** Resolve the built-in directives once. Idempotent. */
+    /** Idempotent. User directives first, so a `builtIn: true` override lands before the bundled copy. */
     public function discover(): void
     {
-        foreach (self::BUILT_IN_ATTRIBUTES as $directiveClass) {
-            /** @var class-string<TypeSystemDirective> $directiveClass */
-            if (isset($this->resolvedByClass[$directiveClass])) {
-                continue;
-            }
-
-            $this->resolvedByClass[$directiveClass] = DirectiveResolver::resolve($directiveClass, $directiveClass::definition());
+        foreach ($this->classFinder->findDirectives() as $directiveClass) {
+            $this->register($directiveClass);
         }
+        foreach (self::BUILT_IN_ATTRIBUTES as $directiveClass) {
+            $this->register($directiveClass);
+        }
+    }
+
+    /** @param class-string<TypeSystemDirective> $directiveClass */
+    private function register(string $directiveClass): void
+    {
+        // Discovery and the built-in list overlap, so a repeat is expected.
+        if (isset($this->resolvedByClass[$directiveClass])) {
+            return;
+        }
+
+        $definition = $directiveClass::definition();
+
+        DirectiveValidator::validate($directiveClass, $definition);
+
+        if (! $definition->builtIn && in_array($definition->name, self::RESERVED_WEBONYX_NAMES, true)) {
+            throw InvalidDirectiveException::reservedName($definition->name, $directiveClass);
+        }
+
+        if (! $definition->builtIn && $this->isReservedBuiltInName($definition->name)) {
+            throw InvalidDirectiveException::reservedName($definition->name, $directiveClass);
+        }
+
+        if (array_key_exists($definition->name, $this->classByName)) {
+            // A builtIn override defers to the already-registered user class; two customs is an error.
+            if ($definition->builtIn) {
+                return;
+            }
+            throw InvalidDirectiveException::duplicateName(
+                $definition->name,
+                $this->classByName[$definition->name],
+                $directiveClass,
+            );
+        }
+
+        $this->resolvedByClass[$directiveClass] = DirectiveResolver::resolve($directiveClass, $definition);
+        $this->classByName[$definition->name] = $directiveClass;
+    }
+
+    private function isReservedBuiltInName(string $name): bool
+    {
+        foreach (self::BUILT_IN_ATTRIBUTES as $builtInClass) {
+            if ($builtInClass::definition()->name === $name) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function hasAny(): bool
