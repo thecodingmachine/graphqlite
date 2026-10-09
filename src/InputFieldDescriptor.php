@@ -27,6 +27,7 @@ class InputFieldDescriptor
      * @param array<string, ParameterInterface> $parameters
      * @param callable $resolver
      * @param bool $injectSource Whether we should inject the source as the first parameter or not.
+     * @param list<string> $descriptionItems Metadata rendered as a list after the description
      */
     public function __construct(
         private readonly string $name,
@@ -41,8 +42,21 @@ class InputFieldDescriptor
         private readonly bool $isUpdate = false,
         private readonly bool $hasDefaultValue = false,
         private readonly mixed $defaultValue = null,
+        private readonly bool $undefinedWhenOmitted = false,
+        private readonly array $descriptionItems = [],
     )
     {
+    }
+
+    /** Whether an omitted field hydrates its constructor parameter or property with Undefined */
+    public function isUndefinedWhenOmitted(): bool
+    {
+        return $this->undefinedWhenOmitted;
+    }
+
+    public function withUndefinedWhenOmitted(bool $undefinedWhenOmitted): self
+    {
+        return $this->with(undefinedWhenOmitted: $undefinedWhenOmitted);
     }
 
     public function isUpdate(): bool
@@ -135,6 +149,22 @@ class InputFieldDescriptor
     public function withDescription(string|null $description): self
     {
         return $this->with(description: $description);
+    }
+
+    /** @return list<string> */
+    public function getDescriptionItems(): array
+    {
+        return $this->descriptionItems;
+    }
+
+    /**
+     * Appends a metadata item, rendered as a Markdown list after the description
+     *
+     * Items keep the order they were added in and survive {@see withDescription()}.
+     */
+    public function withAddedDescriptionItem(string $item): self
+    {
+        return $this->with(descriptionItems: [...$this->descriptionItems, $item]);
     }
 
     public function getMiddlewareAnnotations(): MiddlewareAnnotations

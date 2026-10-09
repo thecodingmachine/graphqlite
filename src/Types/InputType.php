@@ -74,6 +74,10 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
         foreach ($this->inputFields as $inputField) {
             $name = $inputField->name;
             if (! array_key_exists($name, $args)) {
+                if ($inputField->isUndefinedWhenOmitted()) {
+                    $inputField->resolveOmitted($source);
+                }
+
                 continue;
             }
 
@@ -106,6 +110,10 @@ class InputType extends MutableInputObjectType implements ResolvableMutableInput
             $resolve = $constructorInputField->getResolve();
 
             if (! array_key_exists($name, $args)) {
+                if ($constructorInputField->isUndefinedWhenOmitted()) {
+                    $constructorArgs[$name] = $constructorInputField->resolveOmitted($source);
+                }
+
                 continue;
             }
 

@@ -137,6 +137,9 @@ class SchemaFactory
      */
     private bool $useDocblockDescriptions = true;
 
+    /** When true (default), arguments and input fields typed `T|Undefined` say in their description whether null is accepted */
+    private bool $useUndefinedDescriptions = true;
+
     /** @var array<int, FieldMiddlewareInterface> */
     private array $fieldMiddlewares = [];
 
@@ -371,6 +374,20 @@ class SchemaFactory
     }
 
     /**
+     * Controls whether arguments and input fields whose PHP type contains `Undefined` list an item after their
+     * description: "May be omitted; null is accepted." or "May be omitted; null is not accepted."
+     *
+     * GraphQL types can't express "optional but not nullable", and applied directives aren't exposed by
+     * introspection, so the description is the only place every client sees it. Enabled by default.
+     */
+    public function setUndefinedDescriptionsEnabled(bool $enabled): self
+    {
+        $this->useUndefinedDescriptions = $enabled;
+
+        return $this;
+    }
+
+    /**
      * Registers a field middleware (used to parse custom annotations that modify the GraphQLite behaviour in Fields/Queries/Mutations.
      */
     public function addFieldMiddleware(FieldMiddlewareInterface $fieldMiddleware): self
@@ -417,7 +434,7 @@ class SchemaFactory
             $classBoundCache,
             PhpDocumentorDocBlockFactory::default(),
         );
-        $descriptionResolver = new DescriptionResolver($this->useDocblockDescriptions);
+        $descriptionResolver = new DescriptionResolver($this->useDocblockDescriptions, $this->useUndefinedDescriptions);
         $fieldAccessorPrefixes = $this->fieldAccessorPrefixes ?? new FieldAccessorPrefixes();
         $namingStrategy = $this->namingStrategy ?: new NamingStrategy($fieldAccessorPrefixes);
         $typeRegistry = new TypeRegistry();

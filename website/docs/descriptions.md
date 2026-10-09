@@ -68,6 +68,29 @@ one:
    fallback is enabled on the `SchemaFactory`.
 4. Otherwise the schema description is empty.
 
+## Metadata items
+
+GraphQLite lists some facts about a field after its description, as a Markdown list following a blank line:
+the `#[Cost]` of a field (see [Operation complexity](operation-complexity.md)), and whether an argument or
+input field typed `T|Undefined` accepts null (see [Optional input fields](input-types.mdx#optional-input-fields),
+with its own toggle, `setUndefinedDescriptionsEnabled()`). Items are listed even after an explicit
+`description: ''`, and without a description only the list remains:
+
+```graphql
+"""
+Paginated list of Books, optionally filtered
+
+- Cost: complexity = 5, multipliers = [first], defaultMultiplier = null
+"""
+books(first: Int): [Book!]!
+```
+
+A [field middleware](field-middlewares.md) adds its own item with
+`QueryFieldDescriptor::withAddedDescriptionItem()`, and an input field middleware with
+`InputFieldDescriptor::withAddedDescriptionItem()`. Items are listed in the order the middlewares add
+them, are kept when a middleware replaces the description with `withDescription()`, and an item the
+description already contains is left out.
+
 ## Disabling the docblock fallback
 
 Docblocks double as developer-facing notes (implementation reminders, `@see` references, TODOs).

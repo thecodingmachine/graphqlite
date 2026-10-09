@@ -12,11 +12,14 @@ use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use ReflectionProperty;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
+use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 use Throwable;
 
 /**
@@ -40,7 +43,7 @@ final class InputField extends InputObjectField
         string $name,
         InputType $type,
         array $arguments,
-        ResolverInterface $originalResolver,
+        private readonly ResolverInterface $originalResolver,
         callable $resolver,
         private bool $forConstructorHydration,
         string|null $description,
@@ -48,6 +51,7 @@ final class InputField extends InputObjectField
         bool $hasDefaultValue,
         mixed $defaultValue,
         array|null $additionalConfig = null,
+        private readonly bool $undefinedWhenOmitted = false,
     ) {
         $config = [
             'name' => $name,
@@ -122,6 +126,41 @@ final class InputField extends InputObjectField
         return $this->forConstructorHydration;
     }
 
+    /** Whether an omitted field hydrates its constructor parameter or property with Undefined */
+    public function isUndefinedWhenOmitted(): bool
+    {
+        return $this->undefinedWhenOmitted;
+    }
+
+    /**
+     * Hydrates an omitted field with Undefined, returning the field's value
+     *
+     * Skips the middleware: nothing was sent, so there is nothing to authorize. A property the constructor
+     * already assigned keeps that value, as it would without Undefined (and a readonly one can't be reassigned).
+     */
+    public function resolveOmitted(object|null $source): mixed
+    {
+        $resolver = $this->originalResolver;
+        if ($source !== null && $resolver instanceof SourceInputPropertyResolver) {
+            $property = $resolver->propertyReflection();
+            if (self::isAssigned($property, $source)) {
+                return $property->getValue($source);
+            }
+        }
+
+        return $resolver($source, Undefined::VALUE);
+    }
+
+    /** Whether the property holds a value, given an untyped property starts out null rather than uninitialized */
+    private static function isAssigned(ReflectionProperty $property, object $source): bool
+    {
+        if ($property->hasType()) {
+            return $property->isInitialized($source);
+        }
+
+        return $property->getValue($source) !== null;
+    }
+
     private static function fromDescriptor(InputFieldDescriptor $fieldDescriptor): self
     {
         return new self(
@@ -131,10 +170,11 @@ final class InputField extends InputObjectField
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
             $fieldDescriptor->isForConstructorHydration(),
-            $fieldDescriptor->getDescription(),
+            DescriptionResolver::appendItems($fieldDescriptor->getDescription(), $fieldDescriptor->getDescriptionItems()),
             $fieldDescriptor->isUpdate(),
             $fieldDescriptor->hasDefaultValue(),
             $fieldDescriptor->getDefaultValue(),
+            undefinedWhenOmitted: $fieldDescriptor->isUndefinedWhenOmitted(),
         );
     }
 

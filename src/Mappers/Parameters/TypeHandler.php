@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
 
 use GraphQL\Type\Definition\InputType;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use InvalidArgumentException;
@@ -237,7 +238,9 @@ class TypeHandler implements ParameterHandlerInterface
             $defaultValue = $parameter->getDefaultValue();
         }
 
-        if (! $hasDefaultValue && UndefinedTypeMapper::containsUndefined($phpdocType)) {
+        $containsUndefined = self::containsUndefined($phpdocType, $paramTagType);
+
+        if (! $hasDefaultValue && $containsUndefined) {
             $hasDefaultValue = true;
             $defaultValue = Undefined::VALUE;
         }
@@ -247,17 +250,34 @@ class TypeHandler implements ParameterHandlerInterface
             $defaultValue = null;
         }
 
-        $description = $this->getParameterDescriptionFromDocBlock($docBlock, $parameter);
+        $refusesNull = $containsUndefined && ! $parameter->allowsNull();
+        $descriptionItems = $containsUndefined && ! $type instanceof NonNull
+            ? $this->descriptionResolver->describeUndefined($refusesNull)
+            : [];
 
         return new InputTypeParameter(
             name: $parameter->getName(),
             type: $type,
             description: $description,
+            descriptionItems: $descriptionItems,
             hasDefaultValue: $hasDefaultValue,
             defaultValue: $defaultValue,
             defaultValueImplicit: $defaultValue === Undefined::VALUE,
             argumentResolver: $this->argumentResolver,
+            refusesNull: $refusesNull,
+            acceptsUndefined: $containsUndefined,
         );
+    }
+
+    /** Whether the native type includes Undefined, or the docblock type does when the native type is absent or mixed */
+    private static function containsUndefined(Type $phpdocType, Type|null $docBlockType): bool
+    {
+        $nativeType = $phpdocType instanceof Nullable ? $phpdocType->getActualType() : $phpdocType;
+        if ($nativeType instanceof Mixed_ && $docBlockType !== null) {
+            return UndefinedTypeMapper::containsUndefined($docBlockType);
+        }
+
+        return UndefinedTypeMapper::containsUndefined($phpdocType);
     }
 
     private function getParameterDescriptionFromDocBlock(DocBlock $docBlock, ReflectionParameter $parameter): string|null
@@ -316,6 +336,9 @@ class TypeHandler implements ParameterHandlerInterface
     /**
      * Maps class property into input property.
      *
+     * $acceptsNull says whether the constructor parameter or setter that receives the value accepts null.
+     * It defaults to the property's own type.
+     *
      * @throws CannotMapTypeException
      */
     public function mapInputProperty(
@@ -326,6 +349,7 @@ class TypeHandler implements ParameterHandlerInterface
         mixed $defaultValue = null,
         bool|null $isNullable = null,
         bool $hasDefaultValue = false,
+        bool|null $acceptsNull = null,
     ): InputTypeProperty
     {
         $docBlockDescription = $docBlock->getSummary() . PHP_EOL . $docBlock->getDescription()->render();
@@ -362,14 +386,17 @@ class TypeHandler implements ParameterHandlerInterface
             assert($inputType instanceof InputType);
         }
 
+        // Undefined before null: GraphQL would fill a printed `null` default in for an omitted `T|null|Undefined` field.
+        $containsUndefined = self::containsUndefined($phpdocType, $this->getDocBlockPropertyType($docBlock, $refProperty));
+
+        if (! $hasDefaultValue && $containsUndefined) {
+            $hasDefaultValue = true;
+            $defaultValue = Undefined::VALUE;
+        }
+
         if (! $hasDefaultValue && $isNullable) {
             $hasDefaultValue = true;
             $defaultValue = null;
-        }
-
-        if (! $hasDefaultValue && UndefinedTypeMapper::containsUndefined($phpdocType)) {
-            $hasDefaultValue = true;
-            $defaultValue = Undefined::VALUE;
         }
 
         $fieldName = $argumentName ?? $refProperty->getName();
@@ -385,6 +412,8 @@ class TypeHandler implements ParameterHandlerInterface
             defaultValue: $defaultValue,
             defaultValueImplicit: $defaultValue === Undefined::VALUE,
             argumentResolver: $this->argumentResolver,
+            refusesNull: $containsUndefined && ! ($acceptsNull ?? $propertyType?->allowsNull() ?? true),
+            acceptsUndefined: $containsUndefined,
         );
     }
 

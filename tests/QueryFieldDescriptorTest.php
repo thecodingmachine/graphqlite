@@ -16,6 +16,10 @@ class QueryFieldDescriptorTest extends TestCase
         string $added,
     ): void
     {
+        $this->expectUserDeprecationMessage(
+            'QueryFieldDescriptor::withAddedDescriptionLines() is deprecated; use withAddedDescriptionItem() instead.',
+        );
+
         $resolver = fn () => null;
 
         $descriptor = (new QueryFieldDescriptor(
@@ -34,5 +38,28 @@ class QueryFieldDescriptorTest extends TestCase
         yield ['', null, ''];
         yield ['Asd', null, 'Asd'];
         yield ["Some description\nAsd", 'Some description', 'Asd'];
+    }
+
+    public function testDescriptionItemsAreKeptApartFromTheDescription(): void
+    {
+        $resolver = fn () => null;
+
+        $descriptor = (new QueryFieldDescriptor(
+            'test',
+            Type::string(),
+            resolver: $resolver,
+            originalResolver: new ServiceResolver($resolver),
+            description: 'From the docblock',
+        ))
+            ->withAddedDescriptionItem('Audience: librarians')
+            ->withAddedDescriptionItem('Cost: complexity = 5')
+            ->withDescription('Explicit');
+
+        self::assertSame('Explicit', $descriptor->getDescription());
+        self::assertSame(['Audience: librarians', 'Cost: complexity = 5'], $descriptor->getDescriptionItems());
+        self::assertSame(
+            "Explicit\n\n- Audience: librarians\n- Cost: complexity = 5",
+            QueryField::fromFieldDescriptor($descriptor)->description,
+        );
     }
 }

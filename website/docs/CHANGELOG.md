@@ -20,6 +20,15 @@ sidebar_label: Changelog
   field name. **Migration**: if a `#[Field]`/`#[SourceField]` method relied on the old behavior (for
   example `issue()` exposing a field named `sue`), set an explicit field name with `#[Field(name:)]`
   or the source field's `name`.
+- Description metadata is rendered as a Markdown list after a blank line, so the `#[Cost]` text in
+  introspection and printed schemas changes from `Cost: complexity = ...` on its own line to the list item
+  `- Cost: complexity = ...`. **Migration**: update anything that parses or snapshots field descriptions.
+  @oojacoboo
+- An omitted input field typed `T|null|Undefined` without a PHP default now resolves to `Undefined::VALUE`
+  instead of `null`, and no longer prints a `= null` default in the schema. A constructor parameter or
+  property without a PHP default gets `Undefined::VALUE` too, instead of being left unset, unless the
+  constructor already assigned the property. **Migration**: code that treated `null` as "not sent" for such
+  a field should compare against `Undefined::VALUE`. @oojacoboo
 
 ### New Features
 
@@ -35,11 +44,22 @@ sidebar_label: Changelog
 - [#822 Accept PHP callables as `#[Security]` rules](https://github.com/thecodingmachine/graphqlite/pull/822)
   @oojacoboo, alongside the existing expression form, with access to the field context and custom
   refusal messages.
+- Arguments and input fields typed `T|Undefined` now say in their GraphQL description that they may be
+  omitted and whether null is accepted ("May be omitted; null is not accepted." or "May be omitted; null is
+  accepted."), since GraphQL types can't express it. Disable with
+  `SchemaFactory::setUndefinedDescriptionsEnabled(false)`. @oojacoboo
+- Field and input field middlewares add description metadata as list items with
+  `withAddedDescriptionItem()`. `QueryFieldDescriptor::withAddedDescriptionLines()` is deprecated in favor of
+  it. @oojacoboo
 
 ### Bug Fixes
 
 - [#819 Fix undefined array input type](https://github.com/thecodingmachine/graphqlite/pull/819)
   @michael-georgiadis
+- An explicit `null` sent for an argument or input field typed `T|Undefined` (without `null`) is now
+  refused with a client error naming it, instead of failing with a `TypeError`. @oojacoboo
+- [#793](https://github.com/thecodingmachine/graphqlite/pull/793) Argument `@param` descriptions no longer
+  reach the schema when `SchemaFactory::setDocblockDescriptionsEnabled(false)` is set. @oojacoboo
 
 ## >8.0.0
 

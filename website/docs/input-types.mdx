@@ -175,7 +175,7 @@ class UpdateUserInput
 	public string $username;
 
     #[Field]
-	protected int|null|Undefined $age;
+	public int|null|Undefined $age;
 }
 ```
 
@@ -210,11 +210,37 @@ class Article
 }
 ```
 
-For field parameters and input field properties, an explicit `= Undefined::VALUE` default is not required:
-when the type includes `Undefined`, GraphQLite resolves omitted values as `Undefined::VALUE`. Adding the
-default explicitly is optional and can still be useful for clarity. Constructor parameters and promoted
-properties are different: if you want an omitted value there to resolve to `Undefined::VALUE`, you still
-need a real PHP default such as `= Undefined::VALUE`.
+An explicit `= Undefined::VALUE` default is not required: when the type includes `Undefined`, GraphQLite
+resolves omitted values as `Undefined::VALUE`, including for nullable types and for properties hydrated through
+a constructor parameter or setter. Adding the default explicitly is optional and can still be useful for
+clarity. A different PHP default, such as `= null`, is kept as the GraphQL default instead, and a property
+the constructor assigns keeps that value. A setter method carrying `#[Field]`, itself, is not called when its
+field is omitted.
+
+GraphQL can't express "optional but not nullable", so a type like `int|Undefined` is exposed as a nullable `Int`.
+An explicit `null` for it is refused with a GraphQL error naming the field or argument, before the resolver runs.
+Add `null` to the PHP type (`int|null|Undefined`) when `null` is a meaningful value. For a property hydrated
+through a constructor parameter or setter, that parameter's type decides.
+
+Since the GraphQL type can't carry this, GraphQLite says it in the description of every argument and input field
+whose PHP type contains `Undefined`, as a list item after any description you wrote
+(see [Metadata items](descriptions.md#metadata-items)):
+
+- `int|Undefined`: "May be omitted; null is not accepted."
+- `int|null|Undefined`: "May be omitted; null is accepted."
+
+```graphql
+"""
+Age in years.
+
+- May be omitted; null is not accepted.
+"""
+age: Int
+```
+
+The item isn't added if your description already contains the sentence. It is left off when `inputType` or
+`#[UseInputType]` forces a non-null GraphQL type, since that type already says the value is required. Disable it
+with `$schemaFactory->setUndefinedDescriptionsEnabled(false)`, for instance to word it yourself.
 
 ## Factory
 

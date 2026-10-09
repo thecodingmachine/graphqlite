@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\GraphQLite\Integration;
 
+use GraphQL\Error\DebugFlag;
+use GraphQL\GraphQL;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Utils\SchemaPrinter;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -13,11 +18,20 @@ use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Fixtures\Description\Book;
 use TheCodingMachine\GraphQLite\Fixtures\DescriptionDuplicate\Book as DuplicateBook;
+use TheCodingMachine\GraphQLite\Fixtures\DescriptionItems\AudienceFieldMiddleware;
+use TheCodingMachine\GraphQLite\Fixtures\DescriptionItems\AudienceInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Fixtures\DescriptionItems\BookController;
 use TheCodingMachine\GraphQLite\Fixtures\DescriptionLegacyEnum\Era;
+use TheCodingMachine\GraphQLite\Fixtures\UndefinedDescription\UndefinedDescriptionController;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\VoidAuthorizationService;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
+
+use function array_column;
+use function assert;
+use function substr_count;
 
 /**
  * End-to-end verification of the explicit-description attribute + SchemaFactory docblock toggle
@@ -43,16 +57,24 @@ class DescriptionTest extends TestCase
      *
      * @param class-string $fixtureClass Any class from the fixture namespace to build over.
      */
-    private function buildSchema(string $fixtureClass, bool $docblockDescriptions = true): Schema
+    private function buildSchema(
+        string $fixtureClass,
+        bool $docblockDescriptions = true,
+        bool $undefinedDescriptions = true,
+        CacheInterface|null $cache = null,
+    ): Schema
     {
         $factory = new SchemaFactory(
-            new Psr16Cache(new ArrayAdapter()),
+            $cache ?? new Psr16Cache(new ArrayAdapter()),
             new BasicAutoWiringContainer(new EmptyContainer()),
         );
         $factory->setAuthenticationService(new VoidAuthenticationService());
         $factory->setAuthorizationService(new VoidAuthorizationService());
         $factory->addNamespace((new ReflectionClass($fixtureClass))->getNamespaceName());
         $factory->setDocblockDescriptionsEnabled($docblockDescriptions);
+        $factory->setUndefinedDescriptionsEnabled($undefinedDescriptions);
+        $factory->addFieldMiddleware(new AudienceFieldMiddleware());
+        $factory->addInputFieldMiddleware(new AudienceInputFieldMiddleware());
 
         return $factory->createSchema();
     }
@@ -253,5 +275,250 @@ class DescriptionTest extends TestCase
             $this->assertStringContainsString('DescriptionDuplicate\\Book', $exception->getMessage());
             $this->assertStringContainsString('DescriptionDuplicate\\BookExtension', $exception->getMessage());
         }
+    }
+
+    public function testUndefinedDescriptionsAreAppendedByDefault(): void
+    {
+        $schema = $this->buildSchema(UndefinedDescriptionController::class);
+
+        $this->assertSame('May be omitted; null is not accepted.', DescriptionResolver::UNDEFINED_REFUSES_NULL);
+        $this->assertSame('May be omitted; null is accepted.', DescriptionResolver::UNDEFINED_ACCEPTS_NULL);
+        $refuses = '- ' . DescriptionResolver::UNDEFINED_REFUSES_NULL;
+        $accepts = '- ' . DescriptionResolver::UNDEFINED_ACCEPTS_NULL;
+
+        $this->assertSame([
+            'property' => $refuses,
+            'nullableProperty' => $accepts,
+            'describedProperty' => "Age in years.\n\n" . $refuses,
+            'describedNullableProperty' => "Age in years.\n\n" . $accepts,
+            // Not duplicated when the developer already wrote it
+            'alreadyDescribedProperty' => 'Age in years. May be omitted; null is not accepted.',
+            'plainProperty' => 'Age in years.',
+            // A forced non-null type says it is required, so no sentence
+            'nonNullProperty' => '',
+            'promotedParameter' => $refuses,
+            'nullablePromotedParameter' => $accepts,
+            'describedPromotedParameter' => "Age in years.\n\n" . $refuses,
+            'describedNullablePromotedParameter' => "Age in years.\n\n" . $accepts,
+            'setter' => $refuses,
+            'nullableSetter' => $accepts,
+            'describedSetter' => "Age in years.\n\n" . $refuses,
+            'describedNullableSetter' => "Age in years.\n\n" . $accepts,
+            'nonNullSetter' => '',
+        ], $this->introspectInputFieldDescriptions($schema));
+
+        $this->assertSame([
+            'argument' => $refuses,
+            'nullableArgument' => $accepts,
+            'describedArgument' => "Age in years.\n\n" . $refuses,
+            'describedNullableArgument' => "Age in years.\n\n" . $accepts,
+            'plainArgument' => null,
+            'nonNullArgument' => null,
+        ], $this->introspectArgumentDescriptions($schema));
+
+        $printedInput = SchemaPrinter::printType($schema->getType('UndefinedDescriptionInput'));
+        $this->assertStringContainsString(
+            "  \"\"\"\n  Age in years.\n  \n  - May be omitted; null is not accepted.\n  \"\"\"\n  describedProperty: Int\n",
+            $printedInput,
+        );
+        $this->assertStringContainsString("  \"- May be omitted; null is accepted.\"\n  nullableSetter: Int\n", $printedInput);
+        $this->assertStringContainsString("  \"\"\n  nonNullProperty: Int!\n", $printedInput);
+        $this->assertStringContainsString("  \"\"\n  nonNullSetter: Int!\n", $printedInput);
+        $this->assertStringContainsString(
+            "    plainArgument: Int = null\n    nonNullArgument: Int!\n",
+            SchemaPrinter::printType($schema->getQueryType()),
+        );
+    }
+
+    public function testUndefinedDescriptionsCanBeDisabled(): void
+    {
+        $schema = $this->buildSchema(UndefinedDescriptionController::class, undefinedDescriptions: false);
+
+        $this->assertSame([
+            'property' => '',
+            'nullableProperty' => '',
+            'describedProperty' => 'Age in years.',
+            'describedNullableProperty' => 'Age in years.',
+            'alreadyDescribedProperty' => 'Age in years. May be omitted; null is not accepted.',
+            'plainProperty' => 'Age in years.',
+            'nonNullProperty' => '',
+            'promotedParameter' => '',
+            'nullablePromotedParameter' => '',
+            'describedPromotedParameter' => 'Age in years.',
+            'describedNullablePromotedParameter' => 'Age in years.',
+            'setter' => '',
+            'nullableSetter' => '',
+            'describedSetter' => 'Age in years.',
+            'describedNullableSetter' => 'Age in years.',
+            'nonNullSetter' => '',
+        ], $this->introspectInputFieldDescriptions($schema));
+
+        $this->assertSame([
+            'argument' => null,
+            'nullableArgument' => null,
+            'describedArgument' => 'Age in years.',
+            'describedNullableArgument' => 'Age in years.',
+            'plainArgument' => null,
+            'nonNullArgument' => null,
+        ], $this->introspectArgumentDescriptions($schema));
+    }
+
+    public function testUndefinedDescriptionsSurviveDisabledDocblockFallback(): void
+    {
+        $schema = $this->buildSchema(UndefinedDescriptionController::class, docblockDescriptions: false);
+
+        $refuses = '- ' . DescriptionResolver::UNDEFINED_REFUSES_NULL;
+        $accepts = '- ' . DescriptionResolver::UNDEFINED_ACCEPTS_NULL;
+        $this->assertSame([
+            'property' => $refuses,
+            'nullableProperty' => $accepts,
+            'describedProperty' => $refuses,
+            'describedNullableProperty' => $accepts,
+            'alreadyDescribedProperty' => 'Age in years. May be omitted; null is not accepted.',
+            'plainProperty' => null,
+            'nonNullProperty' => null,
+            'promotedParameter' => $refuses,
+            'nullablePromotedParameter' => $accepts,
+            'describedPromotedParameter' => "Age in years.\n\n" . $refuses,
+            'describedNullablePromotedParameter' => "Age in years.\n\n" . $accepts,
+            'setter' => $refuses,
+            'nullableSetter' => $accepts,
+            'describedSetter' => $refuses,
+            'describedNullableSetter' => $accepts,
+            'nonNullSetter' => null,
+        ], $this->introspectInputFieldDescriptions($schema));
+
+        $this->assertSame([
+            'argument' => $refuses,
+            'nullableArgument' => $accepts,
+            // The @param description stays out of the schema with the docblock fallback off
+            'describedArgument' => $refuses,
+            'describedNullableArgument' => $accepts,
+            'plainArgument' => null,
+            'nonNullArgument' => null,
+        ], $this->introspectArgumentDescriptions($schema));
+    }
+
+    public function testArgumentDocblockDescriptionsFollowTheToggle(): void
+    {
+        $enabled = $this->buildSchema(BookController::class);
+        $this->assertSame(
+            'Number of Books to return',
+            $enabled->getQueryType()->getField('books')->getArg('first')->description,
+        );
+
+        $disabled = $this->buildSchema(BookController::class, docblockDescriptions: false);
+        $this->assertNull($disabled->getQueryType()->getField('books')->getArg('first')->description);
+    }
+
+    public function testDescriptionItemsAreListedAfterTheDescription(): void
+    {
+        $schema = $this->buildSchema(BookController::class);
+        $query = $schema->getQueryType();
+
+        // Items keep the middleware pipe order: user middlewares, then #[Cost]
+        $this->assertSame(
+            "Paginated list of Books, optionally filtered\n"
+                . "\n"
+                . "- Audience: librarians\n"
+                . "- Audience: members\n"
+                . '- Cost: complexity = 5, multipliers = [first], defaultMultiplier = null',
+            $query->getField('books')->description,
+        );
+        $this->assertSame(
+            "Counts the Books on loan.\n\n- Cost: complexity = 2, multipliers = [], defaultMultiplier = null",
+            $query->getField('loanedBookCount')->description,
+        );
+        $this->assertSame(
+            "- Audience: librarians\n- Cost: complexity = 3, multipliers = [], defaultMultiplier = null",
+            $query->getField('undescribedBooks')->description,
+        );
+        $this->assertSame(
+            '- Cost: complexity = 4, multipliers = [], defaultMultiplier = null',
+            $query->getField('emptyDescribedBooks')->description,
+        );
+
+        $input = $schema->getType('BookInput');
+        assert($input instanceof InputObjectType);
+
+        // The Undefined item comes first, since it is added before the input field middlewares run
+        $this->assertSame(
+            "Title of the Book.\n\n- May be omitted; null is not accepted.\n- Audience: librarians",
+            $input->getField('title')->description,
+        );
+        $this->assertSame(
+            "Publication date, if any\n\n- May be omitted; null is accepted.\n- Audience: librarians",
+            $input->getField('publishedOn')->description,
+        );
+        $this->assertSame('- Audience: librarians', $input->getField('notes')->description);
+    }
+
+    public function testDescriptionItemsWithoutDocblockFallback(): void
+    {
+        $schema = $this->buildSchema(BookController::class, docblockDescriptions: false);
+        $query = $schema->getQueryType();
+
+        $this->assertSame(
+            '- Cost: complexity = 2, multipliers = [], defaultMultiplier = null',
+            $query->getField('loanedBookCount')->description,
+        );
+        $this->assertStringStartsWith(
+            "Paginated list of Books, optionally filtered\n\n- Audience: librarians\n",
+            $query->getField('books')->description,
+        );
+
+        $input = $schema->getType('BookInput');
+        assert($input instanceof InputObjectType);
+        $this->assertSame(
+            "- May be omitted; null is not accepted.\n- Audience: librarians",
+            $input->getField('title')->description,
+        );
+    }
+
+    public function testDescriptionItemsAreNotRepeatedAcrossBuildsSharingACache(): void
+    {
+        $cache = new Psr16Cache(new ArrayAdapter());
+        $descriptions = [];
+        for ($build = 0; $build < 2; $build++) {
+            $schema = $this->buildSchema(BookController::class, cache: $cache);
+            $input = $schema->getType('BookInput');
+            assert($input instanceof InputObjectType);
+            $descriptions[] = [
+                $schema->getQueryType()->getField('books')->description,
+                $input->getField('title')->description,
+            ];
+        }
+
+        $this->assertSame($descriptions[0], $descriptions[1]);
+        $this->assertSame(1, substr_count($descriptions[1][0], 'Cost:'));
+        $this->assertSame(1, substr_count($descriptions[1][1], 'May be omitted'));
+    }
+
+    /** @return array<string, string|null> */
+    private function introspectInputFieldDescriptions(Schema $schema): array
+    {
+        $result = GraphQL::executeQuery(
+            $schema,
+            '{ __type(name: "UndefinedDescriptionInput") { inputFields { name description } } }',
+        )->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+
+        return array_column($result['data']['__type']['inputFields'], 'description', 'name');
+    }
+
+    /** @return array<string, string|null> */
+    private function introspectArgumentDescriptions(Schema $schema): array
+    {
+        $result = GraphQL::executeQuery(
+            $schema,
+            '{ __type(name: "Query") { fields { name args { name description } } } }',
+        )->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
+
+        foreach ($result['data']['__type']['fields'] as $field) {
+            if ($field['name'] === 'undefinedDescriptionArguments') {
+                return array_column($field['args'], 'description', 'name');
+            }
+        }
+
+        $this->fail('The undefinedDescriptionArguments query is missing');
     }
 }

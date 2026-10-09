@@ -208,6 +208,19 @@ query {
 }
 ```
 
+## Cost in the schema description
+
+GraphQLite lists each field's cost after its description, so clients can see it through introspection:
+
+```graphql
+"""
+Fetches books.
+
+- Cost: complexity = 5, multipliers = [take], defaultMultiplier = 200
+"""
+books(take: Int): [Book!]!
+```
+
 ## Setup
 
 As with query depth, automatic query complexity is configured through PSR15 middleware:

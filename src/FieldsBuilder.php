@@ -43,6 +43,7 @@ use TheCodingMachine\GraphQLite\Middlewares\SourceConstructorParameterResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceInputPropertyResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
+use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
@@ -57,6 +58,7 @@ use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_intersect_key;
+use function array_key_exists;
 use function array_keys;
 use function array_merge;
 use function array_shift;
@@ -1069,6 +1071,11 @@ class FieldsBuilder
 
             assert($type instanceof InputType);
 
+            $parameter = $args[$name];
+            $descriptionItems = $parameter instanceof InputTypeParameter && $parameter->acceptsUndefined() && ! $type instanceof NonNull
+                ? $this->descriptionResolver->describeUndefined($parameter->refusesNull())
+                : [];
+
             $resolver = new SourceMethodResolver($refMethod);
 
             $inputFieldDescriptor = new InputFieldDescriptor(
@@ -1079,10 +1086,11 @@ class FieldsBuilder
                 parameters: $args,
                 injectSource: $injectSource,
                 description: $description !== null ? trim($description) : null,
+                descriptionItems: $descriptionItems,
                 middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refMethod),
                 isUpdate: $isUpdate,
                 hasDefaultValue: $isUpdate,
-                defaultValue: $args[$name]->getDefaultValue(),
+                defaultValue: $parameter->getDefaultValue(),
             );
 
             $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
@@ -1142,7 +1150,19 @@ class FieldsBuilder
             $name = $annotation->getName() ?: $refProperty->getName();
             $inputType = $annotation->getInputType();
             $constructerParameters = $this->getClassConstructParameterNames($refClass);
-            $inputProperty = $this->typeMapper->mapInputProperty($refProperty, $docBlock, $name, $inputType, $defaultProperties[$refProperty->getName()] ?? null, $isUpdate ? true : null, isset($defaultProperties[$refProperty->getName()]));
+            $forConstructorHydration = in_array($name, $constructerParameters);
+            $constructorParameter = $forConstructorHydration ? $this->findConstructorParameter($refClass, $name) : null;
+            $hasDefaultValue = $this->hasDefaultValue($refProperty, $defaultProperties);
+            $inputProperty = $this->typeMapper->mapInputProperty(
+                $refProperty,
+                $docBlock,
+                $name,
+                $inputType,
+                $defaultProperties[$refProperty->getName()] ?? null,
+                $isUpdate ? true : null,
+                $hasDefaultValue,
+                $this->hydrationAcceptsNull($refClass, $refProperty, $constructorParameter),
+            );
 
             $description = $this->descriptionResolver->resolve(
                 $annotation->getDescription(),
@@ -1154,7 +1174,11 @@ class FieldsBuilder
                 $type = $type->getWrappedType();
             }
             assert($type instanceof InputType);
-            $forConstructorHydration = in_array($name, $constructerParameters);
+
+            $descriptionItems = $inputProperty->acceptsUndefined() && ! $type instanceof NonNull
+                ? $this->descriptionResolver->describeUndefined($inputProperty->refusesNull())
+                : [];
+
             $resolver = $forConstructorHydration
                 ? new SourceConstructorParameterResolver(
                     $refProperty->getDeclaringClass()->getName(),
@@ -1172,10 +1196,14 @@ class FieldsBuilder
                 injectSource: false,
                 forConstructorHydration: $forConstructorHydration,
                 description: $description !== null ? trim($description) : null,
+                descriptionItems: $descriptionItems,
                 middlewareAnnotations: $this->annotationReader->getMiddlewareAnnotations($refProperty),
                 isUpdate: $isUpdate,
                 hasDefaultValue: $inputProperty->hasDefaultValue(),
                 defaultValue: $inputProperty->getDefaultValue(),
+                // Otherwise an omitted field leaves the property uninitialized, or the constructor without its argument
+                undefinedWhenOmitted: $inputProperty->isDefaultValueUndefined()
+                    && ! ($constructorParameter?->isDefaultValueAvailable() ?? $hasDefaultValue),
             );
 
             $field = $this->inputFieldMiddleware->process($inputFieldDescriptor, new class implements InputFieldHandlerInterface {
@@ -1193,6 +1221,57 @@ class FieldsBuilder
         }
 
         return $fields;
+    }
+
+    /**
+     * Whether the constructor parameter or setter that receives an input property's value accepts null
+     *
+     * Mirrors {@see PropertyAccessor::setValue()}. Null when neither receives it, so the property type decides.
+     */
+    private function hydrationAcceptsNull(
+        ReflectionClass $refClass,
+        ReflectionProperty $refProperty,
+        ReflectionParameter|null $constructorParameter,
+    ): bool|null
+    {
+        if ($constructorParameter !== null) {
+            return $constructorParameter->allowsNull();
+        }
+
+        $setter = PropertyAccessor::findSetter($refClass->getName(), $refProperty->getName());
+        if ($setter === null) {
+            return null;
+        }
+
+        $parameters = $refClass->getMethod($setter)->getParameters();
+
+        return ! isset($parameters[0]) || $parameters[0]->allowsNull();
+    }
+
+    private function findConstructorParameter(ReflectionClass $refClass, string $name): ReflectionParameter|null
+    {
+        foreach ($refClass->getConstructor()?->getParameters() ?? [] as $parameter) {
+            if ($parameter->getName() === $name) {
+                return $parameter;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether an input property has a PHP default
+     *
+     * An untyped property's `null` default can't be told apart from no default at all, so it counts as none.
+     *
+     * @param array<string, mixed> $defaultProperties
+     */
+    private function hasDefaultValue(ReflectionProperty $refProperty, array $defaultProperties): bool
+    {
+        $name = $refProperty->getName();
+
+        return isset($defaultProperties[$name])
+            || ($refProperty->hasType() && array_key_exists($name, $defaultProperties));
     }
 
     /** @return string[] */

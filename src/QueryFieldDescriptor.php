@@ -14,6 +14,10 @@ use TheCodingMachine\GraphQLite\Middlewares\SourcePropertyResolver;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Utils\Cloneable;
 
+use function trigger_error;
+
+use const E_USER_DEPRECATED;
+
 /**
  * A class that describes a field to be created.
  * To contains getters and setters to alter the field behaviour.
@@ -27,6 +31,7 @@ class QueryFieldDescriptor
      * @param array<string, ParameterInterface> $parameters
      * @param callable $resolver
      * @param bool $injectSource Whether we should inject the source as the first parameter or not.
+     * @param list<string> $descriptionItems Metadata rendered as a list after the description
      */
     public function __construct(
         private readonly string $name,
@@ -38,6 +43,7 @@ class QueryFieldDescriptor
         private readonly string|null $description = null,
         private readonly string|null $deprecationReason = null,
         private readonly MiddlewareAnnotations $middlewareAnnotations = new MiddlewareAnnotations([]),
+        private readonly array $descriptionItems = [],
     )
     {
     }
@@ -94,8 +100,34 @@ class QueryFieldDescriptor
         return $this->with(description: $description);
     }
 
+    /** @return list<string> */
+    public function getDescriptionItems(): array
+    {
+        return $this->descriptionItems;
+    }
+
+    /**
+     * Appends a metadata item, rendered as a Markdown list after the description
+     *
+     * Items keep the order they were added in and survive {@see withDescription()}.
+     */
+    public function withAddedDescriptionItem(string $item): self
+    {
+        return $this->with(descriptionItems: [...$this->descriptionItems, $item]);
+    }
+
+    /**
+     * Appends raw text to the description, on a new line
+     *
+     * @deprecated Use {@see withAddedDescriptionItem()}, which renders metadata as a list after the description
+     */
     public function withAddedDescriptionLines(string $description): self
     {
+        trigger_error(
+            'QueryFieldDescriptor::withAddedDescriptionLines() is deprecated; use withAddedDescriptionItem() instead.',
+            E_USER_DEPRECATED,
+        );
+
         if (! $this->description) {
             return $this->withDescription($description);
         }

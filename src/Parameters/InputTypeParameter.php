@@ -9,11 +9,13 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 
 use function array_key_exists;
 
 class InputTypeParameter implements InputTypeParameterInterface
 {
+    /** @param list<string> $descriptionItems Metadata rendered as a list after the description */
     public function __construct(
         private readonly string $name,
         private readonly InputType&Type $type,
@@ -22,6 +24,9 @@ class InputTypeParameter implements InputTypeParameterInterface
         private readonly mixed $defaultValue,
         private readonly bool $defaultValueImplicit,
         private readonly ArgumentResolver $argumentResolver,
+        private readonly bool $refusesNull = false,
+        private readonly bool $acceptsUndefined = false,
+        private readonly array $descriptionItems = [],
     )
     {
     }
@@ -30,6 +35,10 @@ class InputTypeParameter implements InputTypeParameterInterface
     public function resolve(object|null $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         if (array_key_exists($this->name, $args)) {
+            if ($args[$this->name] === null && $this->refusesNull) {
+                throw NullArgumentException::create($this->name);
+            }
+
             return $this->argumentResolver->resolve($source, $args[$this->name], $context, $info, $this->type);
         }
 
@@ -72,8 +81,26 @@ class InputTypeParameter implements InputTypeParameterInterface
         return ! $this->defaultValueImplicit ? $this->defaultValue : null;
     }
 
+    /** Whether an omitted value resolves to Undefined, a default GraphQL can't print */
+    public function isDefaultValueUndefined(): bool
+    {
+        return $this->hasDefaultValue && $this->defaultValueImplicit;
+    }
+
+    /** Whether the receiving PHP type contains Undefined */
+    public function acceptsUndefined(): bool
+    {
+        return $this->acceptsUndefined;
+    }
+
+    /** Whether an explicit null is refused, because the receiving PHP type contains Undefined but not null */
+    public function refusesNull(): bool
+    {
+        return $this->refusesNull;
+    }
+
     public function getDescription(): string
     {
-        return $this->description ?? '';
+        return DescriptionResolver::appendItems($this->description, $this->descriptionItems) ?? '';
     }
 }

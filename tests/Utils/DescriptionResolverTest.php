@@ -81,4 +81,32 @@ class DescriptionResolverTest extends TestCase
         self::assertTrue((new DescriptionResolver(true))->isDocblockFallbackEnabled());
         self::assertFalse((new DescriptionResolver(false))->isDocblockFallbackEnabled());
     }
+
+    public function testDescribeUndefined(): void
+    {
+        $resolver = new DescriptionResolver(true);
+
+        self::assertSame(['May be omitted; null is not accepted.'], $resolver->describeUndefined(true));
+        self::assertSame(['May be omitted; null is accepted.'], $resolver->describeUndefined(false));
+        self::assertSame([], (new DescriptionResolver(true, false))->describeUndefined(true));
+    }
+
+    /** @param list<string> $items */
+    #[DataProvider('provideAppendItemsCases')]
+    public function testAppendItems(string|null $expected, string|null $description, array $items): void
+    {
+        self::assertSame($expected, DescriptionResolver::appendItems($description, $items));
+    }
+
+    public static function provideAppendItemsCases(): iterable
+    {
+        yield 'no items keeps no description' => [null, null, []];
+        yield 'no items keeps the description untouched' => ["Age in years\n", "Age in years\n", []];
+        yield 'items without a description' => ["- Audience: librarians\n- Cost: complexity = 5", null, ['Audience: librarians', 'Cost: complexity = 5']];
+        yield 'items after an empty description' => ['- Cost: complexity = 5', '', ['Cost: complexity = 5']];
+        yield 'items after a blank line' => ["Age in years\n\n- First\n- Second", "Age in years\n", ['First', 'Second']];
+        yield 'item the description already contains' => ['Age. May be omitted; null is not accepted.', 'Age. May be omitted; null is not accepted.', ['May be omitted; null is not accepted.']];
+        yield 'repeated item' => ["Age\n\n- First", 'Age', ['First', 'First']];
+        yield 'surrounding whitespace and blank items' => ["Age\n\n- Cost: complexity = 1", 'Age', ["\nCost: complexity = 1", ' ']];
+    }
 }

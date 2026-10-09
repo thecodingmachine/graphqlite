@@ -80,6 +80,10 @@ $factory->setSchemaConfig($schemaConfig);
 // backwards compatibility. See [Schema descriptions](descriptions.md) for the precedence rule
 // and security rationale.
 $factory->setDocblockDescriptionsEnabled(false);
+// Control whether arguments and input fields typed `T|Undefined` get a sentence appended to their description
+// saying they may be omitted and whether null is accepted. Enabled by default.
+// See [Optional input fields](input-types.mdx#optional-input-fields).
+$factory->setUndefinedDescriptionsEnabled(false);
 // Configures the time-to-live for the GraphQLite cache. Defaults to 2 seconds in dev mode.
 $factory->setGlobTtl(2);
 // Enables prod-mode (cache settings optimized for best performance).

@@ -49,6 +49,9 @@ class QueryFieldDescriptor
     public function withInjectSource(bool $injectSource): self { /* ... */ }
     public function getDescription(): ?string { /* ... */ }
     public function withDescription(?string $description): self { /* ... */ }
+    public function getDescriptionItems(): array { /* ... */ }
+    public function withAddedDescriptionItem(string $item): self { /* ... */ }
+    /** @deprecated Use withAddedDescriptionItem() */
     public function withAddedDescriptionLines(string $description): self { /* ... */ }
     public function getMiddlewareAnnotations(): MiddlewareAnnotations { /* ... */ }
     public function withMiddlewareAnnotations(MiddlewareAnnotations $middlewareAnnotations): self { /* ... */ }
@@ -59,6 +62,10 @@ class QueryFieldDescriptor
 ```
 
 The role of a middleware is to analyze the `QueryFieldDescriptor` and modify it (or to directly return a `FieldDefinition`).
+
+To publish metadata about a field (an access rule, a cost), add it with `withAddedDescriptionItem()` rather than
+editing the description: items are listed after the description as a Markdown list (see
+[Metadata items](descriptions.md#metadata-items)).
 
 If you want the field to purely disappear, your middleware can return `null`, although this should be used with caution:
 field middlewares only get called once per Schema instance. If you use a long-running server (like Laravel Octane, Swoole, RoadRunner etc)

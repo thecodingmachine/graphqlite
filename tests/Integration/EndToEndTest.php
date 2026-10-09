@@ -9,7 +9,10 @@ use GraphQL\GraphQL;
 use GraphQL\Server\Helper;
 use GraphQL\Server\OperationParams;
 use GraphQL\Server\ServerConfig;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\Type;
 use GraphQL\Utils\SchemaPrinter;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Container\ContainerInterface;
 use stdClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -2375,6 +2378,445 @@ class EndToEndTest extends IntegrationTestCase
         $data = $this->getSuccessResult($result);
         $this->assertSame(['tech', 'news'], $data['untouched']['tags']);
         $this->assertNull($data['nullified']['tags']);
+    }
+
+    public function testEndToEndInputUndefinedOmittedValues(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittable(input: {})
+        }
+        ');
+
+        $this->assertSame([
+            'property: undefined',
+            'nullableProperty: undefined',
+            'setter: undefined',
+            'nullableSetter: undefined',
+            'promotedParameter: undefined',
+            'nullablePromotedParameter: undefined',
+            'constructorParameter: undefined',
+            'nullableConstructorParameter: undefined',
+            'propertyWithNullableConstructorParameter: undefined',
+            'nullablePropertyWithConstructorParameter: undefined',
+            'propertyWithNullableSetter: undefined',
+            'nullablePropertyWithSetter: undefined',
+            'nullablePropertyWithNullDefault: null',
+            'list: undefined',
+            'nullableList: undefined',
+        ], $this->getSuccessResult($result)['updateOmittable']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            omittableArguments
+        }
+        ');
+
+        $this->assertSame([
+            'argument: undefined',
+            'nullableArgument: undefined',
+            'list: undefined',
+        ], $this->getSuccessResult($result)['omittableArguments']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            omittableFactory(value: {})
+        }
+        ');
+
+        $this->assertSame([
+            'value: undefined',
+            'nullableValue: undefined',
+        ], $this->getSuccessResult($result)['omittableFactory']);
+    }
+
+    public function testEndToEndInputUndefinedProvidedValues(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittable(input: {
+                property: 1,
+                nullableProperty: 2,
+                setter: 3,
+                nullableSetter: 4,
+                promotedParameter: 5,
+                nullablePromotedParameter: 6,
+                constructorParameter: 7,
+                nullableConstructorParameter: 8,
+                propertyWithNullableConstructorParameter: 9,
+                nullablePropertyWithConstructorParameter: 10,
+                propertyWithNullableSetter: 11,
+                nullablePropertyWithSetter: 12,
+                nullablePropertyWithNullDefault: 16,
+                list: [13, 14],
+                nullableList: [15],
+            })
+        }
+        ');
+
+        $this->assertSame([
+            'property: 1',
+            'nullableProperty: 2',
+            'setter: 3',
+            'nullableSetter: 4',
+            'promotedParameter: 5',
+            'nullablePromotedParameter: 6',
+            'constructorParameter: 7',
+            'nullableConstructorParameter: 8',
+            'propertyWithNullableConstructorParameter: 9',
+            'nullablePropertyWithConstructorParameter: 10',
+            'propertyWithNullableSetter: 11',
+            'nullablePropertyWithSetter: 12',
+            'nullablePropertyWithNullDefault: 16',
+            'list: [13,14]',
+            'nullableList: [15]',
+        ], $this->getSuccessResult($result)['updateOmittable']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            omittableArguments(argument: 1, nullableArgument: 2, list: [3])
+        }
+        ');
+
+        $this->assertSame([
+            'argument: 1',
+            'nullableArgument: 2',
+            'list: [3]',
+        ], $this->getSuccessResult($result)['omittableArguments']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            omittableFactory(value: { value: 1, nullableValue: 2 })
+        }
+        ');
+
+        $this->assertSame([
+            'value: 1',
+            'nullableValue: 2',
+        ], $this->getSuccessResult($result)['omittableFactory']);
+    }
+
+    public function testEndToEndInputUndefinedNullableAcceptsNull(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittable(input: {
+                nullableProperty: null,
+                nullableSetter: null,
+                nullablePromotedParameter: null,
+                nullableConstructorParameter: null,
+                propertyWithNullableConstructorParameter: null,
+                propertyWithNullableSetter: null,
+                nullableList: null,
+            })
+        }
+        ');
+
+        // The constructor parameter and setter that accept null for a non-nullable property normalize it to 0.
+        $this->assertSame([
+            'property: undefined',
+            'nullableProperty: null',
+            'setter: undefined',
+            'nullableSetter: null',
+            'promotedParameter: undefined',
+            'nullablePromotedParameter: null',
+            'constructorParameter: undefined',
+            'nullableConstructorParameter: null',
+            'propertyWithNullableConstructorParameter: 0',
+            'nullablePropertyWithConstructorParameter: undefined',
+            'propertyWithNullableSetter: 0',
+            'nullablePropertyWithSetter: undefined',
+            'nullablePropertyWithNullDefault: null',
+            'list: undefined',
+            'nullableList: null',
+        ], $this->getSuccessResult($result)['updateOmittable']);
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittableList(inputs: [
+                { propertyWithNullableConstructorParameter: null },
+                { propertyWithNullableSetter: null },
+            ])
+        }
+        ');
+
+        $data = $this->getSuccessResult($result)['updateOmittableList'];
+        $this->assertContains('propertyWithNullableConstructorParameter: 0', $data);
+        $this->assertContains('propertyWithNullableSetter: 0', $data);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            omittableArguments(nullableArgument: null)
+        }
+        ');
+
+        $this->assertSame([
+            'argument: undefined',
+            'nullableArgument: null',
+            'list: undefined',
+        ], $this->getSuccessResult($result)['omittableArguments']);
+
+        $result = GraphQL::executeQuery($schema, '
+        query {
+            omittableFactory(value: { nullableValue: null })
+        }
+        ');
+
+        $this->assertSame([
+            'value: undefined',
+            'nullableValue: null',
+        ], $this->getSuccessResult($result)['omittableFactory']);
+    }
+
+    /** @return iterable<string, array{string, string}> */
+    public static function undefinedRefusesNullProvider(): iterable
+    {
+        $fields = [
+            'property',
+            'setter',
+            'promotedParameter',
+            'constructorParameter',
+            'nullablePropertyWithConstructorParameter',
+            'nullablePropertyWithSetter',
+            'list',
+        ];
+        foreach ($fields as $field) {
+            yield 'input field ' . $field => ['mutation { updateOmittable(input: { ' . $field . ': null }) }', $field];
+        }
+
+        yield 'input field without a default' => ['mutation { updateOmittableWithoutDefault(input: { property: null }) }', 'property'];
+
+        foreach (['updateOmittableProperties', 'updateOmittableMagicSetter'] as $mutation) {
+            foreach (['property', 'propertyWithoutDefault'] as $field) {
+                yield $mutation . ' field ' . $field => ['mutation { ' . $mutation . '(input: { ' . $field . ': null }) }', $field];
+            }
+        }
+
+        yield 'input field in a list' =>['mutation { updateOmittableList(inputs: [{ property: 1 }, { property: null }]) }', 'property'];
+        yield 'factory parameter' => ['query { omittableFactory(value: { value: null }) }', 'value'];
+
+        foreach (['argument', 'list'] as $argument) {
+            yield 'argument ' . $argument => ['query { omittableArguments(' . $argument . ': null) }', $argument];
+        }
+
+        yield 'variable' => ['mutation($value: Int) { updateOmittable(input: { property: $value }) }', 'property'];
+        yield 'argument variable' => ['query($value: Int) { omittableArguments(argument: $value) }', 'argument'];
+    }
+
+    #[DataProvider('undefinedRefusesNullProvider')]
+    public function testEndToEndInputUndefinedRefusesNull(string $queryString, string $name): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery($schema, $queryString, variableValues: ['value' => null]);
+
+        // Unsafe exceptions, such as a TypeError from assigning null, are rethrown here.
+        $errors = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'];
+        $this->assertCount(1, $errors);
+        $this->assertSame("Argument '" . $name . "' may be omitted but cannot be null", $errors[0]['message']);
+    }
+
+    public function testEndToEndInputUndefinedVariables(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $mutation = 'mutation($value: Int) { updateOmittable(input: { property: $value, nullableProperty: $value }) }';
+        $query = 'query($value: Int) { omittableArguments(argument: $value, nullableArgument: $value) }';
+
+        // A variable that isn't provided leaves the field or argument omitted
+        $data = $this->getSuccessResult(GraphQL::executeQuery($schema, $mutation, variableValues: []))['updateOmittable'];
+        $this->assertContains('property: undefined', $data);
+        $this->assertContains('nullableProperty: undefined', $data);
+
+        $data = $this->getSuccessResult(GraphQL::executeQuery($schema, $query, variableValues: []))['omittableArguments'];
+        $this->assertContains('argument: undefined', $data);
+        $this->assertContains('nullableArgument: undefined', $data);
+
+        // A variable provided as null is an explicit null, which only `T|null|Undefined` accepts
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation($value: Int) { updateOmittable(input: { nullableProperty: $value }) }',
+            variableValues: ['value' => null],
+        );
+        $this->assertContains('nullableProperty: null', $this->getSuccessResult($result)['updateOmittable']);
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'query($value: Int) { omittableArguments(nullableArgument: $value) }',
+            variableValues: ['value' => null],
+        );
+        $this->assertContains('nullableArgument: null', $this->getSuccessResult($result)['omittableArguments']);
+
+        foreach ([[$mutation, 'property'], [$query, 'argument']] as [$queryString, $name]) {
+            $errors = GraphQL::executeQuery($schema, $queryString, variableValues: ['value' => null])
+                ->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'];
+            $this->assertCount(1, $errors);
+            $this->assertSame("Argument '" . $name . "' may be omitted but cannot be null", $errors[0]['message']);
+        }
+    }
+
+    public function testEndToEndInputUndefinedFactoryDescriptions(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $inputType = Type::getNamedType($schema->getQueryType()->getField('omittableFactory')->getArg('value')->getType());
+        assert($inputType instanceof InputObjectType);
+
+        $this->assertSame('- May be omitted; null is not accepted.', $inputType->getField('value')->description);
+        $this->assertSame('- May be omitted; null is accepted.', $inputType->getField('nullableValue')->description);
+    }
+
+    public function testEndToEndInputUndefinedWithoutDefault(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        // Undefined is not a GraphQL default, so none is printed, not even `null` for the nullable fields.
+        $inputType = $schema->getType('OmittableWithoutDefaultInput');
+        assert($inputType instanceof InputObjectType);
+        foreach ($inputType->getFields() as $field) {
+            $this->assertFalse($field->defaultValueExists(), $field->name);
+        }
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittableWithoutDefault(input: {})
+        }
+        ');
+
+        $this->assertSame([
+            'property: undefined',
+            'nullableProperty: undefined',
+            'docBlockProperty: undefined',
+            'nullablePromotedParameter: undefined',
+            'nullableConstructorParameter: undefined',
+            'nullablePropertyWithSetter: undefined',
+            'nullableSetter: undefined',
+            // A property the constructor assigned keeps that value, so a readonly one isn't assigned twice
+            'assignedInConstructor: 10',
+            'docBlockAssignedInConstructor: 11',
+            'readonlyAssignedInConstructor: undefined',
+        ], $this->getSuccessResult($result)['updateOmittableWithoutDefault']);
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittableWithoutDefault(input: {
+                nullableProperty: null,
+                docBlockProperty: null,
+                nullablePromotedParameter: null,
+                nullableConstructorParameter: null,
+                nullablePropertyWithSetter: null,
+                nullableSetter: null,
+            })
+        }
+        ');
+
+        $this->assertSame([
+            'property: undefined',
+            'nullableProperty: null',
+            'docBlockProperty: null',
+            'nullablePromotedParameter: null',
+            'nullableConstructorParameter: null',
+            'nullablePropertyWithSetter: null',
+            'nullableSetter: null',
+            'assignedInConstructor: 10',
+            'docBlockAssignedInConstructor: 11',
+            'readonlyAssignedInConstructor: undefined',
+        ], $this->getSuccessResult($result)['updateOmittableWithoutDefault']);
+
+        $result = GraphQL::executeQuery($schema, '
+        mutation {
+            updateOmittableWithoutDefault(input: {
+                property: 1,
+                nullableProperty: 2,
+                docBlockProperty: 3,
+                nullablePromotedParameter: 4,
+                nullableConstructorParameter: 5,
+                nullablePropertyWithSetter: 6,
+                nullableSetter: 7,
+                assignedInConstructor: 8,
+                docBlockAssignedInConstructor: 9,
+            })
+        }
+        ');
+
+        $this->assertSame([
+            'property: 1',
+            'nullableProperty: 2',
+            'docBlockProperty: 3',
+            'nullablePromotedParameter: 4',
+            'nullableConstructorParameter: 5',
+            'nullablePropertyWithSetter: 6',
+            'nullableSetter: 7',
+            'assignedInConstructor: 8',
+            'docBlockAssignedInConstructor: 9',
+            'readonlyAssignedInConstructor: undefined',
+        ], $this->getSuccessResult($result)['updateOmittableWithoutDefault']);
+    }
+
+    /** @return iterable<string, array{string, string}> */
+    public static function undefinedWithoutConstructorProvider(): iterable
+    {
+        yield 'public properties' => ['OmittablePropertiesInput', 'updateOmittableProperties'];
+        yield 'magic setter' => ['OmittableMagicSetterInput', 'updateOmittableMagicSetter'];
+    }
+
+    #[DataProvider('undefinedWithoutConstructorProvider')]
+    public function testEndToEndInputUndefinedWithoutConstructor(string $typeName, string $mutation): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        // Undefined is not a GraphQL default, so none is printed, not even `null` for the nullable fields.
+        $inputType = $schema->getType($typeName);
+        assert($inputType instanceof InputObjectType);
+        foreach ($inputType->getFields() as $field) {
+            $this->assertFalse($field->defaultValueExists(), $field->name);
+        }
+        $this->assertStringNotContainsString('=', SchemaPrinter::printType($inputType));
+
+        $result = GraphQL::executeQuery($schema, 'mutation { ' . $mutation . '(input: {}) }');
+
+        $this->assertSame([
+            'property: undefined',
+            'nullableProperty: undefined',
+            'propertyWithoutDefault: undefined',
+            'nullablePropertyWithoutDefault: undefined',
+        ], $this->getSuccessResult($result)[$mutation]);
+
+        $result = GraphQL::executeQuery($schema, 'mutation {
+            ' . $mutation . '(input: { property: 1, nullableProperty: 2, propertyWithoutDefault: 3, nullablePropertyWithoutDefault: 4 })
+        }');
+
+        $this->assertSame([
+            'property: 1',
+            'nullableProperty: 2',
+            'propertyWithoutDefault: 3',
+            'nullablePropertyWithoutDefault: 4',
+        ], $this->getSuccessResult($result)[$mutation]);
+
+        $result = GraphQL::executeQuery($schema, 'mutation {
+            ' . $mutation . '(input: { nullableProperty: null, nullablePropertyWithoutDefault: null })
+        }');
+
+        $this->assertSame([
+            'property: undefined',
+            'nullableProperty: null',
+            'propertyWithoutDefault: undefined',
+            'nullablePropertyWithoutDefault: null',
+        ], $this->getSuccessResult($result)[$mutation]);
     }
 
     public function testEndToEndSchemaIsPrintable(): void

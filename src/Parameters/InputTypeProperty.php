@@ -19,6 +19,8 @@ class InputTypeProperty extends InputTypeParameter
         mixed $defaultValue,
         bool $defaultValueImplicit,
         ArgumentResolver $argumentResolver,
+        bool $refusesNull = false,
+        bool $acceptsUndefined = false,
     )
     {
         parent::__construct(
@@ -29,6 +31,8 @@ class InputTypeProperty extends InputTypeParameter
             $defaultValue,
             $defaultValueImplicit,
             $argumentResolver,
+            $refusesNull,
+            $acceptsUndefined,
         );
     }
 

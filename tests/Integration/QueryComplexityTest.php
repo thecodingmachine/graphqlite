@@ -172,7 +172,7 @@ class QueryComplexityTest extends IntegrationTestCase
     public static function reportsQueryCostInIntrospectionProvider(): iterable
     {
         yield [
-            "\nCost: complexity = 5, multipliers = [take], defaultMultiplier = 500",
+            "- Cost: complexity = 5, multipliers = [take], defaultMultiplier = 500",
             'Query',
             'articles',
         ];
@@ -184,13 +184,13 @@ class QueryComplexityTest extends IntegrationTestCase
         ];
 
         yield [
-            "\nCost: complexity = 5, multipliers = [], defaultMultiplier = null",
+            "- Cost: complexity = 5, multipliers = [], defaultMultiplier = null",
             'Post',
             'comment',
         ];
 
         yield [
-            "\nCost: complexity = 3, multipliers = [], defaultMultiplier = null",
+            "- Cost: complexity = 3, multipliers = [], defaultMultiplier = null",
             'Post',
             'author',
         ];

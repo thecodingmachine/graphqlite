@@ -96,7 +96,7 @@ class CostFieldMiddlewareTest extends TestCase
         $queryFieldDescriptor->method('getMiddlewareAnnotations')
             ->willReturn(new MiddlewareAnnotations([$cost]));
         $queryFieldDescriptor->expects($this->once())
-            ->method('withAddedDescriptionLines')
+            ->method('withAddedDescriptionItem')
             ->with($expectedDescription)
             ->willReturnSelf();
 
@@ -106,17 +106,17 @@ class CostFieldMiddlewareTest extends TestCase
     public static function addsCostInDescriptionProvider(): iterable
     {
         yield [
-            "\nCost: complexity = 1, multipliers = [], defaultMultiplier = null",
+            "Cost: complexity = 1, multipliers = [], defaultMultiplier = null",
             new Cost(),
         ];
 
         yield [
-            "\nCost: complexity = 5, multipliers = [take], defaultMultiplier = 500",
+            "Cost: complexity = 5, multipliers = [take], defaultMultiplier = 500",
             new Cost(complexity: 5, multipliers: ['take'], defaultMultiplier: 500)
         ];
 
         yield [
-            "\nCost: complexity = 5, multipliers = [take, null], defaultMultiplier = null",
+            "Cost: complexity = 5, multipliers = [take, null], defaultMultiplier = null",
             new Cost(complexity: 5, multipliers: ['take', 'null'], defaultMultiplier: null)
         ];
     }

@@ -20,6 +20,7 @@ use TheCodingMachine\GraphQLite\Middlewares\ResolverInterface;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\SourceParameter;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 
 /**
  * A GraphQL field that maps to a PHP method automatically.
@@ -163,7 +164,7 @@ final class QueryField extends FieldDefinition
             $fieldDescriptor->getParameters(),
             $fieldDescriptor->getOriginalResolver(),
             $fieldDescriptor->getResolver(),
-            $fieldDescriptor->getDescription(),
+            DescriptionResolver::appendItems($fieldDescriptor->getDescription(), $fieldDescriptor->getDescriptionItems()),
             $fieldDescriptor->getDeprecationReason(),
         );
     }
