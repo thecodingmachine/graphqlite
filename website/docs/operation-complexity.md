@@ -232,5 +232,11 @@ $builder = new Psr15GraphQLMiddlewareBuilder($schema);
 $builder->limitQueryComplexity(1000);
 ```
 
+`limitQueryComplexity()` registers GraphQLite's `TheCodingMachine\GraphQLite\Validator\Rules\QueryComplexity`,
+a subclass of webonyx's `QueryComplexity` rule. Pricing fields by their arguments coerces the operation's variables
+during validation; when a variable is invalid, the operation is refused by the executor with one error per variable,
+including its location, rather than a single joined validation error. If you register the rule yourself with
+`addValidationRule()`, prefer this class over webonyx's.
+
 Beware that introspection queries would also be limited in complexity. A full introspection
 query sits at around `107` points, so we recommend a minimum of `150` for query complexity limit.
