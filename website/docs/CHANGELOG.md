@@ -68,7 +68,7 @@ sidebar_label: Changelog
 - `Psr15GraphQLMiddlewareBuilder::limitQueryComplexity()` no longer turns invalid variables into a single joined
   error without locations. Its rule, `TheCodingMachine\GraphQLite\Validator\Rules\QueryComplexity`, leaves them
   to the executor, which refuses each variable with its own located error.
-  ([#PENDING](https://github.com/thecodingmachine/graphqlite/pull/PENDING)) @oojacoboo
+  ([#839](https://github.com/thecodingmachine/graphqlite/pull/839)) @oojacoboo
 
 ## >8.0.0
 
