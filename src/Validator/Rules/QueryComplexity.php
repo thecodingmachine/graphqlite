@@ -7,13 +7,13 @@ namespace TheCodingMachine\GraphQLite\Validator\Rules;
 use GraphQL\Error\Error;
 use GraphQL\Executor\Values;
 use GraphQL\Language\AST\DocumentNode;
+use GraphQL\Language\AST\Node;
 use GraphQL\Language\AST\NodeKind;
 use GraphQL\Language\AST\OperationDefinitionNode;
 use GraphQL\Type\Schema;
 use GraphQL\Validator\QueryValidationContext;
 use GraphQL\Validator\Rules\QueryComplexity as WebonyxQueryComplexity;
 
-use function is_array;
 use function is_callable;
 
 /**
@@ -31,20 +31,22 @@ final class QueryComplexity extends WebonyxQueryComplexity
     {
         $visitor = parent::getVisitor($context);
         $documentVisitor = $visitor[NodeKind::DOCUMENT] ?? null;
-        $leave = is_array($documentVisitor) ? $documentVisitor['leave'] ?? null : null;
-        if (! is_callable($leave)) {
+        if ($documentVisitor === null || is_callable($documentVisitor)) {
             return $visitor;
         }
 
-        $documentVisitor['leave'] = function (DocumentNode $document, mixed ...$arguments) use ($leave, $context): mixed {
-            try {
-                return $leave($document, ...$arguments);
-            } catch (Error $error) {
-                if ($this->variablesFailCoercion($context->getSchema(), $document)) {
-                    return null;
-                }
+        $leave = $documentVisitor['leave'] ?? null;
+        if ($leave === null) {
+            return $visitor;
+        }
 
-                throw $error;
+        $documentVisitor['leave'] = function (Node $node, mixed ...$arguments) use ($leave, $context): void {
+            try {
+                $leave($node, ...$arguments);
+            } catch (Error $error) {
+                if (! $node instanceof DocumentNode || ! $this->variablesFailCoercion($context->getSchema(), $node)) {
+                    throw $error;
+                }
             }
         };
         $visitor[NodeKind::DOCUMENT] = $documentVisitor;
