@@ -8,6 +8,7 @@ use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\QueryComplexity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use TheCodingMachine\GraphQLite\Schema;
+use TheCodingMachine\GraphQLite\Validator\Rules\QueryComplexity as GraphQLiteQueryComplexity;
 
 class QueryComplexityTest extends IntegrationTestCase
 {
@@ -57,6 +58,34 @@ class QueryComplexityTest extends IntegrationTestCase
         );
 
         $this->assertSame('Max query complexity should be 5 but got 60.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
+    }
+
+    public function testInvalidVariableIsRefusedByTheExecutor(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            <<<'GRAPHQL'
+                query ($take: Int) {
+                    articles(take: $take) {
+                        title
+                    }
+                }
+            GRAPHQL,
+            variableValues: ['take' => 'many'],
+            validationRules: [
+                ...DocumentValidator::allRules(),
+                new GraphQLiteQueryComplexity(60),
+            ]
+        );
+
+        $errors = $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'];
+
+        $this->assertCount(1, $errors);
+        $this->assertSame('Variable "$take" got invalid value "many"; Int cannot represent non-integer value: "many"', $errors[0]['message']);
+        $this->assertSame([['line' => 1, 'column' => 12]], $errors[0]['locations']);
     }
 
     #[DataProvider('calculatesCorrectQueryCostProvider')]

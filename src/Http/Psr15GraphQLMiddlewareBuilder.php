@@ -11,7 +11,6 @@ use GraphQL\Server\OperationParams;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Type\Schema;
 use GraphQL\Validator\DocumentValidator;
-use GraphQL\Validator\Rules\QueryComplexity;
 use GraphQL\Validator\Rules\ValidationRule;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\StreamFactory;
@@ -24,6 +23,7 @@ use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Server\PersistedQuery\CachePersistedQueryLoader;
 use TheCodingMachine\GraphQLite\Server\PersistedQuery\NotSupportedPersistedQueryLoader;
+use TheCodingMachine\GraphQLite\Validator\Rules\QueryComplexity;
 
 use function class_exists;
 use function is_callable;
