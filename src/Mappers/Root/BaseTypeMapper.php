@@ -19,6 +19,7 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Upload\UploadType;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\PseudoTypes\Generic;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\AbstractList;
 use phpDocumentor\Reflection\Types\Array_;
@@ -36,6 +37,7 @@ use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\DateTimeType;
 use TheCodingMachine\GraphQLite\Types\ID;
 
+use function end;
 use function ltrim;
 
 /**
@@ -62,6 +64,14 @@ class BaseTypeMapper implements RootTypeMapperInterface
             /*if ($innerType === null) {
                 return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
             }*/
+
+            return GraphQLType::listOf($innerType);
+        }
+        // phpdocumentor/type-resolver 2 represents generic iterables like `\ArrayObject<int, User>` as `Generic`
+        // (an `Object_`) instead of `Collection` (an `AbstractList`).
+        if ($type instanceof Generic && $type->getTypes() !== []) {
+            $genericTypes = $type->getTypes();
+            $innerType = $this->topRootTypeMapper->toGraphQLOutputType(end($genericTypes), $subType, $reflector, $docBlockObj);
 
             return GraphQLType::listOf($innerType);
         }
