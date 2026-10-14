@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunk=globalThis.webpackChunk||[]).push([[64195],{62841:(e,l,n)=>{n.r(l),n.d(l,{default:()=>t});var o=n(16005),a=n(67294);const t=()=>("undefined"!=typeof window&&(window.location.href="/docs"),a.createElement(o.Z,null,null))}}]);
