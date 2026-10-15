@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 use Iterator;
 use IteratorAggregate;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\PseudoTypes\Generic;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Compound;
@@ -44,7 +45,8 @@ class IteratorTypeMapper implements RootTypeMapperInterface
             try {
                 return $this->next->toGraphQLOutputType($type, $subType, $reflector, $docBlockObj);
             } catch (CannotMapTypeException $e) {
-                if ($type instanceof Object_) {
+                // A `Generic` like `\ArrayObject<int, User>` already provides its item type
+                if ($type instanceof Object_ && ! $type instanceof Generic) {
                     /** @var class-string<object> $fqcn */
                     $fqcn = (string) $type->getFqsen();
                     $refClass = new ReflectionClass($fqcn);
@@ -207,7 +209,7 @@ class IteratorTypeMapper implements RootTypeMapperInterface
     private function splitIteratorFromOtherTypes(array &$types): Type|null
     {
         foreach ($types as $key => $singleDocBlockType) {
-            if (! ($singleDocBlockType instanceof Object_)) {
+            if (! ($singleDocBlockType instanceof Object_) || $singleDocBlockType instanceof Generic) {
                 continue;
             }
 

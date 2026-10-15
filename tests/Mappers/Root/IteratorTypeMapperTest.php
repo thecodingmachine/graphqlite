@@ -6,9 +6,11 @@ use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use phpDocumentor\Reflection\DocBlock;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use TheCodingMachine\GraphQLite\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class IteratorTypeMapperTest extends AbstractQueryProvider
@@ -49,5 +51,36 @@ class IteratorTypeMapperTest extends AbstractQueryProvider
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('"\ArrayObject" is iterable. Please provide a more specific type. For instance: \ArrayObject|User[].');
         $result = $typeMapper->toGraphQLOutputType(self::resolveType('ArrayObject|array<int>|array<string>'), null, new ReflectionMethod(__CLASS__, 'testInputIterator'), new DocBlock());
+    }
+
+    #[DataProvider('unmappableGenericIterablesProvider')]
+    public function testUnmappableGenericIterable(string $phpdocType, string $expectedMessage): void
+    {
+        $typeMapper = $this->getRootTypeMapper();
+
+        $this->expectException(CannotMapTypeException::class);
+        $this->expectExceptionMessage($expectedMessage);
+        $typeMapper->toGraphQLOutputType(self::resolveType($phpdocType), null, new ReflectionMethod(__CLASS__, 'testUnmappableGenericIterable'), new DocBlock());
+    }
+
+    public static function unmappableGenericIterablesProvider(): iterable
+    {
+        // A generic iterable already defines its item type, so other union members are not used as its item type
+        yield 'generic iterable or bool' => [
+            \sprintf('\ArrayObject<int, %s>|bool', TestObject::class),
+            'in GraphQL, you can only use union types between objects. These types cannot be used in union types: [TestObject!]!, Boolean!',
+        ];
+        yield 'generic iterable or object' => [
+            \sprintf('\ArrayObject<int, %s>|%s', TestObject::class, TestObject2::class),
+            'in GraphQL, you can only use union types between objects. These types cannot be used in union types: [TestObject!]!, TestObject2!',
+        ];
+        yield 'generic iterable or array' => [
+            \sprintf('\ArrayObject<int, %s>|%s[]', TestObject::class, TestObject2::class),
+            'in GraphQL, you can only use union types between objects. These types cannot be used in union types: [TestObject!]!, [TestObject2!]!',
+        ];
+        yield 'generic iterable with unmappable item type' => [
+            \sprintf('\ArrayObject<int, %s&%s>', TestObject::class, TestObject2::class),
+            \sprintf("don't know how to handle type \\%s&\\%s", TestObject::class, TestObject2::class),
+        ];
     }
 }

@@ -102,7 +102,7 @@ class BaseTypeMapper implements RootTypeMapperInterface
 
             return GraphQLType::listOf($innerType);
         }
-        if ($type instanceof Object_) {
+        if ($type instanceof Object_ && ! $type instanceof Generic) {
             $className = ltrim((string) $type->getFqsen(), '\\');
 
             return $this->recursiveTypeMapper->mapClassToInputType($className);
