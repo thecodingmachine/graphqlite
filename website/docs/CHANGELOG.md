@@ -54,6 +54,9 @@ sidebar_label: Changelog
   `withAddedDescriptionItem()`. `QueryFieldDescriptor::withAddedDescriptionLines()` is deprecated in favor of
   it.
   ([#838](https://github.com/thecodingmachine/graphqlite/pull/838)) @oojacoboo
+- Supports `phpdocumentor/reflection-docblock` 6 and `phpdocumentor/type-resolver` 2 alongside 5 and 1, so GraphQLite
+  installs next to packages that already require them. Generic iterables such as `\ArrayObject<int, User>` map to
+  lists with both type-resolver versions. @timtheisinger
 
 ### Bug Fixes
 

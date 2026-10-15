@@ -14,6 +14,7 @@ use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\Fqsen;
+use phpDocumentor\Reflection\PseudoTypes\Generic;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
@@ -453,7 +454,8 @@ class TypeHandler implements ParameterHandlerInterface
             // Try to match generic phpdoc-provided iterables with non-generic return-type-provided iterables
             // Example: (return type `\ArrayObject`, phpdoc `\ArrayObject<string, TestObject>`)
             || ($innerType instanceof Object_
-                && $docBlockType instanceof Collection
+                // `Collection` with phpdocumentor/type-resolver 1, `Generic` with phpdocumentor/type-resolver 2
+                && ($docBlockType instanceof Collection || $docBlockType instanceof Generic)
                 && (string) $innerType->getFqsen() === (string) $docBlockType->getFqsen()
             )
         ) {
