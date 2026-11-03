@@ -8,7 +8,6 @@ use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\QueryComplexity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use TheCodingMachine\GraphQLite\Schema;
-use TheCodingMachine\GraphQLite\Validator\Rules\QueryComplexity as GraphQLiteQueryComplexity;
 
 class QueryComplexityTest extends IntegrationTestCase
 {
@@ -60,7 +59,7 @@ class QueryComplexityTest extends IntegrationTestCase
         $this->assertSame('Max query complexity should be 5 but got 60.', $result->toArray(DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)['errors'][0]['message']);
     }
 
-    public function testInvalidVariableIsRefusedByTheExecutor(): void
+    public function testInvalidVariableIsRefusedWithItsLocation(): void
     {
         $schema = $this->mainContainer->get(Schema::class);
         assert($schema instanceof Schema);
@@ -77,7 +76,7 @@ class QueryComplexityTest extends IntegrationTestCase
             variableValues: ['take' => 'many'],
             validationRules: [
                 ...DocumentValidator::allRules(),
-                new GraphQLiteQueryComplexity(60),
+                new QueryComplexity(60),
             ]
         );
 

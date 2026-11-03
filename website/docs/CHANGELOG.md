@@ -69,8 +69,8 @@ sidebar_label: Changelog
   reach the schema when `SchemaFactory::setDocblockDescriptionsEnabled(false)` is set.
   ([#838](https://github.com/thecodingmachine/graphqlite/pull/838)) @oojacoboo
 - `Psr15GraphQLMiddlewareBuilder::limitQueryComplexity()` no longer turns invalid variables into a single joined
-  error without locations. Its rule, `TheCodingMachine\GraphQLite\Validator\Rules\QueryComplexity`, leaves them
-  to the executor, which refuses each variable with its own located error.
+  error without locations. GraphQLite now requires `webonyx/graphql-php` 15.38.3, whose `QueryComplexity` rule
+  reports each invalid variable with its own located error.
   ([#839](https://github.com/thecodingmachine/graphqlite/pull/839)) @oojacoboo
 
 ## >8.0.0
