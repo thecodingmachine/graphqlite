@@ -194,6 +194,44 @@ class EndToEndTest extends IntegrationTestCase
         );
     }
 
+    public function testPrefetchingSameFieldWithDifferentArguments(): void
+    {
+        $schema = $this->mainContainer->get(Schema::class);
+        assert($schema instanceof Schema);
+
+        $queryString = '
+        query {
+            contacts {
+                foo: repeatName(prefix:"foo", suffix:"")
+                bar: repeatName(prefix:"bar", suffix:"")
+                again: repeatName(prefix:"foo", suffix:"!")
+            }
+        }
+        ';
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $queryString,
+            null,
+            new Context(),
+        );
+
+        $this->assertSame([
+            'contacts' => [
+                [
+                    'foo' => 'fooJoe',
+                    'bar' => 'barJoe',
+                    'again' => 'fooJoe!',
+                ],
+                [
+                    'foo' => 'fooBill',
+                    'bar' => 'barBill',
+                    'again' => 'fooBill!',
+                ],
+            ],
+        ], $this->getSuccessResult($result));
+    }
+
     public function testDeprecatedField(): void
     {
         $schema = $this->mainContainer->get(Schema::class);

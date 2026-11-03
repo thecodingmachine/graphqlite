@@ -29,7 +29,7 @@ class PrefetchDataParameterTest extends TestCase
         ];
         $buffer = $context->getPrefetchBuffer($parameter);
 
-        $buffer->storeResult($source, $prefetchResult);
+        $buffer->storeResult($source, $prefetchResult, $args);
 
         $resolvedParameterPromise = $parameter->resolve($source, $args, $context, $this->createStub(ResolveInfo::class));
 
