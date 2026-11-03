@@ -72,6 +72,9 @@ sidebar_label: Changelog
   error without locations. GraphQLite now requires `webonyx/graphql-php` 15.38.3, whose `QueryComplexity` rule
   reports each invalid variable with its own located error.
   ([#839](https://github.com/thecodingmachine/graphqlite/pull/839)) @oojacoboo
+- A `#[Prefetch]` field selected twice on the same object with different arguments (two aliases) no longer
+  returns the first alias's prefetch result for both. `PrefetchBuffer` stores results per source and argument
+  set; its result methods take the arguments and `ResolveInfo` as optional trailing parameters. @oojacoboo
 
 ## >8.0.0
 

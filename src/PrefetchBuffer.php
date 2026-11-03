@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite;
 use GraphQL\Type\Definition\ResolveInfo;
 use WeakMap;
 
+use function array_key_exists;
 use function md5;
 use function serialize;
 
@@ -18,7 +19,10 @@ class PrefetchBuffer
     /** @var array<string, array<int, object>> An array of buffered, indexed by hash of arguments. */
     private array $objects = [];
 
-    /** @var WeakMap A Storage of prefetch method results, holds source to resolved values. */
+    /**
+     * @var WeakMap<object, array<string, mixed>> Prefetch method results per source, indexed by hash of arguments, so
+     * aliases of one field with different arguments don't share a result.
+     */
     private WeakMap $results;
 
     public function __construct()
@@ -71,28 +75,49 @@ class PrefetchBuffer
         unset($this->objects[$this->computeHash($arguments, $info)]);
     }
 
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function storeResult(
         object $source,
         mixed $result,
+        array $arguments = [],
+        ResolveInfo|null $info = null,
     ): void {
-        $this->results->offsetSet($source, $result);
+        $results = $this->results[$source] ?? [];
+        $results[$this->computeHash($arguments, $info)] = $result;
+        $this->results[$source] = $results;
     }
 
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function hasResult(
         object $source,
+        array $arguments = [],
+        ResolveInfo|null $info = null,
     ): bool {
-        return $this->results->offsetExists($source);
+        return array_key_exists($this->computeHash($arguments, $info), $this->results[$source] ?? []);
     }
 
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function getResult(
         object $source,
+        array $arguments = [],
+        ResolveInfo|null $info = null,
     ): mixed {
-        return $this->results->offsetGet($source);
+        return $this->results[$source][$this->computeHash($arguments, $info)];
     }
 
+    /** @param array<array-key, mixed> $arguments The input arguments passed from GraphQL to the field. */
     public function purgeResult(
         object $source,
+        array $arguments = [],
+        ResolveInfo|null $info = null,
     ): void {
-        $this->results->offsetUnset($source);
+        $results = $this->results[$source] ?? [];
+        unset($results[$this->computeHash($arguments, $info)]);
+
+        if ($results === []) {
+            unset($this->results[$source]);
+        } else {
+            $this->results[$source] = $results;
+        }
     }
 }

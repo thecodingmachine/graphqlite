@@ -53,11 +53,11 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
         // needed, GraphQL calls the callback of Deferred below. That's when we call the prefetch method,
         // already knowing all the requested fields (source-arguments combinations).
         return new Deferred(function () use ($source, $info, $context, $args, $prefetchBuffer) {
-            if (! $prefetchBuffer->hasResult($source)) {
+            if (! $prefetchBuffer->hasResult($source, $args, $info)) {
                 $this->processPrefetch($args, $context, $info, $prefetchBuffer);
             }
 
-            return $prefetchBuffer->getResult($source);
+            return $prefetchBuffer->getResult($source, $args, $info);
         });
     }
 
@@ -72,7 +72,7 @@ class PrefetchDataParameter implements ParameterInterface, ExpandsInputTypeParam
 
         foreach ($sources as $source) {
             // map results to each source to support old prefetch behavior
-            $prefetchBuffer->storeResult($source, $resolvedValues);
+            $prefetchBuffer->storeResult($source, $resolvedValues, $args, $info);
         }
     }
 
