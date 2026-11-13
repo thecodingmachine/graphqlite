@@ -114,7 +114,8 @@ jobs:
               fi
 
               echo "Changed since the version-${PREVIOUS} snapshot:"
-              diff -rq "website/docs" "$snapshot" 2>&1 | sed 's/^/  /'
+              # diff exits 1 when files differ, which pipefail and set -e would turn into a failed step.
+              { diff -rq "website/docs" "$snapshot" 2>&1 || true; } | sed 's/^/  /'
             fi
           fi
 
