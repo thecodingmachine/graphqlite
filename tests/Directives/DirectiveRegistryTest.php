@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Directives;
+namespace TheCodingMachine\GraphQLite\Tests\Directives;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\Deprecated;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\OneOf;
+use TheCodingMachine\GraphQLite\Directives\DirectiveRegistry;
 use TheCodingMachine\GraphQLite\Directives\Exceptions\InvalidDirectiveException;
-use TheCodingMachine\GraphQLite\Fixtures\Directives\MisusedOneOfOnType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Directives\MisusedOneOfOnType;
 
 final class DirectiveRegistryTest extends TestCase
 {

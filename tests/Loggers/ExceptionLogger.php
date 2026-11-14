@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Loggers;
+namespace TheCodingMachine\GraphQLite\Tests\Loggers;
 
 use Exception;
 use Psr\Log\AbstractLogger;

@@ -1,9 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
+use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\SourceField;
 
 class SourceFieldTest extends TestCase
 {

@@ -1,6 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
+
+use TheCodingMachine\GraphQLite\InputTypeGenerator;
 
 
 use PHPUnit\Framework\TestCase;

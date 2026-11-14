@@ -1,9 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\TypeRegistry;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeRegistryTest extends TestCase

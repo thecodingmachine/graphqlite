@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces;
 
 class ClassB extends ClassA
 {

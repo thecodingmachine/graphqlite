@@ -1,15 +1,17 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers\Root;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Root;
 
 use InvalidArgumentException;
+use TheCodingMachine\GraphQLite\Mappers\Root\CompoundTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\FinalRootTypeMapper;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Iterable_;
 use phpDocumentor\Reflection\Types\String_;
 use ReflectionMethod;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 

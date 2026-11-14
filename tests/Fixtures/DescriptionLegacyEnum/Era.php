@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\DescriptionLegacyEnum;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionLegacyEnum;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 

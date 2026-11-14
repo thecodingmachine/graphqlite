@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types;
 
 use Exception;
 use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
@@ -10,8 +10,8 @@ use GraphQL\Executor\Promise\Promise;
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Comment;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Comment;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Post;
 
 #[ExtendType(class:Post::class)]
 class PostType

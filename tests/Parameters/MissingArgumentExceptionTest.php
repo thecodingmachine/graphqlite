@@ -1,9 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Parameters;
 
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
+use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Filter;
 
 class MissingArgumentExceptionTest extends TestCase
 {
@@ -13,7 +14,7 @@ class MissingArgumentExceptionTest extends TestCase
         $e = MissingArgumentException::create('foo');
         $e2 = MissingArgumentException::wrapWithFactoryContext($e, 'Input', [Filter::class, 'create']);
 
-        $this->assertEquals('Expected argument \'foo\' was not provided in GraphQL input type \'Input\' used in factory \'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter::create()\'', $e2->getMessage());
+        $this->assertEquals('Expected argument \'foo\' was not provided in GraphQL input type \'Input\' used in factory \'TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Filter::create()\'', $e2->getMessage());
 
         $e3 = MissingArgumentException::wrapWithFactoryContext($e, 'Input', function() {});
 

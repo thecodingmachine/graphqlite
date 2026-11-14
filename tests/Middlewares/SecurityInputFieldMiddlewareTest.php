@@ -1,10 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use stdClass;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;

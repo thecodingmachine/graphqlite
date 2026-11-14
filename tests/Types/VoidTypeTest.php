@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use DateTimeImmutable;
 use Exception;
@@ -10,6 +10,7 @@ use GraphQL\Language\AST\StringValueNode;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\Types;
+use TheCodingMachine\GraphQLite\Types\VoidType;
 
 class VoidTypeTest extends TestCase
 {

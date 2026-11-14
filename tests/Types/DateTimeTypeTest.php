@@ -1,12 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use DateTimeImmutable;
 use Exception;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Language\AST\StringValueNode;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Types\DateTimeType;
 
 class DateTimeTypeTest extends TestCase
 {

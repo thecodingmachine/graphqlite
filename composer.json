@@ -48,7 +48,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "TheCodingMachine\\GraphQLite\\": "tests/"
+            "TheCodingMachine\\GraphQLite\\Tests\\": "tests/"
         }
     },
     "scripts": {

@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Subscription;
 
 /**
  * Exercises {@see AbstractGraphQLElement}-level behaviour via the {@see Query} subclass, which inherits

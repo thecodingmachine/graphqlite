@@ -1,17 +1,17 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Controllers;
 
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\BazInterface;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\ClassA;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\ClassD;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\NotAnnotatedQux;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\QuxInterface;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\WizzInterface;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\BazInterface;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\ClassA;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\ClassD;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\FooInterface;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\NotAnnotatedQux;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\QuxInterface;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\WizzInterface;
 
 class AnnotatedInterfaceController
 {

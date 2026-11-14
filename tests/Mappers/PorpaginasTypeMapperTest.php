@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers;
 
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\ListOfType;
@@ -8,8 +8,11 @@ use GraphQL\Type\Definition\StringType;
 use Porpaginas\Arrays\ArrayResult;
 use Porpaginas\Result;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\PorpaginasMissingParameterException;
+use TheCodingMachine\GraphQLite\Mappers\PorpaginasTypeMapper;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Mocks\MockResolvableInputObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class PorpaginasTypeMapperTest extends AbstractQueryProvider

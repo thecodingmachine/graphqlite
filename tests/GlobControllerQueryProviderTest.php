@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Psr\Container\ContainerInterface;
@@ -11,7 +11,8 @@ use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
-use TheCodingMachine\GraphQLite\Fixtures\TestController;
+use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestController;
 
 use function md5;
 
@@ -41,7 +42,7 @@ class GlobControllerQueryProviderTest extends AbstractQueryProvider
             }
         };
 
-        $namespace = 'TheCodingMachine\\GraphQLite\\Fixtures';
+        $namespace = 'TheCodingMachine\\GraphQLite\\Tests\\Fixtures';
         $finder = new ComposerFinder();
         $finder->inNamespace($namespace);
         $finder->filter(static fn (ReflectionClass $class) => $class->getNamespaceName() === $namespace); // Fix for recursive:false

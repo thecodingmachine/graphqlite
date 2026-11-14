@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Parameters;
 
 use GraphQL\Deferred;
 use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
@@ -8,6 +8,7 @@ use GraphQL\Executor\Promise\Promise;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Parameters\PrefetchDataParameter;
 use stdClass;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Types\ArgumentResolver;

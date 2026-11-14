@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateInputs;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\DuplicateInputs;
 
 use TheCodingMachine\GraphQLite\Annotations\Input;
 

@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\ClassNotFoundException;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\Attributes\TestType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Annotations\ClassWithInvalidClassAnnotation;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Annotations\ClassWithInvalidTypeAnnotation;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Attributes\TestType;
 
 class AnnotationReaderTest extends TestCase
 {
@@ -67,7 +68,7 @@ class AnnotationReaderTest extends TestCase
         $annotationReader = new AnnotationReader();
 
         $this->expectException(ClassNotFoundException::class);
-        $this->expectExceptionMessage("Could not autoload class 'foo' defined in #[ExtendType] attribute of class 'TheCodingMachine\GraphQLite\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
+        $this->expectExceptionMessage("Could not autoload class 'foo' defined in #[ExtendType] attribute of class 'TheCodingMachine\GraphQLite\Tests\Fixtures\Annotations\ClassWithInvalidExtendTypeAnnotation'");
         $annotationReader->getExtendTypeAnnotation(
             new ReflectionClass(ClassWithInvalidExtendTypeAnnotation::class),
         );

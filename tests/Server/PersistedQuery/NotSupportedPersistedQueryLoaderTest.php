@@ -1,9 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Server\PersistedQuery;
+namespace TheCodingMachine\GraphQLite\Tests\Server\PersistedQuery;
 
 use GraphQL\Server\OperationParams;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\NotSupportedPersistedQueryLoader;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\PersistedQueryNotSupportedException;
 
 class NotSupportedPersistedQueryLoaderTest extends TestCase
 {

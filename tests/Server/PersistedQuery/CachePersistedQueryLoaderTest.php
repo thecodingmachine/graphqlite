@@ -1,11 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Server\PersistedQuery;
+namespace TheCodingMachine\GraphQLite\Tests\Server\PersistedQuery;
 
 use GraphQL\Server\OperationParams;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\CachePersistedQueryLoader;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\PersistedQueryIdInvalidException;
+use TheCodingMachine\GraphQLite\Server\PersistedQuery\PersistedQueryNotFoundException;
 
 class CachePersistedQueryLoaderTest extends TestCase
 {

@@ -1,7 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
+namespace TheCodingMachine\GraphQLite\Tests\Reflection\DocBlock;
 
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Types\Array_;
@@ -9,8 +10,8 @@ use phpDocumentor\Reflection\Types\Object_;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\Fixtures\TestController;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestController;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 
 #[CoversClass(PhpDocumentorDocBlockFactory::class)]
 class PhpDocumentorDocBlockFactoryTest extends TestCase
@@ -42,6 +43,6 @@ class PhpDocumentorDocBlockFactoryTest extends TestCase
         $refMethod = (new ReflectionMethod(TestController::class, 'test'));
         $context = $docBlockFactory->createContext($refMethod);
 
-        $this->assertSame('TheCodingMachine\GraphQLite\Fixtures', $context->getNamespace());
+        $this->assertSame('TheCodingMachine\GraphQLite\Tests\Fixtures', $context->getNamespace());
     }
 }

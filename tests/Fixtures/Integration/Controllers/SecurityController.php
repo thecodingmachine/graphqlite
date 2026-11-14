@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use stdClass;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Security;
-use TheCodingMachine\GraphQLite\Fixtures\PageSizeWithin;
-use TheCodingMachine\GraphQLite\Fixtures\SecretIs;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\PageSizeWithin;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\SecretIs;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
 

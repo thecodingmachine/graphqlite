@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
@@ -15,25 +15,31 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\AggregateControllerQueryProviderFactory;
+use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers\ContactController;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Comment;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\CompanyType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactFactory;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactOtherType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ContactType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\PostType;
-use TheCodingMachine\GraphQLite\Fixtures\TestSelfType;
+use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\Schema;
+use TheCodingMachine\GraphQLite\SchemaFactory;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers\ContactController;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Comment;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Company;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Post;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\CompanyType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\ContactFactory;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\ContactOtherType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\ContactType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\ExtendedContactType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\PostType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestSelfType;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
-use TheCodingMachine\GraphQLite\Mappers\Root\VoidRootTypeMapperFactory;
+use TheCodingMachine\GraphQLite\Tests\Mappers\Root\VoidRootTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Mappers\StaticClassListTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
@@ -51,7 +57,7 @@ class SchemaFactoryTest extends TestCase
         $factory->setAuthenticationService(new VoidAuthenticationService());
         $factory->setAuthorizationService(new VoidAuthorizationService());
 
-        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
         $factory->addQueryProvider(new AggregateQueryProvider([]));
         $factory->addFieldMiddleware(new FieldMiddlewarePipe());
         $factory->addInputFieldMiddleware(new InputFieldMiddlewarePipe());
@@ -68,7 +74,7 @@ class SchemaFactoryTest extends TestCase
 
         $factory = new SchemaFactory($cache, $container);
 
-        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setNamingStrategy(new NamingStrategy())
@@ -98,7 +104,7 @@ class SchemaFactoryTest extends TestCase
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setFinder(new ComposerFinder())
-                ->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+                ->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
 
         $schema = $factory->createSchema();
 
@@ -145,7 +151,7 @@ class SchemaFactoryTest extends TestCase
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
                 ->setFinder(new RecursiveFinder(__DIR__ . '/Annotations'))
-                ->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+                ->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
 
         $this->doTestSchemaWithError($factory->createSchema());
     }
@@ -224,11 +230,11 @@ class SchemaFactoryTest extends TestCase
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
                 ->setAuthorizationService(new VoidAuthorizationService())
-                ->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueries')
-                ->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+                ->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\DuplicateQueries')
+                ->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
 
         $this->expectException(DuplicateMappingException::class);
-        $this->expectExceptionMessage("The query/mutation/field 'duplicateQuery' is declared twice in class 'TheCodingMachine\GraphQLite\Fixtures\DuplicateQueries\TestControllerWithDuplicateQuery'. First in 'TheCodingMachine\GraphQLite\Fixtures\DuplicateQueries\TestControllerWithDuplicateQuery::testDuplicateQuery1()', second in 'TheCodingMachine\GraphQLite\Fixtures\DuplicateQueries\TestControllerWithDuplicateQuery::testDuplicateQuery2()'");
+        $this->expectExceptionMessage("The query/mutation/field 'duplicateQuery' is declared twice in class 'TheCodingMachine\GraphQLite\Tests\Fixtures\DuplicateQueries\TestControllerWithDuplicateQuery'. First in 'TheCodingMachine\GraphQLite\Tests\Fixtures\DuplicateQueries\TestControllerWithDuplicateQuery::testDuplicateQuery1()', second in 'TheCodingMachine\GraphQLite\Tests\Fixtures\DuplicateQueries\TestControllerWithDuplicateQuery::testDuplicateQuery2()'");
         $schema = $factory->createSchema();
         $queryString = '
         query {
@@ -251,11 +257,11 @@ class SchemaFactoryTest extends TestCase
         );
         $factory->setAuthenticationService(new VoidAuthenticationService())
             ->setAuthorizationService(new VoidAuthorizationService())
-            ->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers')
-            ->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+            ->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\DuplicateQueriesInTwoControllers')
+            ->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
 
         $this->expectException(DuplicateMappingException::class);
-        $this->expectExceptionMessage("The query/mutation 'duplicateQuery' is declared twice: in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery1' and in class 'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery2");
+        $this->expectExceptionMessage("The query/mutation 'duplicateQuery' is declared twice: in class 'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery1' and in class 'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\DuplicateQueriesInTwoControllers\\TestControllerWithDuplicateQuery2");
         $schema = $factory->createSchema();
         $queryString = '
         query {

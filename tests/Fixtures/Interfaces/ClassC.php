@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Interfaces;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces;
 
 
 class ClassC extends ClassB

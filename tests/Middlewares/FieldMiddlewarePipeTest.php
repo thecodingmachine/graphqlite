@@ -1,10 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 class FieldMiddlewarePipeTest extends TestCase

@@ -1,8 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Security;
+namespace TheCodingMachine\GraphQLite\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
+use TheCodingMachine\GraphQLite\Security\SecurityNotImplementedException;
 
 class FailAuthenticationServiceTest extends TestCase
 {

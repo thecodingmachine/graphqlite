@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
+use TheCodingMachine\GraphQLite\AnnotationReader;
 use TheCodingMachine\GraphQLite\CallableResolver;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\NamedType;
@@ -14,6 +15,13 @@ use GraphQL\Type\Schema;
 use Kcs\ClassFinder\FileFinder\CachedFileFinder;
 use Kcs\ClassFinder\FileFinder\DefaultFileFinder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\InputTypeGenerator;
+use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
+use TheCodingMachine\GraphQLite\TypeGenerator;
+use TheCodingMachine\GraphQLite\TypeRegistry;
 use phpDocumentor\Reflection\TypeResolver as PhpDocumentorTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -32,10 +40,10 @@ use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
-use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterMiddlewarePipe;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;

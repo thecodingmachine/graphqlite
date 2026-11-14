@@ -1,11 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\QueryField;
+use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 
 class QueryFieldDescriptorTest extends TestCase
 {

@@ -1,12 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Discovery;
+namespace TheCodingMachine\GraphQLite\Tests\Discovery;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\Fixtures\TestType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooExtendType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooType;
 
 #[CoversClass(StaticClassFinder::class)]
 class StaticClassFinderTest extends TestCase

@@ -1,14 +1,18 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Framework\Constraint\IsEqual;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Types\ExtendedContactOtherType;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
+use TheCodingMachine\GraphQLite\CallableResolver;
+use TheCodingMachine\GraphQLite\FieldsBuilder;
+use TheCodingMachine\GraphQLite\InvalidCallableRuntimeException;
+use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types\ExtendedContactOtherType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooExtendType;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
 class ParameterizedCallableResolverTest extends TestCase
@@ -113,7 +117,7 @@ class ParameterizedCallableResolverTest extends TestCase
     public function testResolveThrowsInvalidCallableMethodNotFoundException(): void
     {
         $this->expectException(InvalidCallableRuntimeException::class);
-        $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\ParameterizedCallableResolverTest::doesntExist wasn\'t found or isn\'t accessible.');
+        $this->expectExceptionMessage('Method TheCodingMachine\\GraphQLite\\Tests\\ParameterizedCallableResolverTest::doesntExist wasn\'t found or isn\'t accessible.');
 
         (new ParameterizedCallableResolver(
             $this->createMock(FieldsBuilder::class),

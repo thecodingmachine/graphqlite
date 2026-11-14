@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -24,7 +24,7 @@ class AnnotatedInterfaceTest extends TestCase
         $container = new BasicAutoWiringContainer(new EmptyContainer());
 
         $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), $container);
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\AnnotatedInterfaces');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\AnnotatedInterfaces');
 
         $this->schema = $schemaFactory->createSchema();
     }

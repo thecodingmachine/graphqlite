@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures\StaticTypeMapper\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\StaticTypeMapper\Types;
 
 
 class TestLegacyObject

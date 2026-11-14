@@ -1,11 +1,15 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\InputFieldDescriptor;
 use TheCodingMachine\GraphQLite\InputField;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewareInterface;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldMiddlewarePipe;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 
 class InputFieldMiddlewarePipeTest extends TestCase
 {

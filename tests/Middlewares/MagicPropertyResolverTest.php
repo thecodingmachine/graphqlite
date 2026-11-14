@@ -1,10 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Middlewares\MagicPropertyResolver;
 use stdClass;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeWithMagicProperty;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestTypeWithMagicProperty;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class MagicPropertyResolverTest extends TestCase

@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Parameters;
 
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\MissingAutowireTypeException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterHandlerInterface;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
@@ -23,7 +26,7 @@ class ContainerParameterMapperTest extends AbstractQueryProvider
         $parameter = $refMethod->getParameters()[0];
 
         $this->expectException(MissingAutowireTypeException::class);
-        $this->expectExceptionMessage('For parameter $foo in TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterMapperTest::dummy, annotated with annotation @Autowire, you must either provide a type-hint or specify the container identifier with @Autowire(identifier="my_service")');
+        $this->expectExceptionMessage('For parameter $foo in TheCodingMachine\GraphQLite\Tests\Mappers\Parameters\ContainerParameterMapperTest::dummy, annotated with annotation @Autowire, you must either provide a type-hint or specify the container identifier with @Autowire(identifier="my_service")');
         $mapper->mapParameter(
             $parameter,
             new DocBlock(),

@@ -1,8 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\PrefetchBuffer;
 use stdClass;
 
 class PrefetchBufferTest extends TestCase

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Button;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Color;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Position;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Size;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Button;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Color;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Position;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Size;
 use TheCodingMachine\GraphQLite\Types\ID;
 
 final class ButtonController

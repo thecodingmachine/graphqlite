@@ -1,10 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\ResolveUtils;
+use TheCodingMachine\GraphQLite\TypeMismatchRuntimeException;
 use stdClass;
 
 class ResolveUtilsTest extends TestCase

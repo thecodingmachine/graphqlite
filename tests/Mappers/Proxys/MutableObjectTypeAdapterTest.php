@@ -1,13 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers\Proxys;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Proxys;
 
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\Fixtures\StaticTypeMapper\Types\TestLegacyObject;
+use TheCodingMachine\GraphQLite\Mappers\Proxys\MutableObjectTypeAdapter;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\StaticTypeMapper\Types\TestLegacyObject;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\NoFieldsException;
 

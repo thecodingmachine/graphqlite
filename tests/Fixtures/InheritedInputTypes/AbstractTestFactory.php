@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\InheritedInputTypes;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\InheritedInputTypes;
 
 use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 
 abstract class AbstractTestFactory
 {

@@ -1,12 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Security;
+namespace TheCodingMachine\GraphQLite\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
 use Symfony\Component\Cache\Simple\NullCache;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 
 class SecurityExpressionLanguageProviderTest extends TestCase
 {

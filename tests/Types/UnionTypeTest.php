@@ -1,14 +1,15 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\Types\UnionType;
 
 class UnionTypeTest extends AbstractQueryProvider
 {

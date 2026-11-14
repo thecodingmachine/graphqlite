@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateQueries;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\DuplicateQueries;
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
 

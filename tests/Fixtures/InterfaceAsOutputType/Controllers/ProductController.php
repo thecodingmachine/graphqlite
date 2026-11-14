@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\InterfaceAsOutputType\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\InterfaceAsOutputType\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\InterfaceAsOutputType\Types\Book;
-use TheCodingMachine\GraphQLite\Fixtures\InterfaceAsOutputType\Types\CreateProductInput;
-use TheCodingMachine\GraphQLite\Fixtures\InterfaceAsOutputType\Types\ProductInterface;
-use TheCodingMachine\GraphQLite\Fixtures\InterfaceAsOutputType\Types\ProductItems;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\InterfaceAsOutputType\Types\Book;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\InterfaceAsOutputType\Types\CreateProductInput;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\InterfaceAsOutputType\Types\ProductInterface;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\InterfaceAsOutputType\Types\ProductItems;
 
 class ProductController
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers\Root;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Root;
 
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ListOfType;
@@ -8,9 +8,9 @@ use GraphQL\Type\Definition\NonNull;
 use phpDocumentor\Reflection\DocBlock;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 class IteratorTypeMapperTest extends AbstractQueryProvider

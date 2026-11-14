@@ -1,9 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Types\ID;
 use stdClass;
 
 class IDTest extends TestCase

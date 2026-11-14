@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\DuplicateQueriesInTwoControllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\DuplicateQueriesInTwoControllers;
 
 use ArrayObject;
 use TheCodingMachine\GraphQLite\Annotations\Query;

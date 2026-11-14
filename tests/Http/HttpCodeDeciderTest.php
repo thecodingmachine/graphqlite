@@ -1,12 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Http;
+namespace TheCodingMachine\GraphQLite\Tests\Http;
 
 use Exception;
 use GraphQL\Error\ClientAware;
 use GraphQL\Error\Error;
 use GraphQL\Executor\ExecutionResult;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Http\HttpCodeDecider;
 
 class HttpCodeDeciderTest extends TestCase
 {

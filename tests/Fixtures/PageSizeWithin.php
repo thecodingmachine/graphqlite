@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures;
 
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleMessageInterface;

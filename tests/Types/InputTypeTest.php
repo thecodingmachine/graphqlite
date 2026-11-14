@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use DateTime;
 use GraphQL\Type\Definition\IntType;
@@ -9,18 +9,19 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use PHPUnit\Framework\Attributes\Group;
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\FailedResolvingInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputA;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\CircularInputB;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\InputWithSetter;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorAndProperties;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestConstructorPromotedProperties;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\TestOnlyConstruct;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\TypedFooBar;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\CircularInputA;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\CircularInputB;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\FooBar;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\InputInterface;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\InputWithSetter;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\TestConstructorAndProperties;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\TestConstructorPromotedProperties;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\TestOnlyConstruct;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\TypedFooBar;
+use TheCodingMachine\GraphQLite\Types\InputType;
 
 class InputTypeTest extends AbstractQueryProvider
 {
@@ -92,7 +93,7 @@ class InputTypeTest extends AbstractQueryProvider
     public function testPassingInterfaceName(): void
     {
         $this->expectException(FailedResolvingInputType::class);
-        $this->expectExceptionMessage("Class 'TheCodingMachine\GraphQLite\Fixtures\Inputs\InputInterface' annotated with @Input must be instantiable.");
+        $this->expectExceptionMessage("Class 'TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\InputInterface' annotated with @Input must be instantiable.");
 
         new InputType(InputInterface::class, 'TestInput', null, false, $this->getFieldsBuilder());
     }
@@ -100,7 +101,7 @@ class InputTypeTest extends AbstractQueryProvider
     public function testInputCannotBeDecorator(): void
     {
         $this->expectException(FailedResolvingInputType::class);
-        $this->expectExceptionMessage("Input type 'TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar' cannot be a decorator.");
+        $this->expectExceptionMessage("Input type 'TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\FooBar' cannot be a decorator.");
 
         $input = new InputType(FooBar::class, 'FooBarInput', null, false, $this->getFieldsBuilder());
         $input->decorate(function () {});
@@ -213,7 +214,7 @@ class InputTypeTest extends AbstractQueryProvider
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
         $this->expectException(FailedResolvingInputType::class);
-        $this->expectExceptionMessage("TheCodingMachine\GraphQLite\Fixtures\Inputs\FooBar::__construct(): Argument #1 (\$foo) not passed. It should be mapped as required field.");
+        $this->expectExceptionMessage("TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\FooBar::__construct(): Argument #1 (\$foo) not passed. It should be mapped as required field.");
 
         $input->resolve(null, $args, [], $resolveInfo);
     }

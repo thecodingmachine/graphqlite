@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use Closure;
 use GraphQL\Type\Definition\FieldDefinition;
@@ -16,6 +16,11 @@ use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\CallableResolver;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Middlewares\BadExpressionInSecurityException;
+use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\QueryFieldDescriptor;
 use TheCodingMachine\GraphQLite\Security\SecurityExpressionLanguageProvider;
 use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
@@ -195,7 +200,7 @@ class SecurityFieldMiddlewareTest extends TestCase
                 class FirstClassCallableRuleProbe
                 {
                     #[\TheCodingMachine\GraphQLite\Annotations\Security(
-                        rule: \TheCodingMachine\GraphQLite\Middlewares\SecurityFieldMiddlewareTest::denyEverything(...),
+                        rule: \TheCodingMachine\GraphQLite\Tests\Middlewares\SecurityFieldMiddlewareTest::denyEverything(...),
                     )]
                     public function guarded(): string
                     {

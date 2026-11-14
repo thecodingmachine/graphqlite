@@ -1,11 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Framework\TestCase;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Utils\FieldAccessorPrefixes;
 
 class NamingStrategyTest extends TestCase

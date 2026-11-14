@@ -1,13 +1,16 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers;
 
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;

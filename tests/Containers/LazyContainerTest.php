@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Containers;
+namespace TheCodingMachine\GraphQLite\Tests\Containers;
 
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Containers\LazyContainer;
+use TheCodingMachine\GraphQLite\Containers\NotFoundException;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestType;
 
 final class LazyContainerTest extends AbstractQueryProvider
 {

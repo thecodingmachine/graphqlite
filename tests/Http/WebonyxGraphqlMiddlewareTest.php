@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Http;
+namespace TheCodingMachine\GraphQLite\Tests\Http;
 
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Executor\Promise\Adapter\SyncPromise;
@@ -19,6 +19,8 @@ use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\StreamFactory;
 use Laminas\Diactoros\Uri;
+use TheCodingMachine\GraphQLite\Http\HttpCodeDecider;
+use TheCodingMachine\GraphQLite\Http\WebonyxGraphqlMiddleware;
 use function fopen;
 use function fwrite;
 use function json_encode;

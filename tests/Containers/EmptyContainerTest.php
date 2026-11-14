@@ -1,9 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Containers;
+namespace TheCodingMachine\GraphQLite\Tests\Containers;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\NotFoundExceptionInterface;
+use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 
 class EmptyContainerTest extends TestCase
 {

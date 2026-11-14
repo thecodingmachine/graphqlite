@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Article;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\UpdateArticleInput;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Article;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\UpdateArticleInput;
 use TheCodingMachine\GraphQLite\Undefined;
 
 class ArticleController

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Mappers;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -10,13 +10,20 @@ use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
+use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\StaticTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\TypeNotFoundException;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA;
-use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB;
-use TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassC;
-use TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types\ClassAType;
-use TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types\ClassBType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\ClassA;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\ClassB;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\ClassC;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\Types\ClassAType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\Types\ClassBType;
 use TheCodingMachine\GraphQLite\NamingStrategy;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
@@ -133,7 +140,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProvider
 
             $typeGenerator = new TypeGenerator($this->getAnnotationReader(), $namingStrategy, $this->getTypeRegistry(), $this->getRegistry(), $this->typeMapper, $this->getFieldsBuilder());
 
-            $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Interfaces\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(), $namingStrategy, $this->typeMapper, $this->getClassFinderComputedCache());
+            $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\Types'), $typeGenerator, $this->getInputTypeGenerator(), $this->getInputTypeUtils(), $container, new \TheCodingMachine\GraphQLite\AnnotationReader(), $namingStrategy, $this->typeMapper, $this->getClassFinderComputedCache());
             $compositeMapper->addTypeMapper($mapper);
         }
         return $this->typeMapper;
@@ -172,9 +179,9 @@ class RecursiveTypeMapperTest extends AbstractQueryProvider
         $recursiveMapper = $this->getTypeMapper();
 
         $outputTypes = $recursiveMapper->getOutputTypes();
-        $this->assertArrayHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassA', $outputTypes);
-        $this->assertArrayHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassB', $outputTypes);
-        $this->assertArrayNotHasKey('TheCodingMachine\\GraphQLite\\Fixtures\\Interfaces\\ClassC', $outputTypes);
+        $this->assertArrayHasKey('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Interfaces\\ClassA', $outputTypes);
+        $this->assertArrayHasKey('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Interfaces\\ClassB', $outputTypes);
+        $this->assertArrayNotHasKey('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Interfaces\\ClassC', $outputTypes);
     }
 
     public function testDuplicateDetection(): void
@@ -202,7 +209,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProvider
         );
 
         $this->expectException(DuplicateMappingException::class);
-        $this->expectExceptionMessage("The type 'Foobar' is created by 2 different classes: 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassB' and 'TheCodingMachine\GraphQLite\Fixtures\Interfaces\ClassA'");
+        $this->expectExceptionMessage("The type 'Foobar' is created by 2 different classes: 'TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\ClassB' and 'TheCodingMachine\GraphQLite\Tests\Fixtures\Interfaces\ClassA'");
         $recursiveTypeMapper->getOutputTypes();
     }
 
@@ -230,7 +237,7 @@ class RecursiveTypeMapperTest extends AbstractQueryProvider
         $typeGenerator = $this->getTypeGenerator();
         $inputTypeGenerator = $this->getInputTypeGenerator();
 
-        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Fixtures\Integration'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
+        $mapper = new ClassFinderTypeMapper($this->getClassFinder('TheCodingMachine\GraphQLite\Tests\Fixtures\Integration'), $typeGenerator, $inputTypeGenerator, $this->getInputTypeUtils(), $this->getRegistry(), new \TheCodingMachine\GraphQLite\AnnotationReader(), new NamingStrategy(), $this->getTypeMapper(), $this->getClassFinderComputedCache());
 
         $recursiveTypeMapper = new RecursiveTypeMapper(
             $mapper,

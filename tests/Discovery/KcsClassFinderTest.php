@@ -1,26 +1,28 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Discovery;
+namespace TheCodingMachine\GraphQLite\Tests\Discovery;
 
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\Fixtures\TestType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\AbstractFooType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\EnumType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\GetterSetterType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\MagicGetterSetterType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\NoTypeAnnotation;
-use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
+use TheCodingMachine\GraphQLite\Discovery\ClassFinder;
+use TheCodingMachine\GraphQLite\Discovery\KcsClassFinder;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\AbstractFooType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\EnumType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooExtendType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\GetterSetterType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\MagicGetterSetterType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\NoTypeAnnotation;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\TestFactory;
 
 #[CoversClass(KcsClassFinder::class)]
 class KcsClassFinderTest extends TestCase
 {
     public function testYieldsGivenClasses(): void
     {
-        $namespaces = 'TheCodingMachine\GraphQLite\Fixtures\Types';
+        $namespaces = 'TheCodingMachine\GraphQLite\Tests\Fixtures\Types';
         $finder = new KcsClassFinder(
             (new ComposerFinder())->inNamespace($namespaces),
             md5($namespaces)

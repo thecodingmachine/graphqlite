@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Http;
+namespace TheCodingMachine\GraphQLite\Tests\Http;
 
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Server\ServerConfig;
@@ -14,6 +14,8 @@ use Symfony\Component\Cache\Simple\ArrayCache;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
+use TheCodingMachine\GraphQLite\Http\HttpCodeDecider;
+use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\Middlewares\FieldMiddlewarePipe;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;
@@ -39,7 +41,7 @@ class Psr15GraphQLMiddlewareBuilderTest extends TestCase
         $factory = new SchemaFactory($cache, $container);
         $factory->setAuthenticationService(new VoidAuthenticationService());
         $factory->setAuthorizationService(new VoidAuthorizationService());
-        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
 
         $schema = $factory->createSchema();
 

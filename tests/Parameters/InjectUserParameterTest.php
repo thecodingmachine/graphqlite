@@ -1,11 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Parameters;
 
 use Generator;
 use GraphQL\Type\Definition\ResolveInfo;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Parameters\InjectUserParameter;
 use stdClass;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;

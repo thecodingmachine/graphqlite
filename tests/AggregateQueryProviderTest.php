@@ -1,9 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use TheCodingMachine\GraphQLite\AggregateQueryProvider;
+use TheCodingMachine\GraphQLite\QueryField;
+use TheCodingMachine\GraphQLite\QueryProviderInterface;
 
 class AggregateQueryProviderTest extends TestCase
 {

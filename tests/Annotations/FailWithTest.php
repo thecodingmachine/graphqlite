@@ -1,10 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 
 class FailWithTest extends TestCase
 {

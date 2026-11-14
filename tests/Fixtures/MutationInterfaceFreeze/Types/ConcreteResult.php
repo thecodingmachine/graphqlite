@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\MutationInterfaceFreeze\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\MutationInterfaceFreeze\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;

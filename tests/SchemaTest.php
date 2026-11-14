@@ -1,6 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
+
+use TheCodingMachine\GraphQLite\QueryProviderInterface;
+use TheCodingMachine\GraphQLite\Schema;
 
 class SchemaTest extends AbstractQueryProvider
 {

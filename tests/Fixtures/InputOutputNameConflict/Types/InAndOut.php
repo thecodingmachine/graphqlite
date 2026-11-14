@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\InputOutputNameConflict\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\InputOutputNameConflict\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\Annotations\Field;

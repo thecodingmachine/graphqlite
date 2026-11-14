@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Mocks;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Mocks;
 
 
 use BadMethodCallException;

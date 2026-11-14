@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\InputObjectType;
@@ -10,6 +10,7 @@ use GraphQL\Type\Schema;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 class TypeResolverTest extends TestCase
 {

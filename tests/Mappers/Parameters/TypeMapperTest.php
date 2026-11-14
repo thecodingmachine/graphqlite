@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Parameters;
 
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -11,9 +11,11 @@ use ReflectionMethod;
 use ReflectionProperty;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\CannotHideParameterRuntimeException;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\TypeHandler;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\HideParameter;
-use TheCodingMachine\GraphQLite\Fixtures\UnionOutputType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\UnionOutputType;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Parameters\DefaultValueParameter;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;
@@ -50,7 +52,7 @@ class TypeMapperTest extends AbstractQueryProvider
         $docBlockObj = $docBlockFactory->create($refMethod);
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: String!, Int!');
+        $this->expectExceptionMessage('For return type of TheCodingMachine\GraphQLite\Tests\Mappers\Parameters\TypeMapperTest::dummy, in GraphQL, you can only use union types between objects. These types cannot be used in union types: String!, Int!');
         $typeMapper->mapReturnType($refMethod, $docBlockObj);
     }
 
@@ -304,7 +306,7 @@ class TypeMapperTest extends AbstractQueryProvider
         $annotations = $this->getAnnotationReader()->getParameterAnnotationsPerParameter([$refParameter])['foo'];
 
         $this->expectException(CannotHideParameterRuntimeException::class);
-        $this->expectExceptionMessage('For parameter $foo of method TheCodingMachine\GraphQLite\Mappers\Parameters\TypeMapperTest::withoutDefaultValue(), cannot use the @HideParameter annotation. The parameter needs to provide a default value.');
+        $this->expectExceptionMessage('For parameter $foo of method TheCodingMachine\GraphQLite\Tests\Mappers\Parameters\TypeMapperTest::withoutDefaultValue(), cannot use the @HideParameter annotation. The parameter needs to provide a default value.');
 
         $typeMapper->mapParameter($refParameter, $docBlockObj, null, $annotations);
     }
