@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\OmittableInput;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\OmittableMagicSetterInput;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\OmittablePropertiesInput;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\OmittableValue;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\OmittableWithoutDefaultInput;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\OmittableInput;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\OmittableMagicSetterInput;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\OmittablePropertiesInput;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\OmittableValue;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\OmittableWithoutDefaultInput;
 use TheCodingMachine\GraphQLite\Undefined;
 
 use function array_map;

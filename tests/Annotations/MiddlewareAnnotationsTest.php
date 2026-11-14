@@ -1,8 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotations;
+use TheCodingMachine\GraphQLite\Annotations\TooManyAnnotationsException;
 
 class MiddlewareAnnotationsTest extends TestCase
 {

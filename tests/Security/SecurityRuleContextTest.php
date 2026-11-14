@@ -1,8 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Security;
+namespace TheCodingMachine\GraphQLite\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContext;
+use TheCodingMachine\GraphQLite\Security\SecurityRuleContextInterface;
 use stdClass;
 
 use function array_key_exists;

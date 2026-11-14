@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Inputs;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs;
 
 use TheCodingMachine\GraphQLite\Types\InputTypeValidatorInterface;
 

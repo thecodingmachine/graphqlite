@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Utils;
+namespace TheCodingMachine\GraphQLite\Tests\Utils;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Utils\DescriptionResolver;
 
 class DescriptionResolverTest extends TestCase
 {

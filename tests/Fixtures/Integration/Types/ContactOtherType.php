@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
 
 use function strtoupper;
 

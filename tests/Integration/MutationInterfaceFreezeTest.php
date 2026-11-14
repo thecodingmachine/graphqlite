@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -29,7 +29,7 @@ class MutationInterfaceFreezeTest extends TestCase
         $container = new BasicAutoWiringContainer(new EmptyContainer());
 
         $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), $container);
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\MutationInterfaceFreeze');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\MutationInterfaceFreeze');
 
         $this->schema = $schemaFactory->createSchema();
     }

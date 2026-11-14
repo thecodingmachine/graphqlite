@@ -1,8 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Annotations\Factory;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class FactoryTest extends TestCase

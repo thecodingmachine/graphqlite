@@ -1,11 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Reflection;
+namespace TheCodingMachine\GraphQLite\Tests\Reflection;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use TheCodingMachine\GraphQLite\Reflection\Fixtures\SomeClass;
-use TheCodingMachine\GraphQLite\Reflection\Fixtures\SomeInterface;
+use TheCodingMachine\GraphQLite\Reflection\ReflectionInterfaceUtils;
+use TheCodingMachine\GraphQLite\Tests\Reflection\Fixtures\SomeClass;
+use TheCodingMachine\GraphQLite\Tests\Reflection\Fixtures\SomeInterface;
 
 class ReflectionInterfaceUtilsTest extends TestCase
 {

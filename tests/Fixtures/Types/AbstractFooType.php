@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 
 #[SourceField(name: 'test')]
 #[SourceField(name: 'testBool', annotations: [new Logged()])]

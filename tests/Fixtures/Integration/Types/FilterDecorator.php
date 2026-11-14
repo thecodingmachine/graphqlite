@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Filter;
 
 class FilterDecorator
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Post;
 
 class PostController
 {

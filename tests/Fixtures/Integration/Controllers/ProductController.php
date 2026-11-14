@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use ArrayIterator;
 use DateTimeImmutable;
@@ -10,10 +10,10 @@ use Porpaginas\Arrays\ArrayResult;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\ProductTypeEnum;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\SpecialProduct;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\TrickyProduct;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Product;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\ProductTypeEnum;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\SpecialProduct;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\TrickyProduct;
 
 class ProductController
 {

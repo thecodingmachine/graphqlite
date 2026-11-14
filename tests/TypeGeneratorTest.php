@@ -1,11 +1,14 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use Psr\Container\ContainerInterface;
+use TheCodingMachine\GraphQLite\MissingAnnotationException;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\TypeGenerator;
 use stdClass;
 use TheCodingMachine\GraphQLite\Containers\LazyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\TypeFoo;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TypeFoo;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 
 class TypeGeneratorTest extends AbstractQueryProvider

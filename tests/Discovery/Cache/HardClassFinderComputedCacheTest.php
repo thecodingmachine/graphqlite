@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Discovery\Cache;
+namespace TheCodingMachine\GraphQLite\Tests\Discovery\Cache;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
+use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
-use TheCodingMachine\GraphQLite\Fixtures\TestType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
-use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooExtendType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQLite\Tests\Loggers\ExceptionLogger;
 
 use function array_values;
 

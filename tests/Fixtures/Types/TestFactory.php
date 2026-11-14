@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Types;
 
 use DateTimeInterface;
 use TheCodingMachine\GraphQLite\Annotations\Decorate;
 use TheCodingMachine\GraphQLite\Annotations\Factory;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
 
 use function count;
 use function implode;

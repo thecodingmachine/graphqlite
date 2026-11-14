@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -28,7 +28,7 @@ final class DirectiveLayerEndToEndTest extends TestCase
     public function setUp(): void
     {
         $factory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), new BasicAutoWiringContainer(new EmptyContainer()));
-        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DirectiveLayerIntegration');
+        $factory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\DirectiveLayerIntegration');
 
         $this->schema = $factory->createSchema();
     }

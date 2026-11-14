@@ -1,10 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface;
+use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\FooInterface;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 
 class TypeTest extends TestCase
@@ -27,7 +28,7 @@ class TypeTest extends TestCase
     {
         $type = new Type(['default'=>false]);
         $this->expectException(GraphQLRuntimeException::class);
-        $this->expectExceptionMessage('Problem in attribute #[Type] for interface "TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
+        $this->expectExceptionMessage('Problem in attribute #[Type] for interface "TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types\FooInterface": you cannot use the default="false" attribute on interfaces');
         $type->setClass(FooInterface::class);
     }
 

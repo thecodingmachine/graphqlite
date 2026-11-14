@@ -1,9 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Exceptions;
+namespace TheCodingMachine\GraphQLite\Tests\Exceptions;
 
 use GraphQL\Error\Error;
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 class GraphQLAggregateExceptionTest extends TestCase
 {

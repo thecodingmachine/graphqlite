@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -22,15 +22,15 @@ use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\ValidationException;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Color;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Position;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Size;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\ValidationException;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\Validator;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Color;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Position;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Size;
 use TheCodingMachine\GraphQLite\GraphQLRuntimeException;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
-use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
+use TheCodingMachine\GraphQLite\Tests\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
 use TheCodingMachine\GraphQLite\Middlewares\NonBooleanSecurityResultException;
@@ -1112,7 +1112,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->expectException(TypeMismatchRuntimeException::class);
-        $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
+        $this->expectExceptionMessage('In TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration\\Controllers\\ProductController::getProductsBadType() (declaring field "productsBadType"): Expected resolved value to be an object but got "array"');
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
@@ -1923,12 +1923,12 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\InputOutputNameConflict');
 
         $schema = $schemaFactory->createSchema();
 
         $this->expectException(CannotMapTypeException::class);
-        $this->expectExceptionMessage('For parameter $inAndOut, in TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers\\InAndOutController::testInAndOut, type "InAndOut" must be an input type (if you declared an input type with the name "InAndOut", make sure that there are no output type with the same name as this is forbidden by the GraphQL spec).');
+        $this->expectExceptionMessage('For parameter $inAndOut, in TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\InputOutputNameConflict\\Controllers\\InAndOutController::testInAndOut, type "InAndOut" must be an input type (if you declared an input type with the name "InAndOut", make sure that there are no output type with the same name as this is forbidden by the GraphQL spec).');
 
         $schema->validate();
     }
@@ -1999,7 +1999,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->expectException(AccessPropertyException::class);
-        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::private'. Either make the property public or add a public getter for it like 'getPrivate' or 'isPrivate' with no required parameters");
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact::private'. Either make the property public or add a public getter for it like 'getPrivate' or 'isPrivate' with no required parameters");
 
         $queryString = '
         query {
@@ -2015,7 +2015,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->expectException(AccessPropertyException::class);
-        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact::zipcode'. Either make the property public or add a public getter for it like 'getZipcode' or 'isZipcode' with no required parameters");
+        $this->expectExceptionMessage("Could not get value from property 'TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact::zipcode'. Either make the property public or add a public getter for it like 'getZipcode' or 'isZipcode' with no required parameters");
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
@@ -2187,7 +2187,7 @@ class EndToEndTest extends IntegrationTestCase
         );
 
         $this->expectException(AccessPropertyException::class);
-        $this->expectExceptionMessage("Could not set value for property 'TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post::inaccessible'. Either make the property public or add a public setter for it like this: 'setInaccessible'");
+        $this->expectExceptionMessage("Could not set value for property 'TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Post::inaccessible'. Either make the property public or add a public setter for it like this: 'setInaccessible'");
         $result->toArray(DebugFlag::RETHROW_INTERNAL_EXCEPTIONS);
     }
 
@@ -2246,7 +2246,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\Integration');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration');
         $schemaFactory->setAuthenticationService($container->get(AuthenticationServiceInterface::class));
         $schemaFactory->setAuthorizationService($container->get(AuthorizationServiceInterface::class));
         $schemaFactory->setInputTypeValidator($validator);
@@ -3178,7 +3178,7 @@ class EndToEndTest extends IntegrationTestCase
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\CircularInputReference');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\CircularInputReference');
 
         $schema = $schemaFactory->createSchema();
 

@@ -1,17 +1,20 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Utils;
+namespace TheCodingMachine\GraphQLite\Tests\Utils;
 
 use Exception;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Preferences;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Product;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\TrickyProduct;
-use TheCodingMachine\GraphQLite\Fixtures\Types\GetterSetterType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\MagicGetterSetterType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Post;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Preferences;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Product;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\TrickyProduct;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\GetterSetterType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\MagicGetterSetterType;
+use TheCodingMachine\GraphQLite\Utils\AccessPropertyException;
+use TheCodingMachine\GraphQLite\Utils\FieldAccessorPrefixes;
+use TheCodingMachine\GraphQLite\Utils\PropertyAccessor;
 
 class PropertyAccessorTest extends TestCase
 {

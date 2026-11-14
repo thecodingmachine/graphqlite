@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\ClassFinderCustomTypeMapper\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\ClassFinderCustomTypeMapper\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;

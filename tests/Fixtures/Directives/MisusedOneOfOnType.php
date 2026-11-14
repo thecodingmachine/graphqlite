@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Directives;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Directives;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use TheCodingMachine\GraphQLite\Directives\BuiltIn\OneOf;

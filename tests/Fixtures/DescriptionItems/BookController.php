@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\DescriptionItems;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionItems;
 
 use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;

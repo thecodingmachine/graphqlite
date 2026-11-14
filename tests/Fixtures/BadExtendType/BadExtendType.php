@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\BadExtendType;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\BadExtendType;
 
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 

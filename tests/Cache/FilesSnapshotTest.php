@@ -1,11 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Cache;
+namespace TheCodingMachine\GraphQLite\Tests\Cache;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooType;
 
 use function Safe\touch;
 use function Safe\filemtime;

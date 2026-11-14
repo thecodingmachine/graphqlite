@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types;
 
 interface ParentParentInterface extends GrandFatherInterface, GrandMotherInterface
 {

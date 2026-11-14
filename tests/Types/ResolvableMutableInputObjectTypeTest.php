@@ -2,19 +2,20 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use DateTimeImmutable;
 use GraphQL\Error\Error;
 use GraphQL\Type\Definition\ResolveInfo;
+use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputObjectType;
 use stdClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory;
-use TheCodingMachine\GraphQLite\Mappers\Parameters\HardCodedParameter;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\TestFactory;
+use TheCodingMachine\GraphQLite\Tests\Mappers\Parameters\HardCodedParameter;
 use TheCodingMachine\GraphQLite\Parameters\MissingArgumentException;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
 
@@ -49,7 +50,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProvider
         $this->assertSame(true, $obj->isTestBool());
 
         $this->expectException(MissingArgumentException::class);
-        $this->expectExceptionMessage("Expected argument 'string' was not provided in GraphQL input type 'InputObject' used in factory 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myFactory()'");
+        $this->expectExceptionMessage("Expected argument 'string' was not provided in GraphQL input type 'InputObject' used in factory 'TheCodingMachine\GraphQLite\Tests\Fixtures\Types\TestFactory::myFactory()'");
         $inputType->resolve(new stdClass(), [], null, $resolveInfo);
     }
 
@@ -71,7 +72,7 @@ class ResolvableMutableInputObjectTypeTest extends AbstractQueryProvider
         $resolveInfo = $this->createMock(ResolveInfo::class);
 
         $this->expectException(MissingArgumentException::class);
-        $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL input type 'InputObject' used in decorator 'TheCodingMachine\GraphQLite\Fixtures\Types\TestFactory::myDecorator()'");
+        $this->expectExceptionMessage("Expected argument 'int' was not provided in GraphQL input type 'InputObject' used in decorator 'TheCodingMachine\GraphQLite\Tests\Fixtures\Types\TestFactory::myDecorator()'");
         $inputType->resolve(new stdClass(), ['string' => 'foobar'], null, $resolveInfo);
     }
 

@@ -1,13 +1,16 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Runner\Version;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Middlewares\CostFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Cost;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\IncompatibleAnnotationsException;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;

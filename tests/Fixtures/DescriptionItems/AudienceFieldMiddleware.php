@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\DescriptionItems;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionItems;
 
 use GraphQL\Type\Definition\FieldDefinition;
 use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;

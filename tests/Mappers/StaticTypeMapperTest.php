@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -9,14 +9,17 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
+use TheCodingMachine\GraphQLite\Mappers\StaticTypeMapper;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\Mocks\MockResolvableInputObjectType;
-use TheCodingMachine\GraphQLite\Fixtures\StaticTypeMapper\Types\TestLegacyObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
-use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Mocks\MockResolvableInputObjectType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\StaticTypeMapper\Types\TestLegacyObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\Loggers\ExceptionLogger;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use TheCodingMachine\GraphQLite\SchemaFactory;
@@ -137,7 +140,7 @@ class StaticTypeMapperTest extends AbstractQueryProvider
         $arrayAdapter = new ArrayAdapter();
         $arrayAdapter->setLogger(new ExceptionLogger());
         $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\StaticTypeMapper\\Controllers');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\StaticTypeMapper\\Controllers');
 
         // Let's register a type that maps by default to the "MyClass" PHP class
         $staticTypeMapper = new StaticTypeMapper(

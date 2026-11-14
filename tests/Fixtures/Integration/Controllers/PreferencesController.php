@@ -1,9 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Preferences;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Preferences;
 
 class PreferencesController
 {

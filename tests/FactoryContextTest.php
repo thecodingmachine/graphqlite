@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -9,7 +9,9 @@ use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Discovery\Cache\HardClassFinderComputedCache;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
-use TheCodingMachine\GraphQLite\Fixtures\Inputs\Validator;
+use TheCodingMachine\GraphQLite\FactoryContext;
+use TheCodingMachine\GraphQLite\NamingStrategy;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Inputs\Validator;
 
 class FactoryContextTest extends AbstractQueryProvider
 {

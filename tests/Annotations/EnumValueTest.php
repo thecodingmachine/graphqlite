@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use PHPUnit\Framework\TestCase;
+use TheCodingMachine\GraphQLite\Annotations\EnumValue;
 
 class EnumValueTest extends TestCase
 {

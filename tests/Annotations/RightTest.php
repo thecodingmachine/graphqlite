@@ -1,7 +1,8 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use \ReflectionMethod;
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;

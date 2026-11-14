@@ -1,7 +1,9 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Parameters;
 
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterHandlerInterface;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\PrefetchParameterMiddleware;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use PHPUnit\Framework\Constraint\IsEqual;
@@ -10,12 +12,12 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotations;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\FieldsBuilder;
-use TheCodingMachine\GraphQLite\Fixtures\TestType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestType;
 use TheCodingMachine\GraphQLite\InvalidCallableRuntimeException;
 use TheCodingMachine\GraphQLite\InvalidPrefetchMethodRuntimeException;
 use TheCodingMachine\GraphQLite\ParameterizedCallableResolver;
@@ -80,7 +82,7 @@ class PrefetchParameterMiddlewareTest extends AbstractQueryProvider
     public function testRethrowsInvalidCallableAsInvalidPrefetchException(): void
     {
         $this->expectException(InvalidPrefetchMethodRuntimeException::class);
-        $this->expectExceptionMessage('#[Prefetch] attribute on parameter $foo in TheCodingMachine\\GraphQLite\\Mappers\\Parameters\\PrefetchParameterMiddlewareTest::dummy specifies a callable that is invalid: Method TheCodingMachine\\GraphQLite\\Fixtures\\TestType::notExists wasn\'t found or isn\'t accessible.');
+        $this->expectExceptionMessage('#[Prefetch] attribute on parameter $foo in TheCodingMachine\\GraphQLite\\Tests\\Mappers\\Parameters\\PrefetchParameterMiddlewareTest::dummy specifies a callable that is invalid: Method TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\TestType::notExists wasn\'t found or isn\'t accessible.');
 
         $parameterizedCallableResolver = $this->createMock(ParameterizedCallableResolver::class);
         $parameterizedCallableResolver

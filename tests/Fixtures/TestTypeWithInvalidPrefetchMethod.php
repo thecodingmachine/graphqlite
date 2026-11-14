@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures;
 
 use Exception;
 use TheCodingMachine\GraphQLite\Annotations\Field;

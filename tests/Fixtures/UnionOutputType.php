@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures;
 
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
 
 class UnionOutputType
 {

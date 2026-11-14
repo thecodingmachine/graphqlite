@@ -1,10 +1,10 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Type;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 
 #[Type(class: TestObject::class)]
 class FooType extends AbstractFooType

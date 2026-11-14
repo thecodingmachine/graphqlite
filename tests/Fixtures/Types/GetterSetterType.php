@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 

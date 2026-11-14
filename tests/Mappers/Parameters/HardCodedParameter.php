@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Parameters;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;

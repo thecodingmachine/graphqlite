@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Type\Definition\EnumType;
 use PHPUnit\Framework\TestCase;
@@ -11,8 +11,8 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\EnumExposure\PublishStatus;
-use TheCodingMachine\GraphQLite\Fixtures\EnumExposureLegacy\Weekday;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\EnumExposure\PublishStatus;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\EnumExposureLegacy\Weekday;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;

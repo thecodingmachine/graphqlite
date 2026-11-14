@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Annotations;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use TheCodingMachine\GraphQLite\Annotations\Input;
 
 class InputTest extends TestCase
 {

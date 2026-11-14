@@ -1,13 +1,15 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers\Parameters;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Parameters;
 
 use Generator;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
+use TheCodingMachine\GraphQLite\Mappers\Parameters\ParameterHandlerInterface;
 use phpDocumentor\Reflection\DocBlock;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use stdClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Parameters\InjectUserParameter;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;

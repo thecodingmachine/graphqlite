@@ -1,11 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers;
 
 use ReflectionClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\TestTypeId;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType;
+use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestTypeId;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooExtendType;
 
 class CannotMapTypeTraitTest extends AbstractQueryProvider
 {
@@ -28,7 +29,7 @@ class CannotMapTypeTraitTest extends AbstractQueryProvider
         $e->addSourceFieldInfo($class, $sourceFields[0]);
         $e->addSourceFieldInfo($class, $sourceFields[0]);
 
-        $this->assertSame('For @SourceField "test" declared in "TheCodingMachine\GraphQLite\Fixtures\TestTypeId", cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
+        $this->assertSame('For @SourceField "test" declared in "TheCodingMachine\GraphQLite\Tests\Fixtures\TestTypeId", cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
     }
 
     public function testAddExtendTypeInfo()
@@ -40,7 +41,7 @@ class CannotMapTypeTraitTest extends AbstractQueryProvider
         $e->addExtendTypeInfo($class, $extendType);
         $e->addExtendTypeInfo($class, $extendType);
 
-        $this->assertSame('For @ExtendType(class="TheCodingMachine\GraphQLite\Fixtures\TestObject") annotation declared in class "TheCodingMachine\GraphQLite\Fixtures\Types\FooExtendType", cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
+        $this->assertSame('For @ExtendType(class="TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject") annotation declared in class "TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooExtendType", cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
     }
 
     public function testAddReturnInfo()
@@ -51,6 +52,6 @@ class CannotMapTypeTraitTest extends AbstractQueryProvider
         $e->addReturnInfo($refMethod);
         $e->addReturnInfo($refMethod);
 
-        $this->assertSame('For return type of TheCodingMachine\GraphQLite\Mappers\CannotMapTypeTraitTest::testAddReturnInfo, cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
+        $this->assertSame('For return type of TheCodingMachine\GraphQLite\Tests\Mappers\CannotMapTypeTraitTest::testAddReturnInfo, cannot map class "Foo" to a known GraphQL type. Check your TypeMapper configuration.', $e->getMessage());
     }
 }

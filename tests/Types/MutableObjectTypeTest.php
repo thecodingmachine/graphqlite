@@ -1,10 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use TheCodingMachine\GraphQLite\Types\MutableObjectType;
+use TheCodingMachine\GraphQLite\Types\NoFieldsException;
 
 class MutableObjectTypeTest extends TestCase
 {

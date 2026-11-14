@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\ExtendType;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Company;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Company;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
 
 #[ExtendType(class:Company::class)]
 class CompanyType

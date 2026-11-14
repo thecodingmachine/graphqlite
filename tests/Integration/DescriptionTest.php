@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -16,13 +16,13 @@ use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Annotations\Exceptions\DuplicateDescriptionOnTypeException;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
-use TheCodingMachine\GraphQLite\Fixtures\Description\Book;
-use TheCodingMachine\GraphQLite\Fixtures\DescriptionDuplicate\Book as DuplicateBook;
-use TheCodingMachine\GraphQLite\Fixtures\DescriptionItems\AudienceFieldMiddleware;
-use TheCodingMachine\GraphQLite\Fixtures\DescriptionItems\AudienceInputFieldMiddleware;
-use TheCodingMachine\GraphQLite\Fixtures\DescriptionItems\BookController;
-use TheCodingMachine\GraphQLite\Fixtures\DescriptionLegacyEnum\Era;
-use TheCodingMachine\GraphQLite\Fixtures\UndefinedDescription\UndefinedDescriptionController;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Description\Book;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionDuplicate\Book as DuplicateBook;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionItems\AudienceFieldMiddleware;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionItems\AudienceInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionItems\BookController;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\DescriptionLegacyEnum\Era;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\UndefinedDescription\UndefinedDescriptionController;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\VoidAuthenticationService;

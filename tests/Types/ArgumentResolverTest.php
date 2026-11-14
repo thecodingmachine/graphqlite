@@ -1,13 +1,13 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use RuntimeException;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 
 class ArgumentResolverTest extends AbstractQueryProvider
 {

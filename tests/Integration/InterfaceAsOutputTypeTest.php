@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -29,7 +29,7 @@ class InterfaceAsOutputTypeTest extends TestCase
         $container = new BasicAutoWiringContainer(new EmptyContainer());
 
         $schemaFactory = new SchemaFactory(new Psr16Cache(new ArrayAdapter()), $container);
-        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\InterfaceAsOutputType');
+        $schemaFactory->addNamespace('TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\InterfaceAsOutputType');
 
         $this->schema = $schemaFactory->createSchema();
     }

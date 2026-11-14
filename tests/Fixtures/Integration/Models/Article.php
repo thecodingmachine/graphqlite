@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Models;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;

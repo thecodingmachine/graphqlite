@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\InputOutputNameConflict\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\InputOutputNameConflict\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use TheCodingMachine\GraphQLite\Fixtures\InputOutputNameConflict\Types\InAndOut;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\InputOutputNameConflict\Types\InAndOut;
 
 class InAndOutController
 {

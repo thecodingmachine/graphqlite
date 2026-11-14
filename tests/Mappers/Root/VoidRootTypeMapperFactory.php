@@ -1,7 +1,11 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Mappers\Root;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Root;
+
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryInterface;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 
 
 class VoidRootTypeMapperFactory implements RootTypeMapperFactoryInterface

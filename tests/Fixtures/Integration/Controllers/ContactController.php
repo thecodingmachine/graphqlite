@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use DateTimeInterface;
 use Porpaginas\Arrays\ArrayResult;
@@ -10,8 +10,8 @@ use Porpaginas\Result;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Subscription;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\User;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\User;
 
 class ContactController
 {

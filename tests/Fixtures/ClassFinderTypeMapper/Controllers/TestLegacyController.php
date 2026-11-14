@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\ClassFinderTypeMapper\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\ClassFinderTypeMapper\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\ClassFinderTypeMapper\Types\TestLegacyObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\ClassFinderTypeMapper\Types\TestLegacyObject;
 
 class TestLegacyController
 {

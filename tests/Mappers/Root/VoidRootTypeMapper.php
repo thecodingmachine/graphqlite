@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Mappers\Root;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Root;
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\NamedType;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Type;
 use ReflectionMethod;

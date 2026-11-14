@@ -1,10 +1,11 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use InvalidArgumentException;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Types\TypeAnnotatedInterfaceType;
 
 class TypeAnnotatedInterfaceTypeTest extends AbstractQueryProvider
 {

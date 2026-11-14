@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\GraphQLite\Fixtures\AnnotatedInterfaces\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\AnnotatedInterfaces\Types;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;

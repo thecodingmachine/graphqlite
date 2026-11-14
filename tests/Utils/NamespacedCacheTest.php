@@ -1,11 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Utils;
+namespace TheCodingMachine\GraphQLite\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Cache\Simple\ArrayCache;
+use TheCodingMachine\GraphQLite\Utils\NamespacedCache;
 
 class NamespacedCacheTest extends TestCase
 {

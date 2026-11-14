@@ -1,13 +1,15 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Cache;
+namespace TheCodingMachine\GraphQLite\Tests\Cache;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use TheCodingMachine\GraphQLite\Fixtures\Types\FooType;
-use TheCodingMachine\GraphQLite\Fixtures\Types\NoTypeAnnotation;
+use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
+use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\FooType;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Types\NoTypeAnnotation;
 
 use function Safe\touch;
 use function Safe\filemtime;

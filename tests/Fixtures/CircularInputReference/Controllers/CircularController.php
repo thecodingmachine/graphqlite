@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\CircularInputReference\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\CircularInputReference\Controllers;
 
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
-use TheCodingMachine\GraphQLite\Fixtures\CircularInputReference\Types\CircularInputA;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\CircularInputReference\Types\CircularInputA;
 use TheCodingMachine\GraphQLite\Types\ID;
 
 class CircularController

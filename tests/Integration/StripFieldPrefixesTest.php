@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
@@ -43,7 +43,7 @@ class StripFieldPrefixesTest extends TestCase
     public function testHasserSourceFieldResolvesWhenGetterPrefixConfigured(): void
     {
         $schema = $this->buildSchema(
-            'TheCodingMachine\\GraphQLite\\Fixtures\\StripFieldPrefixes',
+            'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\StripFieldPrefixes',
             getters: ['get', 'is', 'has'],
         );
 
@@ -66,7 +66,7 @@ class StripFieldPrefixesTest extends TestCase
     public function testCustomSetterPrefixDefinesAndHydratesInputField(): void
     {
         $schema = $this->buildSchema(
-            'TheCodingMachine\\GraphQLite\\Fixtures\\StripFieldPrefixesInput',
+            'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\StripFieldPrefixesInput',
             setters: ['set', 'assign'],
         );
 

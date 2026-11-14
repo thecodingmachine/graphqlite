@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Types;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Types;
 
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -12,8 +12,8 @@ use TheCodingMachine\GraphQLite\Annotations\HideParameter;
 use TheCodingMachine\GraphQLite\Annotations\Prefetch;
 use TheCodingMachine\GraphQLite\Annotations\SourceField;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Contact;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Post;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Contact;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Post;
 
 use function array_filter;
 use function array_search;

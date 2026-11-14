@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Reflection\DocBlock;
+namespace TheCodingMachine\GraphQLite\Tests\Reflection\DocBlock;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -9,6 +9,9 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\CachedDocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\DocBlockFactory;
+use TheCodingMachine\GraphQLite\Reflection\DocBlock\PhpDocumentorDocBlockFactory;
 
 #[CoversClass(CachedDocBlockFactory::class)]
 class CachedDocBlockFactoryTest extends TestCase

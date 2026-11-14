@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Mappers\Root;
+namespace TheCodingMachine\GraphQLite\Tests\Mappers\Root;
 
 use Closure;
 use Generator;
@@ -10,6 +10,8 @@ use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use TheCodingMachine\GraphQLite\Mappers\Root\ClosureTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperInterface;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
@@ -23,9 +25,9 @@ use phpDocumentor\Reflection\Types\String_;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject2;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject2;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 
 #[CoversClass(ClosureTypeMapper::class)]

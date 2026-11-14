@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Integration\Controllers;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Controllers;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use TheCodingMachine\GraphQLite\Fixtures\Integration\Models\Filter;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\Integration\Models\Filter;
 
 use function array_map;
 

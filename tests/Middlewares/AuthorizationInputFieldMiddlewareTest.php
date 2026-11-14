@@ -1,11 +1,15 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Middlewares;
+namespace TheCodingMachine\GraphQLite\Tests\Middlewares;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use TheCodingMachine\GraphQLite\Middlewares\AuthorizationInputFieldMiddleware;
+use TheCodingMachine\GraphQLite\Middlewares\InputFieldHandlerInterface;
+use TheCodingMachine\GraphQLite\Middlewares\MissingAuthorizationException;
+use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use stdClass;
-use TheCodingMachine\GraphQLite\AbstractQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\AbstractQueryProvider;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;

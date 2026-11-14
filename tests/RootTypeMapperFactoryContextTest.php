@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -9,6 +9,7 @@ use TheCodingMachine\GraphQLite\Cache\FilesSnapshot;
 use TheCodingMachine\GraphQLite\Cache\SnapshotClassBoundCache;
 use TheCodingMachine\GraphQLite\Containers\EmptyContainer;
 use TheCodingMachine\GraphQLite\Mappers\Root\RootTypeMapperFactoryContext;
+use TheCodingMachine\GraphQLite\NamingStrategy;
 
 class RootTypeMapperFactoryContextTest extends AbstractQueryProvider
 {

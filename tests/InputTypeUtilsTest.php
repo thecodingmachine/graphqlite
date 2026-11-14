@@ -1,10 +1,12 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use PHPUnit\Runner\Version;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\InputTypeUtils;
+use TheCodingMachine\GraphQLite\MissingTypeHintRuntimeException;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Parameters\ExpandsInputTypeParameters;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
 use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
@@ -18,7 +20,7 @@ class InputTypeUtilsTest extends AbstractQueryProvider
         $inputTypeGenerator = $this->getInputTypeUtils();
 
         $this->expectException(MissingTypeHintRuntimeException::class);
-        $this->expectExceptionMessage('Factory "TheCodingMachine\\GraphQLite\\InputTypeUtilsTest::factoryNoReturnType" must have a return type.');
+        $this->expectExceptionMessage('Factory "TheCodingMachine\\GraphQLite\\Tests\\InputTypeUtilsTest::factoryNoReturnType" must have a return type.');
         $inputTypeGenerator->getInputTypeNameAndClassName(new ReflectionMethod($this, 'factoryNoReturnType'));
     }
 
@@ -27,7 +29,7 @@ class InputTypeUtilsTest extends AbstractQueryProvider
         $inputTypeGenerator = $this->getInputTypeUtils();
 
         $this->expectException(MissingTypeHintRuntimeException::class);
-        $this->expectExceptionMessage('The return type of factory "TheCodingMachine\\GraphQLite\\InputTypeUtilsTest::factoryStringReturnType" must be an object, "string" passed instead.');
+        $this->expectExceptionMessage('The return type of factory "TheCodingMachine\\GraphQLite\\Tests\\InputTypeUtilsTest::factoryStringReturnType" must be an object, "string" passed instead.');
         $inputTypeGenerator->getInputTypeNameAndClassName(new ReflectionMethod($this, 'factoryStringReturnType'));
     }
 
@@ -36,7 +38,7 @@ class InputTypeUtilsTest extends AbstractQueryProvider
         $inputTypeGenerator = $this->getInputTypeUtils();
 
         $this->expectException(MissingTypeHintRuntimeException::class);
-        $this->expectExceptionMessage('Factory "TheCodingMachine\\GraphQLite\\InputTypeUtilsTest::factoryNullableReturnType" must have a non nullable return type.');
+        $this->expectExceptionMessage('Factory "TheCodingMachine\\GraphQLite\\Tests\\InputTypeUtilsTest::factoryNullableReturnType" must have a non nullable return type.');
         $inputTypeGenerator->getInputTypeNameAndClassName(new ReflectionMethod($this, 'factoryNullableReturnType'));
     }
 

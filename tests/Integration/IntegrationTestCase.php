@@ -1,6 +1,6 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite\Integration;
+namespace TheCodingMachine\GraphQLite\Tests\Integration;
 
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
@@ -28,7 +28,7 @@ use TheCodingMachine\GraphQLite\FieldsBuilder;
 use TheCodingMachine\GraphQLite\GlobControllerQueryProvider;
 use TheCodingMachine\GraphQLite\InputTypeGenerator;
 use TheCodingMachine\GraphQLite\InputTypeUtils;
-use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
+use TheCodingMachine\GraphQLite\Tests\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\ClassFinderTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
@@ -98,9 +98,9 @@ class IntegrationTestCase extends TestCase
             },
             ClassFinder::class => function () {
                 $namespaces = [
-                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Types',
-                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Models',
-                    'TheCodingMachine\\GraphQLite\\Fixtures\\Integration\\Controllers',
+                    'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration\\Types',
+                    'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration\\Models',
+                    'TheCodingMachine\\GraphQLite\\Tests\\Fixtures\\Integration\\Controllers',
                 ];
 
                 $hash = md5(implode(',', $namespaces));

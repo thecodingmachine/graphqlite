@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\Annotations;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\Annotations;
 
 /**
  * No namespace here

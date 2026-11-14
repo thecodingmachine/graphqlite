@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite\Fixtures\EnumExposureLegacy;
+namespace TheCodingMachine\GraphQLite\Tests\Fixtures\EnumExposureLegacy;
 
 use TheCodingMachine\GraphQLite\Annotations\Query;
 

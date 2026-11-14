@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use GraphQL\Error\Error;
 use GraphQL\Executor\Promise\Adapter\SyncPromise;
@@ -12,7 +12,8 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
-use TheCodingMachine\GraphQLite\Fixtures\TestObject;
+use TheCodingMachine\GraphQLite\QueryField;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestObject;
 use TheCodingMachine\GraphQLite\Middlewares\ServiceResolver;
 use TheCodingMachine\GraphQLite\Middlewares\SourceMethodResolver;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameter;

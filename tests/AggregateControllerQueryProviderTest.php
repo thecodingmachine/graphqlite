@@ -1,9 +1,10 @@
 <?php
 
-namespace TheCodingMachine\GraphQLite;
+namespace TheCodingMachine\GraphQLite\Tests;
 
 use Psr\Container\ContainerInterface;
-use TheCodingMachine\GraphQLite\Fixtures\TestController;
+use TheCodingMachine\GraphQLite\AggregateControllerQueryProvider;
+use TheCodingMachine\GraphQLite\Tests\Fixtures\TestController;
 
 class AggregateControllerQueryProviderTest extends AbstractQueryProvider
 {
